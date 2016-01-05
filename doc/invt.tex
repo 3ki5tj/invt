@@ -1,0 +1,1030 @@
+\documentclass[reprint]{revtex4-1}
+\usepackage{amsmath}
+\begin{document}
+
+
+\title{Optimal updating factor in Wang-Landau and metadynamics simulations}
+
+\maketitle
+
+
+\section{Background}
+
+
+
+\subsection{Flat-distribution sampling}
+
+
+
+Given a system,
+consider the problem of computing
+the distribution, $p^*_i$
+along a discrete quantity $i$.
+%
+The discrete nature of $i$ is natural
+in discrete models.
+%
+For example, $i$ can be the energy $E$
+in lattice models; or the temperature index
+in a simulated tempering simulation.
+%
+For a continuous quantity, $z$,
+which is typical in molecular systems,
+we can also discretize $z$
+such that the integer $i$ represents
+the index of a small interval, or a bin, $(z, z + dz)$.
+%
+In both cases,
+the distribution can be normalized as
+$\sum_{i = 1}^n p^*_i = 1$.
+
+
+
+For a large system,
+the distribution $p^*_i$ is often
+localized around some $i_0$,
+%
+and to find out the global property,
+it is often desirable to carry out
+a biased sampling that targets
+a wider distribution $p_i$.
+%
+%Here, we refer to simulations that target
+%a flat or nearly flat distribution
+%as entropic or multicanonical sampling.
+
+
+
+To do so, we need to introduce a bias potential $\phi_i$,
+such that the target distribution is changed to
+%
+\begin{equation}
+  \pi_i \propto p^*_i \, e^{-\phi_i}.
+  \label{eq:pi_p_phi1}
+\end{equation}
+%
+Upon normalization $\sum_{i = 1}^n \pi_i = 1$,
+we get
+%
+\begin{equation}
+  \pi_i =
+  \frac{ p^*_i \, e^{-\phi_i} }
+  { \sum_{j = 1}^n p^*_j \, e^{-\phi_j} }.
+  \label{eq:pi_p_phi}
+\end{equation}
+%
+Particularly,
+to achieve a flat distribution $\pi_i$,
+the bias potential $\phi_i$
+must coincide with $\log p^*_i$,
+up to an additive constant.
+
+
+
+Generally, we may wish to target
+a slowly-varying distribution, $p_i$,
+by adjusting the bias potential $\phi_i$
+on the fly.
+%
+For example,
+we can monitor the histogram accumulated over
+a period of time and use it for $\pi_i$ in
+Eq. \eqref{eq:pi_p_phi1},
+and then update
+$\phi_i$ according to
+$$
+\phi_i^{\mathrm{new}}
+=
+\phi_i^{\mathrm{old}}
+-
+\log \frac{ p_i } { \pi_i }.
+$$
+%
+%From Eq. \eqref{eq:pi_p_phi1},
+%it is clear that to achieve the target distribution
+%$\pi_i = p_i$ requires
+%%
+%\begin{equation}
+%\log p^*_i
+%=\phi_i + \ln p_i + c
+%\label{eq:bias_pmf}
+%\end{equation}
+%%
+%%
+%In the end of the simulation,
+%the PMF, $\phi^*_i$,
+%can be deduced from Eq. \eqref{eq:bias_pmf}.
+%
+The above inversion process can be inconvenient
+in practice,
+for we need to make the period
+as long as a multiple of
+the autocorrelation time,
+which is difficult to estimate for an unknown system.
+
+
+
+\subsection{Wang-Landau algorithm}
+
+
+
+The Wang-Landau (WL) algorithm is a convenient technique
+of obtaining the desired bias potential $\phi_i$
+on the fly.
+%
+To simplify the notation, we introduce
+a shifted bias potential
+%
+\begin{equation}
+  v_i \equiv \phi_i - \ln p^*_i + \ln p_i.
+  \label{eq:v_def}
+\end{equation}
+%
+%
+and in $v_i$, Eq. \eqref{eq:pi_p_phi}
+becomes
+%
+\begin{equation}
+  \pi_i = \frac{ p_i e^{-v_i} }
+  { \sum_{j = 1}^n p_j e^{-v_j} }
+  \propto p_i \, e^{-v_i}.
+  \label{eq:pi_p_v}
+\end{equation}
+%
+According to Eq. \eqref{eq:pi_p_phi1},
+$v_i$ should approach a constant of $i$
+upon convergence (i.e., when $\pi_i \approx p_i$).
+
+
+
+In the WL algorithm, $v_i$ are updated
+in each MC step $t$,
+and $v_i(t)$ as a function of $t$
+is updated as
+%
+\begin{equation}
+  v_i(t+1)
+  =
+  v_i(t)
+  +
+  \delta_{i, \, i(t)}
+  \frac{ \alpha(t) } { p_i }.
+  \label{eq:wl_update}
+\end{equation}
+%
+where $i(t)$ is the bin at step $t$,
+and $\alpha(t)$ is the updating magnitude.
+%
+Note that the updating scheme only applies
+to the $v_i$ at the current bin.
+%The values of $v_j(t)$ at $j \ne i(t)$
+%are kept unchanged.
+%
+One can show that with a constant $\alpha(t) = \alpha > 0$,
+the distribution collected from
+the trajectory is identical to $p^*_i$.
+%
+However, the updating scheme
+makes $v_i(t)$ a fluctuating quantity,
+and Eq. \eqref{eq:pi_p_v} no longer holds
+at all times.
+%%
+%The source of the deviation is two-fold.
+%%
+%First, since $v_i(t)$ is updated continuously,
+%there is a random noise that is proportional
+%to $\sqrt \alpha$.
+%%
+%Second, there is a systematic error
+%that comes from the updating dynamics itself,
+%as it breaks the Markovian nature
+%that underlies Eq. \eqref{eq:pi_p_v}.
+%%
+%
+Thus, one has to decrease $\alpha$ over time
+to reduce the error of $v_i$,
+in order to get the unbiased distribution
+$\ln p_i^*$ via Eq. \eqref{eq:v_def}.
+
+
+
+
+
+In the original WL scheme,
+the updating magnitude $\alpha$ (or $\ln f$
+in the original paper) is kept as a constant
+for a period of time,
+which is referred to as a stage below.
+%
+The histogram collected in the stage is monitored.
+%
+Once the histogram is sufficiently flat,
+we are allowed to enter a new stage
+with a reduced $\alpha$
+(usually half as large as
+that in the previous stage).
+%
+This scheme works well for early stages.
+%
+However, in later stages, it tends to reduce $\alpha$
+too quickly, making the asymptotic error
+saturate.
+
+
+
+\subsection{$1/t$ formula}
+
+
+
+A more effective way
+of updating the $\alpha(t)$
+is to discard the stage-wise setup,
+and to follow the formula
+%
+\begin{equation}
+  \alpha(t) = \frac{1}{t},
+  \label{eq:alpha_invt}
+\end{equation}
+%
+where $t$ is the number of steps
+from the beginning of the MC simulation,
+which shall be referred to as the ``time'' below.
+%
+This surprisingly simple formula has attracted
+several studies, notably the one by Zhou.
+%
+There are, however, some reservations about
+the constant of proportionality:
+the optimal formula for $\alpha(t)$
+might be $C/t$ with a constant $C$
+different from $1.0$.
+
+
+
+Here we shall derive the optimal $\alpha(t)$
+for the WL algorithm, Eq. \eqref{eq:wl_update}.
+%
+Further, we shall generalize the result
+to a class of multiple-bin updating schemes,
+in which an update affects
+not only the current bin $i(t)$,
+but also a few neighboring ones.
+%(such schemes are designed
+%to maintain a smooth bias potential).
+%
+We shall show that
+the constant of proportionality, $1$,
+in Eq. \eqref{eq:alpha_invt}
+is optimal for the single-bin updating scheme,
+Eq. \eqref{eq:wl_update}
+(as in the WL algorithm),
+but not necessarily so
+for a multiple-bin updating scheme.
+%
+Below, we discuss the single-bin updating scheme
+in Section \ref{sec:single-bin},
+and the multiple-bin case
+in Section \ref{sec:multiple-bin}.
+
+
+
+\section{\label{sec:single-bin}
+Single-bin updating scheme}
+
+
+
+In this section,
+we shall derive the optimal $\alpha(t)$
+for the single-bin updating scheme,
+Eq. \eqref{eq:wl_update}.
+%
+To do so,
+we shall first express the error of $v(t)$
+as a functional of $\alpha(t)$,
+and then find the optimal value
+by functional variation.
+
+
+
+\subsection{Differential equation}
+
+
+
+We first approximate Eq. \eqref{eq:wl_update}
+by a differential equation
+%
+\begin{equation}
+  \dot v_i(t)
+  =
+  h_i(t) \frac{ \alpha(t) } { p_i },
+  \label{eq:vt_diffeq}
+\end{equation}
+%
+where
+$\dot v_i(t) \equiv dv_i(t)/dt$,
+%
+and $h_i(t) = \delta_{i, i(t)}$
+is the instantaneous histogram,
+which is equal to $1.0$
+for the current bin $i(t)$
+or zero otherwise.
+
+
+
+Next, we split $h_i(t)$ into a deterministic part
+and a noise
+%
+\begin{equation}
+  h_i(t) = \langle h_i(t) \rangle + \zeta_i(t).
+  \label{eq:h_split}
+\end{equation}
+%
+Here, the deterministic part can be related
+to the ``ensemble average'' of $h_i$.
+%
+The ensemble consists of many similar simulation copies
+that have experienced the same schedule $\alpha(t)$
+and have reached the same $v_i(t)$
+at time $t$.
+%
+The initial states and random numbers of the copies
+may, however, be different.
+
+
+
+For sufficiently small $\alpha(t)$,
+the sampling process is approximately
+Markovian of a finite order,
+and we may assume Eq. \eqref{eq:pi_p_v}
+for the deterministic part
+%
+\begin{equation}
+  \langle h_i(t) \rangle
+  \approx
+  \frac{ p_i \, e^{-v_i} }
+  { \sum_{j = 1}^n p_j \, e^{-v_j} }.
+  \label{eq:h_ave}
+\end{equation}
+
+
+
+For the noise part, we have
+$\langle \zeta_i(t) \rangle = 0$.
+%
+%The noise is not necessarily white.
+Unless specified otherwise, we assume
+a general noise with the correlation
+function depending on the time difference:
+%
+\begin{equation}
+  \langle \zeta_i(t) \, \zeta_j(t') \rangle
+  =
+  \sigma_{ij}(t - t'),
+  \label{eq:zeta_zeta_correlation}
+\end{equation}
+%
+where $\sigma_{ij}(t)$ is an even function of $t$
+that vanishes at large $t$.
+
+
+
+\subsection{Linear approximation}
+
+
+
+To proceed, we first observe that
+the average $\bar v = \sum_{i = 1}^n p_i \, v_i$
+increases steadily over time:
+%
+\begin{equation}
+\frac{ d \bar v } { d t }
+=
+\sum_{i = 1}^n p_i \dot v_i
+=
+\alpha(t) \sum_{i = 1}^n h_i(t) = \alpha(t).
+\label{eq:dvbardt}
+\end{equation}
+%
+However, the difference between $v_i$ and $\bar v$,
+%
+\begin{equation}
+  x_i \equiv v_i - \bar v = v_i - \sum_{j = 1}^n p_j \, v_j,
+  \label{eq:x_def}
+\end{equation}
+%
+is expected to be small in the asymptotic regime,
+and we can expand Eq. \eqref{eq:h_ave} as
+\begin{align}
+\langle h_i(t) \rangle
+&\approx
+\frac{ p_i \, e^{- x_i} }
+{ \sum_{ j = 1}^n p_j \, e^{- x_j} }
+\approx
+\frac{ p_i ( 1 - x_i ) }
+{ \sum_{ j = 1}^n p_j (1 - x_j) }
+\notag \\
+&\approx
+p_i \, \left(
+  1 - x_i + \sum_{j=1}^n p_j \, x_j
+\right)
+=
+p_i \, (1 - x_i),
+\label{eq:hdet_linearize}
+\end{align}
+where we have used $\sum_{j=1}^n p_j = 1$,
+and
+%
+\begin{equation}
+  \sum_{i = 1}^n p_i \, x_i = 0,
+  \label{eq:px_sum}
+\end{equation}
+which follows directly from Eq. \eqref{eq:x_def}.
+%
+With Eqs.
+\eqref{eq:vt_diffeq},
+\eqref{eq:h_split},
+\eqref{eq:dvbardt},
+and
+\eqref{eq:hdet_linearize},
+we get a set of decoupled equations
+%
+\begin{equation}
+  \dot x_i(t)
+  =
+  -\alpha(t) \, \left[ x_i(t) - \frac{ \zeta_i(t) } { p_i } \right].
+  \label{eq:dxdt_WL}
+\end{equation}
+
+
+
+The total error of the bias potentials can be written in
+terms of $x_i$,
+\begin{equation}
+\mathcal E
+=
+\sum_{i = 1}^n p_i \, \langle x_i^2 \rangle
+=
+\sum_{i = 1}^n p_i \, \left\langle (v_i - \bar v)^2 \right\rangle,
+\label{eq:error_sum}
+\end{equation}
+where
+$\bar v = \sum_{i = 1}^n p_i v_i$.
+%
+Our aim is to find the $\alpha(t)$
+that minimizes Eq. \eqref{eq:error_sum}.
+%
+To do so, we shall first consider
+a simpler one-variable problem.
+
+
+
+\subsection{One-variable problem}
+
+
+
+Consider the following equation
+of a single variable:
+%
+\begin{equation}
+\dot x(t) = -\alpha(t) \, \lambda \left[ x(t) - \xi(t) \right],
+\label{eq:dxdt_alpha}
+\end{equation}
+%
+where $\xi(t)$ is a generalized noise
+that is invariant under time translation:
+%
+\begin{equation}
+\left\langle \xi(t) \, \xi(t') \right\rangle
+=
+\kappa(t - t').
+\label{eq:noise_correlation}
+\end{equation}
+%
+Additionally, we require
+\begin{equation}
+  \lim_{t \rightarrow \pm\infty} \kappa(t) = 0.
+  \label{eq:kappat_limit}
+\end{equation}
+%
+For example, for a white noise,
+$\kappa(t)$ is proportional to
+Dirac's $\delta$-function, $\delta(t)$.
+%
+We wish to show that the optimal $\alpha(t)$
+of minimizing $\langle x^2(t) \rangle$ at long times
+is given by
+%
+\begin{equation}
+  \alpha(t) = \frac{1}{\lambda \, (t + t_0)}.
+\label{eq:alpha_opt}
+\end{equation}
+
+
+
+To do so, we first recall
+the formal solution of Eq. \eqref{eq:dxdt_alpha}:
+%
+\begin{equation}
+x(t) = x(0) \, e^{-\lambda \, q(t)}
++ \int_0^t \dot u(t') \, \xi(t') \, dt',
+\label{eq:xt_solution}
+\end{equation}
+%
+where,
+%
+\begin{equation}
+q(t) \equiv \int_0^t \alpha(t') \, dt',
+\label{eq:qt_definition}
+\end{equation}
+%
+and
+%
+\begin{align}
+u(q(t'))
+&\equiv
+e^{-\lambda \, q(t) + \lambda \, q(t')}.
+\label{eq:ut_definition}
+\end{align}
+
+
+We shall further demand that
+%
+\begin{equation}
+  \lim_{t \to \infty} q(t) \to \infty.
+  \label{eq:qt_limit}
+\end{equation}
+%
+Then, for a large time $t$,
+the first term on the right-hand side
+of Eq. \eqref{eq:xt_solution} can be neglected, and
+%
+\begin{align}
+\left\langle x^2(t) \right\rangle
+%&=
+%\int_0^t \int_0^t \dot u(t') \, \dot u(t'')
+%    \left\langle \xi(t') \xi(t'') \right\rangle dt'' \, dt'
+%\notag
+%\\
+&=
+\int_0^t \int_0^t
+  \dot u(q(t')) \, \dot u(q(t'')) \,
+  \kappa(t' - t'') \, dt'' \, dt'.
+\label{eq:x2t_average}
+\end{align}
+
+
+
+Variating this expression and
+using the Euler-Lagrange equation yields
+$$
+\begin{aligned}
+0
+&=
+\frac{d}{d\tau} \int_0^t \dot u(q(t')) \, \kappa(t' - \tau) \, dt'
+= \int_0^t \ddot u(q(t')) \, \kappa(t' - \tau) \, dt',
+\end{aligned}
+$$
+where we have dropped the boundary terms
+by using Eq. \eqref{eq:kappat_limit}.
+%
+%In fact, we can repeat the process $n$ times, and
+%$$
+%\int_0^t u^{(n)}(t') \, \kappa(t' - \tau) \, dt' = 0,
+%\qquad (n \ge 1)
+%$$
+%
+In order for this to hold for any $\tau$,
+we must have
+%
+\begin{equation}
+\ddot u(q(t')) = 0,
+\qquad
+\mathrm{or}
+\;\;
+\dot u(q(t')) = c,
+\label{eq:ddu_eq_0}
+\end{equation}
+%
+where $c$ is a constant of $t'$.
+%
+Using Eq. \eqref{eq:ut_definition}
+we get
+$$
+e^{-\lambda \, q(t) + \lambda \, q(t')}
+=
+c \, (t' + t_0),
+$$
+where $t_0$ is a constant.
+%
+Taking the logarithm, and differentiating this with respect to $t'$
+yields Eq. \eqref{eq:alpha_opt}.
+
+
+
+\subsection{Optimal $\alpha(t)$ for the single-bin updating scheme}
+
+
+
+Going back to the problem of
+minimizing Eq. \eqref{eq:error_sum}
+for the single-bin updating scheme,
+we find from Eq. \eqref{eq:dxdt_WL}
+that with $\lambda = 1$,
+Eq. \eqref{eq:alpha_opt}
+will optimize each term $\langle x_i^2 \rangle$,
+and hence the sum.
+%
+Thus, Eq. \eqref{eq:alpha_invt} is optimal
+up to a constant $t_0$ defining the origin of $t$.
+
+
+
+\section{\label{sec:multiple-bin}
+Multiple-bin update}
+
+
+
+We now extend the above analysis to
+the multiple-bin updating scheme.
+%
+In this case,
+upon a visit to bin $j$,
+we update not only $v_j$,
+but also $v_i$ for a few neighboring bins $i$.
+%
+The update magnitudes are given by a matrix $\mathbf w$
+with elements $w_{ij}$.
+%
+Then, Eq. \eqref{eq:vt_diffeq} is generalized to
+\begin{equation}
+  \dot v_i(t) =
+  \sum_{j=1}^n \alpha(t) \, h_j(t) \frac{ w_{ij} } { p_j }.
+  \label{eq:vt_diffeq_mbin}
+\end{equation}
+
+
+The procedure of optimization is largely
+the same as the single-bin case,
+whereas the matrix nature brings about
+some difficulties that require
+certain restrictions and approximations.
+
+
+
+\subsection{Updating matrix $\mathbf w$}
+
+
+
+The matrix $\mathbf w$ is not arbitrary.
+%
+A necessary condition to sample desired distribution
+$\mathbf p = (p_1, \dots, p_n)$
+is that in Eq. \eqref{eq:vt_diffeq_mbin}
+when $h_j(t)$ coincides with $p_j$,
+the rate of change $\dot v_i(t)$
+should be independent of $i$.
+%
+This allows $v_i(t)$ to approach a constant
+asymptotically.
+%
+Thus, by a proper scaling of $\alpha(t)$,
+we may write this condition as
+%
+\begin{equation}
+  \sum_{j = 1}^n w_{ij} = 1.
+  \label{eq:w_sumj}
+\end{equation}
+%
+This means $(1, \dots, 1)^T$
+is a right eigenvector of $\mathbf w$
+with eigenvalue $1$.
+%
+Thus, the transpose $\mathbf w^T$
+resembles a transition matrix,
+although the matrix elements can be negative.
+
+
+
+To simplify the following discussion,
+we shall further impose the
+detailed balance condition:
+%
+\begin{equation}
+  p_i \, w_{ij} = p_j \, w_{ji}.
+  \label{eq:w_detailedbalance}
+\end{equation}
+%
+It follows that
+\begin{equation}
+  \sum_{i = 1}^n p_i \, w_{ij}
+  =
+  \sum_{i = 1}^n p_j \, w_{ji}
+  = p_j,
+  \label{eq:w_balance}
+\end{equation}
+%
+i.e., $\mathbf p$ is a left eigenvector of
+$\mathbf w$ with eigenvalue $1$.
+
+
+
+Further, by Eq. \eqref{eq:w_detailedbalance},
+we can define a symmetric matrix $\hat{\mathbf w}$
+as $\hat w_{ij} = \sqrt{p_i/p_j} \, w_{ij}$
+that can be diagonalized
+with a set of orthonormal eigenvectors:
+%
+$\sum_{i = 1}^n U_{ki} \, \hat w_{ij} = \lambda_k \, U_{kj}$.
+%
+Thus,
+in terms of diagonalizing $\mathbf w$, we have
+\begin{equation}
+  \sum_{i = 1}^n T_{ki} \, w_{ij} = \lambda_k \, T_{kj},
+  \label{eq:T_w}
+\end{equation}
+where
+$T_{ij} = \sqrt{p_j} \, U_{ij}$ satisfies
+the orthonormal conditions:
+%
+\begin{align}
+\sum_{k = 1}^n T_{ki} \, T_{kj}
+&= \delta_{ij} \, p_i,
+\label{eq:T_orthonormal_cols}
+\\
+\sum_{k = 1}^n \frac{ T_{ik} \, T_{jk} }{ p_k }
+&= \delta_{ij}.
+\label{eq:T_orthonormal_rows}
+\end{align}
+
+
+
+We emphasize that, in a stable updating scheme,
+all eigenvalues $\lambda_k$ must be nonnegative,
+for otherwise there is a fluctuating mode
+that can increase indefinitely.
+
+
+
+\subsection{Linearization and decoupling}
+
+
+
+We can now simplify Eq. \eqref{eq:vt_diffeq_mbin}.
+%
+By using Eq. \eqref{eq:w_balance},
+we can show that
+Eqs. \eqref{eq:dvbardt} and \eqref{eq:px_sum}
+remain true.
+%
+%Thus, for Eq. \eqref{eq:x_def}, we have
+%
+$$
+\begin{aligned}
+\dot x_i
+&= \alpha(t) \sum_{j=1}^n w_{ij}
+\left( \frac{ h_j } { p_j }  - 1 \right)
+\\
+&=
+-\alpha(t) \sum_{j = 1}^n
+w_{ij} \left[ x_j(t) - \frac{\zeta_j (t)}{p_j} \right],
+\end{aligned}
+$$
+where
+we have expanded the right-hand side
+in linear terms of $x_j$ in the second step.
+
+
+Now by diagonalizing the matrix $\mathbf w$
+using matrix defined in Eqs. \eqref{eq:T_w},
+\eqref{eq:T_orthonormal_cols},
+and
+\eqref{eq:T_orthonormal_rows},
+we get a set of decoupled equations
+%
+\begin{equation}
+\dot y_i(t)
+=
+-\alpha(t) \, \lambda_i
+[y_i(t) - \eta_i(t)],
+\label{eq:yt_diffeq}
+\end{equation}
+%
+where
+\begin{align}
+  y_i &= \sum_{j=1}^n T_{ij} \, x_j,
+  \label{eq:y_def}
+  \\
+  \eta_i &= \sum_{j=1}^n T_{ij} \frac{ \zeta_j}{ p_j}.
+  \label{eq:eta_def}
+\end{align}
+
+
+
+\subsection{Minimization of the error function}
+
+
+
+The error function can be obtained
+from Eq. \eqref{eq:T_orthonormal_cols}
+as
+\begin{align}
+  \mathcal E
+  &\equiv
+  \sum_{i = 1}^n p_i \, x_i^2
+  =
+  \sum_{i, j, k=1}^n T_{ki} \, T_{kj} \, x_i \, x_j
+  =
+  \sum_{k = 1}^n y_k^2.
+  \label{eq:y2_sum}
+\end{align}
+%
+If we arrange $y_k$ such that
+the mode $y_1 = \sum_{j=1}^n p_j \, x_j$,
+(corresponding to $\lambda_1 = 1$),
+then $y_1$ vanishes identically
+by Eq. \eqref{eq:px_sum},
+and the sum of $y_k$ in Eq. \eqref{eq:y2_sum}
+can start from $k = 2$.
+
+
+
+In analogous to Eq. \eqref{eq:x2t_average},
+we can rewrite Eq. \eqref{eq:y2_sum} as
+%
+\begin{align}
+  \mathcal E
+  %&= \sum_{i = 2}^n \langle y_i^2 \rangle
+  %\notag
+  %\\
+  &=
+  \int_0^t \int_0^t
+  \sum_{i = 2}^n
+  \dot u_i(q(t')) \,
+  \dot u_i(q(t'')) \,
+  \kappa_i(t' - t'') \, dt' \, dt'',
+  \notag
+  %\label{eq:y2_int}
+\end{align}
+%
+where
+\begin{align*}
+  u_i(q(t'))
+  &\equiv
+  e^{\lambda_i \, [q(t') - \, q(t)]},
+  \\
+  \kappa_i(t - t')
+  &\equiv
+  \left\langle \eta_i(t) \, \eta_i(t') \right\rangle,
+\end{align*}
+%
+and the extremal condition of $\mathcal E$ is given by
+%
+\begin{align}
+\sum_{i=2}^n
+u_i'(q(\tau))
+\int_0^t
+\ddot u_i(q(t')) \, \kappa_i(t' - \tau) \, dt' = 0.
+\label{eq:optimal_mbin1}
+\end{align}
+%
+If all $\lambda_i$, hence all $u_i$, are the same,
+the above condition can be satisfied
+by Eq. \eqref{eq:ddu_eq_0},
+which is the single-bin case.
+%
+The general solution of Eq. \eqref{eq:optimal_mbin1}
+is harder to obtain.
+%
+
+
+
+\subsection{Optimal $\alpha(t)$}
+
+
+To proceed, we shall further assume perfect sampling,
+%
+\begin{equation}
+  \langle \zeta_i(t) \, \zeta_j(t') \rangle
+  =
+  p_i \, \delta_{ij} \, \delta(t - t').
+  \label{eq:zz_perfect}
+\end{equation}
+%
+Thus, from Eqs. \eqref{eq:T_orthonormal_rows} and \eqref{eq:eta_def},
+we get
+%
+\begin{equation}
+  \kappa_i(t - t')
+  =
+  \sum_{j,k = 1}^n
+  \frac{ T_{ij} } { p_j }
+  \frac{ T_{ik} } { p_k }
+  \langle \zeta_j(t) \, \zeta_k(t') \rangle
+  =
+  \delta(t - t').
+  \label{eq:kappa_perfect}
+\end{equation}
+%
+Thus, Eq. \eqref{eq:optimal_mbin1}
+is simplified as
+%
+\begin{align}
+  \sum_{i=1}^n
+  \ddot u_i(q(\tau)) \, u'_i(q(\tau)) = 0.
+  \label{eq:optimal_mbin2}
+\end{align}
+%
+%We can study two limiting cases.
+%
+For $\tau \ll t$,
+the dominant contribution comes from
+the term(s) with the smallest eigenvalue $\lambda_i = \lambda_n$,
+and
+$$
+\ddot u_n(\tau) = 0,
+\quad
+\dot u_n(\tau) = c,
+\quad
+\mathrm{and}\;
+u_n(\tau) = c \, (\tau + t_0),
+$$
+which means
+$$
+\alpha(\tau) \approx \frac{1}{\lambda_n \, (\tau + t_0)}.
+$$
+
+
+
+\subsection{Comparison of updating schemes}
+
+
+
+A more direct, and often more accurate, approach
+is to assume the functional form
+\begin{equation}
+\alpha(\tau) = \frac{1}{\lambda \, (\tau + t_0) },
+\label{eq:alpha_trial}
+\end{equation}
+and find the optimal choice of $\lambda$.
+%
+Using Eqs. \eqref{eq:kappa_perfect}, \eqref{eq:alpha_trial}
+in Eq. \eqref{eq:y2_sum}, we get
+%
+\begin{equation}
+\mathcal E
+=
+\int_0^t
+\sum_{i=0}^n \dot u_i^2(q(t')) \, dt'
+\stackrel{t \to \infty}
+{=\joinrel=\joinrel=}
+\frac{1}{t}
+\sum_{i = 2}^n
+\frac{ \lambda_i^2 } { \lambda \, (2 \, \lambda_i - \lambda) },
+\label{eq:y2_sum_perfect_invt}
+\end{equation}
+%
+and the optimal $\lambda$
+can be found from the smallest root of
+%
+\begin{equation}
+\sum_{i = 2}^n
+\frac{ \lambda_i - \lambda }
+{ \left(2 - \lambda/ \lambda_i \right)^2 }
+= 0.
+\end{equation}
+
+
+
+Under the approximation, we have
+$$
+\frac{ \lambda_i^2 }{ \lambda \, (2 \lambda_i - \lambda) } \ge 1,
+$$
+with the equality achieved only at $\lambda = \lambda_i$,
+we see the from Eq. \eqref{eq:y2_sum_perfect_invt}
+that the minimal error is achieved with
+\begin{equation}
+  \lambda_2 = \dots = \lambda_n = \lambda.
+\end{equation}
+%
+and the updating matrix $\mathbf w$ satisfying this condition
+is essentially a multiple of the identity matrix
+(since $\lambda_1$ corresponds to the mode
+of a uniform shift of all $v_i$,
+we can freely set it to $\lambda_2$
+without changing the nature of the updating scheme).
+%
+This shows that in terms of convergence,
+the single-bin updating scheme
+(as adopted in the WL algorithm)
+is the most efficient candidate
+of all multiple-bin schemes.
+
+
+
+%\section{Numerical results}
+
+
+%Here
+
+
+\end{document}
