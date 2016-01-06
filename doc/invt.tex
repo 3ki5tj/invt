@@ -1,5 +1,25 @@
 \documentclass[reprint]{revtex4-1}
 \usepackage{amsmath}
+\usepackage{upgreek}
+\usepackage[usenames,dvipsnames]{xcolor}
+\usepackage{tikz}
+\usepackage{hyperref}
+
+
+
+\definecolor{DarkBlue}{RGB}{0,0,64}
+\definecolor{DarkBrown}{RGB}{64,20,10}
+\definecolor{DarkGreen}{RGB}{0,64,0}
+\definecolor{DarkPurple}{RGB}{64,0,42}
+% annotation macros
+\newcommand{\repl}[2]{{\color{gray} [#1] }{\color{blue} #2}}
+\newcommand{\add}[1]{{\color{blue} #1}}
+\newcommand{\del}[1]{{\color{gray} [#1]}}
+\newcommand{\note}[1]{{\color{DarkGreen}\footnotesize \textsc{Note.} #1}}
+\newcommand{\answer}[1]{{\color{DarkBlue}\footnotesize \textsc{Answer.} #1}}
+\newcommand{\summary}[1]{{\color{DarkPurple}\footnotesize \textsc{Summary.} #1}}
+
+
 \begin{document}
 
 
@@ -182,7 +202,7 @@ to the $v_i$ at the current bin.
 %
 One can show that with a constant $\alpha(t) = \alpha > 0$,
 the distribution collected from
-the trajectory is identical to $p^*_i$.
+the trajectory is identical to $p_i$.
 %
 However, the updating scheme
 makes $v_i(t)$ a fluctuating quantity,
@@ -457,7 +477,7 @@ we get a set of decoupled equations
 
 
 
-The total error of the bias potentials can be written in
+The total error of the bias potential can be written in
 terms of $x_i$,
 \begin{equation}
 \mathcal E
@@ -791,7 +811,7 @@ w_{ij} \left[ x_j(t) - \frac{\zeta_j (t)}{p_j} \right],
 $$
 where
 we have expanded the right-hand side
-in linear terms of $x_j$ in the second step.
+in linear terms of $x_j$.
 
 
 Now by diagonalizing the matrix $\mathbf w$
@@ -965,7 +985,7 @@ is to assume the functional form
 \alpha(\tau) = \frac{1}{\lambda \, (\tau + t_0) },
 \label{eq:alpha_trial}
 \end{equation}
-and find the optimal choice of $\lambda$.
+and find the optimal value of $\lambda$.
 %
 Using Eqs. \eqref{eq:kappa_perfect}, \eqref{eq:alpha_trial}
 in Eq. \eqref{eq:y2_sum}, we get
@@ -1021,10 +1041,131 @@ of all multiple-bin schemes.
 
 
 
-%\section{Numerical results}
+\subsection{Example}
 
 
-%Here
+
+As an example, consider the following matrix $\mathbf w$
+%
+\begin{equation}
+  w_{ij} = m_{|i-j|} + m_{i+j-1} + m_{2n+1-i-j},
+  \label{eq:w_band}
+\end{equation}
+%
+where $m_0, \dots, m_b \, (b < n)$
+are a set of numbers satisfying
+%
+\begin{equation}
+m_0 + 2 \, m_1 + \cdots + 2 \, m_b = 1,
+\label{eq:m_normalization}
+\end{equation}
+%
+and $m_l = 0$ for $l > b$.
+
+
+This matrix is clearly symmetric, and hence
+satisfies Eqs. \eqref{eq:w_sumj}-\eqref{eq:w_balance},
+for the flat distribution $p_i \equiv 1/n$.
+%
+It admits $n$ eigenvectors,
+$\pmb\theta^{(1)}, \dots, \pmb\theta^{(n)}$,
+given by
+%
+\begin{equation}
+\theta^{(k)}_i
+= \cos \frac{ (2 \, i - 1) k \pi}{2 \, n}.
+\label{eq:wband_eigenvector}
+\end{equation}
+%
+with eigenvalues
+\note{To show Eqs.
+  \eqref{eq:wband_eigenvector} and \eqref{eq:wband_eigenvalue},
+  we first define $m_l = 0$, for $l \le 0$, then
+$$
+\begin{aligned}
+&\sum_{i = 1}^n
+  \theta^{(k)}_i
+  \, w_{ij}
+=
+- \theta^{(k)}_j \, m_0
+\\
+&
++\sum_{i=1}^n
+  \theta^{(k)}_i
+  \left(
+    m_{i - j} + m_{j - i} + m_{i + j - 1} + m_{2n+1-i-j}
+  \right)
+.
+\end{aligned}
+$$
+
+Now
+$$
+\begin{aligned}
+  &
+  \sum_{i=1}^n
+  \theta^{(k)}_i \,
+  \left(
+    m_{i - j} + m_{2n+1-i-j}
+  \right)
+  \\
+  &=
+  \sum_{l=1-j}^{n-j} \theta^{(k)}_{j+l} \, m_l
+  +
+  \sum_{l=n-j+1}^{2n-j} \theta^{(k)}_{2n+1-j-l} \, m_l
+  \\
+  &=
+  \sum_{l=1-j}^{2n-j} \theta^{(k)}_{j+l} \, m_l
+  =
+  \sum_{l=0}^{b} m_l \, \cos\frac{(j+l-\frac12)k\pi}{n},
+\end{aligned}
+$$
+where we have used
+$$
+\theta^{(k)}_i = \theta^{(k)}_{1-i} = \theta^{(k)}_{2n+1-i}.
+$$
+Similarly,
+$$
+\begin{aligned}
+  \sum_{i=1}^n
+  \theta^{(k)}_i
+  \left(
+    m_{j - i} + m_{i+j-1}
+  \right)
+  =
+  \sum_{l=0}^{b} m_l \, \cos\frac{(j-l-\frac12)k\pi}{n}.
+\end{aligned}
+$$
+%
+So
+$$
+\begin{aligned}
+\sum_{i = 1}^n \theta^{(k)}_i \, w_{ij}
+&=
+- \theta^{(k)}_j \, m_0
++\sum_{l=0}^{b} m_l \, 2 \, \cos\frac{lk\pi}{n} \, \cos\frac{(j-\frac12)k\pi}{n}
+\\
+&= \theta^{(k)}_j \, \lambda_k,
+\end{aligned}
+$$
+with $\lambda_k$ given by Eq. \eqref{eq:wband_eigenvalue}.
+}
+%
+\begin{equation}
+\lambda_k = m_0 + \sum_{l = 1}^b 2 \, m_l \cos \frac{k l \pi}{n}.
+\label{eq:wband_eigenvalue}
+\end{equation}
+
+
+
+\section{Numerical results}
+
+
+1. Single-bin update.
+Show the error versus $\lambda$.
+
+
+2. Multiple-bin update scheme.
 
 
 \end{document}
