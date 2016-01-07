@@ -546,7 +546,7 @@ the formal solution of Eq. \eqref{eq:dxdt_alpha}:
 %
 \begin{equation}
 x(t) = x(0) \, e^{-\lambda \, q(t)}
-+ \int_0^t \dot u(t') \, \xi(t') \, dt',
++ \int_0^t \dot u\bigl( q(t') \bigr) \, \xi(t') \, dt',
 \label{eq:xt_solution}
 \end{equation}
 %
@@ -560,9 +560,9 @@ q(t) \equiv \int_0^t \alpha(t') \, dt',
 and
 %
 \begin{align}
-u(q(t'))
+u(z)
 &\equiv
-e^{-\lambda \, q(t) + \lambda \, q(t')}.
+e^{-\lambda \, q(t) + \lambda \, z}.
 \label{eq:ut_definition}
 \end{align}
 
@@ -587,7 +587,8 @@ of Eq. \eqref{eq:xt_solution} can be neglected, and
 %\\
 &=
 \int_0^t \int_0^t
-  \dot u(q(t')) \, \dot u(q(t'')) \,
+  \dot u\bigl( q(t') \bigr) \,
+  \dot u\bigl( q(t'') \bigr) \,
   \kappa(t' - t'') \, dt'' \, dt'.
 \label{eq:x2t_average}
 \end{align}
@@ -600,8 +601,10 @@ $$
 \begin{aligned}
 0
 &=
-\frac{d}{d\tau} \int_0^t \dot u(q(t')) \, \kappa(t' - \tau) \, dt'
-= \int_0^t \ddot u(q(t')) \, \kappa(t' - \tau) \, dt',
+\frac{d}{d\tau} \int_0^t
+  \dot u\bigl( q(t') \bigr) \, \kappa(t' - \tau) \, dt'
+= \int_0^t
+  \ddot u\bigl( q(t') \bigr) \, \kappa(t' - \tau) \, dt',
 \end{aligned}
 $$
 where we have dropped the boundary terms
@@ -617,11 +620,11 @@ In order for this to hold for any $\tau$,
 we must have
 %
 \begin{equation}
-\ddot u(q(t')) = 0,
+\ddot u\bigl( q(t') \bigr) = 0,
 \qquad
 \mathrm{or}
 \;\;
-\dot u(q(t')) = c,
+\dot u\bigl( q(t') \bigr) = c,
 \label{eq:ddu_eq_0}
 \end{equation}
 %
@@ -879,32 +882,33 @@ we can rewrite Eq. \eqref{eq:y2_sum} as
   &=
   \int_0^t \int_0^t
   \sum_{i = 2}^n
-  \dot u_i(q(t')) \,
-  \dot u_i(q(t'')) \,
+  \dot u_i\bigl( q(t') \bigr) \,
+  \dot u_i\bigl( q(t'') \bigr) \,
   \kappa_i(t' - t'') \, dt' \, dt'',
-  \notag
-  %\label{eq:y2_int}
+  \label{eq:error_mbin}
 \end{align}
 %
 where
 \begin{align*}
-  u_i(q(t'))
+  u_i(z)
   &\equiv
-  e^{\lambda_i \, [q(t') - \, q(t)]},
+  e^{\lambda_i \, [q(t') - z]},
   \\
   \kappa_i(t - t')
   &\equiv
-  \left\langle \eta_i(t) \, \eta_i(t') \right\rangle,
+  \left\langle
+    \eta_i(t) \, \eta_i(t')
+  \right\rangle,
 \end{align*}
 %
 and the extremal condition of $\mathcal E$ is given by
 %
 \begin{align}
 \sum_{i=2}^n
-u_i'(q(\tau))
+\lambda_i \, u_i\bigl( q(\tau) \bigr)
 \int_0^t
-\ddot u_i(q(t')) \, \kappa_i(t' - \tau) \, dt' = 0.
-\label{eq:optimal_mbin1}
+\ddot u_i\bigl( q(t') \bigr) \, \kappa_i(t' - \tau) \, dt' = 0.
+\label{eq:optimal_mbin}
 \end{align}
 %
 If all $\lambda_i$, hence all $u_i$, are the same,
@@ -912,13 +916,13 @@ the above condition can be satisfied
 by Eq. \eqref{eq:ddu_eq_0},
 which is the single-bin case.
 %
-The general solution of Eq. \eqref{eq:optimal_mbin1}
+The general solution of Eq. \eqref{eq:optimal_mbin}
 is harder to obtain.
-%
 
 
 
 \subsection{Optimal $\alpha(t)$}
+
 
 
 To proceed, we shall further assume perfect sampling,
@@ -945,14 +949,36 @@ we get
   \label{eq:kappa_perfect}
 \end{equation}
 %
-Thus, Eq. \eqref{eq:optimal_mbin1}
-is simplified as
+Then, Eq. \eqref{eq:error_mbin} is simplified as
+%
+\begin{align}
+  \mathcal E
+  &=
+  \int_0^t
+  \sum_{i = 2}^n
+  \dot u_i^2\bigl( q(t') \bigr) \, dt',
+  \label{eq:error_mbin_perfect}
+\end{align}
+%
+and Eq. \eqref{eq:optimal_mbin} becomes
 %
 \begin{align}
   \sum_{i=1}^n
-  \ddot u_i(q(\tau)) \, u'_i(q(\tau)) = 0.
-  \label{eq:optimal_mbin2}
+  \lambda_i \, u_i\bigl( q(\tau) \bigr) \, \ddot u_i\bigl( q(\tau) \bigr) = 0.
+  \label{eq:optimal_mbin_perfect}
 \end{align}
+%
+\note{If we treat $u_i$ as the position,
+  and $\lambda_i$ as the mass,
+  then $\lambda_i \, \ddot u_i$ is the force.
+  So the left-hand side of Eq. \eqref{eq:optimal_mbin_perfect}
+  is the virial.
+  %
+  Thus this condition states that the total virial is zero.
+}
+
+
+
 %
 %We can study two limiting cases.
 %
@@ -987,14 +1013,11 @@ is to assume the functional form
 \end{equation}
 and find the optimal value of $\lambda$.
 %
-Using Eqs. \eqref{eq:kappa_perfect}, \eqref{eq:alpha_trial}
-in Eq. \eqref{eq:y2_sum}, we get
+Using Eq. \eqref{eq:alpha_trial}
+in Eq. \eqref{eq:error_mbin_perfect} yield
 %
 \begin{equation}
 \mathcal E
-=
-\int_0^t
-\sum_{i=0}^n \dot u_i^2(q(t')) \, dt'
 \stackrel{t \to \infty}
 {=\joinrel=\joinrel=}
 \frac{1}{t}
@@ -1004,13 +1027,14 @@ in Eq. \eqref{eq:y2_sum}, we get
 \end{equation}
 %
 and the optimal $\lambda$
-can be found from the smallest root of
+can be found from the smallest real root of
 %
 \begin{equation}
 \sum_{i = 2}^n
 \frac{ \lambda_i - \lambda }
 { \left(2 - \lambda/ \lambda_i \right)^2 }
 = 0.
+\label{eq:optimal_lambda_approx}
 \end{equation}
 
 
@@ -1041,7 +1065,7 @@ of all multiple-bin schemes.
 
 
 
-\subsection{Example}
+\subsection{Uniform band matrix}
 
 
 
@@ -1073,11 +1097,16 @@ given by
 %
 \begin{equation}
 \theta^{(k)}_i
-= \cos \frac{ (2 \, i - 1) k \pi}{2 \, n}.
+= \cos \frac{ \left(i - \frac12\right) (k - 1) \, \pi}{n}.
 \label{eq:wband_eigenvector}
 \end{equation}
 %
 with eigenvalues
+\begin{equation}
+  \lambda_k = m_0 + \sum_{l = 1}^b 2 \, m_l \cos \frac{(k - 1)  \, l \pi}{n}.
+\label{eq:wband_eigenvalue}
+\end{equation}
+
 \note{To show Eqs.
   \eqref{eq:wband_eigenvector} and \eqref{eq:wband_eigenvalue},
   we first define $m_l = 0$, for $l \le 0$, then
@@ -1117,7 +1146,7 @@ $$
   &=
   \sum_{l=1-j}^{2n-j} \theta^{(k)}_{j+l} \, m_l
   =
-  \sum_{l=0}^{b} m_l \, \cos\frac{(j+l-\frac12)k\pi}{n},
+  \sum_{l=0}^{b} m_l \, \cos\frac{(j+l-\frac12)(k-1)\pi}{n},
 \end{aligned}
 $$
 where we have used
@@ -1133,7 +1162,7 @@ $$
     m_{j - i} + m_{i+j-1}
   \right)
   =
-  \sum_{l=0}^{b} m_l \, \cos\frac{(j-l-\frac12)k\pi}{n}.
+  \sum_{l=0}^{b} m_l \, \cos\frac{(j-l-\frac12)(k-1)\pi}{n}.
 \end{aligned}
 $$
 %
@@ -1143,7 +1172,7 @@ $$
 \sum_{i = 1}^n \theta^{(k)}_i \, w_{ij}
 &=
 - \theta^{(k)}_j \, m_0
-+\sum_{l=0}^{b} m_l \, 2 \, \cos\frac{lk\pi}{n} \, \cos\frac{(j-\frac12)k\pi}{n}
++\sum_{l=0}^{b} m_l \, 2 \, \cos\frac{(k-1)l\pi}{n} \, \cos\frac{(j-\frac12)(k-1)\pi}{n}
 \\
 &= \theta^{(k)}_j \, \lambda_k,
 \end{aligned}
@@ -1151,14 +1180,246 @@ $$
 with $\lambda_k$ given by Eq. \eqref{eq:wband_eigenvalue}.
 }
 %
+
+
+
+\subsubsection{Tridiagonal matrix}
+
+
+
+Particularly, if $m_2 = \dots = m_b = 0$,
+the matrix $\mathbf w$ is tridiagonal,
+%
 \begin{equation}
-\lambda_k = m_0 + \sum_{l = 1}^b 2 \, m_l \cos \frac{k l \pi}{n}.
-\label{eq:wband_eigenvalue}
+\arraycolsep=1.4pt\def\arraystretch{1.4}
+\mathbf w
+=
+\left(
+  \begin{array}{cccccccc}
+    1 - m_1   & m_1 & 0 & \dots & 0 \\
+    m_1 & 1 - 2 \, m_1  & m_1 & \dots & 0 \\
+    \vdots & &  & & \vdots \\
+    0 & \dots & m_1 & 1 - 2 \, m_1  & m_1 \\
+    0 & \dots & 0 & m_1 & 1 - m_1
+  \end{array}
+\right).
+\label{eq:wtridiag}
+\end{equation}
+%
+We have
+\begin{equation}
+  \lambda_k = 1 - 4 \, m_1 \sin^2 \frac{(k - 1) \, \pi}{2n}.
+\label{eq:wtridiag_eigenvalue}
+\end{equation}
+
+Thus, this updating matrix requires
+$$
+m_1 < \frac{1}{4 \, \cos^2\frac{\pi}{2n} }.
+$$
+
+
+
+For a large $n \gg 1$,
+we can convert Eq.
+\eqref{eq:y2_sum_perfect_invt}
+%and
+%\eqref{eq:optimal_lambda_approx}
+to an integral,
+$$
+\begin{aligned}
+\mathcal E
+&=
+\frac{2 \, n}{\pi \, t}
+\int_0^{\pi/2}
+\frac{ \left(1 - 4 \, m_1 \, \cos^2 p \right)^2 }
+{ \lambda \, \left(2 - 8 \, m_1 \, \cos^2 p - \lambda \right) }
+\, dp
+\notag \\
+&=
+\frac{n}{4 \, t}
+\left(
+  \frac{2 - 4 \, m_1 + \lambda}{ \lambda }
+  +
+  \frac{ \lambda }
+  { \sqrt{ (2 - \lambda) (2 - 8 \, m_1 - \lambda) } }
+\right).
+\end{aligned}
+$$
+\note{
+  The integral is done by contour integration.
+  %
+$$
+\begin{aligned}
+\mathcal E
+&=
+\frac{n}{\lambda \, t}
+\frac{1}{2 \pi i}
+\int_0^{2 \, \pi}
+\frac{ \left(1 - 4 \, m_1 \, \cos^2 p \right)^2 }
+{ 2 - 8 \, m_1 \, \cos^2 p - \lambda }
+\, dp
+\\
+&=
+\frac{n}{\lambda \, t}
+\frac{1}{2 \pi i}
+\oint
+\frac{ \left[1 - m_1 \, \left(z+\frac{1}{z}\right)^2 \right]^2 }
+{ 2 - 2 \, m_1 \, \left(z + \frac{1}{z}\right)^2 - \lambda }
+\, \frac{dz}{z},
+\end{aligned}
+$$
+where the contour is around the unit circle in the complex plane.
+%
+This integral has five poles, one at the origin,
+which produces a residue $\frac{2 - 4 \, m_1 - \lambda}{4}$
+(from series expansion of small $z$),
+and the other four at
+$$
+z + \frac{1}{z} = \pm\sqrt\frac{2-\lambda}{2 \, m_1},
+$$
+with two of them inside the unit circle:
+$$
+z_\pm = \pm \frac{\sqrt{2-\lambda} -\sqrt{2 - 8 \, m_1 - \lambda}}
+{\sqrt{8 m_1}}.
+$$
+Thus,
+$$
+\begin{aligned}
+  \mathcal E
+&=
+\frac{n}{\lambda \, t}
+\left(
+ \frac{2 - 4 \, m_1 - \lambda}{4}
+ +
+ \sum_{z = z_{\pm} }
+ \frac{ \left(z^2 - m_1 (1 + z^2)^2 \right)^2 }
+ { 2 z^4 (2 - 4 m_1 - \lambda - 4 m_1 z^2) }
+\right)
+\\
+&=
+\frac{n}{\lambda \, t}
+\left(
+  \frac{2 - 4 \, m_1 - \lambda}{4}
+ +
+ \frac{ \left(1 - m_1 \left(z + \frac{1}{z} \right)^2 \right)^2 }
+ { 2 - 4 m_1 - \lambda - 4 m_1 z_{\pm}^2 }
+\right)
+\\
+&=
+\frac{n}{\lambda \, t}
+\left(
+  \frac{2 - 4 \, m_1 - \lambda}{4}
+ +
+ \frac{ (\lambda/2)^2 }
+ { \sqrt{(2-\lambda) (2 - 8 m_1 -\lambda)} }
+\right).
+\end{aligned}
+$$
+}
+%
+Minimizing the function yields
+%
+\begin{equation}
+\lambda = \frac{1 - 4 \, m_1} { 1 - 2 \, m_1 },
+\label{eq:lambda_tridiag}
+\end{equation}
+%
+and the minimal error is given by
+%
+\begin{equation}
+\mathcal E
+=
+\frac{n}{t}
+\left(
+  1+ \frac{2 \, m_1^2}{1-4 \, m_1}
+\right),
+\label{eq:error_tridiag}
+\end{equation}
+%
+which increases rapidly with $m_1$.
+
+
+
+\subsubsection{Gaussian matrix}
+
+
+
+Another common updating scheme
+in metadynamics is a Gaussian wave.
+%
+With $b = n - 1 \gg 1$,
+we can take the continuous limit:
+$x = l \, \Delta x$,
+$\Delta x = \pi/n$,
+and
+$m_l = m(x) \, \Delta x$.
+%
+Then
+Eq. \eqref{eq:wband_eigenvalue}
+can be approximated by an integral:
+%
+\begin{equation}
+\lambda_k
+=
+2 \int_0^{\pi}
+m(x) \, \cos\bigl((k-1) \, x\bigr) \, dx,
+\label{eq:lambda_int}
+\end{equation}
+%
+with the normalization
+%
+\begin{equation}
+1 = 2 \int_0^{\pi} m(x) \, dx.
+\label{eq:mx_normalization}
 \end{equation}
 
 
 
+Particularly, for the Gaussian wave
+%
+\begin{equation}
+m(x) = \frac{1}{\sqrt{2\pi\sigma^2}}
+\exp\left( -\frac{ x^2 } { 2 \, \sigma^2 } \right),
+\end{equation}
+%
+with $\Delta x \ll \sigma \ll 1$,
+we can extend the upper limit of the integrals
+in Eqs. \eqref{eq:lambda_int}
+and \eqref{eq:mx_normalization} to infinity,
+and
+\begin{equation}
+\lambda_k = \exp\left(
+  -\frac{ (k-1)^2 \, \sigma^2 } { 2 }
+\right).
+\label{eq:lambda_Gaussian}
+\end{equation}
+
+Owing to singularity,
+we can show that the optimal $\lambda$
+in Eq. \eqref{eq:alpha_trial}
+\begin{equation}
+  \lambda \approx 2 \lambda_{n}.
+\end{equation}
+
+
 \section{Numerical results}
+
+
+\subsection{Optimal $\alpha(t)$}
+
+
+To determine the optimal schedule,
+we shall test a model system
+in the following fashion.
+%
+Initially $\alpha$ is set to $\alpha_0 = 1/n$
+for a sufficiently long time.
+%
+Then we reset the simulation time $t = 0$,
+and switch to
+$$
+\alpha(t) = \min\left\{ \alpha_0, \frac{ 1 } { \lambda \, t } \right\}.
+$$
 
 
 1. Single-bin update.
@@ -1166,6 +1427,9 @@ Show the error versus $\lambda$.
 
 
 2. Multiple-bin update scheme.
+Error vs. $\lambda$.
 
+3. Optimality of the Single-bin update.
+Error vs. $m_1$.
 
 \end{document}

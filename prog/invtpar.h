@@ -17,8 +17,10 @@
 #define NBMAX 127
 
 
+
 typedef struct {
   double c; /* constant for the updating magnitude */
+  double t0; /* offset of equation c/(t + t0) */
   int n; /* number of bins */
   double alpha0; /* initial updating magnitude */
   long nequil; /* equilibration time */
@@ -35,14 +37,16 @@ typedef struct {
 
 
 enum {
-  SAMPMETHOD_PERFECT = 0,
-  SAMPMETHOD_NNMC,
+  SAMPMETHOD_MCLOCAL = 0,
+  SAMPMETHOD_MCGLOBAL,
+  SAMPMETHOD_HEATBATH,
   SAMPMETHOD_COUNT
 };
 
 const char *sampmethod_names[][8] = {
-  {"perfect", "p"},
-  {"near-neighbor Monte Carlo", "nnmc", "nn"},
+  {"MC-local", "local", "l"},
+  {"MC-global", "global", "g"},
+  {"heat-bath", "h"},
   {""}
 };
 
@@ -50,15 +54,35 @@ const char *sampmethod_names[][8] = {
 
 static void invtpar_init(invtpar_t *p)
 {
+  int i;
+
   p->c = 1.0;
+  p->t0 = 0;
   p->n = 10;
-  p->alpha0 = 0.1;
+  p->alpha0 = 0.0;
   p->nequil = p->n * 10000L;
   p->nsteps = 100000000L;
   p->tcorr = 0.0; /* perfect sampling */
   p->ntrials = 100;
   p->nbn = 1; /* single bin update */
+  for ( i = 1; i < p->nbn; i++ ) {
+    p->nbs[i] = 0;
+  }
+  p->nbs[0] = 1;
   p->prog = "invt";
+  p->verbose = 0;
+}
+
+
+
+static void invtpar_compute(invtpar_t *m)
+{
+  if ( m->alpha0 <= 0 ) {
+    m->alpha0 = 1.0 / m->n;
+  }
+  if ( m->t0 <= 0 ) {
+    m->t0 = m->c / m->alpha0;
+  }
 }
 
 
@@ -101,13 +125,18 @@ static int invtpar_load(invtpar_t *m, const char *fn)
     for ( ; *p; p++ )
       *p = (char) tolower(*p);
 
-    if ( strcmpfuzzy(key, "n") ) {
+    if ( strcmp(key, "n") == 0 ) {
       m->n = atoi(val);
-    } else if ( strcmpfuzzy(key, "c") ) {
+    } else if ( strcmp(key, "c") == 0 ) {
       m->c = atof(val);
+    } else if ( strcmp(key, "t0") == 0 ) {
+      m->t0 = atof(val);
     } else if ( strcmpfuzzy(key, "equil") == 0
              || strcmpfuzzy(key, "nequil") == 0 ) {
       m->nequil = atoi(val);
+    } else if ( strcmpfuzzy(key, "steps") == 0
+             || strcmpfuzzy(key, "nsteps") == 0 ) {
+      m->nsteps = atoi(val);
     } else if ( strcmpfuzzy(key, "steps") == 0
              || strcmpfuzzy(key, "nsteps") == 0 ) {
       m->nsteps = atoi(val);
@@ -119,6 +148,9 @@ static int invtpar_load(invtpar_t *m, const char *fn)
   }
 
   fclose(fp);
+
+  invtpar_compute(m);
+
   return 0;
 }
 
@@ -131,6 +163,12 @@ static void invtpar_help(const invtpar_t *m)
   fprintf(stderr, "Usage:\n");
   fprintf(stderr, "  %s [Options] [input.cfg]\n\n", m->prog);
   fprintf(stderr, "Options:\n");
+  fprintf(stderr, "  --n=:          set the number of bins, default %d\n", m->n);
+  fprintf(stderr, "  --c=:          set c in alpha = c/(t + t0), default %g\n", m->c);
+  fprintf(stderr, "  --t0=:         set t0 in alpha = c/(t + t0), default %g\n", m->t0);
+  fprintf(stderr, "  --try=:        set the number of trials, default %d\n", m->ntrials);
+  fprintf(stderr, "  --step=:       set the number of simulation steps, default %ld\n", m->nsteps);
+  fprintf(stderr, "  --equil=:      set the number of equilibration steps, default %ld\n", m->nequil);
   fprintf(stderr, "  -v:            be verbose, -vv to be more verbose, etc.\n");
   fprintf(stderr, "  -h, --help:    display this message\n");
   exit(1);
@@ -185,7 +223,10 @@ static int invtpar_doargs(invtpar_t *m, int argc, char **argv)
         m->n = atoi(q);
       } else if ( strcmp(p, "c") == 0 ) {
         m->c = atof(q);
-      } else if ( strcmp(p, "nb") == 0 ) {
+      } else if ( strcmp(p, "t0") == 0 ) {
+        m->t0 = atof(q);
+      } else if ( strcmp(p, "nb") == 0
+          || strcmp(p, "neighbor") == 0 ) {
         double sum = 0;
         m->nbn = 1 + readarray(m->nbs + 1, NBMAX, q);
         for ( j = 1; j < m->nbn; j++ ) {
@@ -195,8 +236,13 @@ static int invtpar_doargs(invtpar_t *m, int argc, char **argv)
       } else if ( strcmp(p, "equil") == 0
                || strcmp(p, "nequil") == 0 ) {
         m->nequil = atoi(q);
-      } else if ( strcmp(p, "steps") == 0
-               || strcmp(p, "nsteps") == 0 ) {
+      } else if ( strstartswith(p, "ntrial")
+          || strstartswith(p, "trials")
+          || strcmp(p, "ntry") == 0
+          || strcmp(p, "try") == 0 ) {
+        m->ntrials = atoi(q);
+      } else if ( strstartswith(p, "steps")
+               || strstartswith(p, "nsteps") ) {
         m->nsteps = atoi(q);
       } else if ( strcmp(p, "help") == 0 ) {
         invtpar_help(m);
@@ -245,6 +291,8 @@ static int invtpar_doargs(invtpar_t *m, int argc, char **argv)
       }
     }
   }
+
+  invtpar_compute(m);
 
   return 0;
 }

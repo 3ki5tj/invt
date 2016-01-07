@@ -1,15 +1,15 @@
-#include "mtrand.h"
-#include "util.h"
-#include "invtpar.h"
+
+
+#include "invt.h"
 
 
 
 /* return the root squared error of the inverse time scheme
  * */
-static double comperr(const invtpar_t *p)
+static double comperr(const invtpar_t *m)
 {
-  double *v, a, dv, err, t0;
-  int i, j, n = p->n;
+  double *v, a, err;
+  int i, n = m->n;
   long t;
 
   xnew(v, n);
@@ -17,40 +17,35 @@ static double comperr(const invtpar_t *p)
     v[i] = 0;
   }
 
-  /* constant */
-  t0 = p->c / p->alpha0;
-
-  for ( t = 0; t < p->nsteps + p->nequil; t++ ) {
+  i = 0;
+  for ( t = 0; t < m->nsteps + m->nequil; t++ ) {
     /* MCMC sampling */
-    if ( i < 0 || p->tcorr <= 0 || rand01() * p->tcorr < 1 ) {
-      j = (int) ( n * rand01() );
-      dv = v[j] - v[i];
-      if ( dv < 0 || rand01() < exp(-dv) ) {
-        i = j;
-      }
+    if ( m->tcorr <= 0 || rand01() * m->tcorr < 1 )
+    {
+      i = mc_metro_g(v, n, i);
     }
 
-    /* compute the updating magnitude
-     * the distribution density is p = 1/n
-     * this is why we have to multiply by n */
-    if ( t >= p->nequil ) {
-      /* the constant t0 makes the transition
-       * of alpha at t = t0 smooth */
-      a = p->c * n / (t - p->nequil + t0);
+    /* compute the updating magnitude */
+    if ( t >= m->nequil + m->c / m->alpha0 - m->t0 ) {
+      a = m->c / (t - m->nequil + m->t0);
     } else {
-      a = p->alpha0 * n;
+      a = m->alpha0;
     }
 
-    if ( p->nbn > 1 ) {
+    /* the distribution density is p = 1/n
+     * this is why we have to multiply by n */
+    a *= n;
+
+    if ( m->nbn > 1 ) {
       double rem = 1, z;
 
       if ( i > 0 ) {
-        z = p->nbs[1];
+        z = m->nbs[1];
         v[i - 1] += a * z;
         rem -= z;
       }
       if ( i < n - 1 ) {
-        z = p->nbs[1];
+        z = m->nbs[1];
         v[i + 1] += a * z;
         rem -= z;
       }
@@ -62,22 +57,13 @@ static double comperr(const invtpar_t *p)
   }
 
   /* normalize */
-  for ( a = 0, i = 0; i < n; i++ ) {
-    a += v[i];
-  }
-  a /= n;
-  for ( i = 0; i < n; i++ ) {
-    v[i] -= a;
-  }
+  normalize(v, n);
 
   /* compute the error */
-  err = 0;
-  for ( i = 0; i < n; i++ ) {
-    err += v[i] * v[i];
-  }
+  err = geterror(v, n);
 
   /* print out the error */
-  if ( p->verbose ) {
+  if ( m->verbose ) {
     for ( i = 0; i < n; i++ ) {
       printf("  %+11.8f", v[i]);
     }
@@ -86,25 +72,26 @@ static double comperr(const invtpar_t *p)
 
   free(v);
 
-  return sqrt(err / n);
+  return err;
 }
 
 
 
-static double invt_test(invtpar_t *p)
+static double invt_test(invtpar_t *m)
 {
-  double err, se = 0;
+  double err, see = 0;
   int i;
 
   mtscramble( time(NULL) );
-  for ( i = 0; i < p->ntrials; i++ ) {
-    err = comperr(p);
-    se += err;
-    printf("%4d: err %10.8f, ave %10.8f\n", i, err, se/(i+1));
+  for ( i = 0; i < m->ntrials; i++ ) {
+    err = comperr(m);
+    see += err * err;
+    printf("%4d: err %10.8f, ave %10.8f, sqr %e\n",
+        i, err, sqrt(see/(i+1)), see/(i+1));
   }
 
-  err = se / p->ntrials;
-  printf("average error: %g\n", err);
+  err = see / m->ntrials;
+  printf("average error: %10.8f, sqr %e\n", sqrt(err), err);
   return err;
 }
 
@@ -112,12 +99,12 @@ static double invt_test(invtpar_t *p)
 
 int main(int argc, char **argv)
 {
-  invtpar_t p[1];
+  invtpar_t m[1];
 
-  invtpar_init(p);
-  invtpar_doargs(p, argc, argv);
-  invtpar_dump(p);
-  invt_test(p);
+  invtpar_init(m);
+  invtpar_doargs(m, argc, argv);
+  invtpar_dump(m);
+  invt_test(m);
 
   return 0;
 }
