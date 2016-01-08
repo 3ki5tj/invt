@@ -37,8 +37,8 @@ typedef struct {
 
 
 enum {
-  SAMPMETHOD_MCLOCAL = 0,
-  SAMPMETHOD_MCGLOBAL,
+  SAMPMETHOD_METROGLOBAL = 0,
+  SAMPMETHOD_METROLOCAL,
   SAMPMETHOD_HEATBATH,
   SAMPMETHOD_COUNT
 };
@@ -47,8 +47,8 @@ enum {
 #define MAX_OPT_ALIASES 8
 
 const char *sampmethod_names[][MAX_OPT_ALIASES] = {
-  {"MC-local", "local", "l"},
-  {"MC-global", "global", "g"},
+  {"Metropolis-global", "global", "g"},
+  {"Metropolis-local", "local", "l"},
   {"heat-bath", "h"},
   {""}
 };
@@ -84,7 +84,8 @@ static int selectoption(const char *s,
   for ( i = 0; i < cnt; i++ ) {
     /* loop over aliases */
     for ( j = 0; j < MAX_OPT_ALIASES; j++ ) {
-      if ( names[i][j][0] == '\0' ) {
+      if ( names[i][j] == NULL
+        || names[i][j][0] == '\0' ) {
         break;
       }
 
@@ -94,30 +95,40 @@ static int selectoption(const char *s,
     }
   }
 
-  return 0;
+  /* try to treat `s` is a number */
+  if ( isdigit(s[0]) ) {
+    i = atoi(s);
+    if ( i < 0 || i >= cnt ) i = 0;
+  } else {
+    i = 0;
+  }
+
+  return i;
 }
 
 
 
-static void invtpar_init(invtpar_t *p)
+/* initialize the default parameters */
+static void invtpar_init(invtpar_t *m)
 {
   int i;
 
-  p->c = 1.0;
-  p->t0 = 0;
-  p->n = 10;
-  p->alpha0 = 0.0;
-  p->nequil = p->n * 10000L;
-  p->nsteps = 100000000L;
-  p->tcorr = 0.0; /* perfect sampling */
-  p->ntrials = 100;
-  p->nbn = 1; /* single bin update */
-  for ( i = 1; i < p->nbn; i++ ) {
-    p->nbs[i] = 0;
+  m->c = 1.0;
+  m->t0 = 0;
+  m->n = 10;
+  m->alpha0 = 0.0;
+  m->nequil = m->n * 10000L;
+  m->nsteps = 100000000L;
+  m->tcorr = 0.0; /* perfect sampling */
+  m->ntrials = 100;
+  m->nbn = 1; /* single bin update */
+  for ( i = 1; i < m->nbn; i++ ) {
+    m->nbs[i] = 0;
   }
-  p->nbs[0] = 1;
-  p->prog = "invt";
-  p->verbose = 0;
+  m->nbs[0] = 1;
+  m->sampmethod = 0;
+  m->prog = "invt";
+  m->verbose = 0;
 }
 
 
@@ -128,7 +139,8 @@ static void invtpar_compute(invtpar_t *m)
   int i;
 
   if ( m->alpha0 <= 0 ) {
-    m->alpha0 = 1.0 / m->n;
+    /* alpha0 is to be divided by p[i] = 1/n */
+    m->alpha0 = 0.1 / m->n;
   }
 
   if ( m->t0 <= 0 ) {
@@ -189,7 +201,8 @@ static int invtpar_load(invtpar_t *m, const char *fn)
       m->c = atof(val);
     } else if ( strcmpfuzzy(key, "t0") == 0 ) {
       m->t0 = atof(val);
-    } else if ( strcmpfuzzy(key, "alpha0") == 0 ) {
+    } else if ( strcmpfuzzy(key, "alpha0") == 0
+             || strcmpfuzzy(key, "a0") == 0 ) {
       m->alpha0 = atof(val);
     } else if ( strstartswith(key, "nb")
              || strstartswith(key, "neighbo")
@@ -281,14 +294,16 @@ static int invtpar_doargs(invtpar_t *m, int argc, char **argv)
       } else if ( strcmpfuzzy(p, "c") == 0
                || strcmpfuzzy(p, "invtc") == 0 ) {
         m->c = atof(q);
+      } else if ( strcmpfuzzy(p, "alpha0") == 0
+               || strcmpfuzzy(p, "a0") == 0 ) {
+        m->alpha0 = atof(q);
       } else if ( strcmp(p, "t0") == 0 ) {
         m->t0 = atof(q);
       } else if ( strstartswith(p, "nb")
                || strstartswith(p, "neighbor")
                || strcmpfuzzy(p, "window")  == 0 ) {
         m->nbn = 1 + readarray(m->nbs + 1, NBMAX, q);
-      } else if ( strcmpfuzzy(p, "sampling-method") == 0
-               || strcmpfuzzy(p, "sampmethod") == 0 ) {
+      } else if ( strstartswith(p, "samp") ) {
         m->sampmethod = selectoption(q,
             sampmethod_names, SAMPMETHOD_COUNT);
       } else if ( strcmpfuzzy(p, "tcorr") == 0
@@ -367,8 +382,10 @@ static void invtpar_dump(const invtpar_t *m)
 {
   int i;
 
-  fprintf(stderr, "ntrials %d, n %d, alpha = %g/t, alpha0 %g\n",
-      m->ntrials, m->n, m->c, m->alpha0);
+  fprintf(stderr, "ntrials %d, n %d, alpha = %g/t, alpha0 %g, "
+      "%s, tcorr %g\n",
+      m->ntrials, m->n, m->c, m->alpha0,
+      sampmethod_names[m->sampmethod][0], m->tcorr);
   fprintf(stderr, "update window function (%d bins): ", m->nbn);
   for ( i = 0; i < m->nbn; i++ ) {
     fprintf(stderr, "%g ", m->nbs[i]);

@@ -8,7 +8,7 @@
  * */
 static double comperr(const invtpar_t *m)
 {
-  double *v, a, err;
+  double *v, *vac, a, err;
   int i, n = m->n;
   long t;
 
@@ -17,12 +17,21 @@ static double comperr(const invtpar_t *m)
     v[i] = 0;
   }
 
+  /* space for the accumulative distribution function */
+  xnew(vac, n + 1);
+
   i = 0;
   for ( t = 0; t < m->nsteps + m->nequil; t++ ) {
     /* MCMC sampling */
     if ( m->tcorr <= 0 || rand01() * m->tcorr < 1 )
     {
-      i = mc_metro_g(v, n, i);
+      if ( m->sampmethod == SAMPMETHOD_METROGLOBAL ) {
+        i = mc_metro_g(v, n, i);
+      } else if ( m->sampmethod == SAMPMETHOD_METROLOCAL ) {
+        i = mc_metro_l(v, n, i);
+      } else if ( m->sampmethod == SAMPMETHOD_HEATBATH ) {
+        i = mc_heatbath(v, vac, n);
+      }
     }
 
     /* compute the updating magnitude */
@@ -71,6 +80,7 @@ static double comperr(const invtpar_t *m)
   }
 
   free(v);
+  free(vac);
 
   return err;
 }

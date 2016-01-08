@@ -9,7 +9,7 @@
 
 
 /* global Metropolis move */
-static int mc_metro_g(double *v, int n, int i)
+static int mc_metro_g(const double *v, int n, int i)
 {
   int j, acc;
   double dv, r;
@@ -33,15 +33,16 @@ static int mc_metro_g(double *v, int n, int i)
 
 
 /* local Metropolis move */
-static int mc_metro_l(double *v, int n, int i)
+static int mc_metro_l(const double *v, int n, int i)
 {
   int j, acc;
   double dv, r;
 
   j = (rand01() > 0.5) ? i + 1 : i - 1;
+  if ( j < 0 || j >= n ) return i;
+
   /* periodic boundary condition */
-  j = (j + n) % n;
-  // if ( j < 0 || j >= n ) return i;
+  // j = (j + n) % n;
 
   dv = v[j] - v[i];
   if ( dv <= 0 ) {
@@ -58,6 +59,34 @@ static int mc_metro_l(double *v, int n, int i)
   return i;
 }
 
+
+
+/* heat-bath move */
+static int mc_heatbath(const double *v, double *vac, int n)
+{
+  int i;
+  double vmin = DBL_MAX, r;
+
+  for ( i = 0; i < n; i++ ) {
+    if ( v[i] < vmin )
+      vmin = v[i];
+  }
+
+  vac[0] = 0;
+  for ( i = 0; i < n; i++ ) {
+    vac[i + 1] = vac[i] + exp(vmin - v[i]);
+  }
+
+  r = vac[n] * rand01();
+
+  /* find the bracket that contains r */
+  for ( i = n - 1; i >= 0; i-- ) {
+    if ( r >= vac[i] )
+      break;
+  }
+
+  return i;
+}
 
 
 
