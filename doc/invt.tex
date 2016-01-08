@@ -1,5 +1,6 @@
 \documentclass[reprint]{revtex4-1}
 \usepackage{amsmath}
+\usepackage{mathtools}
 \usepackage{upgreek}
 \usepackage[usenames,dvipsnames]{xcolor}
 \usepackage{tikz}
@@ -23,9 +24,41 @@
 \begin{document}
 
 
+
 \title{Optimal updating factor in Wang-Landau and metadynamics simulations}
 
+\begin{abstract}
+  Wang-Landau (WL) and metadynamics algorithms
+  are widely-used techniques in free energy simulations.
+  %
+  These techniques allow one to sample a flat distribution
+  along a quantity of interest
+  by constructing a bias potential on the fly,
+  and to compute the negative potential of mean force (PMF),
+  which is the negative of the bias potential.
+  %
+  However, the asymptotic error of the resulting PMF
+  is determined by the magnitude of updating the bias potential,
+  and in what fashion the magnitude is reduced
+  over the simulation time.
+  %
+  In the Wang-Landau case,
+  an effective prescription of determining the magnitude
+  is to set it to be the inverse of the number of simulation steps.
+  %
+  Here, we shall reexamine the optimality of this prescription,
+  and attempt to extend it to the metadynamics case,
+  in which the bias potential at several neighboring bins
+  are updating according to a prescribed function,
+  upon each visit.
+  %
+  Our analysis also suggests that in terms of the convergence
+  the WL algorithm represents one of the best of the class
+  updating schemes among more sophisticated candidates.
+\end{abstract}
+
 \maketitle
+
 
 
 \section{Background}
@@ -41,16 +74,16 @@ consider the problem of computing
 the distribution, $p^*_i$
 along a discrete quantity $i$.
 %
-The discrete nature of $i$ is natural
-in discrete models.
+%The discreteness of $i$ is natural
+%in discrete models.
 %
 For example, $i$ can be the energy $E$
-in lattice models; or the temperature index
+in lattice spin models; or the temperature index
 in a simulated tempering simulation.
 %
-For a continuous quantity, $z$,
+For the quantity of interest, $z$, is continuous,
 which is typical in molecular systems,
-we can also discretize $z$
+we can discretize $z$
 such that the integer $i$ represents
 the index of a small interval, or a bin, $(z, z + dz)$.
 %
@@ -61,8 +94,8 @@ $\sum_{i = 1}^n p^*_i = 1$.
 
 
 For a large system,
-the distribution $p^*_i$ is often
-localized around some $i_0$,
+the distribution $p^*_i$ tends to
+be localized around some $i_0$,
 %
 and to find out the global property,
 it is often desirable to carry out
@@ -101,8 +134,8 @@ up to an additive constant.
 
 
 
-Generally, we may wish to target
-a slowly-varying distribution, $p_i$,
+Generally, we may wish to sample
+a nearly flat distribution, $p_i$,
 by adjusting the bias potential $\phi_i$
 on the fly.
 %
@@ -352,7 +385,7 @@ or zero otherwise.
 
 
 Next, we split $h_i(t)$ into a deterministic part
-and a noise
+and a noise part,
 %
 \begin{equation}
   h_i(t) = \langle h_i(t) \rangle + \zeta_i(t).
@@ -392,8 +425,7 @@ For the noise part, we have
 $\langle \zeta_i(t) \rangle = 0$.
 %
 %The noise is not necessarily white.
-Unless specified otherwise, we assume
-a general noise with the correlation
+We consider a general noise with the correlation
 function depending on the time difference:
 %
 \begin{equation}
@@ -603,7 +635,8 @@ $$
 &=
 \frac{d}{d\tau} \int_0^t
   \dot u\bigl( q(t') \bigr) \, \kappa(t' - \tau) \, dt'
-= \int_0^t
+\\
+&= \int_0^t
   \ddot u\bigl( q(t') \bigr) \, \kappa(t' - \tau) \, dt',
 \end{aligned}
 $$
@@ -658,7 +691,7 @@ will optimize each term $\langle x_i^2 \rangle$,
 and hence the sum.
 %
 Thus, Eq. \eqref{eq:alpha_invt} is optimal
-up to a constant $t_0$ defining the origin of $t$.
+up to a constant $t_0$. %defining the origin of $t$.
 
 
 
@@ -667,13 +700,12 @@ Multiple-bin update}
 
 
 
-We now extend the above analysis to
-the multiple-bin updating scheme.
+We now consider the multiple-bin updating scheme.
 %
 In this case,
 upon a visit to bin $j$,
-we update not only $v_j$,
-but also $v_i$ for a few neighboring bins $i$.
+we update not only the bias potential there,
+but also those for a few neighboring bins $i$.
 %
 The update magnitudes are given by a matrix $\mathbf w$
 with elements $w_{ij}$.
@@ -689,7 +721,7 @@ Then, Eq. \eqref{eq:vt_diffeq} is generalized to
 The procedure of optimization is largely
 the same as the single-bin case,
 whereas the matrix nature brings about
-some difficulties that require
+some technical difficulties that require
 certain restrictions and approximations.
 
 
@@ -1001,33 +1033,113 @@ $$
 
 
 
-\subsection{Comparison of updating schemes}
+\subsection{Optimal coefficient of proportionality}
 
 
 
 A more direct, and often more accurate, approach
 is to assume the functional form
+%
 \begin{equation}
 \alpha(\tau) = \frac{1}{\lambda \, (\tau + t_0) },
 \label{eq:alpha_trial}
 \end{equation}
-and find the optimal value of $\lambda$.
+%
+and to find the optimal value of $\lambda$.
 %
 Using Eq. \eqref{eq:alpha_trial}
-in Eq. \eqref{eq:error_mbin_perfect} yield
+in Eq. \eqref{eq:error_mbin_perfect} yields
 %
-\begin{equation}
+\begin{align}
 \mathcal E
-\stackrel{t \to \infty}
-{=\joinrel=\joinrel=}
-\frac{1}{t}
-\sum_{i = 2}^n
-\frac{ \lambda_i^2 } { \lambda \, (2 \, \lambda_i - \lambda) },
-\label{eq:y2_sum_perfect_invt}
-\end{equation}
+&=
+\frac{1}{t+t_0}
+\sum_{i=2}^n \frac{ \lambda_i^2 } { \lambda \, (2 \lambda_i - \lambda) }
+\left[
+  1 - \left(
+    1 + \frac{t}{t_0}
+  \right)^{1 - 2 \, \lambda_i/\lambda}
+\right]
+\notag
+\\
+&\stackrel{      t \gg t_0      }
+          { =\joinrel=\joinrel= }
 %
-and the optimal $\lambda$
-can be found from the smallest real root of
+\sum_{i = 2}^n
+\begin{dcases}
+  \frac{ 1 }
+       { t }
+  \frac{ \lambda_i^2 }
+       { \lambda \, (2 \, \lambda_i - \lambda) }
+  &
+  \mathrm{if \;} \lambda < 2 \, \lambda_i,
+  \\%[1em]
+  %
+  %
+  \frac{   1    }
+       { 4 \, t }
+  \ln \frac{ t + t_0 }
+           {  t_0    }
+  &
+  \mathrm{if \;} \lambda = 2 \, \lambda_i,
+  \\%[1em]
+  %
+  %
+  \frac{ t_0^{ 2 \, \lambda_i / \lambda  - 1} }
+       { t^{ 2 \, \lambda_i / \lambda } }
+  \frac{ \lambda_i^2 }
+       { \lambda \, (\lambda - 2 \, \lambda_i) }
+  &
+  \mathrm{if \;} \lambda > 2 \, \lambda_i.
+\end{dcases}
+\label{eq:y2_sum_perfect_invt}
+\end{align}
+%
+\note{In the above expression,
+$t + t_0$ are replaced by $t$.
+%
+Adding back $t_0$, we get
+$$
+\begin{aligned}
+  \mathcal E
+  \stackrel{         t \to \infty         }
+           { =\joinrel=\joinrel=\joinrel= }
+  \sum_{i = 2}^n
+  \begin{dcases}
+    \frac{ 1 }{ t + t_0 }
+    \frac{ \lambda_i^2 } { \lambda \, (2 \, \lambda_i - \lambda) }
+    &
+    \mathrm{if \;} \lambda < 2 \, \lambda_i,
+    \\%[1em]
+    %
+    %
+    \frac{1}{4 \, (t + t_0) } \ln\frac{t + t_0}{t_0}
+    &
+    \mathrm{if \;} \lambda = 2 \, \lambda_i,
+    \\
+    %
+    %
+    \frac{ t_0^{ 2 \, \lambda_i / \lambda  - 1} }
+         { (t + t_0)^{ 2 \, \lambda_i / \lambda } }
+    \frac{ \lambda_i^2 }
+         { \lambda \, (\lambda - 2 \, \lambda_i) }
+    &
+    \mathrm{if \;} \lambda > 2 \, \lambda_i.
+  \end{dcases}
+\end{aligned}
+$$
+}
+%
+The last two cases, $\lambda \ge 2\lambda_i$,
+are asymptotically suboptimal
+as they decay slower than $1/t$.
+%
+Thus, the optimal $\lambda$
+satisfies $\lambda < 2 \min \lambda_i$,
+and in this case,
+we can seek that
+the optimal value from
+the smallest real root of
 %
 \begin{equation}
 \sum_{i = 2}^n
@@ -1087,7 +1199,7 @@ m_0 + 2 \, m_1 + \cdots + 2 \, m_b = 1,
 and $m_l = 0$ for $l > b$.
 
 
-This matrix is clearly symmetric, and hence
+This matrix, being symmetric,
 satisfies Eqs. \eqref{eq:w_sumj}-\eqref{eq:w_balance},
 for the flat distribution $p_i \equiv 1/n$.
 %
@@ -1180,6 +1292,7 @@ $$
 with $\lambda_k$ given by Eq. \eqref{eq:wband_eigenvalue}.
 }
 %
+We discuss two special cases below.
 
 
 
@@ -1211,16 +1324,23 @@ We have
   \lambda_k = 1 - 4 \, m_1 \sin^2 \frac{(k - 1) \, \pi}{2n}.
 \label{eq:wtridiag_eigenvalue}
 \end{equation}
-
-Thus, this updating matrix requires
+%
+Thus, for this updating matrix to be stable,
+we need
+$\min \lambda_k = \lambda_n > 0$,
+and
 $$
 m_1 < \frac{1}{4 \, \cos^2\frac{\pi}{2n} }.
 $$
 
 
 
-For a large $n \gg 1$,
-we can convert Eq.
+We can find an analytical expression
+of the optimal value of $\lambda$
+in the limit of large $n$.
+%
+In this case,
+we convert Eq.
 \eqref{eq:y2_sum_perfect_invt}
 %and
 %\eqref{eq:optimal_lambda_approx}
@@ -1245,8 +1365,7 @@ $$
 \right).
 \end{aligned}
 $$
-\note{
-  The integral is done by contour integration.
+\note{The integral is evaluated by contour integration.
   %
 $$
 \begin{aligned}
@@ -1268,7 +1387,8 @@ $$
 \, \frac{dz}{z},
 \end{aligned}
 $$
-where the contour is around the unit circle in the complex plane.
+where the contour is the unit circle
+in the complex plane of $z$.
 %
 This integral has five poles, one at the origin,
 which produces a residue $\frac{2 - 4 \, m_1 - \lambda}{4}$
@@ -1324,7 +1444,7 @@ Minimizing the function yields
 \label{eq:lambda_tridiag}
 \end{equation}
 %
-and the minimal error is given by
+and the error in the optimal is given by
 %
 \begin{equation}
 \mathcal E
@@ -1332,11 +1452,16 @@ and the minimal error is given by
 \frac{n}{t}
 \left(
   1+ \frac{2 \, m_1^2}{1-4 \, m_1}
-\right),
+\right).
 \label{eq:error_tridiag}
 \end{equation}
 %
-which increases rapidly with $m_1$.
+From Eq. \eqref{eq:error_tridiag},
+it is clear that the error
+increases rapidly with magnitude of $m_1$,
+no matter its sign,
+and optimal value is given by $m_1 = 0$,
+which is the single-bin update scheme.
 
 
 
@@ -1347,8 +1472,16 @@ which increases rapidly with $m_1$.
 Another common updating scheme
 in metadynamics is a Gaussian wave.
 %
-With $b = n - 1 \gg 1$,
-we can take the continuous limit:
+Below we show that the updating scheme
+is stable, although
+it might be less effective
+in reducing local noises.
+
+
+
+We start by defining
+a continuous limit
+for $b = n - 1 \gg 1$:
 $x = l \, \Delta x$,
 $\Delta x = \pi/n$,
 and
@@ -1361,45 +1494,128 @@ can be approximated by an integral:
 \begin{equation}
 \lambda_k
 =
-2 \int_0^{\pi}
-m(x) \, \cos\bigl((k-1) \, x\bigr) \, dx,
+2 \int_0^\pi
+  m(x) \, \cos \bigl( (k-1) \, x \bigr) \, dx,
 \label{eq:lambda_int}
 \end{equation}
 %
 with the normalization
 %
 \begin{equation}
-1 = 2 \int_0^{\pi} m(x) \, dx.
+1 = 2 \int_0^\pi m(x) \, dx.
 \label{eq:mx_normalization}
 \end{equation}
 
 
 
-Particularly, for the Gaussian wave
+For the Gaussian wave,
+$m(x) \propto \exp(-\frac{1}{2} x^2/\sigma^2)$.
+%
+If $\Delta x \ll \sigma \ll 1$,
+we can extended
+the upper limit of the integrals
+in Eqs. \eqref{eq:lambda_int}
+and \eqref{eq:mx_normalization}
+to infinity, and
 %
 \begin{equation}
-m(x) = \frac{1}{\sqrt{2\pi\sigma^2}}
-\exp\left( -\frac{ x^2 } { 2 \, \sigma^2 } \right),
+m(x)
+=
+\frac{            1            }
+     { \sqrt{ 2 \pi \sigma^2 } }
+%
+\exp\left(
+      -\frac{       x^2     }
+            { 2 \, \sigma^2 }
+    \right),
 \end{equation}
 %
-with $\Delta x \ll \sigma \ll 1$,
-we can extend the upper limit of the integrals
-in Eqs. \eqref{eq:lambda_int}
-and \eqref{eq:mx_normalization} to infinity,
-and
+%
+The eigenvalues are given by
+%
 \begin{equation}
-\lambda_k = \exp\left(
-  -\frac{ (k-1)^2 \, \sigma^2 } { 2 }
-\right).
+\lambda_k
+=
+\exp\left(
+      -\frac{ (k - 1)^2 \, \sigma^2 }
+            {           2           }
+    \right).
 \label{eq:lambda_Gaussian}
 \end{equation}
+%
+The eigenvalues are positive,
+which means that the updating scheme
+is stable.
 
-Owing to singularity,
-we can show that the optimal $\lambda$
-in Eq. \eqref{eq:alpha_trial}
-\begin{equation}
-  \lambda \approx 2 \lambda_{n}.
-\end{equation}
+
+However,
+as $\sigma/\Delta x \gg 1$,
+the smallest eigenvalue
+%
+$$
+\lambda_n
+\approx
+\exp\left(
+      -\frac{ n^2 \, \sigma^2 }
+            {        2        }
+    \right)
+=
+\exp\left[
+      -\frac{ \pi^2 }{ 2 }
+      \left(
+        \frac{  \sigma }
+             { \Delta x }
+      \right)^2
+    \right]
+.
+$$
+%
+is exponentially small.
+%
+This means that it will be difficult
+to use the optimal value of $\lambda$
+given by Eq. \eqref{eq:optimal_lambda_approx},
+which leads to a value
+$\lambda < 2 \, \lambda_n$
+that can be too small in practice.
+%
+In other words,
+with a reasonable $\lambda$,
+the error of the last few fluctuation modes
+will always decay suboptimally,
+accordingly to Eq. \eqref{eq:y2_sum_perfect_invt}.
+%
+However, since these modes
+represent high-frequency fluctuations,
+they may be unimportant.
+%
+Thus,
+we may truncate the sum of the error function
+in Eq. \eqref{eq:y2_sum_perfect_invt}
+at some $k_{\max}$,
+which reflects a minimal length scale
+$l_{\min} = \Delta x \, (n /k_{\max}) = \pi/k_{\max}$,
+that is greater than or
+at least comparable to $\sigma$.
+%
+Then, the optimal $\lambda$ is given by
+$$
+\lambda
+\approx
+\lambda_{ k_{\max} }
+\approx
+\exp\left(
+      -\frac{ k_{\max}^2 \, \sigma^2 }
+            {           2            }
+    \right)
+=
+\exp\left(
+      -\frac{  \pi^2 \, \sigma^2    }
+            {    2 \, l_{\min}^2  }
+    \right).
+$$
+
+
 
 
 \section{Numerical results}
