@@ -23,12 +23,12 @@ typedef struct {
   double t0; /* offset of equation c/(t + t0) */
   int n; /* number of bins */
   double alpha0; /* initial updating magnitude */
-  long nequil; /* equilibration time */
-  long nsteps; /* number of steps */
-  int nbn; /* number of neighboring bins */
-  double nbs[NBMAX + 1]; /* magnitudes of neighbors */
+  int nbn; /* width of the updating window function */
+  double nbs[NBMAX + 1]; /* shape of the window function */
   int sampmethod; /* sampling method */
   double tcorr; /* correlation time */
+  long nequil; /* equilibration time */
+  long nsteps; /* number of steps */
   int ntrials; /* number of trials */
   int verbose; /* verbose level */
   const char *prog; /* name of the program */
@@ -43,12 +43,59 @@ enum {
   SAMPMETHOD_COUNT
 };
 
-const char *sampmethod_names[][8] = {
+
+#define MAX_OPT_ALIASES 8
+
+const char *sampmethod_names[][MAX_OPT_ALIASES] = {
   {"MC-local", "local", "l"},
   {"MC-global", "global", "g"},
   {"heat-bath", "h"},
   {""}
 };
+
+
+
+/* parse a string into an array */
+static int readarray(double *arr, int n, char *s)
+{
+  const char *delims = ",;:";
+  char *p;
+  int i = 0;
+
+  p = strtok(s, delims);
+  while ( p != NULL ) {
+    arr[ i++ ] = atof(p);
+    p = strtok(NULL, delims);
+    if ( i >= n )
+      break;
+  }
+  return i;
+}
+
+
+
+/* select an option */
+static int selectoption(const char *s,
+    const char *names[][MAX_OPT_ALIASES], int cnt)
+{
+  int i, j;
+
+  /* loop over options */
+  for ( i = 0; i < cnt; i++ ) {
+    /* loop over aliases */
+    for ( j = 0; j < MAX_OPT_ALIASES; j++ ) {
+      if ( names[i][j][0] == '\0' ) {
+        break;
+      }
+
+      if ( strcmpfuzzy(names[i][j], s) == 0 ) {
+        return i;
+      }
+    }
+  }
+
+  return 0;
+}
 
 
 
@@ -77,21 +124,36 @@ static void invtpar_init(invtpar_t *p)
 
 static void invtpar_compute(invtpar_t *m)
 {
+  double x = 0;
+  int i;
+
   if ( m->alpha0 <= 0 ) {
     m->alpha0 = 1.0 / m->n;
   }
+
   if ( m->t0 <= 0 ) {
     m->t0 = m->c / m->alpha0;
   }
+
+  for ( x = 0, i = 1; i < m->nbn; i++ ) {
+    x += m->nbs[i];
+  }
+  m->nbs[0] = 1 - 2 * x;
 }
 
 
 
+/* loading parameters from a configuration file
+ * each line of the configuration file is
+ *
+ * key = val
+ *
+ *
+ * */
 static int invtpar_load(invtpar_t *m, const char *fn)
 {
   FILE *fp;
   char buf[800], *p, *key, *val;
-  int inpar;
 
   if ( (fp = fopen(fn, "r")) == NULL ) {
     fprintf(stderr, "cannot load %s\n", fn);
@@ -103,43 +165,52 @@ static int invtpar_load(invtpar_t *m, const char *fn)
     if ( buf[0] == '\0' || buf[0] == '#' ) continue;
 
     /* parse the line to a key and a value */
-    /* find the end of the key */
-    inpar = 0; /* within (...) */
-    for ( p = buf; *p; p++ ) {
-      if ( (!inpar && isspace(*p)) || *p == '=' ) {
-        *p = '\0'; /* end the key part */
-        break;
-      }
-      if ( !inpar && (*p == '(' || *p == '[') )
-        inpar = 1; /* enter a parentheses block */
-      else if ( inpar && (*p == ')' || *p == ']') )
-        inpar = 0; /* leave a parentheses block */
-      *p = (char) tolower(*p);
-    }
     key = buf;
+    /* find the end of the key */
+    if ( (p = strchr(key, '=')) != NULL ) {
+      *p = '\0'; /* end the key part */
+      strstrip(key);
 
-    /* find the beginning of the value */
-    for ( p++; isspace(*p) || *p == '=' ; )
-      p++;
-    val = p;
-    for ( ; *p; p++ )
-      *p = (char) tolower(*p);
+      /* find the beginning of the value */
+      for ( val = p + 1; isspace( *val ) ; )
+        val++;
+    } else {
+      val = NULL;
+    }
 
     if ( strcmp(key, "n") == 0 ) {
       m->n = atoi(val);
-    } else if ( strcmp(key, "c") == 0 ) {
+    } else if ( strcmpfuzzy(key, "c") == 0
+             || strcmpfuzzy(key, "invt-c") ) {
       m->c = atof(val);
-    } else if ( strcmp(key, "t0") == 0 ) {
+    } else if ( strcmpfuzzy(key, "t0") == 0 ) {
       m->t0 = atof(val);
+    } else if ( strcmpfuzzy(key, "alpha0") == 0 ) {
+      m->alpha0 = atof(val);
+    } else if ( strstartswith(key, "nb")
+             || strstartswith(key, "neighbo")
+             || strcmpfuzzy(key, "window") == 0 ) {
+      m->nbn = 1 + readarray(m->nbs + 1, NBMAX, val);
+    } else if ( strcmpfuzzy(key, "sampling-method") == 0
+             || strcmpfuzzy(key, "sampmethod") == 0 ) {
+      m->sampmethod = selectoption(val,
+          sampmethod_names, SAMPMETHOD_COUNT);
+    } else if ( strcmpfuzzy(key, "tcorr") == 0
+             || strcmpfuzzy(key, "corr-time") == 0 ) {
+      m->tcorr = atof(val);
     } else if ( strcmpfuzzy(key, "equil") == 0
              || strcmpfuzzy(key, "nequil") == 0 ) {
       m->nequil = atoi(val);
     } else if ( strcmpfuzzy(key, "steps") == 0
              || strcmpfuzzy(key, "nsteps") == 0 ) {
       m->nsteps = atoi(val);
-    } else if ( strcmpfuzzy(key, "steps") == 0
-             || strcmpfuzzy(key, "nsteps") == 0 ) {
-      m->nsteps = atoi(val);
+    } else if ( strcmpfuzzy(key, "try") == 0
+             || strcmpfuzzy(key, "repeat") == 0
+             || strstartswith(key, "trial")
+             || strstartswith(key, "ntrial") ) {
+      m->ntrials = atoi(val);
+    } else if ( strcmpfuzzy(key, "verbose") == 0 ) {
+      m->verbose = val ? atoi(val) : 1;
     } else {
       fprintf(stderr, "Unknown options %s = %s in %s\n",
           key, val, fn);
@@ -176,25 +247,6 @@ static void invtpar_help(const invtpar_t *m)
 
 
 
-/* parse a string into an array */
-static int readarray(double *arr, int n, char *s)
-{
-  const char *delims = ",;:";
-  char *p;
-  int i = 0;
-
-  p = strtok(s, delims);
-  while ( p != NULL ) {
-    arr[ i++ ] = atof(p);
-    p = strtok(NULL, delims);
-    if ( i >= n )
-      break;
-  }
-  return i;
-}
-
-
-
 static int invtpar_doargs(invtpar_t *m, int argc, char **argv)
 {
   int i, j, ch;
@@ -221,29 +273,35 @@ static int invtpar_doargs(invtpar_t *m, int argc, char **argv)
 
       if ( strcmp(p, "n") == 0 ) {
         m->n = atoi(q);
-      } else if ( strcmp(p, "c") == 0 ) {
+      } else if ( strcmpfuzzy(p, "c") == 0
+               || strcmpfuzzy(p, "invtc") == 0 ) {
         m->c = atof(q);
       } else if ( strcmp(p, "t0") == 0 ) {
         m->t0 = atof(q);
-      } else if ( strcmp(p, "nb") == 0
-          || strcmp(p, "neighbor") == 0 ) {
-        double sum = 0;
+      } else if ( strstartswith(p, "nb")
+               || strstartsiwth(p, "neighbor")
+               || strcmpfuzzy(p, "window")  == 0 ) {
         m->nbn = 1 + readarray(m->nbs + 1, NBMAX, q);
-        for ( j = 1; j < m->nbn; j++ ) {
-          sum += m->nbs[j];
-        }
-        m->nbs[0] = 1 - 2 * sum;
+      } else if ( strcmpfuzzy(p, "sampling-method") == 0
+               || strcmpfuzzy(p, "sampmethod") == 0 ) {
+        m->sampmethod = selectoption(q,
+            sampmethod_names, SAMPMETHOD_COUNT);
+      } else if ( strcmpfuzzy(key, "tcorr") == 0
+               || strcmpfuzzy(key, "corr-time") == 0 ) {
+        m->tcorr = atof(val);
       } else if ( strcmp(p, "equil") == 0
                || strcmp(p, "nequil") == 0 ) {
         m->nequil = atoi(q);
-      } else if ( strstartswith(p, "ntrial")
-          || strstartswith(p, "trials")
-          || strcmp(p, "ntry") == 0
-          || strcmp(p, "try") == 0 ) {
-        m->ntrials = atoi(q);
       } else if ( strstartswith(p, "steps")
                || strstartswith(p, "nsteps") ) {
         m->nsteps = atoi(q);
+      } else if ( strcmp(p, "try") == 0
+               || strcmp(p, "window") == 0
+               || strstartswith(p, "trial")
+               || strstartswith(p, "ntrial") ) {
+        m->ntrials = atoi(q);
+      } else if ( strcmp(p, "verbose") == 0 ) {
+        m->verbose = atoi(q);
       } else if ( strcmp(p, "help") == 0 ) {
         invtpar_help(m);
       } else {

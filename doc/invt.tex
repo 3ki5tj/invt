@@ -33,9 +33,8 @@
   %
   These techniques allow one to sample a flat distribution
   along a quantity of interest
-  by constructing a bias potential on the fly,
-  and to compute the negative potential of mean force (PMF),
-  which is the negative of the bias potential.
+  by adaptively constructing a bias potential,
+  as the negative potential of mean force (PMF).
   %
   However, the asymptotic error of the resulting PMF
   is determined by the magnitude of updating the bias potential,
@@ -43,13 +42,13 @@
   over the simulation time.
   %
   In the Wang-Landau case,
-  an effective prescription of determining the magnitude
-  is to set it to be the inverse of the number of simulation steps.
+  a simple and effective formula for the magnitude
+  is given by the inverse of the number of simulation steps.
   %
   Here, we shall reexamine the optimality of this prescription,
   and attempt to extend it to the metadynamics case,
   in which the bias potential at several neighboring bins
-  are updating according to a prescribed function,
+  are updated according to a predetermined window function,
   upon each visit.
   %
   Our analysis also suggests that in terms of the convergence
@@ -893,13 +892,13 @@ as
   \label{eq:y2_sum}
 \end{align}
 %
-If we arrange $y_k$ such that
-the mode $y_1 = \sum_{j=1}^n p_j \, x_j$,
+We note that there is one mode, say
+$y_1 = \sum_{j=1}^n p_j \, x_j$
 (corresponding to $\lambda_1 = 1$),
-then $y_1$ vanishes identically
-by Eq. \eqref{eq:px_sum},
-and the sum of $y_k$ in Eq. \eqref{eq:y2_sum}
-can start from $k = 2$.
+vanishes identically by Eq. \eqref{eq:px_sum}.
+%
+Thus, we can start the sum in Eq. \eqref{eq:y2_sum}
+from $k = 2$.
 
 
 
@@ -1456,8 +1455,8 @@ and the error in the optimal is given by
 \label{eq:error_tridiag}
 \end{equation}
 %
-From Eq. \eqref{eq:error_tridiag},
-it is clear that the error
+%From Eq. \eqref{eq:error_tridiag}, it is clear that
+Clearly, the error
 increases rapidly with magnitude of $m_1$,
 no matter its sign,
 and optimal value is given by $m_1 = 0$,
@@ -1543,9 +1542,8 @@ The eigenvalues are given by
 \label{eq:lambda_Gaussian}
 \end{equation}
 %
-The eigenvalues are positive,
-which means that the updating scheme
-is stable.
+The eigenvalues are all positive,
+suggesting stability of the updating scheme.
 
 
 However,
@@ -1572,12 +1570,11 @@ $$
 %
 is exponentially small.
 %
-This means that it will be difficult
-to use the optimal value of $\lambda$
-given by Eq. \eqref{eq:optimal_lambda_approx},
-which leads to a value
-$\lambda < 2 \, \lambda_n$
-that can be too small in practice.
+This means that
+the optimal value of $\lambda$
+given by Eq. \eqref{eq:optimal_lambda_approx}
+would be too small in practice,
+for it requires $\lambda < 2 \, \lambda_n$.
 %
 In other words,
 with a reasonable $\lambda$,
@@ -1590,13 +1587,12 @@ represent high-frequency fluctuations,
 they may be unimportant.
 %
 Thus,
-we may truncate the sum of the error function
+we can truncate the sum of the error function
 in Eq. \eqref{eq:y2_sum_perfect_invt}
 at some $k_{\max}$,
-which reflects a minimal length scale
-$l_{\min} = \Delta x \, (n /k_{\max}) = \pi/k_{\max}$,
-that is greater than or
-at least comparable to $\sigma$.
+which corresponds to a minimal length scale
+$l_{\min} = \Delta x \, (n /k_{\max}) = \pi/k_{\max}$
+comparable to $\sigma$.
 %
 Then, the optimal $\lambda$ is given by
 $$
