@@ -145,10 +145,7 @@ static void invtpar_compute(invtpar_t *m)
 
 /* loading parameters from a configuration file
  * each line of the configuration file is
- *
- * key = val
- *
- *
+ *  key = val
  * */
 static int invtpar_load(invtpar_t *m, const char *fn)
 {
@@ -174,6 +171,13 @@ static int invtpar_load(invtpar_t *m, const char *fn)
       /* find the beginning of the value */
       for ( val = p + 1; isspace( *val ) ; )
         val++;
+      strstrip(val);
+
+      /* remove the trailing semicolon */
+      p = val + strlen(val) - 1;
+      if ( *p == ';' ) *p = '\0';
+      strstrip(val);
+
     } else {
       val = NULL;
     }
@@ -247,6 +251,7 @@ static void invtpar_help(const invtpar_t *m)
 
 
 
+/* scan parameters from command-line arguments */
 static int invtpar_doargs(invtpar_t *m, int argc, char **argv)
 {
   int i, j, ch;
@@ -279,16 +284,16 @@ static int invtpar_doargs(invtpar_t *m, int argc, char **argv)
       } else if ( strcmp(p, "t0") == 0 ) {
         m->t0 = atof(q);
       } else if ( strstartswith(p, "nb")
-               || strstartsiwth(p, "neighbor")
+               || strstartswith(p, "neighbor")
                || strcmpfuzzy(p, "window")  == 0 ) {
         m->nbn = 1 + readarray(m->nbs + 1, NBMAX, q);
       } else if ( strcmpfuzzy(p, "sampling-method") == 0
                || strcmpfuzzy(p, "sampmethod") == 0 ) {
         m->sampmethod = selectoption(q,
             sampmethod_names, SAMPMETHOD_COUNT);
-      } else if ( strcmpfuzzy(key, "tcorr") == 0
-               || strcmpfuzzy(key, "corr-time") == 0 ) {
-        m->tcorr = atof(val);
+      } else if ( strcmpfuzzy(p, "tcorr") == 0
+               || strcmpfuzzy(p, "corr-time") == 0 ) {
+        m->tcorr = atof(q);
       } else if ( strcmp(p, "equil") == 0
                || strcmp(p, "nequil") == 0 ) {
         m->nequil = atoi(q);
@@ -296,7 +301,7 @@ static int invtpar_doargs(invtpar_t *m, int argc, char **argv)
                || strstartswith(p, "nsteps") ) {
         m->nsteps = atoi(q);
       } else if ( strcmp(p, "try") == 0
-               || strcmp(p, "window") == 0
+               || strcmp(p, "repeat") == 0
                || strstartswith(p, "trial")
                || strstartswith(p, "ntrial") ) {
         m->ntrials = atoi(q);
@@ -357,18 +362,21 @@ static int invtpar_doargs(invtpar_t *m, int argc, char **argv)
 
 
 
+/* print out the key parameters */
 static void invtpar_dump(const invtpar_t *m)
 {
   int i;
 
-  fprintf(stderr, "ntrials %d, n %d, c %g\n",
-      m->ntrials, m->n, m->c);
-  fprintf(stderr, "update matrix (%d): ", m->nbn);
+  fprintf(stderr, "ntrials %d, n %d, alpha = %g/t, alpha0 %g\n",
+      m->ntrials, m->n, m->c, m->alpha0);
+  fprintf(stderr, "update window function (%d bins): ", m->nbn);
   for ( i = 0; i < m->nbn; i++ ) {
     fprintf(stderr, "%g ", m->nbs[i]);
   }
   fprintf(stderr, "\n");
 }
+
+
 
 #endif /* INVTPAR__ */
 
