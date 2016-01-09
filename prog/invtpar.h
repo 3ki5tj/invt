@@ -139,13 +139,18 @@ static void invtpar_compute(invtpar_t *m)
   int i;
 
   if ( m->alpha0 <= 0 ) {
-    /* alpha0 is to be divided by p[i] = 1/n */
-    m->alpha0 = 0.1 / m->n;
+    /* alpha0 is to be divided by p[i] = 1/n
+     * the coefficient can be as large as 1.0 for global MC moves
+     * but should be much smaller for local MC moves
+     * the current value is good for n up to 100 */
+    m->alpha0 = 0.01 / m->n;
   }
 
+/*
   if ( m->t0 <= 0 ) {
     m->t0 = m->c / m->alpha0;
   }
+*/
 
   for ( x = 0, i = 1; i < m->nbn; i++ ) {
     x += m->nbs[i];

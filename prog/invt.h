@@ -112,6 +112,9 @@ static double geterror(double *v, int n)
   double err = 0;
   int i;
 
+  /* subtract the baseline */
+  normalize(v, n);
+
   for ( i = 0; i < n; i++ ) {
     err += v[i] * v[i];
   }
