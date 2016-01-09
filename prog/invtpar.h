@@ -25,6 +25,7 @@ typedef struct {
   double alpha0; /* initial updating magnitude */
   int nbn; /* width of the updating window function */
   double nbs[NBMAX + 1]; /* shape of the window function */
+  double wgaus; /* width of the Gaussian window */
   int sampmethod; /* sampling method */
   double tcorr; /* correlation time */
   long nequil; /* equilibration time */
@@ -126,6 +127,7 @@ static void invtpar_init(invtpar_t *m)
     m->nbs[i] = 0;
   }
   m->nbs[0] = 1;
+  m->wgaus = 0;
   m->sampmethod = 0;
   m->prog = "invt";
   m->verbose = 0;
@@ -152,10 +154,37 @@ static void invtpar_compute(invtpar_t *m)
   }
 */
 
-  for ( x = 0, i = 1; i < m->nbn; i++ ) {
-    x += m->nbs[i];
+  /* construct the Gaussian window */
+  if ( m->wgaus > 0 ) {
+    m->nbn = NBMAX;
+
+    if ( m->nbn >= m->n / 2 ) {
+      m->nbn = m->n / 2;
+    }
+
+    /* truncate the Gaussian at 5 sigma */
+    if ( m->nbn >= m->wgaus * 5 ) {
+      m->nbn = m->wgaus * 5;
+    }
+
+    x = 1;
+    for ( i = 1; i < m->nbn; i++ ) {
+      m->nbs[i] = exp(-0.5*i*i/m->wgaus/m->wgaus);
+      x += m->nbs[i] * 2;
+    }
+
+    /* normalize */
+    for ( i = 0; i < m->nbn; i++ ) {
+      m->nbs[i] /= x;
+    }
+
+  } else {
+
+    for ( x = 0, i = 1; i < m->nbn; i++ ) {
+      x += m->nbs[i];
+    }
+    m->nbs[0] = 1 - 2 * x;
   }
-  m->nbs[0] = 1 - 2 * x;
 }
 
 
@@ -213,6 +242,11 @@ static int invtpar_load(invtpar_t *m, const char *fn)
              || strstartswith(key, "neighbo")
              || strcmpfuzzy(key, "window") == 0 ) {
       m->nbn = 1 + readarray(m->nbs + 1, NBMAX, val);
+    } else if ( strcmpfuzzy(key, "wgaus") == 0
+             || strcmpfuzzy(key, "width-Gaussian") == 0
+             || strcmpfuzzy(key, "sigma") == 0
+             || strcmpfuzzy(key, "sig") == 0 ) {
+      m->wgaus = atof(val);
     } else if ( strcmpfuzzy(key, "sampling-method") == 0
              || strcmpfuzzy(key, "sampmethod") == 0 ) {
       m->sampmethod = selectoption(val,
@@ -308,6 +342,11 @@ static int invtpar_doargs(invtpar_t *m, int argc, char **argv)
                || strstartswith(p, "neighbor")
                || strcmpfuzzy(p, "window")  == 0 ) {
         m->nbn = 1 + readarray(m->nbs + 1, NBMAX, q);
+      } else if ( strcmpfuzzy(p, "wgaus") == 0
+               || strcmpfuzzy(p, "width-Gaussian") == 0
+               || strcmpfuzzy(p, "sigma") == 0
+               || strcmpfuzzy(p, "sig") == 0 ) {
+        m->wgaus = atof(q);
       } else if ( strstartswith(p, "samp") ) {
         m->sampmethod = selectoption(q,
             sampmethod_names, SAMPMETHOD_COUNT);

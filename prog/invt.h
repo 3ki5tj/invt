@@ -90,6 +90,30 @@ static int mc_heatbath(const double *v, double *vac, int n)
 
 
 
+/* multiple-bin update */
+static void mbin_update(double *v, int n, int i,
+    double a, const double *win, int width)
+{
+  int j, k;
+
+  v[i] += a * win[0];
+  for ( j = 1; j < width; j++ ) {
+    k = i - j;
+    if ( k < 0 ) {
+      k = - k - 1;
+    }
+    v[k] += a * win[ j ];
+
+    k = i + j;
+    if ( k >= n ) {
+      k = 2 * n - 1 - k;
+    }
+
+    v[k] += a * win[ abs(j) ];
+  }
+}
+
+
 /* normalize the potential */
 static void normalize(double *v, int n)
 {

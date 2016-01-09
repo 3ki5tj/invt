@@ -59,20 +59,7 @@ static double comperr(const invtpar_t *m, double *err0)
     a *= n;
 
     if ( m->nbn > 1 ) {
-      double rem = 1, z;
-
-      if ( i > 0 ) {
-        z = m->nbs[1];
-        v[i - 1] += a * z;
-        rem -= z;
-      }
-      if ( i < n - 1 ) {
-        z = m->nbs[1];
-        v[i + 1] += a * z;
-        rem -= z;
-      }
-      v[i] += a * rem;
-
+      mbin_update(v, n, i, a, m->nbs, m->nbn);
     } else {
       v[i] += a;
     }
@@ -82,7 +69,7 @@ static double comperr(const invtpar_t *m, double *err0)
   err = geterror(v, n);
 
   /* print out the error */
-  if ( m->verbose ) {
+  if ( m->verbose >= 2 ) {
     for ( i = 0; i < n; i++ ) {
       printf("  %+11.8f", v[i]);
     }
