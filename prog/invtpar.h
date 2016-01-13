@@ -26,6 +26,7 @@ typedef struct {
   int nbn; /* width of the updating window function */
   double nbs[NBMAX + 1]; /* shape of the window function */
   double wgaus; /* width of the Gaussian window */
+  double initrand; /* magnitude of the initial Gaussian noise */
   int sampmethod; /* sampling method */
   double tcorr; /* correlation time */
   long nequil; /* equilibration time */
@@ -128,6 +129,7 @@ static void invtpar_init(invtpar_t *m)
   }
   m->nbs[0] = 1;
   m->wgaus = 0;
+  m->initrand = 0;
   m->sampmethod = 0;
   m->prog = "invt";
   m->verbose = 0;
@@ -247,6 +249,8 @@ static int invtpar_load(invtpar_t *m, const char *fn)
              || strcmpfuzzy(key, "sigma") == 0
              || strcmpfuzzy(key, "sig") == 0 ) {
       m->wgaus = atof(val);
+    } else if ( strcmpfuzzy(key, "initrand") == 0 ) {
+      m->initrand = atof(val);
     } else if ( strcmpfuzzy(key, "sampling-method") == 0
              || strcmpfuzzy(key, "sampmethod") == 0 ) {
       m->sampmethod = selectoption(val,
@@ -293,6 +297,9 @@ static void invtpar_help(const invtpar_t *m)
   fprintf(stderr, "  --n=:          set the number of bins, default %d\n", m->n);
   fprintf(stderr, "  --c=:          set c in alpha = c/(t + t0), default %g\n", m->c);
   fprintf(stderr, "  --t0=:         set t0 in alpha = c/(t + t0), default %g\n", m->t0);
+  fprintf(stderr, "  --nb=:         explicitly set the update window parameters, separated by comma, like --nb=0.2,0.4\n");
+  fprintf(stderr, "  --sig=:        set the Gaussian window width, default %g\n", m->wgaus);
+  fprintf(stderr, "  --initrand=:   randomize the error initially, default %g\n", m->initrand);
   fprintf(stderr, "  --try=:        set the number of trials, default %d\n", m->ntrials);
   fprintf(stderr, "  --step=:       set the number of simulation steps, default %ld\n", m->nsteps);
   fprintf(stderr, "  --equil=:      set the number of equilibration steps, default %ld\n", m->nequil);
@@ -347,6 +354,8 @@ static int invtpar_doargs(invtpar_t *m, int argc, char **argv)
                || strcmpfuzzy(p, "sigma") == 0
                || strcmpfuzzy(p, "sig") == 0 ) {
         m->wgaus = atof(q);
+      } else if ( strcmpfuzzy(p, "initrand") == 0 ) {
+        m->initrand = atof(q);
       } else if ( strstartswith(p, "samp") ) {
         m->sampmethod = selectoption(q,
             sampmethod_names, SAMPMETHOD_COUNT);

@@ -13,8 +13,10 @@ static double comperr(const invtpar_t *m, double *err0)
   long t;
 
   xnew(v, n);
+
+  /* initially randomize the error */
   for ( i = 0; i < n; i++ ) {
-    v[i] = 0;
+    v[i] = m->initrand * randgaus();
   }
 
   /* space for the accumulative distribution function */
@@ -37,12 +39,10 @@ static double comperr(const invtpar_t *m, double *err0)
     /* try to start production */
     if ( !prod && t >= m->nequil + m->c / m->alpha0 - m->t0 ) {
       prod = 1;
-      if ( err0 != NULL ) {
-        *err0 = geterror(v, n);
-        if ( m->verbose >= 1 ) {
-          fprintf(stderr, "starting production at step %ld, t0 %g, err %g\n",
-              t, m->t0, *err0);
-        }
+      *err0 = geterror(v, n);
+      if ( m->verbose >= 1 ) {
+        fprintf(stderr, "starting production at step %ld, t0 %g, err %g\n",
+            t, m->t0, *err0);
       }
     }
 
