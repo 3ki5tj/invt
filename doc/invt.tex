@@ -109,11 +109,11 @@ a wider distribution $p_i$.
 
 
 
-To do so, we need to introduce a bias potential $\phi_i$,
+To do so, we need to introduce a bias potential $V_i$,
 such that the target distribution is changed to
 %
 \begin{equation}
-  \pi_i \propto p^*_i \, e^{-\phi_i}.
+  \pi_i \propto p^*_i \, e^{-V_i}.
   \label{eq:pi_p_phi1}
 \end{equation}
 %
@@ -122,14 +122,14 @@ we get
 %
 \begin{equation}
   \pi_i =
-  \frac{ p^*_i \, e^{-\phi_i} }
-  { \sum_{j = 1}^n p^*_j \, e^{-\phi_j} }.
+  \frac{ p^*_i \, e^{-V_i} }
+  { \sum_{j = 1}^n p^*_j \, e^{-V_j} }.
   \label{eq:pi_p_phi}
 \end{equation}
 %
 Particularly,
 to achieve a flat distribution $\pi_i$,
-the bias potential $\phi_i$
+the bias potential $V_i$
 must coincide with $\log p^*_i$,
 up to an additive constant.
 
@@ -137,7 +137,7 @@ up to an additive constant.
 
 Generally, we may wish to sample
 a nearly flat distribution, $p_i$,
-by adjusting the bias potential $\phi_i$
+by adjusting the bias potential $V_i$
 on the fly.
 %
 For example,
@@ -145,11 +145,11 @@ we can monitor the histogram accumulated over
 a period of time and use it for $\pi_i$ in
 Eq. \eqref{eq:pi_p_phi1},
 and then update
-$\phi_i$ according to
+$V_i$ according to
 $$
-\phi_i^{\mathrm{new}}
+V_i^{\mathrm{new}}
 =
-\phi_i^{\mathrm{old}}
+V_i^{\mathrm{old}}
 -
 \log \frac{ p_i } { \pi_i }.
 $$
@@ -160,17 +160,18 @@ $$
 %%
 %\begin{equation}
 %\log p^*_i
-%=\phi_i + \ln p_i + c
+%=V_i + \ln p_i + c
 %\label{eq:bias_pmf}
 %\end{equation}
 %%
 %%
 %In the end of the simulation,
-%the PMF, $\phi^*_i$,
+%the PMF, $-\log p^*_i$,
 %can be deduced from Eq. \eqref{eq:bias_pmf}.
 %
-The above inversion process can be inconvenient
-in practice,
+The above inversion process,
+adopted by early multicanonical or entropic sampling,
+can be inconvenient in practice,
 for we need to make the period
 as long as a multiple of
 the autocorrelation time,
@@ -183,14 +184,14 @@ which is difficult to estimate for an unknown system.
 
 
 The Wang-Landau (WL) algorithm is a convenient technique
-of obtaining the desired bias potential $\phi_i$
+of obtaining the desired bias potential $V_i$
 on the fly.
 %
 To simplify the notation, we introduce
 a shifted bias potential
 %
 \begin{equation}
-  v_i \equiv \phi_i - \ln p^*_i + \ln p_i.
+  v_i \equiv V_i - \ln p^*_i + \ln p_i.
   \label{eq:v_def}
 \end{equation}
 %
@@ -199,9 +200,12 @@ and in $v_i$, Eq. \eqref{eq:pi_p_phi}
 becomes
 %
 \begin{equation}
-  \pi_i = \frac{ p_i e^{-v_i} }
-  { \sum_{j = 1}^n p_j e^{-v_j} }
-  \propto p_i \, e^{-v_i}.
+  \pi_i
+  =
+  \frac{                p_i \, e^{-v_i} }
+       { \sum_{j = 1}^n p_j \, e^{-v_j} }
+  \propto
+  p_i \, e^{-v_i}.
   \label{eq:pi_p_v}
 \end{equation}
 %
@@ -401,33 +405,37 @@ that have experienced the same schedule $\alpha(t)$
 and have reached the same $v_i(t)$
 at time $t$.
 %
-The initial states and random numbers of the copies
-may, however, be different.
+The initial states and the stochastic forces
+during the process may, however, be different.
 
 
 
 For sufficiently small $\alpha(t)$,
-the sampling process is approximately
-Markovian of a finite order,
+the $v_i$'s remain roughly the same for a short period.
+%
+Then,
+the sampling process is approximately Markovian, % of a finite order,
 and we may assume Eq. \eqref{eq:pi_p_v}
 for the deterministic part
 %
 \begin{equation}
   \langle h_i(t) \rangle
   \approx
+  \pi_i
+  =
   \frac{ p_i \, e^{-v_i} }
   { \sum_{j = 1}^n p_j \, e^{-v_j} }.
   \label{eq:h_ave}
 \end{equation}
-
-
-
+%
+%
+%
 For the noise part, we have
-$\langle \zeta_i(t) \rangle = 0$.
+$\langle \zeta_i(t) \rangle = 0$,
 %
 %The noise is not necessarily white.
-We consider a general noise with the correlation
-function depending on the time difference:
+and the correlation functions
+depend only on the time difference
 %
 \begin{equation}
   \langle \zeta_i(t) \, \zeta_j(t') \rangle
@@ -438,6 +446,21 @@ function depending on the time difference:
 %
 where $\sigma_{ij}(t)$ is an even function of $t$
 that vanishes at large $t$.
+%
+More explicitly,
+if the transition matrix of a period $\tau$
+is $T^\tau_{ij}$,
+then
+$
+  \langle \zeta_i(t) \, \zeta_j(t') \rangle
+  =
+  \langle h_i(t) \, h_j(t') \rangle
+  -
+  \langle h_i(t) \rangle \, \langle h_j(t') \rangle
+  =
+  T^{t - t'}_{ij} \pi_j - \pi_i \, \pi_j.
+$
+
 
 
 
@@ -790,31 +813,32 @@ as $\hat w_{ij} = \sqrt{p_i/p_j} \, w_{ij}$
 that can be diagonalized
 with a set of orthonormal eigenvectors:
 %
-$\sum_{i = 1}^n U_{ki} \, \hat w_{ij} = \lambda_k \, U_{kj}$.
+$\sum_{i = 1}^n \varphi_{ki} \, \hat w_{ij} = \lambda_k \, \varphi_{kj}$.
 %
 Thus,
 in terms of diagonalizing $\mathbf w$, we have
 \begin{equation}
-  \sum_{i = 1}^n T_{ki} \, w_{ij} = \lambda_k \, T_{kj},
-  \label{eq:T_w}
+  \sum_{i = 1}^n \phi_{ki} \, w_{ij} = \lambda_k \, \phi_{kj},
+  \label{eq:eig_w}
 \end{equation}
 where
-$T_{ij} = \sqrt{p_j} \, U_{ij}$ satisfies
+$\phi_{ij} = \sqrt{p_j} \, \varphi_{ij}$ satisfies
 the orthonormal conditions:
 %
 \begin{align}
-\sum_{k = 1}^n T_{ki} \, T_{kj}
+\sum_{k = 1}^n \phi_{ki} \, \phi_{kj}
 &= \delta_{ij} \, p_i,
-\label{eq:T_orthonormal_cols}
+\label{eq:eig_orthonormal_cols}
 \\
-\sum_{k = 1}^n \frac{ T_{ik} \, T_{jk} }{ p_k }
+\sum_{k = 1}^n \frac{ \phi_{ik} \, \phi_{jk} }{ p_k }
 &= \delta_{ij}.
-\label{eq:T_orthonormal_rows}
+\label{eq:eig_orthonormal_rows}
 \end{align}
 
 
 
-We emphasize that, in a stable updating scheme,
+%It is worth pointing out
+Note that, in a stable updating scheme,
 all eigenvalues $\lambda_k$ must be nonnegative,
 for otherwise there is a fluctuating mode
 that can increase indefinitely.
@@ -851,10 +875,10 @@ in linear terms of $x_j$.
 
 
 Now by diagonalizing the matrix $\mathbf w$
-using matrix defined in Eqs. \eqref{eq:T_w},
-\eqref{eq:T_orthonormal_cols},
+using matrix defined in Eqs. \eqref{eq:eig_w},
+\eqref{eq:eig_orthonormal_cols},
 and
-\eqref{eq:T_orthonormal_rows},
+\eqref{eq:eig_orthonormal_rows},
 we get a set of decoupled equations
 %
 \begin{equation}
@@ -867,10 +891,10 @@ we get a set of decoupled equations
 %
 where
 \begin{align}
-  y_i &= \sum_{j=1}^n T_{ij} \, x_j,
+  y_i &= \sum_{j=1}^n \phi_{ij} \, x_j,
   \label{eq:y_def}
   \\
-  \eta_i &= \sum_{j=1}^n T_{ij} \frac{ \zeta_j}{ p_j}.
+  \eta_i &= \sum_{j=1}^n \phi_{ij} \frac{ \zeta_j}{ p_j}.
   \label{eq:eta_def}
 \end{align}
 
@@ -881,14 +905,14 @@ where
 
 
 The error function can be obtained
-from Eq. \eqref{eq:T_orthonormal_cols}
+from Eq. \eqref{eq:eig_orthonormal_cols}
 as
 \begin{align}
   \mathcal E
   &\equiv
   \sum_{i = 1}^n p_i \, x_i^2
   =
-  \sum_{i, j, k=1}^n T_{ki} \, T_{kj} \, x_i \, x_j
+  \sum_{i, j, k=1}^n \phi_{ki} \, \phi_{kj} \, x_i \, x_j
   =
   \sum_{k = 1}^n y_k^2.
   \label{eq:y2_sum}
@@ -931,10 +955,10 @@ where
   &\equiv
   \left\langle
     \eta_i(t) \, \eta_i(t')
-  \right\rangle,
+  \right\rangle.
 \end{align*}
 %
-and the extremal condition of $\mathcal E$ is given by
+\note{The extremal condition of $\mathcal E$ is given by
 %
 \begin{align}
 \sum_{i=2}^n
@@ -949,38 +973,26 @@ the above condition can be satisfied
 by Eq. \eqref{eq:ddu_eq_0},
 which is the single-bin case.
 %
-The general solution of Eq. \eqref{eq:optimal_mbin}
-is harder to obtain.
+Unfortunately, the above expression
+appears to be useless in a general setting.
+}
 
 
 
-\subsection{Optimal $\alpha(t)$}
+\subsection{White-noise approximation}
 
 
 
-To proceed, we shall further assume perfect sampling,
+In the asymptotically regime,
+where $t \gg 1/\alpha(t)$,
+we can approximate $\kappa_i(t)$ as
 %
 \begin{equation}
-  \langle \zeta_i(t) \, \zeta_j(t') \rangle
-  =
-  p_i \, \delta_{ij} \, \delta(t - t').
-  \label{eq:zz_perfect}
+  \kappa_i(t) \approx \Gamma_i \, \delta(t)
+  \label{eq:kappa_delta}
 \end{equation}
 %
-Thus, from Eqs. \eqref{eq:T_orthonormal_rows} and \eqref{eq:eta_def},
-we get
-%
-\begin{equation}
-  \kappa_i(t - t')
-  =
-  \sum_{j,k = 1}^n
-  \frac{ T_{ij} } { p_j }
-  \frac{ T_{ik} } { p_k }
-  \langle \zeta_j(t) \, \zeta_k(t') \rangle
-  =
-  \delta(t - t').
-  \label{eq:kappa_perfect}
-\end{equation}
+where, $\Gamma_i = \int_{-\infty}^\infty \kappa_i(t) \, dt$.
 %
 Then, Eq. \eqref{eq:error_mbin} is simplified as
 %
@@ -989,26 +1001,78 @@ Then, Eq. \eqref{eq:error_mbin} is simplified as
   &=
   \int_0^t
   \sum_{i = 2}^n
-  \dot u_i^2\bigl( q(t') \bigr) \, dt',
-  \label{eq:error_mbin_perfect}
+  \Gamma_i \, \dot u_i^2\bigl( q(t') \bigr) \, dt',
+  \label{eq:error_mbin1}
 \end{align}
 %
-and Eq. \eqref{eq:optimal_mbin} becomes
 %
-\begin{align}
-  \sum_{i=1}^n
-  \lambda_i \, u_i\bigl( q(\tau) \bigr) \, \ddot u_i\bigl( q(\tau) \bigr) = 0.
-  \label{eq:optimal_mbin_perfect}
-\end{align}
-%
-\note{If we treat $u_i$ as the position,
-  and $\lambda_i$ as the mass,
-  then $\lambda_i \, \ddot u_i$ is the force.
-  So the left-hand side of Eq. \eqref{eq:optimal_mbin_perfect}
-  is the virial.
+\note{This is equivalent to saying that the Fourier transform
+  $$
+  \tilde \kappa_i(\omega) = \Gamma_i
+  $$
+  is a roughly constant.
   %
-  Thus this condition states that the total virial is zero.
+  For the next order correction we would have
+  $$
+  \tilde \kappa_i(\omega) = \Gamma_i + \Gamma^{(2)}_i \omega^2 + \dots,
+  $$
+  which leads to a correction to $\mathcal E$
+  $$
+  \Gamma^{(2)}_i
+  \int_0^t \ddot u_i^2\bigl( q(t') \bigr) \, dt'.
+  $$
+  This correction is of order $\alpha^2$
+  compared to the main term in Eq. \eqref{eq:error_mbin1},
+  and hence asymptotically unimportant.
+
+  The extremal property, Eq. \eqref{eq:optimal_mbin},
+  now becomes
+  %
+  \begin{align}
+    \sum_{i=1}^n
+      \Gamma_i \, \lambda_i \,
+      u_i\bigl( q(\tau) \bigr) \,
+      \ddot u_i\bigl( q(\tau) \bigr) = 0.
+    \label{eq:optimal_mbin1}
+  \end{align}
+  %
+  If we interpret $u_i$ as the position,
+  and $\Gamma_i \, \lambda_i$ as the mass,
+  then the right-hand side give the virial.
+  %
+  Thus, the extremal condition demands
+  the total virial to be zero.
+  $$\,$$
 }
+%
+For example,
+if we assume perfect sampling,
+%
+\begin{equation}
+  \langle \zeta_i(t) \, \zeta_j(t') \rangle
+  =
+  p_i \, (1 - p_i) \, \delta_{ij} \, \delta(t - t').
+  \label{eq:zz_perfect}
+\end{equation}
+%
+Thus, from Eqs. \eqref{eq:eig_orthonormal_rows} and \eqref{eq:eta_def},
+we get
+%
+\begin{equation}
+  \kappa_i(t - t')
+  =
+  \sum_{j,k = 1}^n
+  \frac{ \phi_{ij} } { p_j }
+  \frac{ \phi_{ik} } { p_k }
+  \langle \zeta_j(t) \, \zeta_k(t') \rangle
+  %
+  \approx \delta(t - t').
+  \label{eq:kappa_perfect}
+\end{equation}
+%
+where we have assumed the large $n$ limit
+such that $p_i \ll 1$
+in the last expression.
 
 
 
@@ -1034,12 +1098,147 @@ $$
 
 
 
+\subsection{\label{sec:optWL}
+Optimality of the single-bin updating scheme}
+
+
+
+We can show from Eq. \eqref{eq:error_mbin1}
+that the single-bin updating scheme
+is an optimal updating scheme.
+%
+Using the Cauchy-Schwarz inequality, we have,
+for any set of $\beta_i \ge 0$
+%
+\begin{align}
+&
+\left( \int_0^t
+  dt' \sum_{i = 2}^n \Gamma_i \,
+                     \dot u_i^2\bigl( q(t') \bigr)
+\right)
+\left(
+\int_0^t
+  dt' \sum_{i = 2}^n \Gamma_i \, c_i^2
+\right)
+\notag
+\\
+&
+\ge
+\left(
+\int_0^t
+  dt' \sum_{i = 2}^n \Gamma_i \, c_i \,
+                     \dot u_i\bigl( q(t') \bigr)
+\right)^2
+\notag
+\\
+&
+=
+\left(
+  \sum_{i = 2}^n \Gamma_k \, c_i
+    \left[
+      1 - e^{ -\lambda_i q(t) }
+    \right]
+\right)^2.
+\notag
+\end{align}
+%
+\note{A quick proof of the above version
+  of the Cauchy-Schwarz inequality
+  is the following.
+  %
+  First, we have
+$$
+\int_0^t
+  dt' \sum_{i = 2}^n \Gamma_i \,
+    \left( \dot u_i \, X - c_i \right)^2
+\ge 0,
+$$
+  for any $X$.
+  %
+  Thus, the right-hand side,
+  as a quadratic polynomial of $X$,
+  must have a non-positive discriminant.
+  %
+  This condition gives the desired inequality.
+  \\%
+}
+%
+Note that the last expression depends on
+$q(t')$ only through the end point value,
+which is fixed in the variation process.
+%
+The equality is achieved
+if $\dot u_i\left( q(t') \right) = c_i$
+for all $i = 2, \dots, n$ at any $t'$,
+up to a multiplicative factor.
+%
+Solving this set of equations yields
+$$
+\alpha(t') = \frac{              1              }
+                  { \lambda_i \, (t' + t_{i0} ) },
+\quad
+\mathrm{with\;\;}
+t_{i0} = \frac{             t            }
+              { e^{ \lambda_i q(t) } - 1 }.
+$$
+Such a solution is possible only if
+\begin{equation}
+\lambda_2 = \dots = \lambda_n.
+\end{equation}
+%
+\note{
+  We add some steps for solution.
+  Integrating $\dot u_i = c_i$ yields
+  \begin{equation}
+  u_i(t') = c_i \left(t' + t_{i0} \right).
+  \label{eq:ui_solution}
+  \end{equation}
+  Given that $u_i(t) = 1$ and $u_i(0) = e^{-\lambda_i \, q(t)}$,
+  we have
+  $$
+  c_i = \frac{ 1 }{ t + t_{i0} },
+  \quad
+  \mathrm{and\;}
+  \frac{ t_{i0} } { t + t_{i0} }
+  =
+  e^{ -\lambda_k \, q(t) }.
+  $$
+  Taking the logarithm of Eq. \eqref{eq:ui_solution} yields
+  $$
+  -\lambda_i \, q(t) + \lambda_i \, q(t')
+  = \log c_i + \log\left( t' + t_{i0} \right).
+  $$
+  Differentiating this with respect to $t'$ yields
+  $$
+  \lambda_i \, \alpha(t') = \frac{ 1 } { t' + t_{i0} }.
+  $$
+}
+
+Now an updating matrix $\mathbf w$ satisfying this condition
+is essentially a multiple of the identity matrix
+(since $\lambda_1$ corresponds to the mode
+of a uniform shift of all $v_i$,
+we can freely set it to $\lambda_2$
+without changing the nature of the updating scheme).
+%
+Thus, in terms of convergence,
+the single-bin updating scheme
+(as adopted in the WL algorithm)
+is generally the most efficient
+updating scheme.
+
+
+
+
 \subsection{Optimal coefficient of proportionality}
 
 
 
-A more direct, and often more accurate, approach
-is to assume the functional form
+If we wish to find,
+for a given updating matrix $\mathbf w$,
+a near-optimal $\alpha(t)$,
+%
+then a good candidate is
 %
 \begin{equation}
 \alpha(\tau) = \frac{1}{\lambda \, (\tau + t_0) },
@@ -1049,7 +1248,7 @@ is to assume the functional form
 and to find the optimal value of $\lambda$.
 %
 Using Eq. \eqref{eq:alpha_trial}
-in Eq. \eqref{eq:error_mbin_perfect} yields
+in Eq. \eqref{eq:error_mbin1} yields
 %
 \begin{align}
 \mathcal E
@@ -1159,22 +1358,10 @@ $$
 with the equality achieved only at $\lambda = \lambda_i$,
 we see the from Eq. \eqref{eq:y2_sum_perfect_invt}
 that the minimal error is achieved with
-\begin{equation}
-  \lambda_2 = \dots = \lambda_n = \lambda.
-\end{equation}
-%
-and the updating matrix $\mathbf w$ satisfying this condition
-is essentially a multiple of the identity matrix
-(since $\lambda_1$ corresponds to the mode
-of a uniform shift of all $v_i$,
-we can freely set it to $\lambda_2$
-without changing the nature of the updating scheme).
-%
-This shows that in terms of convergence,
-the single-bin updating scheme
-(as adopted in the WL algorithm)
-is the most efficient candidate
-of all multiple-bin schemes.
+$\lambda_2 = \dots = \lambda_n = \lambda$,
+agreeing with the general conclusion
+in Sec. \ref{sec:optWL}.
+
 
 
 
@@ -1185,57 +1372,76 @@ of all multiple-bin schemes.
 As an example, consider the following matrix $\mathbf w$
 %
 \begin{equation}
-  w_{ij} = m_{|i-j|} + m_{i+j-1} + m_{2n+1-i-j},
+  w_{ij} = \mu_{|i-j|} + \mu_{i+j-1} + \mu_{2n+1-i-j},
   \label{eq:w_band}
 \end{equation}
 %
-where $m_0, \dots, m_b \, (b < n)$
+where $\mu_0, \dots, \mu_b \, (b < n)$
 are a set of numbers satisfying
 %
 \begin{equation}
-m_0 + 2 \, m_1 + \cdots + 2 \, m_b = 1,
+\mu_0 + 2 \, \mu_1 + \cdots + 2 \, \mu_b = 1,
 \label{eq:m_normalization}
 \end{equation}
 %
-and $m_l = 0$ for $l > b$.
+and $\mu_l = 0$ for $l > b$.
 
 
 This matrix, being symmetric,
 satisfies Eqs. \eqref{eq:w_sumj}-\eqref{eq:w_balance},
 for the flat distribution $p_i \equiv 1/n$.
 %
-It admits $n$ eigenvectors,
-$\pmb\theta^{(1)}, \dots, \pmb\theta^{(n)}$,
+It has $n$ orthonormal eigenvectors,
+$\pmb\varphi^{(1)}, \dots, \pmb\varphi^{(n)}$,
 given by
 %
 \begin{equation}
-\theta^{(k)}_i
-= \cos \frac{ \left(i - \frac12\right) (k - 1) \, \pi}{n}.
+\varphi^{(k)}_i
+= \sqrt{
+    \frac{ 2 - \delta_{k, 1} }
+         {       n           }
+       }
+  \cos \frac{ \left(i - \frac12\right) (k - 1) \, \pi}{n}.
 \label{eq:wband_eigenvector}
 \end{equation}
 %
 with eigenvalues
 \begin{equation}
-  \lambda_k = m_0 + \sum_{l = 1}^b 2 \, m_l \cos \frac{(k - 1)  \, l \pi}{n}.
+  \lambda_k = \mu_0 + \sum_{l = 1}^b 2 \, \mu_l \cos \frac{(k - 1)  \, l \pi}{n}.
 \label{eq:wband_eigenvalue}
 \end{equation}
+%
+\note{We derive Eqs.
+  \eqref{eq:wband_eigenvector} and \eqref{eq:wband_eigenvalue}
+  below.
 
-\note{To show Eqs.
-  \eqref{eq:wband_eigenvector} and \eqref{eq:wband_eigenvalue},
-  we first define $m_l = 0$, for $l \le 0$, then
+  To simplify the calculation,
+  let us first consider the unnormalized eigenvectors,
+  $$
+  \theta^{(k)}_i
+  =
+  \cos \frac{ \left(i - \frac12\right) (k - 1) \, \pi}{n},
+  $$
+  which satisfies the following reflection symmetry,
+  \begin{equation}
+    \theta^{(k)}_i = \theta^{(k)}_{1-i} = \theta^{(k)}_{2n+1-i}.
+    \label{eq:wband_reflection_symmetry}
+  \end{equation}
+  %
+  We shall also define $\mu_l = 0$, for $l \le 0$, then
 $$
 \begin{aligned}
 &\sum_{i = 1}^n
   \theta^{(k)}_i
   \, w_{ij}
 =
-- \theta^{(k)}_j \, m_0
+- \theta^{(k)}_j \, \mu_0
 \\
 &
 +\sum_{i=1}^n
   \theta^{(k)}_i
   \left(
-    m_{i - j} + m_{j - i} + m_{i + j - 1} + m_{2n+1-i-j}
+    \mu_{i - j} + \mu_{j - i} + \mu_{i + j - 1} + \mu_{2n+1-i-j}
   \right)
 .
 \end{aligned}
@@ -1248,34 +1454,32 @@ $$
   \sum_{i=1}^n
   \theta^{(k)}_i \,
   \left(
-    m_{i - j} + m_{2n+1-i-j}
+    \mu_{i - j} + \mu_{2n+1-i-j}
   \right)
   \\
   &=
-  \sum_{l=1-j}^{n-j} \theta^{(k)}_{j+l} \, m_l
+  \sum_{l=1-j}^{n-j} \theta^{(k)}_{j+l} \, \mu_l
   +
-  \sum_{l=n-j+1}^{2n-j} \theta^{(k)}_{2n+1-j-l} \, m_l
+  \sum_{l=n-j+1}^{2n-j} \theta^{(k)}_{2n+1-j-l} \, \mu_l
   \\
   &=
-  \sum_{l=1-j}^{2n-j} \theta^{(k)}_{j+l} \, m_l
+  \sum_{l=1-j}^{2n-j} \theta^{(k)}_{j+l} \, \mu_l
   =
-  \sum_{l=0}^{b} m_l \, \cos\frac{(j+l-\frac12)(k-1)\pi}{n},
+  \sum_{l=0}^{b} \mu_l \, \cos\frac{(j+l-\frac12)(k-1)\pi}{n},
 \end{aligned}
 $$
-where we have used
-$$
-\theta^{(k)}_i = \theta^{(k)}_{1-i} = \theta^{(k)}_{2n+1-i}.
-$$
+where we have used Eq. \eqref{eq:wband_reflection_symmetry}.
+%
 Similarly,
 $$
 \begin{aligned}
   \sum_{i=1}^n
   \theta^{(k)}_i
   \left(
-    m_{j - i} + m_{i+j-1}
+    \mu_{j - i} + \mu_{i+j-1}
   \right)
   =
-  \sum_{l=0}^{b} m_l \, \cos\frac{(j-l-\frac12)(k-1)\pi}{n}.
+  \sum_{l=0}^{b} \mu_l \, \cos\frac{(j-l-\frac12)(k-1)\pi}{n}.
 \end{aligned}
 $$
 %
@@ -1284,13 +1488,126 @@ $$
 \begin{aligned}
 \sum_{i = 1}^n \theta^{(k)}_i \, w_{ij}
 &=
-- \theta^{(k)}_j \, m_0
-+\sum_{l=0}^{b} m_l \, 2 \, \cos\frac{(k-1)l\pi}{n} \, \cos\frac{(j-\frac12)(k-1)\pi}{n}
+- \theta^{(k)}_j \, \mu_0
++\sum_{l=0}^{b} \mu_l \, 2 \, \cos\frac{(k-1)l\pi}{n} \, \cos\frac{(j-\frac12)(k-1)\pi}{n}
 \\
 &= \theta^{(k)}_j \, \lambda_k,
 \end{aligned}
 $$
 with $\lambda_k$ given by Eq. \eqref{eq:wband_eigenvalue}.
+
+Next, let us compute the normalization factor.
+%
+If $k = 1$, $\theta^{(1)}_i = 1$, and
+$
+\sum_{i = 1}^n \left( \theta^{(1)}_i \right)^2 = n.
+$
+For $k \ge 2$,
+$$
+\begin{aligned}
+  \sum_{i = 1}^n \cos^2 \left[\left(i - \frac1 2 \right) a\right]
+  &=
+  \frac n 2
+  +
+  \frac 1 2
+  \sum_{i = 1}^n \cos\left[(2 i - 1)\, a \right]
+  =
+  \frac n 2,
+\end{aligned}
+$$
+where $a = \frac{k-1}{n} \pi$.
+Thus, the normalization factor $\sqrt{(2 - \delta_{k1})/n}$
+encompasses both cases.
+
+We can also show that column-wise orthogonality.
+%
+For this we need a lemma, for $a = q \, \pi/n$,
+with $q$ a positive integer.
+$$
+\begin{aligned}
+\sum_{k = 1}^n \cos[(k - 1) \, a]
+&=
+1 + \cos a + \dots + \cos[(n - 1) \, a]
+\\
+&=
+\frac{
+      \sin\frac a 2
+    + \sin \left[ \left( n - \frac 1 2 \right) a \right]
+    }
+    {
+      2 \, \sin \frac a 2
+    }
+\\
+&=
+\frac{ 1 - (-1)^q } { 2 }
+= \operatorname{odd}(q),
+\end{aligned}
+$$
+%
+where, we have used
+$\sin \left[ \left( n - \frac 1 2 \right) a \right]
+= \sin \left( q \, \pi - \frac a 2 \right)
+= -(-)^q\sin\frac a 2.$
+%
+and $\operatorname{odd}(q)$
+yields $1$ for odd $q$ or $0$ otherwise.
+%
+Adding the case of $q = 0$, where the sum yields $n$,
+we get
+$$
+\sum_{k = 1}^n \cos\left[(k - 1) \, \frac { q \, \pi } { n }  \right]
+= n \delta_{q, 0} + \operatorname{odd}(q).
+$$
+
+
+Now, for the orthogonality,
+$$
+\begin{aligned}
+  \sum_{k = 1}^n
+  \theta^{(k)}_i \, \theta^{(k)}_j
+  &=
+  \frac 1 2
+  \sum_{k = 1}^n
+  \left[
+    \cos \tfrac{ (i - j) (k - 1) \, \pi }
+               {         n              }
+    +
+    \cos \tfrac{ (i + j - 1) (k - 1) \, \pi }
+               {             n              }
+  \right]
+  \\
+  &=
+  \frac 1 2
+  \left[
+    n \, \delta_{i, j}
+    +
+    \operatorname{odd}(i - j)
+    +
+    \operatorname{odd}(i + j - 1)
+  \right]
+  \\
+  &=
+  \frac n 2 \, \delta_{i, j}
+  + \frac 1 2.
+\end{aligned}
+$$
+where we have used the fact
+that $i - j$ shares the parity with $i + j$
+in the last step.
+%
+So
+$$
+  \sum_{k = 1}^n
+  \varphi^{(k)}_i \, \varphi^{(k)}_j
+  =
+  \frac 2 n
+  \sum_{k = 1}^n
+  \theta^{(k)}_i \, \theta^{(k)}_j
+  -
+  \frac 1 n
+  =
+  \delta_{i, j}.
+$$
 }
 %
 We discuss two special cases below.
@@ -1301,20 +1618,20 @@ We discuss two special cases below.
 
 
 
-Particularly, if $m_2 = \dots = m_b = 0$,
+Particularly, if $\mu_2 = \dots = \mu_b = 0$,
 the matrix $\mathbf w$ is tridiagonal,
 %
 \begin{equation}
-\arraycolsep=1.4pt\def\arraystretch{1.4}
+\arraycolsep=3.6pt\def\arraystretch{1.4}
 \mathbf w
 =
 \left(
   \begin{array}{cccccccc}
-    1 - m_1   & m_1 & 0 & \dots & 0 \\
-    m_1 & 1 - 2 \, m_1  & m_1 & \dots & 0 \\
+    1 - \mu_1   & \mu_1 & 0 & \dots & 0 \\
+    \mu_1 & 1 - 2 \, \mu_1  & \mu_1 & \dots & 0 \\
     \vdots & &  & & \vdots \\
-    0 & \dots & m_1 & 1 - 2 \, m_1  & m_1 \\
-    0 & \dots & 0 & m_1 & 1 - m_1
+    0 & \dots & \mu_1 & 1 - 2 \, \mu_1  & \mu_1 \\
+    0 & \dots & 0 & \mu_1 & 1 - \mu_1
   \end{array}
 \right).
 \label{eq:wtridiag}
@@ -1322,7 +1639,7 @@ the matrix $\mathbf w$ is tridiagonal,
 %
 We have
 \begin{equation}
-  \lambda_k = 1 - 4 \, m_1 \sin^2 \frac{(k - 1) \, \pi}{2n}.
+  \lambda_k = 1 - 4 \, \mu_1 \sin^2 \frac{(k - 1) \, \pi}{2n}.
 \label{eq:wtridiag_eigenvalue}
 \end{equation}
 %
@@ -1331,7 +1648,7 @@ we need
 $\min \lambda_k = \lambda_n > 0$,
 and
 $$
-m_1 < \frac{1}{4 \, \cos^2\frac{\pi}{2n} }.
+\mu_1 < \frac{1}{4 \, \cos^2\frac{\pi}{2n} }.
 $$
 
 
@@ -1352,17 +1669,17 @@ $$
 &=
 \frac{2 \, n}{\pi \, t}
 \int_0^{\pi/2}
-\frac{ \left(1 - 4 \, m_1 \, \cos^2 p \right)^2 }
-{ \lambda \, \left(2 - 8 \, m_1 \, \cos^2 p - \lambda \right) }
+\frac{ \left(1 - 4 \, \mu_1 \, \cos^2 p \right)^2 }
+{ \lambda \, \left(2 - 8 \, \mu_1 \, \cos^2 p - \lambda \right) }
 \, dp
 \notag \\
 &=
 \frac{n}{4 \, t}
 \left(
-  \frac{2 - 4 \, m_1 + \lambda}{ \lambda }
+  \frac{2 - 4 \, \mu_1 + \lambda}{ \lambda }
   +
   \frac{ \lambda }
-  { \sqrt{ (2 - \lambda) (2 - 8 \, m_1 - \lambda) } }
+  { \sqrt{ (2 - \lambda) (2 - 8 \, \mu_1 - \lambda) } }
 \right).
 \end{aligned}
 $$
@@ -1375,16 +1692,16 @@ $$
 \frac{n}{\lambda \, t}
 \frac{1}{2 \pi i}
 \int_0^{2 \, \pi}
-\frac{ \left(1 - 4 \, m_1 \, \cos^2 p \right)^2 }
-{ 2 - 8 \, m_1 \, \cos^2 p - \lambda }
+\frac{ \left(1 - 4 \, \mu_1 \, \cos^2 p \right)^2 }
+{ 2 - 8 \, \mu_1 \, \cos^2 p - \lambda }
 \, dp
 \\
 &=
 \frac{n}{\lambda \, t}
 \frac{1}{2 \pi i}
 \oint
-\frac{ \left[1 - m_1 \, \left(z+\frac{1}{z}\right)^2 \right]^2 }
-{ 2 - 2 \, m_1 \, \left(z + \frac{1}{z}\right)^2 - \lambda }
+\frac{ \left[1 - \mu_1 \, \left(z+\frac{1}{z}\right)^2 \right]^2 }
+{ 2 - 2 \, \mu_1 \, \left(z + \frac{1}{z}\right)^2 - \lambda }
 \, \frac{dz}{z},
 \end{aligned}
 $$
@@ -1392,16 +1709,16 @@ where the contour is the unit circle
 in the complex plane of $z$.
 %
 This integral has five poles, one at the origin,
-which produces a residue $\frac{2 - 4 \, m_1 - \lambda}{4}$
+which produces a residue $\frac{2 - 4 \, \mu_1 - \lambda}{4}$
 (from series expansion of small $z$),
 and the other four at
 $$
-z + \frac{1}{z} = \pm\sqrt\frac{2-\lambda}{2 \, m_1},
+z + \frac{1}{z} = \pm\sqrt\frac{2-\lambda}{2 \, \mu_1},
 $$
 with two of them inside the unit circle:
 $$
-z_\pm = \pm \frac{\sqrt{2-\lambda} -\sqrt{2 - 8 \, m_1 - \lambda}}
-{\sqrt{8 m_1}}.
+z_\pm = \pm \frac{\sqrt{2-\lambda} -\sqrt{2 - 8 \, \mu_1 - \lambda}}
+{\sqrt{8 \mu_1}}.
 $$
 Thus,
 $$
@@ -1410,29 +1727,29 @@ $$
 &=
 \frac{n}{\lambda \, t}
 \left(
- \frac{2 - 4 \, m_1 - \lambda}{4}
+ \frac{2 - 4 \, \mu_1 - \lambda}{4}
  +
  \sum_{z = z_{\pm} }
- \frac{ \left(z^2 - m_1 (1 + z^2)^2 \right)^2 }
- { 2 z^4 (2 - 4 m_1 - \lambda - 4 m_1 z^2) }
+ \frac{ \left(z^2 - \mu_1 (1 + z^2)^2 \right)^2 }
+ { 2 z^4 (2 - 4 \mu_1 - \lambda - 4 \mu_1 z^2) }
 \right)
 \\
 &=
 \frac{n}{\lambda \, t}
 \left(
-  \frac{2 - 4 \, m_1 - \lambda}{4}
+  \frac{2 - 4 \, \mu_1 - \lambda}{4}
  +
- \frac{ \left(1 - m_1 \left(z + \frac{1}{z} \right)^2 \right)^2 }
- { 2 - 4 m_1 - \lambda - 4 m_1 z_{\pm}^2 }
+ \frac{ \left(1 - \mu_1 \left(z + \frac{1}{z} \right)^2 \right)^2 }
+ { 2 - 4 \mu_1 - \lambda - 4 \mu_1 z_{\pm}^2 }
 \right)
 \\
 &=
 \frac{n}{\lambda \, t}
 \left(
-  \frac{2 - 4 \, m_1 - \lambda}{4}
+  \frac{2 - 4 \, \mu_1 - \lambda}{4}
  +
  \frac{ (\lambda/2)^2 }
- { \sqrt{(2-\lambda) (2 - 8 m_1 -\lambda)} }
+ { \sqrt{(2-\lambda) (2 - 8 \mu_1 -\lambda)} }
 \right).
 \end{aligned}
 $$
@@ -1441,7 +1758,7 @@ $$
 Minimizing the function yields
 %
 \begin{equation}
-\lambda = \frac{1 - 4 \, m_1} { 1 - 2 \, m_1 },
+\lambda = \frac{1 - 4 \, \mu_1} { 1 - 2 \, \mu_1 },
 \label{eq:lambda_tridiag}
 \end{equation}
 %
@@ -1452,16 +1769,16 @@ and the error in the optimal is given by
 =
 \frac{n}{t}
 \left(
-  1+ \frac{2 \, m_1^2}{1-4 \, m_1}
+  1+ \frac{2 \, \mu_1^2}{1-4 \, \mu_1}
 \right).
 \label{eq:error_tridiag}
 \end{equation}
 %
 %From Eq. \eqref{eq:error_tridiag}, it is clear that
 Clearly, the error
-increases rapidly with magnitude of $m_1$,
+increases rapidly with magnitude of $\mu_1$,
 no matter its sign,
-and optimal value is given by $m_1 = 0$,
+and optimal value is given by $\mu_1 = 0$,
 which is the single-bin update scheme.
 
 
@@ -1486,7 +1803,7 @@ for $b = n - 1 \gg 1$:
 $x = l \, \Delta x$,
 $\Delta x = \pi/n$,
 and
-$m_l = m(x) \, \Delta x$.
+$\mu_l = \mu(x) \, \Delta x$.
 %
 Then
 Eq. \eqref{eq:wband_eigenvalue}
@@ -1496,21 +1813,21 @@ can be approximated by an integral:
 \lambda_k
 =
 2 \int_0^\pi
-  m(x) \, \cos \bigl( (k-1) \, x \bigr) \, dx,
+  \mu(x) \, \cos \bigl( (k-1) \, x \bigr) \, dx,
 \label{eq:lambda_int}
 \end{equation}
 %
 with the normalization
 %
 \begin{equation}
-1 = 2 \int_0^\pi m(x) \, dx.
+1 = 2 \int_0^\pi \mu(x) \, dx.
 \label{eq:mx_normalization}
 \end{equation}
 
 
 
 For the Gaussian wave,
-$m(x) \propto \exp(-\frac{1}{2} x^2/\sigma^2)$.
+$\mu(x) \propto \exp(-\frac{1}{2} x^2/\sigma^2)$.
 %
 If $\Delta x \ll \sigma \ll 1$,
 we can extended
@@ -1520,7 +1837,7 @@ and \eqref{eq:mx_normalization}
 to infinity, and
 %
 \begin{equation}
-m(x)
+\mu(x)
 =
 \frac{            1            }
      { \sqrt{ 2 \pi \sigma^2 } }
@@ -1585,8 +1902,9 @@ will always decay suboptimally,
 accordingly to Eq. \eqref{eq:y2_sum_perfect_invt}.
 %
 However, since these modes
-represent high-frequency fluctuations,
-they may be unimportant.
+represent short wavelength fluctuations,
+and these modes may be in
+the system under consideration.
 %
 Thus,
 we can truncate the sum of the error function
@@ -1594,12 +1912,10 @@ in Eq. \eqref{eq:y2_sum_perfect_invt}
 at some $k_{\max}$,
 which corresponds to a minimal length scale
 $l_{\min} = \Delta x \, (n /k_{\max}) = \pi/k_{\max}$
-comparable to $\sigma$.
+greater than $\sigma$.
 %
-Then, the optimal $\lambda$ is given by
+Then,
 $$
-\lambda
-\approx
 \lambda_{ k_{\max} }
 \approx
 \exp\left(
@@ -1644,6 +1960,6 @@ Show the error versus $\lambda$.
 Error vs. $\lambda$.
 
 3. Optimality of the Single-bin update.
-Error vs. $m_1$.
+Error vs. $\mu_1$.
 
 \end{document}
