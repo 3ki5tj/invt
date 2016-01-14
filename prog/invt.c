@@ -4,8 +4,7 @@
 
 
 
-/* return the root squared error of the inverse time scheme
- * */
+/* return the root-mean-squared error of the inverse time scheme */
 static double comperr(const invtpar_t *m, double *err0)
 {
   double *v, *vac, a, err;
@@ -37,7 +36,7 @@ static double comperr(const invtpar_t *m, double *err0)
     }
 
     /* try to start production */
-    if ( !prod && t >= m->nequil + m->c / m->alpha0 - m->t0 ) {
+    if ( !prod && t >= m->nequil ) {
       prod = 1;
       *err0 = geterror(v, n);
       if ( m->verbose >= 1 ) {
@@ -53,10 +52,7 @@ static double comperr(const invtpar_t *m, double *err0)
       a = m->alpha0;
     }
 
-
-    /* the distribution density is p = 1/n
-     * this is why we have to multiply by n */
-    a *= n;
+    a /= m->p[i];
 
     if ( m->nbn > 1 ) {
       mbin_update(v, n, i, a, m->nbs, m->nbn);
@@ -84,7 +80,7 @@ static double comperr(const invtpar_t *m, double *err0)
 
 
 
-static double invt_test(invtpar_t *m)
+static double invt_run(invtpar_t *m)
 {
   double err, see = 0;
   double err0, see0 = 0;
@@ -119,7 +115,8 @@ int main(int argc, char **argv)
   invtpar_init(m);
   invtpar_doargs(m, argc, argv);
   invtpar_dump(m);
-  invt_test(m);
+  invt_run(m);
+  invtpar_finish(m);
 
   return 0;
 }

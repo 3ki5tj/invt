@@ -114,7 +114,9 @@ static void mbin_update(double *v, int n, int i,
 }
 
 
-/* normalize the potential */
+
+/* normalize the bias potential
+ * by shifting the baseline */
 static void normalize(double *v, int n)
 {
   double s = 0;
@@ -130,7 +132,9 @@ static void normalize(double *v, int n)
 }
 
 
-/* compute the root-mean-squared error */
+
+/* compute the root-mean-squared error of `v`
+ * note: the baseline of `v` will be shifted  */
 static double geterror(double *v, int n)
 {
   double err = 0;
@@ -143,6 +147,71 @@ static double geterror(double *v, int n)
     err += v[i] * v[i];
   }
   return sqrt(err / n);
+}
+
+
+
+/* compute the cosine table */
+static double *makecostab(int n)
+{
+  int i, k;
+  double *costab, norm = 1.0, ang;
+
+  xnew(costab, n * n);
+
+  for ( i = 0; i < n; i++ ) {
+    costab[i] = norm;
+  }
+
+  norm *= sqrt(2);
+  ang = M_PI / n;
+  for ( k = 1; k < n; k++ ) {
+    for ( i = 0; i < n; i++ ) {
+      costab[k*n + i] = norm * cos((i + 0.5) * k * ang);
+    }
+  }
+
+  return costab;
+}
+
+
+/* compute the magnitude of the eigen histogram modes
+ * save them to `u` */
+static void getcosmodes(double *v, int n, double *u,
+    double *costab)
+{
+  int i, k;
+  double s;
+
+  /* this is a simple implementation
+   * use FFT for performance */
+  for ( k = 0; k < n; k++ ) {
+    s = 0;
+    for ( i = 0; i < n; i++ ) {
+      s += costab[k*n+i] * v[i];
+    }
+    u[k] = s / n;
+  }
+}
+
+
+
+/* compute the vector from the mode coefficients */
+static void fromcosmodes(double *v, int n, double *u,
+    double *costab)
+{
+  int i, k;
+  double s;
+
+  for ( i = 0; i < n; i++ ) {
+    v[i] = 0;
+  }
+
+  for ( k = 0; k < n; k++ ) {
+    for ( i = 0; i < n; i++ ) {
+      v[i] += costab[k*n + i] * u[k];
+    }
+  }
 }
 
 

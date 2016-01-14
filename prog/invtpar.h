@@ -22,6 +22,7 @@ typedef struct {
   double c; /* constant for the updating magnitude */
   double t0; /* offset of equation c/(t + t0) */
   int n; /* number of bins */
+  double *p; /* target distribution */
   double alpha0; /* initial updating magnitude */
   int nbn; /* width of the updating window function */
   double nbs[NBMAX + 1]; /* shape of the window function */
@@ -118,6 +119,7 @@ static void invtpar_init(invtpar_t *m)
   m->c = 1.0;
   m->t0 = 0;
   m->n = 10;
+  m->p = NULL;
   m->alpha0 = 0.0;
   m->nequil = m->n * 10000L;
   m->nsteps = 100000000L;
@@ -150,11 +152,12 @@ static void invtpar_compute(invtpar_t *m)
     m->alpha0 = 0.01 / m->n;
   }
 
-/*
   if ( m->t0 <= 0 ) {
+    /* set the default t0 such that
+     * alpha is continuous at the beginning
+     * of the production run */
     m->t0 = m->c / m->alpha0;
   }
-*/
 
   /* construct the Gaussian window */
   if ( m->wgaus > 0 ) {
@@ -166,7 +169,7 @@ static void invtpar_compute(invtpar_t *m)
 
     /* truncate the Gaussian at 5 sigma */
     if ( m->nbn >= m->wgaus * 5 ) {
-      m->nbn = m->wgaus * 5;
+      m->nbn = (int) (m->wgaus * 5 + 0.5);
     }
 
     x = 1;
@@ -187,6 +190,25 @@ static void invtpar_compute(invtpar_t *m)
     }
     m->nbs[0] = 1 - 2 * x;
   }
+
+  /* initialize the target distribution */
+  if ( m->p ) {
+    free(m->p);
+  }
+  xnew(m->p, m->n);
+
+  for ( i = 0; i < m->n; i++ ) {
+    m->p[i] = 1.0 / m->n;
+  }
+}
+
+
+
+/* clean up */
+static void invtpar_finish(invtpar_t *m)
+{
+  free(m->p);
+  m->p = NULL;
 }
 
 
