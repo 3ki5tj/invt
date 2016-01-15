@@ -984,7 +984,7 @@ appears to be useless in a general setting.
 
 
 In the asymptotically regime,
-where $t \gg 1/\alpha(t)$,
+where $t \gg 1/\max \alpha(t)$,
 we can approximate $\kappa_i(t)$ as
 %
 \begin{equation}
@@ -1019,12 +1019,18 @@ Then, Eq. \eqref{eq:error_mbin} is simplified as
   which leads to a correction to $\mathcal E$
   $$
   \Gamma^{(2)}_i
-  \int_0^t \ddot u_i^2\bigl( q(t') \bigr) \, dt'.
+  \int_0^t \ddot u_i^2\bigl( q(t') \bigr) \, dt'
+  \propto
+  \alpha^2 \, \mathcal E.
   $$
   This correction is of order $\alpha^2$
-  compared to the main term in Eq. \eqref{eq:error_mbin1},
-  and hence asymptotically unimportant.
-
+  compared to the main contribution in Eq. \eqref{eq:error_mbin1}.
+  %
+  Thus, we can assume Eq. \eqref{eq:kappa_delta},
+  once $\alpha(t)$ has dropped below a certain level.
+  \\
+}
+\note{
   The extremal property, Eq. \eqref{eq:optimal_mbin},
   now becomes
   %
@@ -1142,7 +1148,7 @@ for any set of $\beta_i \ge 0$
 \notag
 \end{align}
 %
-\note{A quick proof of the above version
+\note{A short proof of the above version
   of the Cauchy-Schwarz inequality
   is the following.
   %

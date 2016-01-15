@@ -115,9 +115,8 @@ static void mbin_update(double *v, int n, int i,
 
 
 
-/* normalize the bias potential
- * by shifting the baseline */
-static void normalize(double *v, int n)
+/* shift the baseline of the bias potential */
+static void shift(double *v, int n)
 {
   double s = 0;
   int i;
@@ -141,12 +140,28 @@ static double geterror(double *v, int n)
   int i;
 
   /* subtract the baseline */
-  normalize(v, n);
+  shift(v, n);
 
   for ( i = 0; i < n; i++ ) {
     err += v[i] * v[i];
   }
   return sqrt(err / n);
+}
+
+
+
+/* normalize the error such that the standard deviation is sig */
+__inline static double normalize(double *v, int n, double sig)
+{
+  double err;
+  int i;
+
+  err = geterror(v, n);
+  for ( i = 0; i < n; i++ ) {
+    v[i] *= sig / err;
+  }
+
+  return err;
 }
 
 
@@ -201,7 +216,6 @@ static void fromcosmodes(double *v, int n, double *u,
     double *costab)
 {
   int i, k;
-  double s;
 
   for ( i = 0; i < n; i++ ) {
     v[i] = 0;

@@ -24,15 +24,22 @@ typedef struct {
   int n; /* number of bins */
   double *p; /* target distribution */
   double alpha0; /* initial updating magnitude */
+  int fixa; /* fix alpha during the entire process */
   int nbn; /* width of the updating window function */
   double nbs[NBMAX + 1]; /* shape of the window function */
   double wgaus; /* width of the Gaussian window */
   double initrand; /* magnitude of the initial Gaussian noise */
+  int kcutoff; /* cutoff wave number of the initial noise */
   int sampmethod; /* sampling method */
-  double tcorr; /* correlation time */
+  double tcorr; /* correlation time for the sampling method */
+
+  int nstcorr; /* time interval of computing autocorrelation function */
+  double corrtol; /* error tolerance of the autocorrelation function */
+  char fncorr[FILENAME_MAX]; /* file name for the autocorrelation function */
+
   long nequil; /* equilibration time */
   long nsteps; /* number of steps */
-  int ntrials; /* number of trials */
+  long ntrials; /* number of trials */
   int verbose; /* verbose level */
   const char *prog; /* name of the program */
 } invtpar_t;
@@ -121,10 +128,7 @@ static void invtpar_init(invtpar_t *m)
   m->n = 10;
   m->p = NULL;
   m->alpha0 = 0.0;
-  m->nequil = m->n * 10000L;
-  m->nsteps = 100000000L;
-  m->tcorr = 0.0; /* perfect sampling */
-  m->ntrials = 100;
+  m->fixa = 0;
   m->nbn = 1; /* single bin update */
   for ( i = 1; i < m->nbn; i++ ) {
     m->nbs[i] = 0;
@@ -132,7 +136,17 @@ static void invtpar_init(invtpar_t *m)
   m->nbs[0] = 1;
   m->wgaus = 0;
   m->initrand = 0;
+  m->kcutoff = 0;
   m->sampmethod = 0;
+  m->tcorr = 0.0; /* perfect sampling */
+
+  m->nstcorr = 0; /* don't do correlation functions */
+  m->corrtol = 1e-8;
+  m->fncorr[0] = '\0';
+
+  m->nequil = m->n * 10000L;
+  m->nsteps = 100000000L;
+  m->ntrials = 100;
   m->prog = "invt";
   m->verbose = 0;
 }
@@ -157,6 +171,18 @@ static void invtpar_compute(invtpar_t *m)
      * alpha is continuous at the beginning
      * of the production run */
     m->t0 = m->c / m->alpha0;
+  }
+
+  if ( m->fixa ) {
+    /* if a fixed alpha is used,
+     * prepare parameters for the
+     * autocorrelation function */
+    if ( m->nstcorr <= 0 ) {
+      m->nstcorr = (int) (1.0 / m->alpha0 + 0.5);
+    }
+    if ( m->fncorr[0] == '\0' ) {
+      strcpy(m->fncorr, "corr.dat");
+    }
   }
 
   /* construct the Gaussian window */
@@ -196,9 +222,13 @@ static void invtpar_compute(invtpar_t *m)
     free(m->p);
   }
   xnew(m->p, m->n);
-
   for ( i = 0; i < m->n; i++ ) {
     m->p[i] = 1.0 / m->n;
+  }
+
+  /* set the initial cutoff wave number */
+  if ( m->kcutoff <= 0 ) {
+    m->kcutoff = m->n;
   }
 }
 
@@ -262,6 +292,8 @@ static int invtpar_load(invtpar_t *m, const char *fn)
     } else if ( strcmpfuzzy(key, "alpha0") == 0
              || strcmpfuzzy(key, "a0") == 0 ) {
       m->alpha0 = atof(val);
+    } else if ( strstartswith(key, "fixa") ) {
+      m->fixa = 1;
     } else if ( strstartswith(key, "nb")
              || strstartswith(key, "neighbo")
              || strcmpfuzzy(key, "window") == 0 ) {
@@ -273,6 +305,8 @@ static int invtpar_load(invtpar_t *m, const char *fn)
       m->wgaus = atof(val);
     } else if ( strcmpfuzzy(key, "initrand") == 0 ) {
       m->initrand = atof(val);
+    } else if ( strcmpfuzzy(key, "kcutoff") == 0 ) {
+      m->kcutoff = atoi(val);
     } else if ( strcmpfuzzy(key, "sampling-method") == 0
              || strcmpfuzzy(key, "sampmethod") == 0 ) {
       m->sampmethod = selectoption(val,
@@ -280,17 +314,23 @@ static int invtpar_load(invtpar_t *m, const char *fn)
     } else if ( strcmpfuzzy(key, "tcorr") == 0
              || strcmpfuzzy(key, "corr-time") == 0 ) {
       m->tcorr = atof(val);
+    } else if ( strcmpfuzzy(key, "nstcorr") == 0 ) {
+      m->nstcorr = atoi(val);
+    } else if ( strcmpfuzzy(key, "corrtol") == 0 ) {
+      m->corrtol = atof(val);
+    } else if ( strcmpfuzzy(key, "fncorr") == 0 ) {
+      strcpy(m->fncorr, val);
     } else if ( strcmpfuzzy(key, "equil") == 0
              || strcmpfuzzy(key, "nequil") == 0 ) {
-      m->nequil = atoi(val);
+      m->nequil = atol(val);
     } else if ( strcmpfuzzy(key, "steps") == 0
              || strcmpfuzzy(key, "nsteps") == 0 ) {
-      m->nsteps = atoi(val);
+      m->nsteps = atol(val);
     } else if ( strcmpfuzzy(key, "try") == 0
              || strcmpfuzzy(key, "repeat") == 0
              || strstartswith(key, "trial")
              || strstartswith(key, "ntrial") ) {
-      m->ntrials = atoi(val);
+      m->ntrials = atol(val);
     } else if ( strcmpfuzzy(key, "verbose") == 0 ) {
       m->verbose = val ? atoi(val) : 1;
     } else {
@@ -318,11 +358,18 @@ static void invtpar_help(const invtpar_t *m)
   fprintf(stderr, "Options:\n");
   fprintf(stderr, "  --n=:          set the number of bins, default %d\n", m->n);
   fprintf(stderr, "  --c=:          set c in alpha = c/(t + t0), default %g\n", m->c);
-  fprintf(stderr, "  --t0=:         set t0 in alpha = c/(t + t0), default %g\n", m->t0);
+  fprintf(stderr, "  --a0=:         set the initial alpha during equilibration, default %g\n", m->alpha0);
+  fprintf(stderr, "  --t0=:         set t0 in alpha = c/(t + t0), if unset, t0 = c/a0, default %g\n", m->t0);
+  fprintf(stderr, "  --fixa:        fix the alpha during the entire process, default %d\n", m->fixa);
   fprintf(stderr, "  --nb=:         explicitly set the update window parameters, separated by comma, like --nb=0.2,0.4\n");
   fprintf(stderr, "  --sig=:        set the Gaussian window width, default %g\n", m->wgaus);
-  fprintf(stderr, "  --initrand=:   randomize the error initially, default %g\n", m->initrand);
-  fprintf(stderr, "  --try=:        set the number of trials, default %d\n", m->ntrials);
+  fprintf(stderr, "  --initrand=:   magnitude of the initial random error, default %g\n", m->initrand);
+  fprintf(stderr, "  --kcutoff=:    cutoff of wave number of the initial random error, default %d\n", m->kcutoff);
+  fprintf(stderr, "  --samp=:       set the sampling scheme, g=global Metropolis, l=local Metropolis, h=heat-bath, default %s\n", sampmethod_names[m->sampmethod][0]);
+  fprintf(stderr, "  --nstcorr=:    set the number of steps of setting the correlation function, default %d\n", m->nstcorr);
+  fprintf(stderr, "  --corrtol=:    set the tolerance level to truncate the autocorrelation function, default %g\n", m->corrtol);
+  fprintf(stderr, "  --fncorr=:     set the file name for the correlation function, default %s\n", m->fncorr);
+  fprintf(stderr, "  --try=:        set the number of trials, default %ld\n", m->ntrials);
   fprintf(stderr, "  --step=:       set the number of simulation steps, default %ld\n", m->nsteps);
   fprintf(stderr, "  --equil=:      set the number of equilibration steps, default %ld\n", m->nequil);
   fprintf(stderr, "  -v:            be verbose, -vv to be more verbose, etc.\n");
@@ -365,6 +412,8 @@ static int invtpar_doargs(invtpar_t *m, int argc, char **argv)
       } else if ( strcmpfuzzy(p, "alpha0") == 0
                || strcmpfuzzy(p, "a0") == 0 ) {
         m->alpha0 = atof(q);
+      } else if ( strstartswith(p, "fixa") ) {
+        m->fixa = 1;
       } else if ( strcmp(p, "t0") == 0 ) {
         m->t0 = atof(q);
       } else if ( strstartswith(p, "nb")
@@ -378,23 +427,31 @@ static int invtpar_doargs(invtpar_t *m, int argc, char **argv)
         m->wgaus = atof(q);
       } else if ( strcmpfuzzy(p, "initrand") == 0 ) {
         m->initrand = atof(q);
+      } else if ( strcmpfuzzy(p, "kcutoff") == 0 ) {
+        m->kcutoff = atoi(q);
       } else if ( strstartswith(p, "samp") ) {
         m->sampmethod = selectoption(q,
             sampmethod_names, SAMPMETHOD_COUNT);
       } else if ( strcmpfuzzy(p, "tcorr") == 0
                || strcmpfuzzy(p, "corr-time") == 0 ) {
         m->tcorr = atof(q);
+      } else if ( strcmpfuzzy(p, "nstcorr") == 0 ) {
+        m->nstcorr = atoi(q);
+      } else if ( strcmpfuzzy(p, "corrtol") == 0 ) {
+        m->corrtol = atof(q);
+      } else if ( strcmpfuzzy(p, "fncorr") == 0 ) {
+        strcpy(m->fncorr, q);
       } else if ( strcmp(p, "equil") == 0
                || strcmp(p, "nequil") == 0 ) {
-        m->nequil = atoi(q);
+        m->nequil = atol(q);
       } else if ( strstartswith(p, "steps")
                || strstartswith(p, "nsteps") ) {
-        m->nsteps = atoi(q);
+        m->nsteps = atol(q);
       } else if ( strcmp(p, "try") == 0
                || strcmp(p, "repeat") == 0
                || strstartswith(p, "trial")
                || strstartswith(p, "ntrial") ) {
-        m->ntrials = atoi(q);
+        m->ntrials = atol(q);
       } else if ( strcmp(p, "verbose") == 0 ) {
         m->verbose = atoi(q);
       } else if ( strcmp(p, "help") == 0 ) {
@@ -457,10 +514,10 @@ static void invtpar_dump(const invtpar_t *m)
 {
   int i;
 
-  fprintf(stderr, "ntrials %d, n %d, alpha = %g/t, alpha0 %g, "
-      "%s, tcorr %g\n",
+  fprintf(stderr, "%ld trials: n %d, alpha = %g/t, alpha0 %g, "
+      "%s, %ld steps;\n",
       m->ntrials, m->n, m->c, m->alpha0,
-      sampmethod_names[m->sampmethod][0], m->tcorr);
+      sampmethod_names[m->sampmethod][0], m->nsteps);
   fprintf(stderr, "update window function (%d bins): ", m->nbn);
   for ( i = 0; i < m->nbn; i++ ) {
     fprintf(stderr, "%g ", m->nbs[i]);

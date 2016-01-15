@@ -2,6 +2,7 @@
 #include "invt.h"
 
 
+
 static void printarr(const double *a, int n, const char *delim)
 {
   int i;
@@ -14,8 +15,9 @@ static void printarr(const double *a, int n, const char *delim)
 }
 
 
-static int output(const double *v1, const double *v2, int n,
-    const char *fn)
+
+static int output(const double *v1, const double *v2,
+    const double *u, int n, const char *fn)
 {
   int i;
   FILE *fp;
@@ -27,7 +29,7 @@ static int output(const double *v1, const double *v2, int n,
   }
 
   for ( i = 0; i < n; i++ ) {
-    fprintf(fp, "%d\t%g\t%g\n", i, v1[i], v2[i]);
+    fprintf(fp, "%d\t%g\t%g\t%g\n", i, v1[i], v2[i], u[i]);
   }
 
   fclose(fp);
@@ -36,10 +38,12 @@ static int output(const double *v1, const double *v2, int n,
 }
 
 
+
 int main(void)
 {
-  int n = 100, i, j;
+  int n = 10000, kcutoff = 10, i;
   double *u, *u1, *v, *v1, *v2, *costab;
+  double errv, erru, errv2;
 
   xnew(u, n);
   xnew(u1, n);
@@ -53,19 +57,31 @@ int main(void)
     v[i] = randgaus();
   }
 
+  /* normalize the error */
+  normalize(v, n, 1.0);
+
+  errv = geterror(v, n);
+
   /* convert them to modes */
   getcosmodes(v, n, u, costab);
+
+  erru = geterror(u, n);
 
   /* convert back */
   fromcosmodes(v1, n, u, costab);
 
   /* truncate high frequency modes */
   for ( i = 0; i < n; i++ ) {
-    u1[i] = ( i <= 10 ) ? u[i] : 0;
+    u1[i] = ( i < kcutoff ) ? u[i] : 0;
   }
 
   /* convert back */
   fromcosmodes(v2, n, u1, costab);
+
+  errv2 = geterror(u, n);
+
+  printf("n %d, errv %g, erru %g, erru * sqrt(n) %g, errv2 %g\n",
+      n, errv, erru, erru * sqrt(n), errv2);
 
   /* print out u and v */
   if ( n <= 12 ) {
@@ -75,7 +91,7 @@ int main(void)
     printarr(v2, n, "  ");
   }
 
-  output(v1, v2, n, "out.dat");
+  output(v1, v2, u, n, "out.dat");
 
   free(u);
   free(u1);
@@ -83,4 +99,6 @@ int main(void)
   free(v1);
   free(v2);
   free(costab);
+
+  return 0;
 }
