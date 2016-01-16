@@ -30,43 +30,189 @@
 
 
 \begin{abstract}
-  Wang-Landau (WL) and metadynamics algorithms
-  are widely-used techniques in free energy simulations.
+  The Wang-Landau (WL) algorithm and metadynamics
+  are two closely-related techniques in free energy simulations.
   %
-  These techniques allow one to sample a flat distribution
-  along a quantity of interest
+  They allow one to sample a flat distribution
+  along a quantity of interest, $z$,
   by adaptively constructing a bias potential,
-  as the negative potential of mean force (PMF).
+  which is the negative potential of mean force (PMF).
   %
-  However, the asymptotic error of the resulting PMF
-  is determined by the magnitude of updating the bias potential,
-  and in what fashion the magnitude is reduced
+  The two algorithms differ by
+  the manner of updating the bias potential:
+  %
+  in the WL case, each simulation step triggers
+  an update of the bias potential to only
+  the bin containing the current $z$,
+  while in the metadynamics case,
+  the bias potential of several neighboring bins
+  are affected as well.
+  %
+  The asymptotic error of the resulting PMF
+  is determined by the updating magnitude,
+  and the rate of the reduction of the magnitude
   over the simulation time.
   %
-  In the Wang-Landau case,
+  In the WL case,
   a simple and effective formula for the magnitude
   is given by the inverse of the number of simulation steps.
   %
-  Here, we shall reexamine the optimality of this prescription,
-  and attempt to extend it to the metadynamics case,
-  in which the bias potential at several neighboring bins
-  are updated according to a predetermined window function,
-  upon each visit.
+  In this study, we shall reexamine the optimality of this prescription,
+  and attempt to extend it to the metadynamics case.
   %
-  Our analysis also suggests that in terms of convergence
-  the WL algorithm represents one of the best of the class
-  updating schemes among more sophisticated candidates.
+  Further, we compared the two algorithms, and found that
+  although metadynamics produces a smoother PMF profile,
+  it is less effective in reducing errors with the shorter wavelengths.
+  %
+  Thus, it relies more heavily on the assumption of
+  the smoothness of the PMF profile,
+  especially with a wide updating window.
 \end{abstract}
 
 \maketitle
 
 
 
-\section{Background}
+\section{Introduction}
 
 
 
-\subsection{Flat-distribution sampling}
+Free energy calculation\cite{frenkel} is a central theme
+in computational physics and chemistry.
+%
+Given a system,
+the problem is to compute a distribution, $p^*(z)$,
+along a quantity of interest $z$, and to see how
+the distribution changes with the external conditions,
+such as temperatures and pressures.
+%
+The negative logarithm $-\log p^*(z)$,
+or the potential of mean force (PMF),
+defines a free energy.
+%
+A straightforward approach of computing the PMF
+is to run multiple independent simulations
+under different conditions,
+and then piece together the information
+gathered there.
+%
+This solution is often unsatisfactory
+for a complex and glassy system,
+because the system can be trapped
+in a local free energy minimum
+for a long time.
+
+
+
+A better solution is to artificially alter
+the target distribution,
+such that we can, in a single simulation, sample
+a flat distribution\cite{mezei1987, berg1992, lee1993,
+wang2001, wang2001pre, laio2002}
+along $z$ over a wide range.
+%
+This alleviates the above problem of local trapping
+as the system is now forced to travel along the $z$ direction,
+which often represents a slow reaction coordinate.
+%
+It, however, requires one to efficiently construct a
+bias potential for an often unknown system.
+%
+Note that the bias potential is directly related to the PMF
+as the former must precisely offset the latter
+to achieve a flat distribution.
+
+
+
+The Wang-Landau (WL) algorithm\cite{wang2001, wang2001pre}
+and metadynamics\cite{laio2002}
+are two widely-used techniques for this purpose,
+in which a bias potential is actively build-up
+based on the simulation history.
+%
+In essence, these techniques
+encourage the system to leave a region that has been visited
+by elevating the bias potential there.
+%
+To be effective, the updates to bias potential
+are made at every few steps,
+while a side effect is that the underlying dynamics
+is no longer a equilibrium sampling
+required by statistical mechanics.
+%
+Thus, one has to reduce the magnitude of updating
+over the course of simulation.
+
+
+
+Naturally, the manner of reducing
+the updating magnitude\cite{
+belardinelli2007, belardinelli2007jcp, belardinelli2008,
+morozov2007, zhou2008, morozov2009,
+komura2012, caparica2012, caparica2014}
+determines the precision of the final bias potential,
+hence that of PMF.
+%
+For the WL algorithm, it is found
+that asymptotically the optimal magnitude of updating $\ln f$
+should be given by the
+inverse time\cite{
+belardinelli2007, belardinelli2007jcp, belardinelli2008,
+morozov2007, zhou2008},
+where ``time'' is defined as
+the number of simulation steps
+divided by the number of bins.
+
+
+In this study,
+we shall give a proof of the inverse-time formula,
+and try to generalize it to
+updating schemes involving neighboring bins,
+such as those used in metadynamics.
+%
+As a byproduct, we shall show that
+the single-bin scheme used by the WL algorithm
+is generally one of the best
+updating schemes in terms of convergence.
+%
+The article is organized as follows.
+%
+We present the analytical results in Sec. \ref{sec:theory},
+numerically verify some key aspects
+in Sec. \ref{sec:results},
+and conclude the article
+in Sec. \ref{sec:conclusion}.
+
+
+
+
+\section{\label{sec:theory}
+Theory}
+
+
+In this section,
+we first review the basics and fix notations
+in Sec. \ref{sec:background}.
+%
+We then prove the optimality
+of the inverse-time formula
+for the single-bin WL algorithm
+in Sec. \ref{sec:single-bin}.
+%
+Next, we discuss the generalized
+multiple-bin schemes
+in Secs. \ref{sec:multiple-bin}
+and \ref{sec:band-matrix}.
+%
+
+
+
+\subsection{\label{sec:background}
+Background}
+
+
+
+\subsubsection{Flat-distribution sampling}
 
 
 
@@ -89,7 +235,7 @@ such that the integer $i$ represents
 the index of a small interval, or a bin, $(z, z + dz)$.
 %
 In both cases,
-the distribution can be normalized as
+the distribution is normalized as
 $\sum_{i = 1}^n p^*_i = 1$.
 
 
@@ -109,15 +255,15 @@ a wider distribution $p_i$.
 
 
 
-To do so, we need to introduce a bias potential $V_i$,
-such that the target distribution is changed to
+To do so, we need to introduce a bias potential $V_i$
+to modify the target distribution to
 %
 \begin{equation}
   \pi_i \propto p^*_i \, e^{-V_i}.
   \label{eq:pi_p_phi1}
 \end{equation}
 %
-Upon normalization $\sum_{i = 1}^n \pi_i = 1$,
+Upon normalization, $\sum_{i = 1}^n \pi_i = 1$,
 we get
 %
 \begin{equation}
@@ -136,7 +282,7 @@ up to an additive constant.
 
 
 Generally, we may wish to sample
-a nearly flat distribution, $p_i$,
+a nearly flat distribution\cite{dayal2004, trebst2004}, $p_i$,
 by adjusting the bias potential $V_i$
 on the fly.
 %
@@ -170,7 +316,8 @@ $$
 %can be deduced from Eq. \eqref{eq:bias_pmf}.
 %
 The above inversion process,
-adopted by early multicanonical or entropic sampling,
+adopted by early multicanonical or
+entropic sampling\cite{berg1992, lee1993},
 can be inconvenient in practice,
 for we need to make the period
 as long as a multiple of
@@ -178,25 +325,18 @@ the autocorrelation time,
 which is difficult to estimate for an unknown system.
 
 
-
-\subsection{Wang-Landau algorithm}
-
-
-
-The Wang-Landau (WL) algorithm is a convenient technique
-of obtaining the desired bias potential $V_i$
-on the fly.
-%
-To simplify the notation, we introduce
-a shifted bias potential
+For later convenience, we introduce
 %
 \begin{equation}
   v_i \equiv V_i - \ln p^*_i + \ln p_i.
   \label{eq:v_def}
 \end{equation}
 %
+Since the last two terms of Eq. \eqref{eq:v_def}
+are constant during the course of simulation,
+updates to $V_i$ are equivalent to those to $v_i$.
 %
-and in $v_i$, Eq. \eqref{eq:pi_p_phi}
+In terms of $v_i$, Eq. \eqref{eq:pi_p_phi}
 becomes
 %
 \begin{equation}
@@ -215,7 +355,13 @@ upon convergence (i.e., when $\pi_i \approx p_i$).
 
 
 
-In the WL algorithm, $v_i$ are updated
+
+\subsubsection{Updating schemes}
+
+
+
+In the WL algorithm\cite{wang2001, wang2001pre},
+$v_i$ are updated
 in each MC step $t$,
 and $v_i(t)$ as a function of $t$
 is updated as
@@ -233,16 +379,24 @@ is updated as
 where $i(t)$ is the bin at step $t$,
 and $\alpha(t)$ is the updating magnitude.
 %
-Note that the updating scheme only applies
-to the $v_i$ at the current bin.
+We refer to the above scheme as the single-bin scheme,
+for it applies only to the bias potential
+at the current bin, $i(t)$,
+%
+By contrast, a multiple-bin scheme
+means the general case in which
+several neighboring bins are updated.
+
 %The values of $v_j(t)$ at $j \ne i(t)$
 %are kept unchanged.
-%
+
+
+
 One can show that with a constant $\alpha(t) = \alpha > 0$,
 the distribution collected from
 the trajectory is identical to $p_i$.
 %
-However, the updating scheme
+However, the continuous update
 makes $v_i(t)$ a fluctuating quantity,
 and Eq. \eqref{eq:pi_p_v} no longer holds
 at all times.
@@ -290,14 +444,13 @@ saturate.
 
 
 
-\subsection{$1/t$ formula}
+\subsubsection{$1/t$ formula}
 
 
 
 A more effective way
 of updating the $\alpha(t)$
-is to discard the stage-wise setup,
-and to follow the formula
+is to follow the formula
 %
 \begin{equation}
   \alpha(t) = \frac{1}{t},
@@ -319,41 +472,41 @@ different from $1.0$.
 
 
 
-Here we shall derive the optimal $\alpha(t)$
-for the WL algorithm, Eq. \eqref{eq:wl_update}.
-%
-Further, we shall generalize the result
-to a class of multiple-bin updating schemes,
-in which an update affects
-not only the current bin $i(t)$,
-but also a few neighboring ones.
-%(such schemes are designed
-%to maintain a smooth bias potential).
-%
-We shall show that
-the constant of proportionality, $1$,
-in Eq. \eqref{eq:alpha_invt}
-is optimal for the single-bin updating scheme,
-Eq. \eqref{eq:wl_update}
-(as in the WL algorithm),
-but not necessarily so
-for a multiple-bin updating scheme.
-%
-Below, we discuss the single-bin updating scheme
-in Section \ref{sec:single-bin},
-and the multiple-bin case
-in Section \ref{sec:multiple-bin}.
+%Here we shall derive the optimal $\alpha(t)$
+%For the WL algorithm, Eq. \eqref{eq:wl_update}.
+%%
+%Further, we shall generalize the result
+%To a class of multiple-bin schemes,
+%In which an update affects
+%Not only the current bin $i(t)$,
+%But also a few neighboring ones.
+%%(such schemes are designed
+%%to maintain a smooth bias potential).
+%%
+%We shall show that
+%The constant of proportionality, $1$,
+%In Eq. \eqref{eq:alpha_invt}
+%Is optimal for the single-bin scheme,
+%Eq. \eqref{eq:wl_update}
+%(as in the WL algorithm),
+%But not necessarily so
+%For a multiple-bin scheme.
+%%
+%Below, we discuss the single-bin scheme
+%In Section \ref{sec:single-bin},
+%And the multiple-bin case
+%In Section \ref{sec:multiple-bin}.
 
 
 
-\section{\label{sec:single-bin}
-Single-bin updating scheme}
+\subsection{\label{sec:single-bin}
+Single-bin scheme}
 
 
 
 In this section,
 we shall derive the optimal $\alpha(t)$
-for the single-bin updating scheme,
+for the single-bin scheme,
 Eq. \eqref{eq:wl_update}.
 %
 To do so,
@@ -364,7 +517,7 @@ by functional variation.
 
 
 
-\subsection{Differential equation}
+\subsubsection{Differential equation}
 
 
 
@@ -433,7 +586,7 @@ for the deterministic part
 For the noise part, we have
 $\langle \zeta_i(t) \rangle = 0$,
 %
-%The noise is not necessarily white.
+%The noise is not necessarily white,
 and the correlation functions
 depend only on the time difference
 %
@@ -464,7 +617,7 @@ $
 
 
 
-\subsection{Linear approximation}
+\subsubsection{Linear approximation}
 
 
 
@@ -554,7 +707,7 @@ a simpler one-variable problem.
 
 
 
-\subsection{One-variable problem}
+\subsubsection{One-variable problem}
 
 
 
@@ -701,13 +854,13 @@ yields Eq. \eqref{eq:alpha_opt}.
 
 
 
-\subsection{Optimal $\alpha(t)$ for the single-bin updating scheme}
+\subsubsection{Optimal $\alpha(t)$ for the single-bin scheme}
 
 
 
 Going back to the problem of
 minimizing Eq. \eqref{eq:error_sum}
-for the single-bin updating scheme,
+for the single-bin scheme,
 we find from Eq. \eqref{eq:dxdt_WL}
 that with $\lambda = 1$,
 Eq. \eqref{eq:alpha_opt}
@@ -719,12 +872,12 @@ up to a constant $t_0$. %defining the origin of $t$.
 
 
 
-\section{\label{sec:multiple-bin}
-Multiple-bin update}
+\subsection{\label{sec:multiple-bin}
+Multiple-bin scheme}
 
 
 
-We now consider the multiple-bin updating scheme.
+We now consider the multiple-bin scheme.
 %
 In this case,
 upon a visit to bin $j$,
@@ -750,7 +903,7 @@ certain restrictions and approximations.
 
 
 
-\subsection{Updating matrix $\mathbf w$}
+\subsubsection{Updating matrix}
 
 
 
@@ -845,7 +998,7 @@ that can increase indefinitely.
 
 
 
-\subsection{Linearization and decoupling}
+\subsubsection{Linearization and decoupling}
 
 
 
@@ -900,7 +1053,7 @@ where
 
 
 
-\subsection{Minimization of the error function}
+\subsubsection{Minimization of the error function}
 
 
 
@@ -979,12 +1132,11 @@ appears to be useless in a general setting.
 
 
 
-\subsection{White-noise approximation}
+\subsubsection{White-noise approximation}
 
 
 
-In the asymptotically regime,
-where $t \gg 1/\max \alpha(t)$,
+In the asymptotic regime,
 we can approximate $\kappa_i(t)$ as
 %
 \begin{equation}
@@ -1001,10 +1153,13 @@ Then, Eq. \eqref{eq:error_mbin} is simplified as
   &=
   \int_0^t
   \sum_{i = 2}^n
-  \Gamma_i \, \dot u_i^2\bigl( q(t') \bigr) \, dt',
+  \Gamma_i \, \dot u_i^2\bigl( q(t') \bigr) \, dt'.
   \label{eq:error_mbin1}
 \end{align}
 %
+The next order correction to Eq. \eqref{eq:kappa_delta}
+would lead to a correction to $\mathcal E$
+that is about $\alpha_{\max}^2$ as large.
 %
 \note{This is equivalent to saying that the Fourier transform
   $$
@@ -1104,14 +1259,19 @@ $$
 
 
 
-\subsection{\label{sec:optWL}
-Optimality of the single-bin updating scheme}
+\subsubsection{\label{sec:optWL}
+Optimality of the single-bin scheme}
 
 
 
-We can show from Eq. \eqref{eq:error_mbin1}
-that the single-bin updating scheme
-is an optimal updating scheme.
+We now show
+that the single-bin scheme
+is an optimal scheme.
+%
+Consider a class of $\mathbf w$ matrices
+with the same set of eigenvectors,
+hence same $\Gamma_i$'s,
+but with different eigenvalues, $\lambda_i$'s.
 %
 Using the Cauchy-Schwarz inequality, we have,
 for any set of $\beta_i \ge 0$
@@ -1173,6 +1333,10 @@ Note that the last expression depends on
 $q(t')$ only through the end point value,
 which is fixed in the variation process.
 %
+Thus, the inequality sets a lower bound
+of the error $\mathcal E$
+expressed in Eq. \eqref{eq:error_mbin1},
+%
 The equality is achieved
 if $\dot u_i\left( q(t') \right) = c_i$
 for all $i = 2, \dots, n$ at any $t'$,
@@ -1228,7 +1392,7 @@ we can freely set it to $\lambda_2$
 without changing the nature of the updating scheme).
 %
 Thus, in terms of convergence,
-the single-bin updating scheme
+the single-bin scheme
 (as adopted in the WL algorithm)
 is generally the most efficient
 updating scheme.
@@ -1236,7 +1400,7 @@ updating scheme.
 
 
 
-\subsection{Optimal coefficient of proportionality}
+\subsubsection{Optimal coefficient of proportionality}
 
 
 
@@ -1371,7 +1535,8 @@ in Sec. \ref{sec:optWL}.
 
 
 
-\subsection{Uniform band matrix}
+\subsection{\label{sec:band-matrix}
+Uniform band matrix}
 
 
 
@@ -1785,7 +1950,7 @@ Clearly, the error
 increases rapidly with magnitude of $\mu_1$,
 no matter its sign,
 and optimal value is given by $\mu_1 = 0$,
-which is the single-bin update scheme.
+which is the single-bin scheme.
 
 
 
@@ -1796,7 +1961,7 @@ which is the single-bin update scheme.
 Another common updating scheme
 in metadynamics is a Gaussian wave.
 %
-Below we show that the updating scheme
+Below we show that this scheme
 is stable, although
 it might be less effective
 in reducing local noises.
@@ -1938,7 +2103,8 @@ $$
 
 
 
-\section{Numerical results}
+\section{\label{sec:results}
+Numerical results}
 
 
 \subsection{Optimal $\alpha(t)$}
@@ -1948,24 +2114,43 @@ To determine the optimal schedule,
 we shall test a model system
 in the following fashion.
 %
-Initially $\alpha$ is set to $\alpha_0 = 1/n$
+Initially $\alpha$ is set to some $\alpha_0$
 for a sufficiently long time.
 %
 Then we reset the simulation time $t = 0$,
 and switch to
 $$
-\alpha(t) = \min\left\{ \alpha_0, \frac{ 1 } { \lambda \, t } \right\}.
+\alpha(t) = \frac{ 1 } { \lambda \, (t + t_0) },
 $$
+where $t_0 = 1/(\lambda \, \alpha_0)$
+to make $\alpha(t)$ continuous.
 
 
-1. Single-bin update.
+1. Single-bin scheme.
 Show the error versus $\lambda$.
 
+Change upon using local sampling scheme.
 
-2. Multiple-bin update scheme.
+
+2. Multiple-bin scheme.
 Error vs. $\lambda$.
 
-3. Optimality of the Single-bin update.
+3. Optimality of the Single-bin scheme.
 Error vs. $\mu_1$.
 
+
+\section{\label{sec:conclusion}
+Conclusions and Discussions}
+
+
+We verified the optimality of the inverse-time formula.
+
+We have shown that
+without a priori information,
+the single-bin scheme is asymptotically
+the best among all updating scheme
+in term of convergence.
+
+
+\bibliography{simul}
 \end{document}
