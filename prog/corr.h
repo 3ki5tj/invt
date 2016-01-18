@@ -139,11 +139,12 @@ static int corr_compute(corr_t *c, double *uu, int j,
  * if `subave` is true, the time-average value is subtracted
  * from c->arr[] before computing the correlation function
  * otherwise, zero is assumed as the average */
-static int corr_save(corr_t *c, int dt, double tol,
+static int corr_save(corr_t *c, int dt,
+    int tmax, double tol,
     int subave, const char *fn)
 {
-  int i, j, n = c->n;
-  double *uu0, *uu, *uave;
+  int i, j, n = c->n, stop;
+  double *uu0, *uu, *uave = NULL;
   FILE *fp;
 
   if ( (fp = fopen(fn, "w")) == NULL ) {
@@ -163,7 +164,9 @@ static int corr_save(corr_t *c, int dt, double tol,
   /* save the heading */
   fprintf(fp, "# %d %d %d\n", n, dt, c->cnt);
 
-  for ( j = 0; j < c->cnt; j++ ) {
+  if ( tmax <= 0 ) tmax = c->cnt;
+
+  for ( j = 0; j < tmax; j++ ) {
     /* compute correlation functions
      * at a separation of j frames */
     corr_compute(c, uu, j, uave);
@@ -174,8 +177,6 @@ static int corr_save(corr_t *c, int dt, double tol,
         uu0[i] = uu[i];
       }
     } else {
-      int stop = 1;
-
       /* decide if to stop the calculation */
       for ( i = 0; i < n; i++ ) {
         if ( uu[i] > uu0[i] * tol ) {

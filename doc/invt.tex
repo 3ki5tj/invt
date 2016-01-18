@@ -1424,11 +1424,13 @@ in Eq. \eqref{eq:error_mbin1} yields
 \mathcal E
 &=
 \frac{1}{t+t_0}
-\sum_{i=2}^n \frac{ \lambda_i^2 } { \lambda \, (2 \lambda_i - \lambda) }
+\sum_{i=2}^n
+  \frac{       \Gamma_i \, \lambda_i^2      }
+       { \lambda \, (2 \lambda_i - \lambda) }
 \left[
   1 - \left(
-    1 + \frac{t}{t_0}
-  \right)^{1 - 2 \, \lambda_i/\lambda}
+        1 + \frac{ t }{ t_0 }
+      \right)^{1 - 2 \, \lambda_i/\lambda}
 \right]
 \notag
 \\
@@ -1439,15 +1441,15 @@ in Eq. \eqref{eq:error_mbin1} yields
 \begin{dcases}
   \frac{ 1 }
        { t }
-  \frac{ \lambda_i^2 }
+  \frac{         \Gamma_i \, \lambda_i^2       }
        { \lambda \, (2 \, \lambda_i - \lambda) }
   &
   \mathrm{if \;} \lambda < 2 \, \lambda_i,
   \\%[1em]
   %
   %
-  \frac{   1    }
-       { 4 \, t }
+  \frac{ \Gamma_i }
+       {  4 \, t  }
   \ln \frac{ t + t_0 }
            {  t_0    }
   &
@@ -1455,9 +1457,9 @@ in Eq. \eqref{eq:error_mbin1} yields
   \\%[1em]
   %
   %
-  \frac{ t_0^{ 2 \, \lambda_i / \lambda  - 1} }
-       { t^{ 2 \, \lambda_i / \lambda } }
-  \frac{ \lambda_i^2 }
+  \frac{ t_0^{ 2 \, \lambda_i / \lambda  - 1 } }
+       {   t^{ 2 \, \lambda_i / \lambda      } }
+  \frac{      \Gamma_i \, \lambda_i^2          }
        { \lambda \, (\lambda - 2 \, \lambda_i) }
   &
   \mathrm{if \;} \lambda > 2 \, \lambda_i.
@@ -1476,22 +1478,27 @@ $$
            { =\joinrel=\joinrel=\joinrel= }
   \sum_{i = 2}^n
   \begin{dcases}
-    \frac{ 1 }{ t + t_0 }
-    \frac{ \lambda_i^2 } { \lambda \, (2 \, \lambda_i - \lambda) }
+    \frac{    1    }
+         { t + t_0 }
+    \frac{       \Gamma_i \, \lambda_i^2         } 
+         { \lambda \, (2 \, \lambda_i - \lambda) }
     &
     \mathrm{if \;} \lambda < 2 \, \lambda_i,
     \\%[1em]
     %
     %
-    \frac{1}{4 \, (t + t_0) } \ln\frac{t + t_0}{t_0}
+    \frac{    \Gamma_i    }
+         { 4 \, (t + t_0) }
+    \ln \frac{ t + t_0 }
+             {   t_0  }
     &
     \mathrm{if \;} \lambda = 2 \, \lambda_i,
     \\
     %
     %
-    \frac{ t_0^{ 2 \, \lambda_i / \lambda  - 1} }
+    \frac{  t_0^{ 2 \, \lambda_i / \lambda  - 1}  }
          { (t + t_0)^{ 2 \, \lambda_i / \lambda } }
-    \frac{ \lambda_i^2 }
+    \frac{      \Gamma_i \, \lambda_i^2          }
          { \lambda \, (\lambda - 2 \, \lambda_i) }
     &
     \mathrm{if \;} \lambda > 2 \, \lambda_i.

@@ -7,8 +7,9 @@
 
 
 
-/* return the root-mean-squared error of the inverse time scheme */
-static double comperr(const invtpar_t *m, double *err0)
+/* simulate a metadynamics process
+ * return the root-mean-squared error of the inverse time scheme */
+static double simulmeta(const invtpar_t *m, double *err0)
 {
   double *v = NULL, *vac = NULL, a, err;
   int i, n = m->n, prod = 0;
@@ -17,6 +18,7 @@ static double comperr(const invtpar_t *m, double *err0)
   corr_t *corr = NULL;
   double *u = NULL, *costab = NULL;
   int nfrcorr = 0;
+
 
   xnew(v, n);
   xnew(u, n);
@@ -27,13 +29,13 @@ static double comperr(const invtpar_t *m, double *err0)
     u[i] = randgaus();
   }
   fromcosmodes(v, n, u, costab);
-  normalize(v, n, m->initrand);
+  normalize(v, n, m->initrand, m->p);
 
   /* space for the accumulative distribution function */
   xnew(vac, n + 1);
 
   /* open an object for correlation functions */
-  if ( m->nstcorr > 0 ) {
+  if ( m->docorr ) {
     nfrcorr = m->nsteps / m->nstcorr + 1;
     corr = corr_open(n - 1, nfrcorr);
   }
@@ -55,7 +57,7 @@ static double comperr(const invtpar_t *m, double *err0)
     /* try to start production */
     if ( !prod && t >= m->nequil ) {
       prod = 1;
-      *err0 = geterror(v, n);
+      *err0 = geterror(v, n, m->p);
       if ( m->verbose >= 1 ) {
         fprintf(stderr, "starting production at step %ld, t0 %g, err %g\n",
             t, m->t0, *err0);
@@ -71,8 +73,8 @@ static double comperr(const invtpar_t *m, double *err0)
 
     a /= m->p[i];
 
-    if ( m->nbn > 1 ) {
-      mbin_update(v, n, i, a, m->nbs, m->nbn);
+    if ( m->winn > 1 ) {
+      mbin_update(v, n, i, a, m->win, m->winn);
     } else {
       v[i] += a;
     }
@@ -87,19 +89,24 @@ static double comperr(const invtpar_t *m, double *err0)
   }
 
   /* compute the error */
-  err = geterror(v, n);
+  err = geterror(v, n, m->p);
 
-  /* print out the error */
+  /* print out the error of the modes */
   if ( m->verbose >= 2 ) {
+    getcosmodes(v, n, u, costab);
     for ( i = 0; i < n; i++ ) {
-      printf("  %+11.8f", v[i]);
+      printf("  %+11.8f", u[i]);
     }
     printf("\n");
   }
 
   if ( corr != NULL ) {
-    /* save the correlation functions to file */
-    corr_save(corr, m->nstcorr, m->corrtol, 0, m->fncorr);
+    /* save the correlation functions to file
+     * for a maximal of 100 frame separations
+     * this should work for the default setting
+     * with `nstcorr` set to `1/alpha` */
+    corr_save(corr, m->nstcorr, 100,
+        m->corrtol, 0, m->fncorr);
   }
 
   free(v);
@@ -118,31 +125,45 @@ static double comperr(const invtpar_t *m, double *err0)
 
 static double invt_run(invtpar_t *m)
 {
-  double err, see = 0;
-  double err0, see0 = 0;
+  double err, see = 0, averr, errref;
+  double err0, see0 = 0, averr0, err0ref;
   int i;
 
   mtscramble( time(NULL) );
 
-  if ( m->fixa ) {
-    err = comperr(m, &err0);
+  if ( m->docorr ) {
+    /* compute correlation functions
+     * for a single run */
+    err = simulmeta(m, &err0);
   } else {
+    /* do multiple runs to compute the average error */
+
+    /* compute the prediction from the analytical result */
+    err0ref = esterror0_ez(m->alpha0,
+        m->n, m->winn, m->win, m->sampmethod, m->verbose);
+    errref = esterror_ez(m->c, (double) m->nsteps, m->t0,
+        m->n, m->winn, m->win, m->sampmethod, m->verbose);
+
     for ( i = 0; i < m->ntrials; i++ ) {
-      err = comperr(m, &err0);
+      err = simulmeta(m, &err0);
       see += err * err;
       see0 += err0 * err0;
+      averr = sqrt( see / (i + 1) );
+      averr0 = sqrt( see0 / (i + 1) );
       printf("%4d: err %10.8f -> %10.8f, "
                   "ave %10.8f -> %10.8f, "
                   "sqr %e -> %e\n",
           i, err0, err,
-          sqrt(see0/(i+1)), sqrt(see/(i+1)),
-          see0/(i+1), see/(i+1));
+          averr0, averr,
+          averr0 * averr0, averr * averr);
     }
 
-    err = see / m->ntrials;
-    err0 = see0 / m->ntrials;
-    printf("average error: %10.8f -> %10.8f, sqr %e -> %e\n",
-        sqrt(err0), sqrt(err), err0, err);
+    averr = sqrt( see / m->ntrials );
+    averr0 = sqrt( see0 / m->ntrials );
+    printf("average error: %10.8f -> %10.8f, sqr %e -> %e, "
+           "ref: %10.8f --> %10.8f, sqr %e -> %e\n",
+        averr0, averr, averr0 * averr0, averr * averr,
+        err0ref, errref, err0ref * err0ref, errref * errref);
   }
 
   return err;

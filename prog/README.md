@@ -34,11 +34,10 @@ under a fixed updating magnitude alpha,
 determined by the option `--a0`.
 For example
 ```
-./invt --a0=0.0001 --fixa
+./invt --a0=0.0001 --corr --fixa
 ```
 Such a run will by default compute the autocorrelation functions
-of different updating modes, which are save in
-the file given "corr.dat".
+of different updating modes, which are save in the file given "corr.dat".
 
 For these simulations, `ntrials` is automatically set to 1.
 So it helps to increase the number of steps by manually
@@ -84,14 +83,20 @@ Regular options
 Correlation functions
 ----------------------
 
+ o  Compute correlation functions, `--corr`.
 
  o  Name of output autocorrelation function,
     specified by `--fncorr=`.
+    If this option is explicitly specified,
+    `--corr` is unnecessary.
 
  o  Interval of saving frames for computing autocorrelation functions
     This is determined by the `--nstcorr=`.
-    By default, it is set to `1/a0`,
+    By default (value 0), it is set to `1/a0`,
     where `a0` is the value given by `--alpha0`.
+    If this option is explicitly specified,
+    and the value is different from 0,
+    `--corr` is unnecessary.
 
  o  Tolerance to truncate autocorrelation functions, `tol`
     On output of the autocorrelation functions

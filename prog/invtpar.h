@@ -25,14 +25,15 @@ typedef struct {
   double *p; /* target distribution */
   double alpha0; /* initial updating magnitude */
   int fixa; /* fix alpha during the entire process */
-  int nbn; /* width of the updating window function */
-  double nbs[NBMAX + 1]; /* shape of the window function */
-  double wgaus; /* width of the Gaussian window */
+  int winn; /* width of the updating window function */
+  double win[NBMAX + 1]; /* shape of the window function */
+  double wingaus; /* width of the Gaussian window */
   double initrand; /* magnitude of the initial Gaussian noise */
   int kcutoff; /* cutoff wave number of the initial noise */
   int sampmethod; /* sampling method */
   double tcorr; /* correlation time for the sampling method */
 
+  int docorr; /* compute correlation functions */
   int nstcorr; /* time interval of computing autocorrelation function */
   double corrtol; /* error tolerance of the autocorrelation function */
   char fncorr[FILENAME_MAX]; /* file name for the autocorrelation function */
@@ -129,17 +130,18 @@ static void invtpar_init(invtpar_t *m)
   m->p = NULL;
   m->alpha0 = 0.0;
   m->fixa = 0;
-  m->nbn = 1; /* single bin update */
-  for ( i = 1; i < m->nbn; i++ ) {
-    m->nbs[i] = 0;
+  m->winn = 1; /* single bin update */
+  for ( i = 1; i < m->winn; i++ ) {
+    m->win[i] = 0;
   }
-  m->nbs[0] = 1;
-  m->wgaus = 0;
+  m->win[0] = 1;
+  m->wingaus = 0;
   m->initrand = 0;
   m->kcutoff = 0;
   m->sampmethod = 0;
   m->tcorr = 0.0; /* perfect sampling */
 
+  m->docorr = 0; /* compute correlation functions */
   m->nstcorr = 0; /* don't do correlation functions */
   m->corrtol = 1e-8;
   m->fncorr[0] = '\0';
@@ -173,48 +175,58 @@ static void invtpar_compute(invtpar_t *m)
     m->t0 = m->c / m->alpha0;
   }
 
-  if ( m->fixa ) {
-    /* if a fixed alpha is used,
-     * prepare parameters for the
+  /* turn on correlation function computation
+   * if the output file or frequency is set */
+  if ( m->fncorr[0] != '\0' || m->nstcorr != 0 ) {
+    m->docorr = 1;
+  }
+
+  if ( m->docorr ) {
+    /* set default parameters for computing
      * autocorrelation function */
     if ( m->nstcorr <= 0 ) {
       m->nstcorr = (int) (1.0 / m->alpha0 + 0.5);
     }
+
     if ( m->fncorr[0] == '\0' ) {
       strcpy(m->fncorr, "corr.dat");
     }
+
+    m->fixa = 1;
+    m->ntrials = 1;
   }
 
   /* construct the Gaussian window */
-  if ( m->wgaus > 0 ) {
-    m->nbn = NBMAX;
+  if ( m->wingaus > 0 ) {
+    m->winn = NBMAX;
 
-    if ( m->nbn >= m->n / 2 ) {
-      m->nbn = m->n / 2;
+    if ( m->winn >= m->n / 2 ) {
+      m->winn = m->n / 2;
     }
 
     /* truncate the Gaussian at 5 sigma */
-    if ( m->nbn >= m->wgaus * 5 ) {
-      m->nbn = (int) (m->wgaus * 5 + 0.5);
+    if ( m->winn >= m->wingaus * 5 ) {
+      m->winn = (int) (m->wingaus * 5 + 0.5);
     }
 
     x = 1;
-    for ( i = 1; i < m->nbn; i++ ) {
-      m->nbs[i] = exp(-0.5*i*i/m->wgaus/m->wgaus);
-      x += m->nbs[i] * 2;
+    for ( i = 1; i < m->winn; i++ ) {
+      m->win[i] = exp(-0.5*i*i/m->wingaus/m->wingaus);
+      x += m->win[i] * 2;
     }
 
-    /* normalize */
-    for ( i = 0; i < m->nbn; i++ ) {
-      m->nbs[i] /= x;
+    /* normalize the window function, such that
+     * win[0] + 2 * (win[1] + ... + win[n - 1]) = 1 */
+    for ( i = 0; i < m->winn; i++ ) {
+      m->win[i] /= x;
     }
 
   } else {
 
-    for ( x = 0, i = 1; i < m->nbn; i++ ) {
-      x += m->nbs[i];
+    for ( x = 0, i = 1; i < m->winn; i++ ) {
+      x += m->win[i];
     }
-    m->nbs[0] = 1 - 2 * x;
+    m->win[0] = 1 - 2 * x;
   }
 
   /* initialize the target distribution */
@@ -296,13 +308,15 @@ static int invtpar_load(invtpar_t *m, const char *fn)
       m->fixa = 1;
     } else if ( strstartswith(key, "nb")
              || strstartswith(key, "neighbo")
+             || strcmpfuzzy(key, "win") == 0
              || strcmpfuzzy(key, "window") == 0 ) {
-      m->nbn = 1 + readarray(m->nbs + 1, NBMAX, val);
+      m->winn = 1 + readarray(m->win + 1, NBMAX, val);
     } else if ( strcmpfuzzy(key, "wgaus") == 0
+             || strcmpfuzzy(key, "wingaus") == 0
              || strcmpfuzzy(key, "width-Gaussian") == 0
              || strcmpfuzzy(key, "sigma") == 0
              || strcmpfuzzy(key, "sig") == 0 ) {
-      m->wgaus = atof(val);
+      m->wingaus = atof(val);
     } else if ( strcmpfuzzy(key, "initrand") == 0 ) {
       m->initrand = atof(val);
     } else if ( strcmpfuzzy(key, "kcutoff") == 0 ) {
@@ -314,6 +328,9 @@ static int invtpar_load(invtpar_t *m, const char *fn)
     } else if ( strcmpfuzzy(key, "tcorr") == 0
              || strcmpfuzzy(key, "corr-time") == 0 ) {
       m->tcorr = atof(val);
+    } else if ( strcmpfuzzy(key, "corr") == 0
+             || strcmpfuzzy(key, "docorr") == 0 ) {
+      m->docorr = 1;
     } else if ( strcmpfuzzy(key, "nstcorr") == 0 ) {
       m->nstcorr = atoi(val);
     } else if ( strcmpfuzzy(key, "corrtol") == 0 ) {
@@ -362,10 +379,11 @@ static void invtpar_help(const invtpar_t *m)
   fprintf(stderr, "  --t0=:         set t0 in alpha = c/(t + t0), if unset, t0 = c/a0, default %g\n", m->t0);
   fprintf(stderr, "  --fixa:        fix the alpha during the entire process, default %d\n", m->fixa);
   fprintf(stderr, "  --nb=:         explicitly set the update window parameters, separated by comma, like --nb=0.2,0.4\n");
-  fprintf(stderr, "  --sig=:        set the Gaussian window width, default %g\n", m->wgaus);
+  fprintf(stderr, "  --sig=:        set the Gaussian window width, default %g\n", m->wingaus);
   fprintf(stderr, "  --initrand=:   magnitude of the initial random error, default %g\n", m->initrand);
   fprintf(stderr, "  --kcutoff=:    cutoff of wave number of the initial random error, default %d\n", m->kcutoff);
   fprintf(stderr, "  --samp=:       set the sampling scheme, g=global Metropolis, l=local Metropolis, h=heat-bath, default %s\n", sampmethod_names[m->sampmethod][0]);
+  fprintf(stderr, "  --corr:        compute correlation functions, default %d\n", m->docorr);
   fprintf(stderr, "  --nstcorr=:    set the number of steps of setting the correlation function, default %d\n", m->nstcorr);
   fprintf(stderr, "  --corrtol=:    set the tolerance level to truncate the autocorrelation function, default %g\n", m->corrtol);
   fprintf(stderr, "  --fncorr=:     set the file name for the correlation function, default %s\n", m->fncorr);
@@ -417,14 +435,16 @@ static int invtpar_doargs(invtpar_t *m, int argc, char **argv)
       } else if ( strcmp(p, "t0") == 0 ) {
         m->t0 = atof(q);
       } else if ( strstartswith(p, "nb")
-               || strstartswith(p, "neighbor")
+               || strstartswith(p, "neighbo")
+               || strcmpfuzzy(p, "win") == 0
                || strcmpfuzzy(p, "window")  == 0 ) {
-        m->nbn = 1 + readarray(m->nbs + 1, NBMAX, q);
+        m->winn = 1 + readarray(m->win + 1, NBMAX, q);
       } else if ( strcmpfuzzy(p, "wgaus") == 0
+               || strcmpfuzzy(p, "wingaus") == 0
                || strcmpfuzzy(p, "width-Gaussian") == 0
                || strcmpfuzzy(p, "sigma") == 0
                || strcmpfuzzy(p, "sig") == 0 ) {
-        m->wgaus = atof(q);
+        m->wingaus = atof(q);
       } else if ( strcmpfuzzy(p, "initrand") == 0 ) {
         m->initrand = atof(q);
       } else if ( strcmpfuzzy(p, "kcutoff") == 0 ) {
@@ -435,6 +455,9 @@ static int invtpar_doargs(invtpar_t *m, int argc, char **argv)
       } else if ( strcmpfuzzy(p, "tcorr") == 0
                || strcmpfuzzy(p, "corr-time") == 0 ) {
         m->tcorr = atof(q);
+      } else if ( strcmpfuzzy(p, "corr") == 0
+               || strcmpfuzzy(p, "docorr") == 0 ) {
+        m->docorr = 1;
       } else if ( strcmpfuzzy(p, "nstcorr") == 0 ) {
         m->nstcorr = atoi(q);
       } else if ( strcmpfuzzy(p, "corrtol") == 0 ) {
@@ -518,9 +541,9 @@ static void invtpar_dump(const invtpar_t *m)
       "%s, %ld steps;\n",
       m->ntrials, m->n, m->c, m->alpha0,
       sampmethod_names[m->sampmethod][0], m->nsteps);
-  fprintf(stderr, "update window function (%d bins): ", m->nbn);
-  for ( i = 0; i < m->nbn; i++ ) {
-    fprintf(stderr, "%g ", m->nbs[i]);
+  fprintf(stderr, "update window function (%d bins): ", m->winn);
+  for ( i = 0; i < m->winn; i++ ) {
+    fprintf(stderr, "%g ", m->win[i]);
   }
   fprintf(stderr, "\n");
 }
