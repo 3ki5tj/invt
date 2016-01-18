@@ -112,8 +112,12 @@ static int corr_compute(corr_t *c, double *uu, int j,
   for ( k = 0; k < tmax - j; k++ ) {
     k2 = k + j;
     for ( i = 0; i < n; i++ ) {
-      u1 = c->arr[k * n + i] - uave[i];
-      u2 = c->arr[k2 * n + i] - uave[i];
+      u1 = c->arr[k * n + i];
+      u2 = c->arr[k2 * n + i];
+      if ( uave != NULL ) {
+        u1 -= uave[i];
+        u2 -= uave[i];
+      }
       uu[i] += u1 * u2;
     }
   }
@@ -128,8 +132,15 @@ static int corr_compute(corr_t *c, double *uu, int j,
 
 
 
-/* compute and save autocorrelation functions */
-static int corr_save(corr_t *c, int dt, double tol, const char *fn)
+/* compute and save autocorrelation functions
+ * `tol` is the tolerance level as a fraction of the peak value
+ * of the correlation functions at time zero, below which
+ * the correlation functions are assumed to be zero
+ * if `subave` is true, the time-average value is subtracted
+ * from c->arr[] before computing the correlation function
+ * otherwise, zero is assumed as the average */
+static int corr_save(corr_t *c, int dt, double tol,
+    int subave, const char *fn)
 {
   int i, j, n = c->n;
   double *uu0, *uu, *uave;
@@ -140,13 +151,16 @@ static int corr_save(corr_t *c, int dt, double tol, const char *fn)
     return -1;
   }
 
-  xnew(uave, n);
   xnew(uu0, n);
   xnew(uu, n);
 
   /* compute the averages */
-  corr_getave(c, uave);
+  if ( subave ) {
+    xnew(uave, n);
+    corr_getave(c, uave);
+  }
 
+  /* save the heading */
   fprintf(fp, "# %d %d %d\n", n, dt, c->cnt);
 
   for ( j = 0; j < c->cnt; j++ ) {
@@ -182,7 +196,9 @@ static int corr_save(corr_t *c, int dt, double tol, const char *fn)
 
   fprintf(stderr, "autocorrelation functions saved in %s, %d frames\n", fn, j);
   fclose(fp);
-  free(uave);
+  if ( uave != NULL ) {
+    free(uave);
+  }
   free(uu0);
   free(uu);
 

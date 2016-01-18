@@ -1,3 +1,5 @@
+/* main driver */
+
 
 
 #include "invt.h"
@@ -97,7 +99,7 @@ static double comperr(const invtpar_t *m, double *err0)
 
   if ( corr != NULL ) {
     /* save the correlation functions to file */
-    corr_save(corr, m->nstcorr, m->corrtol, m->fncorr);
+    corr_save(corr, m->nstcorr, m->corrtol, 0, m->fncorr);
   }
 
   free(v);

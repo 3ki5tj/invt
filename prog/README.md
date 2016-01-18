@@ -3,7 +3,7 @@ Overview
 
 This project aims at testing the effectiveness
 of the inverse-t scheme for the updating magnitude
-in adapative sampling scheme, such as
+in adaptive sampling scheme, such as
 Wang-Landau and metadynamics.
 
 
@@ -30,7 +30,7 @@ Computing autocorrelation function
 -----------------------------------
 
 It is possible to compute the autocorrelation functions
-under a fixed updating magniude alpha,
+under a fixed updating magnitude alpha,
 determined by the option `--a0`.
 For example
 ```
