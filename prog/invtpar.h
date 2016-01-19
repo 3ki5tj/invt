@@ -269,7 +269,7 @@ static int invtpar_keymatch(invtpar_t *m,
   if ( strcmp(key, "n") == 0 ) {
     m->n = atoi(val);
   } else if ( strcmpfuzzy(key, "c") == 0
-           || strcmpfuzzy(key, "invt-c") ) {
+           || strcmpfuzzy(key, "invt-c") == 0 ) {
     m->c = atof(val);
   } else if ( strcmpfuzzy(key, "t0") == 0 ) {
     m->t0 = atof(val);
@@ -441,8 +441,7 @@ static int invtpar_doargs(invtpar_t *m, int argc, char **argv)
         *q++ = '\0';
       } else if ( i < argc - 1 ) {
         /* try to use the next argument as the value */
-        ++i;
-        q = argv[i];
+        q = argv[ ++i ];
       } else {
         q = NULL;
       }
@@ -495,7 +494,7 @@ static int invtpar_doargs(invtpar_t *m, int argc, char **argv)
       }
     }
   }
-
+  
   invtpar_compute(m);
 
   return 0;

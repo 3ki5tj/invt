@@ -364,7 +364,7 @@ static double esterr1(double lambda, double t, double t0,
     double lambda_i, double gamma_i)
 {
   const double tol = 1e-10;
-  double del, lammax, r;
+  double del, lammax, r, err1;
 
   del = fabs(lambda_i * 2 - lambda);
   /* lammax is the larger of lambda and lambda_i */
@@ -375,7 +375,9 @@ static double esterr1(double lambda, double t, double t0,
   } else {
     r = lambda_i / lambda;
     //printf("lambda %g, %g, r %g, gamma_i %g, t %g, t0 %g\n", lambda, lambda_i, r, gamma_i, t, t0); getchar();
-    return gamma_i / (t + t0) * ( r * r / ( 2 * r - 1 ) )
+    /* remainder error */
+    err1 = r / t0 * gamma_i * pow(t0/(t+t0), r);
+    return err1 + gamma_i / (t + t0) * ( r * r / ( 2 * r - 1 ) )
            * ( 1 - pow(t0 / (t + t0), 2 * r - 1) );
   }
 }

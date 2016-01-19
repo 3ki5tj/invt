@@ -195,7 +195,8 @@ static int corr_save(corr_t *c, int dt,
     fprintf(fp, "\n");
   }
 
-  fprintf(stderr, "autocorrelation functions saved in %s, %d frames\n", fn, j);
+  fprintf(stderr, "autocorrelation functions saved in %s, %d frames\n",
+      fn, j);
   fclose(fp);
   if ( uave != NULL ) {
     free(uave);

@@ -35,8 +35,8 @@
   %
   They allow one to sample a flat distribution
   along a quantity of interest, $z$,
-  by adaptively constructing a bias potential,
-  which is the negative potential of mean force (PMF).
+  by adaptively constructing a bias potential
+  that offsets the potential of mean force (PMF).
   %
   The two algorithms differ by
   the manner of updating the bias potential:
@@ -62,6 +62,8 @@
   %
   Further, we compared the two algorithms, and found that
   although metadynamics produces a smoother PMF profile,
+  which is necessary for stable numerical differentiation
+  in computing the force,
   it is less effective in reducing errors with the shorter wavelengths.
   %
   Thus, it relies more heavily on the assumption of
@@ -83,7 +85,7 @@ in computational physics and chemistry.
 Given a system,
 the problem is to compute a distribution, $p^*(z)$,
 along a quantity of interest $z$, and to see how
-the distribution changes with the external conditions,
+the distribution changes with external conditions,
 such as temperatures and pressures.
 %
 The negative logarithm $-\log p^*(z)$,
@@ -112,14 +114,14 @@ wang2001, wang2001pre, laio2002}
 along $z$ over a wide range.
 %
 This alleviates the above problem of local trapping
-as the system is now forced to travel along the $z$ direction,
+as the system is now forced to travel more flexibly
+along the $z$ direction,
 which often represents a slow reaction coordinate.
 %
 It, however, requires one to efficiently construct a
 bias potential for an often unknown system.
 %
-Note that the bias potential is directly related to the PMF
-as the former must precisely offset the latter
+Note that the bias potential must exactly cancel the PMF
 to achieve a flat distribution.
 
 
@@ -127,12 +129,22 @@ to achieve a flat distribution.
 The Wang-Landau (WL) algorithm\cite{wang2001, wang2001pre}
 and metadynamics\cite{laio2002}
 are two widely-used techniques for this purpose,
-in which a bias potential is actively build-up
-based on the simulation history.
+in which a bias potential is actively built-up on-the-fly
+during simulation.
 %
 In essence, these techniques
 encourage the system to leave a region that has been visited
 by elevating the bias potential there.
+%
+A main difference of the two techniques
+is that in the WL case, an update is limited to the bin
+containing the current $z$,
+while metadynamics adopts a more widespread window
+covering several neighboring bins.
+%
+The latter ensures a smooth profile
+suitable for numerical differentiation for force calculation,
+and hence is more often used molecular dynamics simulations.
 %
 To be effective, the updates to bias potential
 are made at every few steps,
@@ -167,7 +179,7 @@ divided by the number of bins.
 In this study,
 we shall give a proof of the inverse-time formula,
 and try to generalize it to
-updating schemes involving neighboring bins,
+updating schemes involving several neighboring bins,
 such as those used in metadynamics.
 %
 As a byproduct, we shall show that
@@ -318,14 +330,16 @@ $$
 The above inversion process,
 adopted by early multicanonical or
 entropic sampling\cite{berg1992, lee1993},
-can be inconvenient in practice,
-for we need to make the period
-as long as a multiple of
-the autocorrelation time,
-which is difficult to estimate for an unknown system.
+can be inconvenient in practice.
+%
+For example, a reasonably precise the histogram
+requires an accumulation period
+longer than the autocorrelation time,
+whereas the latter is difficult to
+estimate beforehand for an unknown system.
 
 
-For later convenience, we introduce
+For later convenience, we introduce a shifted bias potential
 %
 \begin{equation}
   v_i \equiv V_i - \ln p^*_i + \ln p_i.
@@ -333,10 +347,10 @@ For later convenience, we introduce
 \end{equation}
 %
 Since the last two terms of Eq. \eqref{eq:v_def}
-are constant during the course of simulation,
-updates to $V_i$ are equivalent to those to $v_i$.
+remain constant during the course of simulation,
+updates to $V_i$'s are equivalent to those to $v_i$'s.
 %
-In terms of $v_i$, Eq. \eqref{eq:pi_p_phi}
+In terms of $v_i$'s, Eq. \eqref{eq:pi_p_phi}
 becomes
 %
 \begin{equation}
@@ -379,16 +393,28 @@ is updated as
 where $i(t)$ is the bin at step $t$,
 and $\alpha(t)$ is the updating magnitude.
 %
-We refer to the above scheme as the single-bin scheme,
+We refer to the above scheme as the \emph{single-bin scheme},
 for it applies only to the bias potential
 at the current bin, $i(t)$,
 %
-By contrast, a multiple-bin scheme
-means the general case in which
-several neighboring bins are updated.
-
-%The values of $v_j(t)$ at $j \ne i(t)$
-%are kept unchanged.
+In a more general \emph{multiple-bin scheme}, however,
+several neighboring bins are updated:
+%
+\begin{equation}
+  v_i(t+1)
+  =
+  v_i(t)
+  +
+  w_{i, \, i(t)}
+  \frac{ \alpha(t) } { p_i },
+  \label{eq:mbin_update}
+\end{equation}
+%
+where $w_{ij}$ are a set of coefficients satisfying
+$\sum_{j=1}^n w_{ij} = 1$.
+%
+We shall discuss other restrictions on $w_{ij}$
+in Sec. \ref{sec:updating-matrix}.
 
 
 
@@ -396,8 +422,8 @@ One can show that with a constant $\alpha(t) = \alpha > 0$,
 the distribution collected from
 the trajectory is identical to $p_i$.
 %
-However, the continuous update
-makes $v_i(t)$ a fluctuating quantity,
+However, the above updates
+change $v_i(t)$ continuously,
 and Eq. \eqref{eq:pi_p_v} no longer holds
 at all times.
 %%
@@ -432,7 +458,7 @@ The histogram collected in the stage is monitored.
 %
 Once the histogram is sufficiently flat,
 we are allowed to enter a new stage
-with a reduced $\alpha$
+with a reduced $\alpha$\cite{wang2001, wang2001pre}
 (usually half as large as
 that in the previous stage).
 %
@@ -440,7 +466,7 @@ This scheme works well for early stages.
 %
 However, in later stages, it tends to reduce $\alpha$
 too quickly, making the asymptotic error
-saturate.
+saturate\cite{belardinelli2007, belardinelli2007jcp, belardinelli2008}.
 
 
 
@@ -462,13 +488,16 @@ from the beginning of the MC simulation,
 which shall be referred to as the ``time'' below.
 %
 This surprisingly simple formula has attracted
-several studies, notably the one by Zhou.
+several studies\cite{belardinelli2007, belardinelli2007jcp, belardinelli2008,
+morozov2007, zhou2008, morozov2009,
+komura2012, caparica2012, caparica2014}.
 %
-There are, however, some reservations about
+There are, however, some reservation about
 the constant of proportionality:
 the optimal formula for $\alpha(t)$
 might be $C/t$ with a constant $C$
-different from $1.0$.
+different from $1.0$\cite{
+morozov2007, zhou2008, morozov2009}.
 
 
 
@@ -512,8 +541,7 @@ Eq. \eqref{eq:wl_update}.
 To do so,
 we shall first express the error of $v(t)$
 as a functional of $\alpha(t)$,
-and then find the optimal value
-by functional variation.
+and then minimize it by variation.
 
 
 
@@ -634,15 +662,15 @@ increases steadily over time:
 \label{eq:dvbardt}
 \end{equation}
 %
-However, the difference between $v_i$ and $\bar v$,
+However, we expect the difference between $v_i$ and $\bar v$,
 %
 \begin{equation}
   x_i \equiv v_i - \bar v = v_i - \sum_{j = 1}^n p_j \, v_j,
   \label{eq:x_def}
 \end{equation}
 %
-is expected to be small in the asymptotic regime,
-and we can expand Eq. \eqref{eq:h_ave} as
+to be small in the asymptotic regime,
+and expand Eq. \eqref{eq:h_ave} as
 \begin{align}
 \langle h_i(t) \rangle
 &\approx
@@ -669,12 +697,10 @@ and
 \end{equation}
 which follows directly from Eq. \eqref{eq:x_def}.
 %
-With Eqs.
+From Eqs.
 \eqref{eq:vt_diffeq},
 \eqref{eq:h_split},
-\eqref{eq:dvbardt},
-and
-\eqref{eq:hdet_linearize},
+\eqref{eq:dvbardt}-\eqref{eq:hdet_linearize},
 we get a set of decoupled equations
 %
 \begin{equation}
@@ -683,7 +709,26 @@ we get a set of decoupled equations
   -\alpha(t) \, \left[ x_i(t) - \frac{ \zeta_i(t) } { p_i } \right].
   \label{eq:dxdt_WL}
 \end{equation}
-
+\note{The derivation:
+$$
+\begin{aligned}
+  \dot x_i
+  &\stackrel{\mathrm{Eq.\; \eqref{eq:x_def}}}
+            {=\joinrel=\joinrel=\joinrel=\joinrel=}
+  \dot v_i - \dot{ \bar v }
+  \stackrel{\mathrm{Eqs.\; \eqref{eq:vt_diffeq}\; and\; \eqref{eq:dvbardt}}}
+            {=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=}
+  \alpha(t) \left( \frac{ h_i } { p_i } - 1 \right)
+  \\
+  &\stackrel{\mathrm{Eq.\; \eqref{eq:h_split}}}
+            {=\joinrel=\joinrel=\joinrel=\joinrel=}
+  \alpha(t) \left( \frac{ \langle h_i \rangle } { p_i } + \frac{ \zeta_i } { p_i } - 1 \right)
+  \stackrel{\mathrm{Eq.\; \eqref{eq:hdet_linearize}}}
+            {=\joinrel=\joinrel=\joinrel=\joinrel=}
+  \alpha(t) \left[ -x_i(t) + \frac{ \zeta_i } { p_i } \right].
+\end{aligned}
+$$
+}
 
 
 The total error of the bias potential can be written in
@@ -702,8 +747,9 @@ $\bar v = \sum_{i = 1}^n p_i v_i$.
 Our aim is to find the $\alpha(t)$
 that minimizes Eq. \eqref{eq:error_sum}.
 %
-To do so, we shall first consider
-a simpler one-variable problem.
+Fortunately, we shall find that it suffices to consider
+a simpler one-variable problem
+in this case.
 
 
 
@@ -739,7 +785,7 @@ For example, for a white noise,
 $\kappa(t)$ is proportional to
 Dirac's $\delta$-function, $\delta(t)$.
 %
-We wish to show that the optimal $\alpha(t)$
+We wish to show that the $\alpha(t)$
 of minimizing $\langle x^2(t) \rangle$ at long times
 is given by
 %
@@ -774,6 +820,20 @@ u(z)
 e^{-\lambda \, q(t) + \lambda \, z}.
 \label{eq:ut_definition}
 \end{align}
+So
+\begin{align}
+\left\langle x^2(t) \right\rangle
+&=
+\int_0^t \int_0^t
+  \dot u\bigl( q(t') \bigr) \,
+  \dot u\bigl( q(t'') \bigr) \,
+  \kappa(t' - t'') \, dt'' \, dt'
+\notag
+\\
+&\hphantom{=}
++\langle x^2(0) \rangle e^{-2 \, \lambda \, q(t)}.
+\label{eq:x2t_average}
+\end{align}
 
 
 We shall further demand that
@@ -783,8 +843,8 @@ We shall further demand that
   \label{eq:qt_limit}
 \end{equation}
 %
-Then, for a large time $t$,
-the first term on the right-hand side
+Then, for a large $t$,
+the second term on the right-hand side
 of Eq. \eqref{eq:xt_solution} can be neglected, and
 %
 \begin{align}
@@ -799,7 +859,7 @@ of Eq. \eqref{eq:xt_solution} can be neglected, and
   \dot u\bigl( q(t') \bigr) \,
   \dot u\bigl( q(t'') \bigr) \,
   \kappa(t' - t'') \, dt'' \, dt'.
-\label{eq:x2t_average}
+\label{eq:x2t_average_asym}
 \end{align}
 
 
@@ -860,15 +920,21 @@ yields Eq. \eqref{eq:alpha_opt}.
 
 Going back to the problem of
 minimizing Eq. \eqref{eq:error_sum}
-for the single-bin scheme,
-we find from Eq. \eqref{eq:dxdt_WL}
-that with $\lambda = 1$,
+for the single-bin scheme.
+%
+Note that Eq. \eqref{eq:dxdt_WL}
+is of the form of Eq. \eqref{eq:dxdt_alpha}.
+%
+Thus, with $\lambda = 1$,
 Eq. \eqref{eq:alpha_opt}
 will optimize each term $\langle x_i^2 \rangle$,
 and hence the sum.
 %
-Thus, Eq. \eqref{eq:alpha_invt} is optimal
-up to a constant $t_0$. %defining the origin of $t$.
+In other words, the $\alpha(t)$ given by
+Eq. \eqref{eq:alpha_invt} is optimal
+up to a constant $t_0$.
+
+
 
 
 
@@ -877,7 +943,8 @@ Multiple-bin scheme}
 
 
 
-We now consider the multiple-bin scheme.
+We now consider the multiple-bin scheme,
+Eq. \eqref{eq:mbin_update}.
 %
 In this case,
 upon a visit to bin $j$,
@@ -895,15 +962,15 @@ Then, Eq. \eqref{eq:vt_diffeq} is generalized to
 \end{equation}
 
 
-The procedure of optimization is largely
-the same as the single-bin case,
+The optimization procedure is similar to the single-bin case,
 whereas the matrix nature brings about
-some technical difficulties that require
+some technical complexities that require
 certain restrictions and approximations.
 
 
 
-\subsubsection{Updating matrix}
+\subsubsection{\label{sec:updating-matrix}
+Updating matrix}
 
 
 
@@ -911,13 +978,15 @@ The matrix $\mathbf w$ is not arbitrary.
 %
 A necessary condition to sample desired distribution
 $\mathbf p = (p_1, \dots, p_n)$
-is that in Eq. \eqref{eq:vt_diffeq_mbin}
-when $h_j(t)$ coincides with $p_j$,
-the rate of change $\dot v_i(t)$
+is the following.
+%
+In Eq. \eqref{eq:vt_diffeq_mbin},
+if $h_j(t)$ were the same as $p_j$,
+the rates of change $\dot v_i(t)$'s
 should be independent of $i$.
 %
-This allows $v_i(t)$ to approach a constant
-asymptotically.
+This allows $v_i(t)$'s to grow uniformly
+in the asymptotic regime.
 %
 Thus, by a proper scaling of $\alpha(t)$,
 we may write this condition as
@@ -927,7 +996,7 @@ we may write this condition as
   \label{eq:w_sumj}
 \end{equation}
 %
-This means $(1, \dots, 1)^T$
+The above condition means that $(1, \dots, 1)^T$
 is a right eigenvector of $\mathbf w$
 with eigenvalue $1$.
 %
@@ -963,7 +1032,7 @@ $\mathbf w$ with eigenvalue $1$.
 Further, by Eq. \eqref{eq:w_detailedbalance},
 we can define a symmetric matrix $\hat{\mathbf w}$
 as $\hat w_{ij} = \sqrt{p_i/p_j} \, w_{ij}$
-that can be diagonalized
+that can be diagonalized\cite{vankampen}
 with a set of orthonormal eigenvectors:
 %
 $\sum_{i = 1}^n \varphi_{ki} \, \hat w_{ij} = \lambda_k \, \varphi_{kj}$.
@@ -976,7 +1045,7 @@ in terms of diagonalizing $\mathbf w$, we have
 \end{equation}
 where
 $\phi_{ij} = \sqrt{p_j} \, \varphi_{ij}$ satisfies
-the orthonormal conditions:
+the orthonormal conditions\cite{vankampen}:
 %
 \begin{align}
 \sum_{k = 1}^n \phi_{ki} \, \phi_{kj}
@@ -992,7 +1061,8 @@ the orthonormal conditions:
 
 %It is worth pointing out
 Note that, in a stable updating scheme,
-all eigenvalues $\lambda_k$ must be nonnegative,
+all eigenvalues $\lambda_k$ of $\mathbf w$
+must be nonnegative,
 for otherwise there is a fluctuating mode
 that can increase indefinitely.
 
@@ -1007,9 +1077,7 @@ We can now simplify Eq. \eqref{eq:vt_diffeq_mbin}.
 By using Eq. \eqref{eq:w_balance},
 we can show that
 Eqs. \eqref{eq:dvbardt} and \eqref{eq:px_sum}
-remain true.
-%
-%Thus, for Eq. \eqref{eq:x_def}, we have
+remain true, and
 %
 $$
 \begin{aligned}
@@ -1017,7 +1085,7 @@ $$
 &= \alpha(t) \sum_{j=1}^n w_{ij}
 \left( \frac{ h_j } { p_j }  - 1 \right)
 \\
-&=
+&\approx
 -\alpha(t) \sum_{j = 1}^n
 w_{ij} \left[ x_j(t) - \frac{\zeta_j (t)}{p_j} \right],
 \end{aligned}
@@ -1026,9 +1094,27 @@ where
 we have expanded the right-hand side
 in linear terms of $x_j$.
 
+\note{The proof of Eq. \eqref{eq:dvbardt},
+$$
+\begin{aligned}
+  \dot{ \bar v }
+  &= \sum_{i = 1}^n p_i \, \dot v_i
+  \stackrel{\mathrm{Eq.\; \eqref{eq:vt_diffeq_mbin}}}
+  {=\joinrel=\joinrel=\joinrel=\joinrel=}
+  \sum_{j = 1}^n \alpha(t) \, \frac{ h_j(t) } { p_j } \sum_{ i = 1 }^{n} p_i \, w_{ij}
+  \\
+  &
+  \stackrel{\mathrm{Eq.\; \eqref{eq:w_balance}}}
+  {=\joinrel=\joinrel=\joinrel=\joinrel=}
+  \sum_{j = 1}^n \alpha(t) \, h_j(t) = \alpha(t).
+\end{aligned}
+$$
+Equation \eqref{eq:px_sum} follows directly from the definition
+Eq. \eqref{eq:x_def}.
+}
 
 Now by diagonalizing the matrix $\mathbf w$
-using matrix defined in Eqs. \eqref{eq:eig_w},
+using the eigenvectors defined in Eqs. \eqref{eq:eig_w},
 \eqref{eq:eig_orthonormal_cols},
 and
 \eqref{eq:eig_orthonormal_rows},
@@ -1071,7 +1157,7 @@ as
   \label{eq:y2_sum}
 \end{align}
 %
-We note that there is one mode, say
+Note that there is always one mode, say
 $y_1 = \sum_{j=1}^n p_j \, x_j$
 (corresponding to $\lambda_1 = 1$),
 vanishes identically by Eq. \eqref{eq:px_sum}.
@@ -1159,8 +1245,9 @@ Then, Eq. \eqref{eq:error_mbin} is simplified as
 %
 The next order correction to Eq. \eqref{eq:kappa_delta}
 would lead to a correction to $\mathcal E$
-that is about $\alpha_{\max}^2$ as large.
-%
+that is about $\alpha_{\max}^2$ times as large.
+
+
 \note{This is equivalent to saying that the Fourier transform
   $$
   \tilde \kappa_i(\omega) = \Gamma_i
@@ -1227,10 +1314,12 @@ we get
   \frac{ \phi_{ik} } { p_k }
   \langle \zeta_j(t) \, \zeta_k(t') \rangle
   %
-  \approx \delta(t - t').
+  \approx \delta(t - t'),
   \label{eq:kappa_perfect}
 \end{equation}
 %
+or
+$\Gamma_i \approx 1$,
 where we have assumed the large $n$ limit
 such that $p_i \ll 1$
 in the last expression.
@@ -1308,8 +1397,7 @@ for any set of $\beta_i \ge 0$
 \notag
 \end{align}
 %
-\note{A short proof of the above version
-  of the Cauchy-Schwarz inequality
+\note{A short proof of the above inequality
   is the following.
   %
   First, we have
@@ -1321,9 +1409,11 @@ $$
 $$
   for any $X$.
   %
-  Thus, the right-hand side,
-  as a quadratic polynomial of $X$,
-  must have a non-positive discriminant.
+  Thus, the left-hand side,
+  expanded as a quadratic polynomial of $X$,
+  $A \, X^2 + B \, X + C$,
+  must have a non-positive discriminant,
+  $B^2 - 4 \, A \, C$.
   %
   This condition gives the desired inequality.
   \\%
@@ -1563,6 +1653,12 @@ are a set of numbers satisfying
 \end{equation}
 %
 and $\mu_l = 0$ for $l > b$.
+%
+On the right-hand side of Eq. \eqref{eq:w_band},
+the first term represents the relative updating magnitude
+to a neighbor that is $|i - j|$ bins away,
+whereas the next two terms are added to avoid
+boundary artifacts.
 
 
 This matrix, being symmetric,
@@ -1584,10 +1680,16 @@ given by
 \end{equation}
 %
 with eigenvalues
-\begin{equation}
-  \lambda_k = \mu_0 + \sum_{l = 1}^b 2 \, \mu_l \cos \frac{(k - 1)  \, l \pi}{n}.
+\begin{align}
+  \lambda_k
+  &=
+  \mu_0 + \sum_{l = 1}^b 2 \, \mu_l \cos \frac{(k - 1)  \, l \pi}{n}
+  \notag \\
+  &=
+  1 - \sum_{l = 1}^b 4 \, \mu_l \sin^2 \frac{(k - 1)  \, l \pi}{ 2 \, n }
+  .
 \label{eq:wband_eigenvalue}
-\end{equation}
+\end{align}
 %
 \note{We derive Eqs.
   \eqref{eq:wband_eigenvector} and \eqref{eq:wband_eigenvalue}
@@ -1840,7 +1942,11 @@ we convert Eq.
 \eqref{eq:y2_sum_perfect_invt}
 %and
 %\eqref{eq:optimal_lambda_approx}
-to an integral,
+to an integral.
+%
+Particularly,
+for perfect sampling, $\Gamma_i \approx 1$,
+we get
 $$
 \begin{aligned}
 \mathcal E
@@ -1956,8 +2062,8 @@ and the error in the optimal is given by
 Clearly, the error
 increases rapidly with magnitude of $\mu_1$,
 no matter its sign,
-and optimal value is given by $\mu_1 = 0$,
-which is the single-bin scheme.
+and the minimal value, obtained at $\mu_1 = 0$,
+corresponds to the single-bin scheme.
 
 
 
