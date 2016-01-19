@@ -67,11 +67,15 @@ const char *sampmethod_names[][MAX_OPT_ALIASES] = {
 
 
 /* parse a string into an array */
-static int readarray(double *arr, int n, char *s)
+static int readarray(double *arr, int n, const char *s0)
 {
   const char *delims = ",;:";
-  char *p;
+  char *p, *s;
   int i = 0;
+
+  /* make a copy of s0 */
+  xnew(s, strlen(s0) + 1);
+  strcpy(s, s0);
 
   p = strtok(s, delims);
   while ( p != NULL ) {
@@ -80,6 +84,9 @@ static int readarray(double *arr, int n, char *s)
     if ( i >= n )
       break;
   }
+
+  free(s);
+
   return i;
 }
 
@@ -126,7 +133,7 @@ static void invtpar_init(invtpar_t *m)
 
   m->c = 1.0;
   m->t0 = 0;
-  m->n = 10;
+  m->n = 100;
   m->p = NULL;
   m->alpha0 = 0.0;
   m->fixa = 0;
@@ -255,6 +262,76 @@ static void invtpar_finish(invtpar_t *m)
 
 
 
+/* match string key and value pairs */
+static int invtpar_keymatch(invtpar_t *m,
+    const char *key, const char *val)
+{
+  if ( strcmp(key, "n") == 0 ) {
+    m->n = atoi(val);
+  } else if ( strcmpfuzzy(key, "c") == 0
+           || strcmpfuzzy(key, "invt-c") ) {
+    m->c = atof(val);
+  } else if ( strcmpfuzzy(key, "t0") == 0 ) {
+    m->t0 = atof(val);
+  } else if ( strcmpfuzzy(key, "alpha0") == 0
+           || strcmpfuzzy(key, "a0") == 0 ) {
+    m->alpha0 = atof(val);
+  } else if ( strstartswith(key, "fixa") ) {
+    m->fixa = 1;
+  } else if ( strstartswith(key, "nb")
+           || strstartswith(key, "neighbo")
+           || strcmpfuzzy(key, "win") == 0
+           || strcmpfuzzy(key, "window") == 0 ) {
+    m->winn = 1 + readarray(m->win + 1, NBMAX, val);
+  } else if ( strcmpfuzzy(key, "wgaus") == 0
+           || strcmpfuzzy(key, "wingaus") == 0
+           || strcmpfuzzy(key, "width-Gaussian") == 0
+           || strcmpfuzzy(key, "sigma") == 0
+           || strcmpfuzzy(key, "sig") == 0 ) {
+    m->wingaus = atof(val);
+  } else if ( strcmpfuzzy(key, "initrand") == 0 ) {
+    m->initrand = atof(val);
+  } else if ( strcmpfuzzy(key, "kcutoff") == 0 ) {
+    m->kcutoff = atoi(val);
+  } else if ( strcmpfuzzy(key, "sampling-method") == 0
+           || strcmpfuzzy(key, "sampmethod") == 0
+           || strcmpfuzzy(key, "samp") == 0 ) {
+    m->sampmethod = selectoption(val,
+        sampmethod_names, SAMPMETHOD_COUNT);
+  } else if ( strcmpfuzzy(key, "tcorr") == 0
+           || strcmpfuzzy(key, "corr-time") == 0 ) {
+    m->tcorr = atof(val);
+  } else if ( strcmpfuzzy(key, "corr") == 0
+           || strcmpfuzzy(key, "docorr") == 0 ) {
+    m->docorr = 1;
+  } else if ( strcmpfuzzy(key, "nstcorr") == 0 ) {
+    m->nstcorr = atoi(val);
+  } else if ( strcmpfuzzy(key, "corrtol") == 0 ) {
+    m->corrtol = atof(val);
+  } else if ( strcmpfuzzy(key, "fncorr") == 0 ) {
+    strcpy(m->fncorr, val);
+  } else if ( strcmpfuzzy(key, "equil") == 0
+           || strcmpfuzzy(key, "nequil") == 0 ) {
+    m->nequil = atol(val);
+  } else if ( strcmpfuzzy(key, "steps") == 0
+           || strcmpfuzzy(key, "nsteps") == 0 ) {
+    m->nsteps = atol(val);
+  } else if ( strcmpfuzzy(key, "try") == 0
+           || strcmpfuzzy(key, "repeat") == 0
+           || strstartswith(key, "trial")
+           || strstartswith(key, "ntrial") ) {
+    m->ntrials = atol(val);
+  } else if ( strcmpfuzzy(key, "verbose") == 0 ) {
+    m->verbose = val ? atoi(val) : 1;
+  } else {
+    return -1;
+  }
+
+  return 0;
+}
+
+
+
 /* loading parameters from a configuration file
  * each line of the configuration file is
  *  key = val
@@ -294,63 +371,7 @@ static int invtpar_load(invtpar_t *m, const char *fn)
       val = NULL;
     }
 
-    if ( strcmp(key, "n") == 0 ) {
-      m->n = atoi(val);
-    } else if ( strcmpfuzzy(key, "c") == 0
-             || strcmpfuzzy(key, "invt-c") ) {
-      m->c = atof(val);
-    } else if ( strcmpfuzzy(key, "t0") == 0 ) {
-      m->t0 = atof(val);
-    } else if ( strcmpfuzzy(key, "alpha0") == 0
-             || strcmpfuzzy(key, "a0") == 0 ) {
-      m->alpha0 = atof(val);
-    } else if ( strstartswith(key, "fixa") ) {
-      m->fixa = 1;
-    } else if ( strstartswith(key, "nb")
-             || strstartswith(key, "neighbo")
-             || strcmpfuzzy(key, "win") == 0
-             || strcmpfuzzy(key, "window") == 0 ) {
-      m->winn = 1 + readarray(m->win + 1, NBMAX, val);
-    } else if ( strcmpfuzzy(key, "wgaus") == 0
-             || strcmpfuzzy(key, "wingaus") == 0
-             || strcmpfuzzy(key, "width-Gaussian") == 0
-             || strcmpfuzzy(key, "sigma") == 0
-             || strcmpfuzzy(key, "sig") == 0 ) {
-      m->wingaus = atof(val);
-    } else if ( strcmpfuzzy(key, "initrand") == 0 ) {
-      m->initrand = atof(val);
-    } else if ( strcmpfuzzy(key, "kcutoff") == 0 ) {
-      m->kcutoff = atoi(val);
-    } else if ( strcmpfuzzy(key, "sampling-method") == 0
-             || strcmpfuzzy(key, "sampmethod") == 0 ) {
-      m->sampmethod = selectoption(val,
-          sampmethod_names, SAMPMETHOD_COUNT);
-    } else if ( strcmpfuzzy(key, "tcorr") == 0
-             || strcmpfuzzy(key, "corr-time") == 0 ) {
-      m->tcorr = atof(val);
-    } else if ( strcmpfuzzy(key, "corr") == 0
-             || strcmpfuzzy(key, "docorr") == 0 ) {
-      m->docorr = 1;
-    } else if ( strcmpfuzzy(key, "nstcorr") == 0 ) {
-      m->nstcorr = atoi(val);
-    } else if ( strcmpfuzzy(key, "corrtol") == 0 ) {
-      m->corrtol = atof(val);
-    } else if ( strcmpfuzzy(key, "fncorr") == 0 ) {
-      strcpy(m->fncorr, val);
-    } else if ( strcmpfuzzy(key, "equil") == 0
-             || strcmpfuzzy(key, "nequil") == 0 ) {
-      m->nequil = atol(val);
-    } else if ( strcmpfuzzy(key, "steps") == 0
-             || strcmpfuzzy(key, "nsteps") == 0 ) {
-      m->nsteps = atol(val);
-    } else if ( strcmpfuzzy(key, "try") == 0
-             || strcmpfuzzy(key, "repeat") == 0
-             || strstartswith(key, "trial")
-             || strstartswith(key, "ntrial") ) {
-      m->ntrials = atol(val);
-    } else if ( strcmpfuzzy(key, "verbose") == 0 ) {
-      m->verbose = val ? atoi(val) : 1;
-    } else {
+    if ( invtpar_keymatch(m, key, val) != 0 ) {
       fprintf(stderr, "Unknown options %s = %s in %s\n",
           key, val, fn);
       getchar();
@@ -418,69 +439,19 @@ static int invtpar_doargs(invtpar_t *m, int argc, char **argv)
       /* let q point to the argument of the option */
       if ( (q = strchr(p, '=')) != NULL ) {
         *q++ = '\0';
+      } else if ( i < argc - 1 ) {
+        /* try to use the next argument as the value */
+        ++i;
+        q = argv[i];
       } else {
         q = NULL;
       }
 
-      if ( strcmp(p, "n") == 0 ) {
-        m->n = atoi(q);
-      } else if ( strcmpfuzzy(p, "c") == 0
-               || strcmpfuzzy(p, "invtc") == 0 ) {
-        m->c = atof(q);
-      } else if ( strcmpfuzzy(p, "alpha0") == 0
-               || strcmpfuzzy(p, "a0") == 0 ) {
-        m->alpha0 = atof(q);
-      } else if ( strstartswith(p, "fixa") ) {
-        m->fixa = 1;
-      } else if ( strcmp(p, "t0") == 0 ) {
-        m->t0 = atof(q);
-      } else if ( strstartswith(p, "nb")
-               || strstartswith(p, "neighbo")
-               || strcmpfuzzy(p, "win") == 0
-               || strcmpfuzzy(p, "window")  == 0 ) {
-        m->winn = 1 + readarray(m->win + 1, NBMAX, q);
-      } else if ( strcmpfuzzy(p, "wgaus") == 0
-               || strcmpfuzzy(p, "wingaus") == 0
-               || strcmpfuzzy(p, "width-Gaussian") == 0
-               || strcmpfuzzy(p, "sigma") == 0
-               || strcmpfuzzy(p, "sig") == 0 ) {
-        m->wingaus = atof(q);
-      } else if ( strcmpfuzzy(p, "initrand") == 0 ) {
-        m->initrand = atof(q);
-      } else if ( strcmpfuzzy(p, "kcutoff") == 0 ) {
-        m->kcutoff = atoi(q);
-      } else if ( strstartswith(p, "samp") ) {
-        m->sampmethod = selectoption(q,
-            sampmethod_names, SAMPMETHOD_COUNT);
-      } else if ( strcmpfuzzy(p, "tcorr") == 0
-               || strcmpfuzzy(p, "corr-time") == 0 ) {
-        m->tcorr = atof(q);
-      } else if ( strcmpfuzzy(p, "corr") == 0
-               || strcmpfuzzy(p, "docorr") == 0 ) {
-        m->docorr = 1;
-      } else if ( strcmpfuzzy(p, "nstcorr") == 0 ) {
-        m->nstcorr = atoi(q);
-      } else if ( strcmpfuzzy(p, "corrtol") == 0 ) {
-        m->corrtol = atof(q);
-      } else if ( strcmpfuzzy(p, "fncorr") == 0 ) {
-        strcpy(m->fncorr, q);
-      } else if ( strcmp(p, "equil") == 0
-               || strcmp(p, "nequil") == 0 ) {
-        m->nequil = atol(q);
-      } else if ( strstartswith(p, "steps")
-               || strstartswith(p, "nsteps") ) {
-        m->nsteps = atol(q);
-      } else if ( strcmp(p, "try") == 0
-               || strcmp(p, "repeat") == 0
-               || strstartswith(p, "trial")
-               || strstartswith(p, "ntrial") ) {
-        m->ntrials = atol(q);
-      } else if ( strcmp(p, "verbose") == 0 ) {
-        m->verbose = atoi(q);
-      } else if ( strcmp(p, "help") == 0 ) {
-        invtpar_help(m);
-      } else {
-        fprintf(stderr, "Unknown option %s\n", argv[i]);
+      if ( invtpar_keymatch(m, p, q) != 0 ) {
+        if ( strcmpfuzzy(p, "help") != 0 ) {
+          fprintf(stderr, "Unknown option %s, key [%s], val [%s]\n",
+              argv[i], p, (q != NULL ? q : "NULL") );
+        }
         invtpar_help(m);
       }
       continue;
@@ -537,9 +508,9 @@ static void invtpar_dump(const invtpar_t *m)
 {
   int i;
 
-  fprintf(stderr, "%ld trials: n %d, alpha = %g/t, alpha0 %g, "
+  fprintf(stderr, "%ld trials: n %d, alpha = %g/(t + %g), alpha0 %g, "
       "%s, %ld steps;\n",
-      m->ntrials, m->n, m->c, m->alpha0,
+      m->ntrials, m->n, m->c, m->t0, m->alpha0,
       sampmethod_names[m->sampmethod][0], m->nsteps);
   fprintf(stderr, "update window function (%d bins): ", m->winn);
   for ( i = 0; i < m->winn; i++ ) {

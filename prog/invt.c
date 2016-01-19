@@ -126,7 +126,8 @@ static double simulmeta(const invtpar_t *m, double *err0)
 static double invt_run(invtpar_t *m)
 {
   double err, see = 0, averr, errref;
-  double err0, see0 = 0, averr0, err0ref;
+  double err0, see0 = 0, averr0, err0ref; /* initial */
+  double err1ref; /* final saturated */
   int i;
 
   mtscramble( time(NULL) );
@@ -139,8 +140,13 @@ static double invt_run(invtpar_t *m)
     /* do multiple runs to compute the average error */
 
     /* compute the prediction from the analytical result */
+    /* initial saturated error */
     err0ref = esterror0_ez(m->alpha0,
-        m->n, m->winn, m->win, m->sampmethod, m->verbose);
+        m->n, m->winn, m->win, m->sampmethod,
+        "initial", m->verbose);
+    err1ref = esterror0_ez(m->c / (m->t0 + (double) m->nsteps),
+        m->n, m->winn, m->win, m->sampmethod,
+        "final", m->verbose);
     errref = esterror_ez(m->c, (double) m->nsteps, m->t0,
         m->n, m->winn, m->win, m->sampmethod, m->verbose);
 
@@ -160,10 +166,12 @@ static double invt_run(invtpar_t *m)
 
     averr = sqrt( see / m->ntrials );
     averr0 = sqrt( see0 / m->ntrials );
-    printf("average error: %10.8f -> %10.8f, sqr %e -> %e, "
-           "ref: %10.8f --> %10.8f, sqr %e -> %e\n",
-        averr0, averr, averr0 * averr0, averr * averr,
+    printf("average error: %10.8f -> %10.8f, sqr %e -> %e\n",
+        averr0, averr, averr0 * averr0, averr * averr);
+    printf("predicted val: %10.8f -> %10.8f, sqr %e -> %e\n",
         err0ref, errref, err0ref * err0ref, errref * errref);
+    printf("saturated val: %10.8f -> %10.8f, sqr %e -> %e\n",
+        err0ref, err1ref, err0ref * err0ref, err1ref * err1ref);
   }
 
   return err;

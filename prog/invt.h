@@ -285,9 +285,9 @@ static double *estgamma(int n, int sampmethod)
     } else if ( sampmethod == SAMPMETHOD_HEATBATH ) {
       gamma[i] = 1.0;
     } else {
-      if ( i == 1 ) {
-        /* complain once */
-        fprintf(stderr, "Error: unknown sampling method, %d\n", sampmethod);
+      if ( i == 1 ) { /* complain only once */
+        fprintf(stderr, "Error: unknown sampling method, %d\n",
+            sampmethod);
       }
       gamma[i] = 1.0;
     }
@@ -296,6 +296,63 @@ static double *estgamma(int n, int sampmethod)
   return gamma;
 }
 
+
+
+
+/* print out the values of lambda_i and gamma_i */
+static void dumplambdagamma(int n, const double *lamarr,
+    const double *gamma, const double *xerr)
+{
+  int i;
+
+  fprintf(stderr, "   i:   lambda_i      gamma_i\n");
+  for ( i = 0; i < n; i++ ) {
+    fprintf(stderr, "%4d: %10.6f %10.3f %20.6e\n",
+        i + 1, lamarr[i], gamma[i], xerr[i]);
+  }
+}
+
+
+
+/* estimate the error of a constant alpha
+ * according to the analytical prediction */
+static double esterror0_ez(double alpha,
+   int n, int winn, double *win, int sampmethod,
+   const char *name, int verbose)
+{
+  int i;
+  double *lamarr, *gamma, *xerr, err;
+
+  xnew(xerr, n);
+
+  /* estimate the eigenvalues of the w matrix,
+   * for the updating scheme */
+  lamarr = esteigvals(n, winn, win);
+
+  /* estimate the correlation integrals
+   * of the eigenmodes of the w matrix,
+   * for the updating scheme */
+  gamma = estgamma(n, sampmethod);
+
+  err = 0;
+  for ( i = 0; i < n; i++ ) {
+    xerr[i] = alpha * lamarr[i] / (alpha * lamarr[i] + 1 / gamma[i]);
+    err += xerr[i];
+  }
+
+  /* print out the values of lambda_i and gamma_i */
+  if ( verbose >= 2 ) {
+    dumplambdagamma(n, lamarr, gamma, xerr);
+  }
+  fprintf(stderr, "estimated %s saturated error %g, sqr: %e\n",
+      name, sqrt(err), err);
+
+  free(lamarr);
+  free(gamma);
+  free(xerr);
+
+  return sqrt(err);
+}
 
 
 
@@ -319,7 +376,7 @@ static double esterr1(double lambda, double t, double t0,
     r = lambda_i / lambda;
     //printf("lambda %g, %g, r %g, gamma_i %g, t %g, t0 %g\n", lambda, lambda_i, r, gamma_i, t, t0); getchar();
     return gamma_i / (t + t0) * ( r * r / ( 2 * r - 1 ) )
-      * ( 1 - pow(t0 / (t + t0), 2 * r - 1) );
+           * ( 1 - pow(t0 / (t + t0), 2 * r - 1) );
   }
 }
 
@@ -344,21 +401,6 @@ static double esterrn(double lambda, double t, double t0,
   }
 
   return err;
-}
-
-
-
-/* print out the values of lambda_i and gamma_i */
-static void dumplambdagamma(int n, const double *lamarr,
-    const double *gamma, const double *xerr)
-{
-  int i;
-
-  fprintf(stderr, "   i:   lambda_i      gamma_i\n");
-  for ( i = 0; i < n; i++ ) {
-    fprintf(stderr, "%4d: %10.6f %10.3f %20.6e\n",
-        i + 1, lamarr[i], gamma[i], xerr[i]);
-  }
 }
 
 
@@ -389,49 +431,7 @@ static double esterror_ez(double c, double t, double t0,
   if ( verbose >= 2 ) {
     dumplambdagamma(n, lamarr, gamma, xerr);
   }
-  fprintf(stderr, "estimated error %g, sqr: %e\n",
-      sqrt(err), err);
-
-  free(lamarr);
-  free(gamma);
-  free(xerr);
-
-  return sqrt(err);
-}
-
-
-
-/* estimate the error of a constant alpha
- * according to the analytical prediction */
-static double esterror0_ez(double alpha,
-   int n, int winn, double *win, int sampmethod,
-   int verbose)
-{
-  int i;
-  double *lamarr, *gamma, *xerr, err;
-
-  xnew(xerr, n);
-
-  /* estimate the eigenvalues of the w matrix,
-   * for the updating scheme */
-  lamarr = esteigvals(n, winn, win);
-
-  /* estimate the correlation integrals
-   * of the eigenmodes of the w matrix,
-   * for the updating scheme */
-  gamma = estgamma(n, sampmethod);
-
-  err = 0;
-  for ( i = 0; i < n; i++ ) {
-    xerr[i] = alpha * lamarr[i] / (alpha * lamarr[i] + 1 / gamma[i]);
-    err += xerr[i];
-  }
-
-  /* print out the values of lambda_i and gamma_i */
-  if ( verbose >= 2 ) {
-    dumplambdagamma(n, lamarr, gamma, xerr);
-  }
-  fprintf(stderr, "estimated initial error %g, sqr: %e\n",
+  fprintf(stderr, "estimated final error %g, sqr: %e\n",
       sqrt(err), err);
 
   free(lamarr);
