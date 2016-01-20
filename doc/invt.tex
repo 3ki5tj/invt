@@ -671,23 +671,26 @@ However, we expect the difference between $v_i$ and $\bar v$,
 %
 to be small in the asymptotic regime,
 and expand Eq. \eqref{eq:h_ave} as
+%
 \begin{align}
 \langle h_i(t) \rangle
 &\approx
-\frac{ p_i \, e^{- x_i} }
-{ \sum_{ j = 1}^n p_j \, e^{- x_j} }
+\frac{                 p_i \, e^{- x_i} }
+     { \sum_{ j = 1}^n p_j \, e^{- x_j} }
 \approx
-\frac{ p_i ( 1 - x_i ) }
-{ \sum_{ j = 1}^n p_j (1 - x_j) }
-\notag \\
+\frac{                 p_i (1 - x_i) }
+     { \sum_{ j = 1}^n p_j (1 - x_j) }
+\notag
+\\
 &\approx
 p_i \, \left(
-  1 - x_i + \sum_{j=1}^n p_j \, x_j
-\right)
+         1 - x_i + \sum_{j=1}^n p_j \, x_j
+       \right)
 =
 p_i \, (1 - x_i),
 \label{eq:hdet_linearize}
 \end{align}
+%
 where we have used $\sum_{j=1}^n p_j = 1$,
 and
 %
@@ -1230,7 +1233,17 @@ we can approximate $\kappa_i(t)$ as
   \label{eq:kappa_delta}
 \end{equation}
 %
-where, $\Gamma_i = \int_{-\infty}^\infty \kappa_i(t) \, dt$.
+where,
+\begin{equation}
+  \Gamma_i = \int_{-\infty}^\infty \kappa_i(t) \, dt,
+  \notag
+  %\label{eq:Gamma_integral}
+\end{equation}
+or in discrete time,
+\begin{equation}
+  \Gamma_i = \sum_{t = -\infty}^\infty \kappa_i(t).
+  \label{eq:Gamma_sum}
+\end{equation}
 %
 Then, Eq. \eqref{eq:error_mbin} is simplified as
 %
@@ -1270,8 +1283,8 @@ that is about $\alpha_{\max}^2$ times as large.
   %
   Thus, we can assume Eq. \eqref{eq:kappa_delta},
   once $\alpha(t)$ has dropped below a certain level.
-  \\
 }
+
 \note{
   The extremal property, Eq. \eqref{eq:optimal_mbin},
   now becomes
@@ -1286,25 +1299,102 @@ that is about $\alpha_{\max}^2$ times as large.
   %
   If we interpret $u_i$ as the position,
   and $\Gamma_i \, \lambda_i$ as the mass,
-  then the right-hand side give the virial.
+  then the right-hand side gives the virial.
   %
   Thus, the extremal condition demands
   the total virial to be zero.
   $$\,$$
 }
+
+
+
+\subsubsection{Integrals of the correlation functions}
+
+
+
+We can evaluate the $\Gamma_i$'s
+in two special case.
 %
-For example,
-if we assume perfect sampling,
+If the sampling is perfect,
+Eq. \eqref{eq:kappa_delta} is exact, and
+%
+\begin{equation}
+  \Gamma_i = 1.
+  \label{eq:Gamma_perfect}
+\end{equation}
+%
+In this case,
+the bin index $i$ is an independent random variable
+at each time step $t$, and
 %
 \begin{equation}
   \langle \zeta_i(t) \, \zeta_j(t') \rangle
   =
-  p_i \, (1 - p_i) \, \delta_{ij} \, \delta(t - t').
+  \left( p_i \, \delta_{ij} - p_i \, p_j \right) \, \delta(t - t'),
   \label{eq:zz_perfect}
 \end{equation}
 %
+where $\delta(t - t')$ is understood as an adaption of $\delta_{t, t'}$
+from the discrete time case to the continuous limit. % hereinafter.
+%
+\note{To show Eq. \eqref{eq:zz_perfect}, we first note that
+  with $t \ne t'$ (going back to the discrete time case),
+  $$
+  \begin{aligned}
+  \langle \zeta_i(t) \, \zeta_j(t') \rangle
+  &=
+  \langle \zeta_i(t)  \rangle
+  \langle \zeta_j(t') \rangle
+  \\
+  &=
+  \bigl\langle h_i(t)  - \langle h_i(t)  \rangle \bigr\rangle
+  \bigl\langle h_j(t') - \langle h_j(t') \rangle \bigr\rangle
+  =
+  0.
+  \end{aligned}
+  $$
+  Next, for $t = t'$, we have
+  $$
+  \zeta_i(t)
+  = h_i(t) - \langle h_i(t) \rangle
+  = \delta_{i, i(t)} - p_i,
+  $$
+  and
+  $$
+  \begin{aligned}
+  \left\langle
+    \zeta_i(t) \, \zeta_j(t)
+  \right\rangle
+  &=
+  \left\langle
+    \delta_{i, i(t)} \, \delta_{j, i(t)}
+  \right\rangle
+  -
+  p_i \, p_j
+  \\
+  &=
+  \left\langle
+    \delta_{i, i(t)}
+  \right\rangle
+  \delta_{i, j}
+  -
+  p_i \, p_j
+  =
+  p_i \, \delta_{ij}
+  - p_i \, p_j.
+  \end{aligned}
+  $$
+  %
+  The average
+  $\left\langle \delta_{i, i(t)} \right\rangle$ is $p_i$,
+  because as $i(t)$ goes through $1$ to $n$,
+  $\delta_{i, i(t)}$ gives $1$
+  if $i(t)$ matches $i$ with probability $p_i$,
+  or $0$ otherwise.
+}
+%
 Thus, from Eqs. \eqref{eq:eig_orthonormal_rows} and \eqref{eq:eta_def},
-we get
+we get, for $i \ge 2$,
 %
 \begin{equation}
   \kappa_i(t - t')
@@ -1314,37 +1404,133 @@ we get
   \frac{ \phi_{ik} } { p_k }
   \langle \zeta_j(t) \, \zeta_k(t') \rangle
   %
-  \approx \delta(t - t'),
+  = \delta(t - t'),
   \label{eq:kappa_perfect}
 \end{equation}
 %
-or
-$\Gamma_i \approx 1$,
-where we have assumed the large $n$ limit
-such that $p_i \ll 1$
-in the last expression.
+\note{To show Eq. \eqref{eq:kappa_perfect},
+  $$
+  \begin{aligned}
+  \kappa_i(t - t')
+  &=
+  \sum_{j,k = 1}^n
+  \frac{ \phi_{ij} } { p_j }
+  \frac{ \phi_{ik} } { p_k }
+  \langle \zeta_j(t) \, \zeta_k(t') \rangle
+  \\
+  %
+  &=
+  \sum_{j,k = 1}^n
+  \frac{ \phi_{ij} } { p_j }
+  \frac{ \phi_{ik} } { p_k }
+  \left(
+    p_j \, \delta_{j, k} - p_j \, p_k
+  \right)
+  \, \delta(t - t')
+  \\
+  &=
+  \left(
+    \sum_{j = 1}^n
+    \frac{ \phi_{ij}^2 } { p_j }
+    -
+    \sum_{j = 1}^n \phi_{ij}
+    \sum_{k = 1}^n \phi_{ik}
+  \right)
+  \, \delta(t - t')
+  \\
+  &=
+  (1 - 0 \cdot 0) \, \delta(t - t').
+  \end{aligned}
+  $$
+  where,
+  we have used
+  Eq. \eqref{eq:eta_def}
+  on the first line,
+  %
+  Eq. \eqref{eq:zz_perfect}
+  on the second line,
+  and
+  Eq. \eqref{eq:eig_orthonormal_rows}
+  on the last line.
+  %
+  Note for $i \ge 2$,
+  $$
+  \sum_{j = 1}^n \phi_{ij}
+  =
+  \sum_{j = 1}^n \frac{ \phi_{ij} \, \phi_{1j} } { p_j }
+  =
+  \delta_{i1}
+  =
+  0.
+  $$
+  as the mode $1$, or the first row, $\phi_{1j}$,
+  is given by the equilibrium distribution $p_j$.
+}
 
+
+Another special case is the one-step process\cite{vankampen},
+in each step, the system hops to the previous $i - 1$ bin
+or the next bin $i + 1$ with equal probability $1/2$,
+ignoring out-of-boundary transitions.
+%
+We shall further assume that
+the eigenvectors of the $\mathbf w$ matrix
+coincide with the those of the transition matrix
+of the above sampling process
+(cf. Sec. \ref{sec:band-matrix}).
+%
+Since the transition matrix is tridiagonal,
+as given by Eq. \eqref{eq:wtridiag} with $\mu_1 = 1/2$,
+the eigenvalues are given
+by Eq. \eqref{eq:wband_eigenvalue} as
+$$
+\Lambda_i = 1 - 2 \sin^2 \frac{ (i - 1) \, \pi } { 2 \, n }.
+$$
+Note, however, these $\Lambda_i$'s are the eigenvalues of
+the transition matrix of sampling scheme,
+not to be confused with the eigenvalues, $\lambda_i$'s,
+of the $\mathbf w$ matrix.
+%
+The correlation function $\kappa_i(t)$ of
+decays as $\kappa_i(0) \, \Lambda_i^t$,
+with the same-time value $\kappa_i(0) = 1$ being the same as
+that in perfect sampling.
+%
+Thus, from Eq. \eqref{eq:Gamma_sum}, we get
+%
+\begin{equation}
+\Gamma_i
+=
+1 + 2 \, \sum_{t = 1}^\infty \Lambda_i^t
+=
+\frac{ 1 + \Lambda_i } { 1 - \Lambda_i }
+=
+\cot^2 \left( \frac{ i \, \pi } { 2 \, n } \right).
+\label{eq:Gamma_onestep}
+\end{equation}
+%
+We can use this case to model local sampling processes.
 
 
 %
 %We can study two limiting cases.
 %
-For $\tau \ll t$,
-the dominant contribution comes from
-the term(s) with the smallest eigenvalue $\lambda_i = \lambda_n$,
-and
-$$
-\ddot u_n(\tau) = 0,
-\quad
-\dot u_n(\tau) = c,
-\quad
-\mathrm{and}\;
-u_n(\tau) = c \, (\tau + t_0),
-$$
-which means
-$$
-\alpha(\tau) \approx \frac{1}{\lambda_n \, (\tau + t_0)}.
-$$
+%For $\tau \ll t$,
+%the dominant contribution comes from
+%the term(s) with the smallest eigenvalue $\lambda_i = \lambda_n$,
+%and
+%$$
+%\ddot u_n(\tau) = 0,
+%\quad
+%\dot u_n(\tau) = c,
+%\quad
+%\mathrm{and}\;
+%u_n(\tau) = c \, (\tau + t_0),
+%$$
+%which means
+%$$
+%\alpha(\tau) \approx \frac{1}{\lambda_n \, (\tau + t_0)}.
+%$$
 
 
 
@@ -1358,7 +1544,7 @@ that the single-bin scheme
 is an optimal scheme.
 %
 Consider a class of $\mathbf w$ matrices
-with the same set of eigenvectors,
+sharing the same set of eigenvectors,
 hence same $\Gamma_i$'s,
 but with different eigenvalues, $\lambda_i$'s.
 %
@@ -1367,22 +1553,26 @@ for any set of $\beta_i \ge 0$
 %
 \begin{align}
 &
-\left( \int_0^t
-  dt' \sum_{i = 2}^n \Gamma_i \,
-                     \dot u_i^2\bigl( q(t') \bigr)
-\right)
 \left(
-\int_0^t
-  dt' \sum_{i = 2}^n \Gamma_i \, c_i^2
+  \int_0^t dt'
+    \sum_{i = 2}^n
+      \Gamma_i \, \dot u_i^2\bigl( q(t') \bigr)
 \right)
+%
+\left(
+  \int_0^t dt'
+    \sum_{i = 2}^n
+      \Gamma_i \, c_i^2
+\right)
+%
 \notag
 \\
 &
 \ge
 \left(
-\int_0^t
-  dt' \sum_{i = 2}^n \Gamma_i \, c_i \,
-                     \dot u_i\bigl( q(t') \bigr)
+  \int_0^t dt'
+    \sum_{i = 2}^n
+      \Gamma_i \, c_i \, \dot u_i\bigl( q(t') \bigr)
 \right)^2
 \notag
 \\
@@ -1680,6 +1870,7 @@ given by
 \end{equation}
 %
 with eigenvalues
+%
 \begin{align}
   \lambda_k
   &=
@@ -1945,8 +2136,8 @@ we convert Eq.
 to an integral.
 %
 Particularly,
-for perfect sampling, $\Gamma_i \approx 1$,
-we get
+for perfect sampling,
+we get from Eq. \eqref{eq:Gamma_perfect},
 $$
 \begin{aligned}
 \mathcal E

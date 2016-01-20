@@ -2,9 +2,10 @@ Overview
 =========
 
 This project aims at testing the effectiveness
-of the inverse-t scheme for the updating magnitude
+of the inverse-time formula for the updating magnitude
 in adaptive sampling scheme, such as
-Wang-Landau and metadynamics.
+the Wang-Landau algorithm and metadynamics.
+
 
 
 Programs

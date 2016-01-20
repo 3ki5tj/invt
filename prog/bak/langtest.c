@@ -9,7 +9,7 @@
 
 
 
-int gausdev = 1;
+int gausdev = 0;
 double alpha = 0.0001;
 long nsteps = 100000000L;
 int block = 10000;
@@ -29,7 +29,7 @@ static void langevin(void)
     if ( gausdev ) {
       dx += randgaus();
     } else {
-      dx += (rand01() * 2 - 1);
+      dx += (rand01() > 0.5 ? 1 : -1);
     }
     x -= alpha * dx;
     if ( t % block == 0 ) {

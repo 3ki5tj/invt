@@ -12,6 +12,7 @@
 #include "invtpar.h"
 
 
+
 /* global Metropolis move */
 static int mc_metro_g(const double *v, int n, int i)
 {
@@ -295,16 +296,17 @@ static double *esteigvals(int n, int winn, const double *win)
 static double *estgamma(int n, int sampmethod)
 {
   int i;
-  double *gamma;
+  double *gamma, x;
 
   xnew(gamma, n);
 
   gamma[0] = 0;
   for ( i = 1; i < n; i++ ) {
     if ( sampmethod == SAMPMETHOD_METROGLOBAL ) {
-      gamma[i] = n / (n - 1.0);
+      gamma[i] = 1.0; /* n / (n - 1.0); */
     } else if ( sampmethod == SAMPMETHOD_METROLOCAL ) {
-      gamma[i] = 1.0 / (1 - cos(i*M_PI/n));
+      x = sin( i * M_PI * 0.5 / n );
+      gamma[i] = 1.0 / (x * x) - 1;
     } else if ( sampmethod == SAMPMETHOD_HEATBATH ) {
       gamma[i] = 1.0;
     } else {
