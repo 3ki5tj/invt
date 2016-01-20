@@ -18,7 +18,10 @@ static int mc_metro_g(const double *v, int n, int i)
   int j, acc;
   double dv, r;
 
-  j = (int) ( (i + 1 + (n - 1) * rand01()) ) % n;
+  /*
+   * j = (int) ( (i + 1 + (n - 1) * rand01()) ) % n;
+   * */
+  j = (int) ( n * rand01() );
   dv = v[j] - v[i];
   if ( dv <= 0 ) {
     acc = 1;
@@ -150,6 +153,23 @@ static double geterror(double *v, int n, const double *p)
     x = v[i] * v[i];
     /* multiply the normalization factor */
     x *= ( p != NULL ) ? p[i] : 1.0 / n;
+    err += x;
+  }
+
+  return sqrt(err);
+}
+
+
+
+/* compute the root-mean-squared error of the modes `u`
+ * This routine here is demonstrate the normalization */
+__inline static double getuerror(double *u, int n)
+{
+  double err = 0, x;
+  int i;
+
+  for ( i = 0; i < n; i++ ) {
+    x = u[i] * u[i];
     err += x;
   }
 
@@ -336,7 +356,7 @@ static double esterror0_ez(double alpha,
 
   err = 0;
   for ( i = 0; i < n; i++ ) {
-    xerr[i] = alpha * lamarr[i] / (alpha * lamarr[i] + 1 / gamma[i]);
+    xerr[i] = 0.5 * alpha * lamarr[i] * gamma[i];
     err += xerr[i];
   }
 
@@ -376,7 +396,7 @@ static double esterr1(double lambda, double t, double t0,
     r = lambda_i / lambda;
     //printf("lambda %g, %g, r %g, gamma_i %g, t %g, t0 %g\n", lambda, lambda_i, r, gamma_i, t, t0); getchar();
     /* remainder error */
-    err1 = r / t0 * gamma_i * pow(t0/(t+t0), r);
+    err1 = 0.5 * r / t0 * gamma_i * pow(t0/(t+t0), 2 * r);
     return err1 + gamma_i / (t + t0) * ( r * r / ( 2 * r - 1 ) )
            * ( 1 - pow(t0 / (t + t0), 2 * r - 1) );
   }
@@ -407,7 +427,7 @@ static double esterrn(double lambda, double t, double t0,
 
 
 
-/* estimate the error of the updating schedule
+/* estimate the final error of the updating schedule
  * alpha(t) = c / (t + t0)
  * according to the analytical prediction */
 static double esterror_ez(double c, double t, double t0,

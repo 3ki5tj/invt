@@ -140,10 +140,10 @@ static int corr_compute(corr_t *c, double *uu, int j,
  * from c->arr[] before computing the correlation function
  * otherwise, zero is assumed as the average */
 static int corr_save(corr_t *c, int dt,
-    int tmax, double tol,
+    double tmax, double tol,
     int subave, const char *fn)
 {
-  int i, j, n = c->n, stop;
+  int i, j, jmax, n = c->n, stop;
   double *uu0, *uu, *uave = NULL;
   FILE *fp;
 
@@ -164,9 +164,13 @@ static int corr_save(corr_t *c, int dt,
   /* save the heading */
   fprintf(fp, "# %d %d %d\n", n, dt, c->cnt);
 
-  if ( tmax <= 0 ) tmax = c->cnt;
+  if ( tmax <= 0 ) {
+    jmax = c->cnt;
+  } else {
+    jmax = (int) ( tmax / dt );
+  }
 
-  for ( j = 0; j < tmax; j++ ) {
+  for ( j = 0; j < jmax; j++ ) {
     /* compute correlation functions
      * at a separation of j frames */
     corr_compute(c, uu, j, uave);

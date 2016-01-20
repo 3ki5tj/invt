@@ -7,6 +7,16 @@ in adaptive sampling scheme, such as
 Wang-Landau and metadynamics.
 
 
+Programs
+========
+
+ Program  |  Descriptions
+----------+------------------------------------
+invt      | Main program
+modetest  | Test program for mode decomposition
+langtest  | Test for Langevin equations
+
+
 
 Compilation and running
 =======================

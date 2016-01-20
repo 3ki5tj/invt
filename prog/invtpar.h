@@ -439,9 +439,6 @@ static int invtpar_doargs(invtpar_t *m, int argc, char **argv)
       /* let q point to the argument of the option */
       if ( (q = strchr(p, '=')) != NULL ) {
         *q++ = '\0';
-      } else if ( i < argc - 1 ) {
-        /* try to use the next argument as the value */
-        q = argv[ ++i ];
       } else {
         q = NULL;
       }
@@ -494,7 +491,7 @@ static int invtpar_doargs(invtpar_t *m, int argc, char **argv)
       }
     }
   }
-  
+
   invtpar_compute(m);
 
   return 0;

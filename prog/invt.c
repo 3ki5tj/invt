@@ -101,11 +101,9 @@ static double simulmeta(const invtpar_t *m, double *err0)
   }
 
   if ( corr != NULL ) {
-    /* save the correlation functions to file
-     * for a maximal of 100 frame separations
-     * this should work for the default setting
-     * with `nstcorr` set to `1/alpha` */
-    corr_save(corr, m->nstcorr, 100,
+    /* compute the correlation functions and save them to file
+     * the maximal span, 100/alpha, should be large enough */
+    corr_save(corr, m->nstcorr, 100 / m->alpha0,
         m->corrtol, 0, m->fncorr);
   }
 

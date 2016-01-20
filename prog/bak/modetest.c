@@ -1,4 +1,7 @@
-/* test the eigenmode decomposition code */
+/* test the eigenmode decomposition code
+ * that is the pair of functions
+ * getcosmodes() and fromcosmodes()
+ * */
 #include "invt.h"
 
 
@@ -39,11 +42,19 @@ static int output(const double *v1, const double *v2,
 
 
 
-int main(void)
+int main(int argc, char **argv)
 {
-  int n = 10000, kcutoff = 10, i;
+  int n = 2, kcutoff = 10, i;
   double *u, *u1, *v, *v1, *v2, *costab;
   double errv, erru, errv2;
+
+  if ( argc > 1 ) {
+    n = atoi(argv[1]);
+  }
+
+  if ( argc > 2 ) {
+    kcutoff = atoi(argv[2]);
+  }
 
   xnew(u, n);
   xnew(u1, n);
@@ -58,14 +69,34 @@ int main(void)
   }
 
   /* normalize the error */
-  normalize(v, n, 1.0);
+  normalize(v, n, 1.0, NULL);
 
-  errv = geterror(v, n);
+  /* print out the field for a small n */
+  if ( n <= 10 ) {
+    printf("   i:      vi        vi^2\n");
+    for ( i = 0; i < n; i++ ) {
+      printf("%4d: %10.6f %10.6f\n", i, v[i], v[i] * v[i]);
+    }
+    printf("\n");
+  }
+
+  /* errv^2 = sum_i v_i^2 / n */
+  errv = geterror(v, n, NULL);
 
   /* convert them to modes */
   getcosmodes(v, n, u, costab);
 
-  erru = geterror(u, n);
+  /* print out the field for a small n */
+  if ( n <= 10 ) {
+    printf("   i:      ui        ui^2\n");
+    for ( i = 0; i < n; i++ ) {
+      printf("%4d: %10.6f %10.6f\n", i, u[i], u[i] * u[i]);
+    }
+    printf("\n");
+  }
+
+  /* erru^2 = sum_i u_i^2 */
+  erru = getuerror(u, n);
 
   /* convert back */
   fromcosmodes(v1, n, u, costab);
@@ -78,10 +109,10 @@ int main(void)
   /* convert back */
   fromcosmodes(v2, n, u1, costab);
 
-  errv2 = geterror(u, n);
+  errv2 = geterror(v2, n, NULL);
 
-  printf("n %d, errv %g, erru %g, erru * sqrt(n) %g, errv2 %g\n",
-      n, errv, erru, erru * sqrt(n), errv2);
+  printf("n %d, errv %g, erru %g, errv2 %g\n",
+      n, errv, erru, errv2);
 
   /* print out u and v */
   if ( n <= 12 ) {
