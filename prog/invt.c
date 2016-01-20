@@ -57,6 +57,7 @@ static double simulmeta(const invtpar_t *m, double *err0)
     /* try to start production */
     if ( !prod && t >= m->nequil ) {
       prod = 1;
+      /* compute the initial error */
       *err0 = geterror(v, n, m->p);
       if ( m->verbose >= 1 ) {
         fprintf(stderr, "starting production at step %ld, t0 %g, err %g\n",

@@ -264,14 +264,17 @@ static void fromcosmodes(double *v, int n, double *u,
 static double *esteigvals(int n, int winn, const double *win)
 {
   int i, j;
-  double *lamarr;
+  double *lamarr, x;
 
   xnew(lamarr, n);
 
+  /* loop over eigenvalues */
   for ( i = 0; i < n; i++ ) {
-    lamarr[i] = win[0];
+    lamarr[i] = 1;
+    /* loop over windows */
     for ( j = 1; j < winn; j++ ) {
-      lamarr[i] += 2 * win[i] * cos(i * j * M_PI / n);
+      x = sin(i * j * M_PI * 0.5 / n);
+      lamarr[i] -= 4 * win[j] * x * x;
     }
   }
 
@@ -379,26 +382,25 @@ static double esterror0_ez(double alpha,
 /* estimate the error of the updating schedule
  * alpha(t) = 1/ [lambda (t + t0)]
  * for a single updating mode
- * according the analytical formula */
+ * according the analytical formula
+ *
+ * currently, assuming equilibrium values of < x^2 >
+ * of alpha(0) = c / t0 at t = 0
+ * */
 static double esterr1(double lambda, double t, double t0,
     double lambda_i, double gamma_i)
 {
-  const double tol = 1e-10;
-  double del, lammax, r, err1;
+  const double tol = 1e-6;
+  double r, errsat; /* errsat: saturated error */
 
-  del = fabs(lambda_i * 2 - lambda);
-  /* lammax is the larger of lambda and lambda_i */
-  lammax = lambda_i > lambda ? lambda_i : lambda;
+  r = lambda_i / lambda;
+  errsat = 0.5 * gamma_i * r / (t + t0);
   /* degenerate case */
-  if ( del < lammax * tol ) {
-    return gamma_i / 4 / (t + t0) * log( (t + t0) / t0 );
+  if ( r < tol ) {
+    return errsat * ( log( (t + t0) / t0 ) + 1 );
   } else {
-    r = lambda_i / lambda;
-    //printf("lambda %g, %g, r %g, gamma_i %g, t %g, t0 %g\n", lambda, lambda_i, r, gamma_i, t, t0); getchar();
-    /* remainder error */
-    err1 = 0.5 * r / t0 * gamma_i * pow(t0/(t+t0), 2 * r);
-    return err1 + gamma_i / (t + t0) * ( r * r / ( 2 * r - 1 ) )
-           * ( 1 - pow(t0 / (t + t0), 2 * r - 1) );
+    return errsat * (1 + 1 / (r * 2 - 1)
+           * ( 1 - pow(t0 / (t + t0), 2 * r - 1) ) );
   }
 }
 
@@ -406,7 +408,11 @@ static double esterr1(double lambda, double t, double t0,
 
 /* estimate the error of the updating schedule
  * alpha(t) = 1/ [lambda (t + t0)]
- * according to the analytical prediction */
+ * according to the analytical prediction
+ *
+ * currently, assuming equilibrium values of < x^2 >
+ * of alpha(0) = c / t0 at t = 0
+ * */
 static double esterrn(double lambda, double t, double t0,
     int n, const double *lamarr, const double *gamma,
     double *xerr)
@@ -429,7 +435,11 @@ static double esterrn(double lambda, double t, double t0,
 
 /* estimate the final error of the updating schedule
  * alpha(t) = c / (t + t0)
- * according to the analytical prediction */
+ * according to the analytical prediction
+ *
+ * currently, assuming equilibrium values of < x^2 >
+ * of alpha(0) = c / t0 at t = 0
+ * */
 static double esterror_ez(double c, double t, double t0,
    int n, int winn, double *win, int sampmethod,
    int verbose)
