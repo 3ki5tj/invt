@@ -58,8 +58,8 @@ enum {
 #define MAX_OPT_ALIASES 8
 
 const char *sampmethod_names[][MAX_OPT_ALIASES] = {
-  {"Metropolis-global", "global", "g"},
-  {"Metropolis-local", "local", "l"},
+  {"global Metropolis", "global", "g"},
+  {"local Metropolis", "local", "l"},
   {"heat-bath", "h"},
   {""}
 };
@@ -88,8 +88,8 @@ static void invtpar_init(invtpar_t *m)
   m->sampmethod = 0;
   m->tcorr = 0.0; /* perfect sampling */
 
-  m->docorr = 0; /* compute correlation functions */
-  m->nstcorr = 0; /* don't do correlation functions */
+  m->docorr = 0; /* don't compute correlation functions */
+  m->nstcorr = 0; /* do correlation functions */
   m->corrtol = 1e-8;
   m->fncorr[0] = '\0';
 
@@ -435,7 +435,7 @@ static int invtpar_keymatch(invtpar_t *m,
     m->nsteps = invtpar_getlong(m, key, val);
   }
   else if ( strcmpfuzzy(key, "try") == 0
-         || strcmpfuzzy(key, "repeat") == 0
+         || strstartswith(key, "repeat")
          || strstartswith(key, "trial")
          || strstartswith(key, "ntrial") )
   {
@@ -470,8 +470,13 @@ static int invtpar_load(invtpar_t *m, const char *fn)
   }
 
   while ( fgets(buf, sizeof buf, fp) ) {
-    strstrip(buf); /* remove trailing spaces */
-    if ( buf[0] == '\0' || buf[0] == '#' ) continue;
+    /* remove leading and trailing spaces */
+    strstrip(buf);
+
+    /* skip a blank or comment line */
+    if ( buf[0] == '\0' || buf[0] == '#' ) {
+      continue;
+    }
 
     /* parse the line to a key and a value */
     key = buf;

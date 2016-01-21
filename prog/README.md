@@ -19,8 +19,8 @@ langtest  | Test for Langevin equations
 
 
 
-Compilation and running
-=======================
+Compilation
+===========
 
 The main program is `invt`, to compile it, use
 ```
@@ -31,9 +31,91 @@ Or manual compilation,
 gcc invt.c -o invt -lm
 ```
 
-Then to run the program, type
+
+
+Running
+=======
+
+To run `invt`, type
 ```
 ./invt
+```
+
+You can add options, for a list of options, type
+```
+./invt --help
+```
+
+To load parameters from configuration file
+(for example, `invt.cfg` in this directory)
+```
+./invt invt.cfg
+```
+
+
+Computing the error
+-------------------
+
+By default the program computes the terminal error
+according to the number the schedule
+```
+alpha(t) =  c / (t + t0).
+```
+
+Several key parameters are the following.
+
+### Updating scheme
+
+The default updating scheme is the Wang-Landau one,
+which updates a single bin only.
+However, the program can update several nearby bins.
+To update the nearest neighbors with a relative weight of 0.1 each,
+the next nearest neighbors with a relative weight of 0.05 each, type
+```
+./invt --nb=0.1,0.05
+```
+This means an updating window
+
+  i - 2 | i - 1 |   i   | i + 1 | i + 2
+  ------+-------+-------+-------+-------
+  0.05  |  0.1  |  0.7  |  0.1  |  0.05
+
+The value at bin i is automatically filled such that
+the total is equal to 1.0.
+The boundary values are wrapped around, for example,
+for i = 0 (first bin), i - 1 means 0, i - 2 means 1, etc.
+
+Note that the window function has to be stable.
+That is, the Fourier transform must be nonnegative.
+To check if a window function is stable,
+run `invt` with `-vv` or `--verbose=2`,
+it will print out a table of `gamma_i` in the beginning.
+Make sure that all values are nonnegative.
+
+### Sampling scheme
+
+The default sampling scheme is a global Metropolis one,
+which is close to the perfect sampling in this case.
+Another option is the local (nearest-neighbor) Metropolis sampling.
+This option is turned on by `--samp=l`.
+The last option is the heatbath sampling (strict perfect sampling),
+which is turned on by `--samp=h`.
+
+Example
+```
+./invt --samp=l
+```
+
+
+### Number of bins
+
+The number of bins can be specified by the `-n` option
+```
+./invt -n100
+```
+or equivalently
+```
+./invt --n=100
 ```
 
 

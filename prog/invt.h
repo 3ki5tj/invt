@@ -305,8 +305,8 @@ static double *estgamma(int n, int sampmethod)
     if ( sampmethod == SAMPMETHOD_METROGLOBAL ) {
       gamma[i] = 1.0; /* n / (n - 1.0); */
     } else if ( sampmethod == SAMPMETHOD_METROLOCAL ) {
-      x = sin( i * M_PI * 0.5 / n );
-      gamma[i] = 1.0 / (x * x) - 1;
+      x = tan( i * M_PI * 0.5 / n );
+      gamma[i] = 1.0 / (x * x);
     } else if ( sampmethod == SAMPMETHOD_HEATBATH ) {
       gamma[i] = 1.0;
     } else {

@@ -1468,30 +1468,45 @@ we get, for $i \ge 2$,
 }
 
 
-Another special case is the one-step process\cite{vankampen},
-in each step, the system hops to the previous $i - 1$ bin
-or the next bin $i + 1$ with equal probability $1/2$,
+Another special case is the one-step process\cite{vankampen}:
+in each step, the system hops to the previous bin $i - 1$
+or the next bin $i + 1$ with equal probability $\frac 1 2$,
 ignoring out-of-boundary transitions.
 %
-We shall further assume that
-the eigenvectors of the $\mathbf w$ matrix
-coincide with the those of the transition matrix
-of the above sampling process
-(cf. Sec. \ref{sec:band-matrix}).
+The transition matrix is
 %
-Since the transition matrix is tridiagonal,
-as given by Eq. \eqref{eq:wtridiag} with $\mu_1 = 1/2$,
-the eigenvalues are given
-by Eq. \eqref{eq:wband_eigenvalue} as
+\begin{equation}
+\arraycolsep=3.6pt\def\arraystretch{1.4}
+\mathbf T
+=
+\left(
+  \begin{array}{cccccccc}
+    \frac 1 2 & \frac 1 2 & 0 & \dots & 0 \\
+    \frac 1 2 & 0         & \frac 1 2 & \dots & 0 \\
+    \vdots & &  & & \vdots \\
+    0 & \dots & \frac 1 2 & 0  & \frac 1 2 \\
+    0 & \dots & 0 & \frac 1 2 & \frac 1 2
+  \end{array}
+\right).
+\label{eq:T_tridiag}
+\end{equation}
+%
+We shall further assume that
+the eigenvectors of $\mathbf w$
+coincide with those of $\mathbf T$,
+while the eigenvalues may differ
+(this is true for a class of matrices
+discussed in Sec. \ref{sec:band-matrix}).
+%
+The eigenvalues of $\mathbf T$ are
 $$
 \Lambda_i = 1 - 2 \sin^2 \frac{ (i - 1) \, \pi } { 2 \, n }.
 $$
-Note, however, these $\Lambda_i$'s are the eigenvalues of
-the transition matrix of sampling scheme,
-not to be confused with the eigenvalues, $\lambda_i$'s,
-of the $\mathbf w$ matrix.
+Note that these $\Lambda_i$'s are
+not to be confused with the eigenvalues of $\mathbf w$,
+$\lambda_i$'s.
 %
-The correlation function $\kappa_i(t)$ of
+The correlation function $\kappa_i(t)$
 decays as $\kappa_i(0) \, \Lambda_i^t$,
 with the same-time value $\kappa_i(0) = 1$ being the same as
 that in perfect sampling.
@@ -1505,7 +1520,7 @@ Thus, from Eq. \eqref{eq:Gamma_sum}, we get
 =
 \frac{ 1 + \Lambda_i } { 1 - \Lambda_i }
 =
-\cot^2 \left( \frac{ i \, \pi } { 2 \, n } \right).
+\cot^2 \left[ \frac{ (i - 1) \, \pi } { 2 \, n } \right].
 \label{eq:Gamma_onestep}
 \end{equation}
 %
@@ -1637,7 +1652,7 @@ Such a solution is possible only if
 \end{equation}
 %
 \note{
-  We add some steps for solution.
+  We add some steps for the above solution.
   Integrating $\dot u_i = c_i$ yields
   \begin{equation}
   u_i(t') = c_i \left(t' + t_{i0} \right).
@@ -1695,7 +1710,7 @@ then a good candidate is
 \label{eq:alpha_trial}
 \end{equation}
 %
-and to find the optimal value of $\lambda$.
+for some optimal value of $\lambda$.
 %
 Using Eq. \eqref{eq:alpha_trial}
 in Eq. \eqref{eq:error_mbin1} yields
