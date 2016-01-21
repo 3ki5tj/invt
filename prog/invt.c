@@ -124,9 +124,10 @@ static double simulmeta(const invtpar_t *m, double *err0)
 
 static double invt_run(invtpar_t *m)
 {
-  double err, see = 0, averr, errref;
+  double err, see = 0, averr, errref = 0;
   double err0, see0 = 0, averr0, err0ref; /* initial */
-  double err1ref; /* final saturated */
+  double err1ref = 0; /* final saturated */
+  double optc, errmin = 0; /* optimal c, predicted minimal error */
   int i;
 
   mtscramble( time(NULL) );
@@ -142,12 +143,23 @@ static double invt_run(invtpar_t *m)
     /* initial saturated error */
     err0ref = esterror0_ez(m->alpha0,
         m->n, m->winn, m->win, m->sampmethod,
-        "initial", m->verbose);
-    err1ref = esterror0_ez(m->c / (m->t0 + (double) m->nsteps),
-        m->n, m->winn, m->win, m->sampmethod,
-        "final", m->verbose);
-    errref = esterror_ez(m->c, (double) m->nsteps, m->t0,
-        m->n, m->winn, m->win, m->sampmethod, m->verbose);
+        "initial", m->verbose + 1);
+
+    if ( !m->fixa ) {
+      err1ref = esterror0_ez(m->c / (m->t0 + (double) m->nsteps),
+          m->n, m->winn, m->win, m->sampmethod,
+          "final", m->verbose + 1);
+
+      errref = esterror_ez(m->c, (double) m->nsteps, m->t0,
+          m->n, m->winn, m->win, m->sampmethod,
+          m->verbose + 1);
+
+      /* compute the optimal c */
+      optc = estbestc((double) m->nsteps, m->t0,
+          m->n, m->winn, m->win, m->sampmethod,
+          1e-8, &errmin, m->verbose);
+      printf("predicted optimal c %g, err %g\n", optc, errmin);
+    }
 
     for ( i = 0; i < m->ntrials; i++ ) {
       err = simulmeta(m, &err0);

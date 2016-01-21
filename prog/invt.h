@@ -369,8 +369,10 @@ static double esterror0_ez(double alpha,
   if ( verbose >= 2 ) {
     dumplambdagamma(n, lamarr, gamma, xerr);
   }
-  fprintf(stderr, "estimated %s saturated error %g, sqr: %e\n",
-      name, sqrt(err), err);
+  if ( verbose >= 1 ) {
+    fprintf(stderr, "estimated %s saturated error %g, sqr: %e\n",
+        name, sqrt(err), err);
+  }
 
   free(lamarr);
   free(gamma);
@@ -398,7 +400,7 @@ static double esterr1(double lambda, double t, double t0,
   r = lambda_i / lambda;
   errsat = 0.5 * gamma_i * r / (t + t0);
   /* degenerate case */
-  if ( r < tol ) {
+  if ( fabs(2 * r - 1) < tol ) {
     return errsat * ( log( (t + t0) / t0 ) + 1 );
   } else {
     return errsat * (1 + 1 / (r * 2 - 1)
@@ -465,14 +467,108 @@ static double esterror_ez(double c, double t, double t0,
   if ( verbose >= 2 ) {
     dumplambdagamma(n, lamarr, gamma, xerr);
   }
-  fprintf(stderr, "estimated final error %g, sqr: %e\n",
-      sqrt(err), err);
+  if ( verbose >= 1 ) {
+    fprintf(stderr, "estimated final error %g, sqr: %e\n",
+        sqrt(err), err);
+  }
 
   free(lamarr);
   free(gamma);
   free(xerr);
 
   return sqrt(err);
+}
+
+
+
+/* estimate the best parameter c for the updating schedule
+ * alpha(t) = c / (t + t0)
+ * according to the analytical prediction
+ * */
+static double estbestc(double t, double t0,
+   int n, int winn, double *win, int sampmethod,
+   double prec, double *err, int verbose)
+{
+  double cl, cm, cr, cn;
+  double el, em, er, en;
+
+  /* specify the initial bracket */
+  cl = 0.5;
+  cm = 1.0;
+  cr = 2.0;
+
+  /* compute the values at the initial bracket */
+  el = esterror_ez(cl, t, t0, n, winn, win, sampmethod, 0);
+  em = esterror_ez(cm, t, t0, n, winn, win, sampmethod, 0);
+  er = esterror_ez(cr, t, t0, n, winn, win, sampmethod, 0);
+
+  while ( 1 ) {
+    if ( verbose ) {
+      fprintf(stderr, "%g (%g) - %g (%g) - %g (%g)\n",
+          cl, el, cm, em, cr, er);
+    }
+
+    /* find the minimal value */
+    if ( el < em && el < er ) {
+      /* el is the minimal of the three, extend to the left */
+      cr = cm;
+      cm = cl;
+      cl = cl * 0.5;
+      er = em;
+      em = el;
+      el = esterror_ez(cl, t, t0, n, winn, win, sampmethod, 0);
+    } else if ( er < em && er < el ) {
+      /* er is the minimal of the three, extend to the right */
+      cl = cm;
+      cm = cr;
+      cr = cr * 2.0;
+      el = em;
+      em = er;
+      er = esterror_ez(cr, t, t0, n, winn, win, sampmethod, 0);
+    } else {
+      /* break the loop */
+      if ( cr - cl < prec ) {
+        break;
+      }
+
+      /* em is the minimal of the three */
+      if ( cm - cl > cr - cm ) {
+        /* refine the left half */
+        cn = (cl + cm) * 0.5;
+        en = esterror_ez(cn, t, t0, n, winn, win, sampmethod, 0);
+        if ( en > em ) {
+          /* L - (N - M - R) */
+          cl = cn;
+          el = en;
+        } else {
+          /* (L - N - M) - R */
+          cr = cm;
+          cm = cn;
+          er = em;
+          em = en;
+        }
+      } else {
+        /* refine the right half */
+        cn = (cm + cr) * 0.5;
+        en = esterror_ez(cn, t, t0, n, winn, win, sampmethod, 0);
+        if ( en > em ) {
+          /* (L - M - N) - R */
+          cr = cn;
+          er = en;
+        } else {
+          /* L - (M - N - R) */
+          cl = cm;
+          cm = cn;
+          el = em;
+          em = en;
+        }
+      }
+    }
+  }
+
+  *err = em;
+
+  return cm;
 }
 
 
