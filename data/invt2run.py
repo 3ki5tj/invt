@@ -177,6 +177,13 @@ def main():
       cval += [ c, ]
       c += cdel
     srange = "c=%s:%s:%s" % (cmin, cdel, cmax)
+
+    # construct the larger range for the analytical prediction
+    if cmin > cdel:
+      cmin1 = cmin - cdel
+    else:
+      cmin1 = 0
+    cmax1 = cmax + cdel
   else:
     l = lmin
     while l < lmax + ldel * 0.01:
@@ -184,10 +191,19 @@ def main():
       l += ldel
     srange = "lambda=%s:%s:%s" % (lmin, ldel, lmax)
 
+    # construct the larger range for the analytical prediction
+    cmin1 = 1 / (lmax + ldel)
+    if lmin > ldel:
+      cmax1 = 1 / (lmin - ldel)
+    else:
+      cmax1 = 1 / lmin
+
+
+  dc1 = 0.01
+  if cmin1 <= 0: cmin1 = dc1
   # generate the prediction result
   os.system("%s/predict %s %s --cmin=%s --cdel=%s --cmax=%s > %s"
-      % (progdir, fncfg, cmdopt,
-         min(cval), 0.01, max(cval), fnprd) )
+      % (progdir, fncfg, cmdopt, cmin1, dc1, cmax1, fnprd) )
 
 
   # print out an information line

@@ -21,6 +21,9 @@
 \newcommand{\summary}[1]{{\color{DarkPurple}\footnotesize \textsc{Summary.} #1}}
 
 
+\newcommand{\Err}{E}
+
+
 \begin{document}
 
 
@@ -737,7 +740,7 @@ $$
 The total error of the bias potential can be written in
 terms of $x_i$,
 \begin{equation}
-\mathcal E
+\Err
 =
 \sum_{i = 1}^n p_i \, \langle x_i^2 \rangle
 =
@@ -1150,7 +1153,7 @@ The error function can be obtained
 from Eq. \eqref{eq:eig_orthonormal_cols}
 as
 \begin{align}
-  \mathcal E
+  \Err
   &\equiv
   \sum_{i = 1}^n p_i \, x_i^2
   =
@@ -1174,7 +1177,7 @@ In analogous to Eq. \eqref{eq:x2t_average},
 we can rewrite Eq. \eqref{eq:y2_sum} as
 %
 \begin{align}
-  \mathcal E
+  \Err
   %&= \sum_{i = 2}^n \langle y_i^2 \rangle
   %\notag
   %\\
@@ -1200,7 +1203,7 @@ where
   \right\rangle.
 \end{align*}
 %
-\note{The extremal condition of $\mathcal E$ is given by
+\note{The extremal condition of $\Err$ is given by
 %
 \begin{align}
 \sum_{i=2}^n
@@ -1248,7 +1251,7 @@ or in discrete time,
 Then, Eq. \eqref{eq:error_mbin} is simplified as
 %
 \begin{align}
-  \mathcal E
+  \Err
   &=
   \int_0^t
   \sum_{i = 2}^n
@@ -1257,7 +1260,7 @@ Then, Eq. \eqref{eq:error_mbin} is simplified as
 \end{align}
 %
 The next order correction to Eq. \eqref{eq:kappa_delta}
-would lead to a correction to $\mathcal E$
+would lead to a correction to $\Err$
 that is about $\alpha_{\max}^2$ times as large.
 
 
@@ -1271,12 +1274,12 @@ that is about $\alpha_{\max}^2$ times as large.
   $$
   \tilde \kappa_i(\omega) = \Gamma_i + \Gamma^{(2)}_i \omega^2 + \dots,
   $$
-  which leads to a correction to $\mathcal E$
+  which leads to a correction to $\Err$
   $$
   \Gamma^{(2)}_i
   \int_0^t \ddot u_i^2\bigl( q(t') \bigr) \, dt'
   \propto
-  \alpha^2 \, \mathcal E.
+  \alpha^2 \, \Err.
   $$
   This correction is of order $\alpha^2$
   compared to the main contribution in Eq. \eqref{eq:error_mbin1}.
@@ -1629,7 +1632,7 @@ $q(t')$ only through the end point value,
 which is fixed in the variation process.
 %
 Thus, the inequality sets a lower bound
-of the error $\mathcal E$
+of the error $\Err$
 expressed in Eq. \eqref{eq:error_mbin1},
 %
 The equality is achieved
@@ -1716,7 +1719,7 @@ Using Eq. \eqref{eq:alpha_trial}
 in Eq. \eqref{eq:error_mbin1} yields
 %
 \begin{align}
-\mathcal E
+\Err
 &=
 \frac{1}{t+t_0}
 \sum_{i=2}^n
@@ -1768,7 +1771,7 @@ $t + t_0$ are replaced by $t$.
 Adding back $t_0$, we get
 $$
 \begin{aligned}
-  \mathcal E
+  \Err
   \stackrel{         t \to \infty         }
            { =\joinrel=\joinrel=\joinrel= }
   \sum_{i = 2}^n
@@ -2155,7 +2158,7 @@ for perfect sampling,
 we get from Eq. \eqref{eq:Gamma_perfect},
 $$
 \begin{aligned}
-\mathcal E
+\Err
 &=
 \frac{2 \, n}{\pi \, t}
 \int_0^{\pi/2}
@@ -2177,7 +2180,7 @@ $$
   %
 $$
 \begin{aligned}
-\mathcal E
+\Err
 &=
 \frac{n}{\lambda \, t}
 \frac{1}{2 \pi i}
@@ -2213,7 +2216,7 @@ $$
 Thus,
 $$
 \begin{aligned}
-  \mathcal E
+\Err
 &=
 \frac{n}{\lambda \, t}
 \left(
@@ -2255,7 +2258,7 @@ Minimizing the function yields
 and the error in the optimal is given by
 %
 \begin{equation}
-\mathcal E
+\Err
 =
 \frac{n}{t}
 \left(
