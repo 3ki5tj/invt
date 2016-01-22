@@ -43,6 +43,12 @@ typedef struct {
   long ntrials; /* number of trials */
   int verbose; /* verbose level */
   const char *prog; /* name of the program */
+
+#ifdef CSCAN /* for predict.c */
+  double cmin;
+  double cdel;
+  double cmax;
+#endif /* CSCAN */
 } invtpar_t;
 
 
@@ -98,6 +104,12 @@ static void invtpar_init(invtpar_t *m)
   m->ntrials = 100;
   m->prog = "invt";
   m->verbose = 0;
+
+#ifdef CSCAN /* for predict.c */
+  m->cmin = 0.1;
+  m->cdel = 0.01;
+  m->cmax = 2.0;
+#endif /* CSCAN */
 }
 
 
@@ -226,6 +238,11 @@ static void invtpar_help(const invtpar_t *m)
   fprintf(stderr, "  --try=:        set the number of trials, default %ld\n", m->ntrials);
   fprintf(stderr, "  --step=:       set the number of simulation steps, default %ld\n", m->nsteps);
   fprintf(stderr, "  --equil=:      set the number of equilibration steps, default %ld\n", m->nequil);
+#ifdef CSCAN /* for predict.c */
+  fprintf(stderr, "  --cmin=:       set the minimal c in c-scan, default %g\n", m->cmin);
+  fprintf(stderr, "  --cdel=:       set the increment of c in c-scan, default %g\n", m->cdel);
+  fprintf(stderr, "  --cmax=:       set the maximal c in c-scan, default %g\n", m->cmax);
+#endif /* CSCAN */
   fprintf(stderr, "  -v:            be verbose, -vv to be more verbose, etc.\n");
   fprintf(stderr, "  -h, --help:    display this message\n");
   exit(1);
@@ -445,6 +462,20 @@ static int invtpar_keymatch(invtpar_t *m,
   {
     m->verbose = val ? atoi(val) : 1;
   }
+#ifdef CSCAN /* for predict.c */
+  else if ( strcmpfuzzy(key, "cmin") == 0 )
+  {
+    m->cmin = invtpar_getdouble(m, key, val);
+  }
+  else if ( strcmpfuzzy(key, "cdel") == 0 )
+  {
+    m->cdel = invtpar_getdouble(m, key, val);
+  }
+  else if ( strcmpfuzzy(key, "cmax") == 0 )
+  {
+    m->cmax = invtpar_getdouble(m, key, val);
+  }
+#endif /* CSCAN */
   else
   {
     return -1;
@@ -500,9 +531,8 @@ static int invtpar_load(invtpar_t *m, const char *fn)
     }
 
     if ( invtpar_keymatch(m, key, val) != 0 ) {
-      fprintf(stderr, "Unknown options %s = %s in %s\n",
+      fprintf(stderr, "Warning: unknown options %s = %s in %s\n",
           key, val, fn);
-      getchar();
     }
   }
 
@@ -605,11 +635,17 @@ static void invtpar_dump(const invtpar_t *m)
       "%s, %ld steps;\n",
       m->ntrials, m->n, m->c, m->t0, m->alpha0,
       sampmethod_names[m->sampmethod][0], m->nsteps);
+
   fprintf(stderr, "update window function (%d bins): ", m->winn);
   for ( i = 0; i < m->winn; i++ ) {
     fprintf(stderr, "%g ", m->win[i]);
   }
   fprintf(stderr, "\n");
+
+#ifdef CSCAN
+  fprintf(stderr, "c scan window: %g:%g:%g\n",
+      m->cmin, m->cdel, m->cmax);
+#endif /* CSCAN */
 }
 
 

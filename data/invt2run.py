@@ -13,6 +13,7 @@ import zcom
 
 fncfg = None
 fnout = None
+fnprd = None
 cmdopt = ""
 verbose = 0
 
@@ -45,6 +46,7 @@ def usage():
     --c=cmin:dc:cmax        set the c range in a c-scan
     --l=lmin:dl:lmax        set the lambda range in a lambda = 1/c scan
     -o                      set the output file
+    --prd=                  set the prediction file
     --opt=                  set options to be passed to the command line
     -v                      be verbose
     --verbose=              set verbosity
@@ -62,13 +64,14 @@ def doargs():
         [ "c=", "crange=",
           "l=", "lrange=", "lambda=",
           "output=", "opt=",
+          "prd=", "predict=",
           "help", "verbose=",
         ] )
   except getopt.GetoptError, err:
     print str(err)
     usage()
 
-  global fncfg, fnout, cmdopt, verbose
+  global fncfg, fnout, fnprd, cmdopt, verbose
   global cmin, cdel, cmax
   global lmin, ldel, lmax
 
@@ -93,6 +96,8 @@ def doargs():
       cmdopt = a
     elif o in ("-o", "--output"):
       fnout = a
+    elif o in ("--prd", "--predict"):
+      fnprd = a
     elif o in ("-h", "--help"):
       usage()
 
@@ -103,6 +108,9 @@ def doargs():
   if not fnout:
     fnout = os.path.splitext(fncfg)[0] + "_err.dat"
 
+  if not fnprd:
+    fnprd = os.path.splitext(fncfg)[0] + "_prd.dat"
+
 
 
 def geterror(out):
@@ -110,7 +118,7 @@ def geterror(out):
 
   ln = out.strip().split("\n")[-3].strip()
 
-  m = re.search("sqr.* ([0-9][\.0-9e+-]+) -> ([0-9][\.0-9e+-]+)", ln)
+  m = re.search("average error: ([0-9][\.0-9e+-]+) -> ([0-9][\.0-9e+-]+),", ln)
   if not m:
     print "line [%s]: no error information" % ln
     raise Exception
@@ -122,7 +130,7 @@ def geterror(out):
 
 
 def main():
-  global fncfg, fnout, cmdopt, fnout
+  global fncfg, fnout, fnprd, cmdopt, fnout
 
   progdir = "../prog"
   if not os.path.isdir(progdir):
@@ -155,9 +163,14 @@ def main():
       l += ldel
     srange = "lambda=%s:%s:%s" % (lmin, ldel, lmax)
 
+  # generate the prediction result
+  os.system("%s/predict %s %s --c=%s:%s:%s > %s"
+      % (progdir, fncfg, cmdopt, cmin, 0.01, cmax, fnprd))
+
+
   # print out an information line
   sinfo = "# %s %s %s\n" % (fncfg, cmdopt, srange)
-  open(fnout, "a").write(sinfo)
+  open(fnout, "w").write(sinfo)
 
   for i in range(len(cval)):
     print "%d: testing for c-value %s..." % (i, cval[i])
@@ -170,7 +183,7 @@ def main():
     err0, err1 = geterror(out)
 
     # construct a line of output
-    s = "%s %s %s\n" % (c, err0, err1)
+    s = "%s\t%s\t%s\n" % (c, err0, err1)
 
     # save to the log files
     open(fnout, "a").write(s)

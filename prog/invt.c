@@ -138,6 +138,7 @@ static double invt_run(invtpar_t *m)
     err = simulmeta(m, &err0);
   } else {
     /* do multiple runs to compute the average error */
+    double t = (double) m->nsteps;
 
     /* compute the prediction from the analytical result */
     /* initial saturated error */
@@ -146,16 +147,16 @@ static double invt_run(invtpar_t *m)
         "initial", m->verbose + 1);
 
     if ( !m->fixa ) {
-      err1ref = esterror0_ez(m->c / (m->t0 + (double) m->nsteps),
+      err1ref = esterror0_ez(m->c / (m->t0 + t),
           m->n, m->winn, m->win, m->sampmethod,
           "final", m->verbose + 1);
 
-      errref = esterror_ez(m->c, (double) m->nsteps, m->t0,
+      errref = esterror_ez(m->c, t, m->t0,
           m->n, m->winn, m->win, m->sampmethod,
           m->verbose + 1);
 
       /* compute the optimal c */
-      optc = estbestc((double) m->nsteps, m->t0,
+      optc = estbestc(t, m->t0,
           m->n, m->winn, m->win, m->sampmethod,
           1e-8, &errmin, m->verbose);
       printf("predicted optimal c %g, err %g\n", optc, errmin);

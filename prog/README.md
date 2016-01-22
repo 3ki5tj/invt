@@ -14,6 +14,7 @@ Programs
  Program  |  Descriptions
 ----------|------------------------------------
 invt      | Main program
+predict   | Predict error
 modetest  | Test program for mode decomposition
 langtest  | Test for Langevin equations
 
