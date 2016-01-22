@@ -17,8 +17,8 @@ fnprd = None
 cmdopt = ""
 verbose = 0
 
-# scan c instead of lambda = 1 / c
-cscan = 1
+# scan lambda = 1 / c instead of c
+lscan = 0
 
 # parameters for c scan
 cmin = 0.5
@@ -81,13 +81,13 @@ def doargs():
       cmin = float( carr[0] )
       cdel = float( carr[1] )
       cmax = float( carr[2] )
-      cscan = 1
+      lscan = 0
     elif o in ("--l", "--lambda"):
       larr = a.split(':')
       lmin = float( larr[0] )
       ldel = float( larr[1] )
       lmax = float( larr[2] )
-      cscan = 0
+      lscan = 1
     elif o in ("-v",):
       verbose += 1  # such that -vv gives verbose = 2
     elif o in ("--verbose",):
@@ -116,16 +116,34 @@ def doargs():
 def geterror(out):
   ''' get the initial and final errors from the output '''
 
-  ln = out.strip().split("\n")[-3].strip()
+  # construct the pattern
+  numpat = "([0-9][\.0-9e+-]+)"
+  pat = "average error: .*sqr %s -> %s, stdsqr %s -> %s" % (
+      numpat, numpat, numpat, numpat)
 
-  m = re.search("average error: ([0-9][\.0-9e+-]+) -> ([0-9][\.0-9e+-]+),", ln)
+  s = out.strip().split("\n")
+
+  m = None
+  i = -1
+  while i >= -10:
+    ln = s[i].strip()
+
+    m = re.search(pat, ln)
+    if m: break
+
+    i -= 1
+
   if not m:
-    print "line [%s]: no error information" % ln
-    raise Exception
-  err0 = float( m.group(1) )
-  err1 = float( m.group(2) )
+    print "cannot find error information"
+    print '\n'.join( s[-10:] )
+    exit(1)
 
-  return err0, err1
+  ei    = float( m.group(1) )
+  e     = float( m.group(2) )
+  stdei = float( m.group(3) )
+  stde  = float( m.group(4) )
+
+  return e, ei, stde, stdei
 
 
 
@@ -141,16 +159,19 @@ def main():
 
   prog = "invt"
 
-  # make a copy of the program in case
-  # it gets modified or deleted later
-  shutil.copy("%s/%s" % (progdir, prog), "./%s" % prog)
+  try:
+    # make a copy of the program in case
+    # it gets modified or deleted later
+    shutil.copy("%s/%s" % (progdir, prog), "./%s" % prog)
+  except:
+    pass
 
   cmd0 = "./%s %s %s" % (prog, fncfg, cmdopt)
   cmd0 = cmd0.strip()
 
   # construct an array of c-values
   cval = []
-  if cscan:
+  if not lscan:
     c = cmin
     while c < cmax + cdel * 0.01:
       cval += [ c, ]
@@ -164,8 +185,9 @@ def main():
     srange = "lambda=%s:%s:%s" % (lmin, ldel, lmax)
 
   # generate the prediction result
-  os.system("%s/predict %s %s --c=%s:%s:%s > %s"
-      % (progdir, fncfg, cmdopt, cmin, 0.01, cmax, fnprd))
+  os.system("%s/predict %s %s --cmin=%s --cdel=%s --cmax=%s > %s"
+      % (progdir, fncfg, cmdopt,
+         min(cval), 0.01, max(cval), fnprd) )
 
 
   # print out an information line
@@ -180,10 +202,11 @@ def main():
     # override the c value
     cmd = "%s -c %s" % (cmd0, c)
     ret, out, err = zcom.runcmd(cmd.strip(), capture = True)
-    err0, err1 = geterror(out)
+    e, ei, stde, stdei = geterror(out)
 
     # construct a line of output
-    s = "%s\t%s\t%s\n" % (c, err0, err1)
+    s = "%s\t%s\t%s\t%s\t%s\n" % (
+        c, e, ei, stde, stdei)
 
     # save to the log files
     open(fnout, "a").write(s)

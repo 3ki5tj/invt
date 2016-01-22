@@ -17,15 +17,15 @@ static void invt_predict(invtpar_t *m)
   for ( c = m->cmin; c < m->cmax + 0.001 * m->cdel; c += m->cdel ) {
     t0 = c / m->alpha0;
 
-    /* initial equilibrium value */
-    err0 = esterror0_ez(m->alpha0,
-        m->n, m->winn, m->win, m->sampmethod,
-        "initial", 0);
-
     /* c / (t + t0) */
     err = esterror_ez(c, t, t0,
         m->n, m->winn, m->win, m->sampmethod,
         0);
+
+    /* initial equilibrium value */
+    err0 = esterror0_ez(m->alpha0,
+        m->n, m->winn, m->win, m->sampmethod,
+        "initial", 0);
 
     /* final equilibrium value */
     err1 = esterror0_ez(c / (t0 + t),
@@ -33,7 +33,7 @@ static void invt_predict(invtpar_t *m)
         "final", 0);
 
     printf("%g\t%g\t%g\t%g\n",
-        c, err0, err, err1);
+        c, err, err0, err1);
   }
 }
 

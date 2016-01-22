@@ -124,11 +124,13 @@ static double simulmeta(const invtpar_t *m, double *err0)
 
 static double invt_run(invtpar_t *m)
 {
-  double err, see = 0, averr, errref = 0;
-  double err0, see0 = 0, averr0, err0ref; /* initial */
-  double err1ref = 0; /* final saturated */
+  double err,  e,  se = 0,  see = 0,  ave,  averr,  stde;  /* final */
+  double err0, e0, se0 = 0, see0 = 0, ave0, averr0, stde0; /* initial */
+  /* reference values */
+  double errref, err0ref, err1ref = 0; /* final, initial, final saturated */
   double optc, errmin = 0; /* optimal c, predicted minimal error */
-  int i;
+  long ntr = m->ntrials;
+  long i;
 
   mtscramble( time(NULL) );
 
@@ -162,24 +164,49 @@ static double invt_run(invtpar_t *m)
       printf("predicted optimal c %g, err %g\n", optc, errmin);
     }
 
-    for ( i = 0; i < m->ntrials; i++ ) {
+    for ( i = 0; i < ntr; i++ ) {
       err = simulmeta(m, &err0);
-      see += err * err;
-      see0 += err0 * err0;
-      averr = sqrt( see / (i + 1) );
-      averr0 = sqrt( see0 / (i + 1) );
-      printf("%4d: err %10.8f -> %10.8f, "
-                  "ave %10.8f -> %10.8f, "
-                  "sqr %e -> %e\n",
+
+      /* accumulators for the final error */
+      e = err * err;
+      se += e;
+      see += e * e;
+      ave = se / (i + 1);
+      averr = sqrt( ave );
+
+      /* accumulators for the initial error */
+      e0 = err0 * err0;
+      se0 += e0;
+      see0 += e0 * e0;
+      ave0 = se0 / (i + 1);
+      averr0 = sqrt( ave0 );
+
+      printf("%4ld: err %10.8f -> %10.8f, "
+                   "ave %10.8f -> %10.8f, "
+                   "sqr %e -> %e\n",
           i, err0, err,
           averr0, averr,
-          averr0 * averr0, averr * averr);
+          ave0, ave);
     }
 
-    averr = sqrt( see / m->ntrials );
-    averr0 = sqrt( see0 / m->ntrials );
-    printf("average error: %10.8f -> %10.8f, sqr %e -> %e\n",
-        averr0, averr, averr0 * averr0, averr * averr);
+    /* statistics for the final error */
+    ave = se / ntr;
+    averr = sqrt( ave );
+    stde = sqrt( see / ntr - ave * ave );
+    if ( ntr > 1 ) {
+      stde *= sqrt( ntr / (ntr - 1.0) ) ;
+    }
+
+    /* statistics for the initial error */
+    ave0 = se0 / ntr;
+    averr0 = sqrt( ave0 );
+    stde0 = sqrt( see0 / ntr - ave0 * ave0 );
+    if ( ntr > 1 ) {
+      stde0 *= sqrt( ntr / (ntr - 1.0) ) ;
+    }
+
+    printf("average error: %10.8f -> %10.8f, sqr %e -> %e, stdsqr %e -> %e\n",
+        averr0, averr, ave0, ave, stde0, stde);
     printf("predicted val: %10.8f -> %10.8f, sqr %e -> %e\n",
         err0ref, errref, err0ref * err0ref, errref * errref);
     printf("saturated val: %10.8f -> %10.8f, sqr %e -> %e\n",

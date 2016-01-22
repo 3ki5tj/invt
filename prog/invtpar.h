@@ -240,8 +240,8 @@ static void invtpar_help(const invtpar_t *m)
   fprintf(stderr, "  --equil=:      set the number of equilibration steps, default %ld\n", m->nequil);
 #ifdef CSCAN /* for predict.c */
   fprintf(stderr, "  --cmin=:       set the minimal c in c-scan, default %g\n", m->cmin);
-  fprintf(stderr, "  --cdel=:       set the increment of c in c-scan, default %g\n", m->cdel);
   fprintf(stderr, "  --cmax=:       set the maximal c in c-scan, default %g\n", m->cmax);
+  fprintf(stderr, "  --dc=:         set the increment of c in c-scan, default %g\n", m->cdel);
 #endif /* CSCAN */
   fprintf(stderr, "  -v:            be verbose, -vv to be more verbose, etc.\n");
   fprintf(stderr, "  -h, --help:    display this message\n");
@@ -258,7 +258,15 @@ static int invtpar_getint(invtpar_t *m,
     fprintf(stderr, "no value for %s\n", key);
     invtpar_help(m);
   }
-  return atoi(val);
+
+  /* if 'e' exists in the string, scan the floating point
+   * number, and then convert it to an integer */
+  if ( strchr(val, 'e') != NULL
+    || strchr(val, 'E') != NULL ) {
+    return (int) ( atof(val) + 0.5 );
+  } else {
+    return atoi(val);
+  }
 }
 
 
@@ -271,7 +279,14 @@ static long invtpar_getlong(invtpar_t *m,
     fprintf(stderr, "no value for %s\n", key);
     invtpar_help(m);
   }
-  return atol(val);
+
+  /* if 'e' exists in the string, scan the floating point
+   * number, and then convert it to a long integer */
+  if ( strchr(val, 'e') ) {
+    return (int) ( atof(val) + 0.5 );
+  } else {
+    return atol(val);
+  }
 }
 
 
@@ -467,7 +482,8 @@ static int invtpar_keymatch(invtpar_t *m,
   {
     m->cmin = invtpar_getdouble(m, key, val);
   }
-  else if ( strcmpfuzzy(key, "cdel") == 0 )
+  else if ( strcmpfuzzy(key, "cdel") == 0
+         || strcmpfuzzy(key, "dc") == 0 )
   {
     m->cdel = invtpar_getdouble(m, key, val);
   }

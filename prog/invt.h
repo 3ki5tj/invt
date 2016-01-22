@@ -50,7 +50,7 @@ static int mc_metro_l(const double *v, int n, int i)
   if ( j < 0 || j >= n ) return i;
 
   /* periodic boundary condition */
-  // j = (j + n) % n;
+  /* j = (j + n) % n; */
 
   dv = v[j] - v[i];
   if ( dv <= 0 ) {
