@@ -12,7 +12,7 @@ Programs
 ========
 
  Program  |  Descriptions
-----------+------------------------------------
+----------|------------------------------------
 invt      | Main program
 modetest  | Test program for mode decomposition
 langtest  | Test for Langevin equations
