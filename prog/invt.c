@@ -194,7 +194,7 @@ static double invt_run(invtpar_t *m)
     averr = sqrt( ave );
     stde = sqrt( see / ntr - ave * ave );
     if ( ntr > 1 ) {
-      stde *= sqrt( ntr / (ntr - 1.0) ) ;
+      stde /= sqrt(ntr - 1.0) ;
     }
 
     /* statistics for the initial error */
@@ -202,7 +202,7 @@ static double invt_run(invtpar_t *m)
     averr0 = sqrt( ave0 );
     stde0 = sqrt( see0 / ntr - ave0 * ave0 );
     if ( ntr > 1 ) {
-      stde0 *= sqrt( ntr / (ntr - 1.0) ) ;
+      stde0 /= sqrt(ntr - 1.0);
     }
 
     printf("average error: %10.8f -> %10.8f, sqr %e -> %e, stdsqr %e -> %e\n",

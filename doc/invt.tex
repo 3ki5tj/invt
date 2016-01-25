@@ -130,7 +130,7 @@ to achieve a flat distribution.
 
 
 The Wang-Landau (WL) algorithm\cite{wang2001, wang2001pre}
-and metadynamics\cite{laio2002}
+and metadynamics\cite{laio2002, laio2008, barducci2011, sutto2012}
 are two widely-used techniques for this purpose,
 in which a bias potential is actively built-up on-the-fly
 during simulation.
@@ -142,7 +142,7 @@ by elevating the bias potential there.
 A main difference of the two techniques
 is that in the WL case, an update is limited to the bin
 containing the current $z$,
-while metadynamics adopts a more widespread window
+while metadynamics adopts an extended window
 covering several neighboring bins.
 %
 The latter ensures a smooth profile
@@ -161,17 +161,18 @@ over the course of simulation.
 
 
 Naturally, the manner of reducing
-the updating magnitude\cite{
+the updating magnitude\cite{liang2007,
 belardinelli2007, belardinelli2007jcp, belardinelli2008,
 morozov2007, zhou2008, morozov2009,
-komura2012, caparica2012, caparica2014}
+komura2012, caparica2012, caparica2014,
+barducci2008, dickson2011, dama2014, dickson2015}
 determines the precision of the final bias potential,
 hence that of PMF.
 %
 For the WL algorithm, it is found
 that asymptotically the optimal magnitude of updating $\ln f$
 should be given by the
-inverse time\cite{
+inverse time\cite{liang2007,
 belardinelli2007, belardinelli2007jcp, belardinelli2008,
 morozov2007, zhou2008},
 where ``time'' is defined as
@@ -297,7 +298,8 @@ up to an additive constant.
 
 
 Generally, we may wish to sample
-a nearly flat distribution\cite{dayal2004, trebst2004}, $p_i$,
+a nearly flat distribution\cite{dayal2004, trebst2004, singh2011},
+$p_i$,
 by adjusting the bias potential $V_i$
 on the fly.
 %
@@ -418,6 +420,9 @@ $\sum_{j=1}^n w_{ij} = 1$.
 %
 We shall discuss other restrictions on $w_{ij}$
 in Sec. \ref{sec:updating-matrix}.
+%
+The multiple-bin scheme is more commonly
+used in metadynamics.
 
 
 
@@ -429,6 +434,13 @@ However, the above updates
 change $v_i(t)$ continuously,
 and Eq. \eqref{eq:pi_p_v} no longer holds
 at all times.
+%
+In other words,
+the error in $v_i(t)$
+depends on the updating magnitude\cite{
+  zhou2005, liang2005, bussi2006, liang2007,
+  morozov2007, zhou2008, morozov2009, crespo2010,
+  atchade2011, fort2015}.
 %%
 %The source of the deviation is two-fold.
 %%
@@ -470,6 +482,11 @@ This scheme works well for early stages.
 However, in later stages, it tends to reduce $\alpha$
 too quickly, making the asymptotic error
 saturate\cite{belardinelli2007, belardinelli2007jcp, belardinelli2008}.
+%
+Similarly, for metadynamics,
+there are attempts to reduce the updating magnitude\cite{
+  barducci2008, dickson2011, dama2014, dickson2015}.
+
 
 
 
@@ -2109,24 +2126,25 @@ We discuss two special cases below.
 
 Particularly, if $\mu_2 = \dots = \mu_b = 0$,
 the matrix $\mathbf w$ is tridiagonal,
-%
-\begin{equation}
-\arraycolsep=3.6pt\def\arraystretch{1.4}
-\mathbf w
-=
-\left(
-  \begin{array}{cccccccc}
-    1 - \mu_1   & \mu_1 & 0 & \dots & 0 \\
-    \mu_1 & 1 - 2 \, \mu_1  & \mu_1 & \dots & 0 \\
-    \vdots & &  & & \vdots \\
-    0 & \dots & \mu_1 & 1 - 2 \, \mu_1  & \mu_1 \\
-    0 & \dots & 0 & \mu_1 & 1 - \mu_1
-  \end{array}
-\right).
-\label{eq:wtridiag}
-\end{equation}
-%
-We have
+%%
+%\begin{equation}
+%\arraycolsep=3.6pt\def\arraystretch{1.4}
+%\mathbf w
+%=
+%\left(
+%  \begin{array}{cccccccc}
+%    1 - \mu_1   & \mu_1 & 0 & \dots & 0 \\
+%    \mu_1 & 1 - 2 \, \mu_1  & \mu_1 & \dots & 0 \\
+%    \vdots & &  & & \vdots \\
+%    0 & \dots & \mu_1 & 1 - 2 \, \mu_1  & \mu_1 \\
+%    0 & \dots & 0 & \mu_1 & 1 - \mu_1
+%  \end{array}
+%\right).
+%\label{eq:wtridiag}
+%\end{equation}
+%%
+%We have
+and the eigenvalues are
 \begin{equation}
   \lambda_k = 1 - 4 \, \mu_1 \sin^2 \frac{(k - 1) \, \pi}{2n}.
 \label{eq:wtridiag_eigenvalue}
@@ -2151,14 +2169,27 @@ we convert Eq.
 \eqref{eq:y2_sum_perfect_invt}
 %and
 %\eqref{eq:optimal_lambda_approx}
-to an integral.
-%
-Particularly,
-for perfect sampling,
-we get from Eq. \eqref{eq:Gamma_perfect},
+to an integral,
+$\sum_i \to \frac{2 \, n}{\pi} \int dp$, and
 $$
 \begin{aligned}
-\Err
+\Err_2
+&=
+\frac{2 \, n}{\pi \, t}
+\int_0^{\pi/2}
+\frac{ \Gamma(p) \, \left(1 - 4 \, \mu_1 \, \cos^2 p \right)^2 }
+{ \lambda \, \left(2 - 8 \, \mu_1 \, \cos^2 p - \lambda \right) }
+\, dp.
+\end{aligned}
+$$
+
+
+
+For perfect sampling,
+we have Eq. \eqref{eq:Gamma_perfect}, and
+$$
+\begin{aligned}
+\Err_2
 &=
 \frac{2 \, n}{\pi \, t}
 \int_0^{\pi/2}
@@ -2180,7 +2211,7 @@ $$
   %
 $$
 \begin{aligned}
-\Err
+\Err_2
 &=
 \frac{n}{\lambda \, t}
 \frac{1}{2 \pi i}
@@ -2216,7 +2247,7 @@ $$
 Thus,
 $$
 \begin{aligned}
-\Err
+\Err_2
 &=
 \frac{n}{\lambda \, t}
 \left(
@@ -2252,7 +2283,7 @@ Minimizing the function yields
 %
 \begin{equation}
 \lambda = \frac{1 - 4 \, \mu_1} { 1 - 2 \, \mu_1 },
-\label{eq:lambda_tridiag}
+\label{eq:lambda_tridiag_perfect}
 \end{equation}
 %
 and the error in the optimal is given by
@@ -2264,7 +2295,7 @@ and the error in the optimal is given by
 \left(
   1+ \frac{2 \, \mu_1^2}{1-4 \, \mu_1}
 \right).
-\label{eq:error_tridiag}
+\label{eq:error_tridiag_prefect}
 \end{equation}
 %
 %From Eq. \eqref{eq:error_tridiag}, it is clear that
@@ -2273,6 +2304,45 @@ increases rapidly with magnitude of $\mu_1$,
 no matter its sign,
 and the minimal value, obtained at $\mu_1 = 0$,
 corresponds to the single-bin scheme.
+
+
+
+For one-step sampling,
+we have Eq. \eqref{eq:Gamma_onestep}, and
+$$
+\begin{aligned}
+\Err_2
+&=
+\frac{   2 \, n }
+     { \pi \, t }
+\int_0^{\pi/2}
+    \frac{          \left(1 - 4 \, \mu_1 \, \cos^2 p \right)^2           }
+         { \lambda \, \left(2 - 8 \, \mu_1 \, \cos^2 p - \lambda \right) }
+    \frac{ \cos^2 p }
+         { \sin^2 p + \delta^2 }
+\, dp
+\notag \\
+&
+\stackrel{    \delta \ll 1     }
+         { =\joinrel=\joinrel= }
+\frac{  2 \, n  }
+     { \pi \, t }
+\frac{          (1 - 4 \, \mu_1)^2            }
+     {  \lambda \, (2 - 8 \, \mu_1 - \lambda) }
+\frac{    1   }
+     { \delta }
+,
+\end{aligned}
+$$
+%
+where $\delta \propto 1/n$ is a small parameter to keep the integral finite.
+%
+The optimal $\lambda$ is therefore
+%
+\begin{equation}
+\lambda = 1 - 4 \, \mu_1,
+\label{eq:lambda_tridiag_onestep}
+\end{equation}
 
 
 
@@ -2344,83 +2414,98 @@ to infinity, and
 %
 The eigenvalues are given by
 %
-\begin{equation}
+\begin{align}
 \lambda_k
-=
-\exp\left(
+&=
+\exp\left[
       -\frac{ (k - 1)^2 \, \sigma^2 }
             {           2           }
-    \right).
-\label{eq:lambda_Gaussian}
-\end{equation}
-%
-The eigenvalues are all positive,
-suggesting stability of the updating scheme.
-
-
-However,
-as $\sigma/\Delta x \gg 1$,
-the smallest eigenvalue
-%
-$$
-\lambda_n
-\approx
-\exp\left(
-      -\frac{ n^2 \, \sigma^2 }
-            {        2        }
-    \right)
-=
+    \right]
+\notag
+\\
+&=
 \exp\left[
       -\frac{ \pi^2 }{ 2 }
+      \left(
+        \frac{ k - 1 }
+             {   n   }
+      \right)^2
       \left(
         \frac{  \sigma }
              { \Delta x }
       \right)^2
     \right]
 .
-$$
+\label{eq:lambda_Gaussian}
+\end{align}
 %
-is exponentially small.
-%
-This means that
-the optimal value of $\lambda$
-given by Eq. \eqref{eq:optimal_lambda_approx}
-would be too small in practice,
-for it requires $\lambda < 2 \, \lambda_n$.
-%
-In other words,
-with a reasonable $\lambda$,
-the error of the last few fluctuation modes
-will always decay suboptimally,
-accordingly to Eq. \eqref{eq:y2_sum_perfect_invt}.
-%
-However, since these modes
-represent short wavelength fluctuations,
-and these modes may be in
-the system under consideration.
-%
-Thus,
-we can truncate the sum of the error function
-in Eq. \eqref{eq:y2_sum_perfect_invt}
-at some $k_{\max}$,
-which corresponds to a minimal length scale
-$l_{\min} = \Delta x \, (n /k_{\max}) = \pi/k_{\max}$
-greater than $\sigma$.
-%
-Then,
-$$
-\lambda_{ k_{\max} }
-\approx
-\exp\left(
-      -\frac{ k_{\max}^2 \, \sigma^2 }
-            {           2            }
-    \right)
-=
-\exp\left(
-      -\frac{  \pi^2 \, \sigma^2    }
-            {    2 \, l_{\min}^2  }
-    \right).
-$$
+The eigenvalues are all positive,
+suggesting stability of the updating scheme.
+
+
+%However,
+%as $\sigma/\Delta x \gg 1$,
+%the smallest eigenvalue
+%%
+%$$
+%\lambda_n
+%\approx
+%\exp\left(
+%      -\frac{ n^2 \, \sigma^2 }
+%            {        2        }
+%    \right)
+%=
+%\exp\left[
+%      -\frac{ \pi^2 }{ 2 }
+%      \left(
+%        \frac{  \sigma }
+%             { \Delta x }
+%      \right)^2
+%    \right]
+%.
+%$$
+%%
+%is exponentially small.
+%%
+%This means that
+%the optimal value of $\lambda$
+%given by Eq. \eqref{eq:optimal_lambda_approx}
+%would be too small in practice,
+%for it requires $\lambda < 2 \, \lambda_n$.
+%%
+%In other words,
+%with a reasonable $\lambda$,
+%the error of the last few fluctuation modes
+%will always decay suboptimally,
+%accordingly to Eq. \eqref{eq:y2_sum_perfect_invt}.
+%%
+%However, since these modes
+%represent short wavelength fluctuations,
+%and these modes may be in
+%the system under consideration.
+%%
+%Thus,
+%we can truncate the sum of the error function
+%in Eq. \eqref{eq:y2_sum_perfect_invt}
+%at some $k_{\max}$,
+%which corresponds to a minimal length scale
+%$l_{\min} = \Delta x \, (n /k_{\max}) = \pi/k_{\max}$
+%greater than $\sigma$.
+%%
+%Then,
+%$$
+%\lambda_{ k_{\max} }
+%\approx
+%\exp\left(
+%      -\frac{ k_{\max}^2 \, \sigma^2 }
+%            {           2            }
+%    \right)
+%=
+%\exp\left(
+%      -\frac{  \pi^2 \, \sigma^2    }
+%            {    2 \, l_{\min}^2  }
+%    \right).
+%$$
 
 
 
@@ -2429,7 +2514,7 @@ $$
 Numerical results}
 
 
-\subsection{Optimal $\alpha(t)$}
+\subsection{General simulation protocol}
 
 
 To determine the optimal schedule,
@@ -2448,17 +2533,72 @@ where $t_0 = 1/(\lambda \, \alpha_0)$
 to make $\alpha(t)$ continuous.
 
 
-1. Single-bin scheme.
+\subsection{Single-bin (WL) updating scheme}
+
 Show the error versus $\lambda$.
 
-Change upon using local sampling scheme.
+Good agreement between theory and simulation.
+
+The optimal $\lambda$ is near $1.0$,
+independent of the underlying sampling scheme.
 
 
-2. Multiple-bin scheme.
-Error vs. $\lambda$.
 
-3. Optimality of the Single-bin scheme.
+\begin{figure}[h]
+\begin{center}
+  \makebox[\linewidth][c]{
+    \includegraphics[angle=0, width=0.95\linewidth]{fig/errsbin.pdf}
+  }
+  \caption{
+    \label{fig:err_singlebin}
+    Error, $E$, versus the proportionality constant, $1/\lambda$,
+    in Eq. \eqref{eq:alpha_trial}
+    for the single-bin (WL) scheme.
+    %
+  }
+\end{center}
+\end{figure}
+
+
+
+\subsection{Nearest neighbor updating scheme}
+
+Normalized error vs. $\lambda$.
+
+The optimal $\lambda$ depends on the simulation length.
+This dependence is more significant in the global sampling scheme.
+
+
+\begin{figure}[h]
+\begin{center}
+  \makebox[\linewidth][c]{
+    \includegraphics[angle=0, width=0.95\linewidth]{fig/errnnbr.pdf}
+  }
+  \caption{
+    \label{fig:err_nnbr}
+    Normalized error, $(t + t_0) \, E$,
+    versus the proportionality constant, $1/\lambda$,
+    in Eq. \eqref{eq:alpha_trial}
+    for the nearest-neighbor updating scheme with $\mu_1 = 0.24$.
+    %
+  }
+\end{center}
+\end{figure}
+
+
+
+
+
+\subsection{Gaussian (metadynamics) updating scheme}
+
+
+\subsection{Optimality of the Single-bin scheme}
+
+Randomize the initial error?
+
 Error vs. $\mu_1$.
+
+Error vs. $\sigma$.
 
 
 \section{\label{sec:conclusion}

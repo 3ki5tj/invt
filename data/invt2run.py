@@ -205,10 +205,20 @@ def main():
   os.system("%s/predict %s %s --cmin=%s --cdel=%s --cmax=%s > %s"
       % (progdir, fncfg, cmdopt, cmin1, dc1, cmax1, fnprd) )
 
+  # we save data to a temporary file
+  # and overwrite the actual file only at the end
+  if os.path.exists(fnout):
+    fnouttmp = fnout + ".tmp"
+  else:
+    fnouttmp = fnout
+
+  # text of the output
+  txt = ""
 
   # print out an information line
   sinfo = "# %s %s %s\n" % (fncfg, cmdopt, srange)
-  open(fnout, "w").write(sinfo)
+  txt += sinfo
+  open(fnouttmp, "w").write(sinfo)
 
   for i in range(len(cval)):
     print "%d: testing for c-value %s..." % (i, cval[i])
@@ -223,9 +233,19 @@ def main():
     # construct a line of output
     s = "%s\t%s\t%s\t%s\t%s\n" % (
         c, e, ei, stde, stdei)
+    txt += s
 
-    # save to the log files
-    open(fnout, "a").write(s)
+    # save to the output file
+    open(fnouttmp, "a").write(s)
+
+  # write the entire text at the end
+  # we do not trust the content of fnouttmp,
+  # which is only for backup, and may have been changed
+  open(fnout, "w").write(txt)
+
+  # remove the temporary file
+  if fnouttmp != fnout:
+    os.remove(fnouttmp)
 
 
 
