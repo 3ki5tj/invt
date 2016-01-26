@@ -244,7 +244,7 @@ For example, $i$ can be the energy $E$
 in lattice spin models; or the temperature index
 in a simulated tempering simulation.
 %
-For the quantity of interest, $z$, is continuous,
+For a continuous quantity, $z$,
 which is typical in molecular systems,
 we can discretize $z$
 such that the integer $i$ represents
@@ -438,7 +438,7 @@ at all times.
 In other words,
 the error in $v_i(t)$
 depends on the updating magnitude\cite{
-  zhou2005, liang2005, bussi2006, liang2007,
+  zhou2005, liang2005, laio2005, bussi2006, poulain2006, liang2007,
   morozov2007, zhou2008, morozov2009, crespo2010,
   atchade2011, fort2015}.
 %%
@@ -484,8 +484,8 @@ too quickly, making the asymptotic error
 saturate\cite{belardinelli2007, belardinelli2007jcp, belardinelli2008}.
 %
 Similarly, for metadynamics,
-there are attempts to reduce the updating magnitude\cite{
-  barducci2008, dickson2011, dama2014, dickson2015}.
+there are various ways of reducing the updating magnitude\cite{
+  marsili2006, barducci2008, dickson2011, dama2014, dickson2015}.
 
 
 
@@ -1882,8 +1882,12 @@ and $\mu_l = 0$ for $l > b$.
 On the right-hand side of Eq. \eqref{eq:w_band},
 the first term represents the relative updating magnitude
 to a neighbor that is $|i - j|$ bins away,
-whereas the next two terms are added to avoid
-boundary artifacts.
+whereas the next two terms are added to
+adopt the open boundary condition.
+%
+If $i$ represents a periodic variable,
+the last two terms can be dropped under
+the minimum image convention for $|i-j|$\cite{dama2014}.
 
 
 This matrix, being symmetric,
@@ -2120,7 +2124,7 @@ We discuss two special cases below.
 
 
 
-\subsubsection{Tridiagonal matrix}
+\subsubsection{Nearest-neighbor updating scheme}
 
 
 
@@ -2177,8 +2181,8 @@ $$
 &=
 \frac{2 \, n}{\pi \, t}
 \int_0^{\pi/2}
-\frac{ \Gamma(p) \, \left(1 - 4 \, \mu_1 \, \cos^2 p \right)^2 }
-{ \lambda \, \left(2 - 8 \, \mu_1 \, \cos^2 p - \lambda \right) }
+  \frac{    \Gamma(p) \, \left(1 - 4 \, \mu_1 \, \sin^2 p \right)^2    }
+       { \lambda \, \left(2 - 8 \, \mu_1 \, \sin^2 p - \lambda \right) }
 \, dp.
 \end{aligned}
 $$
@@ -2186,15 +2190,16 @@ $$
 
 
 For perfect sampling,
-we have Eq. \eqref{eq:Gamma_perfect}, and
+we have, from Eq. \eqref{eq:Gamma_perfect},
+$\Gamma(p) = 1$, and
 $$
 \begin{aligned}
 \Err_2
 &=
 \frac{2 \, n}{\pi \, t}
 \int_0^{\pi/2}
-\frac{ \left(1 - 4 \, \mu_1 \, \cos^2 p \right)^2 }
-{ \lambda \, \left(2 - 8 \, \mu_1 \, \cos^2 p - \lambda \right) }
+\frac{ \left(1 - 4 \, \mu_1 \, \sin^2 p \right)^2 }
+{ \lambda \, \left(2 - 8 \, \mu_1 \, \sin^2 p - \lambda \right) }
 \, dp
 \notag \\
 &=
@@ -2208,7 +2213,9 @@ $$
 \end{aligned}
 $$
 \note{The integral is evaluated by contour integration.
-  %
+%
+It is somewhat more convenient to change variable $p \to \frac{ \pi } { 2 } - p$,
+and
 $$
 \begin{aligned}
 \Err_2
@@ -2308,7 +2315,14 @@ corresponds to the single-bin scheme.
 
 
 For one-step sampling,
-we have Eq. \eqref{eq:Gamma_onestep}, and
+we have, from Eq. \eqref{eq:Gamma_onestep},
+$\Gamma(p) = \cot^2 p \approx \cos^2 p / (\sin^2 p + \delta^2)$,
+where we have introduced
+$\delta \propto \sin[ \pi / (2 \, n) ] \sim 1/n$
+as a small parameter to avoid the divergence
+around the origin.
+%
+Then
 $$
 \begin{aligned}
 \Err_2
@@ -2316,8 +2330,8 @@ $$
 \frac{   2 \, n }
      { \pi \, t }
 \int_0^{\pi/2}
-    \frac{          \left(1 - 4 \, \mu_1 \, \cos^2 p \right)^2           }
-         { \lambda \, \left(2 - 8 \, \mu_1 \, \cos^2 p - \lambda \right) }
+    \frac{            \left(1 - 4 \, \mu_1 \, \sin^2 p \right)^2         }
+         { \lambda \, \left(2 - 8 \, \mu_1 \, \sin^2 p - \lambda \right) }
     \frac{ \cos^2 p }
          { \sin^2 p + \delta^2 }
 \, dp
@@ -2325,28 +2339,290 @@ $$
 &
 \stackrel{    \delta \ll 1     }
          { =\joinrel=\joinrel= }
-\frac{  2 \, n  }
+\frac{   2 \, n }
      { \pi \, t }
-\frac{          (1 - 4 \, \mu_1)^2            }
-     {  \lambda \, (2 - 8 \, \mu_1 - \lambda) }
+\frac{             1             }
+     {  \lambda \, (2 - \lambda) }
 \frac{    1   }
      { \delta }
-,
+.
 \end{aligned}
 $$
-%
-where $\delta \propto 1/n$ is a small parameter to keep the integral finite.
 %
 The optimal $\lambda$ is therefore
 %
 \begin{equation}
-\lambda = 1 - 4 \, \mu_1,
+\lambda = 1,
 \label{eq:lambda_tridiag_onestep}
 \end{equation}
+%
+which is the same of the global sampling scheme.
+
+\note{The integral is evaluated as follows.
+%
+We again change variable $p \to \frac{ \pi } { 2 } - p$,
+and
+$$
+\begin{aligned}
+\Err_2
+&=
+\frac{n}{\lambda \, t}
+\frac{1}{2 \pi i}
+\int_0^{2 \, \pi}
+\frac{ \left(1 - 4 \, \mu_1 \, \cos^2 p \right)^2 }
+     {       2 - 8 \, \mu_1 \, \cos^2 p - \lambda }
+\cdot
+\frac{ \sin^2 p            }
+     { \cos^2 p + \delta^2 }
+\, dp
+\\
+&=
+\frac{n}{\lambda \, t}
+\frac{1}{2 \pi i}
+\oint
+\frac{ \left[1 -      \mu_1 \, \left(z + \frac{1}{z}\right)^2 \right]^2 }
+     {       2 - 2 \, \mu_1 \, \left(z + \frac{1}{z}\right)^2 - \lambda }
+\cdot
+\frac{ 4 - \left( z + \frac 1 z \right)^2 }
+     { \left( z + \frac 1 z \right)^2 + 4 \, \delta^2 }
+\, \frac{dz}{z}
+\\
+&=
+\frac{n}{\lambda \, t}
+\frac{1}{2 \pi i}
+\oint
+\frac{ \left[z^2 -      \mu_1 \, (z^2 + 1)^2 \right]^2   }
+     {  (2 - \lambda) \, z^2 - 2 \, \mu_1 \, (z^2 + 1)^2 }
+\cdot
+\frac{ 4 \, z^2 - ( z^2 + 1 )^2 }
+     { ( z^2 + 1 )^2 + 4 \, \delta^2 \, z^2 }
+\, \frac{ dz }{ z^3 }
+\\
+&=
+\frac{ n } { \lambda \, t }
+\sum_i \operatorname{Res}_i
+,
+\end{aligned}
+$$
+where the contour is the unit circle
+in the complex plane of $z$,
+and the integral is reduced to a sum of residues
+around the poles within the unit circle.
+
+The poles of the integral come from three factors,
+namely,
+1: at $z = 0$,
+2: at the zeros of
+$(2 - \lambda) \, z^2 - 2 \, \mu_1 \, (z^2 + 1)^2$,
+3: at the zeros of
+$( z^2 + 1 )^2 + 4 \, \delta^2 \, z^2$.
+
+For the first pole around the origin,
+we need to expand the integrand as
+$$
+\frac{ A + B \, z^2 + \cdots }
+     {          z^3          },
+$$
+then the residue is simply $B$.
+%
+Since
+$$
+\begin{aligned}
+\left[ z^2 - \mu_1 (z^2 + 1)^2 \right]^2
+&=
+[ - \mu_1 + (1 - 2 \, \mu_1) \, z^2]^2
+\\
+&=
+\mu_1^2
+\left[
+  1 + \left(4 - \tfrac { 2  } { \mu_1 } \right) z^2
+\right],
+\\
+%
+(2 - \lambda) \, z^2 - 2 \, \mu_1 \, (z^2 + 1)^2
+&=
+-2 \, \mu_1 \,
+\left[
+  1 + \left(
+        2 + \tfrac{ \lambda - 2 } { 2 \, \mu_1 }
+      \right)
+\right],
+\\
+%
+4 \, z - ( z^2 + 1 )^2
+&=
+-( 1 - z^2 ),
+\\
+%
+( z^2 + 1 )^2 + 4 \, \delta^2 \, z^2
+&=
+1 + (2 + 4 \, \delta^2) \, z^2,
+\end{aligned}
+$$
+the integrand is
+$$
+\begin{aligned}
+\frac{ \mu_1 }
+     {   2   }
+\left[
+  1 + \left(
+        - \frac{ 2 + \lambda } { 2 \, \mu_1 }
+        - 2 - 4 \, \delta^2
+      \right) \, z^2
+\right].
+\end{aligned}
+$$
+and the residue is
+$$
+\operatorname{Res}_1
+=
+  - \frac{ 2 + \lambda } { 4 }
+  - \mu_1 \, \left( 1 +  \, \delta^2 \right).
+$$
+
+
+For the second part,
+we have four roots of
+$$
+(2 - \lambda) \, z^2 = 2 \, \mu_1 \, (z^2 + 1)^2,
+$$
+which are
+$$
+z = \pm \sqrt { \frac{ 2 - \lambda }
+                     { 8 \, \mu_1 } }
+\pm \sqrt { \frac{ 2 - \lambda }
+                 { 8 \, \mu_1 } - 1 }.
+$$
+Two of them lie in the unit circle, namely
+$$
+z = \pm \left(
+  \sqrt { \frac{ 2 - \lambda }
+               { 8 \, \mu_1 } }
+- \sqrt { \frac{ 2 - \lambda }
+               { 8 \, \mu_1 } - 1 }
+        \right),
+$$
+and
+$$
+4 \, \mu_1 \, ( z^2 + 1)
+=
+2 - \lambda
+-
+\sqrt{ ( 2 - \lambda ) ( 2 - \lambda - 8 \, \mu_1 ) }.
+$$
+Thus,
+$$
+\begin{aligned}
+\left[ z^2 - \mu_1 \, (1 + z^2)^2 \right]^2
+&=
+\left( z^2 - \tfrac{ 2 - \lambda } { 2 } z^2 \right)^2
+=
+\frac{ \lambda^2 } { 4 } z^4.
+\\
+%
+4 z^2 - (1 + z^2)^2
+&=
+-\frac{ 2 - \lambda - 8 \, \mu_1  } { 2 \, \mu_1 } z^2,
+\\
+%
+(z^2 + 1)^2 + 4 \, \delta^2 \, z^2
+&=
+\frac{ 2 - \lambda + 8 \, \mu_1 \, \delta^2 }
+     { 2 \, \mu_1 }
+     z^2,
+\\
+%
+(2 - \lambda) \, 2 \, z
+-
+8 \, \mu_1 \, (z^2 + 1) \, z
+&=
+2 \, z \, \left[2 - \lambda - 4 \,  \mu_1 \, (z^2 + 1) \right]
+\\
+&= 2 \, z \, \sqrt{ (2 - \lambda) ( 2 - \lambda - 8 \, \mu_1 ) },
+\end{aligned}
+$$
+where we have used the L'H\^{o}pital's rule
+and taken the derivative for the last factor.
+%
+Note that the two roots within the unit share the same
+residue and the sum for this part is
+$$
+\operatorname{Res}_2
+=
+-\frac{                 \lambda^2                     }
+      { 4 \, ( 2 + 8 \, \mu_1 \, \delta^2 - \lambda ) }
+\sqrt{ 1 - \frac{ 8 \, \mu_1 } { 2 - \lambda } }.
+$$
+
+For the last part,
+we have four roots of
+$(z^2 + 1)^2 = - 4 \, \delta^2 \, z^2$,
+with two of them lying in the unit circle:
+$$
+z = \pm i \left( \sqrt{ 1 + \delta^2 } - \delta \right),
+$$
+such that
+$$
+z^2 + 1 + 2 \, \delta^2 = 2 \, \delta \, \sqrt{1 + \delta^2}.
+$$
+Then,
+$$
+\begin{aligned}
+z^2 - \mu_1 (1 + z^2)^2
+&= z^2 \, (1 + 4 \, \mu_1 \, \delta^2),
+\\
+4 \, z^2 - (1 + z^2)^2
+&=
+4 \, z^2 \, (1 + \delta^2)
+\\
+%
+(2 - \lambda) \, z^2
+- 2 \, \mu_1 (1 + z^2)^2
+&=
+\left(
+  2 - \lambda + 8 \, \mu_1 \, \delta^2
+\right) \, z^2
+\\
+%
+4 \, z \, (1 + z^2)
++
+8 \, \delta^2 \, z
+&=
+4 \, z \, (z^2 + 1 + \delta^2)
+=
+4 \, z \, 2 \, \delta \, \sqrt{ 1 + \delta^2 }.
+\end{aligned}
+$$
+Note that the two roots within the unit share the same
+residue and the sum for this part is
+$$
+\operatorname{Res}_3
+=
+\frac{ (1 + 4 \, \mu_1 \, \delta^2 )^2 }
+     { (2 + 8 \, \mu_1 \, \delta^2 - \lambda }
+\frac{ \sqrt{ 1 + \delta^2 } }
+     {        \delta         }.
+$$
+
+Now as $\delta \to 0$, the last contribution will dominate,
+and we have
+$$
+\Err_2
+\approx
+\frac{ n } { t }
+\frac{ (1 + 4 \, \mu_1 \, \delta^2)^2 }
+{ \lambda \, (2 + 8 \, \mu_1 \, \delta^2 - \lambda) }
+\approx
+\frac{ n } { t }
+\frac{ 1 }
+{ \lambda \, (2 - \lambda) },
+$$
+and the minimum is reached at $\lambda \approx 1$.
+}
 
 
 
-\subsubsection{Gaussian matrix}
+\subsubsection{Gaussian updating scheme}
 
 
 
@@ -2565,7 +2841,8 @@ independent of the underlying sampling scheme.
 
 Normalized error vs. $\lambda$.
 
-The optimal $\lambda$ depends on the simulation length.
+In the global sampling scheme,
+the optimal $\lambda$ depends on the simulation length.
 This dependence is more significant in the global sampling scheme.
 
 

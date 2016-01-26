@@ -218,7 +218,6 @@ def main():
   # print out an information line
   sinfo = "# %s %s %s\n" % (fncfg, cmdopt, srange)
   txt += sinfo
-  open(fnouttmp, "w").write(sinfo)
 
   for i in range(len(cval)):
     print "%d: testing for c-value %s..." % (i, cval[i])
@@ -236,7 +235,7 @@ def main():
     txt += s
 
     # save to the output file
-    open(fnouttmp, "a").write(s)
+    open(fnouttmp, "w").write(txt)
 
   # write the entire text at the end
   # we do not trust the content of fnouttmp,
