@@ -25,6 +25,7 @@ typedef struct {
   double *p; /* target distribution */
   double alpha0; /* initial updating magnitude */
   int fixa; /* fix alpha during the entire process */
+  int pbc; /* periodic boundary condition */
   int winn; /* width of the updating window function */
   double win[NBMAX + 1]; /* shape of the window function */
   double wingaus; /* width of the Gaussian window */
@@ -32,6 +33,13 @@ typedef struct {
   int kcutoff; /* cutoff wave number of the initial noise */
   int sampmethod; /* sampling method */
   double tcorr; /* correlation time for the sampling method */
+
+  /* molecular dynamics parameters */
+  double mddt; /* MD time step */
+  double tp; /* temperature */
+  double thermdt; /* thermostat time step */
+  double dwa; /* parameter a in sin(x) * (a - b * sin(x)) */
+  double dwb; /* parameter b in sin(x) * (a - b * sin(x)) */
 
   int docorr; /* compute correlation functions */
   int nstcorr; /* time interval of computing autocorrelation function */
@@ -41,14 +49,15 @@ typedef struct {
   long nequil; /* equilibration time */
   long nsteps; /* number of steps */
   long ntrials; /* number of trials */
-  int verbose; /* verbose level */
-  const char *prog; /* name of the program */
 
 #ifdef CSCAN /* for predict.c */
   double cmin;
   double cdel;
   double cmax;
 #endif /* CSCAN */
+
+  int verbose; /* verbose level */
+  const char *prog; /* name of the program */
 } invtpar_t;
 
 
@@ -57,6 +66,7 @@ enum {
   SAMPMETHOD_METROGLOBAL = 0,
   SAMPMETHOD_METROLOCAL,
   SAMPMETHOD_HEATBATH,
+  SAMPMETHOD_MD,
   SAMPMETHOD_COUNT
 };
 
@@ -67,6 +77,7 @@ const char *sampmethod_names[][MAX_OPT_ALIASES] = {
   {"global Metropolis", "global", "g"},
   {"local Metropolis", "local", "l"},
   {"heat-bath", "h"},
+  {"molecular dynamics", "MD", "d"},
   {""}
 };
 
@@ -83,6 +94,8 @@ static void invtpar_init(invtpar_t *m)
   m->p = NULL;
   m->alpha0 = 0.0;
   m->fixa = 0;
+
+  m->pbc = 0;
   m->winn = 1; /* single bin update */
   for ( i = 1; i < m->winn; i++ ) {
     m->win[i] = 0;
@@ -93,6 +106,13 @@ static void invtpar_init(invtpar_t *m)
   m->kcutoff = 0;
   m->sampmethod = 0;
   m->tcorr = 0.0; /* perfect sampling */
+
+  /* molecular dynamics parameters */
+  m->mddt = 0.005;
+  m->tp = 1.0;
+  m->thermdt = 0.1;
+  m->dwa = 1.0;
+  m->dwb = 2.0;
 
   m->docorr = 0; /* don't compute correlation functions */
   m->nstcorr = 0; /* do correlation functions */
@@ -201,6 +221,11 @@ static void invtpar_compute(invtpar_t *m)
   if ( m->kcutoff <= 0 ) {
     m->kcutoff = m->n;
   }
+
+  /* Currently, turn on PBC for MD automatically */
+  if ( m->sampmethod == SAMPMETHOD_MD ) {
+    m->pbc = 1;
+  }
 }
 
 
@@ -226,6 +251,7 @@ static void invtpar_help(const invtpar_t *m)
   fprintf(stderr, "  --a0=:         set the initial alpha during equilibration, default %g\n", m->alpha0);
   fprintf(stderr, "  --t0=:         set t0 in alpha = c/(t + t0), if unset, t0 = c/a0, default %g\n", m->t0);
   fprintf(stderr, "  --fixa:        fix the alpha during the entire process, default %d\n", m->fixa);
+  fprintf(stderr, "  --pbc:         use periodic boundary condition, default %d\n", m->pbc);
   fprintf(stderr, "  --nb=:         explicitly set the update window parameters, separated by comma, like --nb=0.2,0.4\n");
   fprintf(stderr, "  --sig=:        set the Gaussian window width, default %g\n", m->wingaus);
   fprintf(stderr, "  --initrand=:   magnitude of the initial random error, default %g\n", m->initrand);
@@ -403,6 +429,14 @@ static int invtpar_keymatch(invtpar_t *m,
   {
     m->fixa = 1;
   }
+  else if ( strcmpfuzzy(key, "pbc") )
+  {
+    if ( val != NULL ) {
+      m->pbc = atoi( val );
+    } else {
+      m->pbc = 1;
+    }
+  }
   else if ( strstartswith(key, "nb")
          || strstartswith(key, "neighbo")
          || strcmpfuzzy(key, "win") == 0
@@ -438,6 +472,27 @@ static int invtpar_keymatch(invtpar_t *m,
          || strcmpfuzzy(key, "corr-time") == 0 )
   {
     m->tcorr = invtpar_getdouble(m, key, val);
+  }
+  else if ( strcmpfuzzy(key, "mddt") == 0 )
+  {
+    m->mddt = invtpar_getdouble(m, key, val);
+  }
+  else if ( strcmpfuzzy(key, "tp") == 0
+         || strstartswith(key, "temp") )
+  {
+    m->tp = invtpar_getdouble(m, key, val);
+  }
+  else if ( strcmpfuzzy(key, "thermdt") == 0 )
+  {
+    m->thermdt = invtpar_getdouble(m, key, val);
+  }
+  else if ( strcmpfuzzy(key, "dwa") == 0 )
+  {
+    m->dwa = invtpar_getdouble(m, key, val);
+  }
+  else if ( strcmpfuzzy(key, "dwb") == 0 )
+  {
+    m->dwb = invtpar_getdouble(m, key, val);
   }
   else if ( strcmpfuzzy(key, "corr") == 0
          || strcmpfuzzy(key, "docorr") == 0 )
@@ -649,8 +704,8 @@ static void invtpar_dump(const invtpar_t *m)
   double sum = 0;
 
   fprintf(stderr, "%ld trials: n %d, alpha = %g/(t + %g), alpha0 %g, "
-      "%s, %ld steps;\n",
-      m->ntrials, m->n, m->c, m->t0, m->alpha0,
+      "pbc %d, %s, %ld steps;\n",
+      m->ntrials, m->n, m->c, m->t0, m->alpha0, m->pbc,
       sampmethod_names[m->sampmethod][0], m->nsteps);
 
   fprintf(stderr, "update window function (%d bins): ", m->winn);

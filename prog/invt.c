@@ -3,6 +3,7 @@
 
 
 #include "invt.h"
+#include "invtsamp.h"
 #include "corr.h"
 
 
@@ -14,6 +15,8 @@ static double simulmeta(const invtpar_t *m, double *err0)
   double *v = NULL, *vac = NULL, a, err;
   int i, n = m->n, prod = 0;
   long t;
+
+  invtmd_t invtmd[1];
 
   corr_t *corr = NULL;
   double *u = NULL, *costab = NULL;
@@ -30,6 +33,12 @@ static double simulmeta(const invtpar_t *m, double *err0)
   }
   fromcosmodes(v, n, u, costab);
   normalize(v, n, m->initrand, m->p);
+
+  if ( m->sampmethod == SAMPMETHOD_MD ) {
+    invtmd_init(invtmd, n,
+        m->mddt, m->tp, m->thermdt,
+        m->dwa, m->dwb, v);
+  }
 
   /* space for the accumulative distribution function */
   xnew(vac, n + 1);
@@ -48,9 +57,11 @@ static double simulmeta(const invtpar_t *m, double *err0)
       if ( m->sampmethod == SAMPMETHOD_METROGLOBAL ) {
         i = mc_metro_g(v, n, i);
       } else if ( m->sampmethod == SAMPMETHOD_METROLOCAL ) {
-        i = mc_metro_l(v, n, i);
+        i = mc_metro_l(v, n, i, m->pbc);
       } else if ( m->sampmethod == SAMPMETHOD_HEATBATH ) {
         i = mc_heatbath(v, vac, n);
+      } else if ( m->sampmethod == SAMPMETHOD_MD ) {
+        i = invtmd_vv(invtmd);
       }
     }
 
@@ -75,7 +86,7 @@ static double simulmeta(const invtpar_t *m, double *err0)
     a /= m->p[i];
 
     if ( m->winn > 1 ) {
-      mbin_update(v, n, i, a, m->win, m->winn);
+      mbin_update(v, n, i, a, m->win, m->winn, m->pbc);
     } else {
       v[i] += a;
     }

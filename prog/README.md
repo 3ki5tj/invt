@@ -11,12 +11,27 @@ the Wang-Landau algorithm and metadynamics.
 Programs
 ========
 
- Program  |  Descriptions
+ Program  |  Description
 ----------|------------------------------------
 invt      | Main program
 predict   | Predict error
 modetest  | Test program for mode decomposition
 langtest  | Test for Langevin equations
+
+
+Source code
+===========
+
+
+invt
+----
+
+File      | Description
+----------|-------------------
+invt.c    | header
+invtpar.h | handling input parameters
+invt.h    | utility routines
+invtsamp.h| sampling routines
 
 
 
