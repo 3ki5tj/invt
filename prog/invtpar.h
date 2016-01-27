@@ -168,7 +168,7 @@ static void invtpar_compute(invtpar_t *m)
       m->winn = (int) (m->wingaus * 5 + 0.5);
     }
 
-    x = 1;
+    m->win[0] = x = 1;
     for ( i = 1; i < m->winn; i++ ) {
       m->win[i] = exp(-0.5*i*i/m->wingaus/m->wingaus);
       x += m->win[i] * 2;
@@ -646,6 +646,7 @@ static int invtpar_doargs(invtpar_t *m, int argc, char **argv)
 static void invtpar_dump(const invtpar_t *m)
 {
   int i;
+  double sum = 0;
 
   fprintf(stderr, "%ld trials: n %d, alpha = %g/(t + %g), alpha0 %g, "
       "%s, %ld steps;\n",
@@ -654,9 +655,11 @@ static void invtpar_dump(const invtpar_t *m)
 
   fprintf(stderr, "update window function (%d bins): ", m->winn);
   for ( i = 0; i < m->winn; i++ ) {
+    sum += m->win[i];
     fprintf(stderr, "%g ", m->win[i]);
   }
-  fprintf(stderr, "\n");
+  sum = sum * 2 - m->win[0];
+  fprintf(stderr, "| sum %g\n", sum);
 
 #ifdef CSCAN
   fprintf(stderr, "c scan window: %g:%g:%g\n",

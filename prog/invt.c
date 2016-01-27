@@ -132,7 +132,8 @@ static double invt_run(invtpar_t *m)
   long ntr = m->ntrials;
   long i;
 
-  mtscramble( time(NULL) );
+  /* clock() is probably better than time(NULL) */
+  mtscramble( clock() );
 
   if ( m->docorr ) {
     /* compute correlation functions

@@ -28,15 +28,17 @@ set ylabel "Normalized error, {/Times (}{/Times-Italic t}{/Times + }{/Times-Ital
 # `width` to reduce the text length
 set key at 10, 1e4 Left reverse width -7
 
+a0 = 0.0001
+
 plot [0:10][:5e4] \
-    "../../data/nb0.24/nb0.24_g_err.dat"     u 1:($2*1e8):($4*1e8)  w e pt 5 ps 1.2  lc rgb "#000000"    t "Global, {/Times-Italic t} = 10^8, simulation", \
-    "../../data/nb0.24/nb0.24_g_prd.dat"     u 1:($2**2*1e8)        w l lt 1 lw 2    lc rgb "#000000"    t "Global, {/Times-Italic t} = 10^8, theory", \
-    "../../data/nb0.24/nb0.24t1e7_g_err.dat" u 1:($2*1e7):($4*1e7)  w e pt 5 ps 1.2  lc rgb "#a0a0a0"    t "Global, {/Times-Italic t} = 10^7, simulation", \
-    "../../data/nb0.24/nb0.24t1e7_g_prd.dat" u 1:($2**2*1e7)        w l lt 1 lw 2    lc rgb "#a0a0a0"    t "Global, {/Times-Italic t} = 10^7, theory", \
-    "../../data/nb0.24/nb0.24_l_err.dat"     u 1:($2*1e8):($4*1e8)  w e pt 7 ps 1.5  lc rgb "#000000"    t "Local, {/Times-Italic t} = 10^8, simulation", \
-    "../../data/nb0.24/nb0.24_l_prd.dat"     u 1:($2**2*1e8)        w l lt 2 lw 2    lc rgb "#000000"    t "Local, {/Times-Italic t} = 10^8, theory", \
-    "../../data/nb0.24/nb0.24t1e7_l_err.dat" u 1:($2*1e7):($4*1e7)  w e pt 7 ps 1.5  lc rgb "#a0a0a0"    t "Local, {/Times-Italic t} = 10^7, simulation", \
-    "../../data/nb0.24/nb0.24t1e7_l_prd.dat" u 1:($2**2*1e7)        w l lt 2 lw 2    lc rgb "#a0a0a0"    t "Local, {/Times-Italic t} = 10^7, theory", \
+    "../../data/nb0.24/nb0.24_g_err.dat"     u 1:($2*(1e8+$1/a0)):($4*(1e8+$1/a0))  w e pt 5 ps 1.2  lc rgb "#000000"    t "Global, {/Times-Italic t} = 10^8, simulation", \
+    "../../data/nb0.24/nb0.24_g_prd.dat"     u 1:($2**2*(1e8+$1/a0))        w l lt 1 lw 2    lc rgb "#000000"    t "Global, {/Times-Italic t} = 10^8, theory", \
+    "../../data/nb0.24/nb0.24t1e7_g_err.dat" u 1:($2*(1e7+$1/a0)):($4*(1e7+$1/a0))  w e pt 5 ps 1.2  lc rgb "#a0a0a0"    t "Global, {/Times-Italic t} = 10^7, simulation", \
+    "../../data/nb0.24/nb0.24t1e7_g_prd.dat" u 1:($2**2*(1e7+$1/a0))        w l lt 1 lw 2    lc rgb "#a0a0a0"    t "Global, {/Times-Italic t} = 10^7, theory", \
+    "../../data/nb0.24/nb0.24_l_err.dat"     u 1:($2*(1e8+$1/a0)):($4*(1e8+$1/a0))  w e pt 7 ps 1.5  lc rgb "#000000"    t "Local, {/Times-Italic t} = 10^8, simulation", \
+    "../../data/nb0.24/nb0.24_l_prd.dat"     u 1:($2**2*(1e8+$1/a0))        w l lt 2 lw 2    lc rgb "#000000"    t "Local, {/Times-Italic t} = 10^8, theory", \
+    "../../data/nb0.24/nb0.24t1e7_l_err.dat" u 1:($2*(1e7+$1/a0)):($4*(1e7+$1/a0))  w e pt 7 ps 1.5  lc rgb "#a0a0a0"    t "Local, {/Times-Italic t} = 10^7, simulation", \
+    "../../data/nb0.24/nb0.24t1e7_l_prd.dat" u 1:($2**2*(1e7+$1/a0))        w l lt 2 lw 2    lc rgb "#a0a0a0"    t "Local, {/Times-Italic t} = 10^7, theory", \
     -1 notitle
 
 
