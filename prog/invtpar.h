@@ -429,7 +429,7 @@ static int invtpar_keymatch(invtpar_t *m,
   {
     m->fixa = 1;
   }
-  else if ( strcmpfuzzy(key, "pbc") )
+  else if ( strcmpfuzzy(key, "pbc") == 0 )
   {
     if ( val != NULL ) {
       m->pbc = atoi( val );

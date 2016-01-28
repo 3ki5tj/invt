@@ -575,7 +575,7 @@ by a differential equation
 \begin{equation}
   \dot v_i(t)
   =
-  h_i(t) \frac{ \alpha(t) } { p_i },
+  \alpha(t) \, \frac{ h_i(t) } { p_i },
   \label{eq:vt_diffeq}
 \end{equation}
 %
@@ -776,7 +776,7 @@ in this case.
 
 
 
-\subsubsection{One-variable problem}
+\subsubsection{Optimization of a one-variable problem}
 
 
 
@@ -845,16 +845,17 @@ e^{-\lambda \, q(t) + \lambda \, z}.
 \end{align}
 So
 \begin{align}
-\left\langle x^2(t) \right\rangle
-&=
+&\left\langle x^2(t) \right\rangle
+=
+\langle x^2(0) \rangle e^{-2 \, \lambda \, q(t)}
+\notag
+\\
+&\qquad
++
 \int_0^t \int_0^t
   \dot u\bigl( q(t') \bigr) \,
   \dot u\bigl( q(t'') \bigr) \,
-  \kappa(t' - t'') \, dt'' \, dt'
-\notag
-\\
-&\hphantom{=}
-+\langle x^2(0) \rangle e^{-2 \, \lambda \, q(t)}.
+  \kappa(t' - t'') \, dt'' \, dt'.
 \label{eq:x2t_average}
 \end{align}
 
@@ -979,8 +980,9 @@ with elements $w_{ij}$.
 %
 Then, Eq. \eqref{eq:vt_diffeq} is generalized to
 \begin{equation}
-  \dot v_i(t) =
-  \sum_{j=1}^n \alpha(t) \, h_j(t) \frac{ w_{ij} } { p_j }.
+  \dot v_i(t)
+  =
+  \alpha(t) \sum_{j=1}^n \, w_{ij} \frac{ h_j(t) } { p_j }.
   \label{eq:vt_diffeq_mbin}
 \end{equation}
 
@@ -1091,7 +1093,7 @@ that can increase indefinitely.
 
 
 
-\subsubsection{Linearization and decoupling}
+\subsubsection{Linearization and decoupling to eigenmodes}
 
 
 
@@ -1121,15 +1123,21 @@ in linear terms of $x_j$.
 $$
 \begin{aligned}
   \dot{ \bar v }
-  &= \sum_{i = 1}^n p_i \, \dot v_i
+  &=
+  \sum_{i = 1}^n p_i \, \dot v_i
+  %
   \stackrel{\mathrm{Eq.\; \eqref{eq:vt_diffeq_mbin}}}
   {=\joinrel=\joinrel=\joinrel=\joinrel=}
-  \sum_{j = 1}^n \alpha(t) \, \frac{ h_j(t) } { p_j } \sum_{ i = 1 }^{n} p_i \, w_{ij}
+  %
+  \sum_{j = 1}^n \alpha(t) \, \frac{ h_j(t) } { p_j }
+                 \sum_{ i = 1 }^{n} p_i \, w_{ij}
   \\
   &
   \stackrel{\mathrm{Eq.\; \eqref{eq:w_balance}}}
   {=\joinrel=\joinrel=\joinrel=\joinrel=}
-  \sum_{j = 1}^n \alpha(t) \, h_j(t) = \alpha(t).
+  \sum_{j = 1}^n \alpha(t) \, h_j(t)
+  =
+  \alpha(t).
 \end{aligned}
 $$
 Equation \eqref{eq:px_sum} follows directly from the definition
@@ -1144,25 +1152,24 @@ and
 we get a set of decoupled equations
 %
 \begin{equation}
-\dot y_i(t)
+\dot y_k(t)
 =
--\alpha(t) \, \lambda_i
-[y_i(t) - \eta_i(t)],
+-\alpha(t) \, \lambda_k \, [y_k(t) - \eta_k(t)],
 \label{eq:yt_diffeq}
 \end{equation}
 %
 where
 \begin{align}
-  y_i &= \sum_{j=1}^n \phi_{ij} \, x_j,
+  y_k &= \sum_{j=1}^n \phi_{kj} \, x_j,
   \label{eq:y_def}
   \\
-  \eta_i &= \sum_{j=1}^n \phi_{ij} \frac{ \zeta_j}{ p_j}.
+  \eta_k &= \sum_{j=1}^n \phi_{kj} \frac{ \zeta_j}{ p_j}.
   \label{eq:eta_def}
 \end{align}
 
 
 
-\subsubsection{Minimization of the error function}
+\subsubsection{Error function}
 
 
 
@@ -1171,14 +1178,18 @@ from Eq. \eqref{eq:eig_orthonormal_cols}
 as
 \begin{align}
   \Err
-  &\equiv
-  \sum_{i = 1}^n p_i \, x_i^2
+  \equiv
+  \sum_{i = 1}^n p_i \,
+                 \langle x_i^2 \rangle
   =
-  \sum_{i, j, k=1}^n \phi_{ki} \, \phi_{kj} \, x_i \, x_j
+  \sum_{i, j, k=1}^n \phi_{ki} \, \phi_{kj} \,
+                     \langle x_i \, x_j \rangle
   =
-  \sum_{k = 1}^n y_k^2.
+  \sum_{k = 1}^n \langle y_k^2 \rangle,
   \label{eq:y2_sum}
 \end{align}
+%
+which is a superposition of the components of the modes.
 %
 Note that there is always one mode, say
 $y_1 = \sum_{j=1}^n p_j \, x_j$
@@ -1191,46 +1202,63 @@ from $k = 2$.
 
 
 In analogous to Eq. \eqref{eq:x2t_average},
-we can rewrite Eq. \eqref{eq:y2_sum} as
+we have, from Eq. \eqref{eq:y2_sum},
 %
-\begin{align}
+\begin{equation}
   \Err
-  %&= \sum_{i = 2}^n \langle y_i^2 \rangle
-  %\notag
-  %\\
-  &=
-  \int_0^t \int_0^t
-  \sum_{i = 2}^n
-  \dot u_i\bigl( q(t') \bigr) \,
-  \dot u_i\bigl( q(t'') \bigr) \,
-  \kappa_i(t' - t'') \, dt' \, dt'',
-  \label{eq:error_mbin}
-\end{align}
+  =
+  \Err_R + \Err_A,
+  \label{eq:error_split}
+\end{equation}
 %
-where
+which is the sum of the residual error
+%
+\begin{equation}
+  \Err_R
+  =
+  \sum_{k = 2}^n
+    \left\langle y_k^2(0) \right\rangle \,
+    e^{ - 2 \, \lambda_k  \, q(t) },
+  \label{eq:error_res}
+\end{equation}
+%
+from the decay of the initial errors,
+and the asymptotic error
+\begin{equation}
+  \Err_A
+  =
+  \int_0^t \int_0^t
+  \sum_{k = 2}^n
+    \dot u_k\bigl( q(t') \bigr) \,
+    \dot u_k\bigl( q(t'') \bigr) \,
+    \kappa_k(t' - t'') \, dt' \, dt'',
+  \label{eq:error_asym}
+\end{equation}
+%
+where,
 \begin{align*}
-  u_i(z)
+  u_k(z)
   &\equiv
-  e^{\lambda_i \, [z - q(t)]},
+  e^{\lambda_k \, [z - q(t)]},
   \\
-  \kappa_i(t - t')
+  \kappa_k(t - t')
   &\equiv
   \left\langle
-    \eta_i(t) \, \eta_i(t')
+    \eta_k(t) \, \eta_k(t')
   \right\rangle.
 \end{align*}
 %
-\note{The extremal condition of $\Err$ is given by
+\note{The extremal condition of $\Err_A$ is given by
 %
 \begin{align}
-\sum_{i=2}^n
-\lambda_i \, u_i\bigl( q(\tau) \bigr)
+\sum_{k = 2}^n
+\lambda_k \, u_k\bigl( q(\tau) \bigr)
 \int_0^t
-\ddot u_i\bigl( q(t') \bigr) \, \kappa_i(t' - \tau) \, dt' = 0.
+\ddot u_k \bigl( q(t') \bigr) \, \kappa_k(t' - \tau) \, dt' = 0.
 \label{eq:optimal_mbin}
 \end{align}
 %
-If all $\lambda_i$, hence all $u_i$, are the same,
+If all $\lambda_k$, hence all $u_k$, are the same,
 the above condition can be satisfied
 by Eq. \eqref{eq:ddu_eq_0},
 which is the single-bin case.
@@ -1246,34 +1274,34 @@ appears to be useless in a general setting.
 
 
 In the asymptotic regime,
-we can approximate $\kappa_i(t)$ as
+we can approximate $\kappa_k(t)$ as
 %
 \begin{equation}
-  \kappa_i(t) \approx \Gamma_i \, \delta(t)
+  \kappa_k(t) \approx \Gamma_k \, \delta(t)
   \label{eq:kappa_delta}
 \end{equation}
 %
 where,
 \begin{equation}
-  \Gamma_i = \int_{-\infty}^\infty \kappa_i(t) \, dt,
+  \Gamma_k = \int_{-\infty}^\infty \kappa_k(t) \, dt,
   \notag
   %\label{eq:Gamma_integral}
 \end{equation}
 or in discrete time,
 \begin{equation}
-  \Gamma_i = \sum_{t = -\infty}^\infty \kappa_i(t).
+  \Gamma_k = \sum_{t = -\infty}^\infty \kappa_k(t).
   \label{eq:Gamma_sum}
 \end{equation}
 %
-Then, Eq. \eqref{eq:error_mbin} is simplified as
+Then, Eq. \eqref{eq:error_asym} is simplified as
 %
 \begin{align}
-  \Err
+  \Err_A
   &=
   \int_0^t
-  \sum_{i = 2}^n
-  \Gamma_i \, \dot u_i^2\bigl( q(t') \bigr) \, dt'.
-  \label{eq:error_mbin1}
+  \sum_{k = 2}^n
+  \Gamma_k \, \dot u_k^2\bigl( q(t') \bigr) \, dt'.
+  \label{eq:error_asym1}
 \end{align}
 %
 The next order correction to Eq. \eqref{eq:kappa_delta}
@@ -1283,23 +1311,23 @@ that is about $\alpha_{\max}^2$ times as large.
 
 \note{This is equivalent to saying that the Fourier transform
   $$
-  \tilde \kappa_i(\omega) = \Gamma_i
+  \tilde \kappa_k(\omega) = \Gamma_k
   $$
   is a roughly constant.
   %
   For the next order correction we would have
   $$
-  \tilde \kappa_i(\omega) = \Gamma_i + \Gamma^{(2)}_i \omega^2 + \dots,
+  \tilde \kappa_k(\omega) = \Gamma_k + \Gamma^{(2)}_k \omega^2 + \dots,
   $$
   which leads to a correction to $\Err$
   $$
-  \Gamma^{(2)}_i
-  \int_0^t \ddot u_i^2\bigl( q(t') \bigr) \, dt'
+  \Gamma^{(2)}_k
+  \int_0^t \ddot u_k^2\bigl( q(t') \bigr) \, dt'
   \propto
   \alpha^2 \, \Err.
   $$
   This correction is of order $\alpha^2$
-  compared to the main contribution in Eq. \eqref{eq:error_mbin1}.
+  compared to the main contribution in Eq. \eqref{eq:error_asym1}.
   %
   Thus, we can assume Eq. \eqref{eq:kappa_delta},
   once $\alpha(t)$ has dropped below a certain level.
@@ -1310,15 +1338,15 @@ that is about $\alpha_{\max}^2$ times as large.
   now becomes
   %
   \begin{align}
-    \sum_{i=1}^n
-      \Gamma_i \, \lambda_i \,
-      u_i\bigl( q(\tau) \bigr) \,
-      \ddot u_i\bigl( q(\tau) \bigr) = 0.
+    \sum_{k = 1}^n
+      \Gamma_k \, \lambda_k \,
+      u_k\bigl( q(\tau) \bigr) \,
+      \ddot u_k\bigl( q(\tau) \bigr) = 0.
     \label{eq:optimal_mbin1}
   \end{align}
   %
-  If we interpret $u_i$ as the position,
-  and $\Gamma_i \, \lambda_i$ as the mass,
+  If we interpret $u_k$ as the position,
+  and $\Gamma_k \, \lambda_k$ as the mass,
   then the right-hand side gives the virial.
   %
   Thus, the extremal condition demands
@@ -1332,23 +1360,25 @@ that is about $\alpha_{\max}^2$ times as large.
 
 
 
-We can evaluate the $\Gamma_i$'s
+We can evaluate the $\Gamma_k$'s
 in two special case.
 %
 If the sampling is perfect,
 Eq. \eqref{eq:kappa_delta} is exact, and
 %
 \begin{equation}
-  \Gamma_i = 1.
+  \Gamma_k = 1.
   \label{eq:Gamma_perfect}
 \end{equation}
 %
 In this case,
-the bin index $i$ is an independent random variable
+the bin index $k$ is an independent random variable
 at each time step $t$, and
 %
 \begin{equation}
-  \langle \zeta_i(t) \, \zeta_j(t') \rangle
+  \left\langle
+    \zeta_i(t) \, \zeta_j(t')
+  \right\rangle
   =
   \left( p_i \, \delta_{ij} - p_i \, p_j \right) \, \delta(t - t'),
   \label{eq:zz_perfect}
@@ -1361,10 +1391,16 @@ from the discrete time case to the continuous limit. % hereinafter.
   with $t \ne t'$ (going back to the discrete time case),
   $$
   \begin{aligned}
-  \langle \zeta_i(t) \, \zeta_j(t') \rangle
+  \left\langle
+    \zeta_i(t) \, \zeta_j(t')
+  \right\rangle
   &=
-  \langle \zeta_i(t)  \rangle
-  \langle \zeta_j(t') \rangle
+  \left\langle
+    \zeta_i(t)
+  \right\rangle
+  \left\langle
+    \zeta_j(t')
+  \right\rangle
   \\
   &=
   \bigl\langle h_i(t)  - \langle h_i(t)  \rangle \bigr\rangle
@@ -1414,15 +1450,15 @@ from the discrete time case to the continuous limit. % hereinafter.
 }
 %
 Thus, from Eqs. \eqref{eq:eig_orthonormal_rows} and \eqref{eq:eta_def},
-we get, for $i \ge 2$,
+we get, for $k \ge 2$,
 %
 \begin{equation}
-  \kappa_i(t - t')
+  \kappa_k(t - t')
   =
-  \sum_{j,k = 1}^n
-  \frac{ \phi_{ij} } { p_j }
-  \frac{ \phi_{ik} } { p_k }
-  \langle \zeta_j(t) \, \zeta_k(t') \rangle
+  \sum_{j,l = 1}^n
+  \frac{ \phi_{kj} } { p_j }
+  \frac{ \phi_{kl} } { p_l }
+  \langle \zeta_j(t) \, \zeta_l(t') \rangle
   %
   = \delta(t - t'),
   \label{eq:kappa_perfect}
@@ -1431,30 +1467,30 @@ we get, for $i \ge 2$,
 \note{To show Eq. \eqref{eq:kappa_perfect},
   $$
   \begin{aligned}
-  \kappa_i(t - t')
+  \kappa_k(t - t')
   &=
-  \sum_{j,k = 1}^n
-  \frac{ \phi_{ij} } { p_j }
-  \frac{ \phi_{ik} } { p_k }
-  \langle \zeta_j(t) \, \zeta_k(t') \rangle
+  \sum_{j,l = 1}^n
+  \frac{ \phi_{kj} } { p_j }
+  \frac{ \phi_{kl} } { p_l }
+  \langle \zeta_j(t) \, \zeta_l(t') \rangle
   \\
   %
   &=
-  \sum_{j,k = 1}^n
-  \frac{ \phi_{ij} } { p_j }
-  \frac{ \phi_{ik} } { p_k }
+  \sum_{j,l = 1}^n
+  \frac{ \phi_{kj} } { p_j }
+  \frac{ \phi_{kl} } { p_l }
   \left(
-    p_j \, \delta_{j, k} - p_j \, p_k
+    p_j \, \delta_{j, l} - p_j \, p_l
   \right)
   \, \delta(t - t')
   \\
   &=
   \left(
     \sum_{j = 1}^n
-    \frac{ \phi_{ij}^2 } { p_j }
+    \frac{ \phi_{kj}^2 } { p_j }
     -
-    \sum_{j = 1}^n \phi_{ij}
-    \sum_{k = 1}^n \phi_{ik}
+    \sum_{j = 1}^n \phi_{kj}
+    \sum_{l = 1}^n \phi_{kl}
   \right)
   \, \delta(t - t')
   \\
@@ -1473,13 +1509,13 @@ we get, for $i \ge 2$,
   Eq. \eqref{eq:eig_orthonormal_rows}
   on the last line.
   %
-  Note for $i \ge 2$,
+  Note for $k \ge 2$,
   $$
-  \sum_{j = 1}^n \phi_{ij}
+  \sum_{j = 1}^n \phi_{kj}
   =
-  \sum_{j = 1}^n \frac{ \phi_{ij} \, \phi_{1j} } { p_j }
+  \sum_{j = 1}^n \frac{ \phi_{kj} \, \phi_{1j} } { p_j }
   =
-  \delta_{i1}
+  \delta_{k1}
   =
   0.
   $$
@@ -1520,39 +1556,111 @@ discussed in Sec. \ref{sec:band-matrix}).
 %
 The eigenvalues of $\mathbf T$ are
 $$
-\Lambda_i = 1 - 2 \sin^2 \frac{ (i - 1) \, \pi } { 2 \, n }.
+\Lambda_k = 1 - 2 \sin^2 \frac{ (k - 1) \, \pi } { 2 \, n }.
 $$
-Note that these $\Lambda_i$'s are
+Note that these $\Lambda_k$'s are
 not to be confused with the eigenvalues of $\mathbf w$,
-$\lambda_i$'s.
+$\lambda_k$'s.
 %
-The correlation function $\kappa_i(t)$
-decays as $\kappa_i(0) \, \Lambda_i^t$,
-with the same-time value $\kappa_i(0) = 1$ being the same as
+The correlation function $\kappa_k(t)$
+decays as $\kappa_k(0) \, \Lambda_k^t$,
+with the same-time value $\kappa_k(0) = 1$ being the same as
 that in perfect sampling.
 %
-Thus, from Eq. \eqref{eq:Gamma_sum}, we get
+Thus,
+$\Gamma_k$ is roughly twice
+the autocorrelation time,
+and from Eq. \eqref{eq:Gamma_sum}, we get
 %
 \begin{equation}
-\Gamma_i
+\Gamma_k
 =
-1 + 2 \, \sum_{t = 1}^\infty \Lambda_i^t
+1 + 2 \, \sum_{t = 1}^\infty \Lambda_k^t
 =
-\frac{ 1 + \Lambda_i } { 1 - \Lambda_i }
+\frac{ 1 + \Lambda_k } { 1 - \Lambda_k }
 =
-\cot^2 \left[ \frac{ (i - 1) \, \pi } { 2 \, n } \right].
+\cot^2 \left[ \frac{ (k - 1) \, \pi } { 2 \, n } \right].
 \label{eq:Gamma_onestep}
 \end{equation}
 %
 We can use this case to model local sampling processes.
 
 
+\subsubsection{\label{eq:eqlerr}
+Equilibrium error under a fixed updating magnitude
+}
+
+
+Before addressing the optimal $\alpha(t)$,
+let us first compute the equilibrium value of $\Err$,
+under a fixed $\alpha(t) \equiv \alpha_0$.
+%
+In this case, we can drop $\Err_R$, and
+%
+\begin{align}
+  \Err
+  &=
+  \Err_A
+  =
+  \int_0^t
+    \sum_{k = 2}^n
+      \Gamma_k \, (\lambda_k \, \alpha_0)^2 \,
+      e^{ 2 \, \lambda_k \, \alpha_0 \, (t' - t) }
+    \, dt
+  \notag
+  \\
+  &
+  \stackrel{ t \to \infty }
+  { =\joinrel=\joinrel=\joinrel= }
+  %
+  \sum_{ k = 2 }^n
+    \frac 1 2 \, \Gamma_k \, \lambda_k \, \alpha_0,
+  \label{eq:error_eql}
+\end{align}
+%
+or, in terms of the components,
+%
+\begin{equation}
+  \left\langle
+    y_k^2
+  \right\rangle
+  =
+  \frac 1 2 \, \Gamma_k \, \lambda_k \, \alpha_0,
+  \label{eq:y2_eql}
+\end{equation}
+%
+
+If we can assume that before entering the asymptotic regime,
+the system has entered the equilibrium under a fixed $\alpha_0$,
+we can then use Eq. \eqref{eq:y2_eql}
+for the $\langle y_k^2(0) \rangle$'s in Eq. \eqref{eq:error_res}.
+
+\note{If we can interpret $\Gamma_k$ as twice the autocorrelation time,
+  and the kernel is exponential
+  $$
+  \kappa_k = \exp\left( - \frac{2}{\Gamma_k} |t| \right),
+  $$
+  then a slightly more accurate value is given by\cite{vankampen}
+  $$
+  \left\langle
+    y_k^2
+  \right\rangle
+  =
+  \frac{      ( \lambda_k \, \alpha_0 )^2     }
+       { \lambda_k \, \alpha_0 + 2 / \Gamma_k }.
+  $$
+  But it appears that the main error of Eq. \eqref{eq:y2_eql}
+  is an underestimate instead of an overestimate.
+  And a possible source of error might be from
+  converting a discrete sum to a continuous integral.
+}
+
 %
 %We can study two limiting cases.
 %
 %For $\tau \ll t$,
 %the dominant contribution comes from
-%the term(s) with the smallest eigenvalue $\lambda_i = \lambda_n$,
+%the term(s) with the smallest eigenvalue $\lambda_k = \lambda_n$,
 %and
 %$$
 %\ddot u_n(\tau) = 0,
@@ -1580,69 +1688,66 @@ is an optimal scheme.
 %
 Consider a class of $\mathbf w$ matrices
 sharing the same set of eigenvectors,
-hence same $\Gamma_i$'s,
-but with different eigenvalues, $\lambda_i$'s.
+hence same $\Gamma_k$'s,
+but with different eigenvalues, $\lambda_k$'s.
 %
 Using the Cauchy-Schwarz inequality, we have,
-for any set of $\beta_i \ge 0$
+for any set of $\beta_k \ge 0$
 %
 \begin{align}
 &
 \left(
   \int_0^t dt'
-    \sum_{i = 2}^n
-      \Gamma_i \, \dot u_i^2\bigl( q(t') \bigr)
+    \sum_{k = 2}^n
+      \Gamma_k \, \dot u_k^2\bigl( q(t') \bigr)
 \right)
 %
 \left(
   \int_0^t dt'
-    \sum_{i = 2}^n
-      \Gamma_i \, c_i^2
+    \sum_{k = 2}^n
+      \Gamma_k \, c_k^2
 \right)
 %
 \notag
 \\
 &
+\qquad \qquad
 \ge
 \left(
   \int_0^t dt'
-    \sum_{i = 2}^n
-      \Gamma_i \, c_i \, \dot u_i\bigl( q(t') \bigr)
+    \sum_{k = 2}^n
+      \Gamma_k \, c_k \, \dot u_k \, \bigl( q(t') \bigr)
 \right)^2
 \notag
 \\
 &
+\qquad \qquad
 =
 \left(
-  \sum_{i = 2}^n \Gamma_k \, c_i
+  \sum_{k = 2}^n \Gamma_k \, c_k
     \left[
-      1 - e^{ -\lambda_i q(t) }
+      1 - e^{ -\lambda_k q(t) }
     \right]
 \right)^2.
 \notag
 \end{align}
 %
-\note{A short proof of the above inequality
-  is the following.
-  %
-  First, we have
+To see this, we first observe that
 $$
 \int_0^t
-  dt' \sum_{i = 2}^n \Gamma_i \,
-    \left( \dot u_i \, X - c_i \right)^2
+  dt' \sum_{k = 2}^n \Gamma_k \,
+    \left( \dot u_k \, Y - c_k \right)^2
 \ge 0,
 $$
-  for any $X$.
-  %
-  Thus, the left-hand side,
-  expanded as a quadratic polynomial of $X$,
-  $A \, X^2 + B \, X + C$,
-  must have a non-positive discriminant,
-  $B^2 - 4 \, A \, C$.
-  %
-  This condition gives the desired inequality.
-  \\%
-}
+holds for any $Y$.
+%
+So the left-hand side,
+as a quadratic polynomial of $Y$,
+$A \, Y^2 + B \, Y + C$,
+must have a non-positive discriminant,
+$B^2 - 4 \, A \, C$.
+%
+This condition gives the desired inequality.
 %
 Note that the last expression depends on
 $q(t')$ only through the end point value,
@@ -1650,21 +1755,21 @@ which is fixed in the variation process.
 %
 Thus, the inequality sets a lower bound
 of the error $\Err$
-expressed in Eq. \eqref{eq:error_mbin1},
+expressed in Eq. \eqref{eq:error_asym1}.
 %
 The equality is achieved
-if $\dot u_i\left( q(t') \right) = c_i$
-for all $i = 2, \dots, n$ at any $t'$,
+if $\dot u_k\left( q(t') \right) = c_k$
+for all $k = 2, \dots, n$ at any $t'$,
 up to a multiplicative factor.
 %
 Solving this set of equations yields
 $$
 \alpha(t') = \frac{              1              }
-                  { \lambda_i \, (t' + t_{i0} ) },
+                  { \lambda_k \, (t' + t_{k0} ) },
 \quad
 \mathrm{with\;\;}
-t_{i0} = \frac{             t            }
-              { e^{ \lambda_i q(t) } - 1 }.
+t_{k0} = \frac{             t            }
+              { e^{ \lambda_k q(t) } - 1 }.
 $$
 Such a solution is possible only if
 \begin{equation}
@@ -1673,36 +1778,36 @@ Such a solution is possible only if
 %
 \note{
   We add some steps for the above solution.
-  Integrating $\dot u_i = c_i$ yields
+  Integrating $\dot u_k = c_k$ yields
   \begin{equation}
-  u_i(t') = c_i \left(t' + t_{i0} \right).
+  u_k(t') = c_k \left(t' + t_{k0} \right).
   \label{eq:ui_solution}
   \end{equation}
-  Given that $u_i(t) = 1$ and $u_i(0) = e^{-\lambda_i \, q(t)}$,
+  Given that $u_k(t) = 1$ and $u_k(0) = e^{-\lambda_k \, q(t)}$,
   we have
   $$
-  c_i = \frac{ 1 }{ t + t_{i0} },
+  c_k = \frac{ 1 }{ t + t_{k0} },
   \quad
   \mathrm{and\;}
-  \frac{ t_{i0} } { t + t_{i0} }
+  \frac{ t_{k0} } { t + t_{k0} }
   =
   e^{ -\lambda_k \, q(t) }.
   $$
   Taking the logarithm of Eq. \eqref{eq:ui_solution} yields
   $$
-  -\lambda_i \, q(t) + \lambda_i \, q(t')
-  = \log c_i + \log\left( t' + t_{i0} \right).
+  -\lambda_k \, q(t) + \lambda_k \, q(t')
+  = \log c_k + \log\left( t' + t_{k0} \right).
   $$
   Differentiating this with respect to $t'$ yields
   $$
-  \lambda_i \, \alpha(t') = \frac{ 1 } { t' + t_{i0} }.
+  \lambda_k \, \alpha(t') = \frac{ 1 } { t' + t_{k0} }.
   $$
 }
 
 Now an updating matrix $\mathbf w$ satisfying this condition
 is essentially a multiple of the identity matrix
 (since $\lambda_1$ corresponds to the mode
-of a uniform shift of all $v_i$,
+of a uniform shift of all $v_k$,
 we can freely set it to $\lambda_2$
 without changing the nature of the updating scheme).
 %
@@ -1715,128 +1820,97 @@ updating scheme.
 
 
 
-\subsubsection{Optimal coefficient of proportionality}
+\subsubsection{Variationally optimal schedule, $\alpha(t)$}
 
 
 
-If we wish to find,
-for a given updating matrix $\mathbf w$,
-a near-optimal $\alpha(t)$,
-%
-then a good candidate is
+From Eq. \eqref{eq:alpha_opt},
+it is reasonable to conjecture that
+a near-optimal $\alpha(t)$ for
+a given updating matrix $\mathbf w$ would be
 %
 \begin{equation}
 \alpha(\tau) = \frac{1}{\lambda \, (\tau + t_0) },
 \label{eq:alpha_trial}
 \end{equation}
 %
-for some optimal value of $\lambda$.
+for some value of $\lambda$.
+%
+Below we shall find the optimal value
+in some special cases.
 %
 Using Eq. \eqref{eq:alpha_trial}
-in Eq. \eqref{eq:error_mbin1} yields
+in Eq. \eqref{eq:error_asym1} yields
 %
 \begin{align}
-\Err
+\Err_A
 &=
-\frac{1}{t+t_0}
-\sum_{i=2}^n
-  \frac{       \Gamma_i \, \lambda_i^2      }
-       { \lambda \, (2 \lambda_i - \lambda) }
+\frac{    1    }
+     { t + t_0 }
+\sum_{k = 2}^n
+  \frac{ \Gamma_k \, \nu_k^2 }
+       {    2 \, \nu_k - 1   }
 \left[
   1 - \left(
         1 + \frac{ t }{ t_0 }
-      \right)^{1 - 2 \, \lambda_i/\lambda}
-\right]
-\notag
-\\
-&\stackrel{      t \gg t_0      }
-          { =\joinrel=\joinrel= }
-%
-\sum_{i = 2}^n
-\begin{dcases}
-  \frac{ 1 }
-       { t }
-  \frac{         \Gamma_i \, \lambda_i^2       }
-       { \lambda \, (2 \, \lambda_i - \lambda) }
-  &
-  \mathrm{if \;} \lambda < 2 \, \lambda_i,
-  \\%[1em]
-  %
-  %
-  \frac{ \Gamma_i }
-       {  4 \, t  }
-  \ln \frac{ t + t_0 }
-           {  t_0    }
-  &
-  \mathrm{if \;} \lambda = 2 \, \lambda_i,
-  \\%[1em]
-  %
-  %
-  \frac{ t_0^{ 2 \, \lambda_i / \lambda  - 1 } }
-       {   t^{ 2 \, \lambda_i / \lambda      } }
-  \frac{      \Gamma_i \, \lambda_i^2          }
-       { \lambda \, (\lambda - 2 \, \lambda_i) }
-  &
-  \mathrm{if \;} \lambda > 2 \, \lambda_i.
-\end{dcases}
-\label{eq:y2_sum_perfect_invt}
+      \right)^{1 - 2 \, \nu_k}
+\right],
+\label{eq:error_asym_invt}
 \end{align}
 %
-\note{In the above expression,
-$t + t_0$ are replaced by $t$.
+where $\nu_k \equiv \lambda_k / \lambda$.
 %
-Adding back $t_0$, we get
+At long times, we get
 $$
 \begin{aligned}
-  \Err
+  \Err_A
   \stackrel{         t \to \infty         }
            { =\joinrel=\joinrel=\joinrel= }
-  \sum_{i = 2}^n
+  \sum_{k = 2}^n
   \begin{dcases}
     \frac{    1    }
          { t + t_0 }
-    \frac{       \Gamma_i \, \lambda_i^2         }
-         { \lambda \, (2 \, \lambda_i - \lambda) }
+    \frac{ \Gamma_k \, \nu_k^2 }
+         {   2 \, \nu_k - 1    }
     &
-    \mathrm{if \;} \lambda < 2 \, \lambda_i,
+    \mathrm{if \;} 2 \, \nu_k > 1,
     \\%[1em]
     %
     %
-    \frac{    \Gamma_i    }
+    \frac{    \Gamma_k    }
          { 4 \, (t + t_0) }
     \ln \frac{ t + t_0 }
              {   t_0  }
     &
-    \mathrm{if \;} \lambda = 2 \, \lambda_i,
+    \mathrm{if \;} 2 \, \nu_k = 1,
     \\
     %
     %
-    \frac{  t_0^{ 2 \, \lambda_i / \lambda  - 1}  }
-         { (t + t_0)^{ 2 \, \lambda_i / \lambda } }
-    \frac{      \Gamma_i \, \lambda_i^2          }
-         { \lambda \, (\lambda - 2 \, \lambda_i) }
+    \frac{  t_0^{ 2 \, \nu_k  - 1}  }
+         { (t + t_0)^{ 2 \, \nu_k } }
+    \frac{ \Gamma_k \, \nu_k^2 }
+         {   1 - 2 \, \nu_k    }
     &
-    \mathrm{if \;} \lambda > 2 \, \lambda_i.
+    \mathrm{if \;} 2 \, \nu_k < 1.
   \end{dcases}
 \end{aligned}
 $$
-}
 %
-The last two cases, $\lambda \ge 2\lambda_i$,
+The last two cases, $\lambda \ge 2\lambda_k$,
 are asymptotically suboptimal
 as they decay slower than $1/t$.
 %
 Thus, the optimal $\lambda$
-satisfies $\lambda < 2 \min \lambda_i$,
+satisfies $\lambda < 2 \min \lambda_k$,
 and in this case,
 we can seek that
 the optimal value from
 the smallest real root of
 %
 \begin{equation}
-\sum_{i = 2}^n
-\frac{ \lambda_i - \lambda }
-{ \left(2 - \lambda/ \lambda_i \right)^2 }
+\sum_{k = 2}^n
+\frac{ \lambda_k - \lambda }
+{ \left(2 - \lambda/ \lambda_k \right)^2 }
 = 0.
 \label{eq:optimal_lambda_approx}
 \end{equation}
@@ -1845,10 +1919,10 @@ the smallest real root of
 
 Under the approximation, we have
 $$
-\frac{ \lambda_i^2 }{ \lambda \, (2 \lambda_i - \lambda) } \ge 1,
+\frac{ \lambda_k^2 }{ \lambda \, (2 \, \lambda_k - \lambda) } \ge 1,
 $$
-with the equality achieved only at $\lambda = \lambda_i$,
-we see the from Eq. \eqref{eq:y2_sum_perfect_invt}
+with the equality achieved only at $\lambda = \lambda_k$,
+we see the from Eq. \eqref{eq:error_asym_invt}
 that the minimal error is achieved with
 $\lambda_2 = \dots = \lambda_n = \lambda$,
 agreeing with the general conclusion
@@ -1856,16 +1930,121 @@ in Sec. \ref{sec:optWL}.
 
 
 
-
-\subsection{\label{sec:band-matrix}
-Uniform band matrix}
-
-
-
-As an example, consider the following matrix $\mathbf w$
+In practice, however, we may wish to optimize
+relative short simulations that have not entered
+the asymptotic regime.
+%
+Then the residual error, $\Err_R$, is not negligible.
+%
+From Eq. \eqref{eq:error_res}, we get
 %
 \begin{equation}
-  w_{ij} = \mu_{|i-j|} + \mu_{i+j-1} + \mu_{2n+1-i-j},
+\Err_R
+=
+\sum_{k = 2}^n
+  \frac{ \Gamma_k \, \nu_k }
+       {        2 \, t_0   }
+  \left(
+      \frac{   t_0   }
+           { t + t_0 }
+   \right)^{ 2 \, \nu_k }
+\label{eq:error_res_invt}
+\end{equation}
+%
+where we have assumed that at $t = 0$
+the system has achieved an equilibrium
+at a constant $\alpha_0$,
+such that the values of
+$\left\langle y_k^2(0) \right\rangle$
+can be computed from Eq. \eqref{eq:y2_eql}.
+%
+The total error is given by the sum of
+Eqs. \eqref{eq:error_res_invt} and \eqref{eq:error_asym_invt}.
+%
+\begin{align}
+\Err
+&=
+\Err_R + \Err_A
+\notag
+\\
+&=
+\sum_{ k = 2 }^n
+  E^f_k \,
+  \left\{
+    1
+    +
+    \frac{ 1 } { 2 \, \nu_k - 1 }
+    \left[
+      1 -
+      \left(
+        \frac{   t_0   }
+             { t + t_0 }
+      \right)^{2 \, \nu_k - 1}
+    \right]
+  \right\}
+,
+\label{eq:error_invt}
+\end{align}
+%
+where
+$$
+E^f_k
+\equiv
+\left\langle
+  y_k^2
+\right\rangle_{ \alpha(t) }
+=
+\frac{  \Gamma_k \, \nu_k   }
+     {  2 \, (t + t_0)      }
+,
+$$
+is the equilibrium error of mode $k$
+under the constant terminal value
+of $\alpha(t)$.
+
+
+Two remarks on Eq. \eqref{eq:error_invt} are in order.
+%
+First, the final error is always greater than
+the saturated equilibrium value at the terminal $\alpha(t)$:
+$$
+E > E_\mathrm{sat} \equiv \sum_{k = 2}^n E^f_k,
+$$
+since the second term in the braces
+is nonnegative no matter the sign of $2 \, \nu_k - 1$.
+%
+Second, in the optimal case,
+$\nu_k = 1$,
+and the final error is twice $E_\mathrm{sat}$
+at long times.
+
+
+
+
+
+\subsection{\label{sec:band-matrix}
+Homogeneous updating schemes}
+
+
+
+In practice, we usually use a homogeneous updating scheme
+that is translational invariant.
+%
+We shall study these schemes below.
+
+
+\subsubsection{
+Eigenvalues and stability}
+
+
+Consider the following matrix $\mathbf w$
+%
+\begin{equation}
+  w_{ij}
+  =
+  \mu_{ |i - j| }
+  + \mu_{ i + j - 1 }
+  + \mu_{ 2 n + 1 - i - j },
   \label{eq:w_band}
 \end{equation}
 %
@@ -1879,20 +2058,27 @@ are a set of numbers satisfying
 %
 and $\mu_l = 0$ for $l > b$.
 %
+The matrix is translational invariant under the reflective
+boundary condition\cite{bussi2006}.
+%
 On the right-hand side of Eq. \eqref{eq:w_band},
 the first term represents the relative updating magnitude
 to a neighbor that is $|i - j|$ bins away,
-whereas the next two terms are added to
-adopt the open boundary condition.
+whereas the next two terms are added
+%according to the boundary condition
+to avoid unintended distortion
+to the equilibrium distribution $p_i = 1/n$\cite{bussi2006}.
 %
-If $i$ represents a periodic variable,
-the last two terms can be dropped under
-the minimum image convention for $|i-j|$\cite{dama2014}.
+Similarly, if $i$ represents a periodic variable,
+the last two terms can be dropped, and
+$|i-j|$ is evaluated
+under the minimum image convention\cite{dama2014}.
+This case is, however, not considered further.
 
 
-This matrix, being symmetric,
+This matrix, being symmetric to the indices $i$ and $j$,
 satisfies Eqs. \eqref{eq:w_sumj}-\eqref{eq:w_balance},
-for the flat distribution $p_i \equiv 1/n$.
+for the flat distribution $p_i = 1/n$.
 %
 It has $n$ orthonormal eigenvectors,
 $\pmb\varphi^{(1)}, \dots, \pmb\varphi^{(n)}$,
@@ -1904,7 +2090,8 @@ given by
     \frac{ 2 - \delta_{k, 1} }
          {       n           }
        }
-  \cos \frac{ \left(i - \frac12\right) (k - 1) \, \pi}{n}.
+  \cos \frac{ \left( i - \frac 1 2 \right) (k - 1) \, \pi}
+            {                  n                         }.
 \label{eq:wband_eigenvector}
 \end{equation}
 %
@@ -1914,13 +2101,14 @@ with eigenvalues
   \lambda_k
   &=
   \mu_0 + \sum_{l = 1}^b 2 \, \mu_l \cos \frac{(k - 1)  \, l \pi}{n}
-  \notag \\
+  \label{eq:wband_eigenvalue1}
+  \\
   &=
   1 - \sum_{l = 1}^b 4 \, \mu_l \sin^2 \frac{(k - 1)  \, l \pi}{ 2 \, n }
   .
-\label{eq:wband_eigenvalue}
+  \label{eq:wband_eigenvalue}
 \end{align}
-%
+
 \note{We derive Eqs.
   \eqref{eq:wband_eigenvector} and \eqref{eq:wband_eigenvalue}
   below.
@@ -1930,11 +2118,11 @@ with eigenvalues
   $$
   \theta^{(k)}_i
   =
-  \cos \frac{ \left(i - \frac12\right) (k - 1) \, \pi}{n},
+  \cos \frac{ \left( i - \frac 1 2 \right) (k - 1) \, \pi}{n},
   $$
   which satisfies the following reflection symmetry,
   \begin{equation}
-    \theta^{(k)}_i = \theta^{(k)}_{1-i} = \theta^{(k)}_{2n+1-i}.
+    \theta^{(k)}_i = \theta^{(k)}_{1 - i} = \theta^{(k)}_{ 2 n + 1 - i }.
     \label{eq:wband_reflection_symmetry}
   \end{equation}
   %
@@ -1948,10 +2136,10 @@ $$
 - \theta^{(k)}_j \, \mu_0
 \\
 &
-+\sum_{i=1}^n
++\sum_{i = 1}^n
   \theta^{(k)}_i
   \left(
-    \mu_{i - j} + \mu_{j - i} + \mu_{i + j - 1} + \mu_{2n+1-i-j}
+    \mu_{i - j} + \mu_{j - i} + \mu_{i + j - 1} + \mu_{2 \, n + 1 - i - j}
   \right)
 .
 \end{aligned}
@@ -1961,16 +2149,16 @@ Now
 $$
 \begin{aligned}
   &
-  \sum_{i=1}^n
+  \sum_{i = 1}^n
   \theta^{(k)}_i \,
   \left(
-    \mu_{i - j} + \mu_{2n+1-i-j}
+    \mu_{i - j} + \mu_{ 2 n + 1 - i - j }
   \right)
   \\
   &=
   \sum_{l=1-j}^{n-j} \theta^{(k)}_{j+l} \, \mu_l
   +
-  \sum_{l=n-j+1}^{2n-j} \theta^{(k)}_{2n+1-j-l} \, \mu_l
+  \sum_{l = n-j+1}^{2n-j} \theta^{(k)}_{2n+1-j-l} \, \mu_l
   \\
   &=
   \sum_{l=1-j}^{2n-j} \theta^{(k)}_{j+l} \, \mu_l
@@ -1983,7 +2171,7 @@ where we have used Eq. \eqref{eq:wband_reflection_symmetry}.
 Similarly,
 $$
 \begin{aligned}
-  \sum_{i=1}^n
+  \sum_{i = 1}^n
   \theta^{(k)}_i
   \left(
     \mu_{j - i} + \mu_{i+j-1}
@@ -2029,7 +2217,7 @@ where $a = \frac{k-1}{n} \pi$.
 Thus, the normalization factor $\sqrt{(2 - \delta_{k1})/n}$
 encompasses both cases.
 
-We can also show that columnwise orthogonality.
+We can also show that column-wise orthogonality.
 %
 For this we need a lemma, for $a = q \, \pi/n$,
 with $q$ a positive integer.
@@ -2120,6 +2308,25 @@ $$
 $$
 }
 %
+
+
+
+We can define a discrete kernel function from the set of numbers as
+$$
+\hat \mu_i = \mu_{ |i| }.
+$$
+Then, according to Eq. \eqref{eq:vt_diffeq_mbin},
+the rate of change of the bias potential, $\dot v_i(t)$,
+is given by a convolution of the above kernel, $\hat \mu_j$,
+and the normalized histogram, $h_j/p_j$\cite{bussi2006},
+and Eq. \eqref{eq:wband_eigenvalue1}
+shows that the eigenvalues, $\lambda_k$, of the updating scheme
+is the Fourier transform of the kernel.
+%
+So, for the updating scheme to be stable,
+the Fourier transform of the kernel
+must be nonnegative.
+
 We discuss two special cases below.
 
 
@@ -2170,7 +2377,7 @@ in the limit of large $n$.
 %
 In this case,
 we convert Eq.
-\eqref{eq:y2_sum_perfect_invt}
+\eqref{eq:error_asym_invt}
 %and
 %\eqref{eq:optimal_lambda_approx}
 to an integral,
@@ -2400,7 +2607,7 @@ $$
 \\
 &=
 \frac{ n } { \lambda \, t }
-\sum_i \operatorname{Res}_i
+\sum_l \operatorname{Res}_l
 ,
 \end{aligned}
 $$
@@ -2625,13 +2832,12 @@ and the minimum is reached at $\lambda \approx 1$.
 \subsubsection{Gaussian updating scheme}
 
 
-
-Another common updating scheme
-in metadynamics is a Gaussian wave.
+The Gaussian kernel is commonly
+used in metadynamics.
 %
-Below we show that this scheme
-is stable, although
-it might be less effective
+Below we show that this
+leads to a stable updating scheme,
+although it can be less effective
 in reducing local noises.
 
 
@@ -2753,7 +2959,7 @@ suggesting stability of the updating scheme.
 %with a reasonable $\lambda$,
 %the error of the last few fluctuation modes
 %will always decay suboptimally,
-%accordingly to Eq. \eqref{eq:y2_sum_perfect_invt}.
+%accordingly to Eq. \eqref{eq:error_asym_invt}.
 %%
 %However, since these modes
 %represent short wavelength fluctuations,
@@ -2762,7 +2968,7 @@ suggesting stability of the updating scheme.
 %%
 %Thus,
 %we can truncate the sum of the error function
-%in Eq. \eqref{eq:y2_sum_perfect_invt}
+%in Eq. \eqref{eq:error_asym_invt}
 %at some $k_{\max}$,
 %which corresponds to a minimal length scale
 %$l_{\min} = \Delta x \, (n /k_{\max}) = \pi/k_{\max}$
@@ -2888,7 +3094,7 @@ We have shown that
 without a priori information,
 the single-bin scheme is asymptotically
 the best among all updating scheme
-in term of convergence.
+in terms of convergence.
 
 
 \bibliography{simul}
