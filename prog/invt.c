@@ -16,6 +16,7 @@ static double simulmeta(const invtpar_t *m, double *err0)
   int i, n = m->n, prod = 0;
   long t;
 
+  ouproc_t *ou = NULL;
   invtmd_t invtmd[1];
 
   corr_t *corr = NULL;
@@ -34,7 +35,9 @@ static double simulmeta(const invtpar_t *m, double *err0)
   fromcosmodes(v, n, u, costab);
   normalize(v, n, m->initrand, m->p);
 
-  if ( m->sampmethod == SAMPMETHOD_MD ) {
+  if ( m->sampmethod == SAMPMETHOD_OU ) {
+    ou = ouproc_open(v, n, m->tcorr);
+  } else if ( m->sampmethod == SAMPMETHOD_MD ) {
     invtmd_init(invtmd, n,
         m->mddt, m->tp, m->thermdt, v);
   }
@@ -59,6 +62,8 @@ static double simulmeta(const invtpar_t *m, double *err0)
         i = mc_metro_l(v, n, i, m->pbc);
       } else if ( m->sampmethod == SAMPMETHOD_HEATBATH ) {
         i = mc_heatbath(v, vac, n);
+      } else if ( m->sampmethod == SAMPMETHOD_OU ) {
+        i = ouproc_step(ou);
       } else if ( m->sampmethod == SAMPMETHOD_MD ) {
         i = invtmd_vv(invtmd);
       }
@@ -122,6 +127,10 @@ static double simulmeta(const invtpar_t *m, double *err0)
   free(vac);
   free(u);
   free(costab);
+
+  if ( m->sampmethod == SAMPMETHOD_OU ) {
+    ouproc_close(ou);
+  }
 
   if ( corr != NULL ) {
     corr_close(corr);

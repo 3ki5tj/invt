@@ -99,6 +99,93 @@ static int mc_heatbath(const double *v, double *vac, int n)
 
 
 
+/* Ornstein-Uhlenbeck process with variance 1/2
+ * and the equilibrium distribution is exp(-x^2) / sqrt(pi) */
+typedef struct {
+  double x;
+  double gamdt;
+  double expndt;
+  double sqrtdt;
+  int n;
+  double *v;
+  double *p; /* probability distribution */
+  double *ap; /* accumulative distribution */
+} ouproc_t;
+
+
+
+static ouproc_t *ouproc_open(double *v, int n, double gamdt)
+{
+  ouproc_t *ou;
+
+  xnew(ou, 1);
+  ou->x = randgaus();
+  ou->gamdt = gamdt;
+  ou->expndt = exp(-0.5 * gamdt);
+  ou->sqrtdt = sqrt(2 * 0.5 * gamdt);
+  ou->n = n;
+  ou->v = v;
+  xnew(ou->p, n);
+  xnew(ou->ap, n + 1);
+
+  return ou;
+}
+
+
+
+static void ouproc_close(ouproc_t *ou)
+{
+  free(ou->p);
+  free(ou->ap);
+  free(ou);
+}
+
+
+
+/* Ornstein-Uhlenbeck process */
+static int ouproc_step(ouproc_t *ou)
+{
+  double r, vmin;
+  int i, n = ou->n;
+
+  /* 1. carry out the Ornstein-Uhlenbeck process */
+  ou->x *= ou->expndt;
+  ou->x += randgaus() * ou->sqrtdt;
+  ou->x *= ou->expndt;
+  r = 0.5 * (1 + erf(ou->x));
+
+  /* 2. inversely map r to an index of v */
+  /* 2a. compute the probability distribution */
+  for ( vmin = ou->v[0], i = 1; i < n; i++ ) {
+    if ( ou->v[i] < vmin ) {
+      vmin = ou->v[i];
+    }
+  }
+  for ( i = 0; i < n; i++ ) {
+    ou->p[i] = exp( -ou->v[i] + vmin );
+  }
+
+  /* 2b. compute the accumulative distribution */
+  ou->ap[0] = 0;
+  for ( i = 0; i < n; i++ ) {
+    ou->ap[i + 1] = ou->ap[i] + ou->p[i];
+  }
+
+  /* 2c. locate the index of the bin containing r
+   * theoretically, binary search would be better
+   * but since we have only O(n) operations elsewhere,
+   * a linear search won't hurt too much, I suppose */
+  r *= ou->ap[n];
+  for ( i = n - 1; i > 0; i-- ) {
+    if ( ou->ap[i] <= r )
+      break;
+  }
+
+  return i;
+}
+
+
+
 typedef struct {
   double x;
   double v;

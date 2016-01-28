@@ -68,6 +68,7 @@ enum {
   SAMPMETHOD_METROGLOBAL = 0,
   SAMPMETHOD_METROLOCAL,
   SAMPMETHOD_HEATBATH,
+  SAMPMETHOD_OU, /* Ornstein-Uhlenbeck process */
   SAMPMETHOD_MD,
   SAMPMETHOD_COUNT
 };
@@ -79,6 +80,8 @@ const char *sampmethod_names[][MAX_OPT_ALIASES] = {
   {"global Metropolis", "global", "g"},
   {"local Metropolis", "local", "l"},
   {"heat-bath", "h"},
+  {"Ornstein-Uhlenbeck", "OU", "o"
+   "Harmonic oscillator", "HO"},
   {"molecular dynamics", "MD", "d"},
   {""}
 };
@@ -107,7 +110,7 @@ static void invtpar_init(invtpar_t *m)
   m->initrand = 0;
   m->kcutoff = 0;
   m->sampmethod = 0;
-  m->tcorr = 0.0; /* perfect sampling */
+  m->tcorr = 1.0; /* only used for the Ornstein-Uhlenbeck process */
 
   /* molecular dynamics parameters */
   m->mddt = 0.01;
@@ -260,7 +263,7 @@ static void invtpar_help(const invtpar_t *m)
   fprintf(stderr, "  --sig=:        set the Gaussian window width, default %g\n", m->wingaus);
   fprintf(stderr, "  --initrand=:   magnitude of the initial random error, default %g\n", m->initrand);
   fprintf(stderr, "  --kcutoff=:    cutoff of wave number of the initial random error, default %d\n", m->kcutoff);
-  fprintf(stderr, "  --samp=:       set the sampling scheme, g=global Metropolis, l=local Metropolis, h=heat-bath, default %s\n", sampmethod_names[m->sampmethod][0]);
+  fprintf(stderr, "  --samp=:       set the sampling scheme, g=global Metropolis, l=local Metropolis, h=heat-bath, d=molecular dynamics, o=Ornstein-Uhlenbeck, default %s\n", sampmethod_names[m->sampmethod][0]);
   fprintf(stderr, "  --corr:        compute correlation functions, default %d\n", m->docorr);
   fprintf(stderr, "  --nstcorr=:    set the number of steps of setting the correlation function, default %d\n", m->nstcorr);
   fprintf(stderr, "  --corrtol=:    set the tolerance level to truncate the autocorrelation function, default %g\n", m->corrtol);
