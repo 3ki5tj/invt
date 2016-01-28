@@ -1969,18 +1969,21 @@ Eqs. \eqref{eq:error_res_invt} and \eqref{eq:error_asym_invt}.
 \\
 &=
 \sum_{ k = 2 }^n
-  E^f_k \,
+  \Err^f_k \,
   \left\{
     1
     +
-    \frac{ 1 } { 2 \, \nu_k - 1 }
-    \left[
-      1 -
-      \left(
-        \frac{   t_0   }
-             { t + t_0 }
-      \right)^{2 \, \nu_k - 1}
-    \right]
+    \frac{ 1 - \left[ t_0 / (t + t_0) \right]^{2 \, \nu_k - 1} }
+         {                 2 \, \nu_k - 1                      }
+%    \frac{       1        }
+%         { 2 \, \nu_k - 1 }
+%    \left[
+%      1 -
+%      \left(
+%        \tfrac{   t_0   }
+%              { t + t_0 }
+%      \right)^{2 \, \nu_k - 1}
+%    \right]
   \right\}
 ,
 \label{eq:error_invt}
@@ -1988,29 +1991,76 @@ Eqs. \eqref{eq:error_res_invt} and \eqref{eq:error_asym_invt}.
 %
 where
 $$
-E^f_k
+\Err^f_k
 \equiv
 \left\langle
   y_k^2
 \right\rangle_{ \alpha(t) }
 =
 \frac{  \Gamma_k \, \nu_k   }
-     {  2 \, (t + t_0)      }
+     {    2 \, (t + t_0)    }
 ,
 $$
 is the equilibrium error of mode $k$
 under the constant terminal value
 of $\alpha(t)$.
 
+\note{Derivation of Eq. \eqref{eq:error_invt}:
+$$
+\begin{aligned}
+\Err_R
+&=
+\sum_{ k = 2 }^n
+  \Err^f_k \left( \frac{   t_0   }
+                       { t + t_0 }
+          \right)^{ 2 \nu_k - 1 }
+\\
+\Err_A
+&=
+\sum_{ k = 2 }^n
+  \frac{ 2 \, \Err^f_k \, \nu_k }
+       {    2 \, \nu_k - 1      }
+  \left[
+    1 -
+    \left(
+      \tfrac{   t_0   }
+            { t + t_0 }
+      \right)^{2 \, \nu_k - 1}
+  \right]
+\\
+&=
+\sum_{ k = 2 }^n
+  \Err^f_k \,
+  \left[
+    1 -
+    \left(
+      \tfrac{   t_0   }
+            { t + t_0 }
+      \right)^{2 \, \nu_k - 1}
+  \right]
+  +
+  \frac{   \Err^f_k     }
+       { 2 \, \nu_k - 1 }
+  \left[
+    1 -
+    \left(
+      \tfrac{   t_0   }
+           { t + t_0 }
+      \right)^{2 \, \nu_k - 1}
+  \right].
+\end{aligned}
+$$
+Adding the two yields Eq. \eqref{eq:error_invt}.
+}
 
-Two remarks on Eq. \eqref{eq:error_invt} are in order.
+We give two remarks on Eq. \eqref{eq:error_invt}.
 %
 First, the final error is always greater than
 the saturated equilibrium value at the terminal $\alpha(t)$:
 $$
 E > E_\mathrm{sat} \equiv \sum_{k = 2}^n E^f_k,
 $$
-since the second term in the braces
+because the second term in the braces
 is nonnegative no matter the sign of $2 \, \nu_k - 1$.
 %
 Second, in the optimal case,
@@ -2797,7 +2847,7 @@ z^2 - \mu_1 (1 + z^2)^2
 &=
 4 \, z \, (z^2 + 1 + \delta^2)
 =
-4 \, z \, 2 \, \delta \, \sqrt{ 1 + \delta^2 }.
+8 \, z \, \delta \, \sqrt{ 1 + \delta^2 }.
 \end{aligned}
 $$
 Note that the two roots within the unit share the same

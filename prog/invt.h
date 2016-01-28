@@ -224,6 +224,10 @@ static double *estgamma(int n, int sampmethod)
       gamma[i] = 1.0 / (x * x);
     } else if ( sampmethod == SAMPMETHOD_HEATBATH ) {
       gamma[i] = 1.0;
+    } else if ( sampmethod == SAMPMETHOD_MD ) {
+      /* borrow the local sampling data */
+      x = tan( i * M_PI * 0.5 / n );
+      gamma[i] = 1.0 / (x * x);
     } else {
       if ( i == 1 ) { /* complain only once */
         fprintf(stderr, "Error: unknown sampling method, %d\n",

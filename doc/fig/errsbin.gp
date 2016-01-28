@@ -29,10 +29,10 @@ set ylabel "Error, {/Times-Italic E}"
 set key Left reverse width -5
 
 plot [0:5][5e-7:0.005] \
-    "../../data/singlebin/singlebin_g_err.dat" u 1:2:4     w e pt 5 ps 1.2  t "Global, simulation", \
-    "../../data/singlebin/singlebin_g_prd.dat" u 1:($2**2) w l lt 1 lw 2    t "Global, theory", \
-    "../../data/singlebin/singlebin_l_err.dat" u 1:2:4     w e pt 7 ps 1.5  t "Local, simulation", \
-    "../../data/singlebin/singlebin_l_prd.dat" u 1:($2**2) w l lt 2 lw 2    t "Local, theory"
+    "../../data/singlebin/singlebin_g_err.dat" u 1:2:4     w e lt 1 pt 5 ps 1.2  t "Global, simulation", \
+    "../../data/singlebin/singlebin_g_prd.dat" u 1:($2**2) w l lt 1 lw 2         t "Global, theory", \
+    "../../data/singlebin/singlebin_l_err.dat" u 1:2:4     w e lt 1 pt 7 ps 1.5  t "Local, simulation", \
+    "../../data/singlebin/singlebin_l_prd.dat" u 1:($2**2) w l lt 2 lw 2         t "Local, theory"
 
 unset output
 set terminal pop

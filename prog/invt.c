@@ -36,8 +36,7 @@ static double simulmeta(const invtpar_t *m, double *err0)
 
   if ( m->sampmethod == SAMPMETHOD_MD ) {
     invtmd_init(invtmd, n,
-        m->mddt, m->tp, m->thermdt,
-        m->dwa, m->dwb, v);
+        m->mddt, m->tp, m->thermdt, v);
   }
 
   /* space for the accumulative distribution function */
@@ -144,7 +143,7 @@ static double invt_run(invtpar_t *m)
   long i;
 
   /* clock() is probably better than time(NULL) */
-  mtscramble( clock() );
+  //mtscramble( clock() );
 
   if ( m->docorr ) {
     /* compute correlation functions

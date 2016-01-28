@@ -105,31 +105,41 @@ typedef struct {
   double f;
   double ek, ep;
 
+  int n;
   double dx;
   double dt;
   double tp;
-  double thermdt, expndt;
+  double thermdt;
+  double expndt, sqrtdt;
+#if 0
   double dwa, dwb; /* potential parameters sin(x) (dwa - dwb * sin(x)) */
+#endif
   double *vb; /* point to the bias potential */
 } invtmd_t;
 
 
 
 static void invtmd_init(invtmd_t *md, int n,
-    double dt, double tp, double thermdt,
-    double dwa, double dwb, double *vb)
+    double dt, double tp, double thermdt, double *vb)
 {
   md->dt = dt;
   md->tp = tp;
   md->thermdt = thermdt;
-  md->expndt = exp( -0.5 * thermdt );
+
+  /* parameters for integrating half thermdt */
+  md->expndt = exp( -0.25 * thermdt );
+  md->sqrtdt = sqrt( 2 * tp * thermdt * 0.5 );
+
+#if 0
   md->dwa = dwa;
   md->dwb = dwb;
+#endif
   md->vb = vb;
   md->x = 2 * M_PI * rand01();
   md->v = randgaus();
   md->v *= sqrt(tp);
   md->f = 0;
+  md->n = n;
   md->dx = 2 * M_PI / n;
   md->ep = 0;
   md->ek = 0;
@@ -137,6 +147,7 @@ static void invtmd_init(invtmd_t *md, int n,
 
 
 
+#if 0
 /* compute the normal force */
 static void invtmd_force(invtmd_t *md)
 {
@@ -146,42 +157,41 @@ static void invtmd_force(invtmd_t *md)
   md->ep = s * (a - b * s);
   md->f = c * (-a + 2 * b * s);
 }
+#endif
 
 
 /* add the bias force */
 static void invtmd_forceb(invtmd_t *md)
 {
-  int i;
+  int i, j, n = md->n;
   double y, x = md->x, dx = md->dx;
   double tp = md->tp;
 
   /* assuming x > 0 */
   i = (int) (x / dx);
+  if ( i < 0 || i >= n ) {
+    fprintf(stderr, "i %d, x %g, dx %g\n", i, x, dx);
+    exit(1);
+  }
   y = x - i * dx;
   if ( y >= 0.5 * dx ) {
-    md->f += -(md->vb[i+1] - md->vb[i]) * tp / dx;
+    j = (i + 1) % n;
+    md->f += -(md->vb[j] - md->vb[i]) * tp / dx;
   } else {
-    md->f += -(md->vb[i] - md->vb[i-1]) * tp / dx;
+    j = (i - 1 + n) % n;
+    md->f += -(md->vb[i] - md->vb[j]) * tp / dx;
   }
 }
 
 
 
-/* velocity rescaling thermostat */
-static double invtmd_vrescale(invtmd_t *md)
+/* Langevin thermostat for a half step */
+static double invtmd_tstat(invtmd_t *md)
 {
-  double ek1, ek2, s, r;
-
-  ek1 = 0.5 * md->v * md->v;
-  r = randgaus();
-  ek2 = ek1 + (1 - md->expndt) * ( r * r * md->tp * 0.5 - ek1 )
-      + 2 * r * sqrt( md->expndt * (1 - md->expndt) * ek1 * md->tp * 0.5);
-  if ( ek2 < 0 ) {
-    ek2 = 0;
-  }
-  s = sqrt( ek2 / ek1 );
-  md->v *= s;
-  return ek2;
+  md->v *= md->expndt;
+  md->v += randgaus() * md->sqrtdt;
+  md->v *= md->expndt;
+  return md->v * md->v * 0.5;
 }
 
 
@@ -189,16 +199,24 @@ static double invtmd_vrescale(invtmd_t *md)
 static int invtmd_vv(invtmd_t *md)
 {
   double dt = md->dt;
+  int i;
 
-  invtmd_vrescale(md);
+  invtmd_tstat(md);
   md->v += md->f * dt * 0.5;
-  md->x = fmod(md->x + md->v * dt + 10 * 2 * M_PI, 2 * M_PI);
-  invtmd_force(md);
+  //printf("v %g, x %g, f %g, dx %g\n", md->v, md->x, md->f, md->dx);
+  md->x = fmod(md->x + md->v * dt + 100 * 2 * M_PI, 2 * M_PI);
+  i = (int) (md->x / md->dx);
+  if ( i >= md->n || i < 0 ) {
+    fprintf(stderr, "md->x %g, v %g, f %g, i %d, md->dx %g\n",
+        md->x, md->v, md->f, (int)(md->x/md->dx), md->dx);
+  }
+  md->f = 0;
+  /* invtmd_force(md); */
   invtmd_forceb(md);
   md->v += md->f * dt * 0.5;
-  md->ek = invtmd_vrescale(md);
+  md->ek = invtmd_tstat(md);
 
-  return (int) (md->x / md->dx);
+  return i;
 }
 
 
