@@ -36,7 +36,7 @@ static double simulmeta(const invtpar_t *m, double *err0)
   normalize(v, n, m->initrand, m->p);
 
   if ( m->sampmethod == SAMPMETHOD_OU ) {
-    ou = ouproc_open(v, n, m->tcorr);
+    ou = ouproc_open(v, n, 1.0 / ( m->tcorr + 1e-16 ) );
   } else if ( m->sampmethod == SAMPMETHOD_MD ) {
     invtmd_init(invtmd, n,
         m->mddt, m->tp, m->thermdt, v);

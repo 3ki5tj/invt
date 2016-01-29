@@ -26,19 +26,25 @@ set mytics 10
 set ylabel "Normalized error, {/Times (}{/Times-Italic t}{/Times + }{/Times-Italic t}_{/Times 0}{/Times )} {/Times-Italic E}"
 
 # `width` to reduce the text length
-set key at 10, 1e4 Left reverse width -7
+set key at 12, 1.8e4 Left reverse width -7 spacing 1.3
 
 a0 = 0.0001
 
-plot [0:10][:5e4] \
-    "../../data/nb0.24/nb0.24_g_err.dat"     u 1:($2*(1e8+$1/a0)):($4*(1e8+$1/a0))  w e lt 1 pt 5 ps 1.2  lc rgb "#000000"    t "Global, {/Times-Italic t} = 10^8, simulation", \
-    "../../data/nb0.24/nb0.24_g_prd.dat"     u 1:($2**2*(1e8+$1/a0))                w l lt 1 lw 2    lc rgb "#000000"    t "Global, {/Times-Italic t} = 10^8, theory", \
-    "../../data/nb0.24/nb0.24t1e7_g_err.dat" u 1:($2*(1e7+$1/a0)):($4*(1e7+$1/a0))  w e lt 1 pt 5 ps 1.2  lc rgb "#a0a0a0"    t "Global, {/Times-Italic t} = 10^7, simulation", \
-    "../../data/nb0.24/nb0.24t1e7_g_prd.dat" u 1:($2**2*(1e7+$1/a0))                w l lt 1 lw 2    lc rgb "#a0a0a0"    t "Global, {/Times-Italic t} = 10^7, theory", \
-    "../../data/nb0.24/nb0.24_l_err.dat"     u 1:($2*(1e8+$1/a0)):($4*(1e8+$1/a0))  w e lt 1 pt 7 ps 1.5  lc rgb "#000000"    t "Local, {/Times-Italic t} = 10^8, simulation", \
-    "../../data/nb0.24/nb0.24_l_prd.dat"     u 1:($2**2*(1e8+$1/a0))                w l lt 2 lw 2    lc rgb "#000000"    t "Local, {/Times-Italic t} = 10^8, theory", \
-    "../../data/nb0.24/nb0.24t1e7_l_err.dat" u 1:($2*(1e7+$1/a0)):($4*(1e7+$1/a0))  w e lt 1 pt 7 ps 1.5  lc rgb "#a0a0a0"    t "Local, {/Times-Italic t} = 10^7, simulation", \
-    "../../data/nb0.24/nb0.24t1e7_l_prd.dat" u 1:($2**2*(1e7+$1/a0))                w l lt 2 lw 2    lc rgb "#a0a0a0"    t "Local, {/Times-Italic t} = 10^7, theory", \
+# error bars are too small, no need to have them
+# to add them back, use something like
+#   "u 1:2:4 w e w lp 1"
+# instead of
+#   "u 1:2 w p"
+
+plot [0:12][:5e4] \
+    "../../data/nb0.24/nb0.24_g_err.dat"     u 1:($2*(1e8+$1/a0))     w p pt 5 ps 2.0  lc rgb "#000000"    t "Global, {/Times-Italic t} = 10^8, simulation", \
+    "../../data/nb0.24/nb0.24_g_prd.dat"     u 1:($2**2*(1e8+$1/a0))  w l lt 1 lw 2    lc rgb "#000000"    t "Global, {/Times-Italic t} = 10^8, theory", \
+    "../../data/nb0.24/nb0.24t1e7_g_err.dat" u 1:($2*(1e7+$1/a0))     w p pt 5 ps 2.0  lc rgb "#808080"    t "Global, {/Times-Italic t} = 10^7, simulation", \
+    "../../data/nb0.24/nb0.24t1e7_g_prd.dat" u 1:($2**2*(1e7+$1/a0))  w l lt 1 lw 2    lc rgb "#808080"    t "Global, {/Times-Italic t} = 10^7, theory", \
+    "../../data/nb0.24/nb0.24_l_err.dat"     u 1:($2*(1e8+$1/a0))     w p pt 7 ps 2.0  lc rgb "#000000"    t "Local, {/Times-Italic t} = 10^8, simulation", \
+    "../../data/nb0.24/nb0.24_l_prd.dat"     u 1:($2**2*(1e8+$1/a0))  w l lt 2 lw 2    lc rgb "#000000"    t "Local, {/Times-Italic t} = 10^8, theory", \
+    "../../data/nb0.24/nb0.24t1e7_l_err.dat" u 1:($2*(1e7+$1/a0))     w p pt 7 ps 2.0  lc rgb "#808080"    t "Local, {/Times-Italic t} = 10^7, simulation", \
+    "../../data/nb0.24/nb0.24t1e7_l_prd.dat" u 1:($2**2*(1e7+$1/a0))  w l lt 2 lw 2    lc rgb "#808080"    t "Local, {/Times-Italic t} = 10^7, theory", \
     -1 notitle
 
 

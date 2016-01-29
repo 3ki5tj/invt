@@ -212,6 +212,7 @@ static double *estgamma(int n, int sampmethod)
 {
   int i;
   double *gamma, x;
+  static int once;
 
   xnew(gamma, n);
 
@@ -229,9 +230,10 @@ static double *estgamma(int n, int sampmethod)
       x = tan( i * M_PI * 0.5 / n );
       gamma[i] = 1.0 / (x * x);
     } else {
-      if ( i == 1 ) { /* complain only once */
+      if ( !once ) { /* complain only once */
         fprintf(stderr, "Error: unknown sampling method, %d\n",
             sampmethod);
+        once = 1;
       }
       gamma[i] = 1.0;
     }

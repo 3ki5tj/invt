@@ -80,7 +80,7 @@ const char *sampmethod_names[][MAX_OPT_ALIASES] = {
   {"global Metropolis", "global", "g"},
   {"local Metropolis", "local", "l"},
   {"heat-bath", "h"},
-  {"Ornstein-Uhlenbeck", "OU", "o"
+  {"Ornstein-Uhlenbeck", "OU", "o",
    "Harmonic oscillator", "HO"},
   {"molecular dynamics", "MD", "d"},
   {""}
