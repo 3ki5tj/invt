@@ -65,11 +65,9 @@
   %
   Further, we compared the two algorithms, and found that
   although metadynamics produces a smoother PMF profile,
-  which is necessary for stable numerical differentiation
-  in computing the force,
   it is less effective in reducing errors with the shorter wavelengths.
   %
-  Thus, it relies more heavily on the assumption of
+  Thus, the latter relies more heavily on the assumption of
   the smoothness of the PMF profile,
   especially with a wide updating window.
 \end{abstract}
@@ -86,7 +84,10 @@ Free energy calculation\cite{frenkel} is a central theme
 in computational physics and chemistry.
 %
 Given a system,
-the problem is to compute a distribution, $p^*(z)$,
+the problem is to compute,
+via either Monte Carlo (MC) and
+molecular dynamics (MD) simulations,
+a distribution, $p^*(z)$,
 along a quantity of interest $z$, and to see how
 the distribution changes with external conditions,
 such as temperatures and pressures.
@@ -113,7 +114,7 @@ A better solution is to artificially alter
 the target distribution,
 such that we can, in a single simulation, sample
 a flat distribution\cite{mezei1987, berg1992, lee1993,
-wang2001, wang2001pre, laio2002}
+wang2001, wang2001pre, laio2002, laio2008, barducci2011, sutto2012}
 along $z$ over a wide range.
 %
 This alleviates the above problem of local trapping
@@ -1356,7 +1357,8 @@ that is about $\alpha_{\max}^2$ times as large.
 
 
 
-\subsubsection{Integrals of the correlation functions}
+\subsubsection{\label{sec:Gamma}
+Integrals of the correlation functions}
 
 
 
@@ -1544,7 +1546,7 @@ The transition matrix is
     0 & \dots & 0 & \frac 1 2 & \frac 1 2
   \end{array}
 \right).
-\label{eq:T_tridiag}
+\label{eq:T_nn}
 \end{equation}
 %
 We shall further assume that
@@ -1825,10 +1827,11 @@ updating scheme.
 
 
 For an arbitrary updating matrix $\mathbf w$,
-optimizing Eq. \eqref{eq:error_asym1}
+direct optimization of Eq. \eqref{eq:error_asym1}
 can lead to an algebraically complex expression for $\alpha(t)$.
 %
-In practice, it is more useful to find a simple expression for $\alpha(t)$
+In practice, it is more useful to find
+a simple expression for $\alpha(t)$
 that is near optimal.
 %
 From Eq. \eqref{eq:alpha_opt},
@@ -1836,7 +1839,7 @@ a reasonable candidate would be
 %
 \begin{equation}
 \alpha(\tau) = \frac{1}{\lambda \, (\tau + t_0) },
-\label{eq:alpha_trial}
+\label{eq:alpha_invtlambda}
 \end{equation}
 %
 for some value of $\lambda$.
@@ -1852,7 +1855,7 @@ but also other parameters,
 such as the simulation length, $t$.
 
 
-Using Eq. \eqref{eq:alpha_trial}
+Using Eq. \eqref{eq:alpha_invtlambda}
 in Eq. \eqref{eq:error_asym1} yields
 %
 \begin{align}
@@ -2070,9 +2073,10 @@ Adding the two yields Eq. \eqref{eq:error_invt}.
 
 
 
-We give several remarks on Eq. \eqref{eq:error_invt}.
+%We give several remarks on Eq. \eqref{eq:error_invt}.
 %
-First, the final error is always greater than
+
+Clearly, the final error is always greater than
 the saturated equilibrium value at the terminal $\alpha(t)$:
 $$
 E > E_\mathrm{sat} \equiv \sum_{k = 2}^n E^f_k,
@@ -2084,25 +2088,11 @@ that vanishes only at $\nu_k \to +\infty$).
 
 
 
-\begin{figure}[h]
-\begin{center}
-  \makebox[\linewidth][c]{
-    \includegraphics[angle=0, width=0.95\linewidth]{fig/errcomp.pdf}
-  }
-  \caption{
-    \label{fig:err_component}
-    Component of the error, $G(\nu_k, r)$,
-    versus $\nu_k = \lambda_k / \lambda$,
-    where $r = t_0 / (t + t_0)$.
-    %
-  }
-\end{center}
-\end{figure}
+\subsubsection{\label{sec:optlambda}
+Optimal parameter $\lambda$}
 
 
-
-
-Second, we shall show that the optimal $\lambda$
+We shall show that the optimal $\lambda$
 depends on the simulation length,
 and it tends to decrease as simulation lengthens.
 %
@@ -2133,15 +2123,15 @@ G\left( \nu_k, r \right)
 $$
 %
 As shown in Fig. \ref{fig:err_component},
-the function $G(\nu_k, r)$ depends nontrivial on $\nu_k$.
+the function $G(\nu_k, r)$ depends non-trivially on $\nu_k$.
 %
 For a fixed and sufficiently small $r = t_0 / (t + t_0)$,
 $G(\nu_k, r)$ has two local minima along $\nu_k$,
 one at $\nu_k = 0$, and the other around $\nu_k = 1$,
 with the former being deeper albeit narrower.
 %
-This shows that for a relatively short simulation,
-hence relative large value of $r$,
+This means that for a relatively short simulation,
+hence a relatively large value of $r$,
 the minimal error may be achieved at $\nu_k \approx 0$,
 corresponding to a large value of $\lambda$
 ($\lambda \gg \lambda_k$).
@@ -2157,6 +2147,32 @@ $\nu_k = 1$ or $\lambda = \lambda_k$.
 In this case,
 $G(\nu_k, r) \to G(1, 0) = 2$
 and the total error is roughly twice $E_\mathrm{sat}$.
+
+
+For an arbitrary spectrum of eigenvalues,
+$\lambda_2, \dots, \lambda_n$,
+we expect that the optimal $\lambda$ to shift gradually to
+smaller values as the simulation length, $t$, increasing.
+%
+Asymptotically, we expect the optimal $\lambda$
+to be around $\min_k \lambda_k$.
+
+
+\begin{figure}[h]
+\begin{center}
+  \makebox[\linewidth][c]{
+    \includegraphics[angle=0, width=0.95\linewidth]{fig/errcomp.pdf}
+  }
+  \caption{
+    \label{fig:err_component}
+    Component of the error, $G(\nu_k, r)$,
+    versus $\nu_k = \lambda_k / \lambda$,
+    where $r = t_0 / (t + t_0)$.
+    %
+  }
+\end{center}
+\end{figure}
+
 
 
 
@@ -2491,14 +2507,14 @@ the matrix $\mathbf w$ is tridiagonal,
 %    0 & \dots & 0 & \mu_1 & 1 - \mu_1
 %  \end{array}
 %\right).
-%\label{eq:wtridiag}
+%\label{eq:wnn}
 %\end{equation}
 %%
 %We have
 and the eigenvalues are
 \begin{equation}
   \lambda_k = 1 - 4 \, \mu_1 \sin^2 \frac{(k - 1) \, \pi}{2n}.
-\label{eq:wtridiag_eigenvalue}
+\label{eq:wnn_eigenvalue}
 \end{equation}
 %
 Thus, for this updating matrix to be stable,
@@ -2522,17 +2538,18 @@ we convert Eq.
 %\eqref{eq:optimal_lambda_approx}
 to an integral,
 $\sum_i \to \frac{2 \, n}{\pi} \int dp$, and
-$$
-\begin{aligned}
-\Err_2
-&=
+%
+\begin{align}
+\Err_A
+=
 \frac{2 \, n}{\pi \, t}
 \int_0^{\pi/2}
-  \frac{    \Gamma(p) \, \left(1 - 4 \, \mu_1 \, \sin^2 p \right)^2    }
-       { \lambda \, \left(2 - 8 \, \mu_1 \, \sin^2 p - \lambda \right) }
+  \frac{ \Gamma(p) \, \left(1 - 4 \, \mu_1 \, \sin^2 p \right)^2    }
+       {   \lambda \, \left(2 - 8 \, \mu_1 \, \sin^2 p - \lambda \right) }
 \, dp.
-\end{aligned}
-$$
+\notag
+%\label{eq:error_nn_asym_int}
+\end{align}
 
 
 
@@ -2541,7 +2558,7 @@ we have, from Eq. \eqref{eq:Gamma_perfect},
 $\Gamma(p) = 1$, and
 $$
 \begin{aligned}
-\Err_2
+\Err_A
 &=
 \frac{2 \, n}{\pi \, t}
 \int_0^{\pi/2}
@@ -2565,7 +2582,7 @@ It is somewhat more convenient to change variable $p \to \frac{ \pi } { 2 } - p$
 and
 $$
 \begin{aligned}
-\Err_2
+\Err_A
 &=
 \frac{n}{\lambda \, t}
 \frac{1}{2 \pi i}
@@ -2601,7 +2618,7 @@ $$
 Thus,
 $$
 \begin{aligned}
-\Err_2
+\Err_A
 &=
 \frac{n}{\lambda \, t}
 \left(
@@ -2637,42 +2654,92 @@ Minimizing the function yields
 %
 \begin{equation}
 \lambda = \frac{1 - 4 \, \mu_1} { 1 - 2 \, \mu_1 },
-\label{eq:lambda_tridiag_perfect}
+\label{eq:lambda_nn_perfect}
 \end{equation}
 %
-and the error in the optimal is given by
+and the asymptotic error in the optimal case is given by
 %
 \begin{equation}
-\Err
+\Err_A
 =
 \frac{n}{t}
 \left(
   1+ \frac{2 \, \mu_1^2}{1-4 \, \mu_1}
 \right).
-\label{eq:error_tridiag_prefect}
+\label{eq:error_nn_prefect}
 \end{equation}
 %
-%From Eq. \eqref{eq:error_tridiag}, it is clear that
+%From Eq. \eqref{eq:error_nn}, it is clear that
 Clearly, the error
-increases rapidly with magnitude of $\mu_1$,
+increases with the magnitude of $\mu_1$
 no matter its sign,
 and the minimal value, obtained at $\mu_1 = 0$,
 corresponds to the single-bin scheme.
+%
+Note that we have ignored the residual error
+and assumed $\lambda < 2 \, \min \lambda_k = 2 - 8 \, \mu_1$
+for all $k$ in the above solution.
+%
+Fortunately,
+the $\lambda$ from Eq. \eqref{eq:lambda_nn_perfect}
+satisfies this condition
+by the stability condition,
+$4 \, \mu_1 < 1$.
 
 
 
-For one-step sampling,
-we have, from Eq. \eqref{eq:Gamma_onestep},
-$\Gamma(p) = \cot^2 p \approx \cos^2 p / (\sin^2 p + \delta^2)$,
+For the one-step sampling,
+we find from Eq. \eqref{eq:Gamma_onestep}
+that $\Gamma(p) = \cot^2 p$
+is peaked around $p \approx 0$,
+%
+Then
+$$
+\begin{aligned}
+\Err_A
+&
+\propto
+\frac{   2 \, n }
+     { \pi \, t }
+\left.
+\frac{            \left(1 - 4 \, \mu_1 \, \sin^2 p \right)^2         }
+     { \lambda \, \left(2 - 8 \, \mu_1 \, \sin^2 p - \lambda \right) }
+\right|_{ p \approx 0 }
+\notag \\
+&
+\approx
+\frac{   2 \, n }
+     { \pi \, t }
+\frac{             1             }
+     {  \lambda \, (2 - \lambda) }
+.
+\end{aligned}
+$$
+%
+The optimal $\lambda$ is therefore
+%
+\begin{equation}
+\lambda \approx 1.
+\label{eq:lambda_nn_onestep}
+\end{equation}
+%
+
+\note{We can be a little more precise here.
+%
+From Eq. \eqref{eq:Gamma_onestep}, we get
+%
+$$
+\Gamma(p) = \cot^2 p \approx \cos^2 p / (\sin^2 p + \delta^2),
+$$
+%
 where we have introduced
 $\delta \propto \sin[ \pi / (2 \, n) ] \sim 1/n$
 as a small parameter to avoid the divergence
 around the origin.
 %
-Then
 $$
 \begin{aligned}
-\Err_2
+\Err_A
 &=
 \frac{   2 \, n }
      { \pi \, t }
@@ -2695,23 +2762,13 @@ $$
 .
 \end{aligned}
 $$
-%
-The optimal $\lambda$ is therefore
-%
-\begin{equation}
-\lambda = 1,
-\label{eq:lambda_tridiag_onestep}
-\end{equation}
-%
-which is the same of the global sampling scheme.
-
-\note{The integral is evaluated as follows.
+The integral is evaluated as follows.
 %
 We again change variable $p \to \frac{ \pi } { 2 } - p$,
 and
 $$
 \begin{aligned}
-\Err_2
+\Err_A
 &=
 \frac{n}{\lambda \, t}
 \frac{1}{2 \pi i}
@@ -2754,14 +2811,17 @@ $$
 where the contour is the unit circle
 in the complex plane of $z$,
 and the integral is reduced to a sum of residues
-around the poles within the unit circle.
+around the poles within.
 
-The poles of the integral come from three factors,
+The poles of the integral come from three sources,
 namely,
-1: at $z = 0$,
-2: at the zeros of
+% 1.
+$z = 0$,
+% 2.
+the zeros of
 $(2 - \lambda) \, z^2 - 2 \, \mu_1 \, (z^2 + 1)^2$,
-3: at the zeros of
+% 3.
+and the zeros of
 $( z^2 + 1 )^2 + 4 \, \delta^2 \, z^2$.
 
 For the first pole around the origin,
@@ -2770,39 +2830,45 @@ $$
 \frac{ A + B \, z^2 + \cdots }
      {          z^3          },
 $$
-then the residue is simply $B$.
+then the residue is $B$.
 %
 Since
 $$
 \begin{aligned}
 \left[ z^2 - \mu_1 (z^2 + 1)^2 \right]^2
-&=
+&
+\approx
 [ - \mu_1 + (1 - 2 \, \mu_1) \, z^2]^2
 \\
-&=
+&
+\approx
 \mu_1^2
 \left[
   1 + \left(4 - \tfrac { 2  } { \mu_1 } \right) z^2
 \right],
 \\
 %
+4 \, z^2 - ( z^2 + 1 )^2
+&
+\approx
+-( 1 - 2 \, z^2 ),
+\\
+%
 (2 - \lambda) \, z^2 - 2 \, \mu_1 \, (z^2 + 1)^2
-&=
+&
+\approx
 -2 \, \mu_1 \,
 \left[
   1 + \left(
         2 + \tfrac{ \lambda - 2 } { 2 \, \mu_1 }
       \right)
+      \, z^2
 \right],
 \\
 %
-4 \, z - ( z^2 + 1 )^2
-&=
--( 1 - z^2 ),
-\\
-%
 ( z^2 + 1 )^2 + 4 \, \delta^2 \, z^2
-&=
+&
+\approx
 1 + (2 + 4 \, \delta^2) \, z^2,
 \end{aligned}
 $$
@@ -2824,7 +2890,7 @@ $$
 \operatorname{Res}_1
 =
   - \frac{ 2 + \lambda } { 4 }
-  - \mu_1 \, \left( 1 +  \, \delta^2 \right).
+  - \mu_1 \, \left( 1 + 2 \, \delta^2 \right).
 $$
 
 
@@ -2834,22 +2900,34 @@ $$
 (2 - \lambda) \, z^2 = 2 \, \mu_1 \, (z^2 + 1)^2,
 $$
 which are
+\begin{equation}
+z
+=
+\pm
+\sqrt { \frac{ 2 - \lambda }
+             { 8 \, \mu_1  } }
+\pm
+\sqrt { \frac{ 2 - \lambda }
+             { 8 \, \mu_1  } - 1 }.
+\label{eq:nnint_local_zeros_part2}
+\end{equation}
+We share distinguish two cases.
+\textbf{Case A.}
+If $\lambda < 2 - 8 \, \mu_1$,
+two of the roots lie in the unit circle, namely
 $$
-z = \pm \sqrt { \frac{ 2 - \lambda }
-                     { 8 \, \mu_1 } }
-\pm \sqrt { \frac{ 2 - \lambda }
-                 { 8 \, \mu_1 } - 1 }.
+z
+=
+\pm
+\left(
+\sqrt { \frac{ 2 - \lambda }
+             { 8 \, \mu_1  } }
+-
+\sqrt { \frac{ 2 - \lambda }
+             { 8 \, \mu_1  } - 1 }
+\right),
 $$
-Two of them lie in the unit circle, namely
-$$
-z = \pm \left(
-  \sqrt { \frac{ 2 - \lambda }
-               { 8 \, \mu_1 } }
-- \sqrt { \frac{ 2 - \lambda }
-               { 8 \, \mu_1 } - 1 }
-        \right),
-$$
-and
+which satisfy
 $$
 4 \, \mu_1 \, ( z^2 + 1)
 =
@@ -2860,19 +2938,19 @@ $$
 Thus,
 $$
 \begin{aligned}
-\left[ z^2 - \mu_1 \, (1 + z^2)^2 \right]^2
+\left[ z^2 - \mu_1 \, \left( z^2 + 1 \right)^2 \right]^2
 &=
 \left( z^2 - \tfrac{ 2 - \lambda } { 2 } z^2 \right)^2
 =
 \frac{ \lambda^2 } { 4 } z^4.
 \\
 %
-4 z^2 - (1 + z^2)^2
+4 z^2 - \left( z^2 + 1 \right)^2
 &=
 -\frac{ 2 - \lambda - 8 \, \mu_1  } { 2 \, \mu_1 } z^2,
 \\
 %
-(z^2 + 1)^2 + 4 \, \delta^2 \, z^2
+\left( z^2 + 1 \right)^2 + 4 \, \delta^2 \, z^2
 &=
 \frac{ 2 - \lambda + 8 \, \mu_1 \, \delta^2 }
      { 2 \, \mu_1 }
@@ -2881,7 +2959,7 @@ $$
 %
 (2 - \lambda) \, 2 \, z
 -
-8 \, \mu_1 \, (z^2 + 1) \, z
+8 \, \mu_1 \, \left( z^2 + 1 \right) \, z
 &=
 2 \, z \, \left[2 - \lambda - 4 \,  \mu_1 \, (z^2 + 1) \right]
 \\
@@ -2893,6 +2971,7 @@ and taken the derivative for the last factor.
 %
 Note that the two roots within the unit share the same
 residue and the sum for this part is
+%
 $$
 \operatorname{Res}_2
 =
@@ -2900,6 +2979,57 @@ $$
       { 4 \, ( 2 + 8 \, \mu_1 \, \delta^2 - \lambda ) }
 \sqrt{ 1 - \frac{ 8 \, \mu_1 } { 2 - \lambda } }.
 $$
+%
+\textbf{Case B.}
+If $2 - 8 \, \mu_1 \le \lambda < 2$,
+the four zeros in Eq. \eqref{eq:nnint_local_zeros_part2}:
+%
+\begin{equation}
+z
+=
+\pm
+\sqrt { \frac{ 2 - \lambda }
+             { 8 \, \mu_1  } }
+\pm i \,
+\sqrt { 1 - \frac{ 2 - \lambda }
+                 { 8 \, \mu_1  } },
+\label{eq:nnint_local_zeros_part2b}
+\end{equation}
+%
+all satisfy $|z| = 1$, and hence
+all lie on the border of the unit circle.
+%
+Thus, each contributes half of the residue there.
+%
+However, since the four zeros satisfy
+$$
+2 - \lambda - 4 \, \mu_1 \, ( z^2 + 1)
+=
+\pm i
+\sqrt{ ( 2 - \lambda ) ( 8 \, \mu_1 - 2 + \lambda ) },
+$$
+the sum of the four residues gives zero in this case:
+$$
+\operatorname{Res}_2 = 0.
+$$
+In summary,
+$$
+\operatorname{Res}_2
+=
+\begin{dcases}
+-\frac{                 \lambda^2                     }
+      { 4 \, ( 2 + 8 \, \mu_1 \, \delta^2 - \lambda ) }
+\sqrt{ 1 - \frac{ 8 \, \mu_1 } { 2 - \lambda } }
+&
+\mathrm{if \;}
+\lambda < 2 - 8 \, \mu_1,
+\\
+0
+&
+\mathrm{otherwise}.
+\end{dcases}
+$$
+
 
 For the last part,
 we have four roots of
@@ -2908,30 +3038,30 @@ with two of them lying in the unit circle:
 $$
 z = \pm i \left( \sqrt{ 1 + \delta^2 } - \delta \right),
 $$
-such that
+satisfying
 $$
 z^2 + 1 + 2 \, \delta^2 = 2 \, \delta \, \sqrt{1 + \delta^2}.
 $$
 Then,
 $$
 \begin{aligned}
-z^2 - \mu_1 (1 + z^2)^2
+z^2 - \mu_1 \, \left( z^2 + 1 \right)^2
 &= z^2 \, (1 + 4 \, \mu_1 \, \delta^2),
 \\
-4 \, z^2 - (1 + z^2)^2
+4 \, z^2 - \left( z^2 + 1 \right)^2
 &=
 4 \, z^2 \, (1 + \delta^2)
 \\
 %
 (2 - \lambda) \, z^2
-- 2 \, \mu_1 (1 + z^2)^2
+- 2 \, \mu_1 \, \left( z^2 + 1 \right)^2
 &=
 \left(
   2 - \lambda + 8 \, \mu_1 \, \delta^2
 \right) \, z^2
 \\
 %
-4 \, z \, (1 + z^2)
+4 \, z \, \left( z^2 + 1 \right)
 +
 8 \, \delta^2 \, z
 &=
@@ -2940,13 +3070,13 @@ z^2 - \mu_1 (1 + z^2)^2
 8 \, z \, \delta \, \sqrt{ 1 + \delta^2 }.
 \end{aligned}
 $$
-Note that the two roots within the unit share the same
+Note that the above two roots share the same
 residue and the sum for this part is
 $$
 \operatorname{Res}_3
 =
-\frac{ (1 + 4 \, \mu_1 \, \delta^2 )^2 }
-     { (2 + 8 \, \mu_1 \, \delta^2 - \lambda }
+\frac{ \left( 1 + 4 \, \mu_1 \, \delta^2 \right)^2 }
+     {        2 + 8 \, \mu_1 \, \delta^2 - \lambda }
 \frac{ \sqrt{ 1 + \delta^2 } }
      {        \delta         }.
 $$
@@ -2954,18 +3084,44 @@ $$
 Now as $\delta \to 0$, the last contribution will dominate,
 and we have
 $$
-\Err_2
+\Err_A
 \approx
 \frac{ n } { t }
 \frac{ (1 + 4 \, \mu_1 \, \delta^2)^2 }
 { \lambda \, (2 + 8 \, \mu_1 \, \delta^2 - \lambda) }
+\frac{ 1 } { \delta }
 \approx
 \frac{ n } { t }
 \frac{ 1 }
-{ \lambda \, (2 - \lambda) },
+{ \lambda \, (2 - \lambda) }
+\frac{ 1 } { \delta },
 $$
 and the minimum is reached at $\lambda \approx 1$.
+
+The weakness of the above calculation is two fold.
+%
+First, it ignores the residual error.
+%
+Second, the simplified expression for the asymptotic error
+$E_A$ is also misused.
+%
+Namely, with $\lambda \approx 1$,
+we cannot assume $\lambda < 2 \, \lambda_k$ in general.
+%
+So it only works for a very small value of $\mu_1$.
 }
+
+
+
+Note that Eq. \eqref{eq:lambda_nn_onestep} is only good
+for sufficiently short simulations.
+%
+For very longer simulations,
+the optimal $\lambda$ tends to shift
+toward the smallest eigenvalue,
+$\min \lambda_k = 1 - 4 \, \mu_1$
+according to the discussion in Sec. \ref{sec:optlambda}.
+%
 
 
 
@@ -2973,7 +3129,7 @@ and the minimum is reached at $\lambda \approx 1$.
 
 
 The Gaussian updating kernel is commonly
-adopted in metadynamics.
+adopted by metadynamics simulations.
 %
 Below we show that the resulting updating scheme
 is stable, albeit less effective
@@ -3136,34 +3292,121 @@ suggesting stability of the updating scheme.
 Numerical results}
 
 
-\subsection{General simulation protocol}
+\subsection{Test system and simulation protocol}
 
 
-To determine the optimal schedule,
-we shall test a model system
-in the following fashion.
+We tested the above theory on a one-dimensional system
+of $n = 100$ bins,
+with a flat target distribution
+$p_i = 1/n$.
 %
-Initially $\alpha$ is set to some $\alpha_0$
-for a sufficiently long time.
+Since in the asymptotic regime,
+the distribution converges to $p_i$
+no matter the intrinsic distribution, $p^*_i$,
+we also set the latter to be flat for convenience.
 %
-Then we reset the simulation time $t = 0$,
-and switch to
-$$
-\alpha(t) = \frac{ 1 } { \lambda \, (t + t_0) },
-$$
-where $t_0 = 1/(\lambda \, \alpha_0)$
-to make $\alpha(t)$ continuous.
+Our goal is to observe how the error
+of the bias potential defined in Eq. \eqref{eq:error_sum}
+depends on the schedule function $\alpha(t)$
+at the end of the simulation.
+
+
+
+Initially,
+we set the bias potential to zero,
+$v_i \equiv 0$,
+%
+and let the system undergo a period of equilibration
+during which the updating magnitude is fixed at $\alpha_0$.
+%
+After the equilibration,
+we reset the origin of the time, $t$,
+and started the schedule specified by
+Eq. \eqref{eq:alpha_invtlambda}.
+%
+The goal is then to observe how the final error
+depends on the parameter, $\lambda$.
+%
+Further, we choose $t_0 = 1/(\lambda \, \alpha_0)$
+to smooth the transition from equilibration.
+
+
+
+
+Since the error depends on the underlying sampling scheme,
+we have applied the above protocol to two
+sampling schemes.
+%
+In both cases, we used the
+Metropolis algorithm\cite{metropolis1953, newman, frenkel}
+to sample the state space.
+%
+In each step, a new bin index $j$ was proposed
+and then accepted with probability
+%
+$
+A(i \to j) = \min\{ 1, \exp(v_i - v_j) \}.
+$
+In the first sampling scheme,
+we choose $j$ randomly out of the $n$ bins
+to emulate the perfect sampling scheme
+discussed in Sec. \ref{sec:Gamma}.
+%
+We refer to this scheme as the global sampling scheme.
+%
+In the second sampling scheme,
+we limit $j$ to the two neighbors of $i$,
+$i \pm 1$, with equal probability $1/2$,
+to mimic the one-step sampling scheme
+in Sec. \ref{sec:Gamma}.
+%
+This scheme models local sampling processes
+typical in MD and straightforward MC simulations.
+%
+We refer to this as the local sampling scheme,
+
 
 
 \subsection{Single-bin (WL) updating scheme}
 
-Show the error versus $\lambda$.
 
-Good agreement between theory and simulation.
 
-The optimal $\lambda$ is near $1.0$,
-independent of the underlying sampling scheme.
+We first tested the single-bin (WL) updating scheme
+using the above protocol.
+%
+Here, we chose $\alpha_0 = 0.0001$
+and ran the simulation for $t = 10^8$ steps.
+%
+As shown in Fig. \ref{fig:err_singlebin},
+the numerical results of the terminal error agreed well with
+the analytical prediction by Eq. \eqref{eq:error_invt}.
+%
+For both global and local sampling schemes,
+the optimal $\lambda$ occurred around $1.0$,
+the optimal value in the asymptotic regime.
+%
+Recall that $1/\lambda$ in Eq. \eqref{eq:alpha_invtlambda}
+represents the relative updating magnitude.
+%
+Figure \ref{fig:err_singlebin} also shows that
+a smaller than optimal value of $1/\lambda$
+tends to increase the error more rapidly
+than a larger than optimal value,
+suggesting that the latter is the safer choice
+when the optimal value is unknown.
 
+
+Our final observation is that the error function
+in the two cases differed only by a multiplicative constant.
+%
+This again agreed with the theory.
+%
+Since all eigenvalues of the single-bin scheme were
+the same, $\lambda_2 = \cdots = \lambda_n = 1$,
+the error in Eq. \eqref{eq:error_invt}
+depends on the sampling scheme only through
+the sum $\sum_{ k = 2 }^n \Gamma_k$,
+which gives rise to the multiplicative constant mentioned above.
 
 
 \begin{figure}[h]
@@ -3173,23 +3416,78 @@ independent of the underlying sampling scheme.
   }
   \caption{
     \label{fig:err_singlebin}
-    Error, $E$, versus the proportionality constant, $1/\lambda$,
-    in Eq. \eqref{eq:alpha_trial}
+    Error, $E$, versus the
+    relative updating magnitude,
+    %proportionality constant,
+    $1/\lambda$,
+    in Eq. \eqref{eq:alpha_invtlambda}
     for the single-bin (WL) scheme.
     %
+    The results have been averaged over $1000$ independent runs.
   }
 \end{center}
 \end{figure}
 
 
 
-\subsection{Nearest neighbor updating scheme}
+\subsection{Nearest-neighbor updating scheme}
 
-Normalized error vs. $\lambda$.
 
-In the global sampling scheme,
-the optimal $\lambda$ depends on the simulation length.
-This dependence is more significant in the global sampling scheme.
+We now turn to the nearest-neighbor updating scheme.
+%
+We again find good agreement between simulation and analytical results.
+%
+A new feature is that the optimal $\lambda$
+depends on the simulation length, $t$.
+%
+As shown in Fig. \ref{fig:err_nnbr},
+the normalized error, $(t + t_0) \, \Err$,
+hence the optimal value of $1/\lambda$,
+depended non-trivially on the simulation length
+in the global sampling case.
+%
+The optimal $1/\lambda$ gradually increased
+with simulation length, which is in agreement with
+the discussion in Sec. \ref{sec:optlambda}.
+%
+For the local sampling case, however,
+the normalized error roughly maintained the sample shape,
+and the optimal $\lambda$ is around $1.0$,
+as suggested by Eq. \eqref{eq:lambda_nn_onestep}.
+
+
+
+To understand this behavior,
+we observe that for shorter simulations,
+long-wavelength modes,
+(with larger $\lambda_k$ and smaller $k$),
+dominate the error function,
+according to Eq. \eqref{eq:error_invt},
+as the equilibrium error under a fixed updating magnitude
+is proportional to $\lambda_k \, \Gamma_k$.
+%
+For longer simulations,
+short-wavelength modes
+(with smaller $\lambda_k$ and larger $k$)
+become more important,
+for $\lambda_k$ also gives the decay rate
+of the $k$th mode,
+and errors in smaller $\lambda_k$ modes
+are harder to damp out.
+%
+This causes $\lambda$ to shift toward
+a smaller $\lambda_k$ value.
+%
+Note also that while increasing $\lambda$
+also increases the error of the long-wavelength modes,
+this rate of increase is much smaller,
+as shown in the $\nu_k > 1$ branch
+in Fig. \ref{fig:err_component}.
+%
+The shift of $\lambda$, however, is less noticeable
+under the local sampling scheme,
+because the weight of a longer-wavelength mode
+is further multiplied by much larger value of $\Gamma_k$.
 
 
 \begin{figure}[h]
@@ -3200,10 +3498,13 @@ This dependence is more significant in the global sampling scheme.
   \caption{
     \label{fig:err_nnbr}
     Normalized error, $(t + t_0) \, E$,
-    versus the proportionality constant, $1/\lambda$,
-    in Eq. \eqref{eq:alpha_trial}
+    versus the %proportionality constant,
+    relative updating magnitude,
+    $1/\lambda$,
+    in Eq. \eqref{eq:alpha_invtlambda}
     for the nearest-neighbor updating scheme with $\mu_1 = 0.24$.
     %
+    The results have been averaged over $1000$ independent runs.
   }
 \end{center}
 \end{figure}
@@ -3228,13 +3529,25 @@ Error vs. $\sigma$.
 Conclusions and Discussions}
 
 
-We verified the optimality of the inverse-time formula.
+We verified the optimality of the inverse-time formula
+for the Wang-Landau algorithm.
 
 We have shown that
 without a priori information,
 the single-bin scheme is asymptotically
 the best among all updating scheme
 in terms of convergence.
+
+For metadynamics, and other multiple-bin updating schemes,
+we found formulas to predict the error for finite length
+simulations and the optimal relative updating magnitude,
+$1/\lambda$.
+
+
+\section{Acknowledgments}
+
+We thanks Dr. Y. Mei and Dr. J. Ma for helpful discussions.
+
 
 
 \bibliography{simul}
