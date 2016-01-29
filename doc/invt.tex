@@ -1824,10 +1824,15 @@ updating scheme.
 
 
 
+For an arbitrary updating matrix $\mathbf w$,
+optimizing Eq. \eqref{eq:error_asym1}
+can lead to an algebraically complex expression for $\alpha(t)$.
+%
+In practice, it is more useful to find a simple expression for $\alpha(t)$
+that is near optimal.
+%
 From Eq. \eqref{eq:alpha_opt},
-it is reasonable to conjecture that
-a near-optimal $\alpha(t)$ for
-a given updating matrix $\mathbf w$ would be
+a reasonable candidate would be
 %
 \begin{equation}
 \alpha(\tau) = \frac{1}{\lambda \, (\tau + t_0) },
@@ -1836,9 +1841,17 @@ a given updating matrix $\mathbf w$ would be
 %
 for some value of $\lambda$.
 %
-Below we shall find the optimal value
-in some special cases.
+Below we shall assume this functional form
+and find the optimal value
+in some cases.
 %
+We shall show that the optimal $\lambda$
+generally depends on not only the spectrum
+of eigenvalues and the sampling method,
+but also other parameters,
+such as the simulation length, $t$.
+
+
 Using Eq. \eqref{eq:alpha_trial}
 in Eq. \eqref{eq:error_asym1} yields
 %
@@ -1930,11 +1943,13 @@ in Sec. \ref{sec:optWL}.
 
 
 
-In practice, however, we may wish to optimize
-relative short simulations that have not entered
+In practice, however,
+real simulations
+may be relative short
+and have not entered
 the asymptotic regime.
 %
-Then the residual error, $\Err_R$, is not negligible.
+Then, the residual error, $\Err_R$, is not negligible.
 %
 From Eq. \eqref{eq:error_res}, we get
 %
@@ -1947,11 +1962,11 @@ From Eq. \eqref{eq:error_res}, we get
   \left(
       \frac{   t_0   }
            { t + t_0 }
-   \right)^{ 2 \, \nu_k }
+   \right)^{ 2 \, \nu_k },
 \label{eq:error_res_invt}
 \end{equation}
 %
-where we have assumed that at $t = 0$
+assuming that at $t = 0$
 the system has achieved an equilibrium
 at a constant $\alpha_0$,
 such that the values of
@@ -2003,7 +2018,7 @@ $$
 $$
 is the equilibrium error of mode $k$
 under the constant terminal value
-of $\alpha(t)$.
+of $\alpha(t) = 1/[\lambda (t + t_0)]$.
 
 \note{Derivation of Eq. \eqref{eq:error_invt}:
 $$
@@ -2053,7 +2068,9 @@ $$
 Adding the two yields Eq. \eqref{eq:error_invt}.
 }
 
-We give two remarks on Eq. \eqref{eq:error_invt}.
+
+
+We give several remarks on Eq. \eqref{eq:error_invt}.
 %
 First, the final error is always greater than
 the saturated equilibrium value at the terminal $\alpha(t)$:
@@ -2061,12 +2078,85 @@ $$
 E > E_\mathrm{sat} \equiv \sum_{k = 2}^n E^f_k,
 $$
 because the second term in the braces
-is nonnegative no matter the sign of $2 \, \nu_k - 1$.
+is nonnegative no matter the sign of $2 \, \nu_k - 1$
+(in fact, it is a decreasing function
+that vanishes only at $\nu_k \to +\infty$).
+
+
+
+\begin{figure}[h]
+\begin{center}
+  \makebox[\linewidth][c]{
+    \includegraphics[angle=0, width=0.95\linewidth]{fig/errcomp.pdf}
+  }
+  \caption{
+    \label{fig:err_component}
+    Component of the error, $G(\nu_k, r)$,
+    versus $\nu_k = \lambda_k / \lambda$,
+    where $r = t_0 / (t + t_0)$.
+    %
+  }
+\end{center}
+\end{figure}
+
+
+
+
+Second, we shall show that the optimal $\lambda$
+depends on the simulation length,
+and it tends to decrease as simulation lengthens.
 %
-Second, in the optimal case,
-$\nu_k = 1$,
-and the final error is twice $E_\mathrm{sat}$
-at long times.
+Let us first rewrite Eq. \eqref{eq:error_invt} as
+%
+$$
+\Err
+=
+\sum_{ k = 2 }^n
+  \frac{    \Gamma_k    }
+       { 2 \, (t + t_0) }
+  G\left( \nu_k, \frac{ t_0 } { t + t_0} \right),
+$$
+%
+where the $k$th component is proportional to
+%
+$$
+G\left( \nu_k, r \right)
+=
+\nu_k
+\,
+\left(
+  1
+  +
+  \frac{ 1 - r^{2 \, \nu_k - 1} }
+       {   2 \, \nu_k - 1       }
+\right).
+$$
+%
+As shown in Fig. \ref{fig:err_component},
+the function $G(\nu_k, r)$ depends nontrivial on $\nu_k$.
+%
+For a fixed and sufficiently small $r = t_0 / (t + t_0)$,
+$G(\nu_k, r)$ has two local minima along $\nu_k$,
+one at $\nu_k = 0$, and the other around $\nu_k = 1$,
+with the former being deeper albeit narrower.
+%
+This shows that for a relatively short simulation,
+hence relative large value of $r$,
+the minimal error may be achieved at $\nu_k \approx 0$,
+corresponding to a large value of $\lambda$
+($\lambda \gg \lambda_k$).
+%
+However, this minimum is unstable as simulation lengthens,
+for $G(\nu_k, r)$ increases rapidly
+with decreasing $r$ under a fixed $\nu_k$.
+%
+In other words,
+asymptotically, the minimal error is always achieved at
+$\nu_k = 1$ or $\lambda = \lambda_k$.
+%
+In this case,
+$G(\nu_k, r) \to G(1, 0) = 2$
+and the total error is roughly twice $E_\mathrm{sat}$.
 
 
 
@@ -2882,13 +2972,12 @@ and the minimum is reached at $\lambda \approx 1$.
 \subsubsection{Gaussian updating scheme}
 
 
-The Gaussian kernel is commonly
-used in metadynamics.
+The Gaussian updating kernel is commonly
+adopted in metadynamics.
 %
-Below we show that this
-leads to a stable updating scheme,
-although it can be less effective
-in reducing local noises.
+Below we show that the resulting updating scheme
+is stable, albeit less effective
+in reducing short-wavelength noises.
 
 
 
@@ -2896,9 +2985,11 @@ We start by defining
 a continuous limit
 for $b = n - 1 \gg 1$:
 $x = l \, \Delta x$,
-$\Delta x = \pi/n$,
 and
-$\mu_l = \mu(x) \, \Delta x$.
+$\mu_l = \mu(x) \, \Delta x$,
+where
+$\Delta x = \pi/n$
+is the bin size.
 %
 Then
 Eq. \eqref{eq:wband_eigenvalue}
@@ -2921,10 +3012,9 @@ with the normalization
 
 
 
-For the Gaussian wave,
-$\mu(x) \propto \exp(-\frac{1}{2} x^2/\sigma^2)$.
-%
-If $\Delta x \ll \sigma \ll 1$,
+Particularly,
+for the Gaussian updating kernel,
+if $\Delta x \ll \sigma \ll 1$,
 we can extended
 the upper limit of the integrals
 in Eqs. \eqref{eq:lambda_int}
