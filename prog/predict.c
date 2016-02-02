@@ -18,7 +18,7 @@ static void invt_predict(invtpar_t *m)
     t0 = c / m->alpha0;
 
     /* c / (t + t0) */
-    err = esterror_ez(c, t, t0,
+    err = esterror_ez(c, t, t0, m->alpha0,
         m->n, m->winn, m->win, m->sampmethod,
         0);
 

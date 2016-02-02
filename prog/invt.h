@@ -365,7 +365,7 @@ static double esterrn(double lambda, double t, double t0,
  * currently, assuming equilibrium values of < x^2 >
  * of alpha(0) = c / t0 at t = 0
  * */
-static double esterror_ez(double c, double t, double t0,
+static double esterror_ez(double c, double t, double t0, double a0,
    int n, int winn, double *win, int sampmethod,
    int verbose)
 {
@@ -382,6 +382,9 @@ static double esterror_ez(double c, double t, double t0,
    * for the updating scheme */
   gamma = estgamma(n, sampmethod);
 
+  if ( fabs(t0) <= 0 ) {
+    t0 = c / a0;
+  }
   err = esterrn(1.0 / c, t, t0, n, lamarr, gamma, xerr);
 
   /* print out the values of lambda_i and gamma_i */
@@ -405,13 +408,16 @@ static double esterror_ez(double c, double t, double t0,
 /* estimate the best parameter c for the updating schedule
  * alpha(t) = c / (t + t0)
  * according to the analytical prediction
+ * if t0 <= 0, t0 is set to 1 / (c a0)
+ * assuming a single local minimum
  * */
-static double estbestc(double t, double t0,
+static double estbestc(double t, double t0, double a0,
    int n, int winn, double *win, int sampmethod,
    double prec, double *err, int verbose)
 {
   double cl, cm, cr, cn;
   double el, em, er, en;
+  int it;
 
   /* specify the initial bracket */
   cl = 0.5;
@@ -419,14 +425,18 @@ static double estbestc(double t, double t0,
   cr = 2.0;
 
   /* compute the values at the initial bracket */
-  el = esterror_ez(cl, t, t0, n, winn, win, sampmethod, 0);
-  em = esterror_ez(cm, t, t0, n, winn, win, sampmethod, 0);
-  er = esterror_ez(cr, t, t0, n, winn, win, sampmethod, 0);
+  el = esterror_ez(cl, t, t0, a0, n, winn, win, sampmethod, 0);
+  em = esterror_ez(cm, t, t0, a0, n, winn, win, sampmethod, 0);
+  er = esterror_ez(cr, t, t0, a0, n, winn, win, sampmethod, 0);
 
-  while ( 1 ) {
+  for ( it = 1; ; it++ ) {
     if ( verbose ) {
-      fprintf(stderr, "%g (%g) - %g (%g) - %g (%g)\n",
-          cl, el, cm, em, cr, er);
+      fprintf(stderr, "%d: %g (%g) - %g (%g) - %g (%g)\n",
+          it, cl, el, cm, em, cr, er);
+      if ( verbose >= 3 ) {
+        fprintf(stderr, "Press enter to continue...\n");
+        getchar();
+      }
     }
 
     /* find the minimal value */
@@ -434,10 +444,10 @@ static double estbestc(double t, double t0,
       /* el is the minimal of the three, extend to the left */
       cr = cm;
       cm = cl;
-      cl = cl * 0.5;
+      cl = cl * 0.5; /* make sure cl > 0 */
       er = em;
       em = el;
-      el = esterror_ez(cl, t, t0, n, winn, win, sampmethod, 0);
+      el = esterror_ez(cl, t, t0, a0, n, winn, win, sampmethod, 0);
     } else if ( er < em && er < el ) {
       /* er is the minimal of the three, extend to the right */
       cl = cm;
@@ -445,7 +455,7 @@ static double estbestc(double t, double t0,
       cr = cr * 2.0;
       el = em;
       em = er;
-      er = esterror_ez(cr, t, t0, n, winn, win, sampmethod, 0);
+      er = esterror_ez(cr, t, t0, a0, n, winn, win, sampmethod, 0);
     } else {
       /* break the loop */
       if ( cr - cl < prec ) {
@@ -456,7 +466,7 @@ static double estbestc(double t, double t0,
       if ( cm - cl > cr - cm ) {
         /* refine the left half */
         cn = (cl + cm) * 0.5;
-        en = esterror_ez(cn, t, t0, n, winn, win, sampmethod, 0);
+        en = esterror_ez(cn, t, t0, a0, n, winn, win, sampmethod, 0);
         if ( en > em ) {
           /* L - (N - M - R) */
           cl = cn;
@@ -471,7 +481,7 @@ static double estbestc(double t, double t0,
       } else {
         /* refine the right half */
         cn = (cm + cr) * 0.5;
-        en = esterror_ez(cn, t, t0, n, winn, win, sampmethod, 0);
+        en = esterror_ez(cn, t, t0, a0, n, winn, win, sampmethod, 0);
         if ( en > em ) {
           /* (L - M - N) - R */
           cr = cn;

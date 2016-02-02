@@ -173,12 +173,12 @@ static double invt_run(invtpar_t *m)
           m->n, m->winn, m->win, m->sampmethod,
           "final", m->verbose + 1);
 
-      errref = esterror_ez(m->c, t, m->t0,
+      errref = esterror_ez(m->c, t, m->t0, m->alpha0,
           m->n, m->winn, m->win, m->sampmethod,
           m->verbose + 1);
 
       /* compute the optimal c */
-      optc = estbestc(t, m->t0,
+      optc = estbestc(t, 0, m->alpha0,
           m->n, m->winn, m->win, m->sampmethod,
           1e-8, &errmin, m->verbose);
       printf("predicted optimal c %g, err %g\n", optc, errmin);

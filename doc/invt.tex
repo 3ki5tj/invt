@@ -132,7 +132,8 @@ to achieve a flat distribution.
 
 The Wang-Landau (WL) algorithm\cite{wang2001, wang2001pre}
 and metadynamics\cite{laio2002, laio2008, barducci2011, sutto2012}
-are two widely-used techniques for this purpose,
+are two widely-used and closely-related\cite{micheletti2004}
+techniques for this purpose,
 in which a bias potential is actively built-up on-the-fly
 during simulation.
 %
@@ -182,15 +183,19 @@ divided by the number of bins.
 
 
 In this study,
-we shall give a proof of the inverse-time formula,
-and try to generalize it to
-updating schemes involving several neighboring bins,
+we shall give another proof of the inverse-time formula.
+%
+We then adapt the formula
+to updating schemes involving several neighboring bins,
 such as those used in metadynamics.
+%
+We shall show that the optimal updating magnitude
+depends nontrivially on the simulation length
+and other parameters.
 %
 As a byproduct, we shall show that
 the single-bin scheme used by the WL algorithm
-is generally one of the best
-updating schemes in terms of convergence.
+is best in asymptotic convergence.
 %
 The article is organized as follows.
 %
@@ -636,7 +641,7 @@ For the noise part, we have
 $\langle \zeta_i(t) \rangle = 0$,
 %
 %The noise is not necessarily white,
-and the correlation functions
+and the autocorrelation functions
 depend only on the time difference
 %
 \begin{equation}
@@ -839,16 +844,16 @@ q(t) \equiv \int_0^t \alpha(t') \, dt',
 and
 %
 \begin{align}
-u(z)
+u(q')
 &\equiv
-e^{-\lambda \, q(t) + \lambda \, z}.
+e^{-\lambda \, q(t) + \lambda \, q'}.
 \label{eq:ut_definition}
 \end{align}
 So
 \begin{align}
 &\left\langle x^2(t) \right\rangle
 =
-\langle x^2(0) \rangle e^{-2 \, \lambda \, q(t)}
+\langle x^2(0) \, \rangle e^{-2 \, \lambda \, q(t)}
 \notag
 \\
 &\qquad
@@ -861,36 +866,46 @@ So
 \end{align}
 
 
-We shall further demand that
+We now fix the endpoint value of $q(t)$
+and variate the curve.
 %
-\begin{equation}
-  \lim_{t \to \infty} q(t) \to \infty.
-  \label{eq:qt_limit}
-\end{equation}
+This is equivalent to variating $u$
+with fixing endpoint values,
+$u\bigl( q(0) \bigr)  = e^{-\lambda \, q(t)}$
+and
+$u\bigl( q(t) \bigr) = 1$.
 %
-Then, for a large $t$,
-the second term on the right-hand side
-of Eq. \eqref{eq:xt_solution} can be neglected, and
+Note also that the first term on the right-hand side
+of Eq. \eqref{eq:x2t_average} is fixed during
+the variation process.
 %
-\begin{align}
-\left\langle x^2(t) \right\rangle
+%We shall further demand that
+%%
+%\begin{equation}
+%  \lim_{t \to \infty} q(t) \to \infty.
+%  \label{eq:qt_limit}
+%\end{equation}
+%%
+%Then, for a large $t$,
+%the second term on the right-hand side
+%of Eq. \eqref{eq:xt_solution} can be neglected, and
+%%
+%\begin{align}
+%\left\langle x^2(t) \right\rangle
+%%&=
+%%\int_0^t \int_0^t \dot u(t') \, \dot u(t'')
+%%    \left\langle \xi(t') \xi(t'') \right\rangle dt'' \, dt'
+%%\notag
+%%\\
 %&=
-%\int_0^t \int_0^t \dot u(t') \, \dot u(t'')
-%    \left\langle \xi(t') \xi(t'') \right\rangle dt'' \, dt'
-%\notag
-%\\
-&=
-\int_0^t \int_0^t
-  \dot u\bigl( q(t') \bigr) \,
-  \dot u\bigl( q(t'') \bigr) \,
-  \kappa(t' - t'') \, dt'' \, dt'.
-\label{eq:x2t_average_asym}
-\end{align}
-
-
-
-Variating this expression and
-using the Euler-Lagrange equation yields
+%\int_0^t \int_0^t
+%  \dot u\bigl( q(t') \bigr) \,
+%  \dot u\bigl( q(t'') \bigr) \,
+%  \kappa(t' - t'') \, dt'' \, dt'.
+%\label{eq:x2t_average_asym}
+%\end{align}
+%
+By the Euler-Lagrange equation, we get
 $$
 \begin{aligned}
 0
@@ -1358,7 +1373,7 @@ that is about $\alpha_{\max}^2$ times as large.
 
 
 \subsubsection{\label{sec:Gamma}
-Integrals of the correlation functions}
+Integrals of the autocorrelation functions}
 
 
 
@@ -1564,7 +1579,7 @@ Note that these $\Lambda_k$'s are
 not to be confused with the eigenvalues of $\mathbf w$,
 $\lambda_k$'s.
 %
-The correlation function $\kappa_k(t)$
+The autocorrelation function $\kappa_k(t)$
 decays as $\kappa_k(0) \, \Lambda_k^t$,
 with the same-time value $\kappa_k(0) = 1$ being the same as
 that in perfect sampling.
@@ -1637,7 +1652,8 @@ the system has entered the equilibrium under a fixed $\alpha_0$,
 we can then use Eq. \eqref{eq:y2_eql}
 for the $\langle y_k^2(0) \rangle$'s in Eq. \eqref{eq:error_res}.
 
-\note{If we can interpret $\Gamma_k$ as twice the autocorrelation time,
+\note{Another possible approximation
+  is to interpret $\Gamma_k$ as twice the autocorrelation time,
   and the kernel is exponential
   $$
   \kappa_k = \exp\left( - \frac{2}{\Gamma_k} |t| \right),
@@ -1657,16 +1673,24 @@ for the $\langle y_k^2(0) \rangle$'s in Eq. \eqref{eq:error_res}.
   converting a discrete sum to a continuous integral.
 }
 
+
+
+%\subsubsection{\label{twolimits}
+%Two limits of the optimal schedule, $\alpha(t)$}
 %
-%We can study two limiting cases.
+%
+%The optimal $\alpha(t)$ that minimizes the error
+%Eq. \eqref{eq:error_split}
+%is still difficult to find analytically.
+%%
+%However, we can study two limiting cases,
+%for the asymptotic part, Eq. \eqref{eq:error_asym1}.
 %
 %For $\tau \ll t$,
 %the dominant contribution comes from
 %the term(s) with the smallest eigenvalue $\lambda_k = \lambda_n$,
 %and
 %$$
-%\ddot u_n(\tau) = 0,
-%\quad
 %\dot u_n(\tau) = c,
 %\quad
 %\mathrm{and}\;
@@ -1676,17 +1700,21 @@ for the $\langle y_k^2(0) \rangle$'s in Eq. \eqref{eq:error_res}.
 %$$
 %\alpha(\tau) \approx \frac{1}{\lambda_n \, (\tau + t_0)}.
 %$$
-
+%
+%
+%For $\tau \approx t$,
+%$u_k(q) \approx 1$,
 
 
 \subsubsection{\label{sec:optWL}
-Optimality of the single-bin scheme}
+Asymptotic optimality of the single-bin (WL) scheme}
 
 
 
-We now show
-that the single-bin scheme
-is an optimal scheme.
+We now give an interesting deduction
+following from the error functional
+given in Eq. \eqref{eq:error_asym1}:
+the single-bin scheme is asymptotically optimal.
 %
 Consider a class of $\mathbf w$ matrices
 sharing the same set of eigenvectors,
@@ -1694,7 +1722,7 @@ hence same $\Gamma_k$'s,
 but with different eigenvalues, $\lambda_k$'s.
 %
 Using the Cauchy-Schwarz inequality, we have,
-for any set of $\beta_k \ge 0$
+for any set of numbers, $c_k \ge 0$,
 %
 \begin{align}
 &
@@ -1731,33 +1759,32 @@ for any set of $\beta_k \ge 0$
       1 - e^{ -\lambda_k q(t) }
     \right]
 \right)^2.
-\notag
+\label{eq:CSineq}
 \end{align}
 %
-To see this, we first observe that
+This inequality follows from the fact
+that the following quadratic polynomial of $Y$,
 $$
 \int_0^t
   dt' \sum_{k = 2}^n \Gamma_k \,
     \left( \dot u_k \, Y - c_k \right)^2
-\ge 0,
+  \equiv
+  A \, Y^2 + B \, Y + C
+%\ge 0,
 $$
-holds for any $Y$.
-%
-So the left-hand side,
-as a quadratic polynomial of $Y$,
-$A \, Y^2 + B \, Y + C$,
-must have a non-positive discriminant,
+is always nonnegative, and hence
+has a non-positive discriminant,
 $B^2 - 4 \, A \, C$.
 %
-This condition gives the desired inequality.
+This condition furnishes the desired inequality.
 %
-Note that the last expression depends on
-$q(t')$ only through the end point value,
+Note that the last expression of \eqref{eq:CSineq}
+depends on $q(t')$ only through the end point value,
 which is fixed in the variation process.
 %
 Thus, the inequality sets a lower bound
 of the error $\Err$
-expressed in Eq. \eqref{eq:error_asym1}.
+given in Eq. \eqref{eq:error_asym1}.
 %
 The equality is achieved
 if $\dot u_k\left( q(t') \right) = c_k$
@@ -1765,6 +1792,7 @@ for all $k = 2, \dots, n$ at any $t'$,
 up to a multiplicative factor.
 %
 Solving this set of equations yields
+%
 $$
 \alpha(t') = \frac{              1              }
                   { \lambda_k \, (t' + t_{k0} ) },
@@ -1773,13 +1801,14 @@ $$
 t_{k0} = \frac{             t            }
               { e^{ \lambda_k q(t) } - 1 }.
 $$
+%
 Such a solution is possible only if
+%
 \begin{equation}
 \lambda_2 = \dots = \lambda_n.
 \end{equation}
 %
-\note{
-  We add some steps for the above solution.
+\note{We add some steps for the above solution.
   Integrating $\dot u_k = c_k$ yields
   \begin{equation}
   u_k(t') = c_k \left(t' + t_{k0} \right).
@@ -1813,12 +1842,31 @@ of a uniform shift of all $v_k$,
 we can freely set it to $\lambda_2$
 without changing the nature of the updating scheme).
 %
-Thus, in terms of convergence,
+Thus, in terms of asymptotic convergence,
 the single-bin scheme
 (as adopted in the WL algorithm)
 is generally the most efficient
 updating scheme.
 
+
+We must, however, emphasize that the above result
+holds only under the long time limit,
+and it is not necessarily true
+for finite length simulations.
+%
+For example, consider a system that is initially
+prepared under a fixed $\alpha_0$
+before starting the schedule of, $\alpha(t)$.
+%
+Then for shorter times, $t \approx 0$,
+the error is given by Eq. \eqref{eq:error_eql},
+which is clearly smaller if some eigenvalues
+are less than $1.0$ (the single-bin case).
+%
+In practice, real simulations
+may have long achieved the desired precision
+before reaching the asymptotic regime,
+especially with some $\lambda_k$'s close to $0$.
 
 
 
@@ -1826,13 +1874,13 @@ updating scheme.
 
 
 
-For an arbitrary updating matrix $\mathbf w$,
+Generally, for an arbitrary updating matrix $\mathbf w$,
 direct optimization of Eq. \eqref{eq:error_asym1}
-can lead to an algebraically complex expression for $\alpha(t)$.
+often leads to a complicated expression for $\alpha(t)$.
 %
-In practice, it is more useful to find
+In practice, it is also useful to find
 a simple expression for $\alpha(t)$
-that is near optimal.
+that is optimal with respect to some free parameter(s).
 %
 From Eq. \eqref{eq:alpha_opt},
 a reasonable candidate would be
@@ -1853,7 +1901,6 @@ generally depends on not only the spectrum
 of eigenvalues and the sampling method,
 but also other parameters,
 such as the simulation length, $t$.
-
 
 Using Eq. \eqref{eq:alpha_invtlambda}
 in Eq. \eqref{eq:error_asym1} yields
@@ -2079,12 +2126,15 @@ Adding the two yields Eq. \eqref{eq:error_invt}.
 Clearly, the final error is always greater than
 the saturated equilibrium value at the terminal $\alpha(t)$:
 $$
-E > E_\mathrm{sat} \equiv \sum_{k = 2}^n E^f_k,
+E \ge E_\mathrm{sat} \equiv \sum_{k = 2}^n E^f_k,
 $$
 because the second term in the braces
 is nonnegative no matter the sign of $2 \, \nu_k - 1$
 (in fact, it is a decreasing function
 that vanishes only at $\nu_k \to +\infty$).
+%
+For a set of nonidentical $\lambda_k$'s,
+the equality is reached only at $t = 0$.
 
 
 
@@ -3155,7 +3205,7 @@ can be approximated by an integral:
 \lambda_k
 =
 2 \int_0^\pi
-  \mu(x) \, \cos \bigl( (k-1) \, x \bigr) \, dx,
+  \mu(x) \, \cos \bigl[ (k-1) \, x \bigr] \, dx,
 \label{eq:lambda_int}
 \end{equation}
 %
@@ -3339,22 +3389,23 @@ sampling schemes.
 %
 In both cases, we used the
 Metropolis algorithm\cite{metropolis1953, newman, frenkel}
-to sample the state space.
+to sample the state space:
 %
-In each step, a new bin index $j$ was proposed
+in each step, a new bin index $j$ was proposed
 and then accepted with probability
 %
 $
 A(i \to j) = \min\{ 1, \exp(v_i - v_j) \}.
 $
-In the first sampling scheme,
+The difference is that,
+in the first sampling scheme,
 we choose $j$ randomly out of the $n$ bins
 to emulate the perfect sampling scheme
 discussed in Sec. \ref{sec:Gamma}.
 %
-We refer to this scheme as the global sampling scheme.
+We refer to this as the global sampling scheme.
 %
-In the second sampling scheme,
+In the second scheme,
 we limit $j$ to the two neighbors of $i$,
 $i \pm 1$, with equal probability $1/2$,
 to mimic the one-step sampling scheme
@@ -3392,12 +3443,14 @@ Figure \ref{fig:err_singlebin} also shows that
 a smaller than optimal value of $1/\lambda$
 tends to increase the error more rapidly
 than a larger than optimal value,
-suggesting that the latter is the safer choice
+suggesting that the latter (over-updating)
+is generally preferable to the latter (under-updating)
 when the optimal value is unknown.
 
 
-Our final observation is that the error function
-in the two cases differed only by a multiplicative constant.
+Our final observation is that the error functions
+in the two cases shared the same shape,
+differing only by a multiplicative constant.
 %
 This again agreed with the theory.
 %
@@ -3406,7 +3459,7 @@ the same, $\lambda_2 = \cdots = \lambda_n = 1$,
 the error in Eq. \eqref{eq:error_invt}
 depends on the sampling scheme only through
 the sum $\sum_{ k = 2 }^n \Gamma_k$,
-which gives rise to the multiplicative constant mentioned above.
+which gives rise to the above multiplicative constant.
 
 
 \begin{figure}[h]
@@ -3435,7 +3488,9 @@ which gives rise to the multiplicative constant mentioned above.
 
 We now turn to the nearest-neighbor updating scheme.
 %
-We again find good agreement between simulation and analytical results.
+We again find good agreement
+between simulation and analytical results,
+although there are subtle differences.
 %
 A new feature is that the optimal $\lambda$
 depends on the simulation length, $t$.
@@ -3457,26 +3512,28 @@ as suggested by Eq. \eqref{eq:lambda_nn_onestep}.
 
 
 
-To understand this behavior,
+To understand this dependence,
 we observe that for shorter simulations,
-long-wavelength modes,
+long-wavelength modes
 (with larger $\lambda_k$ and smaller $k$),
-dominate the error function,
-according to Eq. \eqref{eq:error_invt},
-as the equilibrium error under a fixed updating magnitude
-is proportional to $\lambda_k \, \Gamma_k$.
+dominate the error function in Eq. \eqref{eq:error_invt}
+because of the prefactor $\lambda_k \, \Gamma_k$,
+which is inherited from
+the equilibrium error under a fixed updating magnitude,
+Eq. \eqref{eq:error_eql}.
 %
 For longer simulations,
 short-wavelength modes
 (with smaller $\lambda_k$ and larger $k$)
 become more important,
 for $\lambda_k$ also gives the decay rate
-of the $k$th mode,
-and errors in smaller $\lambda_k$ modes
-are harder to damp out.
+of the $k$th mode.
+%and errors in smaller $\lambda_k$ modes
+%are harder to damp out.
 %
-This causes $\lambda$ to shift toward
-a smaller $\lambda_k$ value.
+This drives the optimal $\lambda$ to shift toward
+a smaller $\lambda_k$ value
+as the simulation lengthens.
 %
 Note also that while increasing $\lambda$
 also increases the error of the long-wavelength modes,
@@ -3486,8 +3543,8 @@ in Fig. \ref{fig:err_component}.
 %
 The shift of $\lambda$, however, is less noticeable
 under the local sampling scheme,
-because the weight of a longer-wavelength mode
-is further multiplied by much larger value of $\Gamma_k$.
+because longer-wavelength modes more heavily
+weighted by much larger values of $\Gamma_k$.
 
 
 \begin{figure}[h]
@@ -3516,7 +3573,39 @@ is further multiplied by much larger value of $\Gamma_k$.
 \subsection{Gaussian (metadynamics) updating scheme}
 
 
-\subsection{Optimality of the Single-bin scheme}
+The error of Gaussian updating scheme is similar to
+that of the nearest neighbor scheme,
+as shown in Fig \ref{fig:err_sig5}.
+%
+The dependency of the simulation length is more prominent.
+%
+Even for local sampling,
+there is now a visible shift of the optimal $\lambda$.
+
+
+\begin{figure}[h]
+\begin{center}
+  \makebox[\linewidth][c]{
+    \includegraphics[angle=0, width=0.95\linewidth]{fig/errsig5.pdf}
+  }
+  \caption{
+    \label{fig:err_sig5}
+    Normalized error, $(t + t_0) \, E$,
+    versus the %proportionality constant,
+    relative updating magnitude,
+    $1/\lambda$,
+    in Eq. \eqref{eq:alpha_invtlambda}
+    for the Gaussian updating scheme with $\sigma = 5$ bins.
+    %
+    The results have been averaged over $1000$ independent runs.
+  }
+\end{center}
+\end{figure}
+
+
+
+
+\subsection{Optimality of the single-bin scheme}
 
 Randomize the initial error?
 

@@ -15,8 +15,16 @@ Programs
 ----------|------------------------------------
 invt      | Main program
 predict   | Predict error
+
+
+Test programs
+-------------
+
+ Program  |  Description
+----------|------------------------------------
 modetest  | Test program for mode decomposition
 langtest  | Test for Langevin equations
+outest    | Test for the Ornstein-Uhlenbeck process
 
 
 Source code

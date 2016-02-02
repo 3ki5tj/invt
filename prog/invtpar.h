@@ -316,7 +316,7 @@ static long invtpar_getlong(invtpar_t *m,
   /* if 'e' exists in the string, scan the floating point
    * number, and then convert it to a long integer */
   if ( strchr(val, 'e') ) {
-    return (int) ( atof(val) + 0.5 );
+    return (long) ( atof(val) + 0.5 );
   } else {
     return atol(val);
   }
