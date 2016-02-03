@@ -185,17 +185,20 @@ divided by the number of bins.
 In this study,
 we shall give another proof of the inverse-time formula.
 %
-We then adapt the formula
-to updating schemes involving several neighboring bins,
+We then try to derive a similar result
+for the optimal updating magnitude
+for updating schemes involving several neighboring bins,
 such as those used in metadynamics.
 %
-We shall show that the optimal updating magnitude
+It turns out that the optimal updating magnitude
 depends nontrivially on the simulation length
-and other parameters.
+and other parameters in the latter case.
 %
-As a byproduct, we shall show that
+We also shall show that
 the single-bin scheme used by the WL algorithm
-is best in asymptotic convergence.
+is best in asymptotic convergence,
+although practical simulations may not need
+to reach this regime.
 %
 The article is organized as follows.
 %
@@ -1675,35 +1678,234 @@ for the $\langle y_k^2(0) \rangle$'s in Eq. \eqref{eq:error_res}.
 
 
 
-%\subsubsection{\label{twolimits}
-%Two limits of the optimal schedule, $\alpha(t)$}
+\subsubsection{\label{twolimits}
+Asymptotically optimal schedule}
+
+
+The asymptotic error given by Eq. \eqref{eq:error_asym1}
+can be rewritten as
 %
+\begin{equation}
+  \Err_A
+  =
+  \int_0^t
+    {\mathcal L} \bigl[ q(\tau)\bigr]
+    \, d\tau,
+  \notag
+  %\label{eq:error_asym_action}
+\end{equation}
 %
-%The optimal $\alpha(t)$ that minimizes the error
-%Eq. \eqref{eq:error_split}
-%is still difficult to find analytically.
-%%
-%However, we can study two limiting cases,
-%for the asymptotic part, Eq. \eqref{eq:error_asym1}.
+where, we have defined the Lagrangian,
 %
-%For $\tau \ll t$,
-%the dominant contribution comes from
-%the term(s) with the smallest eigenvalue $\lambda_k = \lambda_n$,
-%and
-%$$
-%\dot u_n(\tau) = c,
-%\quad
-%\mathrm{and}\;
-%u_n(\tau) = c \, (\tau + t_0),
-%$$
-%which means
-%$$
-%\alpha(\tau) \approx \frac{1}{\lambda_n \, (\tau + t_0)}.
-%$$
+\begin{align}
+  {\mathcal L} \bigl[ q(\tau) \bigr]
+  &=
+  \sum_{ k = 2 }^n
+    \Gamma_k \, \dot u_k^2\bigl( q(\tau) \bigr)
+  \notag
+  \\
+  &=
+  \sum_{ k = 2 }^n
+    \Gamma_k \, \lambda_k^2 \, u_k^2 \bigl( q(\tau) \bigr)
+  \; \dot q^2( \tau ).
+  \label{eq:error_asym_lagr}
+\end{align}
 %
+To minimize the functional,
+we notice that the Lagrangian given by Eq. \eqref{eq:error_asym_lagr}
+does not explicitly depend on time, $t$.
 %
-%For $\tau \approx t$,
-%$u_k(q) \approx 1$,
+Thus, the Hamiltonian,
+%
+\begin{equation}
+  \mathcal H
+  =
+  \frac{ \partial \mathcal L }
+       { \partial \dot q     }
+  \, \partial \dot q
+  -
+  \mathcal L
+  =
+  2 \, \mathcal L
+  - \mathcal L
+  =
+  \mathcal L,
+  %=
+  %\mathrm{const.}
+  \notag
+  %\label{eq:error_asym_Hamiltonian}
+\end{equation}
+%
+is conserved, and in this case,
+the Hamiltonian and the Lagrangian coincide.
+%
+So we may write
+%
+\begin{equation}
+  \mathcal L
+  =
+    \textstyle\sum_{ k = 2 }^n
+      \Gamma_k \, \lambda_k^2
+      \, u_k^2 \bigl[ q(\tau) \bigr]
+  \;
+  \dot q^2(\tau)
+  =
+  c^2
+  \quad
+  (c > 0).
+  \label{eq:Lagrangian_const}
+\end{equation}
+%
+Integrating integrate the square root of the left-hand side,
+%
+\begin{equation}
+  \int_0^{ q(\tau) }
+    \sqrt{
+      \textstyle\sum_{ k = 2 }^n
+        \Gamma_k \, \lambda_k^2
+        \, u_k^2( q' )
+    }
+    \;
+    d q'
+  =
+  c \, d\tau
+  ,
+  \label{eq:q_opt}
+\end{equation}
+%
+we get an implicit equation for the optimal $\alpha(t')$
+via $q(\tau) = \int_0^\tau \alpha(t') \, dt'$.
+
+
+Although the explicit solution of Eq. \eqref{eq:q_opt} is difficult,
+we can obtain an expression regarding $\alpha(\tau)$
+by differentiating Eq. \eqref{eq:Lagrangian_const},
+which yields
+%
+\begin{equation}
+  \frac{ d      }
+       { d \tau }
+  \left(
+    \frac{       1        }
+         { \alpha( \tau ) }
+  \right)
+  =
+  \frac{
+    \sum_{ k = 2 }^n
+      \Gamma_k \, \lambda_k^3
+      \, u_k^2 \bigl( q(\tau) \bigr)
+  }
+  {
+    \sum_{ k = 2 }^n
+      \Gamma_k \, \lambda_k^2
+      \, u_k^2 \bigl( q(\tau) \bigr)
+  }
+  .
+  \label{eq:dinvadt}
+\end{equation}
+%
+
+
+
+Consider examine two limiting cases.
+%
+First, during the beginning of a long simulation,
+we have $\tau \ll t$ and $q(t) - q(\tau) \to \infty$,
+the sums on the right-hand side of Eq. \eqref{eq:dinvadt}
+is dominated by the term with the largest
+$u_k = e^{ \lambda_k \, [q(\tau) - q(t)] }$,
+or, equivalently, with the smallest $\lambda_k$.
+Then
+\begin{equation}
+  \frac{ d      }
+       { d \tau }
+  \left(
+    \frac{       1        }
+         { \alpha( \tau ) }
+  \right)
+  =
+  \lambda_{ \min }
+  ,
+  \notag
+  %\label{eq:dinvadt_limit1}
+\end{equation}
+%
+and
+%
+\begin{equation}
+  \alpha( \tau )
+  =
+  \frac{               1                  }
+       { \lambda_{ \min } ( \tau + t_1 )  }
+  .
+  \label{eq:alpha_limit1}
+\end{equation}
+%
+
+
+Second, near the end of simulation,
+we have $\tau \to t$, $u_k \approx 1$,
+%
+\begin{equation}
+  \frac{ d      }
+       { d \tau }
+  \left(
+    \frac{       1        }
+         { \alpha( \tau ) }
+  \right)
+  =
+  \frac{
+    \sum_{ k = 2 }^n
+      \Gamma_k \, \lambda_k^3
+  }
+  {
+    \sum_{ k = 2 }^n
+      \Gamma_k \, \lambda_k^2
+  }
+  =
+  \bar \lambda,
+  \notag
+  %\label{eq:dinvadt_limit2}
+\end{equation}
+%
+where,
+$\bar \lambda$
+is the average of $\lambda_k$ weighted by $\Gamma_k \, \lambda_k^2$,
+and it tends to be dominated
+by the largest $\lambda_k$.
+%
+Thus, in this regime, we have
+%
+\begin{equation}
+  \alpha( \tau )
+  =
+  \frac{             1                }
+       { \bar \lambda ( \tau + t_2 )  }
+  .
+  \label{eq:alpha_limit2}
+\end{equation}
+%
+Thus, we may characterize the optimal schedule as
+%
+\begin{equation}
+  \alpha(\tau)
+  =
+  \frac{                      1                          }
+       { \lambda(\tau) \, \bigl[ \tau + t_0(\tau) \bigr] }
+,
+\notag
+\end{equation}
+%
+where $\lambda(\tau)$ and $t_0(\tau)$ are two
+slowly-varying functions,
+with the former increases gradually from $\lambda_{\min}$
+to $\bar \lambda$.
+
+%Both Eqs. \eqref{eq:alpha_limit1} and \eqref{eq:alpha_limit2}
+%resemble Eq. \eqref{eq:alpha_opt}.
+
+
+
 
 
 \subsubsection{\label{sec:optWL}
