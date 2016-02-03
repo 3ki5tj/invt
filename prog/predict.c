@@ -105,8 +105,16 @@ int main(int argc, char **argv)
   invtpar_dump(m);
 
   if ( !m->cscan && !m->nbscan && !m->sigscan ) {
-    /* do a c-scan by default */
-    m->cscan = 1;
+    double t, err1, err2;
+
+    t = (double) m->nsteps;
+    m->c = estbestc(t, 0, m->alpha0, m->n, m->winn, m->win,
+        m->sampmethod, 0, &err1, 0);
+    err2 = opterror_ez(m->c, t, m->alpha0,
+        1000, "opta.dat",
+        m->n, m->winn, m->win, m->sampmethod);
+
+    printf("c %g, err %g, %g\n", m->c, err1, err2);
   }
 
   if ( m->cscan ) {

@@ -232,6 +232,9 @@ Running predict
 The program `predict` can predict the error
 from the analytical result.
 
+Note, the error reported by predict
+are the square root values
+
 The program scans over a range of an input parameters
 and outputs the error there.
 There are three scan modes.

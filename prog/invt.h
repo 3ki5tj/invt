@@ -260,7 +260,8 @@ static void dumplambdagamma(int n, const double *lamarr,
 
 
 
-/* estimate the error of a constant alpha
+/* estimate the square-root error
+ * under a constant updating magnitude alpha
  * according to the analytical prediction */
 static double esterror0_ez(double alpha,
    int n, int winn, double *win, int sampmethod,
@@ -377,7 +378,7 @@ static double esterror_ez(double c, double t, double t0, double a0,
    * for the updating scheme */
   lamarr = esteigvals(n, winn, win);
 
-  /* estimate the correlation integrals
+  /* estimate the autocorrelation integrals
    * of the eigenmodes of the w matrix,
    * for the updating scheme */
   gamma = estgamma(n, sampmethod);
@@ -505,6 +506,178 @@ static double estbestc(double t, double t0, double a0,
   *err = em;
 
   return cm;
+}
+
+
+
+/* compute the integrand for `intqt` */
+static double intqt_getvel(int n, const double *lamarr, const double *gamma,
+    double dq)
+{
+  int i;
+  double lam, y = 0;
+
+  for ( i = 1; i < n; i++ ) {
+    lam = lamarr[i];
+    y += gamma[i] * lam * lam * exp( 2 * lam * dq );
+  }
+
+  return sqrt( y );
+}
+
+
+
+/* compute the analytically optimal protocol
+ * for a period t, and fixed
+ * qt = Integral {from 0 to t} alpha(t') dt'
+ * the results are saved to tarr[0..m], qarr[0..m], and aarr[0..m]
+ * return the square-root error
+ * */
+static double intqt(double t, double qt,
+    int m, double *tarr, double *aarr, double *qarr,
+    int n, const double *lamarr, const double *gamma)
+{
+  double c, dq, err, y, dt;
+  int j;
+
+  /* integrate over q over uniform grid */
+  dq = qt / m;
+  tarr[0] = 0;
+  qarr[0] = 0;
+  y = intqt_getvel(n, lamarr, gamma, qarr[0] - qt);
+  for ( j = 1; j <= m; j++ ) {
+    qarr[j] = j * dq;
+    tarr[j] = tarr[j - 1] + y * 0.5 * dq;
+    y = intqt_getvel(n, lamarr, gamma, qarr[j] - qt);
+    tarr[j] += y * 0.5 * dq;
+  }
+
+  /* normalize the time array */
+  c = t / tarr[m];
+  for ( j = 1; j <= m; j++ ) {
+    tarr[j] *= c;
+  }
+
+  /* differentiate q(t) */
+  aarr[0] = y = ( qarr[1] - qarr[0] ) / ( tarr[1] - tarr[0] );
+  for ( j = 1; j < m; j++ ) {
+    aarr[j] += 0.5 * y;
+    y = ( qarr[j + 1] - qarr[j] ) / ( tarr[j + 1] - tarr[j] );
+    aarr[j] += 0.5 * y;
+  }
+  aarr[m] = y;
+
+  /* compute the error */
+  err = 0;
+  for ( j = 0; j <= m; j++ ) {
+    y = intqt_getvel(n, lamarr, gamma, qarr[j] - qt) * aarr[j];
+    y = y * y;
+    if ( j == 0 ) {
+      dt = tarr[1] - tarr[0];
+    } else if ( j == m ) {
+      dt = tarr[m] - tarr[m - 1];
+    } else {
+      dt = tarr[j+1] - tarr[j-1];
+    }
+    err += y * 0.5 * dt;
+  }
+
+  return sqrt( err );
+}
+
+
+/* save optimal protocol to file */
+static int intqt_save(int m, const double *tarr,
+    const double *aarr, const double *qarr,
+    double c, double t0,
+    const char *fn)
+{
+  FILE *fp;
+  int i;
+  double a1, q1;
+
+  if ( fn == NULL ||
+      (fp = fopen(fn, "w")) == NULL ) {
+    fprintf(stderr, "cannot open %s\n", fn);
+    return -1;
+  }
+
+  fprintf(fp, "# %d\n", m);
+  for ( i = 0; i < m; i++ ) {
+    a1 = c / (tarr[i] + t0);
+    q1 = c * log( 1 + tarr[i] / t0 );
+    fprintf(fp, "%g\t%20.8e\t%12.6f\t%20.8e\t%12.6f\n",
+        tarr[i], aarr[i], qarr[i], a1, q1);
+  }
+
+  fclose(fp);
+
+  fprintf(stderr, "saved optimal schedule to %s\n",
+     fn);
+
+  return 0;
+}
+
+
+
+/* compute the square-root residue error */
+static double intqt_reserr(double t, double qt, double a0,
+    int n, const double *lamarr, const double *gamma)
+{
+  int i;
+  double err = 0;
+
+  for ( i = 1; i < n; i++ ) {
+    err += 0.5 * a0 * gamma[i] * lamarr[i]
+         * exp(-2.0 * lamarr[i] * qt);
+  }
+  return sqrt(err);
+}
+
+
+
+/* return the square-root error from the optimal schedule  */
+__inline static double opterror_ez(double c, double t, double a0,
+    int m, const char *fnarr,
+    int n, int winn, double *win, int sampmethod)
+{
+  double qt, t0, erra, errr, err;
+  double *lamarr, *gamma;
+  double *tarr, *qarr, *aarr;
+
+  xnew(tarr, m + 1);
+  xnew(aarr, m + 1);
+  xnew(qarr, m + 1);
+
+  /* estimate the eigenvalues of the w matrix,
+   * for the updating scheme */
+  lamarr = esteigvals(n, winn, win);
+
+  /* estimate the autocorrelation integrals
+   * of the eigenmodes of the w matrix,
+   * for the updating scheme */
+  gamma = estgamma(n, sampmethod);
+
+  qt = c * log(1 + a0 * t / c);
+  t0 = c / a0;
+
+  /* compute the optimal schedule */
+  erra = intqt(t, qt, m, tarr, aarr, qarr, n, lamarr, gamma);
+
+  /* compute the residual error */
+  errr = intqt_reserr(t, qt, a0, n, lamarr, gamma);
+
+  /* save the schedule to file */
+  intqt_save(m, tarr, aarr, qarr, c, t0, fnarr);
+
+  free(lamarr);
+  free(gamma);
+  free(tarr);
+  free(qarr);
+  free(aarr);
+
+  err = sqrt( erra * erra + errr * errr );
+  return err;
 }
 
 
