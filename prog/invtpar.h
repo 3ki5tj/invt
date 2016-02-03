@@ -14,7 +14,7 @@
 
 /* maximal number of neighbors
  * in the multiple-bin updating scheme */
-#define NBMAX 127
+#define NBMAX 1025
 
 
 
@@ -52,11 +52,22 @@ typedef struct {
   long nsteps; /* number of steps */
   long ntrials; /* number of trials */
 
-#ifdef CSCAN /* for predict.c */
+#ifdef SCAN /* for predict.c */
+  int cscan;
   double cmin;
   double cdel;
   double cmax;
-#endif /* CSCAN */
+
+  int nbscan;
+  double nbmin;
+  double nbdel;
+  double nbmax;
+
+  int sigscan;
+  double sigmin;
+  double sigdel;
+  double sigmax;
+#endif /* SCAN */
 
   int verbose; /* verbose level */
   const char *prog; /* name of the program */
@@ -132,11 +143,53 @@ static void invtpar_init(invtpar_t *m)
   m->prog = "invt";
   m->verbose = 0;
 
-#ifdef CSCAN /* for predict.c */
+#ifdef SCAN /* for predict.c */
+  m->cscan = 0;
   m->cmin = 0.1;
   m->cdel = 0.01;
-  m->cmax = 2.0;
-#endif /* CSCAN */
+  m->cmax = 5.0;
+
+  m->nbscan = 0;
+  m->nbmin = 0.0;
+  m->nbdel = 0.01;
+  m->nbmax = 0.25;
+
+  m->sigscan = 0;
+  m->sigmin = 0.0;
+  m->sigdel = 0.2;
+  m->sigmax = 10.0;
+#endif /* SCAN */
+}
+
+
+
+static void invtpar_mkgauswin(invtpar_t *m)
+{
+  int i;
+  double x, sig = m->wingaus;
+
+  m->winn = NBMAX;
+
+  if ( m->winn >= m->n / 2 ) {
+    m->winn = m->n / 2;
+  }
+
+  /* truncate the Gaussian at 5 sigma */
+  if ( m->winn >= sig * 5 ) {
+    m->winn = (int) (sig * 5 + 0.5);
+  }
+
+  m->win[0] = x = 1;
+  for ( i = 1; i < m->winn; i++ ) {
+    m->win[i] = exp(-0.5*i*i/(sig*sig));
+    x += m->win[i] * 2;
+  }
+
+  /* normalize the window function, such that
+   * win[0] + 2 * (win[1] + ... + win[n - 1]) = 1 */
+  for ( i = 0; i < m->winn; i++ ) {
+    m->win[i] /= x;
+  }
 }
 
 
@@ -184,28 +237,7 @@ static void invtpar_compute(invtpar_t *m)
 
   /* construct the Gaussian window */
   if ( m->wingaus > 0 ) {
-    m->winn = NBMAX;
-
-    if ( m->winn >= m->n / 2 ) {
-      m->winn = m->n / 2;
-    }
-
-    /* truncate the Gaussian at 5 sigma */
-    if ( m->winn >= m->wingaus * 5 ) {
-      m->winn = (int) (m->wingaus * 5 + 0.5);
-    }
-
-    m->win[0] = x = 1;
-    for ( i = 1; i < m->winn; i++ ) {
-      m->win[i] = exp(-0.5*i*i/m->wingaus/m->wingaus);
-      x += m->win[i] * 2;
-    }
-
-    /* normalize the window function, such that
-     * win[0] + 2 * (win[1] + ... + win[n - 1]) = 1 */
-    for ( i = 0; i < m->winn; i++ ) {
-      m->win[i] /= x;
-    }
+    invtpar_mkgauswin(m);
 
   } else {
 
@@ -271,11 +303,17 @@ static void invtpar_help(const invtpar_t *m)
   fprintf(stderr, "  --try=:        set the number of trials, default %ld\n", m->ntrials);
   fprintf(stderr, "  --step=:       set the number of simulation steps, default %ld\n", m->nsteps);
   fprintf(stderr, "  --equil=:      set the number of equilibration steps, default %ld\n", m->nequil);
-#ifdef CSCAN /* for predict.c */
+#ifdef SCAN /* for predict.c */
   fprintf(stderr, "  --cmin=:       set the minimal c in c-scan, default %g\n", m->cmin);
   fprintf(stderr, "  --cmax=:       set the maximal c in c-scan, default %g\n", m->cmax);
   fprintf(stderr, "  --dc=:         set the increment of c in c-scan, default %g\n", m->cdel);
-#endif /* CSCAN */
+  fprintf(stderr, "  --nbmin=:      set the minimal nearest-neighbor updating magnitude nb in nb-scan, default %g\n", m->nbmin);
+  fprintf(stderr, "  --nbmax=:      set the maximal nearest-neighbor updating magnitude nb in nb-scan, default %g\n", m->nbmax);
+  fprintf(stderr, "  --dnb=:        set the increment of nb in nb-scan, default %g\n", m->nbdel);
+  fprintf(stderr, "  --sigmin=:     set the minimal width of the Gaussian scheme in sig-scan, default %g\n", m->sigmin);
+  fprintf(stderr, "  --sigmax=:     set the maximal width of the Gaussian scheme in sig-scan, default %g\n", m->sigmax);
+  fprintf(stderr, "  --dsig=:       set the increment of the width in sig-scan, default %g\n", m->sigdel);
+#endif /* SCAN */
   fprintf(stderr, "  -v:            be verbose, -vv to be more verbose, etc.\n");
   fprintf(stderr, "  -h, --help:    display this message\n");
   exit(1);
@@ -444,7 +482,7 @@ static int invtpar_keymatch(invtpar_t *m,
       m->pbc = 1;
     }
   }
-  else if ( strstartswith(key, "nb")
+  else if ( strcmpfuzzy(key, "nb") == 0
          || strstartswith(key, "neighbo")
          || strcmpfuzzy(key, "win") == 0
          || strcmpfuzzy(key, "window") == 0 )
@@ -541,21 +579,59 @@ static int invtpar_keymatch(invtpar_t *m,
   {
     m->verbose = val ? atoi(val) : 1;
   }
-#ifdef CSCAN /* for predict.c */
+#ifdef SCAN /* for predict.c */
+  /* c-scan paramerters */
   else if ( strcmpfuzzy(key, "cmin") == 0 )
   {
     m->cmin = invtpar_getdouble(m, key, val);
+    m->cscan = 1;
   }
   else if ( strcmpfuzzy(key, "cdel") == 0
          || strcmpfuzzy(key, "dc") == 0 )
   {
     m->cdel = invtpar_getdouble(m, key, val);
+    m->cscan = 1;
   }
   else if ( strcmpfuzzy(key, "cmax") == 0 )
   {
     m->cmax = invtpar_getdouble(m, key, val);
+    m->cscan = 1;
   }
-#endif /* CSCAN */
+  /* nb-scan parameters */
+  else if ( strcmpfuzzy(key, "nbmin") == 0 )
+  {
+    m->nbmin = invtpar_getdouble(m, key, val);
+    m->nbscan = 1;
+  }
+  else if ( strcmpfuzzy(key, "nbdel") == 0
+         || strcmpfuzzy(key, "dnb") == 0 )
+  {
+    m->nbdel = invtpar_getdouble(m, key, val);
+    m->nbscan = 1;
+  }
+  else if ( strcmpfuzzy(key, "nbmax") == 0 )
+  {
+    m->nbmax = invtpar_getdouble(m, key, val);
+    m->nbscan = 1;
+  }
+  /* sig-scan parameters */
+  else if ( strcmpfuzzy(key, "sigmin") == 0 )
+  {
+    m->sigmin = invtpar_getdouble(m, key, val);
+    m->sigscan = 1;
+  }
+  else if ( strcmpfuzzy(key, "sigdel") == 0
+         || strcmpfuzzy(key, "dsig") == 0 )
+  {
+    m->sigdel = invtpar_getdouble(m, key, val);
+    m->sigscan = 1;
+  }
+  else if ( strcmpfuzzy(key, "sigmax") == 0 )
+  {
+    m->sigmax = invtpar_getdouble(m, key, val);
+    m->sigscan = 1;
+  }
+#endif /* SCAN */
   else
   {
     return -1;
@@ -725,10 +801,22 @@ static void invtpar_dump(const invtpar_t *m)
   sum = sum * 2 - m->win[0];
   fprintf(stderr, "| sum %g\n", sum);
 
-#ifdef CSCAN
-  fprintf(stderr, "c scan window: %g:%g:%g\n",
-      m->cmin, m->cdel, m->cmax);
-#endif /* CSCAN */
+#ifdef SCAN
+  if ( m->cscan ) {
+    fprintf(stderr, "c-scan window: %g:%g:%g\n",
+        m->cmin, m->cdel, m->cmax);
+  }
+
+  if ( m->nbscan ) {
+    fprintf(stderr, "nb-scan window: %g:%g:%g\n",
+        m->nbmin, m->nbdel, m->nbmax);
+  }
+
+  if ( m->sigscan ) {
+    fprintf(stderr, "sig-scan window: %g:%g:%g\n",
+        m->sigmin, m->sigdel, m->sigmax);
+  }
+#endif /* SCAN */
 }
 
 

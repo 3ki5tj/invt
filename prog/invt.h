@@ -419,6 +419,11 @@ static double estbestc(double t, double t0, double a0,
   double el, em, er, en;
   int it;
 
+  /* set the default precision */
+  if ( prec <= 0 ) {
+    prec = 1e-8;
+  }
+
   /* specify the initial bracket */
   cl = 0.5;
   cm = 1.0;

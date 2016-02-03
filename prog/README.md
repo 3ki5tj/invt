@@ -57,8 +57,8 @@ gcc invt.c -o invt -lm
 
 
 
-Running
-=======
+Running invt
+============
 
 To run `invt`, type
 ```
@@ -168,8 +168,8 @@ Then, difference modes will show dramatically different magnitudes.
 
 
 
-Options
-=======
+Options of invt
+===============
 
 
 Regular options
@@ -223,4 +223,37 @@ Correlation functions
     are errors.
     Since the sampling process is Markovian,
     this assumption is usually good.
+
+
+Running predict
+===============
+
+
+The program `predict` can predict the error
+from the analytical result.
+
+The program scans over a range of an input parameters
+and outputs the error there.
+There are three scan modes.
+
+1. c-scan
+
+Scan the proportionality constant c in the schedule
+alpha = c / (t + t0),
+and outputs the error
+
+
+2. nb-scan
+
+For the nearest-neighbor updating scheme, scan the
+magnitude of the updating the nearest neighbor,
+compute the optimal c, and outputs the error.
+
+
+3. sig-scan
+
+For the Gaussian updating scheme, scan the width of
+the Gaussian, compute the optimal c,
+and outputs the error.
+
 
