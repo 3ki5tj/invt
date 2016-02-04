@@ -596,8 +596,11 @@ static int intqt_save(int m, const double *tarr,
   int i;
   double a1, q1;
 
-  if ( fn == NULL ||
-      (fp = fopen(fn, "w")) == NULL ) {
+  if ( fn == NULL || fn[0] == '\0' ) {
+    return -1;
+  }
+
+  if ( (fp = fopen(fn, "w")) == NULL ) {
     fprintf(stderr, "cannot open %s\n", fn);
     return -1;
   }
@@ -621,7 +624,7 @@ static int intqt_save(int m, const double *tarr,
 
 
 /* compute the square-root residue error */
-static double intqt_reserr(double t, double qt, double a0,
+static double intqt_reserr(double qt, double a0,
     int n, const double *lamarr, const double *gamma)
 {
   int i;
@@ -665,7 +668,7 @@ __inline static double opterror_ez(double c, double t, double a0,
   erra = intqt(t, qt, m, tarr, aarr, qarr, n, lamarr, gamma);
 
   /* compute the residual error */
-  errr = intqt_reserr(t, qt, a0, n, lamarr, gamma);
+  errr = intqt_reserr(qt, a0, n, lamarr, gamma);
 
   /* save the schedule to file */
   intqt_save(m, tarr, aarr, qarr, c, t0, fnarr);

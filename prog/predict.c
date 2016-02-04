@@ -8,6 +8,26 @@
 
 
 
+static void invt_geterr(invtpar_t *m)
+{
+  double t, err1, err2;
+
+  t = (double) m->nsteps;
+
+  /* compute the optimal c and the error for 1/t formula */
+  m->c = estbestc(t, 0, m->alpha0, m->n, m->winn, m->win,
+      m->sampmethod, 0, &err1, 0);
+
+  /* compute the exact minimal error under the same condition */
+  err2 = opterror_ez(m->c, t, m->alpha0,
+      m->alpha_nint, m->fnalpha,
+      m->n, m->winn, m->win, m->sampmethod);
+
+  printf("c %g, err %g (invt), %g (exact)\n", m->c, err1, err2);
+}
+
+
+
 static void invt_scanc(invtpar_t *m)
 {
   double c, t, t0;
@@ -42,7 +62,7 @@ static void invt_scanc(invtpar_t *m)
 static void invt_scannb(invtpar_t *m)
 {
   double t, t0;
-  double nb, c, err, errnorm;
+  double nb, c, err1, err1norm, err2, err2norm;
 
   t = (double) m->nsteps;
 
@@ -58,13 +78,20 @@ static void invt_scannb(invtpar_t *m)
 
     /* find the optimal c */
     c = estbestc(t, 0, m->alpha0, m->n, m->winn, m->win,
-        m->sampmethod, 0, &err, 0);
+        m->sampmethod, 0, &err1, 0);
 
     t0 = c / m->alpha0;
-    errnorm = err * sqrt(t + t0);
+    err1norm = err1 * sqrt(t + t0);
 
-    printf("%+8.5f\t%8.3f\t%g\t%g\n",
-        nb, c, err, errnorm);
+    /* compute the exact minimal error under the same condition */
+    err2 = opterror_ez(c, t, m->alpha0,
+        m->alpha_nint, m->fnalpha,
+        m->n, m->winn, m->win, m->sampmethod);
+
+    err2norm = err2 * sqrt(t + t0);
+
+    printf("%+8.5f\t%8.3f\t%g\t%g\t%g\t%g\n",
+        nb, c, err1, err1norm, err2, err2norm);
   }
 }
 
@@ -73,7 +100,7 @@ static void invt_scannb(invtpar_t *m)
 static void invt_scansig(invtpar_t *m)
 {
   double t, t0;
-  double sig, c, err, errnorm;
+  double sig, c, err1, err1norm, err2, err2norm;
 
   t = (double) m->nsteps;
 
@@ -84,13 +111,20 @@ static void invt_scansig(invtpar_t *m)
 
     /* find the optimal c */
     c = estbestc(t, 0, m->alpha0, m->n, m->winn, m->win,
-        m->sampmethod, 0, &err, 0);
+        m->sampmethod, 0, &err1, 0);
 
     t0 = c / m->alpha0;
-    errnorm = err * sqrt(t + t0);
+    err1norm = err1 * sqrt(t + t0);
 
-    printf("%8.5f\t%8.3f\t%g\t%g\n",
-        sig, c, err, errnorm);
+    /* compute the exact minimal error under the same condition */
+    err2 = opterror_ez(c, t, m->alpha0,
+        m->alpha_nint, m->fnalpha,
+        m->n, m->winn, m->win, m->sampmethod);
+
+    err2norm = err2 * sqrt(t + t0);
+
+    printf("%8.5f\t%8.3f\t%g\t%g\t%g\t%g\n",
+        sig, c, err1, err1norm, err2, err2norm);
   }
 }
 
@@ -105,16 +139,7 @@ int main(int argc, char **argv)
   invtpar_dump(m);
 
   if ( !m->cscan && !m->nbscan && !m->sigscan ) {
-    double t, err1, err2;
-
-    t = (double) m->nsteps;
-    m->c = estbestc(t, 0, m->alpha0, m->n, m->winn, m->win,
-        m->sampmethod, 0, &err1, 0);
-    err2 = opterror_ez(m->c, t, m->alpha0,
-        1000, "opta.dat",
-        m->n, m->winn, m->win, m->sampmethod);
-
-    printf("c %g, err %g, %g\n", m->c, err1, err2);
+    invt_geterr(m);
   }
 
   if ( m->cscan ) {

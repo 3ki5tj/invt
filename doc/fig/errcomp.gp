@@ -21,7 +21,7 @@ set xlabel "{/Times {/Symbol-Oblique n}_{/Times-Italic k} = {/Symbolic-Oblique l
 #set format y "10^{%T}"
 set ytics 2
 set mytics 2
-set ylabel "{/Times {/Times-Italic G}({/Symbol-Oblique n}_{/Times-Italic k}, {/Times-Italic r})}" offset 1, 0 
+set ylabel "{/Times {/Times-Italic G}({/Symbol-Oblique n}_{/Times-Italic k}, {/Times-Italic r})}" offset 1, 0
 
 # `width` to reduce the text length
 set key Left reverse width -2 spacing 1.8

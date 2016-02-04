@@ -25,6 +25,10 @@ typedef struct {
   double *p; /* target distribution */
   double alpha0; /* initial updating magnitude */
   int fixa; /* fix alpha during the entire process */
+
+  int alpha_nint; /* number of integration points for the exactly optimal alpha(t) */
+  char fnalpha[FILENAME_MAX]; /* output file for the exactly optimal alpha */
+
   int pbc; /* periodic boundary condition */
   int winn; /* width of the updating window function */
   double win[NBMAX + 1]; /* shape of the window function */
@@ -110,6 +114,9 @@ static void invtpar_init(invtpar_t *m)
   m->p = NULL;
   m->alpha0 = 0.0;
   m->fixa = 0;
+
+  m->alpha_nint = 1000;
+  m->fnalpha[0] = '\0';;
 
   m->pbc = 0;
   m->winn = 1; /* single bin update */
@@ -290,6 +297,8 @@ static void invtpar_help(const invtpar_t *m)
   fprintf(stderr, "  --a0=:         set the initial alpha during equilibration, default %g\n", m->alpha0);
   fprintf(stderr, "  --t0=:         set t0 in alpha = c/(t + t0), if unset, t0 = c/a0, default %g\n", m->t0);
   fprintf(stderr, "  --fixa:        fix the alpha during the entire process, default %d\n", m->fixa);
+  fprintf(stderr, "  --nint:        set the number of integration points for the exact optimal schedule alpha(t), default %d\n", m->fixa);
+  fprintf(stderr, "  --fnalpha:     set the output file to output the exact optimal schedule, alpha(t), default %s\n", m->fnalpha);
   fprintf(stderr, "  --pbc:         use periodic boundary condition, default %d\n", m->pbc);
   fprintf(stderr, "  --nb=:         explicitly set the update window parameters, separated by comma, like --nb=0.2,0.4\n");
   fprintf(stderr, "  --sig=:        set the Gaussian window width, default %g\n", m->wingaus);
@@ -470,9 +479,19 @@ static int invtpar_keymatch(invtpar_t *m,
   {
     m->alpha0 = invtpar_getdouble(m, key, val);
   }
-  else if ( strstartswith(key, "fixa") )
+  else if ( strcmpfuzzy(key, "fixa") == 0
+         || strcmpfuzzy(key, "fixalpha") == 0 )
   {
     m->fixa = 1;
+  }
+  else if ( strcmpfuzzy(key, "nint") == 0 )
+  {
+    m->alpha_nint = invtpar_getint(m, key, val);
+  }
+  else if ( strcmpfuzzy(key, "fna") == 0
+         || strcmpfuzzy(key, "fnalpha") == 0 )
+  {
+    strcpy(m->fnalpha, val);
   }
   else if ( strcmpfuzzy(key, "pbc") == 0 )
   {

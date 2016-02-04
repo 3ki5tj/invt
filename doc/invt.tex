@@ -1654,7 +1654,7 @@ If we can assume that before entering the asymptotic regime,
 the system has entered the equilibrium under a fixed $\alpha_0$,
 we can then use Eq. \eqref{eq:y2_eql}
 for the $\langle y_k^2(0) \rangle$'s in Eq. \eqref{eq:error_res}.
-
+%
 \note{Another possible approximation
   is to interpret $\Gamma_k$ as twice the autocorrelation time,
   and the kernel is exponential
@@ -1675,15 +1675,39 @@ for the $\langle y_k^2(0) \rangle$'s in Eq. \eqref{eq:error_res}.
   And a possible source of error might be from
   converting a discrete sum to a continuous integral.
 }
+%
+In this case, we have
+%
+\begin{equation}
+  \Err_R
+  =
+  \sum_{k = 2}^n
+      \frac 1 2 \, \alpha_0 \, \Gamma_k \, \lambda_k \,
+      e^{  - 2 \, \lambda_k \, q(t) }
+  .
+  \label{eq:error_res1}
+\end{equation}
+%
+It follows that the residue error
+depends on the schedule $\alpha(\tau)$
+only through the integral $q(t)$.
+%
+Thus, if we variate the schedule under a fixed $q(t)$,
+then this part can be ignored,
+and the optimization can be done exclusively
+on the asymptotic part, $\Err_A$.
 
 
 
 \subsubsection{\label{twolimits}
-Asymptotically optimal schedule}
+Optimal schedule}
 
 
-The asymptotic error given by Eq. \eqref{eq:error_asym1}
-can be rewritten as
+As shown above, with fixed endpoint value of $q(t)$,
+the optimization of the error is equivalent to
+that of the asymptotic error.
+%
+We now rewrite Eq. \eqref{eq:error_asym1} as
 %
 \begin{equation}
   \Err_A
@@ -2103,6 +2127,21 @@ generally depends on not only the spectrum
 of eigenvalues and the sampling method,
 but also other parameters,
 such as the simulation length, $t$.
+%
+Note, however,
+since Eq. \eqref{eq:alpha_invtlambda}
+does not fix the endpoint value,
+%
+\begin{equation}
+q(t) = \frac{ 1 } { \lambda }
+\log\left(
+  \frac{ t + t_0 } { t_0 }
+\right),
+\label{eq:qt_invtlambda}
+\end{equation}
+%
+we have to include the residual error
+during the optimization.
 
 Using Eq. \eqref{eq:alpha_invtlambda}
 in Eq. \eqref{eq:error_asym1} yields
@@ -2203,7 +2242,8 @@ the asymptotic regime.
 %
 Then, the residual error, $\Err_R$, is not negligible.
 %
-From Eq. \eqref{eq:error_res}, we get
+From Eqs. \eqref{eq:error_res1} and \eqref{eq:qt_invtlambda},
+we get
 %
 \begin{equation}
 \Err_R
@@ -3806,14 +3846,92 @@ there is now a visible shift of the optimal $\lambda$.
 
 
 
+\subsection{Accuracy of the inverse-time schedule}
 
-\subsection{Optimality of the single-bin scheme}
 
-Randomize the initial error?
 
-Error vs. $\mu_1$.
+In the above, we have assumed the inverse-time schedule,
+Eq. \eqref{eq:alpha_invtlambda}.
+%
+In Fig. \ref{fig:alpha_cmp},
+we compared the inverse-time schedule
+with the optimal $\lambda$,
+and the optimal schedule from integrating
+Eq. \eqref{eq:q_opt}.
+%
+The difference was larger for the global sampling scheme.
+%
+\begin{figure}[h]
+\begin{center}
+  \makebox[\linewidth][c]{
+    \includegraphics[angle=0, width=0.95\linewidth]{fig/alphacmp.pdf}
+  }
+  \caption{
+    \label{fig:alpha_cmp}
+    Optimal schedules, $alpha(t)$, from Eq. \eqref{eq:q_opt},
+    versus the inverse-time schedule,
+    Eq. \eqref{eq:alpha_invtlambda},
+    with the optimal parameter, $\lambda$.
+    %
+    For fair comparison,
+    the $q(t) = \int_0^t \alpha(\tau) \, d\tau$
+    were set to be the same
+    for both schedules.
+  }
+\end{center}
+\end{figure}
 
-Error vs. $\sigma$.
+
+In Fig. \ref{fig:err_sigscan},
+we compared the error from the inverse-time schedule
+with the optimal $\lambda$,
+and that from the asymptotically optimal schedule,
+for the Gaussian updating scheme.
+%
+The errors from the two schedules appeared to be reasonable close,
+unless for large width case.
+%
+This suggests that very long metadynamics simulations
+may benefit from optimal schedule,
+instead of the simple formula, given by
+Eq. \eqref{eq:alpha_invtlambda}.
+
+
+\begin{figure}[h]
+\begin{center}
+  \makebox[\linewidth][c]{
+    \includegraphics[angle=0, width=0.95\linewidth]{fig/errsigscan.pdf}
+  }
+  \caption{
+    \label{fig:err_sigscan}
+    Normalized error, $(t + t_0) \, E$,
+    versus the width of the Gaussian updating scheme,
+    $\sigma$,
+    according to the schedule,
+    Eq. \eqref{eq:alpha_invtlambda},
+    with the optimal $\lambda$,
+    and or the asymptotically optimal schedule.
+  }
+\end{center}
+\end{figure}
+
+
+
+
+%\subsection{Optimality of the single-bin scheme}
+
+
+The above comparison also shows the asymptotic superiority
+of the single-bin scheme.
+It is clear that for short times, 
+the single-bin (WL) may not be optimal,
+but it ultimately wins out as simulation lengthens.
+
+%Randomize the initial error?
+%
+%Error vs. $\mu_1$.
+%
+%Error vs. $\sigma$.
 
 
 \section{\label{sec:conclusion}
@@ -3835,9 +3953,9 @@ simulations and the optimal relative updating magnitude,
 $1/\lambda$.
 
 
-\section{Acknowledgments}
-
-We thanks Dr. Y. Mei and Dr. J. Ma for helpful discussions.
+%\section{Acknowledgments}
+%
+%We thanks Dr. Y. Mei and Dr. J. Ma for helpful discussions.
 
 
 
