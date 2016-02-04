@@ -5,6 +5,7 @@
 /* allow additional parameters for c scan */
 #define SCAN
 #include "invt.h"
+#include "intq.h"
 
 
 
@@ -21,7 +22,8 @@ static void invt_geterr(invtpar_t *m)
   /* compute the exact minimal error under the same condition */
   err2 = opterror_ez(m->c, t, m->alpha0,
       m->alpha_nint, m->fnalpha,
-      m->n, m->winn, m->win, m->sampmethod);
+      m->n, m->winn, m->win, m->sampmethod,
+      NULL, 0);
 
   printf("c %g, err %g (invt), %g (exact)\n", m->c, err1, err2);
 }
@@ -31,7 +33,7 @@ static void invt_geterr(invtpar_t *m)
 static void invt_scanc(invtpar_t *m)
 {
   double c, t, t0;
-  double err, err0, err1;
+  double err, err0, err1, err2;
 
   t = (double) m->nsteps;
   for ( c = m->cmin; c < m->cmax + 0.001 * m->cdel; c += m->cdel ) {
@@ -52,8 +54,14 @@ static void invt_scanc(invtpar_t *m)
         m->n, m->winn, m->win, m->sampmethod,
         "final", 0);
 
-    printf("%g\t%g\t%g\t%g\n",
-        c, err, err0, err1);
+    /* compute the exact minimal error under the same condition */
+    err2 = opterror_ez(c, t, m->alpha0,
+        m->alpha_nint, m->fnalpha,
+        m->n, m->winn, m->win, m->sampmethod,
+        NULL, 0);
+
+    printf("%g\t%g\t%g\t%g\t%g\n",
+        c, err, err0, err1, err2);
   }
 }
 
@@ -86,7 +94,8 @@ static void invt_scannb(invtpar_t *m)
     /* compute the exact minimal error under the same condition */
     err2 = opterror_ez(c, t, m->alpha0,
         m->alpha_nint, m->fnalpha,
-        m->n, m->winn, m->win, m->sampmethod);
+        m->n, m->winn, m->win, m->sampmethod,
+        NULL, 0);
 
     err2norm = err2 * sqrt(t + t0);
 
@@ -119,7 +128,8 @@ static void invt_scansig(invtpar_t *m)
     /* compute the exact minimal error under the same condition */
     err2 = opterror_ez(c, t, m->alpha0,
         m->alpha_nint, m->fnalpha,
-        m->n, m->winn, m->win, m->sampmethod);
+        m->n, m->winn, m->win, m->sampmethod,
+        NULL, 0);
 
     err2norm = err2 * sqrt(t + t0);
 

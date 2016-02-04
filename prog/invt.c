@@ -5,12 +5,61 @@
 #include "invt.h"
 #include "invtsamp.h"
 #include "corr.h"
+#include "cosmodes.h"
+#include "intq.h"
+
+
+
+/* compute the updating magntidue */
+static double getalpha(const invtpar_t *m, double t,
+    intq_t *intq, int fixa)
+{
+  double a = 0;
+  static int id = 0;
+
+  if ( fixa || m->fixa ) {
+    return m->alpha0;
+  }
+  
+  if ( intq != NULL ) {
+    a = intq_interpa(intq, t, &id);
+    //printf("a %g (a_invt: %g), id %d, t %g, %g\n", a, m->c/(t+m->t0), id, t, intq->tarr[id]);
+  } else {
+    a = m->c / (t + m->t0);
+  }
+  return a;
+}
+
+
+
+/* multiple-bin update */
+static void mbin_update(double *v, int n, int i,
+    double a, const double *win, int winn, int pbc)
+{
+  int j, k;
+
+  v[i] += a * win[0];
+  for ( j = 1; j < winn; j++ ) {
+    k = i - j;
+    if ( k < 0 ) {
+      k = pbc ? k + n : - k - 1;
+    }
+    v[k] += a * win[ j ];
+
+    k = i + j;
+    if ( k >= n ) {
+      k = pbc ? k - n : 2 * n - 1 - k;
+    }
+
+    v[k] += a * win[ abs(j) ];
+  }
+}
 
 
 
 /* simulate a metadynamics process
  * return the root-mean-squared error of the inverse time scheme */
-static double simulmeta(const invtpar_t *m, double *err0)
+static double simulmeta(const invtpar_t *m, intq_t *intq, double *err0)
 {
   double *v = NULL, *vac = NULL, a, err;
   int i, n = m->n, prod = 0;
@@ -26,7 +75,7 @@ static double simulmeta(const invtpar_t *m, double *err0)
 
   xnew(v, n);
   xnew(u, n);
-  costab = makecostab(n);
+  costab = mkcostab(n);
 
   /* initially randomize the error */
   for ( i = 0; i < m->kcutoff; i++ ) {
@@ -81,12 +130,7 @@ static double simulmeta(const invtpar_t *m, double *err0)
     }
 
     /* compute the updating magnitude */
-    if ( prod && !m->fixa ) {
-      a = m->c / (t - m->nequil + m->t0);
-    } else {
-      a = m->alpha0;
-    }
-
+    a = getalpha(m, (double) (t - m->nequil), intq, !prod);
     a /= m->p[i];
 
     if ( m->winn > 1 ) {
@@ -148,6 +192,8 @@ static double invt_run(invtpar_t *m)
   /* reference values */
   double errref, err0ref, err1ref = 0; /* final, initial, final saturated */
   double optc, errmin = 0; /* optimal c, predicted minimal error */
+  double t;
+  intq_t *intq = NULL;
   long ntr = m->ntrials;
   long i;
 
@@ -157,12 +203,11 @@ static double invt_run(invtpar_t *m)
   if ( m->docorr ) {
     /* compute correlation functions
      * for a single run */
-    err = simulmeta(m, &err0);
+    err = simulmeta(m, NULL, &err0);
   } else {
     /* do multiple runs to compute the average error */
-    double t = (double) m->nsteps;
+    t = (double) m->nsteps;
 
-    /* compute the prediction from the analytical result */
     /* initial saturated error */
     err0ref = esterror0_ez(m->alpha0,
         m->n, m->winn, m->win, m->sampmethod,
@@ -173,19 +218,36 @@ static double invt_run(invtpar_t *m)
           m->n, m->winn, m->win, m->sampmethod,
           "final", m->verbose + 1);
 
-      errref = esterror_ez(m->c, t, m->t0, m->alpha0,
-          m->n, m->winn, m->win, m->sampmethod,
-          m->verbose + 1);
-
       /* compute the optimal c */
       optc = estbestc(t, 0, m->alpha0,
           m->n, m->winn, m->win, m->sampmethod,
           1e-8, &errmin, m->verbose);
+      
+      if ( m->opta ) {
+        /* compute the optimal schedule */
+        errref = opterror_ez(m->c, t, m->alpha0,
+            m->alpha_nint, m->fnalpha,
+            m->n, m->winn, m->win, m->sampmethod,
+            &intq, m->verbose + 1);
+        
+        errmin = opterror_ez(optc, t, m->alpha0,
+            m->alpha_nint, m->fnalpha,
+            m->n, m->winn, m->win, m->sampmethod,
+            NULL, 0);
+      } else {
+        /* compute the prediction from the analytical result */
+        errref = esterror_ez(m->c, t, m->t0, m->alpha0,
+            m->n, m->winn, m->win, m->sampmethod,
+            m->verbose + 1);
+      }
+
       printf("predicted optimal c %g, err %g\n", optc, errmin);
     }
 
+    /* repeat `ntr` independent simulations */
     for ( i = 0; i < ntr; i++ ) {
-      err = simulmeta(m, &err0);
+      /* run simulation */
+      err = simulmeta(m, intq, &err0);
 
       /* accumulators for the final error */
       e = err * err;

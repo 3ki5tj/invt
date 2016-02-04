@@ -26,6 +26,7 @@ typedef struct {
   double alpha0; /* initial updating magnitude */
   int fixa; /* fix alpha during the entire process */
 
+  int opta; /* use the analytically optimal alpha(t) */
   int alpha_nint; /* number of integration points for the exactly optimal alpha(t) */
   char fnalpha[FILENAME_MAX]; /* output file for the exactly optimal alpha */
 
@@ -115,6 +116,7 @@ static void invtpar_init(invtpar_t *m)
   m->alpha0 = 0.0;
   m->fixa = 0;
 
+  m->opta = 0;
   m->alpha_nint = 1000;
   m->fnalpha[0] = '\0';;
 
@@ -297,7 +299,8 @@ static void invtpar_help(const invtpar_t *m)
   fprintf(stderr, "  --a0=:         set the initial alpha during equilibration, default %g\n", m->alpha0);
   fprintf(stderr, "  --t0=:         set t0 in alpha = c/(t + t0), if unset, t0 = c/a0, default %g\n", m->t0);
   fprintf(stderr, "  --fixa:        fix the alpha during the entire process, default %d\n", m->fixa);
-  fprintf(stderr, "  --nint:        set the number of integration points for the exact optimal schedule alpha(t), default %d\n", m->fixa);
+  fprintf(stderr, "  --opta:        use the exact optimal schedule alpha(t), default %d\n", m->opta);
+  fprintf(stderr, "  --nint:        set the number of integration points for the exact optimal schedule alpha(t), default %d\n", m->alpha_nint);
   fprintf(stderr, "  --fnalpha:     set the output file to output the exact optimal schedule, alpha(t), default %s\n", m->fnalpha);
   fprintf(stderr, "  --pbc:         use periodic boundary condition, default %d\n", m->pbc);
   fprintf(stderr, "  --nb=:         explicitly set the update window parameters, separated by comma, like --nb=0.2,0.4\n");
@@ -457,6 +460,38 @@ static int invtpar_selectoption(invtpar_t *m,
 
 
 
+/* get a boolean/integer value */
+static int invtpar_getbool(invtpar_t *m,
+    const char *key, const char *val)
+{
+  if ( val == NULL || val[0] == '\0' ) {
+    return 1;
+  }
+
+  if ( isdigit(val[0]) ) {
+    return atoi(val);
+  }
+
+  if ( strcmpfuzzy(val, "no") == 0
+    || strcmpfuzzy(val, "false") == 0
+    || strcmpfuzzy(val, "n") == 0
+    || strcmpfuzzy(val, "f") == 0 ) {
+    return 0;
+  } else if ( strcmpfuzzy(val, "yes") == 0
+           || strcmpfuzzy(val, "true") == 0
+           || strcmpfuzzy(val, "y") == 0
+           || strcmpfuzzy(val, "t") == 0 ) {
+    return 1;
+  } else {
+    fprintf(stderr, "unknown value [%s] for %s\n", val, key);
+    invtpar_help(m);
+  }
+
+  return 1;
+}
+
+
+
 /* match string key and value pairs */
 static int invtpar_keymatch(invtpar_t *m,
     const char *key, const char *val)
@@ -482,7 +517,11 @@ static int invtpar_keymatch(invtpar_t *m,
   else if ( strcmpfuzzy(key, "fixa") == 0
          || strcmpfuzzy(key, "fixalpha") == 0 )
   {
-    m->fixa = 1;
+    m->fixa = invtpar_getbool(m, key, val);
+  }
+  else if ( strcmpfuzzy(key, "opta") == 0 )
+  {
+    m->opta = invtpar_getbool(m, key, val);
   }
   else if ( strcmpfuzzy(key, "nint") == 0 )
   {
@@ -495,11 +534,7 @@ static int invtpar_keymatch(invtpar_t *m,
   }
   else if ( strcmpfuzzy(key, "pbc") == 0 )
   {
-    if ( val != NULL ) {
-      m->pbc = atoi( val );
-    } else {
-      m->pbc = 1;
-    }
+    m->pbc = invtpar_getbool(m, key, val);
   }
   else if ( strcmpfuzzy(key, "nb") == 0
          || strstartswith(key, "neighbo")
@@ -563,7 +598,7 @@ static int invtpar_keymatch(invtpar_t *m,
   else if ( strcmpfuzzy(key, "corr") == 0
          || strcmpfuzzy(key, "docorr") == 0 )
   {
-    m->docorr = 1;
+    m->docorr = invtpar_getbool(m, key, val);
   }
   else if ( strcmpfuzzy(key, "nstcorr") == 0 )
   {
@@ -596,7 +631,7 @@ static int invtpar_keymatch(invtpar_t *m,
   }
   else if ( strcmpfuzzy(key, "verbose") == 0 )
   {
-    m->verbose = val ? atoi(val) : 1;
+    m->verbose = invtpar_getbool(m, key, val);
   }
 #ifdef SCAN /* for predict.c */
   /* c-scan paramerters */
