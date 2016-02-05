@@ -20,7 +20,7 @@ static double getalpha(const invtpar_t *m, double t,
   if ( fixa || m->fixa ) {
     return m->alpha0;
   }
-  
+
   if ( intq != NULL ) {
     a = intq_interpa(intq, t, &id);
     //printf("a %g (a_invt: %g), id %d, t %g, %g\n", a, m->c/(t+m->t0), id, t, intq->tarr[id]);
@@ -39,6 +39,7 @@ static void mbin_update(double *v, int n, int i,
   int j, k;
 
   v[i] += a * win[0];
+  /* update the neighbors */
   for ( j = 1; j < winn; j++ ) {
     k = i - j;
     if ( k < 0 ) {
@@ -59,15 +60,19 @@ static void mbin_update(double *v, int n, int i,
 
 /* simulate a metadynamics process
  * return the root-mean-squared error of the inverse time scheme */
-static double simulmeta(const invtpar_t *m, intq_t *intq, double *err0)
+static double simulmeta(const invtpar_t *m, intq_t *intq,
+    double *err0, const double *xerr0)
 {
-  double *v = NULL, *vac = NULL, a, err;
+  double *v = NULL, a, err;
   int i, n = m->n, prod = 0;
   long t;
 
-  ouproc_t *ou = NULL;
-  invtmd_t invtmd[1];
+  /* data for sampling method */
+  double *vac = NULL; /* for the heatbath algorithm */
+  ouproc_t *ou = NULL; /* for Ornstein-Uhlenbeck process */
+  invtmd_t invtmd[1]; /* for molecular dynamics */
 
+  /* data for computing correlation functions */
   corr_t *corr = NULL;
   double *u = NULL, *costab = NULL;
   int nfrcorr = 0;
@@ -75,24 +80,32 @@ static double simulmeta(const invtpar_t *m, intq_t *intq, double *err0)
 
   xnew(v, n);
   xnew(u, n);
+
+  /* compute the coefficients for Fourier transform
+   * used in decomposition of modes */
   costab = mkcostab(n);
 
   /* initially randomize the error */
+  /* initialize the magnitude of the Fourier modes
+   * up to the cutoff wave number */
   for ( i = 0; i < m->kcutoff; i++ ) {
     u[i] = randgaus();
   }
+  /* combine the modes */
   fromcosmodes(v, n, u, costab);
   normalize(v, n, m->initrand, m->p);
 
-  if ( m->sampmethod == SAMPMETHOD_OU ) {
+  /* initialize data for the sampling methods */
+  if ( m->sampmethod == SAMPMETHOD_HEATBATH ) {
+    /* allocated space for the accumulative distribution function
+     * used for heatbath algorithm */
+    xnew(vac, n + 1);
+  } else if ( m->sampmethod == SAMPMETHOD_OU ) {
     ou = ouproc_open(v, n, 1.0 / ( m->tcorr + 1e-16 ) );
   } else if ( m->sampmethod == SAMPMETHOD_MD ) {
     invtmd_init(invtmd, n,
         m->mddt, m->tp, m->thermdt, v);
   }
-
-  /* space for the accumulative distribution function */
-  xnew(vac, n + 1);
 
   /* open an object for correlation functions */
   if ( m->docorr ) {
@@ -102,7 +115,7 @@ static double simulmeta(const invtpar_t *m, intq_t *intq, double *err0)
 
   i = 0;
   for ( t = 0; t < m->nsteps + m->nequil; t++ ) {
-    /* MCMC sampling */
+    /* sampling */
     if ( m->tcorr <= 0 || rand01() * m->tcorr < 1 )
     {
       if ( m->sampmethod == SAMPMETHOD_METROGLOBAL ) {
@@ -118,7 +131,7 @@ static double simulmeta(const invtpar_t *m, intq_t *intq, double *err0)
       }
     }
 
-    /* try to start production */
+    /* try to turn on production after equilibration */
     if ( !prod && t >= m->nequil ) {
       prod = 1;
       /* compute the initial error */
@@ -133,17 +146,16 @@ static double simulmeta(const invtpar_t *m, intq_t *intq, double *err0)
     a = getalpha(m, (double) (t - m->nequil), intq, !prod);
     a /= m->p[i];
 
-    if ( m->winn > 1 ) {
-      mbin_update(v, n, i, a, m->win, m->winn, m->pbc);
-    } else {
-      v[i] += a;
-    }
+    /* update the bias potential */
+    mbin_update(v, n, i, a, m->win, m->winn, m->pbc);
 
+    /* accumulate data for correlation functions */
     if ( prod && corr != NULL && (t + 1) % m->nstcorr == 0 ) {
       shift(v, n);
+      /* Fourier transform to get the modes `u` */
       getcosmodes(v, n, u, costab);
       /* the first mode is always zero,
-       * so we start from u + 1 */
+       * so we start from the second mode, u + 1 */
       corr_add(corr, u + 1);
     }
   }
@@ -161,6 +173,9 @@ static double simulmeta(const invtpar_t *m, intq_t *intq, double *err0)
   }
 
   if ( corr != NULL ) {
+    /* print out the thermodynamic fluctuations */
+    corr_printfluc(corr, 0, xerr0 + 1);
+
     /* compute the correlation functions and save them to file
      * the maximal span, 100/alpha, should be large enough */
     corr_save(corr, m->nstcorr, 100 / m->alpha0,
@@ -193,61 +208,88 @@ static double invt_run(invtpar_t *m)
   double errref, err0ref, err1ref = 0; /* final, initial, final saturated */
   double optc, errmin = 0; /* optimal c, predicted minimal error */
   double t;
+  double *lambda = NULL, *gamma = NULL;
+  double *xerr0 = NULL, *xerr = NULL;
   intq_t *intq = NULL;
   long ntr = m->ntrials;
   long i;
 
   /* clock() is probably better than time(NULL) */
-  //mtscramble( clock() );
+  mtscramble( clock() );
+
+  /* estimate the eigenvalues of the w matrix,
+   * for the updating scheme */
+  lambda = esteigvals(m->n, m->winn, m->win);
+
+  /* estimate the correlation integrals
+   * of the eigenmodes of the w matrix,
+   * for the updating scheme */
+  gamma = estgamma(m->n, m->sampmethod);
+
+  xnew(xerr0, m->n);
+  xnew(xerr, m->n);
+
+  /* initial saturated error */
+  err0ref = esterror_eql(m->alpha0, m->n, xerr0, lambda, gamma);
 
   if ( m->docorr ) {
     /* compute correlation functions
      * for a single run */
-    err = simulmeta(m, NULL, &err0);
+    err = simulmeta(m, NULL, &err0, xerr0);
   } else {
     /* do multiple runs to compute the average error */
     t = (double) m->nsteps;
 
-    /* initial saturated error */
-    err0ref = esterror0_ez(m->alpha0,
-        m->n, m->winn, m->win, m->sampmethod,
-        "initial", m->verbose + 1);
+    printf("estimated initial error %g, sqr: %g\n",
+        err0ref, err0ref * err0ref);
 
     if ( !m->fixa ) {
-      err1ref = esterror0_ez(m->c / (m->t0 + t),
-          m->n, m->winn, m->win, m->sampmethod,
-          "final", m->verbose + 1);
+      err1ref = esterror_eql(m->c / (m->t0 + t), m->n, NULL,
+          lambda, gamma);
+
+      printf("estimated final saturated error %g, sqr: %g\n",
+          err1ref, err1ref * err1ref);
 
       /* compute the optimal c */
-      optc = estbestc(t, 0, m->alpha0,
-          m->n, m->winn, m->win, m->sampmethod,
-          1e-8, &errmin, m->verbose);
-      
+      optc = estbestc_invt(t, m->alpha0, m->n, lambda, gamma,
+          0, &errmin, m->verbose - 1);
+
       if ( m->opta ) {
         /* compute the optimal schedule */
-        errref = opterror_ez(m->c, t, m->alpha0,
-            m->alpha_nint, m->fnalpha,
-            m->n, m->winn, m->win, m->sampmethod,
-            &intq, m->verbose + 1);
-        
-        errmin = opterror_ez(optc, t, m->alpha0,
-            m->alpha_nint, m->fnalpha,
-            m->n, m->winn, m->win, m->sampmethod,
-            NULL, 0);
+        errref = esterror_opt(t,
+            intq_getqt(t, m->c, m->t0), m->alpha0,
+            m->alpha_nint, &intq, m->n, xerr,
+            lambda, gamma);
+
+        /* save the optimal schedule to file */
+        intq_save(intq, m->c, m->c / m->alpha0, m->fnalpha);
+
+        /* compute the optimal schedule for the optimal c */
+        errmin = esterror_opt(t,
+            intq_getqt(t, optc, optc / m->alpha0), m->alpha0,
+            m->alpha_nint, NULL, m->n, NULL,
+            lambda, gamma);
       } else {
-        /* compute the prediction from the analytical result */
-        errref = esterror_ez(m->c, t, m->t0, m->alpha0,
-            m->n, m->winn, m->win, m->sampmethod,
-            m->verbose + 1);
+        /* compute the optimal error from the inverse-time formula */
+        errref = esterror_invt(t, m->c, m->alpha0, m->n, xerr,
+            lambda, gamma);
       }
 
-      printf("predicted optimal c %g, err %g\n", optc, errmin);
+      printf("estimated final error %g, sqr: %g\n",
+          errref, errref * errref);
+
+      printf("predicted optimal c %g, err %g, sqr: %g\n", optc, errmin, errmin * errmin);
+
+      if ( m->verbose ) {
+        dumperror(m->n, lambda, gamma,
+            2, xerr0, xerr);
+      }
     }
 
     /* repeat `ntr` independent simulations */
     for ( i = 0; i < ntr; i++ ) {
       /* run simulation */
-      err = simulmeta(m, intq, &err0);
+      err = simulmeta(m, intq, &err0, xerr0);
 
       /* accumulators for the final error */
       e = err * err;
@@ -294,6 +336,11 @@ static double invt_run(invtpar_t *m)
     printf("saturated val: %10.8f -> %10.8f, sqr %e -> %e\n",
         err0ref, err1ref, err0ref * err0ref, err1ref * err1ref);
   }
+
+  free(lambda);
+  free(gamma);
+  free(xerr0);
+  free(xerr);
 
   return err;
 }

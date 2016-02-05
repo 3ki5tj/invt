@@ -7,6 +7,7 @@
 
 
 
+#include <stdarg.h>
 #include "mtrand.h"
 #include "util.h"
 #include "invtpar.h"
@@ -91,21 +92,21 @@ __inline static double normalize(double *v, int n, double sig,
 static double *esteigvals(int n, int winn, const double *win)
 {
   int i, j;
-  double *lamarr, x;
+  double *lambda, x;
 
-  xnew(lamarr, n);
+  xnew(lambda, n);
 
   /* loop over eigenvalues */
   for ( i = 0; i < n; i++ ) {
-    lamarr[i] = 1;
+    lambda[i] = 1;
     /* loop over windows */
     for ( j = 1; j < winn; j++ ) {
       x = sin(i * j * M_PI * 0.5 / n);
-      lamarr[i] -= 4 * win[j] * x * x;
+      lambda[i] -= 4 * win[j] * x * x;
     }
   }
 
-  return lamarr;
+  return lambda;
 }
 
 
@@ -156,16 +157,30 @@ static double *estgamma(int n, int sampmethod)
 
 
 
-/* print out the values of lambda_i and gamma_i */
-static void dumplambdagamma(int n, const double *lamarr,
-    const double *gamma, const double *xerr)
+/* print out the values of lambda and gamma and errors */
+__inline static void dumperror(int n, const double *lambda,
+    const double *gamma, int nerr, ...)
 {
-  int i;
+  int i, j;
+  va_list ap;
+  const double *xerr;
 
-  fprintf(stderr, "   i:   lambda_i      gamma_i\n");
-  for ( i = 0; i < n; i++ ) {
-    fprintf(stderr, "%4d: %10.6f %10.3f %20.6e\n",
-        i + 1, lamarr[i], gamma[i], xerr[i]);
+  fprintf(stderr, "   i:   lambda        gamma    ");
+  for ( j = 0; j < nerr; j++ ) {
+    fprintf(stderr, " err_%-10d", j);
+  }
+  fprintf(stderr, "\n");
+
+  for ( i = 1; i < n; i++ ) {
+    fprintf(stderr, "%4d: %10.6f %10.3f",
+        i + 1, lambda[i], gamma[i]);
+    va_start(ap, nerr);
+    for ( j = 0; j < nerr; j++ ) {
+      xerr = va_arg(ap, const double *);
+      fprintf(stderr, " %14.4e", xerr[i]);
+    }
+    va_end(ap);
+    fprintf(stderr, "\n");
   }
 }
 
@@ -174,66 +189,47 @@ static void dumplambdagamma(int n, const double *lamarr,
 /* estimate the square-root error
  * under a constant updating magnitude alpha
  * according to the analytical prediction */
-static double esterror0_ez(double alpha,
-   int n, int winn, double *win, int sampmethod,
-   const char *name, int verbose)
+static double esterror_eql(double alpha, int n, double *xerr,
+    const double *lambda, const double *gamma)
 {
   int i;
-  double *lamarr, *gamma, *xerr, err;
-
-  xnew(xerr, n);
-
-  /* estimate the eigenvalues of the w matrix,
-   * for the updating scheme */
-  lamarr = esteigvals(n, winn, win);
-
-  /* estimate the correlation integrals
-   * of the eigenmodes of the w matrix,
-   * for the updating scheme */
-  gamma = estgamma(n, sampmethod);
+  double y, err;
 
   err = 0;
   for ( i = 0; i < n; i++ ) {
-    xerr[i] = 0.5 * alpha * lamarr[i] * gamma[i];
-    err += xerr[i];
+    y = 0.5 * alpha * lambda[i] * gamma[i];
+    if ( xerr != NULL ) {
+      xerr[i] = y;
+    }
+    err += y;
   }
-
-  /* print out the values of lambda_i and gamma_i */
-  if ( verbose >= 2 ) {
-    dumplambdagamma(n, lamarr, gamma, xerr);
-  }
-  if ( verbose >= 1 ) {
-    fprintf(stderr, "estimated %s saturated error %g, sqr: %e\n",
-        name, sqrt(err), err);
-  }
-
-  free(lamarr);
-  free(gamma);
-  free(xerr);
 
   return sqrt(err);
 }
 
 
 
+
 /* estimate the error of the updating schedule
- * alpha(t) = 1/ [lambda (t + t0)]
+ * alpha(t) = c / (t + t0)
  * for a single updating mode
  * according the analytical formula
  *
  * currently, assuming equilibrium values of < x^2 >
  * of alpha(0) = c / t0 at t = 0
  * */
-static double esterr1(double lambda, double t, double t0,
-    double lambda_i, double gamma_i)
+static double esterror_invt1(double t, double c, double a0,
+    double lambda, double gamma)
 {
   const double tol = 1e-6;
-  double r, errsat; /* errsat: saturated error */
+  double t0, r, errsat; /* errsat: saturated error */
 
-  r = lambda_i / lambda;
-  errsat = 0.5 * gamma_i * r / (t + t0);
-  /* degenerate case */
+  t0 = c / a0;
+  r = lambda * c;
+  errsat = 0.5 * gamma * r / (t + t0);
+
   if ( fabs(2 * r - 1) < tol ) {
+    /* degenerate case */
     return errsat * ( log( (t + t0) / t0 ) + 1 );
   } else {
     return errsat * (1 + 1 / (r * 2 - 1)
@@ -244,75 +240,28 @@ static double esterr1(double lambda, double t, double t0,
 
 
 /* estimate the error of the updating schedule
- * alpha(t) = 1/ [lambda (t + t0)]
+ * alpha(t) = c / (t + t0)
  * according to the analytical prediction
  *
  * currently, assuming equilibrium values of < x^2 >
- * of alpha(0) = c / t0 at t = 0
+ * of alpha(0) = c / t0 at t = 0, so t0 = c / a0
  * */
-static double esterrn(double lambda, double t, double t0,
-    int n, const double *lamarr, const double *gamma,
-    double *xerr)
+static double esterror_invt(double t, double c, double a0,
+    int n, double *xerr,
+    const double *lambda, const double *gamma)
 {
   int i;
   double x, err = 0;
 
   for ( i = 1; i < n; i++ ) {
-    x = esterr1(lambda, t, t0, lamarr[i], gamma[i]);
+    x = esterror_invt1(t, c, a0, lambda[i], gamma[i]);
     if ( xerr != NULL ) {
       xerr[i] = x;
     }
     err += x;
   }
 
-  return err;
-}
-
-
-
-/* estimate the final error of the updating schedule
- * alpha(t) = c / (t + t0)
- * according to the analytical prediction
- *
- * currently, assuming equilibrium values of < x^2 >
- * of alpha(0) = c / t0 at t = 0
- * */
-static double esterror_ez(double c, double t, double t0, double a0,
-   int n, int winn, double *win, int sampmethod,
-   int verbose)
-{
-  double *lamarr, *gamma, *xerr, err;
-
-  xnew(xerr, n);
-
-  /* estimate the eigenvalues of the w matrix,
-   * for the updating scheme */
-  lamarr = esteigvals(n, winn, win);
-
-  /* estimate the autocorrelation integrals
-   * of the eigenmodes of the w matrix,
-   * for the updating scheme */
-  gamma = estgamma(n, sampmethod);
-
-  if ( fabs(t0) <= 0 ) {
-    t0 = c / a0;
-  }
-  err = esterrn(1.0 / c, t, t0, n, lamarr, gamma, xerr);
-
-  /* print out the values of lambda_i and gamma_i */
-  if ( verbose >= 2 ) {
-    dumplambdagamma(n, lamarr, gamma, xerr);
-  }
-  if ( verbose >= 1 ) {
-    fprintf(stderr, "estimated final error %g, sqr: %e\n",
-        sqrt(err), err);
-  }
-
-  free(lamarr);
-  free(gamma);
-  free(xerr);
-
-  return sqrt(err);
+  return sqrt( err );
 }
 
 
@@ -323,8 +272,8 @@ static double esterror_ez(double c, double t, double t0, double a0,
  * if t0 <= 0, t0 is set to 1 / (c a0)
  * assuming a single local minimum
  * */
-static double estbestc(double t, double t0, double a0,
-   int n, int winn, double *win, int sampmethod,
+static double estbestc_invt(double t, double a0,
+   int n, const double *lambda, const double *gamma,
    double prec, double *err, int verbose)
 {
   double cl, cm, cr, cn;
@@ -342,12 +291,12 @@ static double estbestc(double t, double t0, double a0,
   cr = 2.0;
 
   /* compute the values at the initial bracket */
-  el = esterror_ez(cl, t, t0, a0, n, winn, win, sampmethod, 0);
-  em = esterror_ez(cm, t, t0, a0, n, winn, win, sampmethod, 0);
-  er = esterror_ez(cr, t, t0, a0, n, winn, win, sampmethod, 0);
+  el = esterror_invt(t, cl, a0, n, NULL, lambda, gamma);
+  em = esterror_invt(t, cm, a0, n, NULL, lambda, gamma);
+  er = esterror_invt(t, cr, a0, n, NULL, lambda, gamma);
 
   for ( it = 1; ; it++ ) {
-    if ( verbose ) {
+    if ( verbose >= 1 ) {
       fprintf(stderr, "%d: %g (%g) - %g (%g) - %g (%g)\n",
           it, cl, el, cm, em, cr, er);
       if ( verbose >= 3 ) {
@@ -364,7 +313,7 @@ static double estbestc(double t, double t0, double a0,
       cl = cl * 0.5; /* make sure cl > 0 */
       er = em;
       em = el;
-      el = esterror_ez(cl, t, t0, a0, n, winn, win, sampmethod, 0);
+      el = esterror_invt(t, cl, a0, n, NULL, lambda, gamma);
     } else if ( er < em && er < el ) {
       /* er is the minimal of the three, extend to the right */
       cl = cm;
@@ -372,7 +321,7 @@ static double estbestc(double t, double t0, double a0,
       cr = cr * 2.0;
       el = em;
       em = er;
-      er = esterror_ez(cr, t, t0, a0, n, winn, win, sampmethod, 0);
+      er = esterror_invt(t, cr, a0, n, NULL, lambda, gamma);
     } else {
       /* break the loop */
       if ( cr - cl < prec ) {
@@ -383,7 +332,7 @@ static double estbestc(double t, double t0, double a0,
       if ( cm - cl > cr - cm ) {
         /* refine the left half */
         cn = (cl + cm) * 0.5;
-        en = esterror_ez(cn, t, t0, a0, n, winn, win, sampmethod, 0);
+        en = esterror_invt(t, cn, a0, n, NULL, lambda, gamma);
         if ( en > em ) {
           /* L - (N - M - R) */
           cl = cn;
@@ -398,7 +347,7 @@ static double estbestc(double t, double t0, double a0,
       } else {
         /* refine the right half */
         cn = (cm + cr) * 0.5;
-        en = esterror_ez(cn, t, t0, a0, n, winn, win, sampmethod, 0);
+        en = esterror_invt(t, cn, a0, n, NULL, lambda, gamma);
         if ( en > em ) {
           /* (L - M - N) - R */
           cr = cn;

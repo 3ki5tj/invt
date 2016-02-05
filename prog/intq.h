@@ -15,7 +15,7 @@ typedef struct {
   double *qarr;
   double *aarr;
   int n;
-  const double *lamarr; /* eigenvalues of the updating magnitude */
+  const double *lambda; /* eigenvalues of the updating magnitude */
   const double *gamma; /* autocorrelation integrals */
   double Ea, Er, E; /* square root errors */
 } intq_t;
@@ -23,7 +23,7 @@ typedef struct {
 
 
 static intq_t *intq_open(double t, double qt, int m,
-    int n, const double *lamarr, const double *gamma)
+    int n, const double *lambda, const double *gamma)
 {
   intq_t *intq;
 
@@ -35,7 +35,7 @@ static intq_t *intq_open(double t, double qt, int m,
   intq->t = t;
   intq->qt = qt;
   intq->n = n;
-  intq->lamarr = lamarr;
+  intq->lambda = lambda;
   intq->gamma = gamma;
   intq->Ea = intq->Er = intq->E = 0;
   return intq;
@@ -60,7 +60,7 @@ static double intq_getvel(intq_t *intq, double q)
   double lam, y = 0, dq = q - intq->qt;
 
   for ( i = 1; i < n; i++ ) {
-    lam = intq->lamarr[i];
+    lam = intq->lambda[i];
     y += intq->gamma[i] * lam * lam * exp( 2 * lam * dq );
   }
 
@@ -125,7 +125,6 @@ static double intq_asymerr(intq_t *intq)
   err = 0;
   for ( j = 0; j <= m; j++ ) {
     y = intq_getvel(intq, intq->qarr[j]) * intq->aarr[j];
-    y = y * y;
     if ( j == 0 ) {
       dt = intq->tarr[1] - intq->tarr[0];
     } else if ( j == m ) {
@@ -133,7 +132,7 @@ static double intq_asymerr(intq_t *intq)
     } else {
       dt = intq->tarr[j+1] - intq->tarr[j-1];
     }
-    err += y * 0.5 * dt;
+    err += y * y * 0.5 * dt;
   }
 
   intq->Ea = err;
@@ -150,8 +149,8 @@ static double intq_reserr(intq_t *intq, double a0)
   double err = 0;
 
   for ( i = 1; i < intq->n; i++ ) {
-    err += 0.5 * a0 * intq->gamma[i] * intq->lamarr[i]
-         * exp(-2.0 * intq->lamarr[i] * intq->qt);
+    err += 0.5 * a0 * intq->gamma[i] * intq->lambda[i]
+         * exp(-2.0 * intq->lambda[i] * intq->qt);
   }
   intq->Er = err;
   return sqrt( err );
@@ -159,8 +158,49 @@ static double intq_reserr(intq_t *intq, double a0)
 
 
 
+/* compute the square-root residue error */
+static double intq_getxerr(intq_t *intq, double a0,
+    double *xerr)
+{
+  int i, j, m = intq->m;
+  double y, dq, dt, err, errtot = 0, lam, gam;
+
+  /* loop over modes, starting from mode 1
+   * since mode 0 is always zero */
+  for ( i = 1; i < intq->n; i++ ) {
+    lam = intq->lambda[i];
+    gam = intq->gamma[i];
+    
+    /* residual error */
+    err = 0.5 * a0 * gam * lam * exp(-2.0 * lam * intq->qt);
+    
+    /* asymptotic error */
+    for ( j = 0; j <= m; j++ ) {
+      dq = intq->qarr[j] - intq->qt;
+      y = gam * lam * lam * exp( 2 * lam * dq ) * intq->aarr[j];
+      if ( j == 0 ) {
+        dt = intq->tarr[1] - intq->tarr[0];
+      } else if ( j == m ) {
+        dt = intq->tarr[m] - intq->tarr[m - 1];
+      } else {
+        dt = intq->tarr[j+1] - intq->tarr[j-1];
+      }
+      err += y * y * 0.5 * dt;
+    }
+    
+    xerr[i] = err;
+
+    errtot += err;
+  }
+
+  return sqrt( errtot );
+}
+
+
+
 /* from the error from the optimal alpha(t) */
-static double intq_geterr(intq_t *intq, double a0)
+static double intq_geterr(intq_t *intq, double a0,
+    double *xerr)
 {
   /* compute the optimal schedule alpha(t) */
   intq_geta(intq);
@@ -170,6 +210,11 @@ static double intq_geterr(intq_t *intq, double a0)
 
   /* compute the residual error */
   intq_reserr(intq, a0);
+
+  /* compute the error components */
+  if ( xerr != NULL ) {
+    intq_getxerr(intq, a0, xerr);
+  }
 
   intq->E = intq->Ea + intq->Er;
 
@@ -204,7 +249,7 @@ __inline static double intq_interpa(intq_t *intq, double t, int *id)
   }
   //if ( i != *id ) { printf("i %d -> %d\n", *id, i); getchar(); }
   *id = i;
-  
+
   /* compute alpha(t) by interpolation or extrapolation */
   if ( i < 0 ) { /* extrapolate */
     i = 0;
@@ -223,8 +268,16 @@ __inline static double intq_interpa(intq_t *intq, double t, int *id)
 
 
 
+/* get the equivalent qt for the inverse time formula */
+__inline static double intq_getqt(double t, double c, double t0)
+{
+  return c * log( 1 + t / t0 );
+}
+
+
+
 /* save optimal protocol to file */
-static int intq_save(intq_t *intq,
+__inline static int intq_save(intq_t *intq,
     double c, double t0, const char *fn)
 {
   FILE *fp;
@@ -260,51 +313,26 @@ static int intq_save(intq_t *intq,
 
 
 /* return the square-root error from the optimal schedule  */
-__inline static double opterror_ez(double c, double t, double a0,
-    int m, const char *fnarr,
-    int n, int winn, double *win, int sampmethod,
-    intq_t **intq_ptr, int verbose)
+static double esterror_opt(double t, double qt, double a0,
+    int m, intq_t **intq_ptr, int n, double *xerr,
+    const double *lambda, const double *gamma)
 {
-  double t0, qt, err;
-  double *lamarr, *gamma;
   intq_t *intq;
+  double err;
 
-  /* estimate the eigenvalues of the w matrix,
-   * for the updating scheme */
-  lamarr = esteigvals(n, winn, win);
-
-  /* estimate the autocorrelation integrals
-   * of the eigenmodes of the w matrix,
-   * for the updating scheme */
-  gamma = estgamma(n, sampmethod);
-
-  qt = c * log(1 + a0 * t / c);
-  t0 = c / a0;
-
-  intq = intq_open(t, qt, m, n, lamarr, gamma);
+  intq = intq_open(t, qt, m, n, lambda, gamma);
 
   /* compute the optimal schedule and error */
-  err = intq_geterr(intq, a0);
-
-  /* save the schedule to file */
-  intq_save(intq, c, t0, fnarr);
-
-  if ( verbose >= 1 ) {
-    fprintf(stderr, "estimated final error %g, sqr: %e\n",
-        sqrt(err), err);
-  }
+  err = intq_geterr(intq, a0, xerr);
 
   if ( intq_ptr != NULL ) {
     *intq_ptr = intq;
   } else {
-    free(lamarr);
-    free(gamma);
     intq_close(intq);
   }
+
   return err;
 }
-
-
 
 
 #endif /* INTQ_H__ */

@@ -125,7 +125,7 @@ static void invtpar_init(invtpar_t *m)
   for ( i = 1; i < m->winn; i++ ) {
     m->win[i] = 0;
   }
-  m->win[0] = 1;
+  m->win[0] = 1; /* single-bin case */
   m->wingaus = 0;
   m->initrand = 0;
   m->kcutoff = 0;
@@ -216,7 +216,7 @@ static void invtpar_compute(invtpar_t *m)
     m->alpha0 = 0.01 / m->n;
   }
 
-  if ( m->t0 <= 0 ) {
+  if ( fabs(m->t0) <= 0 ) { /* means t0 == 0 */
     /* set the default t0 such that
      * alpha is continuous at the beginning
      * of the production run */
@@ -244,22 +244,30 @@ static void invtpar_compute(invtpar_t *m)
     m->ntrials = 1;
   }
 
-  /* construct the Gaussian window */
+  /* initialize the window function */
   if ( m->wingaus > 0 ) {
+
+    /* construct the Gaussian window */
     invtpar_mkgauswin(m);
 
   } else {
 
+    /* normalize the window function
+     * such that it sums to 1.0 */
     for ( x = 0, i = 1; i < m->winn; i++ ) {
       x += m->win[i];
     }
     m->win[0] = 1 - 2 * x;
+
   }
 
   /* initialize the target distribution */
   if ( m->p ) {
+    /* in case this function has been called twice
+     * release the previous memory */
     free(m->p);
   }
+  /* initialize a normalized distribution */
   xnew(m->p, m->n);
   for ( i = 0; i < m->n; i++ ) {
     m->p[i] = 1.0 / m->n;
@@ -270,7 +278,7 @@ static void invtpar_compute(invtpar_t *m)
     m->kcutoff = m->n;
   }
 
-  /* Currently, turn on PBC for MD automatically */
+  /* currently, turn on PBC for MD automatically */
   if ( m->sampmethod == SAMPMETHOD_MD ) {
     m->pbc = 1;
   }

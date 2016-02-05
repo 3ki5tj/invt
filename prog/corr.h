@@ -155,8 +155,11 @@ static int corr_save(corr_t *c, int dt,
   xnew(uu0, n);
   xnew(uu, n);
 
-  /* compute the averages */
   if ( subave ) {
+    /* deduct the average values before computing correlations
+     * in most cases, we test on model systems for which
+     * the averages are zeroes, so there is no need to
+     * deduct the averages to shift the baseline */
     xnew(uave, n);
     corr_getave(c, uave);
   }
@@ -164,14 +167,17 @@ static int corr_save(corr_t *c, int dt,
   /* save the heading */
   fprintf(fp, "# %d %d %d\n", n, dt, c->cnt);
 
+  /* try to determine the maximal separation
+   * for correlation functions */
   if ( tmax <= 0 ) {
     jmax = c->cnt;
   } else {
     jmax = (int) ( tmax / dt );
   }
 
+  /* loop over separations */
   for ( j = 0; j < jmax; j++ ) {
-    /* compute correlation functions
+    /* compute autocorrelation functions
      * at a separation of j frames */
     corr_compute(c, uu, j, uave);
 
@@ -202,10 +208,47 @@ static int corr_save(corr_t *c, int dt,
   fprintf(stderr, "autocorrelation functions saved in %s, %d frames\n",
       fn, j);
   fclose(fp);
-  if ( uave != NULL ) {
-    free(uave);
-  }
+
+  free(uave);
   free(uu0);
+  free(uu);
+
+  return 0;
+}
+
+
+
+/* print the thermodynamic averages of the modes */
+static int corr_printfluc(corr_t *c, int subave,
+    const double *xerr)
+{
+  int i, n = c->n;
+  double *uu, *uave = NULL;
+
+  xnew(uu, n);
+
+  if ( subave ) {
+    /* deduct the average values before computing correlations
+     * in most cases, we test on model systems for which
+     * the averages are zeroes, so there is no need to
+     * deduct the averages to shift the baseline */
+    xnew(uave, n);
+    corr_getave(c, uave);
+  }
+
+  /* compute autocorrelation functions
+   * at a separation of 0 frames */
+  corr_compute(c, uu, 0, uave);
+
+  for ( i = 0; i < n; i++ ) {
+    printf("%4d\t%15.5e", i + 1, uu[i]);
+    if ( xerr != NULL ) {
+      printf("\t%15.5e", xerr[i]);
+    }
+    printf("\n");
+  }
+
+  free(uave);
   free(uu);
 
   return 0;
