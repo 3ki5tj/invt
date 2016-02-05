@@ -80,13 +80,13 @@
 
 
 
-Free energy calculation\cite{frenkel} is a central theme
+Free energy calculation\cite{frenkel, newman} is a central theme
 in computational physics and chemistry.
 %
 Given a system,
 the problem is to compute,
-via either Monte Carlo (MC) and
-molecular dynamics (MD) simulations,
+via either Monte Carlo\cite{frenkel, newman, landau_binder} (MC)
+and molecular dynamics\cite{frenkel, karplus2002} (MD) simulations,
 a distribution, $p^*(z)$,
 along a quantity of interest $z$, and to see how
 the distribution changes with external conditions,
@@ -131,7 +131,7 @@ to achieve a flat distribution.
 
 
 The Wang-Landau (WL) algorithm\cite{wang2001, wang2001pre}
-and metadynamics\cite{laio2002, laio2008, barducci2011, sutto2012}
+and metadynamics\cite{huber1994, laio2002, laio2008, barducci2011, sutto2012}
 are two widely-used and closely-related\cite{micheletti2004}
 techniques for this purpose,
 in which a bias potential is actively built-up on-the-fly
@@ -167,7 +167,7 @@ the updating magnitude\cite{liang2007,
 belardinelli2007, belardinelli2007jcp, belardinelli2008,
 morozov2007, zhou2008, morozov2009,
 komura2012, caparica2012, caparica2014,
-barducci2008, dickson2011, dama2014, dickson2015}
+barducci2008, dickson2011, dama2014}
 determines the precision of the final bias potential,
 hence that of PMF.
 %
@@ -493,8 +493,11 @@ too quickly, making the asymptotic error
 saturate\cite{belardinelli2007, belardinelli2007jcp, belardinelli2008}.
 %
 Similarly, for metadynamics,
-there are various ways of reducing the updating magnitude\cite{
-  marsili2006, barducci2008, dickson2011, dama2014, dickson2015}.
+there are various ways of reducing the updating magnitude,
+particularly in the development of
+self-healing umbrella sampling
+and well-tempered metadynamics\cite{
+  marsili2006, barducci2008, dickson2011, dama2014}.
 
 
 
@@ -2513,7 +2516,7 @@ the first term represents the relative updating magnitude
 to a neighbor that is $|i - j|$ bins away,
 whereas the next two terms are added
 %according to the boundary condition
-to avoid unintended distortion
+to avoid unintended distortion\cite{dickson2011, mcgovern2013}
 to the equilibrium distribution $p_i = 1/n$\cite{bussi2006}.
 %
 Similarly, if $i$ represents a periodic variable,
@@ -3629,7 +3632,7 @@ we have applied the above protocol to two
 sampling schemes.
 %
 In both cases, we used the
-Metropolis algorithm\cite{metropolis1953, newman, frenkel}
+Metropolis algorithm\cite{metropolis1953, newman, frenkel, landau_binder}
 to sample the state space:
 %
 in each step, a new bin index $j$ was proposed
@@ -3922,7 +3925,7 @@ Eq. \eqref{eq:alpha_invtlambda}.
 
 The above comparison also shows the asymptotic superiority
 of the single-bin scheme.
-It is clear that for short times, 
+It is clear that for short times,
 the single-bin (WL) may not be optimal,
 but it ultimately wins out as simulation lengthens.
 
