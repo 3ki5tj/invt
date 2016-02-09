@@ -9,66 +9,63 @@
 set encoding cp1250 # make the minus sign longer
 set terminal push
 # dl 3.0 make dashed line longer
-set terminal postscript eps enhanced dl 3.0 size 8, 4 font "Times, 26"
+set terminal postscript eps enhanced dl 3.0 size 3.5, 5 font "Times, 26"
 set output "errsigscan.eps"
 set multiplot
 
 
-wleft = 0.53
-wright = 1 - wleft
+hbot = 0.54
+htop = 1 - hbot
 
-set size wleft, 1
+# bottom panel
+set size 1, hbot
 set origin 0, 0
 
 set xtics 2 offset 0, 0.3
 set mxtics 2
-set xlabel "Width of the Gaussian, {/Symbol-Oblique s}" offset 0, 0.5 font "Times, 36"
+set xlabel "Width of the Gaussian, {/Symbol-Oblique s}" offset 0, 0.5
 
 set logscale y
 set format y "10^{%T}"
 #set ytics 1e3
 #set format y "%.0t{/Symbol \264}10^{%T}"
 #set mytics 2
-set ylabel "Normalized error, ({/Times-Italic t} + {/Times-Italic t}_{0 }) {/Times-Italic E}" font "Times, 36"
-
-# `width` to reduce the text length
-set key Left reverse width -6.5 spacing 1.4
-
-set title "Global sampling scheme" font "Times, 40"
+set ylabel "Normalized error, ({/Times-Italic t} + {/Times-Italic t}_{0}) {/Times-Italic E}"
 
 a0 = 0.0001
 
-plot [:][30:] \
-    "../../data/scan/sigscan_t1e8_g.dat"   u 1:($4**2) w l lt 1 lw 4 lc rgb "#000000"    t "{/Times-Italic t} = 10^{8}, inverse-time", \
-    "../../data/scan/sigscan_t1e8_g.dat"   u 1:($6**2) w l lt 2 lw 4 lc rgb "#000000"    t "{/Times-Italic t} = 10^{8}, exact", \
-    "../../data/scan/sigscan_t1e10_g.dat"  u 1:($4**2) w l lt 4 lw 6 lc rgb "#808080"    t "{/Times-Italic t} = 10^{10}, inverse-time", \
-    "../../data/scan/sigscan_t1e10_g.dat"  u 1:($6**2) w l lt 5 lw 4 lc rgb "#808080"    t "{/Times-Italic t} = 10^{10}, exact", \
+set title "Local sampling scheme" offset 0, -0.5
+
+plot [:][6000:1e5] \
+    "../../data/scan/sigscan_t1e8_l.dat"   u 1:($4**2) w l lt 1 lw 4 lc rgb "#000000" notitle, \
+    "../../data/scan/sigscan_t1e8_l.dat"   u 1:($6**2) w l lt 2 lw 4 lc rgb "#000000" notitle, \
+    "../../data/scan/sigscan_t1e10_l.dat"  u 1:($4**2) w l lt 4 lw 6 lc rgb "#808080" notitle, \
+    "../../data/scan/sigscan_t1e10_l.dat"  u 1:($6**2) w l lt 5 lw 4 lc rgb "#808080" notitle, \
     -1 notitle
 
 
 
+# top panel
+set origin 0, hbot
+set size 1, hbot
 
-set origin wleft, 0
-set size wright, 1
-
-#set ytics 2e4
-#set mytics 5
-unset ylabel
+set tmargin 4
+set bmargin 0
 
 # `width` to reduce the text length
-set key left Left reverse width -5 spacing 1.4
+set key Left reverse width -7 spacing 1.0 font "Times, 20"
 
-set title "Local sampling scheme"
+unset xlabel
+set format x ""
 
-set lmargin 2
+set title "Global sampling scheme"
 
-plot [:][6000:3e5] \
-    "../../data/scan/sigscan_t1e8_l.dat"   u 1:($4**2) w l lt 1 lw 4 lc rgb "#000000"    t "{/Times-Italic t} = 10^{8}, inverse-time", \
-    "../../data/scan/sigscan_t1e8_l.dat"   u 1:($6**2) w l lt 2 lw 4 lc rgb "#000000"    t "{/Times-Italic t} = 10^{8}, exact", \
-    "../../data/scan/sigscan_t1e10_l.dat"  u 1:($4**2) w l lt 4 lw 6 lc rgb "#808080"    t "{/Times-Italic t} = 10^{10}, inverse-time", \
-    "../../data/scan/sigscan_t1e10_l.dat"  u 1:($6**2) w l lt 5 lw 4 lc rgb "#808080"    t "{/Times-Italic t} = 10^{10}, exact", \
+plot [:][30:2e4] \
+    "../../data/scan/sigscan_t1e8_g.dat"   u 1:($4**2) w l lt 1 lw 4 lc rgb "#000000"    t "{/Times-Italic t} = 10^{8}, Inv. {/Times t}", \
+    "../../data/scan/sigscan_t1e8_g.dat"   u 1:($6**2) w l lt 2 lw 4 lc rgb "#000000"    t "{/Times-Italic t} = 10^{8}, Optimal", \
+    "../../data/scan/sigscan_t1e10_g.dat"  u 1:($4**2) w l lt 4 lw 6 lc rgb "#808080"    t "{/Times-Italic t} = 10^{10}, Inv. {/Times t}", \
+    "../../data/scan/sigscan_t1e10_g.dat"  u 1:($6**2) w l lt 5 lw 4 lc rgb "#808080"    t "{/Times-Italic t} = 10^{10}, Optimal", \
     -1 notitle
-
 
 
 unset multiplot
