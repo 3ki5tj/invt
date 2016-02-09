@@ -122,7 +122,7 @@ static void invtpar_init(invtpar_t *m)
 
   m->pbc = 0;
   m->winn = 1; /* single bin update */
-  for ( i = 1; i < m->winn; i++ ) {
+  for ( i = 1; i <= NBMAX; i++ ) {
     m->win[i] = 0;
   }
   m->win[0] = 1; /* single-bin case */
@@ -175,34 +175,39 @@ static void invtpar_init(invtpar_t *m)
 static void invtpar_mkgauswin(invtpar_t *m)
 {
   int i;
-  double x, sig = m->wingaus;
+  double x, s, sig = m->wingaus;
 
   m->winn = NBMAX;
 
-  if ( m->winn >= m->n / 2 ) {
+  if ( m->winn > m->n / 2 ) {
     m->winn = m->n / 2;
   }
 
-  /* truncate the Gaussian at 5 sigma */
-  if ( m->winn >= sig * 5 ) {
-    m->winn = (int) (sig * 5 + 0.5);
+  /* truncate the Gaussian at 10 sigma */
+  if ( m->winn >= sig * 10 ) {
+    m->winn = (int) (sig * 10 + 0.5);
   }
 
-  m->win[0] = x = 1;
+  m->win[0] = 1;
+  s = m->win[0];
   for ( i = 1; i < m->winn; i++ ) {
-    m->win[i] = exp(-0.5*i*i/(sig*sig));
-    x += m->win[i] * 2;
+    x = i / sig;
+    m->win[i] = exp(-0.5 * x * x);
+    s += m->win[i] * 2;
   }
 
   /* normalize the window function, such that
    * win[0] + 2 * (win[1] + ... + win[n - 1]) = 1 */
   for ( i = 0; i < m->winn; i++ ) {
-    m->win[i] /= x;
+    m->win[i] /= s;
   }
 }
 
 
 
+/* compute dependent parameters
+ * call this function only once
+ * the second call will miss supposedly default parameters */
 static void invtpar_compute(invtpar_t *m)
 {
   double x = 0;
@@ -756,7 +761,9 @@ static int invtpar_load(invtpar_t *m, const char *fn)
 
   fclose(fp);
 
-  invtpar_compute(m);
+  /* do not call invtpar_compute(m) now
+   * because it will call the function prematurally */
+  /* invtpar_compute(m); */
 
   return 0;
 }
@@ -851,9 +858,9 @@ static void invtpar_dump(const invtpar_t *m)
   double sum = 0;
 
   fprintf(stderr, "%ld trials: n %d, alpha = %g/(t + %g), alpha0 %g, "
-      "pbc %d, %s, %ld steps;\n",
+      "pbc %d, %s, %ld steps; equil %ld steps\n",
       m->ntrials, m->n, m->c, m->t0, m->alpha0, m->pbc,
-      sampmethod_names[m->sampmethod][0], m->nsteps);
+      sampmethod_names[m->sampmethod][0], m->nsteps, m->nequil);
 
   fprintf(stderr, "update window function (%d bins): ", m->winn);
   for ( i = 0; i < m->winn; i++ ) {

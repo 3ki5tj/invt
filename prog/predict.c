@@ -150,7 +150,8 @@ int main(int argc, char **argv)
   invtpar_doargs(m, argc, argv);
   invtpar_dump(m);
 
-  lambda = esteigvals(m->n, m->winn, m->win);
+  lambda = geteigvals(m->n, m->winn, m->win,
+      0, NULL, 1);
   gamma = estgamma(m->n, m->sampmethod);
 
   if ( !m->cscan && !m->nbscan && !m->sigscan ) {

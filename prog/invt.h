@@ -89,10 +89,16 @@ __inline static double normalize(double *v, int n, double sig,
 
 /* estimate the eigenvalues of the updating scheme
  * for a given window `win` */
-static double *esteigvals(int n, int winn, const double *win)
+static double *geteigvals(int n,
+    int winn, const double *win,
+    double tol, int *err, int verbose)
 {
-  int i, j;
+  int i, j, nerr = 0;
   double *lambda, x;
+
+  if ( tol <= 0 ) { /* use the default value */
+    tol = 100 * DBL_EPSILON;
+  }
 
   xnew(lambda, n);
 
@@ -104,7 +110,70 @@ static double *esteigvals(int n, int winn, const double *win)
       x = sin(i * j * M_PI * 0.5 / n);
       lambda[i] -= 4 * win[j] * x * x;
     }
+    if ( lambda[i] < -tol ) {
+      nerr += 1;
+      if ( verbose ) {
+        fprintf(stderr, "Warning: eigenvalue %d: %g is negative\n", i + 1, lambda[i]);
+      }
+    } else if ( lambda[i] < tol ) {
+      lambda[i] = 0;
+    }
   }
+
+  if ( err != NULL ) {
+    *err = nerr;
+  }
+
+  return lambda;
+}
+
+
+
+/* modify the window function
+ * such that no eigenvalue is negative */
+__inline static double *trimwindow(int n,
+    int *winn, double *win, double tol)
+{
+  int i, j, err;
+  double *lambda0, *lambda;
+  int nwinn;
+  double nwin[NBMAX + 1];
+
+  /* try to get eigenvalues */
+  lambda0 = geteigvals(n, *winn, win,
+      tol, &err, 1);
+  if ( err == 0 ) {
+    fprintf(stderr, "%d positive eigenvalues\n", n);
+    return lambda0;
+  } else {
+    fprintf(stderr, "%d/%d negative eigenvalues, "
+        "modifying the window function\n", err, n);
+  }
+
+  /* inversely Fourier transform to get the window function */
+  nwinn = n / 2;
+  if ( nwinn > NBMAX ) {
+    nwinn = NBMAX;
+  }
+  for ( j = 0; j < nwinn; j++ ) {
+    nwin[j] = lambda0[0] * 0.5;
+    for ( i = 1; i < n; i++ ) {
+      double lam = lambda0[i];
+      if ( lam > 0 ) {
+        nwin[j] += lam * cos( j * i * M_PI / n );
+      }
+    }
+    nwin[j] /= n;
+  }
+
+  lambda = geteigvals(n, nwinn, nwin,
+      tol, &err, 1);
+  *winn = nwinn;
+  for ( j = 0; j < nwinn; j++ ) {
+    win[j] = nwin[j];
+  }
+
+  free(lambda0);
 
   return lambda;
 }
@@ -227,6 +296,8 @@ static double esterror_invt1(double t, double c, double a0,
   t0 = c / a0;
   r = lambda * c;
   errsat = 0.5 * gamma * r / (t + t0);
+
+  if ( lambda < 0 ) lambda = 0;
 
   if ( fabs(2 * r - 1) < tol ) {
     /* degenerate case */

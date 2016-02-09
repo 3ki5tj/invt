@@ -170,10 +170,10 @@ static double intq_getxerr(intq_t *intq, double a0,
   for ( i = 1; i < intq->n; i++ ) {
     lam = intq->lambda[i];
     gam = intq->gamma[i];
-    
+
     /* residual error */
     err = 0.5 * a0 * gam * lam * exp(-2.0 * lam * intq->qt);
-    
+
     /* asymptotic error */
     for ( j = 0; j <= m; j++ ) {
       dq = intq->qarr[j] - intq->qt;
@@ -187,7 +187,7 @@ static double intq_getxerr(intq_t *intq, double a0,
       }
       err += y * y * 0.5 * dt;
     }
-    
+
     xerr[i] = err;
 
     errtot += err;
