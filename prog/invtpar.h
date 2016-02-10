@@ -179,8 +179,8 @@ static void invtpar_mkgauswin(invtpar_t *m)
 
   m->winn = NBMAX;
 
-  if ( m->winn > m->n / 2 ) {
-    m->winn = m->n / 2;
+  if ( m->winn > m->n ) {
+    m->winn = m->n;
   }
 
   /* truncate the Gaussian at 10 sigma */

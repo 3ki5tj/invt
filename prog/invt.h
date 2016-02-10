@@ -135,6 +135,7 @@ __inline static double *trimwindow(int n,
     int *winn, double *win, double tol)
 {
   int i, j, err;
+  double lam, lamn;
   double *lambda0, *lambda;
   int nwinn;
   double nwin[NBMAX + 1];
@@ -151,19 +152,49 @@ __inline static double *trimwindow(int n,
   }
 
   /* inversely Fourier transform to get the window function */
-  nwinn = n / 2;
+  nwinn = n;
   if ( nwinn > NBMAX ) {
     nwinn = NBMAX;
   }
+
+  /* remove negative eigenvalues */
+  for ( i = 0; i < n; i++ ) {
+    if ( lambda0[i] < 0 ) {
+      lambda0[i] = 0;
+    }
+  }
+
+  /* compute lambda_n such that win[n] == 0 */
+  lamn = lambda0[0];
+  for ( i = 1; i < n; i++ ) {
+    lam = lambda0[i];
+    if ( i % 2 == 0 ) {
+      lamn += 2 * lam;
+    } else {
+      lamn -= 2 * lam;
+    }
+  }
+  if ( n % 2 == 0 ) {
+    lamn = -lamn;
+  }
+  fprintf(stderr, "lambda %g, %g, ..., %g lamn %g\n", lambda0[0], lambda0[1], lambda0[n-1], lamn);
+
   for ( j = 0; j < nwinn; j++ ) {
-    nwin[j] = lambda0[0] * 0.5;
+    /* win[j] = ( (lambda_0 + lambda_n) / 2
+     *        + Sum { k = 1 to n - 1 } lambda_k cos( k j Pi / n) ); */
+    nwin[j] = lambda0[0] * 0.5; /* lambda0[0] should be 1.0 */
+    if ( j % 2 == 0 ) {
+      nwin[j] += lamn * 0.5;
+    } else {
+      nwin[j] -= lamn * 0.5;
+    }
+
     for ( i = 1; i < n; i++ ) {
-      double lam = lambda0[i];
-      if ( lam > 0 ) {
-        nwin[j] += lam * cos( j * i * M_PI / n );
-      }
+      lam = lambda0[i];
+      nwin[j] += lam * cos( j * i * M_PI / n );
     }
     nwin[j] /= n;
+    fprintf(stderr, "win %4d: %22.10e -> %22.10e\n", j, win[j], nwin[j]);
   }
 
   lambda = geteigvals(n, nwinn, nwin,
