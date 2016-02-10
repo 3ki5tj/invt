@@ -16,7 +16,7 @@ set multiplot
 
 reset
 
-htop = 0.48
+htop = 0.50
 hbot = 1 - htop
 
 # bottom panel
@@ -25,35 +25,38 @@ set origin 0, 0
 
 #set xtics 5e7 offset 0, 0.3
 #set format x "%.0t{/Symbol \264}10^{%T}"
-set xtics ("0" 0, \
-           "" 1e7 1, \
-           "" 2e7 1, \
-           "" 3e7 1, \
-           "" 4e7 1, \
-           "5{/Symbol \264}10^7" 5e7, \
-           "" 6e7 1, \
-           "" 7e7 1, \
-           "" 8e7 1, \
-           "" 9e7 1, \
-           "10^8" 1e8) offset 0, 0.2
-set mxtics 5
+#set xtics ( \
+#           "" 1e7 1, \
+#           "" 2e7 1, \
+#           "" 3e7 1, \
+#           "" 4e7 1, \
+#           "5{/Symbol \264}10^7" 5e7, \
+#           "" 6e7 1, \
+#           "" 7e7 1, \
+#           "" 8e7 1, \
+#           "" 9e7 1, \
+#           "10^8" 1e8) offset 0, 0.2
+#set mxtics 5
+set logscale x
+set mxtics 10
+set format x "10^{%T}"
+set xrange [1e4:1e8]
 set xlabel "Time, {/Times-Italic t}" offset 0, 0.5
 
 set logscale y
 set format y "10^{%T}"
 set mytics 10
-set ylabel "{/Symbol-Oblique a} ({/Times-Italic t})"
-
-# `width` to reduce the text length
-set key Left reverse width -6 spacing 1.2
+set ylabel "1 / {/Symbol-Oblique a} ({/Times-Italic t})"
 
 set title "Gaussian updating scheme, {/Symbol-Oblique s} = 5" font "Times, 22"
 
-plot [:1e8][8e-9:3e-4] \
-    "../../data/scan/sig5_g_alpha.dat"  u 1:($2) w l lt 1 lw 4 lc rgb "#000000"    t "Global, inverse-time", \
-    "../../data/scan/sig5_g_alpha.dat"  u 1:($4) w l lt 2 lw 4 lc rgb "#000000"    t "Global, exact", \
-    "../../data/scan/sig5_l_alpha.dat"  u 1:($2) w l lt 4 lw 6 lc rgb "#808080"    t "Local, inverse-time", \
-    "../../data/scan/sig5_l_alpha.dat"  u 1:($4) w l lt 5 lw 4 lc rgb "#808080"    t "Local, exact", \
+set key left top Left reverse spacing 1.1
+
+plot [:][5e3:1e9] \
+    "../../data/scan/sig5_g_alpha.dat"  u 1:(1/$2) w l lt 1 lw 6 lc rgb "#000000"    t "Global, optimal", \
+    "../../data/scan/sig5_g_alpha.dat"  u 1:(1/$4) w l lt 2 lw 6 lc rgb "#000000"    t "Global, inv. {/Times-Italic t}", \
+    "../../data/scan/sig5_l_alpha.dat"  u 1:(1/$2) w l lt 1 lw 2 lc rgb "#000000"    t "Local, optimal", \
+    "../../data/scan/sig5_l_alpha.dat"  u 1:(1/$4) w l lt 2 lw 2 lc rgb "#000000"    t "Local, inv. {/Times-Italic t}", \
     -1 notitle
 
 
@@ -65,17 +68,16 @@ set size 1, htop
 # the top panel share the same x-axis with
 # the bottom one
 unset xlabel
-set format x ""
-
+#set format x ""
 
 
 set title "Nearest-neighbor updating scheme, {/Symbol-Oblique m}_1 = 0.24"
 
-plot [:1e8][8e-9:1e-4] \
-    "../../data/scan/nb0.24_g_alpha.dat"  u 1:($2) w l lt 1 lw 4 lc rgb "#000000"    t "Global, inverse-time", \
-    "../../data/scan/nb0.24_g_alpha.dat"  u 1:($4) w l lt 2 lw 4 lc rgb "#000000"    t "Global, exact", \
-    "../../data/scan/nb0.24_l_alpha.dat"  u 1:($2) w l lt 4 lw 6 lc rgb "#808080"    t "Local, inverse-time", \
-    "../../data/scan/nb0.24_l_alpha.dat"  u 1:($4) w l lt 5 lw 4 lc rgb "#808080"    t "Local, exact", \
+plot [:][5e3:1e9] \
+    "../../data/scan/nb0.24_g_alpha.dat"  u 1:(1/$2) w l lt 1 lw 6 lc rgb "#000000"    t "Global, optimal", \
+    "../../data/scan/nb0.24_g_alpha.dat"  u 1:(1/$4) w l lt 2 lw 6 lc rgb "#000000"    t "Global, inv. {/Times-Italic t}", \
+    "../../data/scan/nb0.24_l_alpha.dat"  u 1:(1/$2) w l lt 1 lw 2 lc rgb "#000000"    t "Local, optimal", \
+    "../../data/scan/nb0.24_l_alpha.dat"  u 1:(1/$4) w l lt 2 lw 2 lc rgb "#000000"    t "Local, inv. {/Times-Italic t}", \
     -1 notitle
 
 

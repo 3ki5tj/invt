@@ -5,6 +5,7 @@ prog=../../prog/predict
 compile::
 	make -C ../../prog predict
 
+# for the optimal alpha(t)
 nbsingle: compile
 	$(prog) --nb=0.24 --samp=g --fnalpha=nb0.24_g_alpha.dat
 	$(prog) --nb=0.24 --samp=l --fnalpha=nb0.24_l_alpha.dat
@@ -13,6 +14,7 @@ sigsingle: compile
 	$(prog) --sig=5 --samp=g --fnalpha=sig5_g_alpha.dat
 	$(prog) --sig=5 --samp=l --fnalpha=sig5_l_alpha.dat
 
+# for the error
 nbscan: compile
 	$(prog) --nbmin=-1.0 --nbdel=0.001 --nbmax=0.25 --samp=g > nbscan_g.dat
 	$(prog) --nbmin=-1.0 --nbdel=0.001 --nbmax=0.25 --samp=l > nbscan_l.dat
