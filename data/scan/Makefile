@@ -22,6 +22,10 @@ nbscan: compile
 	$(prog) --nbmin=-1.0 --nbdel=0.001 --nbmax=0.25 --samp=l --nsteps=1e7 > nbscan_t1e7_l.dat
 
 sigscan: compile
+	$(prog) --sigdel=0.02 --samp=g --nsteps=1e4  > sigscan_t1e4_g.dat
+	$(prog) --sigdel=0.02 --samp=l --nsteps=1e4  > sigscan_t1e4_l.dat
+	$(prog) --sigdel=0.02 --samp=g --nsteps=1e5  > sigscan_t1e5_g.dat
+	$(prog) --sigdel=0.02 --samp=l --nsteps=1e5  > sigscan_t1e5_l.dat
 	$(prog) --sigdel=0.02 --samp=g --nsteps=1e6  > sigscan_t1e6_g.dat
 	$(prog) --sigdel=0.02 --samp=l --nsteps=1e6  > sigscan_t1e6_l.dat
 	$(prog) --sigdel=0.02 --samp=g --nsteps=1e7  > sigscan_t1e7_g.dat

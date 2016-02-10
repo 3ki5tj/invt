@@ -16,7 +16,7 @@ set multiplot
 
 reset
 
-htop = 0.50
+htop = 0.49
 hbot = 1 - htop
 
 # bottom panel

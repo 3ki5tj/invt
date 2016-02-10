@@ -67,10 +67,11 @@ static void invt_scanc(invtpar_t *m,
 
 
 static void invt_scannb(invtpar_t *m,
-    const double *lambda, const double *gamma)
+    const double *gamma)
 {
   double t, t0;
   double nb, c, err1, err1norm, err2, err2norm;
+  double *lambda;
 
   t = (double) m->nsteps;
 
@@ -83,6 +84,8 @@ static void invt_scannb(invtpar_t *m,
     m->winn = 2;
     m->win[1] = nb;
     m->win[0] = 1 - nb;
+    lambda = geteigvals(m->n, m->winn, m->win,
+        0, NULL, 1);
 
     /* find the optimal c */
     c = estbestc_invt(t, m->alpha0, m->n, lambda, gamma,
@@ -99,7 +102,7 @@ static void invt_scannb(invtpar_t *m,
 
     err2norm = err2 * sqrt(t + t0);
 
-    printf("%+8.5f\t%8.3f\t%g\t%g\t%g\t%g\n",
+    printf("%+8.5f\t%10.6f\t%10.6f\t%g\t%10.6f\t%g\n",
         nb, c, err1, err1norm, err2, err2norm);
   }
 }
@@ -107,10 +110,11 @@ static void invt_scannb(invtpar_t *m,
 
 
 static void invt_scansig(invtpar_t *m,
-    const double *lambda, const double *gamma)
+    const double *gamma)
 {
   double t, t0;
   double sig, c, err1, err1norm, err2, err2norm;
+  double *lambda;
 
   t = (double) m->nsteps;
 
@@ -118,6 +122,8 @@ static void invt_scansig(invtpar_t *m,
     /* make the window */
     m->wingaus = sig;
     invtpar_mkgauswin(m);
+    lambda = geteigvals(m->n, m->winn, m->win,
+        0, NULL, 1);
 
     /* find the optimal c */
     c = estbestc_invt(t, m->alpha0, m->n, lambda, gamma,
@@ -134,8 +140,9 @@ static void invt_scansig(invtpar_t *m,
 
     err2norm = err2 * sqrt(t + t0);
 
-    printf("%8.5f\t%8.3f\t%g\t%g\t%g\t%g\n",
+    printf("%8.5f\t%10.6f\t%10.6f\t%g\t%10.6f\t%g\n",
         sig, c, err1, err1norm, err2, err2norm);
+    free(lambda);
   }
 }
 
@@ -163,11 +170,11 @@ int main(int argc, char **argv)
   }
 
   if ( m->nbscan ) {
-    invt_scannb(m, lambda, gamma);
+    invt_scannb(m, gamma);
   }
 
   if ( m->sigscan ) {
-    invt_scansig(m, lambda, gamma);
+    invt_scansig(m, gamma);
   }
 
   free(lambda);

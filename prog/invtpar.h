@@ -166,7 +166,7 @@ static void invtpar_init(invtpar_t *m)
   m->sigscan = 0;
   m->sigmin = 0.0;
   m->sigdel = 0.2;
-  m->sigmax = 10.0;
+  m->sigmax = 6.0;
 #endif /* SCAN */
 }
 
