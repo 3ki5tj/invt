@@ -1,4 +1,4 @@
-\documentclass[reprint]{revtex4-1}
+\documentclass[reprint, floatfix]{revtex4-1}
 \usepackage{amsmath}
 \usepackage{mathtools}
 \usepackage{upgreek}
@@ -1940,9 +1940,8 @@ Asymptotic optimality of the single-bin (WL) scheme}
 
 
 
-We now give an interesting deduction
-following from the error functional
-given in Eq. \eqref{eq:error_asym1}:
+The error functional given in Eq. \eqref{eq:error_asym1}
+leads to an interesting deduction:
 the single-bin scheme is asymptotically optimal.
 %
 Consider a class of $\mathbf w$ matrices
@@ -2004,8 +2003,6 @@ $$
 is always nonnegative, and hence
 has a non-positive discriminant,
 $B^2 - 4 \, A \, C$.
-%
-This condition furnishes the desired inequality.
 %
 Note that the last expression of \eqref{eq:CSineq}
 depends on $q(t')$ only through the end point value,
@@ -2074,8 +2071,7 @@ without changing the nature of the updating scheme).
 Thus, in terms of asymptotic convergence,
 the single-bin scheme
 (as adopted in the WL algorithm)
-is generally the most efficient
-updating scheme.
+is most efficient among updating schemes.
 
 
 We must, however, emphasize that the above result
@@ -2095,7 +2091,8 @@ are less than $1.0$ (the single-bin case).
 In practice, real simulations
 may have long achieved the desired precision
 before reaching the asymptotic regime,
-especially with some $\lambda_k$'s close to $0$.
+especially if the updating matrix
+has some $\lambda_k$'s close to $0$.
 
 
 
@@ -2129,21 +2126,8 @@ generally depends on not only the spectrum
 of eigenvalues and the sampling method,
 but also other parameters,
 such as the simulation length, $t$.
-%
-Note, however,
-since Eq. \eqref{eq:alpha_invtlambda}
-does not fix the endpoint value,
-%
-\begin{equation}
-q(t) = \frac{ 1 } { \lambda }
-\log\left(
-  \frac{ t + t_0 } { t_0 }
-\right),
-\label{eq:qt_invtlambda}
-\end{equation}
-%
-we have to include the residual error
-during the optimization.
+
+
 
 Using Eq. \eqref{eq:alpha_invtlambda}
 in Eq. \eqref{eq:error_asym1} yields
@@ -2228,21 +2212,35 @@ $$
 \frac{ \lambda_k^2 }{ \lambda \, (2 \, \lambda_k - \lambda) } \ge 1,
 $$
 with the equality achieved only at $\lambda = \lambda_k$,
-we see the from Eq. \eqref{eq:error_asym_invt}
-that the minimal error is achieved with
+and the minimal error from \eqref{eq:error_asym_invt}
+is achieved with
 $\lambda_2 = \dots = \lambda_n = \lambda$,
 agreeing with the general conclusion
 in Sec. \ref{sec:optWL}.
 
 
 
-In practice, however,
-real simulations
-may be relative short
-and have not entered
+Real simulations, however,
+can be relatively short
+and need not enter
 the asymptotic regime.
 %
 Then, the residual error, $\Err_R$, is not negligible.
+%
+Note, however,
+since Eq. \eqref{eq:alpha_invtlambda}
+does not fix the endpoint value,
+%
+\begin{equation}
+q(t) = \frac{ 1 } { \lambda }
+\log\left(
+  \frac{ t + t_0 } { t_0 }
+\right),
+\label{eq:qt_invtlambda}
+\end{equation}
+%
+we have to include the residual error
+during the optimization.
 %
 From Eqs. \eqref{eq:error_res1} and \eqref{eq:qt_invtlambda},
 we get
@@ -2310,8 +2308,8 @@ $$
      {    2 \, (t + t_0)    }
 ,
 $$
-is the equilibrium error of mode $k$
-under the constant terminal value
+is the equilibrium, or saturated, error of mode $k$
+at the terminal value
 of $\alpha(t) = 1/[\lambda (t + t_0)]$.
 
 \note{Derivation of Eq. \eqref{eq:error_invt}:
@@ -2386,9 +2384,9 @@ the equality is reached only at $t = 0$.
 Optimal parameter $\lambda$}
 
 
-We shall show that the optimal $\lambda$
-depends on the simulation length,
-and it tends to decrease as simulation lengthens.
+
+We now show that the optimal $\lambda$
+tends to decrease with the simulation length.
 %
 Let us first rewrite Eq. \eqref{eq:error_invt} as
 %
@@ -2421,8 +2419,8 @@ the function $G(\nu_k, r)$ depends non-trivially on $\nu_k$.
 %
 For a fixed and sufficiently small $r = t_0 / (t + t_0)$,
 $G(\nu_k, r)$ has two local minima along $\nu_k$,
-one at $\nu_k = 0$, and the other around $\nu_k = 1$,
-with the former being deeper albeit narrower.
+one at $\nu_k = 0$,
+and the other shallower one around $\nu_k = 1$.
 %
 This means that for a relatively short simulation,
 hence a relatively large value of $r$,
@@ -2430,9 +2428,10 @@ the minimal error may be achieved at $\nu_k \approx 0$,
 corresponding to a large value of $\lambda$
 ($\lambda \gg \lambda_k$).
 %
-However, this minimum is unstable as simulation lengthens,
+However, this minimum is unstable,
 for $G(\nu_k, r)$ increases rapidly
-with decreasing $r$ under a fixed $\nu_k$.
+with decreasing $r$, or increasing simulation length,
+under a fixed $\nu_k$.
 %
 In other words,
 asymptotically, the minimal error is always achieved at
@@ -2449,7 +2448,8 @@ we expect that the optimal $\lambda$ to shift gradually to
 smaller values as the simulation length, $t$, increasing.
 %
 Asymptotically, we expect the optimal $\lambda$
-to be around $\min_k \lambda_k$.
+to be around $\min \lambda_k$.
+
 
 
 \begin{figure}[h]
@@ -2469,18 +2469,22 @@ to be around $\min_k \lambda_k$.
 
 
 
-
-
-
 \subsection{\label{sec:band-matrix}
 Homogeneous updating schemes}
 
 
 
-In practice, we usually use a homogeneous updating scheme
-that is translational invariant.
+We now consider a class of commonly-used updating scheme
+for sampling a uniform distribution, $p_i = 1/n$.
 %
-We shall study these schemes below.
+These schemes are homogeneous,
+or translational invariant with respect to $z$.
+%
+This invariance is natural for a periodic variable\cite{dama2014}.
+%
+Below, however, we focus on a variable
+under the reflective boundary conditions.
+
 
 
 \subsubsection{
@@ -2519,11 +2523,11 @@ whereas the next two terms are added
 to avoid unintended distortion\cite{dickson2011, mcgovern2013}
 to the equilibrium distribution $p_i = 1/n$\cite{bussi2006}.
 %
-Similarly, if $i$ represents a periodic variable,
+\note{Similarly, if $i$ represents a periodic variable,
 the last two terms can be dropped, and
 $|i-j|$ is evaluated
 under the minimum image convention\cite{dama2014}.
-This case is, however, not considered further.
+This case is, however, not considered further.}
 
 
 This matrix, being symmetric to the indices $i$ and $j$,
@@ -2767,7 +2771,7 @@ $$
 $$
 Then, according to Eq. \eqref{eq:vt_diffeq_mbin},
 the rate of change of the bias potential, $\dot v_i(t)$,
-is given by a convolution of the above kernel, $\hat \mu_j$,
+is given by the convolution of the above kernel, $\hat \mu_j$,
 and the normalized histogram, $h_j/p_j$\cite{bussi2006},
 and Eq. \eqref{eq:wband_eigenvalue1}
 shows that the eigenvalues, $\lambda_k$, of the updating scheme
@@ -2814,7 +2818,7 @@ and the eigenvalues are
 Thus, for this updating matrix to be stable,
 we need
 $\min \lambda_k = \lambda_n > 0$,
-and
+or
 $$
 \mu_1 < \frac{1}{4 \, \cos^2\frac{\pi}{2n} }.
 $$
@@ -2914,9 +2918,11 @@ $$
 \begin{aligned}
 \Err_A
 &=
-\frac{n}{\lambda \, t}
+\frac{      n       }
+     { \lambda \, t }
 \left(
- \frac{2 - 4 \, \mu_1 - \lambda}{4}
+ \frac{ 2 - 4 \, \mu_1 - \lambda }
+      {          4               }
  +
  \sum_{z = z_{\pm} }
  \frac{ \left(z^2 - \mu_1 (1 + z^2)^2 \right)^2 }
@@ -2924,18 +2930,22 @@ $$
 \right)
 \\
 &=
-\frac{n}{\lambda \, t}
+\frac{       n      }
+     { \lambda \, t }
 \left(
-  \frac{2 - 4 \, \mu_1 - \lambda}{4}
+  \frac{ 2 - 4 \, \mu_1 - \lambda }
+       {          4               }
  +
  \frac{ \left(1 - \mu_1 \left(z + \frac{1}{z} \right)^2 \right)^2 }
- { 2 - 4 \mu_1 - \lambda - 4 \mu_1 z_{\pm}^2 }
+      { 2 - 4 \mu_1 - \lambda - 4 \mu_1 z_{\pm}^2                 }
 \right)
 \\
 &=
-\frac{n}{\lambda \, t}
+\frac{       n      }
+     { \lambda \, t }
 \left(
-  \frac{2 - 4 \, \mu_1 - \lambda}{4}
+  \frac{ 2 - 4 \, \mu_1 - \lambda }
+       {          4               }
  +
  \frac{ (\lambda/2)^2 }
  { \sqrt{(2-\lambda) (2 - 8 \mu_1 -\lambda)} }
@@ -2979,7 +2989,13 @@ the $\lambda$ from Eq. \eqref{eq:lambda_nn_perfect}
 satisfies this condition
 by the stability condition,
 $4 \, \mu_1 < 1$.
-
+\note{This is because,
+$$
+\frac{ 1 - 4 \, \mu_1 } { 1 - 2 \, \mu_1 } < 2 - 8 \, \mu_1
+\quad \leftrightarrow \quad
+1 < 2 - 4 \, \mu_1.
+$$
+}
 
 
 For the one-step sampling,
@@ -3397,7 +3413,7 @@ The weakness of the above calculation is two fold.
 First, it ignores the residual error.
 %
 Second, the simplified expression for the asymptotic error
-$E_A$ is also misused.
+$E_A$ may also be misused.
 %
 Namely, with $\lambda \approx 1$,
 we cannot assume $\lambda < 2 \, \lambda_k$ in general.
@@ -3415,11 +3431,11 @@ the optimal $\lambda$ tends to shift
 toward the smallest eigenvalue,
 $\min \lambda_k = 1 - 4 \, \mu_1$
 according to the discussion in Sec. \ref{sec:optlambda}.
-%
 
 
 
 \subsubsection{Gaussian updating scheme}
+
 
 
 The Gaussian updating kernel is commonly
@@ -3578,6 +3594,11 @@ suggesting stability of the updating scheme.
 %            {    2 \, l_{\min}^2  }
 %    \right).
 %$$
+
+
+
+\section{\label{eq:stabilize_wband}
+Stabilization}
 
 
 
@@ -3957,7 +3978,6 @@ $1/\lambda$.
 %\section{Acknowledgments}
 %
 %We thanks Dr. Y. Mei and Dr. J. Ma for helpful discussions.
-
 
 
 \bibliography{simul}

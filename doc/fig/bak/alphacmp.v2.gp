@@ -16,26 +16,54 @@ set multiplot
 
 reset
 
-htop = 0.45
+htop = 0.49
 hbot = 1 - htop
 
 # bottom panel
 set size 1, hbot
 set origin 0, 0
 
-set logscale x
-set mxtics 10
-set format x "10^{%T}"
+set format x "%.0t{/Symbol \264}10^{%T}"
+set xtics ("0" 0, \
+           "" 1e7 1, \
+           "" 2e7 1, \
+           "" 3e7 1, \
+           "" 4e7 1, \
+           "5{/Symbol \264}10^7" 5e7, \
+           "" 6e7 1, \
+           "" 7e7 1, \
+           "" 8e7 1, \
+           "" 9e7 1, \
+           "10^8" 1e8) offset 0, 0.2
+set mxtics 5
+#set logscale x
+#set mxtics 10
+#set format x "10^{%T}"
 set xrange [1e4:1e8]
-set xlabel "Time, {/Times-Italic t}" offset 0, 0.0
+set xlabel "Time, {/Times-Italic t}" offset 0, 0.5
 
-set logscale y
-set format y "10^{%T}"
-set mytics 10
-set yrange [1e4:1e9]
+#set logscale y
+#set format y "10^{%T}"
+#set format y "%.0t{/Symbol \264}10^{%T}"
+set ytics ("0" 0, \
+           "" 1e7 1, \
+           "" 2e7 1, \
+           "" 3e7 1, \
+           "" 4e7 1, \
+           "5{/Symbol \264}10^7" 5e7, \
+           "" 6e7 1, \
+           "" 7e7 1, \
+           "" 8e7 1, \
+           "" 9e7 1, \
+           "10^8" 1e8, \
+           "" 11e7 1, \
+           "" 12e7 1 \
+) offset 0.2, 0
+set mytics 5
+set yrange [0:1.2e8]
 set ylabel "1 / {/Symbol-Oblique a} ({/Times-Italic t})"
 
-set title "Gaussian updating scheme, {/Symbol-Oblique s} = 5" offset -1.0, -0.2
+set title "Gaussian updating scheme, {/Symbol-Oblique s} = 5" offset -3, -0.2
 
 set key left top Left reverse spacing 1.1
 
@@ -52,12 +80,10 @@ plot [][] \
 set origin 0, hbot
 set size 1, htop
 
-set bmargin 0
-
 # the top panel share the same x-axis with
 # the bottom one
 unset xlabel
-set format x ""
+#set format x ""
 
 
 set title "Nearest-neighbor updating scheme, {/Symbol-Oblique m}_1 = 0.24"
