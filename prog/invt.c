@@ -255,6 +255,12 @@ static double invt_run(invtpar_t *m)
       optc = estbestc_invt(t, m->alpha0, m->n, lambda, gamma,
           0, &errmin, m->verbose - 1);
 
+      /* use the optimal c */
+      if ( m->optc ) {
+        m->c = optc;
+        fprintf(stderr, "use the optimal c = %g\n", m->c); 
+      }
+
       if ( m->opta ) {
         /* compute the optimal schedule */
         errref = esterror_opt(t,

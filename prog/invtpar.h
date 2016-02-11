@@ -26,6 +26,8 @@ typedef struct {
   double alpha0; /* initial updating magnitude */
   int fixa; /* fix alpha during the entire process */
 
+  int optc; /* use the optimal c */
+
   int opta; /* use the analytically optimal alpha(t) */
   int alpha_nint; /* number of integration points for the exactly optimal alpha(t) */
   char fnalpha[FILENAME_MAX]; /* output file for the exactly optimal alpha */
@@ -115,6 +117,7 @@ static void invtpar_init(invtpar_t *m)
   m->p = NULL;
   m->alpha0 = 0.0;
   m->fixa = 0;
+  m->optc = 0;
 
   m->opta = 0;
   m->alpha_nint = 1000;
@@ -312,6 +315,7 @@ static void invtpar_help(const invtpar_t *m)
   fprintf(stderr, "  --a0=:         set the initial alpha during equilibration, default %g\n", m->alpha0);
   fprintf(stderr, "  --t0=:         set t0 in alpha = c/(t + t0), if unset, t0 = c/a0, default %g\n", m->t0);
   fprintf(stderr, "  --fixa:        fix the alpha during the entire process, default %d\n", m->fixa);
+  fprintf(stderr, "  --optc:        use the optimal c for alpha(t), default %d\n", m->optc);
   fprintf(stderr, "  --opta:        use the exact optimal schedule alpha(t), default %d\n", m->opta);
   fprintf(stderr, "  --nint:        set the number of integration points for the exact optimal schedule alpha(t), default %d\n", m->alpha_nint);
   fprintf(stderr, "  --fnalpha:     set the output file to output the exact optimal schedule, alpha(t), default %s\n", m->fnalpha);
@@ -531,6 +535,10 @@ static int invtpar_keymatch(invtpar_t *m,
          || strcmpfuzzy(key, "fixalpha") == 0 )
   {
     m->fixa = invtpar_getbool(m, key, val);
+  }
+  else if ( strcmpfuzzy(key, "optc") == 0 )
+  {
+    m->optc = invtpar_getbool(m, key, val);
   }
   else if ( strcmpfuzzy(key, "opta") == 0 )
   {
