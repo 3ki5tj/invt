@@ -7,6 +7,13 @@
 \usepackage{hyperref}
 
 
+\hypersetup{
+  colorlinks,
+  linkcolor={red!30!black},
+  citecolor={green!20!black},
+  urlcolor={blue!80!black}
+}
+
 
 \definecolor{DarkBlue}{RGB}{0,0,64}
 \definecolor{DarkBrown}{RGB}{64,20,10}
@@ -45,31 +52,34 @@
   the manner of updating the bias potential:
   %
   in the WL case, each simulation step triggers
-  an update of the bias potential to only
+  an update to only
   the bin containing the current $z$,
   while in the metadynamics case,
-  the bias potential of several neighboring bins
+  several neighboring bins
   are affected as well.
   %
   The asymptotic error of the resulting PMF
-  is determined by the updating magnitude,
-  and the rate of the reduction of the magnitude
-  over the simulation time.
+  is determined by the updating schedule,
+  or the updating magnitude
+  as a function of simulation time.
   %
   In the WL case,
   a simple and effective formula for the magnitude
   is given by the inverse of the number of simulation steps.
   %
   In this study, we shall reexamine the optimality of this prescription,
-  and attempt to extend it to the metadynamics case.
+  and attempt to give similar prescriptions for the metadynamics case.
   %
-  Further, we compared the two algorithms, and found that
-  although metadynamics produces a smoother PMF profile,
-  it is less effective in reducing errors with the shorter wavelengths.
-  %
-  Thus, the latter relies more heavily on the assumption of
-  the smoothness of the PMF profile,
-  especially with a wide updating window.
+  Our results show that the optimal schedule
+  and the effectiveness of metadynamics
+  are sensitive to the simulation length and other parameters.
+  %Further, we compared the two algorithms, and found that
+  %although metadynamics produces a smoother PMF profile,
+  %it is less effective in reducing errors with the shorter wavelengths.
+  %%
+  %Thus, the latter relies more heavily on the assumption of
+  %the smoothness of the PMF profile,
+  %especially with a wide updating window.
 \end{abstract}
 
 \maketitle
@@ -120,7 +130,8 @@ along $z$ over a wide range.
 This alleviates the above problem of local trapping
 as the system is now forced to travel more flexibly
 along the $z$ direction,
-which often represents a slow reaction coordinate.
+which often represents
+a direction of slow motion.
 %
 It, however, requires one to efficiently construct a
 bias potential for an often unknown system.
@@ -144,7 +155,7 @@ by elevating the bias potential there.
 A main difference of the two techniques
 is that in the WL case, an update is limited to the bin
 containing the current $z$,
-while metadynamics adopts an extended window
+while metadynamics adopts an extended updating window
 covering several neighboring bins.
 %
 The latter ensures a smooth profile
@@ -157,12 +168,13 @@ while a side effect is that the underlying dynamics
 is no longer a equilibrium sampling
 required by statistical mechanics.
 %
-Thus, one has to reduce the magnitude of updating
+Thus, one often has to reduce the magnitude of updating
 over the course of simulation.
 
 
 
-Naturally, the manner of reducing
+Naturally, the updating schedule,
+or the manner of reducing
 the updating magnitude\cite{liang2007,
 belardinelli2007, belardinelli2007jcp, belardinelli2008,
 morozov2007, zhou2008, morozov2009,
@@ -183,22 +195,20 @@ divided by the number of bins.
 
 
 In this study,
-we shall give another proof of the inverse-time formula.
-%
-We then try to derive a similar result
-for the optimal updating magnitude
+we shall reexamine the inverse-time formula,
+and similarly optimize schedules
 for updating schemes involving several neighboring bins,
 such as those used in metadynamics.
 %
-It turns out that the optimal updating magnitude
-depends nontrivially on the simulation length
-and other parameters in the latter case.
+It turns out that the optimal updating schedule
+can be sensitive the simulation length.
 %
 We also shall show that
 the single-bin scheme used by the WL algorithm
-is best in asymptotic convergence,
-although practical simulations may not need
-to reach this regime.
+is best in asymptotic convergence.
+%
+For finite-length simulations, however,
+metadynamics may deliver better performance.
 %
 The article is organized as follows.
 %
@@ -2482,7 +2492,7 @@ or translational invariant with respect to $z$.
 %
 This invariance is natural for a periodic variable\cite{dama2014}.
 %
-Below, however, we focus on a variable
+Below, however, we focus on a $z$ that is
 under the reflective boundary conditions.
 
 
@@ -2555,12 +2565,12 @@ with eigenvalues
   \lambda_k
   &=
   \mu_0 + \sum_{l = 1}^b 2 \, \mu_l \cos \frac{(k - 1)  \, l \pi}{n}
-  \label{eq:wband_eigenvalue1}
-  \\
-  &=
-  1 - \sum_{l = 1}^b 4 \, \mu_l \sin^2 \frac{(k - 1)  \, l \pi}{ 2 \, n }
-  .
   \label{eq:wband_eigenvalue}
+  %\\
+  %&=
+  %1 - \sum_{l = 1}^b 4 \, \mu_l \sin^2 \frac{(k - 1)  \, l \pi}{ 2 \, n }
+  %.
+  %\label{eq:wband_eigenvalue2}
 \end{align}
 
 \note{We derive Eqs.
@@ -2773,13 +2783,16 @@ Then, according to Eq. \eqref{eq:vt_diffeq_mbin},
 the rate of change of the bias potential, $\dot v_i(t)$,
 is given by the convolution of the above kernel, $\hat \mu_j$,
 and the normalized histogram, $h_j/p_j$\cite{bussi2006},
-and Eq. \eqref{eq:wband_eigenvalue1}
+and Eq. \eqref{eq:wband_eigenvalue}
 shows that the eigenvalues, $\lambda_k$, of the updating scheme
 is the Fourier transform of the kernel.
 %
 So, for the updating scheme to be stable,
 the Fourier transform of the kernel
 must be nonnegative.
+%
+In Sec. \ref{sec:stabilize_wband},
+we show how to stabilize an arbitrary kernel.
 
 We discuss two special cases below.
 
@@ -3033,8 +3046,7 @@ The optimal $\lambda$ is therefore
 \label{eq:lambda_nn_onestep}
 \end{equation}
 %
-
-\note{We can be a little more precise here.
+\note{We can be a bit more precise here.
 %
 From Eq. \eqref{eq:Gamma_onestep}, we get
 %
@@ -3597,9 +3609,250 @@ suggesting stability of the updating scheme.
 
 
 
-\section{\label{eq:stabilize_wband}
+\subsubsection{\label{sec:stabilize_wband}
 Stabilization}
 
+
+The updating scheme determined by an arbitrary set of numbers,
+$\mu_1, \dots, \mu_b$, is not necessarily stable,
+i.e., the eigenvalues from Eq. \eqref{eq:wband_eigenvalue}
+can be negative.
+%
+Below we show how to minimally modify these numbers
+to make the eigenvalues nonnegative.
+
+The key of this modification is the inversion formula
+%
+\begin{align}
+  \mu_l
+  =
+  \frac 1 n
+  \left[
+    \frac{ \lambda_1 + (-1)^l \, \lambda_{n+1} }
+         {               2                     }
+    +
+    \sum_{ k = 1 }^{ n - 1 }
+      \lambda_{ k + 1 } \,
+      \cos \frac{ k \, l \, \pi }
+                {      n        }
+  \right],
+  \label{eq:mu_from_lambda}
+\end{align}
+%
+where
+%
+\begin{align}
+  \lambda_{ n + 1 }
+  =
+  (-1)^{ n - 1 }
+  \left[
+    \lambda_1
+    +
+    2 \, \sum_{ k = 1 }^{ n - 1 }
+            (-1)^k \, \lambda_{k + 1}
+  \right],
+  \label{eq:lambdan}
+\end{align}
+%
+which ensures that the $\mu_n$
+computed from Eq. \eqref{eq:mu_from_lambda}
+vanishes.
+%
+\note{The inversion formula is derived from the cosine transform.
+  %
+  If we define $\mu_n = 0$ and
+  %
+  \begin{align}
+    \mu_{ 2 n - l } = \mu_l
+    \quad
+    \mathrm{for\;} l = 1, \dots, n - 1,
+    \label{eq:mu_reflection}
+  \end{align}
+  %
+  then Eq. \eqref{eq:wband_eigenvalue} can be rewritten as
+  %
+  \begin{align}
+    \lambda_{k+1}
+    =
+    \sum_{ l = 0 }^{ 2 \, n - 1 }
+    \mu_l \, \cos \frac{ k \, l \, \pi } { n }.
+    \label{eq:lambda_cosine_sum}
+  \end{align}
+  %
+  This formula for $\lambda_{k+1}$
+  can be readily extended to $k = 2 \, n - 1$,
+  and we have
+  %
+  \begin{align}
+    \lambda_{ 2 \, n + 1 - k } = \lambda_k.
+    \label{eq:lambda_reflection}
+  \end{align}
+  %
+  Thus,
+  %
+  $$
+  \begin{aligned}
+    \sum_{ k = 0 }^{ 2 \, n - 1 }
+      \lambda_{ k + 1 } \,
+      \cos \frac{ k \, p \, \pi }
+                {      n        }
+    &=
+    \sum_{ k = 0 }^{ 2 \, n - 1 }
+      \sum_{ l = 0 }^{ 2 \, n - 1 }
+        \mu_l \,
+        \cos \frac{ k \, l \, \pi }
+                  {      n        }
+        \cos \frac{ k \, p \, \pi }
+                  {      n        }
+    \\
+    &=
+    \sum_{ l = 0 }^{ 2 \, n - 1 }
+      \frac{ \mu_l } { 2 }
+      \sum_{ k = 0 }^{ 2 \, n - 1 }
+        \cos \frac{ k \, (p + l) \, \pi }
+                  {      n        }
+                  +
+        \cos \frac{ k \, (p - l) \, \pi }
+                  {      n        }
+    \\
+    &=
+    \sum_{ l = 0 }^{ 2 \, n - 1 }
+      \mu_l \, n \left(
+        \delta_{ p + l - 2 \, n, 0 }
+        +
+        \delta_{ p - l, 0 }
+      \right)
+    \\
+    &=
+    n \, \left( \mu_p + \mu_{ 2 \, n - p} \right)
+    =
+    2 \, n \, \mu_p.
+  \end{aligned}
+  $$
+  This entails
+  $$
+  \begin{aligned}
+    \mu_l
+    &=
+    \frac{    1   }
+         { 2 \, n }
+    \sum_{ k = 0 }^{ 2 \, n - 1 }
+      \lambda_{ k + 1 } \,
+      \cos \frac{ k \, l \, \pi }
+                {      n        }
+              \\
+    &=
+    \frac{    1   }
+         { 2 \, n }
+    \left[
+      \lambda_1
+      +
+      (-1)^l \, \lambda_{n + 1}
+      +
+      2 \sum_{ k = 1 }^{ n - 1 }
+        \lambda_{ k + 1 } \,
+        \cos \frac{ k \, l \, \pi }
+                  {      n        }
+    \right],
+  \end{aligned}
+  $$
+  where we have used Eq. \eqref{eq:lambda_reflection}
+  in the last step.
+
+  However, we are usually given only $\lambda_1, \dots, \lambda_n$
+  without $\lambda_{n + 1}$.
+  %
+  Fortunately, we can deduce the latter from
+  the condition that $\mu_n = 0$, which means
+  $$
+  \begin{aligned}
+    0 = \mu_n
+    =
+    \frac{1}{n}
+    \left[
+      \frac{ \lambda_1 + (-1)^n \, \lambda_{n+1} }
+           {               2                     }
+      +
+      \sum_{ k = 1 }^{ n - 1 }
+      \lambda_{k+1} (-1)^k
+    \right].
+  \end{aligned}
+  $$
+  This allows us to solve for $\lambda_{ n + 1 }$,
+  yielding Eq. \eqref{eq:lambdan}
+
+
+  Some examples for checking.
+  For $n = 2$,
+  $\lambda_3
+  = \mu_0 - 2 \, \mu_1
+  = -(\lambda_1 - 2 \, \lambda_2)$,
+  and
+  $$
+  \begin{aligned}
+  \mu_0
+  &=
+  \lambda_2,
+  \\
+  \mu_1
+  &=
+  \frac{ \lambda_1 - \lambda_2 }
+       {           2           }.
+  \end{aligned}
+  $$
+  For $n = 3$,
+  $\lambda_4
+  = \mu_0 - 2 \, \mu_1 + 2 \, \mu_2
+  = \lambda_1 - 2 \, \lambda_2 + 2 \, \lambda_3$,
+  and
+  $$
+  \begin{aligned}
+  \mu_0
+  &=
+  \frac{ 1 } { 3 }
+  \left(
+    \lambda_1 + 2 \, \lambda_3
+  \right),
+  \\
+  \mu_1
+  &=
+  \frac{ 1 } { 3 }
+  \left(
+    \frac 3 2 \lambda_2
+    -
+    \frac 3 2 \lambda_3
+  \right)
+  \\
+  \mu_2
+  &=
+  \frac{ 1 } { 3 }
+  \left(
+    \lambda_1
+    -
+    \frac 3 2 \lambda_2
+    +
+    \frac 1 2 \lambda_3
+  \right)
+  \end{aligned}
+  $$
+}
+Thus, the algorithm of stabilization consists of three steps.
+%
+\begin{enumerate}
+  \item
+    Compute the eigenvalues from $\lambda_0, \dots, \lambda_{n-1}$
+    from the given $\mu_0, \dots, \mu_b$ with $b < n$
+    according to Eq. \eqref{eq:wband_eigenvalue}.
+  \item
+    Replace the negative eigenvalues by zeros.
+  \item
+    Compute the new $\mu_l$ $(0 \le l < n)$ from
+    the modified eigenvalues according to
+    Eq. \eqref{eq:mu_from_lambda}.
+\end{enumerate}
+%
+Note that, after the stabilization,
+the window is usually widened.
 
 
 
