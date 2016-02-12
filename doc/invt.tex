@@ -125,7 +125,7 @@ the target distribution,
 such that we can, in a single simulation, sample
 a flat distribution\cite{mezei1987, berg1992, lee1993,
 wang2001, wang2001pre, laio2002, laio2008, barducci2011, sutto2012}
-along $z$ over a wide range.
+along $z$.
 %
 This alleviates the above problem of local trapping
 as the system is now forced to travel more flexibly
@@ -192,6 +192,8 @@ morozov2007, zhou2008},
 where ``time'' is defined as
 the number of simulation steps
 divided by the number of bins.
+%
+For metadynamics, ...
 
 
 In this study,
@@ -204,7 +206,7 @@ It turns out that the optimal updating schedule
 can be sensitive the simulation length.
 %
 We also shall show that
-the single-bin scheme used by the WL algorithm
+the single-bin updating scheme used by the WL algorithm
 is best in asymptotic convergence.
 %
 For finite-length simulations, however,
@@ -231,7 +233,7 @@ in Sec. \ref{sec:background}.
 %
 We then prove the optimality
 of the inverse-time formula
-for the single-bin WL algorithm
+for the single-bin updating WL algorithm
 in Sec. \ref{sec:single-bin}.
 %
 Next, we discuss the generalized
@@ -512,7 +514,7 @@ and well-tempered metadynamics\cite{
 
 
 
-\subsubsection{$1/t$ formula}
+\subsubsection{Updating magnitude and the inverse-time formula}
 
 
 
@@ -1619,6 +1621,12 @@ and from Eq. \eqref{eq:Gamma_sum}, we get
 We can use this case to model local sampling processes.
 
 
+
+\subsection{\label{sec:mbin_opta}
+Optimal schedule for the multiple-bin updating scheme}
+
+
+
 \subsubsection{\label{eq:eqlerr}
 Equilibrium error under a fixed updating magnitude
 }
@@ -1793,7 +1801,7 @@ So we may write
   \label{eq:Lagrangian_const}
 \end{equation}
 %
-Integrating integrate the square root of the left-hand side,
+Integrating the square root of the left-hand side, we get
 %
 \begin{equation}
   \int_0^{ q(\tau) }
@@ -2106,7 +2114,7 @@ has some $\lambda_k$'s close to $0$.
 
 
 
-\subsubsection{Variationally optimal schedule, $\alpha(t)$}
+\subsubsection{Inverse-time schedule}
 
 
 
@@ -2391,7 +2399,7 @@ the equality is reached only at $t = 0$.
 
 
 \subsubsection{\label{sec:optlambda}
-Optimal parameter $\lambda$}
+Optimal proportionality constant}
 
 
 
@@ -2484,16 +2492,21 @@ Homogeneous updating schemes}
 
 
 
-We now consider a class of commonly-used updating scheme
-for sampling a uniform distribution, $p_i = 1/n$.
+We now consider a class of updating schemes
+that are homogeneous,
+or translationally invariant. % with respect to $z$,
 %
-These schemes are homogeneous,
-or translational invariant with respect to $z$.
+As we shall see,
+these schemes include the Gaussian updating scheme
+commonly used in metadynamics.
 %
-This invariance is natural for a periodic variable\cite{dama2014}.
+Although the translational invariance is
+natural for a periodic variable\cite{dama2014},
+it can be also extended to an open-end variable
+by imposing the reflective boundary conditions.
 %
-Below, however, we focus on a $z$ that is
-under the reflective boundary conditions.
+For simplicity, we shall assume that our target
+distribution is uniform, or $p_i = 1/n$, below.
 
 
 
@@ -4136,14 +4149,16 @@ Eq. \eqref{eq:q_opt}.
 %
 The difference was larger for the global sampling scheme.
 %
+Compare with Eqs. \eqref{eq:alpha_limit1} and \eqref{eq:alpha_limit2}.
+
 \begin{figure}[h]
 \begin{center}
   \makebox[\linewidth][c]{
-    \includegraphics[angle=0, width=0.95\linewidth]{fig/alphacmp.pdf}
+    \includegraphics[angle=0, width=0.95\linewidth]{fig/dinvacmp.pdf}
   }
   \caption{
     \label{fig:alpha_cmp}
-    Optimal schedules, $\alpha(t)$, from Eq. \eqref{eq:q_opt},
+    Optimal schedules, in terms of $\dot \alpha(t)$, from Eq. \eqref{eq:q_opt},
     versus the inverse-time schedule,
     Eq. \eqref{eq:alpha_invtlambda},
     with the optimal parameter, $\lambda$.

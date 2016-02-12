@@ -13,6 +13,7 @@ static void invt_geterr(invtpar_t *m,
     const double *lambda, const double *gamma)
 {
   double t, err1, err2;
+  intq_t *intq;
 
   t = (double) m->nsteps;
 
@@ -23,10 +24,15 @@ static void invt_geterr(invtpar_t *m,
   /* compute the exact minimal error under the same condition */
   err2 = esterror_opt(t,
       intq_getqt(t, m->c, m->c / m->alpha0), m->alpha0,
-      m->alpha_nint, NULL, m->n, NULL,
+      m->alpha_nint, &intq, m->n, NULL,
       lambda, gamma);
 
-  printf("c %g, err %g (invt), %g (exact)\n", m->c, err1, err2);
+  /* save the optimal schedule to file */
+  intq_save(intq, m->c, m->c / m->alpha0, m->fnalpha);
+
+  printf("c %g, err %g (invt), %g (exact), %s\n", m->c, err1, err2, m->fnalpha);
+
+  intq_close(intq);
 }
 
 

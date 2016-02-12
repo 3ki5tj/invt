@@ -14,6 +14,7 @@ typedef struct {
   double *tarr;
   double *qarr;
   double *aarr;
+  double *dinva;
   int n;
   const double *lambda; /* eigenvalues of the updating magnitude */
   const double *gamma; /* autocorrelation integrals */
@@ -32,6 +33,7 @@ static intq_t *intq_open(double t, double qt, int m,
   xnew(intq->tarr, m + 1);
   xnew(intq->aarr, m + 1);
   xnew(intq->qarr, m + 1);
+  xnew(intq->dinva, m + 1);
   intq->t = t;
   intq->qt = qt;
   intq->n = n;
@@ -45,10 +47,13 @@ static intq_t *intq_open(double t, double qt, int m,
 
 static void intq_close(intq_t *intq)
 {
-  free(intq->tarr);
-  free(intq->aarr);
-  free(intq->qarr);
-  free(intq);
+  if ( intq != NULL ) {
+    free(intq->tarr);
+    free(intq->aarr);
+    free(intq->qarr);
+    free(intq->dinva);
+    free(intq);
+  }
 }
 
 
@@ -109,6 +114,18 @@ static void intq_geta(intq_t *intq)
     intq->aarr[j] += 0.5 * y;
   }
   intq->aarr[m] = y;
+
+  /* differentiate 1/a(t) */
+  y = ( 1.0 / intq->aarr[1] - 1.0 / intq->aarr[0] )
+    / (       intq->tarr[1] -       intq->tarr[0] );
+  intq->dinva[0] = y;
+  for ( j = 1; j < m; j++ ) {
+    intq->dinva[j] += 0.5 * y;
+    y = ( 1.0 / intq->aarr[j + 1] - 1.0 / intq->aarr[j] )
+      / (       intq->tarr[j + 1] -       intq->tarr[j] );
+    intq->dinva[j] += 0.5 * y;
+  }
+  intq->dinva[m] = y;
 }
 
 
@@ -298,8 +315,9 @@ __inline static int intq_save(intq_t *intq,
   for ( i = 0; i < m; i++ ) {
     a1 = c / (intq->tarr[i] + t0);
     q1 = c * log( 1 + intq->tarr[i] / t0 );
-    fprintf(fp, "%g\t%20.8e\t%12.6f\t%20.8e\t%12.6f\n",
-        intq->tarr[i], intq->aarr[i], intq->qarr[i], a1, q1);
+    fprintf(fp, "%12.3f\t%20.8e\t%12.6f\t%20.8e\t%20.8e\t%12.6f\t%20.8e\n",
+        intq->tarr[i], intq->aarr[i], intq->qarr[i], intq->dinva[i],
+        a1, q1, 1.0 / c);
   }
 
   fclose(fp);

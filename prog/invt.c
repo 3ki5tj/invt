@@ -344,6 +344,9 @@ static double invt_run(invtpar_t *m)
         err0ref, err1ref, err0ref * err0ref, err1ref * err1ref);
   }
 
+  if ( intq != NULL ) {
+    intq_close( intq );
+  }
   free(lambda);
   free(gamma);
   free(xerr0);

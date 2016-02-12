@@ -41,9 +41,9 @@ set key left top Left reverse spacing 1.1
 
 plot [][] \
     "../../data/scan/sig5_g_alpha.dat"  u 1:(1/$2) w l lt 1 lw 6 lc rgb "#000000"    t "Global, optimal", \
-    "../../data/scan/sig5_g_alpha.dat"  u 1:(1/$4) w l lt 2 lw 6 lc rgb "#000000"    t "Global, inv. {/Times-Italic t}", \
+    "../../data/scan/sig5_g_alpha.dat"  u 1:(1/$5) w l lt 2 lw 6 lc rgb "#000000"    t "Global, inv. {/Times-Italic t}", \
     "../../data/scan/sig5_l_alpha.dat"  u 1:(1/$2) w l lt 1 lw 2 lc rgb "#000000"    t "Local, optimal", \
-    "../../data/scan/sig5_l_alpha.dat"  u 1:(1/$4) w l lt 2 lw 2 lc rgb "#000000"    t "Local, inv. {/Times-Italic t}", \
+    "../../data/scan/sig5_l_alpha.dat"  u 1:(1/$5) w l lt 2 lw 2 lc rgb "#000000"    t "Local, inv. {/Times-Italic t}", \
     -1 notitle
 
 
@@ -64,9 +64,9 @@ set title "Nearest-neighbor updating scheme, {/Symbol-Oblique m}_1 = 0.24"
 
 plot [][] \
     "../../data/scan/nb0.24_g_alpha.dat"  u 1:(1/$2) w l lt 1 lw 6 lc rgb "#000000"    t "Global, optimal", \
-    "../../data/scan/nb0.24_g_alpha.dat"  u 1:(1/$4) w l lt 2 lw 6 lc rgb "#000000"    t "Global, inv. {/Times-Italic t}", \
+    "../../data/scan/nb0.24_g_alpha.dat"  u 1:(1/$5) w l lt 2 lw 6 lc rgb "#000000"    t "Global, inv. {/Times-Italic t}", \
     "../../data/scan/nb0.24_l_alpha.dat"  u 1:(1/$2) w l lt 1 lw 2 lc rgb "#000000"    t "Local, optimal", \
-    "../../data/scan/nb0.24_l_alpha.dat"  u 1:(1/$4) w l lt 2 lw 2 lc rgb "#000000"    t "Local, inv. {/Times-Italic t}", \
+    "../../data/scan/nb0.24_l_alpha.dat"  u 1:(1/$5) w l lt 2 lw 2 lc rgb "#000000"    t "Local, inv. {/Times-Italic t}", \
     -1 notitle
 
 

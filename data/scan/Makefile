@@ -7,12 +7,12 @@ compile::
 
 # for the optimal alpha(t)
 nbsingle: compile
-	$(prog) --nb=0.24 --samp=g --fnalpha=nb0.24_g_alpha.dat
-	$(prog) --nb=0.24 --samp=l --fnalpha=nb0.24_l_alpha.dat
+	$(prog) --nb=0.24 --samp=g --nint=10000 --fnalpha=nb0.24_g_alpha.dat
+	$(prog) --nb=0.24 --samp=l --nint=10000 --fnalpha=nb0.24_l_alpha.dat
 
 sigsingle: compile
-	$(prog) --sig=5 --samp=g --fnalpha=sig5_g_alpha.dat
-	$(prog) --sig=5 --samp=l --fnalpha=sig5_l_alpha.dat
+	$(prog) --sig=5 --samp=g --nint=10000 --fnalpha=sig5_g_alpha.dat
+	$(prog) --sig=5 --samp=l --nint=10000 --fnalpha=sig5_l_alpha.dat
 
 # for the error
 nbscan: compile
