@@ -258,7 +258,7 @@ static double invt_run(invtpar_t *m)
       /* use the optimal c */
       if ( m->optc ) {
         m->c = optc;
-        fprintf(stderr, "use the optimal c = %g\n", m->c); 
+        fprintf(stderr, "use the optimal c = %g\n", m->c);
       }
 
       if ( m->opta ) {
