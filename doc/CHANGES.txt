@@ -1,0 +1,41 @@
+## Document
+
+### invt.tex
+
+* Better introduction
+* Sec. II.A.1, add the distinction of equilibrium and adaptive flat-distribution sampling methods.
+* Sec. II.E.4, iterative method of stabilizing homogeneous updating schemes.
+* Sec. II.F.2, comparison of the error of equilibrium FDS method.
+
+### Notes
+
+* add `1p2T.tex`
+* add `equilerr.tex`
+* add `outline.tex`
+
+### Misc
+
+* add `mkzip.bat` under the `/doc`
+
+
+
+## Code
+
+* Preliminary run to measure the gamma values
+  o `premeta()` in `invt.c`
+  o --gam
+
+* Iterative method of stabilization a homogeneous updating scheme
+  o `trimwindow()` in `invt.h`
+  o --wmax
+
+* Object-oriented wrapper of `invtsamp.h`
+  o invtsamp_open();
+  o invtsamp_step();
+  o invtsamp_close();
+  
+* Add `test_eig.c`
+* Add `erf.h` and `test_erf.c` for Visual C++ adoption
+* Add `plot_intqt.c`
+
+
