@@ -6,7 +6,8 @@
 
 
 
-/* compute the cosine table */
+/* compute the cosine table
+   costab = phi * n */
 static double *mkcostab(int n)
 {
   int i, k;
@@ -31,7 +32,7 @@ static double *mkcostab(int n)
 
 
 
-/* compute the magnitude of the eigen histogram modes
+/* compute the magnitude of the eigenmodes of the histogram
  * save them to `u` */
 static void getcosmodes(double *v, int n, double *u,
     double *costab)
@@ -70,6 +71,20 @@ static void fromcosmodes(double *v, int n, double *u,
 }
 
 
+
+#if 0
+/* compute the adjusted instantaneous histogram from the bin index i
+   z_i = h_i / p_i - 1 */
+__inline static void mkinsthist(double *ih, int n, int i)
+{
+  int j;
+
+  for ( j = 0; j < n; j++ ) {
+    ih[j] = -1;
+  }
+  ih[i] += n;
+}
+#endif
 
 
 #endif /* COSMODES_H__ */

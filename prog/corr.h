@@ -143,7 +143,8 @@ static int corr_save(corr_t *c, int dt,
     double tmax, double tol,
     int subave, const char *fn)
 {
-  int i, j, jmax, n = c->n, stop;
+  int i, j, jmax, n = c->n, err;
+  int *stopped = NULL;
   double *uu0, *uu, *uave = NULL;
   FILE *fp;
 
@@ -154,6 +155,11 @@ static int corr_save(corr_t *c, int dt,
 
   xnew(uu0, n);
   xnew(uu, n);
+  xnew(stopped, n);
+
+  for ( i = 0; i < n; i++ ) {
+    stopped[i] = 0;
+  }
 
   if ( subave ) {
     /* deduct the average values before computing correlations
@@ -188,14 +194,18 @@ static int corr_save(corr_t *c, int dt,
       }
     } else {
       /* decide if to stop the calculation */
+      err = 0;
       for ( i = 0; i < n; i++ ) {
-        if ( uu[i] > uu0[i] * tol ) {
-          stop = 0;
+        if ( uu[i] <= uu0[i] * tol ) {
+          stopped[i] = 1;
+        }
+        if ( stopped[i] ) {
+          err += 1;
           break;
         }
       }
 
-      if ( stop ) break;
+      if ( err >= n ) break;
     }
 
     fprintf(fp, "%d", j * dt);
@@ -212,6 +222,47 @@ static int corr_save(corr_t *c, int dt,
   free(uave);
   free(uu0);
   free(uu);
+  free(stopped);
+
+  return 0;
+}
+
+
+
+/* compute the integrals of the autocorrelation functions
+ * `tol` is the tolerance level as a fraction of the peak value
+ * of the correlation functions at time zero, below which
+ * the correlation functions are assumed to be zero
+ * otherwise, zero is assumed as the average */
+static int corr_getgamma(corr_t *c, double *gam,
+    double alpha, const double *lam)
+{
+  int i, n = c->n;
+  int *stopped;
+  double *uave;
+
+  xnew(uave, n);
+  xnew(stopped, n);
+
+  for ( i = 0; i < n; i++ ) {
+    gam[i] = 0;
+    stopped[i] = 0;
+  }
+
+  corr_getave(c, uave);
+
+  /* compute the static fluctuation */
+  corr_compute(c, gam, 0, uave);
+
+  for ( i = 0; i < n; i++ ) {
+    gam[i] *= 2 / alpha;
+    if ( lam != NULL ) {
+      gam[i] /= lam[i];
+    }
+  }
+
+  free(uave);
+  free(stopped);
 
   return 0;
 }

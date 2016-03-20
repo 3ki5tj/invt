@@ -3,10 +3,10 @@
 
 
 #include "invt.h"
-#include "invtsamp.h"
-#include "corr.h"
 #include "cosmodes.h"
 #include "intq.h"
+#include "invtsamp.h"
+#include "corr.h"
 
 
 
@@ -58,54 +58,98 @@ static void mbin_update(double *v, int n, int i,
 
 
 
+/* preparation metadynamics run to compute the gamma values */
+static void premeta(const invtpar_t *m, double *gamma)
+{
+  int i, j, n = m->n;
+  long t;
+  double a, *gamma0;
+  double ucnt = 0, *uave, *uvar;
+  
+  /* data for sampling */
+  invtsamp_t *is;
+
+  /* open an object for sampling */
+  is = invtsamp_open(m);
+
+  xnew(gamma0, n);
+  xnew(uave, n);
+  xnew(uvar, n);
+
+  for ( i = 0; i < n; i++ ) {
+    gamma0[i] = gamma[i];
+    gamma[i] = 0;
+    uave[i] = 0;
+    uvar[i] = 0;
+  }
+
+  i = 0;
+  for ( t = 0; t < m->gam_nsteps; t++ ) {
+    /* sampling */
+    if ( m->tcorr <= 0 || rand01() * m->tcorr < 1 ) {
+      invtsamp_step(is, &i);
+    }
+
+    /* compute the updating magnitude */
+    a = m->alpha0 / m->p[i];
+
+    /* update the bias potential (WL) way */
+    is->v[i] += a;
+
+    /* accumulate data for variance */
+    if ( (t + 1) % m->gam_nstave == 0 ) {
+      shift(is->v, n);
+      /* Fourier transform to get the modes `u` */
+      getcosmodes(is->v, n, is->u, is->costab);
+      /* accumulate data for average and variance */
+      for ( j = 0; j < n; j++ ) {
+        double y = 0, du;
+        if ( ucnt > 0 ) {
+          y = uave[j] / ucnt;
+        }
+        uave[j] += is->u[j]; /* update the average */
+        if ( ucnt > 0 ) { /* update the variance */
+          du = is->u[j] - y;
+          uvar[j] += du * du * ucnt / (ucnt + 1);
+        }
+      }
+      ucnt += 1;
+    }
+  }
+
+  /* compute the integrals of the autocorrelation functions */
+  fprintf(stderr, "mode    old-gamma    new-gamma\n");
+  for ( i = 1; i < n; i++ ) {
+    uave[i] /= ucnt;
+    uvar[i] /= ucnt;
+    gamma[i] = 2 * uvar[i] / m->alpha0;
+    fprintf(stderr, "%4d %12.6f %12.6f\n", i, gamma0[i], gamma[i]);
+  }
+
+  invtsamp_close(is);
+}
+
+
+
 /* simulate a metadynamics process
  * return the root-mean-squared error of the inverse time scheme */
 static double simulmeta(const invtpar_t *m, intq_t *intq,
     double *err0, const double *xerr0)
 {
-  double *v = NULL, a, err;
+  double a, err;
   int i, n = m->n, prod = 0;
   long t;
-
-  /* data for sampling method */
-  double *vac = NULL; /* for the heatbath algorithm */
-  ouproc_t *ou = NULL; /* for Ornstein-Uhlenbeck process */
-  invtmd_t invtmd[1]; /* for molecular dynamics */
+  
+  /* data for sampling */
+  invtsamp_t *is;
 
   /* data for computing correlation functions */
   corr_t *corr = NULL;
-  double *u = NULL, *costab = NULL;
   int nfrcorr = 0;
 
-
-  xnew(v, n);
-  xnew(u, n);
-
-  /* compute the coefficients for Fourier transform
-   * used in decomposition of modes */
-  costab = mkcostab(n);
-
-  /* initially randomize the error */
-  /* initialize the magnitude of the Fourier modes
-   * up to the cutoff wave number */
-  for ( i = 0; i < m->kcutoff; i++ ) {
-    u[i] = randgaus();
-  }
-  /* combine the modes */
-  fromcosmodes(v, n, u, costab);
-  normalize(v, n, m->initrand, m->p);
-
-  /* initialize data for the sampling methods */
-  if ( m->sampmethod == SAMPMETHOD_HEATBATH ) {
-    /* allocated space for the accumulative distribution function
-     * used for heatbath algorithm */
-    xnew(vac, n + 1);
-  } else if ( m->sampmethod == SAMPMETHOD_OU ) {
-    ou = ouproc_open(v, n, 1.0 / ( m->tcorr + 1e-16 ) );
-  } else if ( m->sampmethod == SAMPMETHOD_MD ) {
-    invtmd_init(invtmd, n,
-        m->mddt, m->tp, m->thermdt, v);
-  }
+  
+  /* open an object for sampling */
+  is = invtsamp_open(m);
 
   /* open an object for correlation functions */
   if ( m->docorr ) {
@@ -116,26 +160,15 @@ static double simulmeta(const invtpar_t *m, intq_t *intq,
   i = 0;
   for ( t = 0; t < m->nsteps + m->nequil; t++ ) {
     /* sampling */
-    if ( m->tcorr <= 0 || rand01() * m->tcorr < 1 )
-    {
-      if ( m->sampmethod == SAMPMETHOD_METROGLOBAL ) {
-        i = mc_metro_g(v, n, i);
-      } else if ( m->sampmethod == SAMPMETHOD_METROLOCAL ) {
-        i = mc_metro_l(v, n, i, m->pbc);
-      } else if ( m->sampmethod == SAMPMETHOD_HEATBATH ) {
-        i = mc_heatbath(v, vac, n);
-      } else if ( m->sampmethod == SAMPMETHOD_OU ) {
-        i = ouproc_step(ou);
-      } else if ( m->sampmethod == SAMPMETHOD_MD ) {
-        i = invtmd_vv(invtmd);
-      }
+    if ( m->tcorr <= 0 || rand01() * m->tcorr < 1 ) {
+      invtsamp_step(is, &i);
     }
 
     /* try to turn on production after equilibration */
     if ( !prod && t >= m->nequil ) {
       prod = 1;
       /* compute the initial error */
-      *err0 = geterror(v, n, m->p);
+      *err0 = geterror(is->v, n, m->p);
       if ( m->verbose >= 1 ) {
         fprintf(stderr, "starting production at step %ld, t0 %g, err %g\n",
             t, m->t0, *err0);
@@ -146,28 +179,28 @@ static double simulmeta(const invtpar_t *m, intq_t *intq,
     a = getalpha(m, (double) (t - m->nequil), intq, !prod);
     a /= m->p[i];
 
-    /* update the bias potential */
-    mbin_update(v, n, i, a, m->win, m->winn, m->pbc);
+    /* update the bias potential  */
+    mbin_update(is->v, n, i, a, m->win, m->winn, m->pbc);
 
     /* accumulate data for correlation functions */
     if ( prod && corr != NULL && (t + 1) % m->nstcorr == 0 ) {
-      shift(v, n);
+      shift(is->v, n);
       /* Fourier transform to get the modes `u` */
-      getcosmodes(v, n, u, costab);
+      getcosmodes(is->v, n, is->u, is->costab);
       /* the first mode is always zero,
        * so we start from the second mode, u + 1 */
-      corr_add(corr, u + 1);
+      corr_add(corr, is->u + 1);
     }
   }
 
   /* compute the error */
-  err = geterror(v, n, m->p);
+  err = geterror(is->v, n, m->p);
 
   /* print out the error of the modes */
   if ( m->verbose >= 2 ) {
-    getcosmodes(v, n, u, costab);
+    getcosmodes(is->v, n, is->u, is->costab);
     for ( i = 0; i < n; i++ ) {
-      printf("  %+11.8f", u[i]);
+      printf("  %+11.8f", is->u[i]);
     }
     printf("\n");
   }
@@ -182,14 +215,7 @@ static double simulmeta(const invtpar_t *m, intq_t *intq,
         m->corrtol, 0, m->fncorr);
   }
 
-  free(v);
-  free(vac);
-  free(u);
-  free(costab);
-
-  if ( m->sampmethod == SAMPMETHOD_OU ) {
-    ouproc_close(ou);
-  }
+  invtsamp_close(is);
 
   if ( corr != NULL ) {
     corr_close(corr);
@@ -202,10 +228,10 @@ static double simulmeta(const invtpar_t *m, intq_t *intq,
 
 static double invt_run(invtpar_t *m)
 {
-  double err,  e,  se = 0,  see = 0,  ave,  averr,  stde;  /* final */
+  double err = 0,  e,  se = 0,  see = 0,  ave,  averr,  stde;  /* final */
   double err0, e0, se0 = 0, see0 = 0, ave0, averr0, stde0; /* initial */
   /* reference values */
-  double errref, err0ref, err1ref = 0; /* final, initial, final saturated */
+  double errref = 0, err0ref, err1ref = 0; /* final, initial, final saturated */
   double optc, errmin = 0; /* optimal c, predicted minimal error */
   double t;
   double *lambda = NULL, *gamma = NULL;
@@ -222,20 +248,23 @@ static double invt_run(invtpar_t *m)
   //lambda = geteigvals(m->n, m->winn, m->win, NULL, 1);
   lambda = trimwindow(m->n, &m->winn, m->win, 0);
 
-  /* estimate the correlation integrals
-   * of the eigenmodes of the w matrix,
-   * for the updating scheme */
+  /* estimate the integrals of correlations
+   * of the eigenmodes for the updating scheme */
   gamma = estgamma(m->n, m->sampmethod);
 
   xnew(xerr0, m->n);
   xnew(xerr, m->n);
 
-  /* initial saturated error */
+  /* theoretical estimate of the initial saturated error */
   err0ref = esterror_eql(m->alpha0, m->n, xerr0, lambda, gamma);
 
+  /* do a trial run to compute the gamma values */
+  if ( m->pregamma ) {
+    premeta(m, gamma);
+  }
+  
   if ( m->docorr ) {
-    /* compute correlation functions
-     * for a single run */
+    /* compute the correlation functions for a single run */
     err = simulmeta(m, NULL, &err0, xerr0);
   } else {
     /* do multiple runs to compute the average error */
@@ -245,24 +274,25 @@ static double invt_run(invtpar_t *m)
         err0ref, err0ref * err0ref);
 
     if ( !m->fixa ) {
+      /* theoretical estimate of the final error */
       err1ref = esterror_eql(m->c / (m->t0 + t), m->n, NULL,
           lambda, gamma);
 
       printf("estimated final saturated error %g, sqr: %g\n",
           err1ref, err1ref * err1ref);
 
-      /* compute the optimal c */
+      /* compute the theoretically optimal c */
       optc = estbestc_invt(t, m->alpha0, m->n, lambda, gamma,
           0, &errmin, m->verbose - 1);
 
-      /* use the optimal c */
+      /* use the theoretically optimal c */
       if ( m->optc ) {
         m->c = optc;
         fprintf(stderr, "use the optimal c = %g\n", m->c);
       }
 
       if ( m->opta ) {
-        /* compute the optimal schedule */
+        /* compute the theoretically optimal schedule */
         errref = esterror_opt(t,
             intq_getqt(t, m->c, m->t0), m->alpha0,
             m->alpha_nint, &intq, m->n, xerr,
@@ -285,7 +315,8 @@ static double invt_run(invtpar_t *m)
       printf("estimated final error %g, sqr: %g\n",
           errref, errref * errref);
 
-      printf("predicted optimal c %g, err %g, sqr: %g\n", optc, errmin, errmin * errmin);
+      printf("predicted optimal c %g, err %g, sqr: %g\n",
+          optc, errmin, errmin * errmin);
 
       if ( m->verbose ) {
         dumperror(m->n, lambda, gamma,

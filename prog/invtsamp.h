@@ -142,6 +142,8 @@ static void ouproc_close(ouproc_t *ou)
 
 
 
+#include "erf.h"
+
 /* Ornstein-Uhlenbeck process */
 static int ouproc_step(ouproc_t *ou)
 {
@@ -306,6 +308,104 @@ static int invtmd_vv(invtmd_t *md)
   return i;
 }
 
+
+/* data for sampling method */
+typedef struct
+{
+  int n;
+  int sampmethod;
+  int pbc;
+  double *vac; /* for the heatbath algorithm */
+  ouproc_t *ou; /* for Ornstein-Uhlenbeck process */
+  invtmd_t invtmd[1]; /* for molecular dynamics */
+  double *v;
+  double *u; /* cosine transform of v */
+  double *costab;
+} invtsamp_t;
+
+
+
+static invtsamp_t *invtsamp_open(const invtpar_t *m)
+{
+  invtsamp_t *is;
+  int i, n = m->n;
+  
+  xnew(is, 1);
+
+  is->n = n;
+
+  xnew(is->v, n);
+  xnew(is->u, n);
+
+  is->costab = mkcostab(n);
+
+  /* randomize the error */
+  /* initialize the magnitude of the Fourier modes
+   * up to the cutoff wave number */
+  for ( i = 0; i < m->kcutoff; i++ ) {
+    is->u[i] = randgaus();
+  }
+  /* combine the modes */
+  fromcosmodes(is->v, n, is->u, is->costab);
+  normalize(is->v, n, m->initrand, m->p);
+
+  /* compute the coefficients for Fourier transform
+   * used in decomposition of modes */
+  is->costab = mkcostab(n);
+
+  /* copy sampling method */
+  is->sampmethod = m->sampmethod;
+  
+  /* copy boundary condition */
+  is->pbc = m->pbc;
+  
+  if ( is->sampmethod == SAMPMETHOD_HEATBATH ) {
+    /* allocated space for the accumulative distribution function
+     * used for heatbath algorithm */
+    xnew(is->vac, n + 1);
+  } else if ( is->sampmethod == SAMPMETHOD_OU ) {
+    is->ou = ouproc_open(is->v, n, 1.0 / ( m->tcorr + 1e-16 ) );
+  } else if ( is->sampmethod == SAMPMETHOD_MD ) {
+    invtmd_init(is->invtmd, n,
+        m->mddt, m->tp, m->thermdt, is->v);
+  }
+  
+  return is;
+}
+ 
+ 
+
+static void invtsamp_close(invtsamp_t *is)
+{
+  free(is->v);
+  free(is->u);
+  free(is->vac);
+  free(is->costab);
+  if ( is->sampmethod == SAMPMETHOD_OU ) {
+    ouproc_close(is->ou);
+  }
+  free(is);
+}
+
+
+
+/* wrapper function */
+static int invtsamp_step(invtsamp_t *is, int *i)
+{
+  if ( is->sampmethod == SAMPMETHOD_METROGLOBAL ) {
+    *i = mc_metro_g(is->v, is->n, *i);
+  } else if ( is->sampmethod == SAMPMETHOD_METROLOCAL ) {
+    *i = mc_metro_l(is->v, is->n, *i, is->pbc);
+  } else if ( is->sampmethod == SAMPMETHOD_HEATBATH ) {
+    *i = mc_heatbath(is->v, is->vac, is->n);
+  } else if ( is->sampmethod == SAMPMETHOD_OU ) {
+    *i = ouproc_step(is->ou);
+  } else if ( is->sampmethod == SAMPMETHOD_MD ) {
+    *i = invtmd_vv(is->invtmd);
+  }
+
+  return *i;
+}
 
 #endif /* INVTSAMP_H__ */
 

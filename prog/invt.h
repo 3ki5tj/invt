@@ -53,8 +53,9 @@ static double geterror(double *v, int n, const double *p)
 
 
 
+#if 0
 /* compute the root-mean-squared error of the modes `u`
- * This routine here is demonstrate the normalization */
+ * This routine here is to demonstrate the normalization */
 __inline static double getuerror(double *u, int n)
 {
   double err = 0, x;
@@ -67,6 +68,7 @@ __inline static double getuerror(double *u, int n)
 
   return sqrt(err);
 }
+#endif
 
 
 
@@ -134,77 +136,108 @@ static double *geteigvals(int n,
 __inline static double *trimwindow(int n,
     int *winn, double *win, double tol)
 {
-  int i, j, err;
-  double lam, lamn;
-  double *lambda0, *lambda;
-  int nwinn;
+  const int itmax = 10000;
+  int i, j, err, it;
+  double lam, lamn, lammax, *lambda = NULL;
   double nwin[NBMAX + 1];
 
-  /* try to get eigenvalues */
-  lambda0 = geteigvals(n, *winn, win,
-      tol, &err, 1);
-  if ( err == 0 ) {
-    fprintf(stderr, "%d positive eigenvalues\n", n);
-    return lambda0;
-  } else {
-    fprintf(stderr, "%d/%d negative eigenvalues, "
-        "modifying the window function\n", err, n);
+  /* A1. copy window function */
+  for ( i = 0; i < *winn; i++ ) {
+    nwin[i] = win[i];
+  }
+  for ( i = *winn; i < NBMAX; i++ ) {
+    nwin[i] = 0;
+  }
+  
+  if ( n > NBMAX ) {
+    fprintf(stderr, "cannot use this function with %d > %d\n",
+      n, NBMAX);
+    exit(1);
   }
 
-  /* inversely Fourier transform to get the window function */
-  nwinn = n;
-  if ( nwinn > NBMAX ) {
-    nwinn = NBMAX;
-  }
-
-  /* remove negative eigenvalues */
-  for ( i = 0; i < n; i++ ) {
-    if ( lambda0[i] < 0 ) {
-      lambda0[i] = 0;
-    }
-  }
-
-  /* compute lambda_n such that win[n] == 0 */
-  lamn = lambda0[0];
-  for ( i = 1; i < n; i++ ) {
-    lam = lambda0[i];
-    if ( i % 2 == 0 ) {
-      lamn += 2 * lam;
-    } else {
-      lamn -= 2 * lam;
-    }
-  }
-  if ( n % 2 == 0 ) {
-    lamn = -lamn;
-  }
-  fprintf(stderr, "lambda %g, %g, ..., %g lamn %g\n", lambda0[0], lambda0[1], lambda0[n-1], lamn);
-
-  for ( j = 0; j < nwinn; j++ ) {
-    /* win[j] = ( (lambda_0 + lambda_n) / 2
-     *        + Sum { k = 1 to n - 1 } lambda_k cos( k j Pi / n) ); */
-    nwin[j] = lambda0[0] * 0.5; /* lambda0[0] should be 1.0 */
-    if ( j % 2 == 0 ) {
-      nwin[j] += lamn * 0.5;
-    } else {
-      nwin[j] -= lamn * 0.5;
+  for ( it = 0; it < itmax; it++ ) {
+    /* B1. compute the eigenvalues from the window */
+    lambda = geteigvals(n, *winn, nwin,
+        tol, &err, it == itmax - 1);
+ 
+    /* B2. change negative eigenvalues to zeros */
+    lammax = 0;
+    err = 0;
+    for ( i = 0; i < n; i++ ) {
+      if ( lambda[i] < 0 ) {
+        if ( -lambda[i] > lammax ) {
+          lammax = -lambda[i];
+        }
+        lambda[i] = 0;
+        err += 1;
+      }
     }
 
+    /* B3. inversely Fourier transform to get the window function */
+
+    /* compute lambda_n such that win[n] == 0 */
+    lamn = lambda[0];
     for ( i = 1; i < n; i++ ) {
-      lam = lambda0[i];
-      nwin[j] += lam * cos( j * i * M_PI / n );
+      lam = lambda[i];
+      if ( i % 2 == 0 ) {
+        lamn += 2 * lam;
+      } else {
+        lamn -= 2 * lam;
+      }
     }
-    nwin[j] /= n;
-    fprintf(stderr, "win %4d: %22.10e -> %22.10e\n", j, win[j], nwin[j]);
+    if ( n % 2 == 0 ) {
+      lamn = -lamn;
+    }
+    if ( err == 0 || it == itmax - 1 ) {
+      fprintf(stderr, "it %d: lambda %g, %g, ..., %g lamn %g\n",
+          it, lambda[0], lambda[1], lambda[n - 1], lamn);
+    }
+
+    for ( j = 0; j < *winn; j++ ) {
+      /* win[j] = ( (lambda_0 + lambda_n) / 2
+       *        + Sum { k = 1 to n - 1 } lambda_k cos( k j Pi / n) ); */
+      nwin[j] = lambda[0] * 0.5; /* lambda0[0] should be 1.0 */
+      if ( j % 2 == 0 ) {
+        nwin[j] += lamn * 0.5;
+      } else {
+        nwin[j] -= lamn * 0.5;
+      }
+
+      for ( i = 1; i < n; i++ ) {
+        lam = lambda[i];
+        nwin[j] += lam * cos( j * i * M_PI / n );
+      }
+      nwin[j] /= n;
+
+      if ( err == 0 || it == itmax - 1 ) {
+        fprintf(stderr, "it %d: win %4d: %22.10e -> %22.10e\n",
+            it, j, win[j], nwin[j]);
+      }
+    }
+
+    //printf("it %d, err %d\n", it, err); getchar();
+    if ( err == 0 ) {
+      fprintf(stderr, "it %d: %d positive eigenvalues\n",
+          it, n);
+      break;
+    } else {
+      fprintf(stderr, "it %d: %d/%d negative eigenvalues, "
+          "most negative value %g, modifying the window function\n",
+          it, err, n, -lammax);
+    }
+
+    free(lambda);
   }
 
-  lambda = geteigvals(n, nwinn, nwin,
-      tol, &err, 1);
-  *winn = nwinn;
-  for ( j = 0; j < nwinn; j++ ) {
+  /* change the window width if the iteration fails */
+  if ( it >= itmax ) {
+    *winn = n;
+  }
+
+  /* copy the window function */
+  for ( j = 0; j < *winn; j++ ) {
     win[j] = nwin[j];
   }
-
-  free(lambda0);
 
   return lambda;
 }
