@@ -1,0 +1,312 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\begin{document}
+
+\title{Error of the static flat-distribution sampling}
+\author{}
+\date{\vspace{-10ex}}
+\maketitle
+
+[The content of this note is absorbed
+in Secs. II.A.1 and II.F.2]
+
+\section{Introduction}
+
+
+There are two types of flat-distribution sampling (FDS) methods.
+%
+The first type of methods,
+referred to as the equilibrium FDS (E-FDS) method hereinafter,
+fixes the bias potential, $v_i$, during simulation
+and only corrects it in the end.
+%
+Examples include the original
+entropic or multicanonical sampling and simulated tempering.
+%
+The main difficulty is that if a sufficiently accurate bias potential
+is unknown before simulation,
+it can be hard to achieve the desired flat distribution.
+
+For this reason, the second type of methods,
+exemplified by the Wang-Landau (WL) algorithm and metadynamics,
+are invented.
+%
+These methods construct the bias potential on the fly
+and achieve a flat distribution in the meantime.
+%
+Although powerful, they are less well understood,
+in that the adaptive updates to the bias potential
+breaks the microscopic reversibility
+of the underlying sampling mechanism.
+%
+Thus, for a conservative practitioner,
+the E-FDS methods again become appealing
+once a sufficiently accurate bias potential is available.
+%
+Further, with the bias potential fixed to the exact value,
+the equilibrium methods can be thought as
+the asymptotic limit of the adaptive methods upon convergence,
+and thus deliver the maximal possible efficiency.
+
+A practical question now arises.
+%
+In later stages of an adaptive FDS simulation,
+will we be better off switching to the equilibrium FDS
+in order to avoid possible efficiency loss due to the adaptive updates?
+%
+Below, we shall show that it is unnecessary to do so
+if the simulation is using the single-bin (WL) updating scheme
+with the optimal schedule for controlling the updating magnitude.
+%
+That is, the bias potential obtained from
+an optimal single-bin scheme FDS simulation
+will be similar in precision to that from
+an E-FDS simulation in long times.
+%
+Thus, our demonstration below serves as an alternative proof
+of the optimality of the single-bin scheme.
+
+
+\section{Error}
+
+
+Here is a quick review of E-FDS.
+%
+In E-FDS, we fix the bias potential, $v_i$, during simulation,
+and collect a histogram, $\bar h_i$, via trajectory averaging:
+%
+\begin{align}
+\bar h_i
+=
+\frac 1 t
+\sum_{ t_1 = 1 }^{ t }
+  h_i( t_1 )
+=
+\frac 1 t
+\sum_{ t_1 = 1 }^{ t }
+  \delta_{ i, i(t_1) },
+\label{eq:hbar_def}
+\end{align}
+%
+where $h_i(t_1) = \delta_{ i, i(t_1) }$
+is the instantaneous histogram.
+%
+In the end,
+we use this histogram to correct the bias potential as
+%
+\begin{align}
+v_i^\mathrm{corr}
+=
+v_i
++
+\log \frac { \bar h_i }
+           {      p_i }.
+\end{align}
+
+The error of the method depends on the precision of the histogram.
+%
+Below we shall evaluate the error in the ideal case
+in which $v_i$'s assume the exact values.
+Then,
+%
+\begin{align}
+E
+=
+\left\langle
+  \sum_{ i = 1 }^ n
+    p_i \,
+    \left(
+      \log \frac { \bar h_i }
+                 {      p_i }
+    \right)^2
+\right\rangle
+\approx
+\sum_{ i = 1 }^ n
+  p_i \,
+  \left\langle
+    \left(
+      \frac { \bar h_i }
+            {      p_i }
+      - 1
+    \right)^2
+  \right\rangle.
+\end{align}
+
+To make better comparison with
+the error of the single-bin case,
+we shall rewrite the error as
+a sum of the errors of the eigenmodes.
+We define
+\begin{align}
+\bar \eta_k
+=
+\frac{ 1 } { t }
+\sum_{ t_1 = 1 } ^ t
+  \eta_k( t_1 ),
+\end{align}
+%
+with
+\begin{align}
+\eta_k( t_1 )
+=
+\sum_{ i = 1 }^ n
+\phi_{k i} \left[
+             \frac{ h_i(t_1) }
+                  { p_i      }
+             - 1
+           \right],
+\end{align}
+and
+\begin{align}
+\sum_{ k = 1 }^n
+  \phi_{k i} \, \phi_{k j}
+  = p_i \, \delta_{i j}.
+\end{align}
+%
+Then,
+%
+\begin{align}
+E
+=
+\sum_{ k = 1 }^n
+  \left\langle
+    \bar \eta_k^2
+  \right\rangle,
+\label{eq:error_sbin_equil}
+\end{align}
+%
+because
+%
+\begin{align*}
+\sum_{ k = 1 }^n
+  \bar \eta_k^2
+&=
+\frac{ 1 } { t^2 }
+\sum_{ t_1, t_2 = 1 }^n
+  \sum_{ k = 1 }^n
+    \eta_k( t_1 ) \, \eta_k( t_2 )
+\\
+&=
+\frac{ 1 } { t^2 }
+\sum_{ t_1, t_2 = 1 }^n
+  \sum_{ i, j = 1 }^n
+    \left[
+      \frac{ h_i(t_1) }
+           { p_i      }
+      - 1
+    \right]
+    \left[
+      \frac{ h_j(t_2) }
+           { p_j      }
+      - 1
+    \right]
+    \sum_{ k = 1 }^n
+      \phi_{k \, i} \, \phi_{k \, j}
+\\
+&=
+\frac{ 1 } { t^2 }
+\sum_{ t_1, t_2 = 1 }^n
+  \sum_{ i, j = 1 }^n
+    \left[
+      \frac{ h_i(t_1) }
+           { p_i      }
+      - 1
+    \right]
+    \left[
+      \frac{ h_j(t_2) }
+           { p_j      }
+      - 1
+    \right]
+    p_i \, \delta_{i, j}
+\\
+&=
+\sum_{ i = 1 }^n
+\frac{ 1 } { t }
+\sum_{ t_1 = 1 }^n
+    \left[
+      \frac{ h_i(t_1) }
+           { p_i      }
+      - 1
+    \right]
+\frac{ 1 } { t }
+\sum_{ t_2 = 1 }^n
+    \left[
+      \frac{ h_i(t_2) }
+           { p_i      }
+      - 1
+    \right]
+\\
+&=
+\sum_{ i = 1 }^n
+  p_i \,
+    \left(
+      \frac{ \bar h_i }
+           { p_i      }
+      - 1
+    \right)^2
+.
+\end{align*}
+%
+The sum can start from $k = 2$,
+because by $\phi_{1i} = p_i$,
+we have
+$$
+\eta_1(t_1)
+=
+\sum_{ i = 1 }^n
+  \phi_{1i} \, \frac{ h_i(t_1) - p_i } { p_i }
+=
+\sum_{ i = 1 }^n h_i(t_1)
+- \sum_{ i = 1 }^n p_i = 0.
+$$
+
+Finally, we shall evaluate Eq. \eqref{eq:error_sbin_equil}
+in the long-time limit:
+\begin{align*}
+\left\langle
+  \bar \eta_k^2
+\right\rangle
+&=
+\frac{1}{t^2}
+\sum_{ t_1, t_2 = 1 }^n
+\langle \eta_k(t_1) \, \eta_k(t_2) \rangle
+\\
+&\approx
+\frac{1}{t}
+\sum_{ \tau = -\infty }^{ \infty }
+\langle \eta_k(t_1) \, \eta_k(t_1 + \tau) \rangle
+\\
+&=
+\frac{1 }{t}
+\int_{-\infty}^\infty
+\kappa_n(\tau) \, d\tau
+=
+\frac{1}{t}
+\Gamma_k.
+\end{align*}
+%
+Thus,
+\begin{align}
+E
+=
+\frac{ 1 } { t }
+\sum_{ k = 2 }^n
+\Gamma_k
+\end{align}
+
+Now comparing this with the error of the single-bin scheme
+with the optimal schedule,
+$$
+E_{\mathrm{sb}}
+=
+\frac{    t    }
+     { (t + t_0)^2 }
+\sum_{ k = 2 }^n
+  \Gamma_k,
+$$
+we find that the difference is negligible in the long time limit.
+
+
+
+\end{document}
