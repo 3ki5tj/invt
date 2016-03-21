@@ -1957,7 +1957,8 @@ where $c$ is determined by
 the boundary condition at $t = T$.
 %
 Thus, we have an implicit equation for $q(t)$,
-and hence the optimal schedule, $\alpha(t)$.
+and hence the optimal schedule,
+$\alpha(t) = \dot q(t)$.
 
 Although Eq. \eqref{eq:q_opt} is hard to solve explicitly,
 we can obtain an expression regarding $\alpha(t)$
@@ -4438,14 +4439,17 @@ of $n = 100$ bins,
 with a flat target distribution
 $p_i = 1/n$.
 %
-Since in the asymptotic regime,
-the distribution converges to $p_i$
-no matter the intrinsic distribution, $p^*_i$,
-we also set the latter to be flat for convenience.
+%Since in the asymptotic regime,
+%the distribution converges to $p_i$
+%no matter the intrinsic distribution, $p^*_i$,
+%we also set the latter to be flat for convenience.
+For convenience,
+the intrinsic distribution, $p^*_i$,
+is a set to be flat as well.
 %
-Our goal is to observe how the error
+Our goal is to observe how the fluctuating error
 of the bias potential defined in Eq. \eqref{eq:error_sum}
-depends on the schedule function $\alpha(t)$
+depends on the schedule, $\alpha(t)$,
 at the end of the simulation.
 
 
@@ -4454,18 +4458,25 @@ Initially,
 we set the bias potential to zero,
 $v_i \equiv 0$,
 %
-and let the system undergo a period of equilibration
-during which the updating magnitude is fixed at $\alpha_0$.
+and let the system undergo an equilibration period
+of constant updating magnitude,
+$\alpha(t) = \alpha_0$.
 %
-After the equilibration,
+After this,
 we reset the origin of the time, $t$,
 and started the schedule specified by
+either
+Eq. \eqref{eq:q_opt}
+or
 Eq. \eqref{eq:alpha_invtlambda}.
 %
-The goal is then to observe how the final error
-depends on the parameter, $\lambda$.
+We use the latter case to verify our theory.
 %
-Further, we choose $t_0 = 1/(\lambda \, \alpha_0)$
+We wish to see how the final error
+depends on the parameter, $\lambda$,
+and if it matches the predicted value.
+%
+Here, we used $t_0 = 1/(\lambda \, \alpha_0)$
 to smooth the transition from equilibration.
 
 
@@ -4473,7 +4484,8 @@ to smooth the transition from equilibration.
 
 Since the error depends on the underlying sampling scheme,
 we have applied the above protocol to two
-sampling schemes.
+sampling schemes,
+a global one and a local one.
 %
 In both cases, we used the
 Metropolis algorithm\cite{metropolis1953, newman, frenkel, landau_binder}
@@ -4485,24 +4497,29 @@ and then accepted with probability
 $
 A(i \to j) = \min\{ 1, \exp(v_i - v_j) \}.
 $
-The difference is that,
+However,
 in the first sampling scheme,
-we choose $j$ randomly out of the $n$ bins
-to emulate the perfect sampling scheme
-discussed in Sec. \ref{sec:Gamma}.
+we choose the destination $j$
+randomly out of the $n$ bins.
 %
-We refer to this as the global sampling scheme.
+This sampling scheme,
+referred to this as the global sampling scheme,
+emulates the perfect sampling scheme
+discussed in Sec. \ref{sec:Gamma}
+in the long time limit.
 %
 In the second scheme,
-we limit $j$ to the two neighbors of $i$,
+we limit the destination $j$
+to the two neighbors of $i$,
 $i \pm 1$, with equal probability $1/2$,
 to mimic the one-step sampling scheme
 in Sec. \ref{sec:Gamma}.
 %
-This scheme models local sampling processes
+This scheme,
+referred to this as the local sampling scheme,
+models local sampling processes
 typical in MD and straightforward MC simulations.
 %
-We refer to this as the local sampling scheme,
 
 
 
@@ -4536,13 +4553,12 @@ is generally preferable to the latter (under-updating)
 when the optimal value is unknown.
 
 
-Our final observation is that the error functions
-in the two cases shared the same shape,
-differing only by a multiplicative constant.
+Another observation is that the two error functions
+differed only by a multiplicative constant.
 %
 This again agreed with the theory.
 %
-Since all eigenvalues of the single-bin scheme were
+Since all eigenvalues of the single-bin scheme are
 the same, $\lambda_2 = \cdots = \lambda_n = 1$,
 the error in Eq. \eqref{eq:error_invt}
 depends on the sampling scheme only through
@@ -4789,19 +4805,52 @@ but it ultimately wins out as simulation lengthens.
 Conclusions and Discussions}
 
 
-We verified the optimality of the inverse-time formula
-for the Wang-Landau algorithm.
 
-We have shown that
-without a priori information,
-the single-bin scheme is asymptotically
-the best among all updating scheme
-in terms of convergence.
+In conclusion,
+we have proposed a method of computing
+the optimal schedule of the updating magnitude
+for a general adaptive FDS simulation.
+%
+Adaptive FDS methods differ by the updating schemes,
+which specify how the bias potential is modified
+in each updating step.
+%
+In the single-bin or WL case,
+the update is limited to the current bin;
+while in the metadynamics case,
+the bias potential of a few neighboring bins to the current one
+is updated according to a Gaussian wave packet.
 
-For metadynamics, and other multiple-bin updating schemes,
-we found formulas to predict the error for finite length
-simulations and the optimal relative updating magnitude,
-$1/\lambda$.
+
+By this method,
+we have verified the optimality of
+the inverse-time schedule,
+Eq. \eqref{eq:alpha_invt},
+for the single-bin (WL) case.
+%
+However,
+the optimal schedule,
+given by the solution of Eq. \eqref{eq:q_opt},
+is algebraically more involved
+for a general multiple-bin scheme,
+including the Gaussian one used in metadynamics.
+%
+In the latter case,
+both the optimal schedule and the resulting error
+are sensitive to the simulation length.
+
+
+We have also compared different updating schemes.
+%
+We have shown that in the long time limit
+the single-bin scheme belongs to a class of
+optimal updating schemes.
+%
+That is, the single-bin scheme
+is asymptotically as efficient as
+an equilibrium FDS simulation
+with the exact bias potential.
+
 
 
 %\section{Acknowledgments}
