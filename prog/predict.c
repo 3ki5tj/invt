@@ -128,13 +128,15 @@ static void invt_scansig(invtpar_t *m,
     /* make the window */
     m->wingaus = sig;
     invtpar_mkgauswin(m);
-    lambda = geteigvals(m->n, m->winn, m->win,
-        0, NULL, 1);
+    //lambda = geteigvals(m->n, m->winn, m->win, 0, NULL, 1);
+    lambda = trimwindow(m->n, &m->winn, m->win, 0);
 
-    /* find the optimal c */
+    /* find the optimal c, according to the inverse time schedule */
     c = estbestc_invt(t, m->alpha0, m->n, lambda, gamma,
         0, &err1, 0);
 
+    /* compute the time-normalized error
+     * of the optimized inverse-time schedule */
     t0 = c / m->alpha0;
     err1norm = err1 * sqrt(t + t0);
 
@@ -144,6 +146,7 @@ static void invt_scansig(invtpar_t *m,
         m->alpha_nint, NULL, m->n, NULL,
         lambda, gamma);
 
+    /* compute the error of the optimal schedule */
     err2norm = err2 * sqrt(t + t0);
 
     printf("%8.5f\t%10.6f\t%10.6f\t%g\t%10.6f\t%g\n",
@@ -165,7 +168,12 @@ int main(int argc, char **argv)
 
   lambda = geteigvals(m->n, m->winn, m->win,
       0, NULL, 1);
-  gamma = estgamma(m->n, m->sampmethod);
+
+  /* estimate or load the gamma values */
+  gamma = estgamma(m->n, m->sampmethod, m->localg);
+  if ( m->fngamma[0] != '\0' ) {
+    loadgamma(m->n, gamma, m->fngamma);
+  }
 
   if ( !m->cscan && !m->nbscan && !m->sigscan ) {
     invt_geterr(m, lambda, gamma);

@@ -229,12 +229,17 @@ static int corr_save(corr_t *c, int dt,
 
 
 
+#if 0
+/* the following function is now deprecated,
+ * the code of the same functionality is integrated
+ * at the end of `premeta()` in `invt.c` */
+
 /* compute the integrals of the autocorrelation functions
  * `tol` is the tolerance level as a fraction of the peak value
  * of the correlation functions at time zero, below which
  * the correlation functions are assumed to be zero
  * otherwise, zero is assumed as the average */
-static int corr_getgamma(corr_t *c, double *gam,
+__inline static int corr_getgamma(corr_t *c, double *gam,
     double alpha, const double *lam)
 {
   int i, n = c->n;
@@ -256,7 +261,7 @@ static int corr_getgamma(corr_t *c, double *gam,
 
   for ( i = 0; i < n; i++ ) {
     gam[i] *= 2 / alpha;
-    if ( lam != NULL ) {
+    if ( lam != NULL && fabs(lam[i]) > 0 ) {
       gam[i] /= lam[i];
     }
   }
@@ -266,6 +271,7 @@ static int corr_getgamma(corr_t *c, double *gam,
 
   return 0;
 }
+#endif
 
 
 

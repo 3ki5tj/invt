@@ -33,7 +33,7 @@ static double getalpha(const invtpar_t *m, double t,
 
 
 /* multiple-bin update */
-static void mbin_update(double *v, int n, int i,
+__inline static void mbin_update(double *v, int n, int i,
     double a, const double *win, int winn, int pbc)
 {
   int j, k;
@@ -59,13 +59,13 @@ static void mbin_update(double *v, int n, int i,
 
 
 /* preparation metadynamics run to compute the gamma values */
-static void premeta(const invtpar_t *m, double *gamma)
+__inline static void premeta(const invtpar_t *m, double *gamma)
 {
   int i, j, n = m->n;
   long t;
   double a, *gamma0;
   double ucnt = 0, *uave, *uvar;
-  
+
   /* data for sampling */
   invtsamp_t *is;
 
@@ -126,6 +126,10 @@ static void premeta(const invtpar_t *m, double *gamma)
     fprintf(stderr, "%4d %12.6f %12.6f\n", i, gamma0[i], gamma[i]);
   }
 
+  if ( m->pregamma == 1 && m->fngamma[0] != '\0' ) {
+    savegamma(n, gamma, m->fngamma);
+  }
+
   invtsamp_close(is);
 }
 
@@ -139,7 +143,7 @@ static double simulmeta(const invtpar_t *m, intq_t *intq,
   double a, err;
   int i, n = m->n, prod = 0;
   long t;
-  
+
   /* data for sampling */
   invtsamp_t *is;
 
@@ -147,7 +151,7 @@ static double simulmeta(const invtpar_t *m, intq_t *intq,
   corr_t *corr = NULL;
   int nfrcorr = 0;
 
-  
+
   /* open an object for sampling */
   is = invtsamp_open(m);
 
@@ -245,12 +249,12 @@ static double invt_run(invtpar_t *m)
 
   /* estimate the eigenvalues of the w matrix,
    * for the updating scheme */
-  //lambda = geteigvals(m->n, m->winn, m->win, NULL, 1);
+  //lambda = geteigvals(m->n, m->winn, m->win, 0, NULL, 1);
   lambda = trimwindow(m->n, &m->winn, m->win, 0);
 
   /* estimate the integrals of correlations
    * of the eigenmodes for the updating scheme */
-  gamma = estgamma(m->n, m->sampmethod);
+  gamma = estgamma(m->n, m->sampmethod, m->localg);
 
   xnew(xerr0, m->n);
   xnew(xerr, m->n);
@@ -262,7 +266,7 @@ static double invt_run(invtpar_t *m)
   if ( m->pregamma ) {
     premeta(m, gamma);
   }
-  
+
   if ( m->docorr ) {
     /* compute the correlation functions for a single run */
     err = simulmeta(m, NULL, &err0, xerr0);

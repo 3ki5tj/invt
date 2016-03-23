@@ -36,15 +36,17 @@ typedef struct {
   int winn; /* width of the updating window function */
   double win[NBMAX + 1]; /* shape of the window function */
   double wingaus; /* standard deviation of the Gaussian window */
-  int winmax; /* explicit width for the Gaussian window */  
+  int winmax; /* explicit width for the Gaussian window */
   double initrand; /* magnitude of the initial Gaussian noise */
   int kcutoff; /* cutoff wave number of the initial noise */
   int sampmethod; /* sampling method */
+  double localg; /* hopping probability for the local sampling process */
   double tcorr; /* correlation time for the sampling method */
 
   int pregamma; /* use simulation to estimate the gamma values */
   long gam_nsteps; /* number of steps */
   int gam_nstave; /* interval of accumulating averages */
+  char fngamma[FILENAME_MAX]; /* file name for the gamma values */
 
   /* molecular dynamics parameters */
   double mddt; /* MD time step */
@@ -56,9 +58,9 @@ typedef struct {
 #endif
 
   int docorr; /* compute correlation functions */
-  int nstcorr; /* time interval of computing autocorrelation function */
-  double corrtol; /* error tolerance of the autocorrelation function */
-  char fncorr[FILENAME_MAX]; /* file name for the autocorrelation function */
+  int nstcorr; /* time interval of computing the autocorrelation functions */
+  double corrtol; /* error tolerance of the autocorrelation functions */
+  char fncorr[FILENAME_MAX]; /* file name for the autocorrelation functions */
 
   long nequil; /* equilibration time */
   long nsteps; /* number of steps */
@@ -139,11 +141,13 @@ static void invtpar_init(invtpar_t *m)
   m->initrand = 0;
   m->kcutoff = 0;
   m->sampmethod = 0;
+  m->localg = 0.5;
   m->tcorr = 1.0; /* only used for the Ornstein-Uhlenbeck process */
 
   m->pregamma = 0;
-  m->gam_nsteps = 10000000L;
+  m->gam_nsteps = 100000000L;
   m->gam_nstave = 0;
+  m->fngamma[0] = '\0';
 
   /* molecular dynamics parameters */
   m->mddt = 0.01;
@@ -179,7 +183,7 @@ static void invtpar_init(invtpar_t *m)
   m->sigscan = 0;
   m->sigmin = 0.0;
   m->sigdel = 0.2;
-  m->sigmax = 6.0;
+  m->sigmax = 10.0;
 #endif /* SCAN */
 }
 
@@ -196,13 +200,17 @@ static void invtpar_mkgauswin(invtpar_t *m)
     m->winn = m->n;
   }
 
-  /* truncate the Gaussian at 10 sigma */
-  if ( m->winn >= sig * 10 ) {
-    m->winn = (int) (sig * 10 + 0.5);
+  /* truncate the Gaussian at 5 * sigma */
+  if ( m->winn >= sig * 5 ) {
+    m->winn = (int) (sig * 5 + 0.5);
+    if ( m->winn < 1 ) {
+      m->winn = 1;
+    }
   }
 
-  /* limit the window width if an explicit value is given */
-  if ( m->winn > m->winmax ) {
+  /* further limit the window width
+   * if an explicit value is given */
+  if ( m->winmax > 0 && m->winn > m->winmax ) {
     m->winn = m->winmax;
   }
 
@@ -266,7 +274,11 @@ static void invtpar_compute(invtpar_t *m)
     m->fixa = 1;
     m->ntrials = 1;
   }
-  
+
+  if ( m->fngamma[0] != '\0' ) {
+    m->pregamma = 1;
+  }
+
   if ( m->pregamma ) {
     if ( m->gam_nstave <= 0 ) {
       m->gam_nstave = m->n;
@@ -311,6 +323,11 @@ static void invtpar_compute(invtpar_t *m)
   if ( m->sampmethod == SAMPMETHOD_MD ) {
     m->pbc = 1;
   }
+
+  if ( m->localg > 0.5 ) {
+    fprintf(stderr, "local hopping probability cannot exceed 0.5\n");
+    m->localg = 0.5;
+  }
 }
 
 
@@ -339,7 +356,7 @@ static void invtpar_help(const invtpar_t *m)
   fprintf(stderr, "  --optc:        use the optimal c for alpha(t), default %d\n", m->optc);
   fprintf(stderr, "  --opta:        use the exact optimal schedule alpha(t), default %d\n", m->opta);
   fprintf(stderr, "  --nint:        set the number of integration points for the exact optimal schedule alpha(t), default %d\n", m->alpha_nint);
-  fprintf(stderr, "  --fnalpha:     set the output file to output the exact optimal schedule, alpha(t), default %s\n", m->fnalpha);
+  fprintf(stderr, "  --fnalpha=:    set the output file to output the exact optimal schedule, alpha(t), default %s\n", m->fnalpha);
   fprintf(stderr, "  --pbc:         use periodic boundary condition, default %d\n", m->pbc);
   fprintf(stderr, "  --nb=:         explicitly set the update window parameters, separated by comma, like --nb=0.2,0.4\n");
   fprintf(stderr, "  --sig=:        set the standard deviation Gaussian window, default %g\n", m->wingaus);
@@ -347,9 +364,11 @@ static void invtpar_help(const invtpar_t *m)
   fprintf(stderr, "  --initrand=:   magnitude of the initial random error, default %g\n", m->initrand);
   fprintf(stderr, "  --kcutoff=:    cutoff of wave number of the initial random error, default %d\n", m->kcutoff);
   fprintf(stderr, "  --samp=:       set the sampling scheme, g=global Metropolis, l=local Metropolis, h=heat-bath, d=molecular dynamics, o=Ornstein-Uhlenbeck, default %s\n", sampmethod_names[m->sampmethod][0]);
+  fprintf(stderr, "  --localg=:     set the hopping probability for the local sampling process, [0, 0.5], default %g\n", m->localg);
   fprintf(stderr, "  --gam:         use a preliminary simulation to estimate the integrals of autocorrelation functions of the eigenmodes, default %d\n", m->pregamma);
-  fprintf(stderr, "  --gamnsteps:   set the number of steps in the preliminary simulation, default %d\n", m->gam_nsteps);
-  fprintf(stderr, "  --gamnstave:   set the interval of accumulating data in the preliminary simulation, default %d\n", m->gam_nstave);
+  fprintf(stderr, "  --gamnsteps=:  set the number of steps in the preliminary simulation, default %ld\n", m->gam_nsteps);
+  fprintf(stderr, "  --gamnstave=:  set the interval of accumulating data in the preliminary simulation, default %d\n", m->gam_nstave);
+  fprintf(stderr, "  --fngamma=:    set the file for the gamma values, default %s\n", m->fngamma);
   fprintf(stderr, "  --corr:        compute correlation functions, default %d\n", m->docorr);
   fprintf(stderr, "  --nstcorr=:    set the number of steps of setting the correlation function, default %d\n", m->nstcorr);
   fprintf(stderr, "  --corrtol=:    set the tolerance level to truncate the autocorrelation function, default %g\n", m->corrtol);
@@ -618,11 +637,22 @@ static int invtpar_keymatch(invtpar_t *m,
     m->sampmethod = invtpar_selectoption(m, key, val,
         sampmethod_names, SAMPMETHOD_COUNT);
   }
+  else if ( strcmp(key, "g") == 0
+         || strcmpfuzzy(key, "localg") == 0 )
+  {
+    m->localg = invtpar_getdouble(m, key, val);
+  }
   else if ( strcmpfuzzy(key, "gam") == 0
          || strcmpfuzzy(key, "pre") == 0
          || strcmpfuzzy(key, "gamma") == 0 )
   {
-    m->pregamma = 1;
+    /* the value 1 means to compute
+     * the value 2 means to load */
+    if ( val != NULL ) {
+      m->pregamma = invtpar_getint(m, key, val);
+    } else {
+      m->pregamma = 1;
+    }
   }
   else if ( strcmpfuzzy(key, "gamnsteps") == 0
          || strcmpfuzzy(key, "gamsteps") == 0
@@ -637,6 +667,11 @@ static int invtpar_keymatch(invtpar_t *m,
          || strcmpfuzzy(key, "preave") == 0 )
   {
     m->gam_nstave = invtpar_getint(m, key, val);
+  }
+  else if ( strcmpfuzzy(key, "fngamma") == 0
+         || strcmpfuzzy(key, "fngam") == 0 )
+  {
+    strcpy(m->fngamma, val);
   }
   else if ( strcmpfuzzy(key, "tcorr") == 0
          || strcmpfuzzy(key, "corr-time") == 0 )
@@ -919,12 +954,12 @@ static void invtpar_dump(const invtpar_t *m)
       "pbc %d, %s, %ld steps; equil %ld steps\n",
       m->ntrials, m->n, m->c, m->t0, m->alpha0, m->pbc,
       sampmethod_names[m->sampmethod][0], m->nsteps, m->nequil);
-  
+
   if ( m->pregamma ) {
     fprintf(stderr, "preliminary run: %ld steps, averaging every %d steps\n",
       m->gam_nsteps, m->gam_nstave);
   }
-      
+
   fprintf(stderr, "update window function (%d bins): ", m->winn);
   for ( i = 0; i < m->winn; i++ ) {
     sum += m->win[i];

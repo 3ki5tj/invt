@@ -41,28 +41,32 @@ static int mc_metro_g(const double *v, int n, int i)
 
 
 /* local Metropolis move */
-static int mc_metro_l(const double *v, int n, int i, int pbc)
+static int mc_metro_l(const double *v, int n, int i,
+    double g, int pbc)
 {
   int j, acc;
   double dv, r;
 
-  j = (rand01() > 0.5) ? i + 1 : i - 1;
-  if ( pbc ) {
-    j = ( j + n ) % n;
-  } else {
-    if ( j < 0 || j >= n ) return i;
-  }
+  r = rand01();
+  if ( r < 2 * g ) {
+    j = (rand01() > g) ? i + 1 : i - 1;
+    if ( pbc ) {
+      j = ( j + n ) % n;
+    } else {
+      if ( j < 0 || j >= n ) return i;
+    }
 
-  dv = v[j] - v[i];
-  if ( dv <= 0 ) {
-    acc = 1;
-  } else {
-    r = rand01();
-    acc = ( r < exp(-dv) );
-  }
+    dv = v[j] - v[i];
+    if ( dv <= 0 ) {
+      acc = 1;
+    } else {
+      r = rand01();
+      acc = ( r < exp(-dv) );
+    }
 
-  if ( acc ) {
-    i = j;
+    if ( acc ) {
+      i = j;
+    }
   }
 
   return i;
@@ -315,6 +319,7 @@ typedef struct
   int n;
   int sampmethod;
   int pbc;
+  double localg; /* hopping probability for the local sampling process */
   double *vac; /* for the heatbath algorithm */
   ouproc_t *ou; /* for Ornstein-Uhlenbeck process */
   invtmd_t invtmd[1]; /* for molecular dynamics */
@@ -329,7 +334,7 @@ static invtsamp_t *invtsamp_open(const invtpar_t *m)
 {
   invtsamp_t *is;
   int i, n = m->n;
-  
+
   xnew(is, 1);
 
   is->n = n;
@@ -355,10 +360,13 @@ static invtsamp_t *invtsamp_open(const invtpar_t *m)
 
   /* copy sampling method */
   is->sampmethod = m->sampmethod;
-  
-  /* copy boundary condition */
+
+  /* copy the type of the boundary conditions */
   is->pbc = m->pbc;
-  
+
+  /* copy the local hopping probability */
+  is->localg = m->localg;
+
   if ( is->sampmethod == SAMPMETHOD_HEATBATH ) {
     /* allocated space for the accumulative distribution function
      * used for heatbath algorithm */
@@ -369,11 +377,11 @@ static invtsamp_t *invtsamp_open(const invtpar_t *m)
     invtmd_init(is->invtmd, n,
         m->mddt, m->tp, m->thermdt, is->v);
   }
-  
+
   return is;
 }
- 
- 
+
+
 
 static void invtsamp_close(invtsamp_t *is)
 {
@@ -395,7 +403,7 @@ static int invtsamp_step(invtsamp_t *is, int *i)
   if ( is->sampmethod == SAMPMETHOD_METROGLOBAL ) {
     *i = mc_metro_g(is->v, is->n, *i);
   } else if ( is->sampmethod == SAMPMETHOD_METROLOCAL ) {
-    *i = mc_metro_l(is->v, is->n, *i, is->pbc);
+    *i = mc_metro_l(is->v, is->n, *i, is->localg, is->pbc);
   } else if ( is->sampmethod == SAMPMETHOD_HEATBATH ) {
     *i = mc_heatbath(is->v, is->vac, is->n);
   } else if ( is->sampmethod == SAMPMETHOD_OU ) {

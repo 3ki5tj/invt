@@ -148,7 +148,7 @@ __inline static double *trimwindow(int n,
   for ( i = *winn; i < NBMAX; i++ ) {
     nwin[i] = 0;
   }
-  
+
   if ( n > NBMAX ) {
     fprintf(stderr, "cannot use this function with %d > %d\n",
       n, NBMAX);
@@ -159,7 +159,7 @@ __inline static double *trimwindow(int n,
     /* B1. compute the eigenvalues from the window */
     lambda = geteigvals(n, *winn, nwin,
         tol, &err, it == itmax - 1);
- 
+
     /* B2. change negative eigenvalues to zeros */
     lammax = 0;
     err = 0;
@@ -253,7 +253,8 @@ __inline static double *trimwindow(int n,
  * as those of the Monte Carlo transition matrix
  * This is true only for perfect sampling and
  * local Monte Carlo sampling */
-static double *estgamma(int n, int sampmethod)
+static double *estgamma(int n, int sampmethod,
+    double localg)
 {
   int i;
   double *gamma, x;
@@ -267,7 +268,7 @@ static double *estgamma(int n, int sampmethod)
       gamma[i] = 1.0; /* n / (n - 1.0); */
     } else if ( sampmethod == SAMPMETHOD_METROLOCAL ) {
       x = tan( i * M_PI * 0.5 / n );
-      gamma[i] = 1.0 / (x * x);
+      gamma[i] = 1.0 / (2 * localg * x * x) + 1 / (2 * localg) - 1;
     } else if ( sampmethod == SAMPMETHOD_HEATBATH ) {
       gamma[i] = 1.0;
     } else if ( sampmethod == SAMPMETHOD_MD ) {
@@ -504,6 +505,70 @@ static double estbestc_invt(double t, double a0,
 }
 
 
+
+/* save the gamma values */
+__inline static int savegamma(int n, const double *gamma,
+    const char *fn)
+{
+  int i;
+  FILE *fp;
+
+  if ( (fp = fopen(fn, "w")) == NULL ) {
+    fprintf(stderr, "cannot write [%s]\n", fn);
+    return -1;
+  }
+
+  fprintf(fp, "# %d\n", n);
+  for ( i = 0; i < n; i++ ) {
+    fprintf(fp, "%4d %14.6f\n", i, gamma[i]);
+  }
+
+  fclose(fp);
+
+  return 0;
+}
+
+
+__inline static int loadgamma(int n, double *gamma,
+    const char *fn)
+{
+  FILE *fp;
+  char buf[128];
+  int i, id;
+  double x;
+
+  if ( (fp = fopen(fn, "r")) == NULL ) {
+    fprintf(stderr, "cannot open %s\n", fn);
+    return -1;
+  }
+
+  fgets(buf, sizeof buf, fp);
+  sscanf(buf, "# %d", &i);
+  if ( i != n ) {
+    fprintf(stderr, "n mismatch, %d != %d (%s)\n",
+        n, i, fn);
+    fclose(fp);
+    return -1;
+  }
+
+  for ( i = 0; i < n; i++ ) {
+    if ( fgets(buf, sizeof buf, fp) == NULL ) {
+      break;
+    }
+    sscanf(buf, "%d%lf", &id, &x);
+    if ( i != id ) {
+      fprintf(stderr, "index mismatch %d != %d (%s)\n",
+          i, id, fn);
+      break;
+    }
+    fprintf(stderr, "gamma(%d) = %g -> %g\n", i, gamma[i], x);
+    gamma[i] = x;
+  }
+
+  fclose(fp);
+
+  return 0;
+}
 
 
 #endif /* INVT_H__ */
