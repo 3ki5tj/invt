@@ -204,6 +204,7 @@ typedef struct {
   double tp;
   double thermdt;
   double expndt, sqrtdt;
+  int pbc;
 #if 0
   double dwa, dwb; /* potential parameters sin(x) (dwa - dwb * sin(x)) */
 #endif
@@ -213,7 +214,8 @@ typedef struct {
 
 
 static void invtmd_init(invtmd_t *md, int n,
-    double dt, double tp, double thermdt, double *vb)
+    double dt, double tp, double thermdt,
+    int pbc, double *vb)
 {
   md->dt = dt;
   md->tp = tp;
@@ -236,6 +238,7 @@ static void invtmd_init(invtmd_t *md, int n,
   md->dx = 2 * M_PI / n;
   md->ep = 0;
   md->ek = 0;
+  md->pbc = pbc;
 }
 
 
@@ -291,17 +294,40 @@ static double invtmd_tstat(invtmd_t *md)
 
 static int invtmd_vv(invtmd_t *md)
 {
-  double dt = md->dt;
+  double dt = md->dt, x0, x1;
   int i;
 
   invtmd_tstat(md);
   md->v += md->f * dt * 0.5;
   //printf("v %g, x %g, f %g, dx %g\n", md->v, md->x, md->f, md->dx);
-  md->x = fmod(md->x + md->v * dt + 100 * 2 * M_PI, 2 * M_PI);
+
+  x0 = md->x;
+  md->x = md->x + md->v * dt;
+  x1 = md->x;
+  if ( md->pbc ) {
+    /* periodic boundary conditions */
+    md->x = fmod(md->x + 100 * 2 * M_PI, 2 * M_PI);
+  } else {
+    /* reflective boundary conditions */
+    do {
+      i = 0;
+      if ( md->x <= 0 ) {
+        md->x = -md->x;
+        md->v = -md->v;
+        i = 1;
+      }
+      if ( md->x >= 2 * M_PI ) {
+        md->x = 4 * M_PI - md->x;
+        md->v = -md->v;
+        i = 1;
+      }
+    } while ( i );
+  }
+
   i = (int) (md->x / md->dx);
   if ( i >= md->n || i < 0 ) {
-    fprintf(stderr, "md->x %g, v %g, f %g, i %d, md->dx %g\n",
-        md->x, md->v, md->f, (int)(md->x/md->dx), md->dx);
+    fprintf(stderr, "x %g -> %g, md->x %g, v %g, f %g, i %d, md->dx %g\n",
+        x0, x1, md->x, md->v, md->f, (int)(md->x/md->dx), md->dx);
   }
   md->f = 0;
   /* invtmd_force(md); */
@@ -375,7 +401,7 @@ static invtsamp_t *invtsamp_open(const invtpar_t *m)
     is->ou = ouproc_open(is->v, n, 1.0 / ( m->tcorr + 1e-16 ) );
   } else if ( is->sampmethod == SAMPMETHOD_MD ) {
     invtmd_init(is->invtmd, n,
-        m->mddt, m->tp, m->thermdt, is->v);
+        m->mddt, m->tp, m->thermdt, m->pbc, is->v);
   }
 
   return is;

@@ -33,7 +33,7 @@
   o invtsamp_open();
   o invtsamp_step();
   o invtsamp_close();
-  
+
 * Add `test_eig.c`
 * Add `erf.h` and `test_erf.c` for Visual C++ adoption
 * Add `plot_intqt.c`

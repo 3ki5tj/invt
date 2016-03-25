@@ -150,9 +150,9 @@ static void invtpar_init(invtpar_t *m)
   m->fngamma[0] = '\0';
 
   /* molecular dynamics parameters */
-  m->mddt = 0.01;
+  m->mddt = 0.005;
   m->tp = 1.0;
-  m->thermdt = m->mddt;
+  m->thermdt = 0.1;
 #if 0
   m->dwa = 1.0;
   m->dwb = 2.0;
@@ -200,9 +200,9 @@ static void invtpar_mkgauswin(invtpar_t *m)
     m->winn = m->n;
   }
 
-  /* truncate the Gaussian at 5 * sigma */
-  if ( m->winn >= sig * 5 ) {
-    m->winn = (int) (sig * 5 + 0.5);
+  /* truncate the Gaussian at 10 * sigma */
+  if ( m->winn >= sig * 10 ) {
+    m->winn = (int) (sig * 10 + 0.5);
     if ( m->winn < 1 ) {
       m->winn = 1;
     }
@@ -317,11 +317,6 @@ static void invtpar_compute(invtpar_t *m)
   /* set the initial cutoff wave number */
   if ( m->kcutoff <= 0 ) {
     m->kcutoff = m->n;
-  }
-
-  /* currently, turn on PBC for MD automatically */
-  if ( m->sampmethod == SAMPMETHOD_MD ) {
-    m->pbc = 1;
   }
 
   if ( m->localg > 0.5 ) {
