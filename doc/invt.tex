@@ -52,15 +52,13 @@
   The two, however, differ by
   the manner of updating the bias potential:
   %
-  in the WL case,
-  each update applies to only
+  the WL algorithm updates only
   the bin containing the current $z$,
-  while in the metadynamics case,
-  a Gaussian wave packet
-  involving several neighboring bins
-  is used.
+  while metadynamics updates also
+  several neighboring bins according to
+  a Gaussian wave packet.
   %
-  The asymptotic error of the resulting PMF
+  The error of the resulting PMF
   is determined by the updating schedule,
   or the updating magnitude
   as a function of simulation time.
@@ -77,7 +75,7 @@
   %
   We show that while metadynamics can be advantageous
   for relatively short simulations,
-  the WL algorithm is best for asymptotic convergences.
+  the WL algorithm is best for asymptotic convergence.
   %the optimal schedule
   %and the effectiveness of metadynamics
   %are sensitive to the simulation length and other parameters.
@@ -114,18 +112,18 @@ $-\log p^*(z)$,
 defines a free energy,
 or the potential of mean force (PMF).
 %
-Usually, the distribution $p^*(z)$ is
-localized in one or a few small $z$ regions.
+Normally, the distribution $p^*(z)$ is
+limited in one or a few narrow $z$ regions.
 %
 Therefore, to capture the global shape
 of the PMF,
 one has to run multiple independent simulations
 under different umbrella or bias potentials
 along $z$\cite{mezei1987, berg1992, lee1993},
-and then piece together the information.
+and then piece together the entire curve.
 %
 This solution is clumsy in practice
-and often suffers from a convergence problem
+and often fails to converge quickly
 for a complex and glassy system,
 because the system can be trapped
 in a local free energy minimum
@@ -133,9 +131,8 @@ for a long time.
 
 
 
-A better solution is to artificially alter
-the target distribution along $z$
-to a flat one\cite{mezei1987, berg1992, lee1993,
+A better solution is to artificially flatten
+the target distribution along $z$\cite{mezei1987, berg1992, lee1993,
 wang2001, wang2001pre, laio2002, laio2008, barducci2011, sutto2012}.
 %
 This alleviates the above problem of local trapping
@@ -155,21 +152,20 @@ and meta\-dy\-nam\-ics\cite{huber1994, laio2002,
 laio2008, barducci2011, sutto2012}
 are two widely-used and closely-related\cite{micheletti2004}
 techniques for this purpose,
-in which a bias potential is actively built-up on-the-fly
+in which a bias potential is actively built up on-the-fly
 during simulation.
 %
 These techniques employ updating loops
-that discourage the system
-to sample configurations
-sharing the current $z$ value
+that discourage future visits to configurations
+with the current $z$ value
 by elevating the bias potential here.
 %
-The main difference of the two
+The main difference between the two
 is that in the WL case,
 each updating step is limited to the bin
 containing the current $z$,
 while metadynamics adopts an extended
-updating wave packet
+Gaussian wave packet
 covering several neighboring bins.
 %
 The latter is more often used in MD simulations
@@ -204,15 +200,15 @@ hence that of the PMF.
 %
 For the WL algorithm, it is known
 that the optimal magnitude of updating $\ln f$
-is given by the
+is given by the product of the
 inverse time\cite{liang2007,
 belardinelli2007, belardinelli2007jcp, belardinelli2008,
-morozov2007, zhou2008},
-where ``time'' means
-the number of simulation steps
-divided by the number of bins.
+morozov2007, zhou2008}
+(with ``time'' being
+the number of simulation steps)
+and the number of bins.
 %
-The optimal schedule for metadynamics,
+The optimal schedule for the metadynamics case,
 however, is less studied.
 
 
@@ -222,9 +218,10 @@ the optimal schedule
 for a general updating scheme,
 including those used in WL and metadynamics simulations.
 %
-Although the method recovers the inverse-time formula
-for the WL case,
-it predicts, for metadynamics,
+The method reproduces the inverse-time formula
+for the WL case.
+%
+It also predicts, for metadynamics,
 a more algebraically complex schedule,
 which is sensitive to the simulation length
 and the width of the Gaussian wave packet.
@@ -261,7 +258,7 @@ in the following order.
 In Sec. \ref{sec:background},
 we first review the basics of
 flat-distribution sampling
-and the development on the optimal schedule.
+and some known aspects on the optimal schedule.
 %
 This also helps fixing the notations.
 %
@@ -269,7 +266,7 @@ Then, in Sec. \ref{sec:single-bin},
 we illustrate the method of
 computing the optimal schedule
 on the simplest case of
-single-bin updating scheme.
+single-bin (WL) updating scheme.
 %
 We shall prove the optimality
 of the known inverse-time formula.
@@ -297,14 +294,14 @@ Flat-distribution sampling}
 
 Given a system,
 consider the problem of computing
-the distribution, $p^*_i$
+the distribution, $p^*_i$,
 along a discrete quantity $i$.
 %
 %The discreteness of $i$ is natural
 %in discrete models.
 %
 For example, $i$ can be the energy $E$
-in lattice spin models; or the temperature index
+in a lattice spin model; or the temperature index
 in a simulated tempering simulation.
 %
 For a continuous quantity, $z$,
@@ -369,8 +366,9 @@ a flat-distribution sampling (FDS) simulation.
 Roughly speaking, there are two types of FDS methods.
 %
 The first type,
-referred to as the equilibrium FDS % (E-FDS) methods hereinafter,
+referred to as the equilibrium FDS, % (E-FDS) methods hereinafter,
 estimates the bias potential, $V_i$,
+before simulation,
 and fixes it during simulation.
 %
 Examples include the original
@@ -379,32 +377,39 @@ and simulated tempering\cite{marinari1992, lyubartsev1992}
 with $i$ being the index of energy
 and that of temperature, respectively.
 %
-The estimated bias potential, however,
-can often be improved in the end of simulation.
-%
-To do so,
-we accumulate a histogram along $i$
-during simulation and use it for $\pi_i$ in
-Eq. \eqref{eq:pi_p_phi1}.
-%
-This allows us to correct $V_i$ as
+The estimated bias potential, $V_i$,
+can often be improved
+by the histogram along $i$ accumulated
+during simulation
+Using the histogram as $\pi_i$ in
+Eq. \eqref{eq:pi_p_phi1}
+allows us to correct $V_i$ as
 %
 \begin{equation}
-V_i^{\mathrm{corr}}
+V^\mathrm{corr}_i
 =
-V_i^{\mathrm{}}
+V_i
 +
-\log \frac{ \pi_i } { p_i }.
+\log \frac{ \pi_i }
+          {   p_i }.
 \label{eq:vcorr_equil}
 \end{equation}
 %
+\note{This follows from
+  $$
+  \begin{aligned}
+    \pi_i &\propto p^*_i \, e^{-V_i}, \\
+    p_i &\propto p^*_i \, e^{-V^\mathrm{corr}_i}.
+  \end{aligned}
+  $$
+}
 For an unknown system,
 the main difficulty of the process
 is that it is hard to guess a sufficiently accurate
 $V_i$ to start with.
 %
 Thus,
-it usually takes several iterative rounds of simulations
+it can take many iterative rounds of simulations
 to achieve the desired flat distribution.
 %
 Further, a reasonably precise histogram
@@ -420,10 +425,10 @@ Examples include
 the WL and metadynamics methods.
 %
 These methods update the bias potential more frequently
-and are more capable of achieving a flat distribution.
+and can easily achieve a flat distribution.
 %
 However, they are less well understood theoretically,
-the updating loops used there
+as the updating loops used there
 break the microscopic reversibility
 of the underlying sampling mechanism.
 %
@@ -444,9 +449,9 @@ such an adaptive simulation is rather similar
 to the corresponding equilibrium simulation.
 %
 If the bias potential were converged to the exact value,
-the equilibrium simulation can be thought as
+this particular equilibrium simulation can be thought as
 the optimal asymptotic limit of the adaptive counterpart,
-delivering the maximal possible efficiency.
+delivering the maximal efficiency.
 
 
 For later convenience, we introduce a shifted bias potential
@@ -475,7 +480,8 @@ becomes
 %
 According to Eq. \eqref{eq:pi_p_phi1},
 $v_i$ should approach a constant of $i$
-upon convergence (i.e., when $\pi_i \approx p_i$).
+upon convergence (i.e., when $\pi_i \approx p_i$)
+of an adaptive FDS.
 
 
 
