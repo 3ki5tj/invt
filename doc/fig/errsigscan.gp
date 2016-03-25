@@ -21,10 +21,10 @@ htop = 1 - hbot
 set size 1, hbot
 set origin 0, 0
 
-set xtics 5 offset 0, 0.3
-set mxtics 5
+set xtics 2 offset 0, 0.3
+set mxtics 2
 set xlabel "Width of the Gaussian, {/Symbol-Oblique s}" offset 0, 0.5
-set xrange [0:15]
+set xrange [0:12]
 
 set logscale y
 set format y "10^{%T}"
@@ -37,7 +37,7 @@ a0 = 0.0001
 
 set title "MD" offset 0, -0.5
 
-plot [:][3e4:1e6] \
+plot [:][5e4:1e6] \
     "../../data/scan/sigscan_t1e8_md.dat"  u 1:($6**2) w l lt 1 lw 2 lc rgb "#000000" notitle, \
     "../../data/scan/sigscan_t1e8_md.dat"  u 1:($4**2) w l lt 2 lw 2 lc rgb "#000000" notitle, \
     "../../data/scan/sigscan_t1e10_md.dat" u 1:($6**2) w l lt 1 lw 6 lc rgb "#000000" notitle, \

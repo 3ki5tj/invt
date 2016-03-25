@@ -249,12 +249,12 @@ static double invt_run(invtpar_t *m)
 
   /* estimate the eigenvalues of the w matrix,
    * for the updating scheme */
-  //lambda = geteigvals(m->n, m->winn, m->win, 0, NULL, 1);
-  lambda = trimwindow(m->n, &m->winn, m->win, 0);
+  //lambda = geteigvals(m->n, m->winn, m->win, m->pbc, 0, NULL, 1);
+  lambda = trimwindow(m->n, &m->winn, m->win, m->pbc, 0);
 
   /* estimate the integrals of correlations
    * of the eigenmodes for the updating scheme */
-  gamma = estgamma(m->n, m->sampmethod, m->localg);
+  gamma = estgamma(m->n, m->sampmethod, m->pbc, m->localg);
 
   xnew(xerr0, m->n);
   xnew(xerr, m->n);

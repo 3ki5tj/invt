@@ -8,22 +8,38 @@
 
 /* compute the cosine table
    costab = phi * n */
-static double *mkcostab(int n)
+static double *mkcostab(int n, int pbc)
 {
   int i, k;
-  double *costab, norm = 1.0, ang;
+  double *costab, norm = 1.0, ang, y;
 
   xnew(costab, n * n);
 
+  /* first row, uniform distribution */
   for ( i = 0; i < n; i++ ) {
     costab[i] = norm;
   }
 
   norm *= sqrt(2);
-  ang = M_PI / n;
-  for ( k = 1; k < n; k++ ) {
-    for ( i = 0; i < n; i++ ) {
-      costab[k*n + i] = norm * cos((i + 0.5) * k * ang);
+  if ( pbc ) {
+    for ( k = 1; k < n; k++ ) {
+      ang = k * 2 * M_PI / n;
+      for ( i = 0; i < n; i++ ) {
+        if ( k <= n/2 ) {
+          y = cos(i * ang);
+        } else {
+          y = sin(i * ang);
+        }
+        costab[k*n + i] = norm * y;
+      }
+    }
+  } else {
+    /* cosine modes */
+    for ( k = 1; k < n; k++ ) {
+      ang = k * M_PI / n;
+      for ( i = 0; i < n; i++ ) {
+        costab[k*n + i] = norm * cos((i + 0.5) * ang);
+      }
     }
   }
 

@@ -49,10 +49,14 @@ static int mc_metro_l(const double *v, int n, int i,
 
   r = rand01();
   if ( r < 2 * g ) {
+    /* go to left or right */
     j = (rand01() > g) ? i + 1 : i - 1;
+
     if ( pbc ) {
+      /* periodic boundary condition */
       j = ( j + n ) % n;
     } else {
+      /* reflective boundary condition */
       if ( j < 0 || j >= n ) return i;
     }
 
@@ -368,7 +372,9 @@ static invtsamp_t *invtsamp_open(const invtpar_t *m)
   xnew(is->v, n);
   xnew(is->u, n);
 
-  is->costab = mkcostab(n);
+  /* compute the coefficients for Fourier transform
+   * used in decomposition of modes */
+  is->costab = mkcostab(n, m->pbc);
 
   /* randomize the error */
   /* initialize the magnitude of the Fourier modes
@@ -379,10 +385,6 @@ static invtsamp_t *invtsamp_open(const invtpar_t *m)
   /* combine the modes */
   fromcosmodes(is->v, n, is->u, is->costab);
   normalize(is->v, n, m->initrand, m->p);
-
-  /* compute the coefficients for Fourier transform
-   * used in decomposition of modes */
-  is->costab = mkcostab(n);
 
   /* copy sampling method */
   is->sampmethod = m->sampmethod;

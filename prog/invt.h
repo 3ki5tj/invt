@@ -92,7 +92,7 @@ __inline static double normalize(double *v, int n, double sig,
 /* estimate the eigenvalues of the updating scheme
  * for a given window `win` */
 static double *geteigvals(int n,
-    int winn, const double *win,
+    int winn, const double *win, int pbc,
     double tol, int *err, int verbose)
 {
   int i, j, nerr = 0;
@@ -109,7 +109,11 @@ static double *geteigvals(int n,
     lambda[i] = 1;
     /* loop over windows */
     for ( j = 1; j < winn; j++ ) {
-      x = sin(i * j * M_PI * 0.5 / n);
+      x = i * j * M_PI / n;
+      if ( !pbc ) {
+        x *= 0.5;
+      }
+      x = sin(x);
       lambda[i] -= 4 * win[j] * x * x;
     }
     if ( lambda[i] < -tol ) {
@@ -134,7 +138,7 @@ static double *geteigvals(int n,
 /* modify the window function
  * such that no eigenvalue is negative */
 __inline static double *trimwindow(int n,
-    int *winn, double *win, double tol)
+    int *winn, double *win, int pbc, double tol)
 {
   const int itmax = 10000;
   int i, j, err, it;
@@ -157,7 +161,7 @@ __inline static double *trimwindow(int n,
 
   for ( it = 0; it < itmax; it++ ) {
     /* B1. compute the eigenvalues from the window */
-    lambda = geteigvals(n, *winn, nwin,
+    lambda = geteigvals(n, *winn, nwin, pbc,
         tol, &err, it == itmax - 1);
 
     /* B2. change negative eigenvalues to zeros */
@@ -175,39 +179,58 @@ __inline static double *trimwindow(int n,
 
     /* B3. inversely Fourier transform to get the window function */
 
-    /* compute lambda_n such that win[n] == 0 */
-    lamn = lambda[0];
-    for ( i = 1; i < n; i++ ) {
-      lam = lambda[i];
-      if ( i % 2 == 0 ) {
-        lamn += 2 * lam;
-      } else {
-        lamn -= 2 * lam;
+    if ( pbc ) {
+      /* periodic boundary condition, lambda_n = 0 */
+      lamn = 0;
+    } else {
+      /* reflective boundary condition */
+      /* compute lambda_n such that win[n] == 0 */
+      lamn = lambda[0];
+      for ( i = 1; i < n; i++ ) {
+        lam = lambda[i];
+        if ( i % 2 == 0 ) {
+          lamn += 2 * lam;
+        } else {
+          lamn -= 2 * lam;
+        }
+      }
+      if ( n % 2 == 0 ) {
+        lamn = -lamn;
       }
     }
-    if ( n % 2 == 0 ) {
-      lamn = -lamn;
-    }
+
     if ( err == 0 || it == itmax - 1 ) {
       fprintf(stderr, "it %d: lambda %g, %g, ..., %g lamn %g\n",
           it, lambda[0], lambda[1], lambda[n - 1], lamn);
     }
 
     for ( j = 0; j < *winn; j++ ) {
-      /* win[j] = ( (lambda_0 + lambda_n) / 2
-       *        + Sum { k = 1 to n - 1 } lambda_k cos( k j Pi / n) ); */
-      nwin[j] = lambda[0] * 0.5; /* lambda0[0] should be 1.0 */
-      if ( j % 2 == 0 ) {
-        nwin[j] += lamn * 0.5;
+      if ( pbc ) {
+        /* periodic boundary condition */
+        /* win[j] = Sum { k = 0 to n - 1 } lambda_k cos( 2 k j Pi / n) ); */
+        nwin[j] = 0;
+        for ( i = 0; i < n; i++ ) {
+          lam = lambda[i];
+          nwin[j] += lam * cos( j * i * 2 * M_PI / n );
+        }
+        nwin[j] /= n;
       } else {
-        nwin[j] -= lamn * 0.5;
-      }
+        /* reflective boundary condition */
+        /* win[j] = ( (lambda_0 + lambda_n) / 2
+         *        + Sum { k = 1 to n - 1 } lambda_k cos( k j Pi / n) ); */
+        nwin[j] = lambda[0] * 0.5; /* lambda0[0] should be 1.0 */
+        if ( j % 2 == 0 ) {
+          nwin[j] += lamn * 0.5;
+        } else {
+          nwin[j] -= lamn * 0.5;
+        }
 
-      for ( i = 1; i < n; i++ ) {
-        lam = lambda[i];
-        nwin[j] += lam * cos( j * i * M_PI / n );
+        for ( i = 1; i < n; i++ ) {
+          lam = lambda[i];
+          nwin[j] += lam * cos( j * i * M_PI / n );
+        }
+        nwin[j] /= n;
       }
-      nwin[j] /= n;
 
       if ( err == 0 || it == itmax - 1 ) {
         fprintf(stderr, "it %d: win %4d: %22.10e -> %22.10e\n",
@@ -254,7 +277,7 @@ __inline static double *trimwindow(int n,
  * This is true only for perfect sampling and
  * local Monte Carlo sampling */
 static double *estgamma(int n, int sampmethod,
-    double localg)
+    int pbc, double localg)
 {
   int i;
   double *gamma, x;
@@ -267,13 +290,21 @@ static double *estgamma(int n, int sampmethod,
     if ( sampmethod == SAMPMETHOD_METROGLOBAL ) {
       gamma[i] = 1.0; /* n / (n - 1.0); */
     } else if ( sampmethod == SAMPMETHOD_METROLOCAL ) {
-      x = tan( i * M_PI * 0.5 / n );
+      x = i * M_PI / n;
+      if ( !pbc ) {
+        x *= 0.5;
+      }
+      x = tan(x);
       gamma[i] = 1.0 / (2 * localg * x * x) + 1 / (2 * localg) - 1;
     } else if ( sampmethod == SAMPMETHOD_HEATBATH ) {
       gamma[i] = 1.0;
     } else if ( sampmethod == SAMPMETHOD_MD ) {
       /* borrow the local sampling data */
-      x = tan( i * M_PI * 0.5 / n );
+      x = i * M_PI / n;
+      if ( !pbc ) {
+        x *= 0.5;
+      }
+      x = tan(x);
       gamma[i] = 1.0 / (x * x);
     } else {
       if ( !once ) { /* complain only once */
