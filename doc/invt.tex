@@ -344,9 +344,11 @@ Upon normalization, $\sum_{i = 1}^n \pi_i = 1$,
 we get
 %
 \begin{equation}
-  \pi_i =
-  \frac{ p^*_i \, e^{-V_i} }
-  { \sum_{j = 1}^n p^*_j \, e^{-V_j} }.
+  \pi_i
+  =
+  \frac{                p^*_i \, e^{-V_i} }
+       { \sum_{j = 1}^n p^*_j \, e^{-V_j} }
+  .
   \label{eq:pi_p_phi}
 \end{equation}
 %
@@ -491,10 +493,8 @@ of an adaptive FDS.
 
 
 In the WL algorithm\cite{wang2001, wang2001pre},
-$v_i$ are updated
-in each MC step $t$,
-and $v_i(t)$ as a function of $t$
-is updated as
+the bias potential, $v_i(t)$, is updated
+in each MC step $t$ as
 %
 \begin{equation}
   v_i(t+1)
@@ -540,11 +540,11 @@ is a multiple-bin scheme.
 
 One can show that with a constant $\alpha(t) = \alpha > 0$,
 the distribution collected from
-the trajectory is identical to $p_i$.
+the trajectory is identical to $p_i$ in long times.
 %
-However, the above updates
+However, as the above updates
 change $v_i(t)$ continuously,
-and Eq. \eqref{eq:pi_p_v} no longer holds
+Eq. \eqref{eq:pi_p_v} no longer holds
 at all times.
 %
 In other words,
@@ -579,7 +579,7 @@ In the original WL scheme,
 the updating magnitude $\alpha$ (or $\ln f$
 in the original paper) is kept as a constant
 for a period of time,
-which is referred to as a stage below.
+referred to as a stage below.
 %
 The histogram collected in the stage is monitored.
 %
@@ -591,16 +591,10 @@ the previous value).
 %
 This scheme works well for early stages.
 %
-However, in later stages, it tends to reduce $\alpha$
-too quickly, making the asymptotic error
+However, it tends to reduce $\alpha$
+too quickly in late stages, making the asymptotic error
 saturate\cite{belardinelli2007, belardinelli2007jcp, belardinelli2008}.
 %
-Similarly, for metadynamics,
-there are various ways of reducing the updating magnitude,
-particularly in the development of
-self-healing umbrella sampling
-and well-tempered metadynamics\cite{
-  marsili2006, barducci2008, dickson2011, dama2014}.
 
 
 
@@ -609,10 +603,11 @@ and well-tempered metadynamics\cite{
 
 
 
-For the single-bin scheme
-used in WL algorithm,
+%For the single-bin scheme
+%used in WL algorithm,
+Later,
 it was found that
-a more effective way
+a better way
 of updating the schedule $\alpha(t)$
 in late stages
 is to follow the formula
@@ -626,7 +621,7 @@ where $t$ is the number of steps
 from the beginning of the MC simulation,
 which shall be referred to as the ``time'' below.
 %
-This surprisingly simple formula has attracted
+This simple yet effective formula has attracted
 several studies\cite{belardinelli2007, belardinelli2007jcp, belardinelli2008,
 morozov2007, zhou2008, morozov2009,
 komura2012, caparica2012, caparica2014}.
@@ -639,31 +634,18 @@ different from $1.0$\cite{
 morozov2007, zhou2008, morozov2009}.
 
 
+As Eq. \eqref{eq:alpha_invt} was being developed for the WL algorithm,
+several similar ways of
+reducing the updating magnitude
+were developed for umbrella sampling and metadynamics,
+particularly the
+self-healing umbrella sampling
+and well-tempered metadynamics\cite{
+  marsili2006, barducci2008, dickson2011, dama2014}.
+%
+Our aim below is to the optimal schedule $\alpha(t)$,
+for a general updating scheme.
 
-%Here we shall derive the optimal $\alpha(t)$
-%For the WL algorithm, Eq. \eqref{eq:wl_update}.
-%%
-%Further, we shall generalize the result
-%To a class of multiple-bin schemes,
-%In which an update affects
-%Not only the current bin $i(t)$,
-%But also a few neighboring ones.
-%%(such schemes are designed
-%%to maintain a smooth bias potential).
-%%
-%We shall show that
-%The constant of proportionality, $1$,
-%In Eq. \eqref{eq:alpha_invt}
-%Is optimal for the single-bin scheme,
-%Eq. \eqref{eq:wl_update}
-%(as in the WL algorithm),
-%But not necessarily so
-%For a multiple-bin scheme.
-%%
-%Below, we discuss the single-bin scheme
-%In Section \ref{sec:single-bin},
-%And the multiple-bin case
-%In Section \ref{sec:multiple-bin}.
 
 
 
@@ -678,7 +660,8 @@ for the single-bin scheme,
 Eq. \eqref{eq:wl_update}.
 %
 To do so,
-we shall first express the error of $v(t)$
+we shall first express the error of
+the shifted bias potential, $v_i(t)$,
 as a functional of $\alpha(t)$,
 and then minimize it by variation.
 
@@ -717,10 +700,9 @@ and a noise part,
   \label{eq:h_split}
 \end{equation}
 %
-Here, the deterministic part can be related
-to the ``ensemble average'' of $h_i$.
-%
-The ensemble consists of many similar simulation copies
+The deterministic part can be related
+to the ``ensemble average'' of $h_i$,
+where the ensemble consists of many similar simulation copies
 that have experienced the same schedule $\alpha(t)$
 and have reached the same $v_i(t)$
 at time $t$.
@@ -741,10 +723,10 @@ for the deterministic part
 \begin{equation}
   \langle h_i(t) \rangle
   \approx
-  \pi_i
+  \pi_i(t)
   =
-  \frac{ p_i \, e^{-v_i} }
-  { \sum_{j = 1}^n p_j \, e^{-v_j} }.
+  \frac{                p_i \, e^{-v_i(t)} }
+       { \sum_{j = 1}^n p_j \, e^{-v_j(t)} }.
   \label{eq:h_ave}
 \end{equation}
 %
@@ -761,7 +743,8 @@ depend only on the time difference
   \langle \zeta_i(t) \, \zeta_j(t') \rangle
   =
   \sigma_{ij}(t - t'),
-  \label{eq:zeta_zeta_correlation}
+  \notag
+  %\label{eq:zeta_zeta_correlation}
 \end{equation}
 %
 where $\sigma_{ij}(t)$ is an even function of $t$
@@ -808,8 +791,8 @@ However, we expect the difference between $v_i$ and $\bar v$,
   \label{eq:x_def}
 \end{equation}
 %
-to be small in the asymptotic regime,
-and expand Eq. \eqref{eq:h_ave} as
+to be small in the asymptotic regime.
+Expanding Eq. \eqref{eq:h_ave} in $x_i$ yields
 %
 \begin{align}
 \langle h_i(t) \rangle
@@ -889,7 +872,7 @@ $\bar v = \sum_{i = 1}^n p_i v_i$.
 Our aim is to find the $\alpha(t)$
 that minimizes Eq. \eqref{eq:error_sum}.
 %
-Fortunately, we shall find that it suffices to consider
+Fortunately, we find that it suffices to consider
 a simpler one-variable problem
 in this case.
 
@@ -914,13 +897,14 @@ that is invariant under time translation:
 \left\langle \xi(t) \, \xi(t') \right\rangle
 =
 \kappa(t - t').
-\label{eq:noise_correlation}
+\notag
+%\label{eq:noise_correlation}
 \end{equation}
 %
 Additionally, we require
 \begin{equation}
   \lim_{t \rightarrow \pm\infty} \kappa(t) = 0.
-  \label{eq:kappat_limit}
+  \label{eq:kappa_limit}
 \end{equation}
 %
 For example, for a white noise,
@@ -948,14 +932,16 @@ x(0) \, e^{-\lambda \, q(T)}
 +
 \int_0^T
   \dot u\bigl( q(t) \bigr) \, \xi(t) \, dt,
-\label{eq:xt_solution}
+\notag
+%\label{eq:xt_solution}
 \end{equation}
 %
 where,
 %
 \begin{equation}
 q(t) \equiv \int_0^t \alpha(t') \, dt',
-\label{eq:qt_definition}
+\notag
+%\label{eq:q_def}
 \end{equation}
 %
 and
@@ -964,7 +950,7 @@ and
 u(q')
 &\equiv
 e^{-\lambda \, q(T) + \lambda \, q'}.
-\label{eq:ut_definition}
+\label{eq:u_def}
 \end{align}
 At the end of period $T$, we have
 \begin{align}
@@ -984,11 +970,11 @@ At the end of period $T$, we have
 \end{align}
 
 
-We now fix the endpoint value of $q(T)$
-and variate the curve.
+We now fix the endpoint value $q(T)$
+and variate the curve, $q(t)$ ($0 < t < T$).
 %
 This is equivalent to variating $u$
-with fixing endpoint values,
+with fixed endpoint values,
 $u\bigl( q(0) \bigr)  = e^{-\lambda \, q(T)}$
 and
 $u\bigl( q(T) \bigr) = 1$.
@@ -1036,7 +1022,7 @@ $$
 \end{aligned}
 $$
 where we have dropped the boundary terms
-by using Eq. \eqref{eq:kappat_limit}.
+by using Eq. \eqref{eq:kappa_limit}.
 %
 %In fact, we can repeat the process $n$ times, and
 %$$
@@ -1058,10 +1044,10 @@ we must have
 %
 where $c$ is a constant of $t'$.
 %
-Using Eq. \eqref{eq:ut_definition},
+Using Eq. \eqref{eq:u_def},
 we get
 $$
-e^{-\lambda \, q(t) + \lambda \, q(t')}
+e^{-\lambda \, q(T) + \lambda \, q(t')}
 =
 c \, (t' + t_0),
 $$
@@ -1100,7 +1086,8 @@ is given by
 ,
 \label{eq:alpha_invt1}
 \end{equation}
-agreeing with Eq. \eqref{eq:alpha_invt}.
+and Eq. \eqref{eq:alpha_invt}
+is the special case of $t_0 = 0$.
 
 
 
@@ -1114,8 +1101,8 @@ Eq. \eqref{eq:mbin_update}.
 %
 In this case,
 upon a visit to bin $j$,
-we update not only the bias potential there,
-but also those for a few neighboring bins $i$.
+we update not only the bias potential at bin $j$,
+but also those at a few neighboring bins, $i$'s.
 %
 The update magnitudes are given by a matrix
 $\mathbf w$
@@ -1243,11 +1230,12 @@ which satisfies Eq. \eqref{eq:eig_orthonormal_rows}.
 The corresponding eigenvalue is $\lambda_1 = 1$.
 
 %It is worth pointing out
-Further, in a stable updating scheme,
-all eigenvalues $\lambda_k$ of $\mathbf w$
-must be nonnegative,
-for otherwise there is a fluctuating mode
-that can increase indefinitely.
+Finally, there is a stability condition.
+%
+In a \emph{stable} updating scheme,
+no fluctuating mode can increase indefinitely,
+which means all eigenvalues $\lambda_k$ of $\mathbf w$
+must be nonnegative.
 
 
 
@@ -1314,7 +1302,8 @@ we get a set of decoupled equations
 \dot y_k(t)
 =
 -\alpha(t) \, \lambda_k \, [y_k(t) - \eta_k(t)],
-\label{eq:yt_diffeq}
+\notag
+%\label{eq:yt_diffeq}
 \end{equation}
 %
 where
@@ -1350,24 +1339,25 @@ as
 %
 which is a superposition of the components of the modes.
 %
-By Eq. \eqref{eq:eigenmode1},
+From Eq. \eqref{eq:eigenmode1},
 the first eigenmode, $y_1 = \sum_{j=1}^n p_j \, x_j$,
 vanishes identically by Eq. \eqref{eq:px_sum}.
 %
-Thus, we can start the sum in Eq. \eqref{eq:y2_sum}
+Thus, we can start the last sum in Eq. \eqref{eq:y2_sum}
 from $k = 2$.
 
 
 
 In analogous to Eq. \eqref{eq:x2t_average},
 we have, from Eq. \eqref{eq:y2_sum},
-the errors at a period of $T$,
+the error after a period of $T$,
 %
 \begin{equation}
   \Err
   =
   \Err_R + \Err_A,
-  \label{eq:error_split}
+  \notag
+  %\label{eq:error_split}
 \end{equation}
 %
 which is the sum of the residual error
@@ -1433,7 +1423,8 @@ appears to be useless in a general setting.
 
 
 
-In the asymptotic regime,
+In the asymptotic regime
+(i.e., if the simulation length, $T$, is sufficiently long),
 we can approximate $\kappa_k(t)$ as
 %
 \begin{equation}
@@ -1464,9 +1455,6 @@ Then, Eq. \eqref{eq:error_asym} is simplified as
   \label{eq:error_asym1}
 \end{align}
 %
-
-
-
 \note{The next order correction to Eq. \eqref{eq:kappa_delta}
 would lead to a correction to $\Err$
 that is about $\alpha_{\max}^2$ times as large,
@@ -1495,7 +1483,7 @@ This is equivalent to saying that the Fourier transform
   Thus, we can assume Eq. \eqref{eq:kappa_delta},
   once $\alpha(t)$ has dropped below a certain level.
 }
-
+%
 \note{
   The extremal property, Eq. \eqref{eq:optimal_mbin},
   now becomes
@@ -1516,6 +1504,9 @@ This is equivalent to saying that the Fourier transform
   the total virial to be zero.
   $$\,$$
 }
+In this way,
+the underlying sampling process
+affects the error only through the set of numbers, $\Gamma_i$'s.
 
 
 
@@ -1524,10 +1515,11 @@ Integrals of the autocorrelation functions}
 
 
 
-We can evaluate the values of $\Gamma_k$'s
+We evaluate the integrals of the autocorrelation functions,
+$\Gamma_k$'s,
 in two special cases.
 %
-If the sampling is perfect,
+First, if the sampling is perfect,
 Eq. \eqref{eq:kappa_delta} is exact, and
 %
 \begin{equation}
@@ -1536,7 +1528,7 @@ Eq. \eqref{eq:kappa_delta} is exact, and
 \end{equation}
 %
 In this case,
-the bin index $k$ is an independent random variable
+the bin index $i$ is an independent random variable
 at each time step $t$, and
 %
 \begin{equation}
@@ -1548,8 +1540,8 @@ at each time step $t$, and
   \label{eq:zz_perfect}
 \end{equation}
 %
-where $\delta(t - t')$ is understood as an adaption of $\delta_{t, t'}$
-from the discrete time case to the continuous limit. % hereinafter.
+where $\delta(t - t')$ is the equivalent of $\delta_{t, t'}$
+in the continuous limit.
 %
 \note{To show Eq. \eqref{eq:zz_perfect}, we first note that
   with $t \ne t'$ (going back to the discrete time case),
@@ -1613,8 +1605,8 @@ from the discrete time case to the continuous limit. % hereinafter.
   or $0$ otherwise.
 }
 %
-Thus, from Eqs. \eqref{eq:eig_orthonormal_rows} and \eqref{eq:eta_def},
-we get, for $k \ge 2$,
+Thus,
+for $k \ge 2$, we get
 %
 \begin{equation}
   \kappa_k(t - t')
@@ -1627,6 +1619,21 @@ we get, for $k \ge 2$,
   = \delta(t - t'),
   \label{eq:kappa_perfect}
 \end{equation}
+%
+where we have used
+Eqs. \eqref{eq:eig_orthonormal_rows},
+\eqref{eq:eigenmode1},
+\eqref{eq:eta_def},
+and
+$$
+  \sum_{j = 1}^n \phi_{kj}
+  =
+  \sum_{j = 1}^n \frac{ \phi_{kj} \, \phi_{1j} } { p_j }
+  =
+  \delta_{k1}
+  =
+  0.
+$$
 %
 \note{To show Eq. \eqref{eq:kappa_perfect},
   $$
@@ -1672,26 +1679,12 @@ we get, for $k \ge 2$,
   and
   Eq. \eqref{eq:eig_orthonormal_rows}
   on the last line.
-  %
-  Note for $k \ge 2$,
-  $$
-  \sum_{j = 1}^n \phi_{kj}
-  =
-  \sum_{j = 1}^n \frac{ \phi_{kj} \, \phi_{1j} } { p_j }
-  =
-  \delta_{k1}
-  =
-  0.
-  $$
-  as the mode $1$, or the first row, $\phi_{1j}$,
-  is given by the equilibrium distribution $p_j$.
 }
 
 
 Another special case is the one-step process\cite{vankampen}:
 in each step, the system hops to the previous bin $i - 1$
-or the next bin $i + 1$ with equal probability $\frac 1 2$,
-ignoring out-of-boundary transitions.
+or the next bin $i + 1$ with equal probability $1/2$.
 %
 The transition matrix is
 %
@@ -1701,27 +1694,35 @@ The transition matrix is
 =
 \left(
   \begin{array}{cccccccc}
-    \frac 1 2 & \frac 1 2 & 0 & \dots & 0 \\
+    \frac \sigma 2 & \frac 1 2 & 0 & \dots & \frac {1 - \sigma} 2 \\
     \frac 1 2 & 0         & \frac 1 2 & \dots & 0 \\
     \vdots & &  & & \vdots \\
     0 & \dots & \frac 1 2 & 0  & \frac 1 2 \\
-    0 & \dots & 0 & \frac 1 2 & \frac 1 2
+    \frac {1 - \sigma} 2 & \dots & 0 & \frac 1 2 & \frac \sigma 2
   \end{array}
-\right).
+\right),
 \label{eq:T_nn}
 \end{equation}
+%
+where $\sigma = 0$ for a periodic variable, or $1$ otherwise.
 %
 For a large class of updating schemes
 (cf. Sec. \ref{sec:band-matrix}),
 we can further assume that
-the eigenvectors of $\mathbf w$
-coincide with those of $\mathbf Q$,
-while the eigenvalues may differ.
+the matrices $\mathbf Q$ and $\mathbf w$
+share eigvenvectors, but not eigenvalues.
 %
 The eigenvalues of $\mathbf Q$ are
 $$
-\Lambda_k = 1 - 2 \sin^2 \frac{ (k - 1) \, \pi } { 2 \, n }.
+\Lambda_k
+=
+1 -
+2 \sin^2 \frac{ (k - 1) \, g \, \pi }
+              {       2 \, n        }
+,
 $$
+where
+$g = 2$ for a periodic variable, or $1$ otherwise.
 %Note that these $\Lambda_k$'s are
 %not to be confused with the eigenvalues of $\mathbf w$,
 %$\lambda_k$'s.
@@ -1735,9 +1736,8 @@ being the same as
 that in perfect sampling.
 %
 Thus,
-$\Gamma_k$ is roughly twice
-the autocorrelation time,
-and from Eq. \eqref{eq:Gamma_sum}, we get
+%$\Gamma_k$ is roughly twice the autocorrelation time, and
+from Eq. \eqref{eq:Gamma_sum}, we get
 %
 \begin{equation}
 \Gamma_k
@@ -1750,7 +1750,7 @@ and from Eq. \eqref{eq:Gamma_sum}, we get
 \label{eq:Gamma_onestep}
 \end{equation}
 %
-We can use this case to model local sampling processes.
+This case is intended to model a local sampling process.
 
 
 
@@ -1760,7 +1760,7 @@ Optimal schedule for the multiple-bin updating scheme}
 
 
 \subsubsection{\label{eq:eqlerr}
-Equilibrium error under a fixed updating magnitude
+Equilibrium error under a constant updating magnitude
 }
 
 
