@@ -472,9 +472,9 @@ static double estbestc_invt(double t, double a0,
       }
     }
 
-    /* find the minimal value */
+    /* update the bracket */
     if ( el < em && el < er ) {
-      /* el is the minimal of the three, extend to the left */
+      /* el is the least of the three, extend to the left */
       cr = cm;
       cm = cl;
       cl = cl * 0.5; /* make sure cl > 0 */
@@ -482,7 +482,7 @@ static double estbestc_invt(double t, double a0,
       em = el;
       el = esterror_invt(t, cl, a0, n, NULL, lambda, gamma);
     } else if ( er < em && er < el ) {
-      /* er is the minimal of the three, extend to the right */
+      /* er is the least of the three, extend to the right */
       cl = cm;
       cm = cr;
       cr = cr * 2.0;
@@ -495,9 +495,9 @@ static double estbestc_invt(double t, double a0,
         break;
       }
 
-      /* em is the minimal of the three */
+      /* em is the least of the three */
       if ( cm - cl > cr - cm ) {
-        /* refine the left half */
+        /* refine the left side */
         cn = (cl + cm) * 0.5;
         en = esterror_invt(t, cn, a0, n, NULL, lambda, gamma);
         if ( en > em ) {
@@ -512,7 +512,7 @@ static double estbestc_invt(double t, double a0,
           em = en;
         }
       } else {
-        /* refine the right half */
+        /* refine the right side */
         cn = (cm + cr) * 0.5;
         en = esterror_invt(t, cn, a0, n, NULL, lambda, gamma);
         if ( en > em ) {

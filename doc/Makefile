@@ -1,6 +1,6 @@
 prj=invt
 
-ver=0.2
+ver=0.3
 
 figgps=$(wildcard fig/*.gp)
 pdffigs=$(patsubst %.gp,%.pdf, $(figgps))

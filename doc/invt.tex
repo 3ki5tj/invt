@@ -3877,10 +3877,12 @@ Numerical results}
 \subsection{Test system and simulation protocol}
 
 
-We tested the above theory on a one-dimensional system
+Our test system is
+a model one-dimensional system
 of $n = 100$ bins,
 with a flat target distribution
-$p_i = 1/n$.
+$p_i = 1/n$
+under the reflective boundary condition.
 %
 %Since in the asymptotic regime,
 %the distribution converges to $p_i$
@@ -3901,38 +3903,36 @@ Initially,
 we set the bias potential to zero,
 $v_i \equiv 0$,
 %
-and let the system undergo an equilibration period
-of constant updating magnitude,
+and equilibrate the system under
+a constant updating magnitude,
 $\alpha(t) = \alpha_0$.
 %
 After this,
 we reset the origin of the time, $t$,
-and started the schedule specified by
-either
-Eq. \eqref{eq:q_opt}
-or
-Eq. \eqref{eq:alpha_invtlambda}.
-%
-We use the latter case to verify our theory.
-%
-We wish to see how the final error
-depends on the parameter, $\lambda$,
-and if it matches the predicted value.
-%
-Here, we used $t_0 = 1/(\lambda \, \alpha_0)$
-to smooth the transition from equilibration.
+and started the target schedule.
+%specified by either
+%Eq. \eqref{eq:q_opt}
+%or
+%Eq. \eqref{eq:alpha_invtlambda}.
+
+
+For the Gaussian updating scheme,
+the kernel is truncated at
+$\min\{10 \, \sigma, n - 1\}$
+and numerically stabilized
+using the technique
+in Sec. \ref{sec:stabilize_wband}.
 
 
 
-
-Since the error depends on the underlying sampling scheme,
-we have applied the above protocol to two
-sampling schemes,
+Since the error depends on
+the underlying sampling process,
+we have devised two sampling processes,
 a global one and a local one.
 %
-In both cases, we used the
-Metropolis algorithm\cite{metropolis1953, newman, frenkel, landau_binder}
-to sample the state space:
+Both cases were based on
+Metropolis algorithm\cite{metropolis1953, newman, frenkel,
+landau_binder}:
 %
 in each step, a new bin index $j$ was proposed
 and then accepted with probability
@@ -3941,70 +3941,90 @@ $
 A(i \to j) = \min\{ 1, \exp(v_i - v_j) \}.
 $
 However,
-in the first sampling scheme,
+in the first and global sampling process,
 we choose the destination $j$
 randomly out of the $n$ bins.
 %
-This sampling scheme,
-referred to this as the global sampling scheme,
-emulates the perfect sampling scheme
+This sampling process
+emulates the perfect sampling process
 discussed in Sec. \ref{sec:Gamma}
 in the long time limit.
 %
-In the second scheme,
+In the second or local process,
 we limit the destination $j$
 to the two neighbors of $i$,
 $i \pm 1$, with equal probability $1/2$,
-to mimic the one-step sampling scheme
+to mimic the one-step sampling process
 in Sec. \ref{sec:Gamma}.
 %
-This scheme,
-referred to this as the local sampling scheme,
-models local sampling processes
-typical in MD and straightforward MC simulations.
+
+
+
+\subsection{Inverse-time schedule}
+
+
+
+We first tested the theory using
+the inverse-time schedule,
 %
-
-
-
-\subsection{Single-bin (WL) updating scheme}
-
-
-
-We first tested the single-bin (WL) updating scheme
-using the above protocol.
+\begin{equation}
+\alpha(t) = \frac{1}{\lambda \, (t + t_0) },
+\label{eq:alpha_invtlambda}
+\end{equation}
 %
-Here, we chose $\alpha_0 = 0.0001$
+where $\lambda$ is a parameter to be optimized.
+and $t_0 = 1/(\lambda \, \alpha_0)$
+to smooth the transition from equilibration.
+%
+This schedule is analytically simpler
+than the optimal schedule,
+and it is studied in Appendix \ref{sec:invt_schedule}.
+%
+We wish to see how the final error
+depends on the parameter, $\lambda$,
+and if it matches the predicted value,
+given by Eq. \eqref{eq:error_invt}.
+
+
+\subsubsection{Single-bin (WL) updating scheme}
+
+
+
+For the single-bin updating scheme,
+we chose $\alpha_0 = 0.0001$
 and ran the simulation for $t = 10^8$ steps.
 %
 As shown in Fig. \ref{fig:err_singlebin},
 the numerical results of the terminal error agreed well with
 the analytical prediction by Eq. \eqref{eq:error_invt}.
 %
-For both global and local sampling schemes,
+For both global and local sampling processes,
 the optimal $\lambda$ occurred around $1.0$,
-the optimal value in the asymptotic regime.
+verifying Eq. \eqref{eq:alpha_invt}.
 %
-Recall that $1/\lambda$ in Eq. \eqref{eq:alpha_invtlambda}
-represents the relative updating magnitude.
-%
-Figure \ref{fig:err_singlebin} also shows that
-a smaller than optimal value of $1/\lambda$
-tends to increase the error more rapidly
-than a larger than optimal value,
-suggesting that the latter (over-updating)
-is generally preferable to the latter (under-updating)
-when the optimal value is unknown.
+%Recall that $1/\lambda$ in Eq. \eqref{eq:alpha_invtlambda}
+%represents the relative updating magnitude.
+%%
+%Figure \ref{fig:err_singlebin} also shows
+%an asymmetry of the error curve.
+%A smaller than optimal value of
+%the updating magnitude, $1/\lambda$,
+%tends to increase the error more rapidly
+%than a larger than optimal value,
+%suggesting that the over-updating
+%is generally preferable to the under-updating
+%when the optimal value is unknown.
 
 
-Another observation is that the two error functions
-differed only by a multiplicative constant.
+We also observe
+that the two error functions
+differed only by a multiplicative constant,
+again again agreeing with the theory.
 %
-This again agreed with the theory.
-%
-Since all eigenvalues of the single-bin scheme are
-the same, $\lambda_2 = \cdots = \lambda_n = 1$,
+With identical eigenvalues,
+$\lambda_1 = \cdots = \lambda_n = 1$,
 the error in Eq. \eqref{eq:error_invt}
-depends on the sampling scheme only through
+depends on the sampling process only through
 the sum $\sum_{ k = 2 }^n \Gamma_k$,
 which gives rise to the above multiplicative constant.
 
@@ -4030,67 +4050,72 @@ which gives rise to the above multiplicative constant.
 
 
 
-\subsection{Nearest-neighbor updating scheme}
+\subsubsection{Nearest-neighbor updating scheme}
 
 
-We now turn to the nearest-neighbor updating scheme.
+As an example of the multiple-bin schemes,
+we chose the nearest-neighbor updating scheme
+described in Sec. \eqref{sec:nnscheme}.
 %
 We again find good agreement
 between simulation and analytical results.
 %
 A new feature is that the optimal $\lambda$
-depends on the simulation length, $t$.
+depends on the simulation length, $T$.
 %
 As shown in Fig. \ref{fig:err_nnbr},
-the normalized error, $(t + t_0) \, \Err$,
+the normalized error, $(T + t_0) \, \Err$,
 hence the optimal value of $1/\lambda$,
-depended non-trivially on the simulation length
+depended non-trivially on the simulation length, $T$,
 in the global sampling case.
 %
 The optimal $1/\lambda$ gradually increased
 with simulation length, which is in agreement with
 the discussion in Sec. \ref{sec:optlambda}.
 %
-For the local sampling case, however,
-the normalized error roughly maintained the sample shape,
-and the optimal $\lambda$ is around $1.0$,
+For the local sampling case,
+the $T$-dependence was hardly visible
+because of the predominantly large $\Gamma_k$'s
+of the small $k$ modes.
+%
+The optimal $\lambda$ remained around $1.0$,
 as suggested by Eq. \eqref{eq:lambda_nn_onestep}.
 
 
 
-To understand this dependence,
-we observe that for shorter simulations,
-long-wavelength modes
-(with larger $\lambda_k$ and smaller $k$),
-dominate the error function in Eq. \eqref{eq:error_invt}
-because of the prefactor $\lambda_k \, \Gamma_k$,
-which is inherited from
-the equilibrium error under a fixed updating magnitude,
-Eq. \eqref{eq:error_eql}.
-%
-For longer simulations,
-short-wavelength modes
-(with smaller $\lambda_k$ and larger $k$)
-become more important,
-for $\lambda_k$ also gives the decay rate
-of the $k$th mode.
-%and errors in smaller $\lambda_k$ modes
-%are harder to damp out.
-%
-This drives the optimal $\lambda$ to shift toward
-a smaller $\lambda_k$ value
-as the simulation lengthens.
-%
-Note also that while increasing $\lambda$
-also increases the error of the long-wavelength modes,
-this rate of increase is much smaller,
-as shown in the $\nu_k > 1$ branch
-in Fig. \ref{fig:err_component}.
-%
-The shift of $\lambda$, however, is less noticeable
-under the local sampling scheme,
-because longer-wavelength modes more heavily
-weighted by much larger values of $\Gamma_k$.
+%To understand this dependence,
+%we observe that for shorter simulations,
+%long-wavelength modes
+%(with larger $\lambda_k$ and smaller $k$),
+%dominate the error function in Eq. \eqref{eq:error_invt}
+%because of the prefactor $\lambda_k \, \Gamma_k$,
+%which is inherited from
+%the equilibrium error under a fixed updating magnitude,
+%Eq. \eqref{eq:error_eql}.
+%%
+%For longer simulations,
+%short-wavelength modes
+%(with smaller $\lambda_k$ and larger $k$)
+%become more important,
+%for $\lambda_k$ also gives the decay rate
+%of the $k$th mode.
+%%and errors in smaller $\lambda_k$ modes
+%%are harder to damp out.
+%%
+%This drives the optimal $\lambda$ to shift toward
+%a smaller $\lambda_k$ value
+%as the simulation lengthens.
+%%
+%Note also that while increasing $\lambda$
+%also increases the error of the long-wavelength modes,
+%this rate of increase is much smaller,
+%as shown in the $\nu_k > 1$ branch
+%in Fig. \ref{fig:err_component}.
+%%
+%The shift of $\lambda$, however, is less noticeable
+%under the local sampling scheme,
+%because longer-wavelength modes more heavily
+%weighted by much larger values of $\Gamma_k$.
 
 
 \begin{figure}[h]
@@ -4116,81 +4141,102 @@ weighted by much larger values of $\Gamma_k$.
 
 
 
-\subsection{Gaussian (metadynamics) updating scheme}
-
-
-The error of Gaussian updating scheme is similar to
-that of the nearest neighbor scheme,
-as shown in Fig \ref{fig:err_sig5}.
+%\subsection{Gaussian (metadynamics) updating scheme}
 %
-The dependency of the simulation length is more prominent.
 %
-Even for local sampling,
-there is now a visible shift of the optimal $\lambda$.
+%The error of Gaussian updating scheme is similar to
+%that of the nearest neighbor scheme,
+%as shown in Fig \ref{fig:err_sig5}.
+%%
+%The dependency of the simulation length is more prominent.
+%%
+%Even for local sampling,
+%there is now a visible shift of the optimal $\lambda$.
+%
+%
+%\begin{figure}[h]
+%\begin{center}
+%  \makebox[\linewidth][c]{
+%    \includegraphics[angle=0, width=0.95\linewidth]{fig/errsig5.pdf}
+%  }
+%  \caption{
+%    \label{fig:err_sig5}
+%    Normalized error, $(T + t_0) \, E$,
+%    versus the %proportionality constant,
+%    relative updating magnitude,
+%    $1/\lambda$,
+%    in Eq. \eqref{eq:alpha_invtlambda}
+%    for the Gaussian updating scheme with $\sigma = 5$ bins.
+%    %
+%    The results have been averaged over $1000$ independent runs.
+%  }
+%\end{center}
+%\end{figure}
+%
 
+
+\subsection{Optimal schedule}
+
+
+We now turn to the optimal schedule
+predicted by Eq. \eqref{eq:q_opt}.
+%
+For the Gaussian updating scheme
+with $\sigma = 10$,
+we computed the schedule,
+and compared it with the inverse-time schedule
+Eq. \eqref{eq:alpha_invtlambda}
+with the optimal $\lambda$.
 
 \begin{figure}[h]
 \begin{center}
   \makebox[\linewidth][c]{
-    \includegraphics[angle=0, width=0.95\linewidth]{fig/errsig5.pdf}
+    \includegraphics[angle=0, width=0.95\linewidth]{fig/optacmp.pdf}
   }
   \caption{
-    \label{fig:err_sig5}
-    Normalized error, $(T + t_0) \, E$,
-    versus the %proportionality constant,
-    relative updating magnitude,
-    $1/\lambda$,
-    in Eq. \eqref{eq:alpha_invtlambda}
-    for the Gaussian updating scheme with $\sigma = 5$ bins.
+    \label{fig:optacmp}
+    Optimal schedules from Eq. \eqref{eq:q_opt},
+    versus the optimized inverse-time schedule
+    Eq. \eqref{eq:alpha_invtlambda}
+    for the Gaussian updating scheme
+    with $\sigma = 10$.
     %
-    The results have been averaged over $1000$ independent runs.
-  }
-\end{center}
-\end{figure}
-
-
-
-\subsection{Accuracy of the inverse-time schedule}
-
-
-
-In the above, we have assumed the inverse-time schedule,
-Eq. \eqref{eq:alpha_invtlambda}.
-%
-In Fig. \ref{fig:alpha_cmp},
-we compared the inverse-time schedule
-with the optimal $\lambda$,
-and the optimal schedule from integrating
-Eq. \eqref{eq:q_opt}.
-%
-The difference was larger for the global sampling scheme.
-%
-As predicted by
-Eqs. \eqref{eq:dinvadt_limit1} and \eqref{eq:dinvadt_limit2},
-the rate of change of $1/\alpha(t)$
-indeed increases from $\lambda_{\min}$
-to $\bar \lambda \approx 1$.
-
-\begin{figure}[h]
-\begin{center}
-  \makebox[\linewidth][c]{
-    \includegraphics[angle=0, width=0.95\linewidth]{fig/dinvacmp.pdf}
-  }
-  \caption{
-    \label{fig:alpha_cmp}
-    Optimal schedules, in terms of $\dot \alpha(t)$, from Eq. \eqref{eq:q_opt},
-    versus the inverse-time schedule,
-    Eq. \eqref{eq:alpha_invtlambda},
-    with the optimal parameter, $\lambda$.
-    %
-    For fair comparison,
-    the $q(T) = \int_0^t \alpha(t) \, dt$
+    $q(T) = \int_0^t \alpha(t) \, dt$
     were set to be the same
     for both schedules.
   }
 \end{center}
 \end{figure}
 
+As shown in Fig. \ref{fig:optacmp}(a),
+the optimal schedule has a more complex curvature
+than the optimized inverse-time schedule.
+%
+In Fig. \ref{fig:optacmp}(b),
+we show that in the former case,
+the rate of change of $\alpha^{-1}(t)$
+increases gradually
+from $\lambda(0)$ to $\lambda(T) \approx 1$,
+as discussed in Sec. \ref{sec:optschedule}.
+%
+The errors in the two cases were
+$4.0 \times 10^{-7}$
+and
+$5.9 \times 10^{-7}$,
+respectively,
+for the global sampling process,
+%
+or
+$1.67 \times 10^{-4}$
+and
+$1.26 \times 10^{-4}$,
+respectively
+for the local sampling process,
+suggesting a slight edge of
+the optimal schedule from Eq. \eqref{eq:q_opt}.
+
+
+\subsection{Comparison of updating schemes}
 
 In Fig. \ref{fig:err_sigscan},
 we compared the error from the inverse-time schedule
@@ -4307,7 +4353,7 @@ We thanks Dr. Y. Mei and Dr. J. Ma for helpful discussions.
 
 
 
-\section{\label{sec:invt_alpha}
+\section{\label{sec:invt_schedule}
 Inverse-time schedules}
 
 
@@ -4321,13 +4367,9 @@ Several previous studies\cite{marsili2006, barducci2008, dickson2011}
 have been focused on analytically simpler schedules.
 %
 In a similar spirit,
-we consider here a variant of
-the inverse-time formula, Eq. \eqref{eq:alpha_invt1}
-%
-\begin{equation}
-\alpha(t) = \frac{1}{\lambda \, (t + t_0) },
-\label{eq:alpha_invtlambda}
-\end{equation}
+we consider here
+the inverse-time formula,
+Eq. \eqref{eq:alpha_invtlambda},
 %
 with the proportionality constant, $\lambda$,
 to be optimized.

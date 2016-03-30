@@ -26,11 +26,12 @@ typedef struct {
   double alpha0; /* initial updating magnitude */
   int fixa; /* fix alpha during the entire process */
 
-  int optc; /* use the optimal c */
+  int optc; /* use the optimal proportionality constant for the 1/t schedule */
 
   int opta; /* use the analytically optimal alpha(t) */
   int alpha_nint; /* number of integration points for the exactly optimal alpha(t) */
   char fnalpha[FILENAME_MAX]; /* output file for the exactly optimal alpha */
+  double qprec; /* target precision of the integral of alpha(t) */
 
   int pbc; /* periodic boundary condition */
   int winn; /* width of the updating window function */
@@ -127,8 +128,9 @@ static void invtpar_init(invtpar_t *m)
   m->optc = 0;
 
   m->opta = 0;
-  m->alpha_nint = 1000;
-  m->fnalpha[0] = '\0';;
+  m->alpha_nint = 10000;
+  m->fnalpha[0] = '\0';
+  m->qprec = 1e-5;
 
   m->pbc = 0;
   m->winn = 1; /* single bin update */
@@ -348,10 +350,11 @@ static void invtpar_help(const invtpar_t *m)
   fprintf(stderr, "  --a0=:         set the initial alpha during equilibration, default %g\n", m->alpha0);
   fprintf(stderr, "  --t0=:         set t0 in alpha = c/(t + t0), if unset, t0 = c/a0, default %g\n", m->t0);
   fprintf(stderr, "  --fixa:        fix the alpha during the entire process, default %d\n", m->fixa);
-  fprintf(stderr, "  --optc:        use the optimal c for alpha(t), default %d\n", m->optc);
+  fprintf(stderr, "  --optc:        use the optimal proportionality constant c in the inverse-time schedule for alpha(t), default %d\n", m->optc);
   fprintf(stderr, "  --opta:        use the exact optimal schedule alpha(t), default %d\n", m->opta);
   fprintf(stderr, "  --nint:        set the number of integration points for the exact optimal schedule alpha(t), default %d\n", m->alpha_nint);
   fprintf(stderr, "  --fnalpha=:    set the output file to output the exact optimal schedule, alpha(t), default %s\n", m->fnalpha);
+  fprintf(stderr, "  --qprec:       set the precision of the integral of the alpha(t), default %g\n", m->qprec);
   fprintf(stderr, "  --pbc:         use periodic boundary condition, default %d\n", m->pbc);
   fprintf(stderr, "  --nb=:         explicitly set the update window parameters, separated by comma, like --nb=0.2,0.4\n");
   fprintf(stderr, "  --sig=:        set the standard deviation Gaussian window, default %g\n", m->wingaus);
@@ -591,6 +594,10 @@ static int invtpar_keymatch(invtpar_t *m,
          || strcmpfuzzy(key, "fnalpha") == 0 )
   {
     strcpy(m->fnalpha, val);
+  }
+  else if ( strcmpfuzzy(key, "qprec") == 0 )
+  {
+    m->qprec = invtpar_getdouble(m, key, val);
   }
   else if ( strcmpfuzzy(key, "pbc") == 0 )
   {

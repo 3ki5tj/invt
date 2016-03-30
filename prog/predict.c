@@ -12,7 +12,7 @@
 static void invt_geterr(invtpar_t *m,
     const double *lambda, const double *gamma)
 {
-  double t, err1, err2;
+  double t, qt = 0, err1, err2;
   intq_t *intq;
 
   t = (double) m->nsteps;
@@ -22,15 +22,15 @@ static void invt_geterr(invtpar_t *m,
       0, &err1, 0);
 
   /* compute the exact minimal error under the same condition */
-  err2 = esterror_opt(t,
-      intq_getqt(t, m->c, m->c / m->alpha0), m->alpha0,
+  err2 = esterror_opt(t, m->alpha0, &qt, m->qprec,
       m->alpha_nint, &intq, m->n, NULL,
-      lambda, gamma);
+      lambda, gamma, m->verbose);
 
   /* save the optimal schedule to file */
   intq_save(intq, m->c, m->c / m->alpha0, m->fnalpha);
 
-  printf("c %g, err %g (invt), %g (exact), %s\n", m->c, err1, err2, m->fnalpha);
+  printf("c %g, err %g, sqr %g (invt), %g, sqr %g (exact), %s\n",
+      m->c, err1, err1 * err1, err2, err2 * err2, m->fnalpha);
 
   intq_close(intq);
 }
@@ -40,7 +40,7 @@ static void invt_geterr(invtpar_t *m,
 static void invt_scanc(invtpar_t *m,
     const double *lambda, const double *gamma)
 {
-  double c, t, t0;
+  double c, qt = 0, t, t0;
   double err, err0, err1, err2;
 
   t = (double) m->nsteps;
@@ -60,10 +60,9 @@ static void invt_scanc(invtpar_t *m,
         lambda, gamma);
 
     /* compute the exact minimal error under the same condition */
-    err2 = esterror_opt(t,
-        intq_getqt(t, m->c, m->t0), m->alpha0,
+    err2 = esterror_opt(t, m->alpha0, &qt, m->qprec,
         m->alpha_nint, NULL, m->n, NULL,
-        lambda, gamma);
+        lambda, gamma, m->verbose);
 
     printf("%g\t%g\t%g\t%g\t%g\n",
         c, err, err0, err1, err2);
@@ -76,7 +75,7 @@ static void invt_scannb(invtpar_t *m,
     const double *gamma)
 {
   double t, t0;
-  double nb, c, err1, err1norm, err2, err2norm;
+  double nb, c, qt = 0, err1, err1norm, err2, err2norm;
   double *lambda;
 
   t = (double) m->nsteps;
@@ -101,10 +100,9 @@ static void invt_scannb(invtpar_t *m,
     err1norm = err1 * sqrt(t + t0);
 
     /* compute the exact minimal error under the same condition */
-    err2 = esterror_opt(t,
-        intq_getqt(t, c, c / m->alpha0), m->alpha0,
+    err2 = esterror_opt(t, m->alpha0, &qt, m->qprec,
         m->alpha_nint, NULL, m->n, NULL,
-        lambda, gamma);
+        lambda, gamma, m->verbose);
 
     err2norm = err2 * sqrt(t + t0);
 
@@ -119,7 +117,7 @@ static void invt_scansig(invtpar_t *m,
     const double *gamma)
 {
   double t, t0;
-  double sig, c, err1, err1norm, err2, err2norm;
+  double sig, c, qt = 0, err1, err1norm, err2, err2norm;
   double *lambda;
 
   t = (double) m->nsteps;
@@ -141,10 +139,9 @@ static void invt_scansig(invtpar_t *m,
     err1norm = err1 * sqrt(t + t0);
 
     /* compute the exact minimal error under the same condition */
-    err2 = esterror_opt(t,
-        intq_getqt(t, c, c / m->alpha0), m->alpha0,
+    err2 = esterror_opt(t, m->alpha0, &qt, m->qprec,
         m->alpha_nint, NULL, m->n, NULL,
-        lambda, gamma);
+        lambda, gamma, m->verbose);
 
     /* compute the error of the optimal schedule */
     err2norm = err2 * sqrt(t + t0);

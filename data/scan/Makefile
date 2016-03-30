@@ -14,9 +14,9 @@ nbsingle: compile $(fnmdgam)
 	$(prog) --nb=0.24 --samp=md --fngamma=$(fnmdgam) --nint=10000 --fnalpha=nb0.24_md_alpha.dat
 
 sigsingle: compile $(fnmdgam)
-	$(prog) --sig=5 --samp=g --nint=10000 --fnalpha=sig5_g_alpha.dat
-	$(prog) --sig=5 --samp=l --nint=10000 --fnalpha=sig5_l_alpha.dat
-	$(prog) --sig=5 --samp=md --fngamma=$(fnmdgam) --nint=10000 --fnalpha=sig5_md_alpha.dat
+	$(prog) --sig=10 --samp=g --nint=10000 --fnalpha=sig10_g_alpha.dat
+	$(prog) --sig=10 --samp=l --nint=10000 --fnalpha=sig10_l_alpha.dat
+	$(prog) --sig=10 --samp=md --fngamma=$(fnmdgam) --nint=10000 --fnalpha=sig10_md_alpha.dat
 
 # for the error
 nbscan: compile $(fnmdgam)

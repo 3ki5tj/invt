@@ -296,31 +296,27 @@ static double invt_run(invtpar_t *m)
       }
 
       if ( m->opta ) {
+        double qt = 0;
+
         /* compute the theoretically optimal schedule */
-        errref = esterror_opt(t,
-            intq_getqt(t, m->c, m->t0), m->alpha0,
+        errref = esterror_opt(t, m->alpha0, &qt, m->qprec,
             m->alpha_nint, &intq, m->n, xerr,
-            lambda, gamma);
+            lambda, gamma, m->verbose);
+        errmin = errref;
 
         /* save the optimal schedule to file */
         intq_save(intq, m->c, m->c / m->alpha0, m->fnalpha);
-
-        /* compute the optimal schedule for the optimal c */
-        errmin = esterror_opt(t,
-            intq_getqt(t, optc, optc / m->alpha0), m->alpha0,
-            m->alpha_nint, NULL, m->n, NULL,
-            lambda, gamma);
       } else {
         /* compute the optimal error from the inverse-time formula */
         errref = esterror_invt(t, m->c, m->alpha0, m->n, xerr,
             lambda, gamma);
+
+        printf("predicted optimal c %g, err %g, sqr: %g\n",
+            optc, errmin, errmin * errmin);
       }
 
       printf("estimated final error %g, sqr: %g\n",
           errref, errref * errref);
-
-      printf("predicted optimal c %g, err %g, sqr: %g\n",
-          optc, errmin, errmin * errmin);
 
       if ( m->verbose ) {
         dumperror(m->n, lambda, gamma,
