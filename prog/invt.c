@@ -41,11 +41,16 @@ __inline static void mbin_update(double *v, int n, int i,
   v[i] += a * win[0];
   /* update the neighbors */
   for ( j = 1; j < winn; j++ ) {
+
     k = i - j;
     if ( k < 0 ) {
       k = pbc ? k + n : - k - 1;
     }
     v[k] += a * win[ j ];
+
+    if ( j * 2 == n && pbc ) {
+      continue;
+    }
 
     k = i + j;
     if ( k >= n ) {

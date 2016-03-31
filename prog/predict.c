@@ -124,7 +124,7 @@ static void invt_scansig(invtpar_t *m,
 
   for ( sig = m->sigmin; sig < m->sigmax + 0.001 * m->sigdel; sig += m->sigdel ) {
     /* make the window */
-    m->wingaus = sig;
+    m->gaussig = sig;
     invtpar_mkgauswin(m);
     //lambda = geteigvals(m->n, m->winn, m->win, m->pbc, 0, NULL, 1);
     lambda = trimwindow(m->n, &m->winn, m->win, m->pbc, 0);

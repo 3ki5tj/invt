@@ -14,7 +14,7 @@
 
 /* maximal number of neighbors
  * in the multiple-bin updating scheme */
-#define NBMAX 1025
+#define NBMAX 16384
 
 
 
@@ -34,10 +34,14 @@ typedef struct {
   double qprec; /* target precision of the integral of alpha(t) */
 
   int pbc; /* periodic boundary condition */
+
   int winn; /* width of the updating window function */
-  double win[NBMAX + 1]; /* shape of the window function */
-  double wingaus; /* standard deviation of the Gaussian window */
+  double win[NBMAX + 2]; /* shape of the window function */
+  double gaussig; /* standard deviation of the Gaussian window */
   int winmax; /* explicit width for the Gaussian window */
+
+  int okmax; /* cutoff for the optimal updating scheme */
+
   double initrand; /* magnitude of the initial Gaussian noise */
   int kcutoff; /* cutoff wave number of the initial noise */
   int sampmethod; /* sampling method */
@@ -134,12 +138,15 @@ static void invtpar_init(invtpar_t *m)
 
   m->pbc = 0;
   m->winn = 1; /* single bin update */
-  m->winmax = 0;
   for ( i = 1; i <= NBMAX; i++ ) {
     m->win[i] = 0;
   }
   m->win[0] = 1; /* single-bin case */
-  m->wingaus = 0;
+  m->gaussig = 0;
+  m->winmax = 0;
+
+  m->okmax = -1; /* disable the optimal updating scheme */
+
   m->initrand = 0;
   m->kcutoff = 0;
   m->sampmethod = 0;
@@ -191,10 +198,11 @@ static void invtpar_init(invtpar_t *m)
 
 
 
+/* construct a Gaussian window */
 static void invtpar_mkgauswin(invtpar_t *m)
 {
   int i;
-  double x, s, sig = m->wingaus;
+  double x, s, sig = m->gaussig;
 
   m->winn = NBMAX;
 
@@ -228,6 +236,45 @@ static void invtpar_mkgauswin(invtpar_t *m)
    * win[0] + 2 * (win[1] + ... + win[n - 1]) = 1 */
   for ( i = 0; i < m->winn; i++ ) {
     m->win[i] /= s;
+  }
+}
+
+
+
+/* construct the window for an optimal updating scheme */
+static void invtpar_mksinrwin(invtpar_t *m)
+{
+  int i, km = m->okmax, n = m->n;
+  double k2p1 = km * 2 + 1, ang, y;
+
+  m->winn = m->pbc ? (n/2 + 1) : n;
+
+  if ( n > NBMAX ) {
+    fprintf(stderr, "window %d > %d too large!\n",
+        n, NBMAX);
+  }
+
+  if ( m->pbc )
+  {
+    /* win[i] = sin((2*km+1)*i*Pi/n)/sin(i*Pi/n)/n; */
+    m->win[0] = 1.0 * k2p1 / n;
+    for ( i = 1; i < m->winn; i++ ) {
+      ang = i * M_PI / n;
+      y = sin(k2p1 * ang);
+      m->win[i] = y / sin(ang) / n;
+    }
+  }
+  else
+  {
+    /* win[i] = {(-1)^(n+km+i-1)+
+     *         sin[(2*km+1)*i*Pi/2/n]/sin(i*Pi/2/n)}/(2*n); */
+    m->win[0] = ((((n + km) % 2) ? 1 : -1) + k2p1)/ (2.0 * n);
+    for ( i = 1; i < n; i++ ) {
+      ang = i * M_PI / (2 * n);
+      y = sin(k2p1 * ang);
+      m->win[i] = ( ((n + km + i) % 2 ? 1 : -1)
+                + y / sin(ang) ) / (2 * n);
+    }
   }
 }
 
@@ -288,10 +335,16 @@ static void invtpar_compute(invtpar_t *m)
   }
 
   /* initialize the window function */
-  if ( m->wingaus > 0 ) {
+  if ( m->gaussig > 0 ) {
 
     /* construct the Gaussian window */
     invtpar_mkgauswin(m);
+
+  } else if ( m->okmax >= 0 ) {
+
+    /* construct the sinc-like window
+     * for the optimal updating scheme */
+    invtpar_mksinrwin(m);
 
   } else {
 
@@ -357,8 +410,9 @@ static void invtpar_help(const invtpar_t *m)
   fprintf(stderr, "  --qprec:       set the precision of the integral of the alpha(t), default %g\n", m->qprec);
   fprintf(stderr, "  --pbc:         use periodic boundary condition, default %d\n", m->pbc);
   fprintf(stderr, "  --nb=:         explicitly set the update window parameters, separated by comma, like --nb=0.2,0.4\n");
-  fprintf(stderr, "  --sig=:        set the standard deviation Gaussian window, default %g\n", m->wingaus);
+  fprintf(stderr, "  --sig=:        set the standard deviation Gaussian window, default %g\n", m->gaussig);
   fprintf(stderr, "  --wmax=:       set the width truncation of Gaussian window, default %d\n", m->winmax);
+  fprintf(stderr, "  --okmax=:      use the optimal updating scheme, and set the cutoff, default %d\n", m->okmax);
   fprintf(stderr, "  --initrand=:   magnitude of the initial random error, default %g\n", m->initrand);
   fprintf(stderr, "  --kcutoff=:    cutoff of wave number of the initial random error, default %d\n", m->kcutoff);
   fprintf(stderr, "  --samp=:       set the sampling scheme, g=global Metropolis, l=local Metropolis, h=heat-bath, d=molecular dynamics, o=Ornstein-Uhlenbeck, default %s\n", sampmethod_names[m->sampmethod][0]);
@@ -612,17 +666,22 @@ static int invtpar_keymatch(invtpar_t *m,
         m->win + 1, NBMAX);
   }
   else if ( strcmpfuzzy(key, "wgaus") == 0
-         || strcmpfuzzy(key, "wingaus") == 0
-         || strcmpfuzzy(key, "width-Gaussian") == 0
+         || strcmpfuzzy(key, "gaussig") == 0
+         || strcmpfuzzy(key, "Gaussian-Sigma") == 0
          || strcmpfuzzy(key, "sigma") == 0
          || strcmpfuzzy(key, "sig") == 0 )
   {
-    m->wingaus = invtpar_getdouble(m, key, val);
+    m->gaussig = invtpar_getdouble(m, key, val);
   }
   else if ( strcmpfuzzy(key, "wmax") == 0
          || strcmpfuzzy(key, "w-cutoff") == 0 )
   {
     m->winmax = invtpar_getint(m, key, val);
+  }
+  else if ( strcmpfuzzy(key, "okmax") == 0
+         || strcmpfuzzy(key, "kmax") == 0 )
+  {
+    m->okmax = invtpar_getint(m, key, val);
   }
   else if ( strcmpfuzzy(key, "initrand") == 0 )
   {
@@ -950,7 +1009,7 @@ static int invtpar_doargs(invtpar_t *m, int argc, char **argv)
 static void invtpar_dump(const invtpar_t *m)
 {
   int i;
-  double sum = 0;
+  double x, sum = 0;
 
   fprintf(stderr, "%ld trials: n %d, alpha = %g/(t + %g), alpha0 %g, "
       "pbc %d, %s, %ld steps; equil %ld steps\n",
@@ -964,11 +1023,15 @@ static void invtpar_dump(const invtpar_t *m)
 
   fprintf(stderr, "update window function (%d bins): ", m->winn);
   for ( i = 0; i < m->winn; i++ ) {
-    sum += m->win[i];
+    x = m->win[i];
+    if ( i > 0 && !(m->pbc && i * 2 == m->n) ) {
+      x *= 2;
+    }
+    sum += x;
     fprintf(stderr, "%g ", m->win[i]);
   }
-  sum = sum * 2 - m->win[0];
   fprintf(stderr, "| sum %g\n", sum);
+  getchar();
 
 
 #ifdef SCAN
