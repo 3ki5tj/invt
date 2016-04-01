@@ -47,6 +47,6 @@ sigscan: compile $(fnmdgam)
 	$(prog) $(sigopt) --samp=md --fngamma=$(fnmdgam) --nsteps=1e10 > sigscan_t1e10_md.dat
 
 # use `invt` to generate mdgamma.dat
-$(fnmdgam): compile
+$(fnmdgam):
 	../../prog/invt --samp=md --gam --fngamma=$(fnmdgam) --gamnsteps=10000000000 --try=0
 

@@ -127,7 +127,7 @@ static void invt_scansig(invtpar_t *m,
     m->gaussig = sig;
     invtpar_mkgauswin(m);
     //lambda = geteigvals(m->n, m->winn, m->win, m->pbc, 0, NULL, 1);
-    lambda = trimwindow(m->n, &m->winn, m->win, m->pbc, 0);
+    lambda = trimwindow(m->n, &m->winn, m->win, m->pbc, 0, m->verbose);
 
     /* find the optimal c, according to the inverse time schedule */
     c = estbestc_invt(t, m->alpha0, m->n, lambda, gamma,

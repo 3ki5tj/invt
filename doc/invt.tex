@@ -71,27 +71,23 @@
   the inverse simulation time.
   %
   In this study,
-  we give a formula of computing the optimal schedule
+  we give a method of computing the optimal schedule
   for a general updating scheme
   involving multiple bins.
   %
-  We show that while metadynamics can be advantageous
-  for relatively short simulations,
+  We show that the optimal schedule of metadynamics
+  depends on the simulation length
+  and the width of the Gaussian.
+  %is solved from the equation of motion
+  %of a free particle with a position-dependent mass.
+  %
+  Further,
   the single-bin updating scheme
   used in the WL algorithm
-  belongs to a class of updating schemes
-  optimal for asymptotic convergence.
-  %the optimal schedule
-  %and the effectiveness of metadynamics
-  %are sensitive to the simulation length and other parameters.
-  %
-  %Further, we compared the two algorithms, and found that
-  %although metadynamics produces a smoother PMF profile,
-  %it is less effective in reducing errors with the shorter wavelengths.
-  %%
-  %Thus, the latter relies more heavily on the assumption of
-  %the smoothness of the PMF profile,
-  %especially with a wide updating window.
+  belongs to a class of multiple-bin updating schemes
+  optimal for asymptotic convergence,
+  and the optimal schedules of these schemes
+  are all given by the inverse-time formula.
 \end{abstract}
 
 \maketitle
@@ -236,7 +232,9 @@ different updating schemes,
 we show that
 the single-bin updating scheme
 used by the WL algorithm
-is best for infinitely long simulations.
+can be generalized to class of multiple-bin updating schemes
+that are partially optimal for infinitely long simulations,
+and the inverse-time schedule is optimal for these schemes.
 %
 %For finite-length simulations, however,
 %metadynamics may deliver better performance.
@@ -388,7 +386,7 @@ The estimated bias potential, $V_i$,
 can often be improved
 by the histogram along $i$ accumulated
 during simulation
-Using the histogram as $\pi_i$ in
+Using the histogram $H_i$ as $\pi_i$ in
 Eq. \eqref{eq:pi_p_phi1}
 allows us to correct $V_i$ as
 %
@@ -397,8 +395,8 @@ V^\mathrm{corr}_i
 =
 V_i
 +
-\log \frac{ \pi_i }
-          {   p_i }.
+\log \frac{ H_i }
+          { p_i }.
 \label{eq:vcorr_equil}
 \end{equation}
 %
@@ -689,7 +687,12 @@ by a differential equation
 where
 $\dot v_i(t) \equiv dv_i(t)/dt$,
 %
-and $h_i(t) = \delta_{i, i(t)}$
+and
+\begin{equation}
+  h_i(t) = \delta_{i, i(t)}
+  ,
+  \label{eq:h_def}
+\end{equation}
 is the instantaneous histogram,
 which is equal to $1.0$
 for the current bin $i(t)$
@@ -1306,7 +1309,7 @@ we get a set of decoupled equations
 \begin{equation}
 \dot y_k(t)
 =
--\alpha(t) \, \lambda_k \, [y_k(t) - \eta_k(t)],
+-\alpha(t) \, \lambda_k \, [y_k(t) - \theta_k(t)],
 \notag
 %\label{eq:yt_diffeq}
 \end{equation}
@@ -1316,7 +1319,7 @@ where
   y_k &= \sum_{j=1}^n \phi_{kj} \, x_j,
   \label{eq:y_def}
   \\
-  \eta_k &= \sum_{j=1}^n \phi_{kj} \frac{ \zeta_j}{ p_j}.
+  \theta_k &= \sum_{j=1}^n \phi_{kj} \frac{ \zeta_j}{ p_j}.
   \label{eq:eta_def}
 \end{align}
 
@@ -1397,7 +1400,7 @@ where,
   \kappa_k(t - t')
   &\equiv
   \left\langle
-    \eta_k(t) \, \eta_k(t')
+    \theta_k(t) \, \theta_k(t')
   \right\rangle.
 \end{align*}
 %
@@ -1902,7 +1905,7 @@ where the Lagrangian,
   \sum_{ k = 2 }^n
     \Gamma_k \, \lambda_k^2 \, u_k^2 \bigl[ q(t) \bigr]
   \; \dot q^2( t ),
-  \label{eq:error_asym_lagr}
+  \label{eq:error_asym_Lagrangian}
 \end{align}
 %
 represents a free particle
@@ -2209,10 +2212,10 @@ To circumvent the problem, we shall use
 the following modification:
 %
 \begin{equation}
-\operatorname{var} Y_k
-=
-\frac{1}{2}
-\alpha \, \Gamma_k \, \lambda_k,
+  \operatorname{var} Y_k
+  =
+  \frac{1}{2}
+  \alpha \, \Gamma_k \, \lambda_k,
 \label{eq:varY}
 \end{equation}
 %
@@ -2270,7 +2273,12 @@ $$
 Finally, by using Eq. \eqref{eq:y2_eql},
 we get Eq. \eqref{eq:varY}.
 
-
+In practice, Eq. \eqref{eq:varY}
+may fail if some eigenvalue $\lambda_k$ is zero.
+%
+However, the corresponding modes can be ignored
+as they do not contribute to the Lagrangian defined by
+Eq. \eqref{eq:error_asym_Lagrangian}.
 
 
 
@@ -2315,7 +2323,7 @@ distribution is flat, or $p_i = 1/n$, below.
 
 
 \subsubsection{\label{sec:bandkernel}
-Window kernel and eigenvalues}
+Updating kernel and eigenvalues}
 
 
 
@@ -2337,7 +2345,7 @@ Consider the following matrix, $\mathbf w$,
 \end{equation}
 %
 where
-$\mu_{-b}, \dots, \mu_b$ ($b < n/2$)
+$\mu_{-b}, \dots, \mu_b$ ($b \le n/2$)
 are a set of numbers satisfying
 %
 \begin{equation}
@@ -2358,7 +2366,11 @@ that satisfy
 \label{eq:mu_symm}
 \end{equation}
 %
+If $b = n/2$, then $\mu_{-b}$ is dropped
+from Eq. \eqref{eq:normalization}.
+%
 These numbers constitute a \emph{updating kernel}.
+
 
 This above matrix, $\mathbf w$,
 being symmetric to the indices $i$ and $j$,
@@ -3544,10 +3556,10 @@ Now an updating matrix $\mathbf w$
 with identical eigenvalues
 is essentially a multiple of the identity matrix.
 %
-Thus, in terms of asymptotic convergence,
-the single-bin scheme
-(as adopted in the WL algorithm)
-is most efficient among updating schemes.
+Thus, if no eigenvalue $\lambda_k$ is zero,
+then in terms of asymptotic convergence,
+the single-bin scheme adopted in the WL algorithm
+is most efficient.
 %
 In the single-bin case,
 $c_k = 1/(T + t_0)$,
@@ -3583,6 +3595,11 @@ are less than $1.0$ (the single-bin case).
 %especially if the updating matrix
 %has some $\lambda_k$'s close to $0$.
 
+
+\subsubsection{\label{sec:optscheme}
+Optimal schemes}
+
+
 We can also generalize
 the single-bin scheme to a class of
 optimal updating schemes.
@@ -3615,6 +3632,11 @@ $$
     \Gamma_k.
 $$
 
+The optimal schedule of these schemes
+remains to be the inverse-time schedule,
+given by Eq. \eqref{eq:alpha_invt1}.
+
+
 
 \subsubsection{\label{sec:equilerr}
 Comparison to the error of the equilibrium FDS method}
@@ -3638,7 +3660,7 @@ due to the adaptive updates?
 %
 Below, we shall show that this is unnecessary
 if the simulation uses the single-bin (WL) updating scheme
-with the optimal schedule, Eq. \eqref{eq:alpha_invt}.
+with the optimal schedule, Eq. \eqref{eq:alpha_invt1}.
 %
 That is, the bias potential obtained from
 an optimal single-bin scheme FDS simulation
@@ -3666,8 +3688,8 @@ on the right-hand side of Eq. \eqref{eq:vcorr_equil},
     \sum_{ i = 1 }^ n
       p_i \,
       \left(
-        \log \frac { \bar h_i }
-                   {      p_i }
+        \log \frac { H_i }
+                   { p_i }
       \right)^2
   \right\rangle
 \notag
@@ -3677,13 +3699,17 @@ on the right-hand side of Eq. \eqref{eq:vcorr_equil},
     p_i \,
     \left\langle
       \left(
-        \frac { \bar h_i }
-              {      p_i }
+        \frac { H_i }
+              { p_i }
         - 1
       \right)^2
-    \right\rangle.
+    \right\rangle,
 \notag
 \end{align}
+where
+$H_i = \frac{1}{T} \sum_{t = 1}^T h_i(t)$
+with
+$h_i(t)$ defined by Eq. \eqref{eq:h_def}.
 
 To make better comparison with
 the error of the single-bin case,
@@ -3691,19 +3717,19 @@ we shall rewrite the error as
 a sum over the eigenmodes.
 We define
 \begin{align}
-  \bar \eta_k
+  \Theta_k
   =
   \frac{ 1 } { T }
   \sum_{ t = 1 } ^ T
-    \eta_k( t )
+    \theta_k( t )
   ,
 \notag
 \end{align}
 %
-with $\eta_k(t_1)$ defined by Eq. \eqref{eq:eta_def}
+with $\theta_k(t_1)$ defined by Eq. \eqref{eq:eta_def}
 and $\phi_{k i}$ by Eq. \eqref{eq:eig_orthonormal_cols}.
 %\begin{align}
-%\eta_k( t_1 )
+%\theta_k( t_1 )
 %=
 %\sum_{ i = 1 }^ n
 %\phi_{k i} \left[
@@ -3726,7 +3752,7 @@ Then,
   =
   \sum_{ k = 1 }^n
     \left\langle
-      \bar \eta_k^2
+      \Theta_k^2
     \right\rangle.
 \notag
 %\label{eq:error_sbin_equil}
@@ -3736,12 +3762,12 @@ Then,
 %
 \begin{align*}
 \sum_{ k = 1 }^n
-  \bar \eta_k^2
+  \Theta_k^2
 &=
 \frac{ 1 } { T^2 }
 \sum_{ t, t' = 1 }^T
   \sum_{ k = 1 }^n
-    \eta_k( t ) \, \eta_k( t' )
+    \theta_k( t ) \, \theta_k( t' )
 \\
 &=
 \frac{ 1 } { T^2 }
@@ -3807,7 +3833,7 @@ Then,
 The sum can start from $k = 2$, for
 by Eq. \eqref{eq:eigenmode1}, we have
 $$
-\eta_1(t)
+\theta_1(t)
 =
 \sum_{ i = 1 }^n
   \phi_{1i} \, \frac{ h_i(t) - p_i } { p_i }
@@ -3820,17 +3846,17 @@ $$
 In the long-time limit,
 \begin{align*}
 \left\langle
-  \bar \eta_k^2
+  \Theta_k^2
 \right\rangle
 &=
 \frac{1}{T^2}
 \sum_{ t, t' = 1 }^T
-\langle \eta_k(t) \, \eta_k(t') \rangle
+\langle \theta_k(t) \, \theta_k(t') \rangle
 \\
 &\approx
 \frac{1}{T}
 \sum_{ \tau = -\infty }^{ \infty }
-\langle \eta_k(t) \, \eta_k(t + \tau) \rangle
+\langle \theta_k(t) \, \theta_k(t + \tau) \rangle
 \\
 &=
 \frac{1}{T}
@@ -4000,7 +4026,7 @@ the analytical prediction by Eq. \eqref{eq:error_invt}.
 %
 For both global and local sampling processes,
 the optimal $\lambda$ occurred around $1.0$,
-verifying Eq. \eqref{eq:alpha_invt}.
+verifying Eq. \eqref{eq:alpha_invt1}.
 %
 %Recall that $1/\lambda$ in Eq. \eqref{eq:alpha_invtlambda}
 %represents the relative updating magnitude.
@@ -4200,10 +4226,6 @@ with the optimal $\lambda$.
     Eq. \eqref{eq:alpha_invtlambda}
     for the Gaussian updating scheme
     with $\sigma = 10$.
-    %
-    $q(T) = \int_0^t \alpha(t) \, dt$
-    were set to be the same
-    for both schedules.
   }
 \end{center}
 \end{figure}
@@ -4220,23 +4242,26 @@ from $\lambda(0)$ to $\lambda(T) \approx 1$,
 as discussed in Sec. \ref{sec:optschedule}.
 %
 The errors in the two cases were
-$4.0 \times 10^{-7}$
+$2.7 \times 10^{-7}$
 and
 $5.9 \times 10^{-7}$,
 respectively,
 for the global sampling process,
 %
 or
-$1.67 \times 10^{-4}$
+$9.1 \times 10^{-5}$
 and
-$1.26 \times 10^{-4}$,
+$1.67 \times 10^{-4}$,
 respectively
 for the local sampling process,
 suggesting a slight edge of
 the optimal schedule from Eq. \eqref{eq:q_opt}.
 
 
+
 \subsection{Comparison of updating schemes}
+
+
 
 In Fig. \ref{fig:err_sigscan},
 we compared the error from the inverse-time schedule
@@ -4314,7 +4339,7 @@ is updated according to a Gaussian wave packet.
 By this method,
 we have verified the optimality of
 the inverse-time schedule,
-Eq. \eqref{eq:alpha_invt},
+Eq. \eqref{eq:alpha_invt1},
 for the single-bin (WL) case.
 %
 However,

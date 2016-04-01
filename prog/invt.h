@@ -138,7 +138,8 @@ static double *geteigvals(int n,
 /* modify the window function
  * such that no eigenvalue is negative */
 __inline static double *trimwindow(int n,
-    int *winn, double *win, int pbc, double tol)
+    int *winn, double *win,
+    int pbc, double tol, int verbose)
 {
   const int itmax = 10000;
   int i, j, err, it;
@@ -232,7 +233,7 @@ __inline static double *trimwindow(int n,
         nwin[j] /= n;
       }
 
-      if ( err == 0 || it == itmax - 1 ) {
+      if ( verbose > 0 && (err == 0 || it == itmax - 1) ) {
         fprintf(stderr, "it %d: win %4d: %22.10e -> %22.10e\n",
             it, j, win[j], nwin[j]);
       }

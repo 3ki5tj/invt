@@ -1031,8 +1031,6 @@ static void invtpar_dump(const invtpar_t *m)
     fprintf(stderr, "%g ", m->win[i]);
   }
   fprintf(stderr, "| sum %g\n", sum);
-  getchar();
-
 
 #ifdef SCAN
   if ( m->cscan ) {
