@@ -227,9 +227,7 @@ a more algebraically complex schedule,
 which is sensitive to the simulation length
 and the width of the Gaussian wave packet.
 %
-Further, by comparing
-different updating schemes,
-we show that
+Further, we show that
 the single-bin updating scheme
 used by the WL algorithm
 can be generalized to class of multiple-bin updating schemes
@@ -238,7 +236,9 @@ and the inverse-time schedule is optimal for these schemes.
 %
 %For finite-length simulations, however,
 %metadynamics may deliver better performance.
-%
+
+
+
 The article is organized as follows.
 %
 We present the analytical results in Sec. \ref{sec:theory},
@@ -1993,6 +1993,10 @@ the boundary condition at $t = T$ as
 Thus, we have an implicit equation for $q(t)$,
 and hence the optimal schedule,
 $\alpha(t) = \dot q(t)$.
+%
+Since we only optimized the asymptotic error $E_A$,
+the parameter $q(T)$ can be further optimized
+such that total error, $E = E_R + E_A$, is minimal.
 
 Unfortunately,
 Eq. \eqref{eq:q_opt} does not provide much information
@@ -2282,6 +2286,87 @@ Eq. \eqref{eq:error_asym_Lagrangian}.
 
 
 
+\subsubsection{\label{sec:program}
+Program}
+
+
+We can now give a complete program of computing
+the optimal schedule for a given updating scheme.
+
+\begin{enumerate}
+
+\item
+Given an updating matrix, $\mathbf w$,
+compute the eigenvalues, $\lambda_k$'s.
+
+\item
+Run a preliminary adaptive FDS simulation
+using the updating scheme with a constant
+updating magnitude, $\alpha_0$.
+Use Eq. \eqref{eq:varY} to compute $\Gamma_k$'s.
+
+\item
+Select an initial value of $q(T)$,
+e.g., $\ln(1 + \alpha_0 \, T)$.
+
+\item
+Compute the optimal schedule from
+numerically integrating Eq. \eqref{eq:q_opt}.
+
+\item
+Compute the error $E$ from
+Eqs. \eqref{eq:error_split},
+  \eqref{eq:error_asym1} and
+  \eqref{eq:error_res1}.
+
+\item
+Modify the value of $q(T)$ and repeat the above two steps,
+until the minimal error $E$ is found.
+
+\end{enumerate}
+
+The dependence of variables are shown in Fig. \ref{fig:vardep}.
+
+\begin{figure}
+\begin{tikzpicture}
+  \node[draw, text width={width("Updating ")}]
+    (w) at (0, 3) {Updating \\matrix, $w$};
+
+  \node[draw, text width={width("System  11")}]
+    (sys) at (0, 1) {System \& \\sampling \\process};
+
+  \node[draw, text width={width("Eigenvalues, ")}]
+    (lambda) at (2.5, 3) {Eigenvalues, \\$\lambda_2, \dots, \lambda_n$};
+
+  \node[draw, text width={width("Integrals, ")}]
+    (gamma) at (2.5, 1) {Integrals, \\$\Gamma_2, \dots, \Gamma_n$};
+
+  \node[draw, text width={width("Simulation ")}]
+    (T) at (2.5, -0.5) {Simulation \\time, $T$};
+
+  \node[draw, text width={width("Schedule ")}]
+    (alpha) at (5, 1) {Optimal schedule, \\ $\alpha(t)$};
+
+  \node[draw, text width={width("Error ")}]
+    (err) at (7, 1) {Error, \\ $\Err$};
+
+  \draw[->] (w) edge (lambda)
+            (w) edge (gamma)
+            (sys) edge (gamma)
+            (lambda) edge (alpha)
+            (gamma) edge (alpha)
+            (T) edge (alpha)
+            (alpha) edge (err);
+
+\end{tikzpicture}
+\caption{
+  \label{fig:vardep}
+  Dependence of variables in the method of computing
+  the optimal schedule.
+}
+\end{figure}
+
+
 \subsection{\label{sec:band-matrix}
 Homogeneous updating schemes}
 
@@ -2367,9 +2452,9 @@ that satisfy
 \end{equation}
 %
 If $b = n/2$, then $\mu_{-b}$ is dropped
-from Eq. \eqref{eq:normalization}.
+from Eq. \eqref{eq:mu_normalization}.
 %
-These numbers constitute a \emph{updating kernel}.
+These numbers constitutes a \emph{updating kernel}.
 
 
 This above matrix, $\mathbf w$,
@@ -3430,7 +3515,8 @@ that the single-bin scheme is asymptotically optimal.
 Consider a class of $\mathbf w$ matrices
 sharing the same set of eigenvectors,
 hence same $\Gamma_k$'s,
-but with different eigenvalues, $\lambda_k$'s.
+but with different positive eigenvalues,
+$\lambda_k$'s.
 %
 Using the Cauchy-Schwarz inequality, we have,
 for any set of nonnegative numbers, $c_k$'s,
@@ -3502,20 +3588,48 @@ up to a multiplicative factor.
 %
 Solving this set of equations yields
 %
-$$
-\alpha(t) = \frac{              1             }
-                 { \lambda_k \, (t + t_{k0} ) },
-\quad
-\mathrm{with\;\;}
-t_{k0} = \frac{             T            }
-              { e^{ \lambda_k q(T) } - 1 }.
-$$
+\begin{equation}
+  \alpha(t) = \frac{              1             }
+                   { \lambda_k \, (t + t_{k0} ) },
+\label{eq:alpha_invtk}
+\end{equation}
+with
+\begin{equation}
+  t_{k0} = \frac{             T            }
+                { e^{ \lambda_k q(T) } - 1 }.
+\label{eq:tk0}
+\end{equation}
 %
 Such a solution is possible only if
 %
 \begin{equation}
 \lambda_2 = \dots = \lambda_n.
 \end{equation}
+%
+In this case,
+all $t_{k0}$'s also share the same value,
+$t_0$ by Eq. \eqref{eq:tk0},
+such that
+$u_k = (t + t_0) / (T + t_0)$,
+and
+$c_k \propto 1/(T + t_0)$
+for $k \ge 2$.
+%
+The asymptotic error is then
+\begin{align}
+  E_A
+  =
+  \frac{       T     }
+       { (T + t_0)^2 }
+  \sum_{ k = 2 }^n
+    \Gamma_k
+  .
+\label{eq:error_singlebin}
+\end{align}
+%
+If we further assume that $\lambda_2 = 1$,
+the optimal schedule given by Eq. \eqref{eq:alpha_invtk}
+recovers Eq. \eqref{eq:alpha_invt1}.
 %
 \note{We add some steps for the above solution.
   Integrating $\dot u_k = c_k$ yields
@@ -3561,31 +3675,20 @@ then in terms of asymptotic convergence,
 the single-bin scheme adopted in the WL algorithm
 is most efficient.
 %
-In the single-bin case,
-$c_k = 1/(T + t_0)$,
-and the error is
-\begin{align}
-  E
-  =
-  \frac{       T     }
-       { (T + t_0)^2 }
-  \sum_{ k = 2 }^n
-    \Gamma_k
-  .
-\label{eq:error_singlebin}
-\end{align}
 
-Note that the above result
-holds only under the long time limit,
-and it is not necessarily true
-for finite length simulations.
+Note that
+since we only optimized the asymptotic error,
+the inverse-time schedule is optimal
+only in the long time limit,
+but not necessarily so for a finite-length simulation.
 %
 For example, consider a system that is initially
 prepared under a fixed $\alpha_0$
 at the beginning of the schedule $\alpha(t)$.
 %
 Then for shorter times, $T \approx 0$,
-the error, given by Eq. \eqref{eq:error_eql},
+the error, dominated by the residual error
+given by Eq. \eqref{eq:error_res1},
 is clearly smaller if some eigenvalues
 are less than $1.0$ (the single-bin case).
 %
@@ -3597,29 +3700,24 @@ are less than $1.0$ (the single-bin case).
 
 
 \subsubsection{\label{sec:optscheme}
-Optimal schemes}
+Cardinal updating schemes}
 
 
 We can also generalize
 the single-bin scheme to a class of
-optimal updating schemes.
+optimal updating schemes
+that allow zero eigenvalues.
 %
 For example,
-if we know in advance that the intrinsic
-PMF is sufficiently smooth such that
-the error modes can be limited to $k \le K$.
+if we can assume that the PMF is sufficiently smooth
+such that the error modes can be limited to $k \le K$.
 %
-Then we can manually construct
-an updating scheme with
+Then we can construct an updating scheme with
 $$
 \lambda_1 = \cdots = \lambda_K = 1,
 \mathrm{\; and \;}
 \lambda_{K+1} = \cdots = \lambda_n = 0.
 $$
-For homogeneous updating schemes,
-the updating kernel can be inversely
-found from Eq. \eqref{eq:mu_from_lambda_pbc}
-or \eqref{eq:mu_from_lambda_refl}.
 %
 Then,
 Eq. \eqref{eq:error_singlebin} is modified to
@@ -3631,10 +3729,185 @@ $$
   \sum_{ k = 2 }^K
     \Gamma_k.
 $$
-
 The optimal schedule of these schemes
 remains to be the inverse-time schedule,
 given by Eq. \eqref{eq:alpha_invt1}.
+%
+Below, we construct these schemes for
+the homogeneous case.
+
+For a periodic variable, if we demand
+%
+$$
+\begin{aligned}
+&
+\lambda_1 = \cdots = \lambda_{K+1}
+= \lambda_{n-K+1} = \cdots = \lambda_n = 1,
+\\
+&
+\lambda_{K+2} = \cdots = \lambda_{n-K} = 0,
+\end{aligned}
+$$
+for $K \ge 1$, then by using
+Eq. \eqref{eq:mu_from_lambda_pbc},
+we get
+\begin{equation}
+  \mu_l
+  =
+  \frac{
+    \sin
+    \dfrac{ (2 K + 1) \, l \, \pi }
+         {              n        }
+  }
+  {
+    n \, \sin \dfrac{ l \, \pi } { n }
+  }
+  .
+  \label{eq:mu_cardinal_pbc}
+\end{equation}
+\note{Derivation.
+$$
+\begin{aligned}
+\mu_l
+&=
+\frac 1 n \sum_{k = 0}^{n-1} \lambda_{k+1} \cos \frac{ k \, l \, 2 \, \pi } { n }
+\\
+&=
+\frac{1}{n}
+\left(
+  1 +
+  \sum_{k=1}^K
+  \cos \frac { k \, l \, 2 \, \pi } { n }
+  +
+  \sum_{k=n-K}^{n-1}
+  \cos \frac { k \, l \, 2 \, \pi } { n }
+\right)
+\\
+&=
+\frac 1 n
+\sum_{k=-K}^K
+\cos \frac { k \, l \, 2 \, \pi } { n }
+=
+  \frac{
+    \sin
+    \dfrac{ (2 K + 1) \, l \, \pi }
+         {              n        }
+  }
+  {
+    n \, \sin \dfrac{ l \, \pi } { n }
+  }
+.
+\end{aligned}
+$$
+}
+
+For a non-periodic variable, we demand
+$$
+\lambda_1 = \cdots = \lambda_{K+1} = 1,
+\qquad
+\lambda_{K+2} = \cdots = \lambda_n = 0.
+$$
+Then Eq. \eqref{eq:lambdan} gives
+$\lambda_n = (-1)^{n+K-1}$,
+and from Eq. \eqref{eq:mu_from_lambda_refl},
+we have
+\begin{equation}
+  \mu_l
+  =
+  \frac{1}{2 \, n}
+  \left[
+    (-1)^{n+K+l-1}
+    +
+    \frac{
+      \sin
+      \dfrac{ (2 K + 1) \, l \, \pi }
+           {         2 \, n        }
+    }
+    {
+      n \, \sin \dfrac{ l \, \pi } { 2 \, n }
+    }
+  \right]
+  .
+\end{equation}
+\note{Derivation.
+$$
+\begin{aligned}
+  \lambda_{n+1}
+  &=
+  (-1)^{n-1}
+  \left[
+    \lambda_1
+    + 2 (-\lambda_2 + \lambda_3 - \cdots + (-1)^K \lambda_{K+1})
+  \right]
+  \\
+  &=
+  \begin{dcases}
+    (-1)^{n-1} & K \mathrm{\; even,} \\
+    (-1)^n     & K \mathrm{\; odd.}
+  \end{dcases}
+\end{aligned}
+$$
+So
+$$
+\begin{aligned}
+  \lambda_l
+  &=
+  \frac{1}{2\,n}
+  \left[
+    1 +
+    2 \sum_{k=2}^{K+1}
+    \cos \frac { (k - 1) \, l \pi } { n }
+    +
+    (-1)^{n+K-1} (-1)^l
+  \right]
+  \\
+  &=
+  \frac{1}{2\,n}
+  \left[
+    (-1)^{n+K+l-1}
+    +
+    \sum_{k=-K}^{K}
+    \cos \frac { k \, l \pi } { n }
+  \right]
+  .
+\end{aligned}
+$$
+
+\hrulefill
+
+Example 1. If $n = 3, K = 1$,
+then $\lambda_1 = \lambda_2 = 1$, $\lambda_3 = 0$,
+and $\lambda_4 = \lambda_1 - 2 \, \lambda_2 + 2 \, \lambda_3 = -1$.
+%
+We can verify that $\mu_0 = 1/3, \mu_1 = 1/2, \mu_2 = -1/6$.
+%
+Although $\mu_1 > \mu_0$, the system will not be trapped
+in the current bin because of the reflective boundary condition.
+%
+Upon a visit to the middle bin, $j = 2$,
+$v_i$ at bin $i = 1$ or $3$ is updated by $1/2 - 1/6 = 1/3$,
+same as the update on bin $2$.
+Upon a visit to bin $i = 1$, the three bins are updated
+by $1/2 + 1/3 = 5/6$, $1/2 - 1/6 = 1/3$, and $-1/6$,
+respectively.
+
+\hrulefill
+
+Example 2. If $n = 3, K = 2$,
+then $\lambda_1 = \lambda_2 = \lambda_3 = 1$, $\lambda_4 = 1$.
+We have $\mu_0 = 1, \mu_1 = \mu_2 = 0$,
+recovering the single-bin scheme.
+
+\hrulefill
+
+Example 3. If $n = 4, K = 1$,
+then $\lambda_1 = \lambda_2 = 1, \lambda_3 = \lambda_4 = 0$,
+$\lambda_5 = (-1)(\lambda_1 - 2 \, \lambda_2 + 2 \, \lambda_3 - 2 \, \lambda_4 = 1$.
+The kernel is given by
+$\mu_0 = 1/2, \mu_1 = \sqrt{2}/8, \mu_2 = 1/4, \mu_3 = -\sqrt{2}/8$.
+}
+
+
 
 
 
@@ -3726,15 +3999,15 @@ We define
 \notag
 \end{align}
 %
-with $\theta_k(t_1)$ defined by Eq. \eqref{eq:eta_def}
+with $\theta_k(t)$ defined by Eq. \eqref{eq:eta_def}
 and $\phi_{k i}$ by Eq. \eqref{eq:eig_orthonormal_cols}.
 %\begin{align}
-%\theta_k( t_1 )
+%\theta_k( t )
 %=
 %\sum_{ i = 1 }^ n
 %\phi_{k i} \left[
-%             \frac{ h_i(t_1) }
-%                  { p_i      }
+%             \frac{ h_i(t) }
+%                  { p_i    }
 %             - 1
 %           \right],
 %\end{align}
@@ -4325,32 +4598,38 @@ we have proposed a method of computing
 the optimal schedule of the updating magnitude
 for a general adaptive FDS simulation.
 %
-Adaptive FDS methods differ by the updating schemes,
-which specify how the bias potential is modified
-in each updating step.
+Adaptive FDS methods
+effectively sample a flat distribution
+along a quantity of interest, $z$,
+by constructing a bias potential along $z$
+that offsets the PMF.
 %
-In the single-bin or WL case,
-the update is limited to the current bin;
-while in the metadynamics case,
-the bias potential of a few neighboring bins to the current one
-is updated according to a Gaussian wave packet.
+The optimal schedule ensures fastest convergence
+of the bias potential to the PMF.
+%They differ by the updating schemes,
+%which specify how the bias potential is modified
+%in each updating step.
+%%
+%In the single-bin or WL case,
+%the update is limited to the current bin;
+%while in the metadynamics case,
+%the bias potential of a neighborhood of the current one
+%is updated with relative weight specified by a Gaussian wave packet.
 
 
-By this method,
-we have verified the optimality of
-the inverse-time schedule,
+The optimal schedule computed from our method
+is identical to the inverse-time schedule,
 Eq. \eqref{eq:alpha_invt1},
 for the single-bin (WL) case.
 %
-However,
-the optimal schedule,
-given by the solution of Eq. \eqref{eq:q_opt},
-is algebraically more involved
-for a general multiple-bin scheme,
-including the Gaussian one used in metadynamics.
+For a general multiple-bin scheme,
+including the Gaussian one used in metadynamics,
+the optimal schedule does not have a closed form,
+but is given by an equation of motion
+of a free particle with a position-dependent mass, Eq. \eqref{eq:q_opt}.
 %
 In the latter case,
-both the optimal schedule and the resulting error
+the optimal schedule and error
 are sensitive to the simulation length.
 
 
@@ -4358,18 +4637,21 @@ We have also compared different updating schemes.
 %
 We have shown that in the long time limit
 the single-bin scheme belongs to a class of
-optimal updating schemes.
+asymptotically optimal updating schemes.
 %
-That is, the single-bin scheme
-is asymptotically as efficient as
-an equilibrium FDS simulation
-with the exact bias potential.
+%That is, the single-bin scheme
+%is asymptotically as efficient as
+%an equilibrium FDS simulation
+%with the exact bias potential.
 
 
 
 \section{Acknowledgments}
 
-We thanks Dr. Y. Mei and Dr. J. Ma for helpful discussions.
+We thanks
+Dr. Y. Mei, Dr. J. Ma,
+J. Drake, O. Nassar, Dr. C. Lai and Dr. S. Ou
+for helpful discussions.
 
 
 \appendix
