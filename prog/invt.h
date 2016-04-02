@@ -96,7 +96,7 @@ static double *geteigvals(int n,
     double tol, int *err, int verbose)
 {
   int i, j, nerr = 0;
-  double *lambda, x;
+  double *lambda, x, fac;
 
   if ( tol <= 0 ) { /* use the default value */
     tol = 100 * DBL_EPSILON;
@@ -114,7 +114,9 @@ static double *geteigvals(int n,
         x *= 0.5;
       }
       x = sin(x);
-      lambda[i] -= 4 * win[j] * x * x;
+      fac = 4;
+      if ( pbc && j * 2 == n ) fac = 2;
+      lambda[i] -= fac * win[j] * x * x;
     }
     if ( lambda[i] < -tol ) {
       nerr += 1;
@@ -131,6 +133,27 @@ static double *geteigvals(int n,
   }
 
   return lambda;
+}
+
+
+
+/* save the window function */
+__inline static int savewin(int winn, double *win,
+    const char *fn)
+{
+  FILE *fp;
+  int i;
+
+  if ( (fp = fopen(fn, "w")) == NULL ) {
+    fprintf(stderr, "cannot open %s\n", fn);
+    return -1;
+  }
+  fprintf(fp, "# %d\n", winn);
+  for ( i = 0; i < winn; i++ ) {
+    fprintf(fp, "%d %g\n", i, win[i]);
+  }
+  fclose(fp);
+  return 0;
 }
 
 

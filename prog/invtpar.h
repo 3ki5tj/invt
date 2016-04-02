@@ -39,6 +39,7 @@ typedef struct {
   double win[NBMAX + 2]; /* shape of the window function */
   double gaussig; /* standard deviation of the Gaussian window */
   int winmax; /* explicit width for the Gaussian window */
+  char fnwin[FILENAME_MAX]; /* output file of the window function */
 
   int okmax; /* cutoff for the optimal updating scheme */
 
@@ -144,6 +145,8 @@ static void invtpar_init(invtpar_t *m)
   m->win[0] = 1; /* single-bin case */
   m->gaussig = 0;
   m->winmax = 0;
+
+  m->fnwin[0] = '\0';
 
   m->okmax = -1; /* disable the optimal updating scheme */
 
@@ -406,13 +409,14 @@ static void invtpar_help(const invtpar_t *m)
   fprintf(stderr, "  --optc:        use the optimal proportionality constant c in the inverse-time schedule for alpha(t), default %d\n", m->optc);
   fprintf(stderr, "  --opta:        use the exact optimal schedule alpha(t), default %d\n", m->opta);
   fprintf(stderr, "  --nint:        set the number of integration points for the exact optimal schedule alpha(t), default %d\n", m->alpha_nint);
-  fprintf(stderr, "  --fnalpha=:    set the output file to output the exact optimal schedule, alpha(t), default %s\n", m->fnalpha);
+  fprintf(stderr, "  --fnalpha=:    set the output file for the exact optimal schedule, alpha(t), default %s\n", m->fnalpha);
   fprintf(stderr, "  --qprec:       set the precision of the integral of the alpha(t), default %g\n", m->qprec);
   fprintf(stderr, "  --pbc:         use periodic boundary condition, default %d\n", m->pbc);
   fprintf(stderr, "  --nb=:         explicitly set the update window parameters, separated by comma, like --nb=0.2,0.4\n");
   fprintf(stderr, "  --sig=:        set the standard deviation Gaussian window, default %g\n", m->gaussig);
   fprintf(stderr, "  --wmax=:       set the width truncation of Gaussian window, default %d\n", m->winmax);
   fprintf(stderr, "  --okmax=:      use the optimal updating scheme, and set the cutoff, default %d\n", m->okmax);
+  fprintf(stderr, "  --fnwin=:      set the output file for the window function, default %s\n", m->fnwin);
   fprintf(stderr, "  --initrand=:   magnitude of the initial random error, default %g\n", m->initrand);
   fprintf(stderr, "  --kcutoff=:    cutoff of wave number of the initial random error, default %d\n", m->kcutoff);
   fprintf(stderr, "  --samp=:       set the sampling scheme, g=global Metropolis, l=local Metropolis, h=heat-bath, d=molecular dynamics, o=Ornstein-Uhlenbeck, default %s\n", sampmethod_names[m->sampmethod][0]);
@@ -682,6 +686,10 @@ static int invtpar_keymatch(invtpar_t *m,
          || strcmpfuzzy(key, "kmax") == 0 )
   {
     m->okmax = invtpar_getint(m, key, val);
+  }
+  else if ( strcmpfuzzy(key, "fnwin") == 0 )
+  {
+    strcpy(m->fnwin, val);
   }
   else if ( strcmpfuzzy(key, "initrand") == 0 )
   {

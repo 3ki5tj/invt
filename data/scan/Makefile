@@ -46,6 +46,19 @@ sigscan: compile $(fnmdgam)
 	$(prog) $(sigopt) --samp=l                       --nsteps=1e10 > sigscan_t1e10_l.dat
 	$(prog) $(sigopt) --samp=md --fngamma=$(fnmdgam) --nsteps=1e10 > sigscan_t1e10_md.dat
 
+okopt=--okmax=20
+
+oksan: compile $(fnmdgam)
+	$(prog) $(okopt) --samp=g                       --nsteps=1e8  > sigscan_t1e8_g.dat
+	$(prog) $(okopt) --samp=l                       --nsteps=1e8  > sigscan_t1e8_l.dat
+	$(prog) $(okopt) --samp=md --fngamma=$(fnmdgam) --nsteps=1e8  > sigscan_t1e8_md.dat
+	$(prog) $(okopt) --samp=g                       --nsteps=1e9  > sigscan_t1e9_g.dat
+	$(prog) $(okopt) --samp=l                       --nsteps=1e9  > sigscan_t1e9_l.dat
+	$(prog) $(okopt) --samp=md --fngamma=$(fnmdgam) --nsteps=1e9  > sigscan_t1e9_md.dat
+	$(prog) $(okopt) --samp=g                       --nsteps=1e10 > sigscan_t1e10_g.dat
+	$(prog) $(okopt) --samp=l                       --nsteps=1e10 > sigscan_t1e10_l.dat
+	$(prog) $(okopt) --samp=md --fngamma=$(fnmdgam) --nsteps=1e10 > sigscan_t1e10_md.dat
+
 # use `invt` to generate mdgamma.dat
 $(fnmdgam):
 	../../prog/invt --samp=md --gam --fngamma=$(fnmdgam) --gamnsteps=10000000000 --try=0

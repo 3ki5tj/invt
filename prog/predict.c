@@ -165,6 +165,9 @@ int main(int argc, char **argv)
 
   lambda = geteigvals(m->n, m->winn, m->win, m->pbc,
       0, NULL, 1);
+  if ( m->fnwin[0] != '\0' ) {
+    savewin(m->winn, m->win, m->fnwin);
+  }
 
   /* estimate or load the gamma values */
   gamma = estgamma(m->n, m->sampmethod, m->pbc, m->localg);

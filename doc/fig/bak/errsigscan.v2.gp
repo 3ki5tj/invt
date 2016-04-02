@@ -23,7 +23,7 @@ set origin 0, 0
 
 set xtics 2 offset 0, 0.3
 set mxtics 2
-set xlabel "Gaussian, {/Symbol-Oblique s} / Cardinal, {/Times-Italic K}" offset 0, 0.5
+set xlabel "Width of the Gaussian, {/Symbol-Oblique s}" offset 0, 0.5
 set xrange [0:12]
 
 set logscale y
@@ -39,7 +39,9 @@ set title "MD" offset 0, -0.5
 
 plot [:][5e4:1e6] \
     "../../data/scan/sigscan_t1e8_md.dat"  u 1:($6**2) w l lt 1 lw 2 lc rgb "#000000" notitle, \
+    "../../data/scan/sigscan_t1e8_md.dat"  u 1:($4**2) w l lt 2 lw 2 lc rgb "#000000" notitle, \
     "../../data/scan/sigscan_t1e10_md.dat" u 1:($6**2) w l lt 1 lw 6 lc rgb "#000000" notitle, \
+    "../../data/scan/sigscan_t1e10_md.dat" u 1:($4**2) w l lt 2 lw 6 lc rgb "#000000" notitle, \
     -1 notitle
 
 
@@ -60,8 +62,10 @@ set format x ""
 set title "MC, global"
 
 plot [:][30:3e4] \
-    "../../data/scan/sigscan_t1e8_g.dat"   u 1:($6**2) w l lt 1 lw 2 lc rgb "#000000"    t "{/Times-Italic T} = 10^{8}, Gaussian", \
-    "../../data/scan/sigscan_t1e10_g.dat"  u 1:($6**2) w l lt 1 lw 6 lc rgb "#000000"    t "{/Times-Italic T} = 10^{10}, Gaussian", \
+    "../../data/scan/sigscan_t1e8_g.dat"   u 1:($6**2) w l lt 1 lw 2 lc rgb "#000000"    t "{/Times-Italic T} = 10^{8}, optimal", \
+    "../../data/scan/sigscan_t1e8_g.dat"   u 1:($4**2) w l lt 2 lw 2 lc rgb "#000000"    t "{/Times-Italic T} = 10^{8}, inv. {/Times t}", \
+    "../../data/scan/sigscan_t1e10_g.dat"  u 1:($6**2) w l lt 1 lw 6 lc rgb "#000000"    t "{/Times-Italic T} = 10^{10}, optimal", \
+    "../../data/scan/sigscan_t1e10_g.dat"  u 1:($4**2) w l lt 2 lw 6 lc rgb "#000000"    t "{/Times-Italic T} = 10^{10}, inv. {/Times t}", \
     -1 notitle
 
 
