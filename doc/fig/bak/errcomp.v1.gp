@@ -27,13 +27,12 @@ set ylabel "{/Times {/Times-Italic G}({/Symbol-Oblique n}_{/Times-Italic k}, {/T
 set key Left reverse width -2 spacing 1.8
 
 set samples 1000
-#G(x, y) = x * ( 1 + (1 - y**(2*x-1))/(2*x-1) )
-G(x, y) = x * ( x/(2*x-1) + (1 - x/(2*x-1)) * y**(2*x-1) )
+G(x, y) = x * ( 1 + (1 - y**(2*x-1))/(2*x-1) )
 
-plot [0:2][0.01:5] \
+plot [0:2][0.05:7] \
     G(x, 1e-1)  lt 1 lw 5 t "{/Times {/Times-Italic r} = 0.1}", \
-    G(x, 3e-2)  lt 2 lw 5 t "{/Times {/Times-Italic r} = 0.03}", \
-    G(x, 1e-2)  lt 4 lw 5 t "{/Times {/Times-Italic r} = 0.01}", \
+    G(x, 1e-2)  lt 2 lw 5 t "{/Times {/Times-Italic r} = 0.01}", \
+    G(x, 1e-3)  lt 4 lw 5 t "{/Times {/Times-Italic r} = 0.001}", \
     -1 notitle
 
 

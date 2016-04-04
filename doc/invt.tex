@@ -3674,38 +3674,16 @@ Thus, if no eigenvalue $\lambda_k$ is zero,
 then in terms of asymptotic convergence,
 the single-bin scheme adopted in the WL algorithm
 is most efficient.
-%
 
-Note that
-since we only optimized the asymptotic error,
-the inverse-time schedule is optimal
-only in the long time limit,
-but not necessarily so for a finite-length simulation.
-%
-For example, consider a system that is initially
-prepared under a fixed $\alpha_0$
-at the beginning of the schedule $\alpha(t)$.
-%
-Then for shorter times, $T \approx 0$,
-the error, dominated by the residual error
-given by Eq. \eqref{eq:error_res1},
-is clearly smaller if some eigenvalues
-are less than $1.0$ (the single-bin case).
-%
-%In practice, real simulations
-%may have long achieved the desired precision
-%before reaching the asymptotic regime,
-%especially if the updating matrix
-%has some $\lambda_k$'s close to $0$.
 
 
 \subsubsection{\label{sec:optscheme}
-Cardinal updating schemes}
+Brick-wall band-pass updating schemes}
 
 
 We can also generalize
 the single-bin scheme to a class of
-optimal updating schemes
+\emph{brick-wall band-pass} updating schemes
 that allow zero eigenvalues.
 %
 For example,
@@ -3720,15 +3698,18 @@ $$
 $$
 %
 Then,
-Eq. \eqref{eq:error_singlebin} is modified to
-$$
-  E
+Eq. \eqref{eq:error_singlebin} is changed to
+%
+\begin{equation}
+  E_A
   =
   \frac {       T     }
         { (T + t_0)^2 }
   \sum_{ k = 2 }^K
     \Gamma_k.
-$$
+\label{eq:error_asym_sinc}
+\end{equation}
+%
 The optimal schedule of these schemes
 remains to be the inverse-time schedule,
 given by Eq. \eqref{eq:alpha_invt1}.
@@ -3763,7 +3744,7 @@ we get
     n \, \sin \dfrac{ l \, \pi } { n }
   }
   .
-  \label{eq:mu_cardinal_pbc}
+  \label{eq:mu_sinc_pbc}
 \end{equation}
 \note{Derivation.
 $$
@@ -3828,7 +3809,7 @@ we have
     }
   \right]
   .
-\label{eq:mu_cardinal_refl}
+\label{eq:mu_sinc_refl}
 \end{equation}
 \note{Derivation.
 $$
@@ -3909,12 +3890,104 @@ $\mu_0 = 1/2, \mu_1 = \sqrt{2}/8, \mu_2 = 1/4, \mu_3 = -\sqrt{2}/8$.
 }
 
 
-We shall refer to the updating schemes
-given by Eqs. \eqref{eq:mu_cardinal_pbc}
-and \eqref{eq:mu_cardinal_refl}
-as cardinal updating schemes,
-since in the large $n$ limit, Eq. \eqref{eq:mu_cardinal_pbc}
-is reduced to a cardinal sine function.
+\subsubsection{\label{sec:finlencorr}
+Finite-length correction}
+
+
+
+In the above, we have been focusing on
+the asymptotic error.
+%
+For a finite-length simulation,
+we should include the residual part,
+Eq. \eqref{eq:error_res}
+and minimize the total error.
+%
+For the brick-wall band-pass updating schemes,
+this allows to determine the optimal value
+of the free parameter, $t_0$.
+
+Assuming the system is initially equilibrated
+under a constant updating magnitude, $\alpha_0$,
+we may use Eq. \eqref{eq:error_res1} with
+$$
+q(T)
+=
+\int \frac{ dt } { t + t_0 }
+=
+\ln \frac{ T + t_0 } { t_0 }.
+$$
+%
+Thus, from Eqs. \eqref{eq:error_split}
+and \eqref{eq:error_asym_sinc}, we have
+%
+\begin{equation}
+  E
+  =
+  E_R + E_A
+  =
+  \frac { \frac 1 2 \alpha_0 \, t_0^2 + T }
+        {          ( T + t_0 )^2          }
+  \sum_{ k = 2 }^K \Gamma_k
+  .
+\notag
+%\label{eq:error_sinc0}
+\end{equation}
+%
+The optimal error is reached at
+%
+\begin{equation}
+  t_0
+  =
+  \frac{     2    }
+       { \alpha_0 }
+  ,
+\label{eq:t0_sinc}
+\end{equation}
+%
+and at this point
+%
+\begin{equation}
+  E
+  =
+  \frac{        1         }
+       { T + 2 / \alpha_0 }
+  \sum_{ k = 2 }^K
+    \Gamma_k
+  .
+\label{eq:error_sinc}
+\end{equation}
+%
+This means that at the beginning of the schedule,
+the updating magnitude is
+$\alpha(0^+) = \alpha_0 / 2$,
+half of the previous equilibrium value.
+%
+Interestingly, this factor of $1/2$
+happens to coincide with the suggested
+reduction factor of updating magnitude
+in the original WL algorithm\cite{wang2001, wang2001pre}
+during stage transitions.
+
+
+
+
+%
+%For example, consider a system that is initially
+%prepared under a fixed $\alpha_0$
+%at the beginning of the schedule $\alpha(t)$.
+%%
+%Then for shorter times, $T \approx 0$,
+%the error, dominated by the residual error
+%given by Eq. \eqref{eq:error_res1},
+%is clearly smaller if some eigenvalues
+%are less than $1.0$ (the single-bin case).
+%
+%In practice, real simulations
+%may have long achieved the desired precision
+%before reaching the asymptotic regime,
+%especially if the updating matrix
+%has some $\lambda_k$'s close to $0$.
 
 
 
