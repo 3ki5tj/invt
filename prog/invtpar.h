@@ -87,6 +87,8 @@ typedef struct {
   double sigmin;
   double sigdel;
   double sigmax;
+
+  int okscan;
 #endif /* SCAN */
 
   int verbose; /* verbose level */
@@ -196,6 +198,8 @@ static void invtpar_init(invtpar_t *m)
   m->sigmin = 0.0;
   m->sigdel = 0.2;
   m->sigmax = 10.0;
+
+  m->okscan = 0;
 #endif /* SCAN */
 }
 
@@ -442,6 +446,7 @@ static void invtpar_help(const invtpar_t *m)
   fprintf(stderr, "  --sigmin=:     set the minimal width of the Gaussian scheme in sig-scan, default %g\n", m->sigmin);
   fprintf(stderr, "  --sigmax=:     set the maximal width of the Gaussian scheme in sig-scan, default %g\n", m->sigmax);
   fprintf(stderr, "  --dsig=:       set the increment of the width in sig-scan, default %g\n", m->sigdel);
+  fprintf(stderr, "  --okscan=:     scan along okmax, default %d\n", m->okscan);
 #endif /* SCAN */
   fprintf(stderr, "  -v:            be verbose, -vv to be more verbose, etc.\n");
   fprintf(stderr, "  -h, --help:    display this message\n");
@@ -859,6 +864,11 @@ static int invtpar_keymatch(invtpar_t *m,
   {
     m->sigmax = invtpar_getdouble(m, key, val);
     m->sigscan = 1;
+  }
+  else if ( strcmpfuzzy(key, "okscan") == 0
+         || strcmpfuzzy(key, "okmaxscan") == 0 )
+  {
+    m->okscan = 1;
   }
 #endif /* SCAN */
   else

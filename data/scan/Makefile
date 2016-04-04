@@ -37,31 +37,21 @@ nbscan: compile $(fnmdgam)
 	$(prog) --nbmin=-1.0 --nbdel=0.001 --nbmax=0.25 --samp=l                        --nsteps=1e10 > nbscan_t1e10_l.dat
 	$(prog) --nbmin=-1.0 --nbdel=0.001 --nbmax=0.25 --samp=md --fngamma=$(fnmdgam)  --nsteps=1e10 > nbscan_t1e10_l.dat
 
-sigopt=--sigdel=0.02 --sigmax=20
+sigopt=--sigdel=0.1 --sigmax=12
 
 sigscan: compile $(fnmdgam)
 	$(prog) $(sigopt) --samp=g                       --nsteps=1e8  > sigscan_t1e8_g.dat
 	$(prog) $(sigopt) --samp=l                       --nsteps=1e8  > sigscan_t1e8_l.dat
-	$(prog) $(sigopt) --samp=md --fngamma=$(fnmdgam) --nsteps=1e8  > sigscan_t1e8_md.dat
-	$(prog) $(sigopt) --samp=g                       --nsteps=1e9  > sigscan_t1e9_g.dat
-	$(prog) $(sigopt) --samp=l                       --nsteps=1e9  > sigscan_t1e9_l.dat
-	$(prog) $(sigopt) --samp=md --fngamma=$(fnmdgam) --nsteps=1e9  > sigscan_t1e9_md.dat
 	$(prog) $(sigopt) --samp=g                       --nsteps=1e10 > sigscan_t1e10_g.dat
 	$(prog) $(sigopt) --samp=l                       --nsteps=1e10 > sigscan_t1e10_l.dat
-	$(prog) $(sigopt) --samp=md --fngamma=$(fnmdgam) --nsteps=1e10 > sigscan_t1e10_md.dat
 
-okopt=--okmax=20
+okopt=--okscan=1 --okmax=99
 
-oksan: compile $(fnmdgam)
-	$(prog) $(okopt) --samp=g                       --nsteps=1e8  > sigscan_t1e8_g.dat
-	$(prog) $(okopt) --samp=l                       --nsteps=1e8  > sigscan_t1e8_l.dat
-	$(prog) $(okopt) --samp=md --fngamma=$(fnmdgam) --nsteps=1e8  > sigscan_t1e8_md.dat
-	$(prog) $(okopt) --samp=g                       --nsteps=1e9  > sigscan_t1e9_g.dat
-	$(prog) $(okopt) --samp=l                       --nsteps=1e9  > sigscan_t1e9_l.dat
-	$(prog) $(okopt) --samp=md --fngamma=$(fnmdgam) --nsteps=1e9  > sigscan_t1e9_md.dat
-	$(prog) $(okopt) --samp=g                       --nsteps=1e10 > sigscan_t1e10_g.dat
-	$(prog) $(okopt) --samp=l                       --nsteps=1e10 > sigscan_t1e10_l.dat
-	$(prog) $(okopt) --samp=md --fngamma=$(fnmdgam) --nsteps=1e10 > sigscan_t1e10_md.dat
+okscan: compile $(fnmdgam)
+	$(prog) $(okopt) --samp=g                       --nsteps=1e8  > okscan_t1e8_g.dat
+	$(prog) $(okopt) --samp=l                       --nsteps=1e8  > okscan_t1e8_l.dat
+	$(prog) $(okopt) --samp=g                       --nsteps=1e10 > okscan_t1e10_g.dat
+	$(prog) $(okopt) --samp=l                       --nsteps=1e10 > okscan_t1e10_l.dat
 
 # use `invt` to generate mdgamma.dat
 $(fnmdgam):

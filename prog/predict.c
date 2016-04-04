@@ -154,6 +154,47 @@ static void invt_scansig(invtpar_t *m,
 
 
 
+static void invt_scanok(invtpar_t *m,
+    const double *gamma)
+{
+  int ok, okmax = m->okmax;
+  double t, t0;
+  double c, qt = 0, err1, err1norm, err2, err2norm;
+  double *lambda;
+
+  t = (double) m->nsteps;
+
+  for ( ok = 1; ok <= okmax; ok += 1 ) {
+    /* make the window */
+    m->okmax = ok;
+    invtpar_mksinrwin(m);
+    lambda = geteigvals(m->n, m->winn, m->win, m->pbc, 0, NULL, 1);
+
+    /* find the optimal c, according to the inverse time schedule */
+    c = estbestc_invt(t, m->alpha0, m->n, lambda, gamma,
+        0, &err1, 0);
+
+    /* compute the time-normalized error
+     * of the optimized inverse-time schedule */
+    t0 = c / m->alpha0;
+    err1norm = err1 * sqrt(t + t0);
+
+    /* compute the exact minimal error under the same condition */
+    err2 = esterror_opt(t, m->alpha0, &qt, m->qprec,
+        m->alpha_nint, NULL, m->n, NULL,
+        lambda, gamma, m->verbose);
+
+    /* compute the error of the optimal schedule */
+    err2norm = err2 * sqrt(t + t0);
+
+    printf("%8d\t%10.6f\t%10.6f\t%g\t%10.6f\t%g\n",
+        ok, c, err1, err1norm, err2, err2norm);
+    free(lambda);
+  }
+}
+
+
+
 int main(int argc, char **argv)
 {
   invtpar_t m[1];
@@ -175,7 +216,7 @@ int main(int argc, char **argv)
     loadgamma(m->n, gamma, m->fngamma);
   }
 
-  if ( !m->cscan && !m->nbscan && !m->sigscan ) {
+  if ( !m->cscan && !m->nbscan && !m->sigscan && !m->okscan ) {
     invt_geterr(m, lambda, gamma);
   }
 
@@ -189,6 +230,10 @@ int main(int argc, char **argv)
 
   if ( m->sigscan ) {
     invt_scansig(m, gamma);
+  }
+
+  if ( m->okscan ) {
+    invt_scanok(m, gamma);
   }
 
   free(lambda);

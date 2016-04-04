@@ -8,8 +8,8 @@
 
 set encoding cp1250 # make the minus sign longer
 set terminal push
-# dl 3.0 make dashed line longer
-set terminal postscript eps enhanced dl 3.0 size 3.5, 5 font "Times, 26"
+# dl 2.0 make dashed line longer
+set terminal postscript eps enhanced dl 2.0 size 3.5, 5 font "Times, 26"
 set output "errsigscan.eps"
 set multiplot
 
@@ -23,7 +23,7 @@ set origin 0, 0
 
 set xtics 2 offset 0, 0.3
 set mxtics 2
-set xlabel "Gaussian, {/Symbol-Oblique s} / Cardinal, {/Times-Italic K}" offset 0, 0.5
+set xlabel "{/Symbol-Oblique s}" offset 0, 0.5
 set xrange [0:12]
 
 set logscale y
@@ -34,12 +34,15 @@ set format y "10^{%T}"
 set ylabel "Normalized error, ({/Times-Italic T} + {/Times-Italic t}_{0}) {/Times-Italic E}"
 
 a0 = 0.0001
+fac = 2*100/sqrt(2*pi)
 
-set title "MD" offset 0, -0.5
+set title "MC, local" offset 0, -0.5
 
-plot [:][5e4:1e6] \
-    "../../data/scan/sigscan_t1e8_md.dat"  u 1:($6**2) w l lt 1 lw 2 lc rgb "#000000" notitle, \
-    "../../data/scan/sigscan_t1e10_md.dat" u 1:($6**2) w l lt 1 lw 6 lc rgb "#000000" notitle, \
+plot [:][5e3:1.2e4] \
+    "../../data/scan/sigscan_t1e8_l.dat"  u 1:($6**2) w l lt 1 lw 2 lc rgb "#000000" notitle, \
+    "../../data/scan/sigscan_t1e10_l.dat" u 1:($6**2) w l lt 1 lw 6 lc rgb "#000000" notitle, \
+    "../../data/scan/okscan_t1e8_l.dat"    u (fac/(2*$1)):($6**2) w l lt 2 lw 2 lc rgb "#000000" notitle, \
+    "../../data/scan/okscan_t1e10_l.dat"   u (fac/(2*$1)):($6**2) w l lt 4 lw 6 lc rgb "#808080" notitle, \
     -1 notitle
 
 
@@ -59,9 +62,11 @@ set format x ""
 
 set title "MC, global"
 
-plot [:][30:3e4] \
-    "../../data/scan/sigscan_t1e8_g.dat"   u 1:($6**2) w l lt 1 lw 2 lc rgb "#000000"    t "{/Times-Italic T} = 10^{8}, Gaussian", \
-    "../../data/scan/sigscan_t1e10_g.dat"  u 1:($6**2) w l lt 1 lw 6 lc rgb "#000000"    t "{/Times-Italic T} = 10^{10}, Gaussian", \
+plot [:][3:3e3] \
+    "../../data/scan/sigscan_t1e8_g.dat"   u 1:($6**2) w l lt 1 lw 2 lc rgb "#000000"    t "Gaussian, {/Times-Italic T} = 10^{8}", \
+    "../../data/scan/sigscan_t1e10_g.dat"  u 1:($6**2) w l lt 1 lw 6 lc rgb "#000000"    t "Gaussian, {/Times-Italic T} = 10^{10}", \
+    "../../data/scan/okscan_t1e8_g.dat"    u (fac/(2*$1)):($6**2) w l lt 2 lw 2 lc rgb "#000000"    t "Band-pass, {/Times-Italic T} = 10^{8}", \
+    "../../data/scan/okscan_t1e10_g.dat"   u (fac/(2*$1)):($6**2) w l lt 4 lw 6 lc rgb "#808080"    t "Band-pass, {/Times-Italic T} = 10^{10}", \
     -1 notitle
 
 
