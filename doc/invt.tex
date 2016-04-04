@@ -3967,7 +3967,7 @@ Interestingly, this factor of $1/2$
 happens to coincide with the suggested
 reduction factor of updating magnitude
 in the original WL algorithm\cite{wang2001, wang2001pre}
-during stage transitions.
+at stage transitions.
 
 
 
@@ -4927,8 +4927,7 @@ such that the values of
 $\left\langle y_k^2(0) \right\rangle$
 can be computed from Eq. \eqref{eq:y2_eql}.
 %
-The total error is given by the sum of
-Eqs. \eqref{eq:error_res_invt} and \eqref{eq:error_asym_invt}.
+The total error is
 %
 \begin{align}
 \Err
@@ -4938,109 +4937,108 @@ Eqs. \eqref{eq:error_res_invt} and \eqref{eq:error_asym_invt}.
 \\
 &=
 \sum_{ k = 2 }^n
-  \Err^f_k \,
-  \left\{
-    1
-    +
-    \frac{ 1 - \left[ t_0 / (T + t_0) \right]^{2 \, \nu_k - 1} }
-         {                 2 \, \nu_k - 1                      }
-%    \frac{       1        }
-%         { 2 \, \nu_k - 1 }
-%    \left[
-%      1 -
-%      \left(
-%        \tfrac{   t_0   }
-%              { T + t_0 }
-%      \right)^{2 \, \nu_k - 1}
-%    \right]
-  \right\}
-,
+  \frac
+  {
+    \Gamma_k \, \nu_k \,
+    \left[
+      \nu_k
+      -
+      (\nu_k - 1)
+      \left(
+        \frac{ t_0 } { T + t_0 }
+      \right)^{ 2 \, \nu_k - 1 }
+    \right]
+  }
+  {
+    (T + t_0) \, (2 \, \nu_k - 1)
+  }
+  .
 \label{eq:error_invt}
 \end{align}
 %
-where
-$$
-\Err^f_k
-\equiv
-\left\langle
-  y_k^2
-\right\rangle_{ \alpha(t) }
-=
-\frac{  \Gamma_k \, \nu_k   }
-     {    2 \, (T + t_0)    }
-,
-$$
-is the equilibrium, or saturated, error of mode $k$
-at the terminal updating magnitude
-of $\alpha(T) = 1/[\lambda (T + t_0)]$.
+%where
+%$$
+%\Err^f_k
+%\equiv
+%\left\langle
+%  y_k^2
+%\right\rangle_{ \alpha(t) }
+%=
+%\frac{  \Gamma_k \, \nu_k   }
+%     {    2 \, (T + t_0)    }
+%,
+%$$
+%is the equilibrium, or saturated, error of mode $k$
+%at the terminal updating magnitude
+%of $\alpha(T) = 1/[\lambda (T + t_0)]$.
 
-\note{Derivation of Eq. \eqref{eq:error_invt}:
-$$
-\begin{aligned}
-\Err_R
-&=
-\sum_{ k = 2 }^n
-  \Err^f_k \left( \frac{   t_0   }
-                       { T + t_0 }
-          \right)^{ 2 \nu_k - 1 }
-\\
-\Err_A
-&=
-\sum_{ k = 2 }^n
-  \frac{ 2 \, \Err^f_k \, \nu_k }
-       {    2 \, \nu_k - 1      }
-  \left[
-    1 -
-    \left(
-      \tfrac{   t_0   }
-            { T + t_0 }
-      \right)^{2 \, \nu_k - 1}
-  \right]
-\\
-&=
-\sum_{ k = 2 }^n
-  \Err^f_k \,
-  \left[
-    1 -
-    \left(
-      \tfrac{   t_0   }
-            { T + t_0 }
-      \right)^{2 \, \nu_k - 1}
-  \right]
-  +
-  \frac{   \Err^f_k     }
-       { 2 \, \nu_k - 1 }
-  \left[
-    1 -
-    \left(
-      \tfrac{   t_0   }
-           { T + t_0 }
-      \right)^{2 \, \nu_k - 1}
-  \right].
-\end{aligned}
-$$
-Adding the two yields Eq. \eqref{eq:error_invt}.
-}
+%\note{Derivation of Eq. \eqref{eq:error_invt}:
+%$$
+%\begin{aligned}
+%\Err_R
+%&=
+%\sum_{ k = 2 }^n
+%  \Err^f_k \left( \frac{   t_0   }
+%                       { T + t_0 }
+%          \right)^{ 2 \nu_k - 1 }
+%\\
+%\Err_A
+%&=
+%\sum_{ k = 2 }^n
+%  \frac{ 2 \, \Err^f_k \, \nu_k }
+%       {    2 \, \nu_k - 1      }
+%  \left[
+%    1 -
+%    \left(
+%      \tfrac{   t_0   }
+%            { T + t_0 }
+%      \right)^{2 \, \nu_k - 1}
+%  \right]
+%\\
+%&=
+%\sum_{ k = 2 }^n
+%  \Err^f_k \,
+%  \left[
+%    1 -
+%    \left(
+%      \tfrac{   t_0   }
+%            { T + t_0 }
+%      \right)^{2 \, \nu_k - 1}
+%  \right]
+%  +
+%  \frac{   \Err^f_k     }
+%       { 2 \, \nu_k - 1 }
+%  \left[
+%    1 -
+%    \left(
+%      \tfrac{   t_0   }
+%           { T + t_0 }
+%      \right)^{2 \, \nu_k - 1}
+%  \right].
+%\end{aligned}
+%$$
+%Adding the two yields Eq. \eqref{eq:error_invt}.
+%}
 
 
 
 %We give several remarks on Eq. \eqref{eq:error_invt}.
 %
 
-Clearly, the final error is always greater than
-the saturated equilibrium error
-at the terminal $\alpha(T)$:
-$$
-E \ge E_\mathrm{sat} \equiv \sum_{k = 2}^n E^f_k,
-$$
-because the second term in the braces
-of Eq. \eqref{eq:error_invt}
-is nonnegative no matter the sign of $2 \, \nu_k - 1$
-(in fact, it is a decreasing function
-that vanishes only at $\nu_k \to +\infty$).
-%
-For a set of nonidentical $\lambda_k$'s,
-the equality is reached only at $T = 0$.
+%Clearly, the final error is always greater than
+%the saturated equilibrium error
+%at the terminal $\alpha(T)$:
+%$$
+%E \ge E_\mathrm{sat} \equiv \sum_{k = 2}^n E^f_k,
+%$$
+%because the second term in the braces
+%of Eq. \eqref{eq:error_invt}
+%is nonnegative no matter the sign of $2 \, \nu_k - 1$
+%(in fact, it is a decreasing function
+%that vanishes only at $\nu_k \to +\infty$).
+%%
+%For a set of nonidentical $\lambda_k$'s,
+%the equality is reached only at $T = 0$.
 
 
 
@@ -5076,8 +5074,8 @@ $$
 \Err
 =
 \sum_{ k = 2 }^n
-  \frac{    \Gamma_k    }
-       { 2 \, (T + t_0) }
+  \frac{ \Gamma_k  }
+       { (T + t_0) }
   G\left( \nu_k, \frac{ t_0 } { T + t_0} \right),
 $$
 %
@@ -5086,14 +5084,15 @@ where the $k$th component is proportional to
 $$
 G\left( \nu_k, r \right)
 =
-\nu_k
+\frac { \nu_k }
+      { 2 \, \nu_k - 1 }
 \,
-\left(
-  1
-  +
-  \frac{ 1 - r^{2 \, \nu_k - 1} }
-       {   2 \, \nu_k - 1       }
-\right).
+\left[
+  \nu_k
+  -
+  (\nu_k - 1) \,
+  r^{2 \, \nu_k - 1}
+\right].
 $$
 %
 As shown in Fig. \ref{fig:err_component},

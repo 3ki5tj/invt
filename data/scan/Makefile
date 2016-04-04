@@ -18,6 +18,10 @@ sigsingle: compile $(fnmdgam)
 	$(prog) --sig=10 --samp=l --nint=10000 --fnalpha=sig10_l_alpha.dat
 	$(prog) --sig=10 --samp=md --fngamma=$(fnmdgam) --nint=10000 --fnalpha=sig10_md_alpha.dat
 
+sincsingle: compile
+	$(prog) --opta --okmax=8 --fnalpha=sinc_nonpbc_alpha.dat --fnwin=sinc_nonpbc_win.dat
+	$(prog) --opta --okmax=4 --fnalpha=sinc_pbc_alpha.dat --fnwin=sinc_pbc_win.dat
+
 # for the error
 nbscan: compile $(fnmdgam)
 	$(prog) --nbmin=-1.0 --nbdel=0.001 --nbmax=0.25 --samp=g                        --nsteps=1e7  > nbscan_t1e7_g.dat
