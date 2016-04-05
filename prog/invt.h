@@ -137,7 +137,7 @@ static double *geteigvals(int n,
 
 
 
-/* save the window function */
+/* save the updating window function */
 __inline static int savewin(int winn, double *win,
     const char *fn)
 {
@@ -151,6 +151,52 @@ __inline static int savewin(int winn, double *win,
   fprintf(fp, "# %d\n", winn);
   for ( i = 0; i < winn; i++ ) {
     fprintf(fp, "%d %g\n", i, win[i]);
+  }
+  fprintf(fp, "%d 0\n", winn);
+  fclose(fp);
+  return 0;
+}
+
+
+/* save the updating window function
+ * in matrix form */
+__inline static int savewinmat(int winn, double *win,
+    int n, int pbc, const char *fn)
+{
+  FILE *fp;
+  int i, j, ks[3], k, l;
+
+  if ( (fp = fopen(fn, "w")) == NULL ) {
+    fprintf(stderr, "cannot open %s\n", fn);
+    return -1;
+  }
+  fprintf(fp, "# %d %d\n", winn, n);
+  for ( i = 1; i <= n; i++ ) {
+    for ( j = 1; j <= n; j++ ) {
+      double y = 0;
+
+      if ( pbc ) {
+        ks[0] = i - j;
+        ks[1] = i - j - n;
+        ks[2] = i - j + n;
+      } else {
+        ks[0] = i - j;
+        ks[1] = i + j - 1;
+        ks[2] = i + j - 2 * n - 1;
+      }
+      for ( l = 0; l < 3; l++ ) {
+        k = ks[l];
+        if ( k < winn && k > -winn ) {
+          if ( k >= 0 ) {
+            y += win[k];
+          } else {
+            y += win[-k];
+          }
+        }
+      }
+      fprintf(fp, "%d %d %g\n", i, j, y);
+    }
+    fprintf(fp, "\n");
   }
   fclose(fp);
   return 0;

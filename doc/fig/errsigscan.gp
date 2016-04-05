@@ -23,7 +23,8 @@ set origin 0, 0
 
 set xtics 2 offset 0, 0.3
 set mxtics 2
-set xlabel "{/Symbol-Oblique s}" offset 0, 0.5
+#set xlabel "{/Symbol-Oblique s} (Gaussian) or {/Times-Italic n}/{/Times-Italic K}/{/Symbol \326}(2{/Symbol-Italic p}) (Bandpass)" offset 0, 0.5
+set xlabel "Width, {/Symbol-Oblique s}" offset 0, 0.5
 set xrange [0:12]
 
 set logscale y
@@ -65,8 +66,8 @@ set title "MC, global"
 plot [:][3:3e3] \
     "../../data/scan/sigscan_t1e8_g.dat"   u 1:($6**2) w l lt 1 lw 2 lc rgb "#000000"    t "Gaussian, {/Times-Italic T} = 10^{8}", \
     "../../data/scan/sigscan_t1e10_g.dat"  u 1:($6**2) w l lt 1 lw 6 lc rgb "#000000"    t "Gaussian, {/Times-Italic T} = 10^{10}", \
-    "../../data/scan/okscan_t1e8_g.dat"    u (fac/(2*$1)):($6**2) w l lt 2 lw 2 lc rgb "#000000"    t "Band-pass, {/Times-Italic T} = 10^{8}", \
-    "../../data/scan/okscan_t1e10_g.dat"   u (fac/(2*$1)):($6**2) w l lt 4 lw 6 lc rgb "#808080"    t "Band-pass, {/Times-Italic T} = 10^{10}", \
+    "../../data/scan/okscan_t1e8_g.dat"    u (fac/(2*$1)):($6**2) w l lt 2 lw 2 lc rgb "#000000"    t "Bandpass, {/Times-Italic T} = 10^{8}", \
+    "../../data/scan/okscan_t1e10_g.dat"   u (fac/(2*$1)):($6**2) w l lt 4 lw 6 lc rgb "#808080"    t "Bandpass, {/Times-Italic T} = 10^{10}", \
     -1 notitle
 
 

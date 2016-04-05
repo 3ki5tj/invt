@@ -1,4 +1,4 @@
-all: nbscan sigscan nbsingle sigsingle
+all: nbsingle sigsingle sincsingle nbscan sigscan okscan
 
 prog=../../prog/predict
 
@@ -18,9 +18,11 @@ sigsingle: compile $(fnmdgam)
 	$(prog) --sig=10 --samp=l --nint=10000 --fnalpha=sig10_l_alpha.dat
 	$(prog) --sig=10 --samp=md --fngamma=$(fnmdgam) --nint=10000 --fnalpha=sig10_md_alpha.dat
 
+
+# for Figure sinc.gp
 sincsingle: compile
-	$(prog) --opta --okmax=8 --fnalpha=sinc_nonpbc_alpha.dat --fnwin=sinc_nonpbc_win.dat
-	$(prog) --opta --okmax=4 --fnalpha=sinc_pbc_alpha.dat --fnwin=sinc_pbc_win.dat
+	$(prog) --opta --okmax=8 --fnalpha=sinc_nonpbc_alpha.dat --fnwin=sinc_nonpbc_win.dat --fnwinmat=sinc_nonpbc_winmat.dat
+	$(prog) --opta --okmax=4 --pbc --fnalpha=sinc_pbc_alpha.dat --fnwin=sinc_pbc_win.dat
 
 # for the error
 nbscan: compile $(fnmdgam)

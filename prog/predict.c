@@ -164,7 +164,7 @@ static void invt_scanok(invtpar_t *m,
 
   t = (double) m->nsteps;
 
-  for ( ok = 1; ok <= okmax; ok += 1 ) {
+  for ( ok = m->okdel; ok <= okmax; ok += m->okdel ) {
     /* make the window */
     m->okmax = ok;
     invtpar_mksinrwin(m);
@@ -208,6 +208,9 @@ int main(int argc, char **argv)
       0, NULL, 1);
   if ( m->fnwin[0] != '\0' ) {
     savewin(m->winn, m->win, m->fnwin);
+  }
+  if ( m->fnwinmat[0] != '\0' ) {
+    savewinmat(m->winn, m->win, m->n, m->pbc, m->fnwinmat);
   }
 
   /* estimate or load the gamma values */

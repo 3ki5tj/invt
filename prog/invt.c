@@ -255,7 +255,15 @@ static double invt_run(invtpar_t *m)
   /* estimate the eigenvalues of the w matrix,
    * for the updating scheme */
   //lambda = geteigvals(m->n, m->winn, m->win, m->pbc, 0, NULL, 1);
+  /* modify the window function such that all eigenvalues
+   * lambda[i] are positive-definite */
   lambda = trimwindow(m->n, &m->winn, m->win, m->pbc, 0, m->verbose);
+  if ( m->fnwin[0] != '\0' ) {
+    savewin(m->winn, m->win, m->fnwin);
+  }
+  if ( m->fnwinmat[0] != '\0' ) {
+    savewinmat(m->winn, m->win, m->n, m->pbc, m->fnwinmat);
+  }
 
   /* estimate the integrals of correlations
    * of the eigenmodes for the updating scheme */

@@ -40,6 +40,7 @@ typedef struct {
   double gaussig; /* standard deviation of the Gaussian window */
   int winmax; /* explicit width for the Gaussian window */
   char fnwin[FILENAME_MAX]; /* output file of the window function */
+  char fnwinmat[FILENAME_MAX]; /* output file of the window function in matrix form with wrapping */
 
   int okmax; /* cutoff for the optimal updating scheme */
 
@@ -89,6 +90,7 @@ typedef struct {
   double sigmax;
 
   int okscan;
+  int okdel;
 #endif /* SCAN */
 
   int verbose; /* verbose level */
@@ -149,6 +151,7 @@ static void invtpar_init(invtpar_t *m)
   m->winmax = 0;
 
   m->fnwin[0] = '\0';
+  m->fnwinmat[0] = '\0';
 
   m->okmax = -1; /* disable the optimal updating scheme */
 
@@ -200,6 +203,7 @@ static void invtpar_init(invtpar_t *m)
   m->sigmax = 10.0;
 
   m->okscan = 0;
+  m->okdel = 1;
 #endif /* SCAN */
 }
 
@@ -421,6 +425,7 @@ static void invtpar_help(const invtpar_t *m)
   fprintf(stderr, "  --wmax=:       set the width truncation of Gaussian window, default %d\n", m->winmax);
   fprintf(stderr, "  --okmax=:      use the optimal updating scheme, and set the cutoff, default %d\n", m->okmax);
   fprintf(stderr, "  --fnwin=:      set the output file for the window function, default %s\n", m->fnwin);
+  fprintf(stderr, "  --fnwinmat=:   set the output file for the window function in matrix form, default %s\n", m->fnwinmat);
   fprintf(stderr, "  --initrand=:   magnitude of the initial random error, default %g\n", m->initrand);
   fprintf(stderr, "  --kcutoff=:    cutoff of wave number of the initial random error, default %d\n", m->kcutoff);
   fprintf(stderr, "  --samp=:       set the sampling scheme, g=global Metropolis, l=local Metropolis, h=heat-bath, d=molecular dynamics, o=Ornstein-Uhlenbeck, default %s\n", sampmethod_names[m->sampmethod][0]);
@@ -447,6 +452,7 @@ static void invtpar_help(const invtpar_t *m)
   fprintf(stderr, "  --sigmax=:     set the maximal width of the Gaussian scheme in sig-scan, default %g\n", m->sigmax);
   fprintf(stderr, "  --dsig=:       set the increment of the width in sig-scan, default %g\n", m->sigdel);
   fprintf(stderr, "  --okscan=:     scan along okmax, default %d\n", m->okscan);
+  fprintf(stderr, "  --dok=:        set the increment of okmax, default %d\n", m->okdel);
 #endif /* SCAN */
   fprintf(stderr, "  -v:            be verbose, -vv to be more verbose, etc.\n");
   fprintf(stderr, "  -h, --help:    display this message\n");
@@ -696,6 +702,10 @@ static int invtpar_keymatch(invtpar_t *m,
   {
     strcpy(m->fnwin, val);
   }
+  else if ( strcmpfuzzy(key, "fnwinmat") == 0 )
+  {
+    strcpy(m->fnwinmat, val);
+  }
   else if ( strcmpfuzzy(key, "initrand") == 0 )
   {
     m->initrand = invtpar_getdouble(m, key, val);
@@ -868,6 +878,12 @@ static int invtpar_keymatch(invtpar_t *m,
   else if ( strcmpfuzzy(key, "okscan") == 0
          || strcmpfuzzy(key, "okmaxscan") == 0 )
   {
+    m->okscan = 1;
+  }
+  else if ( strcmpfuzzy(key, "okdel") == 0
+         || strcmpfuzzy(key, "dok") == 0 )
+  {
+    m->okdel = invtpar_getint(m, key, val);
     m->okscan = 1;
   }
 #endif /* SCAN */
@@ -1064,6 +1080,11 @@ static void invtpar_dump(const invtpar_t *m)
   if ( m->sigscan ) {
     fprintf(stderr, "sig-scan window: %g:%g:%g\n",
         m->sigmin, m->sigdel, m->sigmax);
+  }
+  
+  if ( m->okscan ) {
+    fprintf(stderr, "okmax-scan window: 0:%d:%d\n",
+        m->okdel, m->okmax);
   }
 #endif /* SCAN */
 }

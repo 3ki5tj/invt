@@ -2622,10 +2622,9 @@ $\lambda_{n - k + 2} = \lambda_k$.
 
 
 
-We now adapt the above formulae to a non-periodic variable.
-%
-We shall use the reflective boundary condition\cite{bussi2006},
-and modifies the form of the updating matrix, $\mathbf w$, as
+To adapt the above formulae to a non-periodic variable,
+we use the reflective boundary condition\cite{bussi2006},
+and change the form of the updating matrix to
 %
 %
 \begin{equation}
@@ -2636,28 +2635,25 @@ and modifies the form of the updating matrix, $\mathbf w$, as
   \mu_{ i + j - 1 }
   +
   \mu_{ i + j - 2 n - 1 },
-  \label{eq:w_band}
+  \label{eq:w_band_refl}
 \end{equation}
 %
 Again the updating kernel satisfies
 Eqs. \eqref{eq:mu_normalization}
-and
-\eqref{eq:mu_symm}.
+and \eqref{eq:mu_symm}.
 %
 However,
-the radius $b$ only need to be less than $n$
-instead of $n/2$.
+the radius $b$ only need to be less than $n$.
 %
 The last two terms
-on the right-hand side of \eqref{eq:w_band} are added
+on the right-hand side of \eqref{eq:w_band_refl} are added
 to avoid unintended distortion\cite{dickson2011, mcgovern2013}
 to the equilibrium distribution $p_i = 1/n$\cite{bussi2006},
 such that Eqs. \eqref{eq:w_sumj}-\eqref{eq:w_balance}
 are satisfied.
 
-To compute the eigenvectors,
-we shall replace Eq. \eqref{eq:phi_pbc}
-and redefine the out-of-boundary values
+Similar to Eq. \eqref{eq:phi_pbc},
+we define the out-of-boundary values
 of $\varphi_j$ as
 %
 \begin{equation}
@@ -2670,7 +2666,7 @@ of $\varphi_j$ as
 \label{eq:phi_refl}
 \end{equation}
 %
-One can show that Eq. \eqref{eq:wmul_to_convol}
+such that Eq. \eqref{eq:wmul_to_convol}
 still holds.
 %
 \note{The derivation of Eq. \eqref{eq:wmul_to_convol}
@@ -2705,8 +2701,7 @@ still holds.
   $$
 }
 %
-Thus, it is also possible to construct
-$n$ orthonormal eigenvectors,
+Thus, we also have $n$ orthonormal eigenvectors,
 $\pmb\varphi^{(1)}, \dots, \pmb\varphi^{(n)}$,
 as
 %
@@ -3678,12 +3673,12 @@ is most efficient.
 
 
 \subsubsection{\label{sec:optscheme}
-Brick-wall band-pass updating schemes}
+Bandpass updating schemes}
 
 
 We can also generalize
 the single-bin scheme to a class of
-\emph{brick-wall band-pass} updating schemes
+perfect (brick-wall) \emph{bandpass} updating schemes
 that allow zero eigenvalues.
 %
 For example,
@@ -3903,7 +3898,7 @@ we should include the residual part,
 Eq. \eqref{eq:error_res}
 and minimize the total error.
 %
-For the brick-wall band-pass updating schemes,
+For the bandpass updating schemes,
 this allows to determine the optimal value
 of the free parameter, $t_0$.
 
@@ -4237,7 +4232,10 @@ Eq. \eqref{eq:error_singlebin},
 we find that the difference is negligible
 in the long time limit.
 
-Again, if we are certain that
+Again, the above argument can be extended
+to the bandpass updating schemes.
+%
+If we are certain that
 the intrinsic PMF is sufficiently smooth,
 then we can explicitly filter some error modes,
 say those for $k > K$,
@@ -4261,7 +4259,10 @@ Our test system is
 a model one-dimensional system
 of $n = 100$ bins,
 with a flat target distribution
-$p_i = 1/n$
+$p_i = 1/n$.
+%
+Unless specified otherwise,
+we assume $i$ is a non-periodic variable
 under the reflective boundary condition.
 %
 %Since in the asymptotic regime,
@@ -4285,7 +4286,7 @@ $v_i \equiv 0$,
 %
 and equilibrate the system under
 a constant updating magnitude,
-$\alpha(t) = \alpha_0$.
+$\alpha_0$.
 %
 After this,
 we reset the origin of the time, $t$,
@@ -4352,18 +4353,13 @@ the inverse-time schedule,
 \label{eq:alpha_invtlambda}
 \end{equation}
 %
-where $\lambda$ is a parameter to be optimized.
-and $t_0 = 1/(\lambda \, \alpha_0)$
-to smooth the transition from equilibration.
+where $\lambda$ is a parameter to be optimized
+with $t_0 = 2/(\lambda \, \alpha_0)$.
 %
-This schedule is analytically simpler
-than the optimal schedule,
-and it is studied in Appendix \ref{sec:invt_schedule}.
-%
-We wish to see how the final error
-depends on the parameter, $\lambda$,
-and if it matches the predicted value,
-given by Eq. \eqref{eq:error_invt}.
+This simple schedule
+allows us to predict the error analytically
+[cf. Appendix \ref{sec:invt_schedule}],
+and it serves as a model of verifying our theory.
 
 
 \subsubsection{Single-bin (WL) updating scheme}
@@ -4396,10 +4392,9 @@ verifying Eq. \eqref{eq:alpha_invt1}.
 %when the optimal value is unknown.
 
 
-We also observe
-that the two error functions
+The two error functions
 differed only by a multiplicative constant,
-again again agreeing with the theory.
+again agreeing with the theory.
 %
 With identical eigenvalues,
 $\lambda_1 = \cdots = \lambda_n = 1$,
@@ -4613,23 +4608,108 @@ the optimal schedule from Eq. \eqref{eq:q_opt}.
 
 
 
+While the optimal schedules of the Gaussian updating schemes
+are rather complex,
+those of the bandpass updating schemes
+are always given by the inverse-time formula,
+Eq. \eqref{eq:alpha_invt1},
+with the optimal $t_0$
+given by Eq. \eqref{eq:t0_sinc},
+as shown in Fig. \ref{fig:sinc}(a).
+
+
+In Fig. \ref{fig:sinc}(b),
+we show that the updating kernels
+of the bandpass updating schemes
+are similar to Gaussian ones
+except the oscillatory tails.
+%
+The equivalent width, $\sigma$, is roughly given
+\begin{equation}
+  \sigma
+  \approx
+  \frac
+  {
+    n
+  }
+  {
+    \sqrt{ 2 \, \pi } \, g \, K
+  }
+  ,
+\label{eq:sigma_equiv}
+\end{equation}
+where $g = 2$ for the periodic case
+or $g = 1$ otherwise.
+%
+The kernel is a zigzag in the non-periodic case
+because of the term $(-1)^{n+K+l-1}$
+in Eq. \eqref{eq:mu_sinc_refl}.
+%
+However, the ruggedness disappears
+in the actual updating matrix, Eq. \eqref{eq:w_band_refl},
+as the above oscillatory term for $l = i - j$
+is canceled by either the term for $l = i + j - 1$
+or that for $l = i + j - 2 \, n - 1$,
+as shown in the inset
+of Fig. \ref{fig:sinc}(b).
+
+
+\begin{figure}[h]
+\begin{center}
+  \makebox[\linewidth][c]{
+    \includegraphics[angle=0, width=0.95\linewidth]{fig/sinc.pdf}
+  }
+  \caption{
+    \label{fig:sinc}
+    (a) Optimal schedules of the bandpass
+    updating schemes for a periodic variable
+    with $K = 4$,
+    and for a non-periodic variable
+    with $K = 8$.
+    (b) Corresponding updating kernels
+    compared to a Gaussian with a similar width,
+    $\sigma = 5$.
+    The lines are a guide to the eyes.
+    Inset. Updating matrix according to Eq. \eqref{eq:w_band_refl}.
+  }
+\end{center}
+\end{figure}
+
+
+
+
+
 \subsection{Comparison of updating schemes}
 
 
 
-In Fig. \ref{fig:err_sigscan},
-we compared the error from the inverse-time schedule
-with the optimal $\lambda$,
-and that from the asymptotically optimal schedule,
-for the Gaussian updating scheme.
+For a finite-length simulation,
+the optimal updating scheme
+depends on the simulation length, $T$,
+and other parameters.
 %
-The errors from the two schedules appeared to be reasonable close,
-unless for large width case.
+To illustrate this,
+we compare Gaussian updating schemes
+with different width, $\sigma$.
 %
-This suggests that very long metadynamics simulations
-may benefit from optimal schedule,
-instead of the simple formula, given by
-Eq. \eqref{eq:alpha_invtlambda}.
+For the global sampling process,
+we see from Fig. \ref{fig:errsigscan}(a)
+that the lowest error was achieved
+by the widest window for the shorter simulation
+of $T = 10^8$,
+while the minimum moved to $\sigma = 0$
+as the simulation lengthens to $T = 10^{10}$.
+%
+However,
+the shift was hard to detect
+for the local sampling scheme,
+as shown in Fig. \ref{fig:errsigscan}(b).
+%
+In all cases,
+the bandpass scheme
+appeared to be a superior
+alternative to the Gaussian updating scheme.
+
 
 
 \begin{figure}[h]
@@ -4638,35 +4718,20 @@ Eq. \eqref{eq:alpha_invtlambda}.
     \includegraphics[angle=0, width=0.95\linewidth]{fig/errsigscan.pdf}
   }
   \caption{
-    \label{fig:err_sigscan}
+    \label{fig:errsigscan}
     Normalized error, $(T + t_0) \, E$,
-    versus the width of the Gaussian updating scheme,
-    $\sigma$,
-    according to the schedule,
-    Eq. \eqref{eq:alpha_invtlambda},
-    with the optimal $\lambda$,
-    and or the asymptotically optimal schedule.
+    versus the width, $\sigma$,
+    for the Gaussian
+    and the brick-wall bandpass updating schemes.
+    %
+    In the latter case,
+    $\sigma$ is given by Eq. \eqref{eq:sigma_equiv}.
   }
 \end{center}
 \end{figure}
 
 
 
-
-%\subsection{Optimality of the single-bin scheme}
-
-
-The above comparison also shows the asymptotic superiority
-of the single-bin scheme.
-It is clear that for short times,
-the single-bin (WL) may not be optimal,
-but it ultimately wins out as simulation lengthens.
-
-%Randomize the initial error?
-%
-%Error vs. $\mu_1$.
-%
-%Error vs. $\sigma$.
 
 
 \section{\label{sec:conclusion}
@@ -4718,7 +4783,8 @@ We have also compared different updating schemes.
 %
 We have shown that in the long time limit
 the single-bin scheme belongs to a class of
-asymptotically optimal updating schemes.
+brick-wall bandpass updating schemes that are
+asymptotically optimal.
 %
 %That is, the single-bin scheme
 %is asymptotically as efficient as
@@ -4912,7 +4978,7 @@ we get
 =
 \sum_{k = 2}^n
   \frac{ \Gamma_k \, \nu_k }
-       {        2 \, t_0   }
+       {        t_0   }
   \left(
       \frac{   t_0   }
            { T + t_0 }
@@ -4920,12 +4986,13 @@ we get
 \label{eq:error_res_invt}
 \end{equation}
 %
-assuming that at $t = 0$
-the system has achieved an equilibrium
+assuming that
+the system was initially equilibrated
 at a constant $\alpha_0$,
 such that the values of
 $\left\langle y_k^2(0) \right\rangle$
-can be computed from Eq. \eqref{eq:y2_eql}.
+can be computed from Eq. \eqref{eq:y2_eql},
+as well as Eq. \eqref{eq:t0_sinc}.
 %
 The total error is
 %
@@ -5809,9 +5876,11 @@ So it only works for a very small value of $\mu_1$.
 
 Note that Eq. \eqref{eq:lambda_nn_onestep}
 is an approximation good only
-for sufficiently short simulations.
+for sufficiently short simulations,
+since we have taken the limit of $n \to \infty$
+for a fixed $T$.
 %
-For very longer simulations,
+For very long simulations,
 the optimal $\lambda$
 will ultimately approach
 the smallest eigenvalue,
