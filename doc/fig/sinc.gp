@@ -45,29 +45,30 @@ set ylabel "{/Symbol-Oblique m}_{/Times-Italic i}" offset 2, -1
 
 set key right bottom Left reverse invert spacing 1.2 width -5
 
-plot [:100][-0.05:0.1] \
+plot [:100][-0.06:0.1] \
     0 lt 1 lw 0.1 lc rgb "#aaaaaa" notitle, \
-    normd(x, 5) lt 1 lw 4 lc rgb "#cccccc" t "Gaussian, {/Symbol-Oblique s} = 5", \
-    "../../data/scan/sinc_nonpbc_win.dat" u 1:($2) w lp pt 1 ps 1.0 lt 1 lw 1.0 t "Non{/*0.7 -}periodic, {/Times-Italic K} = 9", \
-    "../../data/scan/sinc_pbc_win.dat"    u 1:($2) w lp pt 6        lt 1 lw 1.0 t "Periodic, {/Times-Italic K} = 4"
+    normd(x, 6) lt 1 lw 4 lc rgb "#cccccc" t "Gaussian, {/Symbol-Oblique s} = 6", \
+    "../../data/scan/sinc_nonpbc_win.dat" u 1:($2) w lp pt 1 ps 1.0 lt 1 lw 1.0 t "Non{/*0.7 -}periodic, {/Times-Italic K} = 6", \
+    "../../data/scan/sinc_pbc_win.dat"    u 1:($2) w lp pt 6        lt 1 lw 1.0 t "Periodic, {/Times-Italic K} = 3"
 
 
 # inset
-set origin 0.45, hbot*0.5
-set size 0.5, hbot*0.6
+set origin 0.38, hbot*0.52
+set size 0.48, hbot*0.58
+
 
 set title "{/Times-Italic w_{ij}}" offset 0, -0.7 font "Times, 20"
 #unset colorbox
 set cbrange [-0.05:0.2]
-set cbtics 0.1 offset -1, 0 font "Times, 16"
+set cbtics 0.1 offset -1, 0 font "Times, 14"
 set mcbtics 2
 
-set xtics 20 offset 0, 0.8 font "Times, 16"
+set xtics 20 offset 0, 0.8 font "Times, 14"
 set mxtics 2
 #set format x ""
 set xlabel "{/Times-Italic*0.7 j}" offset 0, 1.8
 
-set ytics 20 offset 1, 0 font "Times, 16"
+set ytics 20 offset 1, 0 font "Times, 14"
 set mytics 2
 #set format y ""
 set ylabel "{/Times-Italic*0.7 i}" offset 3.2, 0
@@ -105,10 +106,10 @@ set ylabel "{/Symbol-Oblique a} ({/Times-Italic t})" offset 0, 0
 
 set key left bottom Left reverse noinvert spacing 1.2
 
-plot [][2e-9:5e-5] \
+plot [][7e-9:5e-5] \
     1/(x + 20000) lw 2 t "1 / ({/Times-Italic t} + 2/{/Symbol-Oblique a}_0)", \
-    "../../data/scan/sinc_pbc_alpha.dat"    u 1:($2) every 300 w p pt 6 ps 1.5 lw 2 t "Periodic, {/Times-Italic K} = 4", \
-    "../../data/scan/sinc_nonpbc_alpha.dat" u 1:($2) every 300 w p pt 1 ps 1.5 lw 3 t "Non{/*0.7 -}periodic, {/Times-Italic K} = 8", \
+    "../../data/scan/sinc_pbc_alpha.dat"    u 1:($2) every 300 w p pt 6 ps 1.5 lw 2 t "Periodic, {/Times-Italic K} = 3", \
+    "../../data/scan/sinc_nonpbc_alpha.dat" u 1:($2) every 300 w p pt 1 ps 1.5 lw 3 t "Non{/*0.7 -}periodic, {/Times-Italic K} = 6", \
     -1 notitle
 
 

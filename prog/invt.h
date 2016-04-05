@@ -450,28 +450,29 @@ static double esterror_eql(double alpha, int n, double *xerr,
  * for a single updating mode
  * according the analytical formula
  *
- * currently, assuming equilibrium values of < x^2 >
- * of alpha(0) = c / t0 at t = 0
+ * currently, assuming initial values of < x^2 >
+ * are given by the equilibirium ones at alpha0,
+ * and t0 = 2 c / alpha0.
  * */
-static double esterror_invt1(double t, double c, double a0,
+static double esterror_invt1(double t, double c, double alpha0,
     double lambda, double gamma)
 {
-  const double tol = 1e-6;
+  const double tol = 1e-7;
   double t0, r, errsat; /* errsat: saturated error */
 
-  t0 = c / a0;
+  t0 = 2 * c / alpha0;
   r = lambda * c;
-  errsat = 0.5 * gamma * r / (t + t0);
+  errsat = gamma * r / (t + t0);
 
   if ( lambda < 0 ) lambda = 0;
 
   if ( fabs(2 * r - 1) < tol ) {
     /* degenerate case */
-    return errsat * ( log( (t + t0) / t0 ) + 1 );
-  } else {
-    return errsat * (1 + 1 / (r * 2 - 1)
-           * ( 1 - pow(t0 / (t + t0), 2 * r - 1) ) );
+    r += tol;
   }
+
+  return errsat * (r - (r - 1) * pow(t0 / (t + t0), 2 * r - 1) )
+                / (r * 2 - 1);
 }
 
 
@@ -480,8 +481,9 @@ static double esterror_invt1(double t, double c, double a0,
  * alpha(t) = c / (t + t0)
  * according to the analytical prediction
  *
- * currently, assuming equilibrium values of < x^2 >
- * of alpha(0) = c / t0 at t = 0, so t0 = c / a0
+ * currently, assuming initial values of < x^2 >
+ * are given by the equilibrium ones at alpha0,
+ * and t0 = 2 c / alpha0
  * */
 static double esterror_invt(double t, double c, double a0,
     int n, double *xerr,
@@ -506,7 +508,6 @@ static double esterror_invt(double t, double c, double a0,
 /* estimate the best parameter c for the updating schedule
  * alpha(t) = c / (t + t0)
  * according to the analytical prediction
- * if t0 <= 0, t0 is set to 1 / (c a0)
  * assuming a single local minimum
  * */
 static double estbestc_invt(double t, double a0,

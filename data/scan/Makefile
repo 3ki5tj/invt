@@ -21,8 +21,8 @@ sigsingle: compile $(fnmdgam)
 
 # for Figure sinc.gp
 sincsingle: compile
-	$(prog) --opta --okmax=8 --fnalpha=sinc_nonpbc_alpha.dat --fnwin=sinc_nonpbc_win.dat --fnwinmat=sinc_nonpbc_winmat.dat
-	$(prog) --opta --okmax=4 --pbc --fnalpha=sinc_pbc_alpha.dat --fnwin=sinc_pbc_win.dat
+	$(prog) --opta --okmax=6 --fnalpha=sinc_nonpbc_alpha.dat --fnwin=sinc_nonpbc_win.dat --fnwinmat=sinc_nonpbc_winmat.dat
+	$(prog) --opta --okmax=3 --pbc --fnalpha=sinc_pbc_alpha.dat --fnwin=sinc_pbc_win.dat
 
 # for the error
 nbscan: compile $(fnmdgam)
@@ -46,6 +46,8 @@ sigscan: compile $(fnmdgam)
 	$(prog) $(sigopt) --samp=l                       --nsteps=1e8  > sigscan_t1e8_l.dat
 	$(prog) $(sigopt) --samp=g                       --nsteps=1e10 > sigscan_t1e10_g.dat
 	$(prog) $(sigopt) --samp=l                       --nsteps=1e10 > sigscan_t1e10_l.dat
+	$(prog) $(sigopt) --samp=g                       --nsteps=1e11 > sigscan_t1e11_g.dat
+	$(prog) $(sigopt) --samp=l                       --nsteps=1e11 > sigscan_t1e11_l.dat
 
 okopt=--okscan=1 --okmax=99
 
@@ -54,6 +56,8 @@ okscan: compile $(fnmdgam)
 	$(prog) $(okopt) --samp=l                       --nsteps=1e8  > okscan_t1e8_l.dat
 	$(prog) $(okopt) --samp=g                       --nsteps=1e10 > okscan_t1e10_g.dat
 	$(prog) $(okopt) --samp=l                       --nsteps=1e10 > okscan_t1e10_l.dat
+	$(prog) $(okopt) --samp=g                       --nsteps=1e11 > okscan_t1e11_g.dat
+	$(prog) $(okopt) --samp=l                       --nsteps=1e11 > okscan_t1e11_l.dat
 
 # use `invt` to generate mdgamma.dat
 $(fnmdgam):

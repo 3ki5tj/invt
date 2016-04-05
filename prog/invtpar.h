@@ -308,10 +308,8 @@ static void invtpar_compute(invtpar_t *m)
   }
 
   if ( fabs(m->t0) <= 0 ) { /* means t0 == 0 */
-    /* set the default t0 such that
-     * alpha is continuous at the beginning
-     * of the production run */
-    m->t0 = m->c / m->alpha0;
+    /* set the default t0 to 2 * c / alpha0 */
+    m->t0 = 2 * m->c / m->alpha0;
   }
 
   /* turn on correlation function computation
@@ -1081,7 +1079,7 @@ static void invtpar_dump(const invtpar_t *m)
     fprintf(stderr, "sig-scan window: %g:%g:%g\n",
         m->sigmin, m->sigdel, m->sigmax);
   }
-  
+
   if ( m->okscan ) {
     fprintf(stderr, "okmax-scan window: 0:%d:%d\n",
         m->okdel, m->okmax);

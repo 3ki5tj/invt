@@ -383,10 +383,11 @@ with $i$ being the index of energy
 and that of temperature, respectively.
 %
 The estimated bias potential, $V_i$,
-can often be improved
-by the histogram along $i$ accumulated
-during simulation
-Using the histogram $H_i$ as $\pi_i$ in
+are often improved
+by the histogram, $H_i$, along $i$ accumulated
+during simulation.
+%
+Using $H_i$ as $\pi_i$ in
 Eq. \eqref{eq:pi_p_phi1}
 allows us to correct $V_i$ as
 %
@@ -588,9 +589,9 @@ The histogram collected in the stage is monitored.
 %
 Once the histogram is sufficiently flat,
 we are allowed to enter a new stage
-with a reduced $\alpha$\cite{wang2001, wang2001pre}
-(usually half as large as
-the previous value).
+with $\alpha$
+reduced by a factor of one
+half\cite{wang2001, wang2001pre}.
 %
 This scheme works well for early stages.
 %
@@ -1095,7 +1096,7 @@ is given by
 \label{eq:alpha_invt1}
 \end{equation}
 and Eq. \eqref{eq:alpha_invt}
-is the special case of $t_0 = 0$.
+is the case of $t_0 = 0$.
 
 
 
@@ -2037,8 +2038,7 @@ of the eigenvalues, $\lambda_k$'s,
 and we shall refer to it as the instantaneous
 eigenvalue, $\lambda(t)$.
 %
-The instantaneous eigenvalue
-gives the rate of change of
+It gives the rate of change of
 the inverse updating magnitude.
 
 
@@ -2361,7 +2361,7 @@ The dependence of variables are shown in Fig. \ref{fig:vardep}.
 \end{tikzpicture}
 \caption{
   \label{fig:vardep}
-  Dependence of variables in the method of computing
+  Dependence of variables in computing
   the optimal schedule.
 }
 \end{figure}
@@ -2643,7 +2643,7 @@ Eqs. \eqref{eq:mu_normalization}
 and \eqref{eq:mu_symm}.
 %
 However,
-the radius $b$ only need to be less than $n$.
+the cutoff $b$ only need to be less than $n$.
 %
 The last two terms
 on the right-hand side of \eqref{eq:w_band_refl} are added
@@ -3160,7 +3160,7 @@ suggesting stability of the updating scheme.
 
 
 \subsubsection{\label{sec:stabilize_wband}
-Stabilization}
+Inversion and Stabilization}
 
 
 
@@ -4041,9 +4041,10 @@ on the right-hand side of Eq. \eqref{eq:vcorr_equil},
                    { p_i }
       \right)^2
   \right\rangle
-\notag
-\\
-  &\approx
+%\notag
+%\\
+  %&
+  \approx
   \sum_{ i = 1 }^ n
     p_i \,
     \left\langle
@@ -4194,26 +4195,27 @@ $$
 
 In the long-time limit,
 \begin{align*}
-\left\langle
-  \Theta_k^2
-\right\rangle
-&=
-\frac{1}{T^2}
-\sum_{ t, t' = 1 }^T
-\langle \theta_k(t) \, \theta_k(t') \rangle
-\\
-&\approx
-\frac{1}{T}
-\sum_{ \tau = -\infty }^{ \infty }
-\langle \theta_k(t) \, \theta_k(t + \tau) \rangle
-\\
-&=
-\frac{1}{T}
-\int_{-\infty}^\infty
-\kappa_n(\tau) \, d\tau
-=
-\frac{1}{T}
-\Gamma_k.
+  \left\langle
+    \Theta_k^2
+  \right\rangle
+  &=
+  \frac{1}{T^2}
+  \sum_{ t, t' = 1 }^T
+  \langle \theta_k(t) \, \theta_k(t') \rangle
+  %\\
+  %&\approx
+  %\frac{1}{T}
+  %\sum_{ \tau = -\infty }^{ \infty }
+  %\langle \theta_k(t) \, \theta_k(t + \tau) \rangle
+  %\\
+  %&=
+  =
+  \frac{1}{T}
+  \int_{-\infty}^\infty
+  \kappa_n(\tau) \, d\tau
+  =
+  \frac{ \Gamma_k }{ T }
+.
 \end{align*}
 %
 Thus,
@@ -4237,11 +4239,9 @@ to the bandpass updating schemes.
 %
 If we are certain that
 the intrinsic PMF is sufficiently smooth,
-then we can explicitly filter some error modes,
-say those for $k > K$,
-in the histogram, and the sum in
-Eq. \eqref{eq:error_equil}
-can be truncated at $k = K$.
+then we can explicitly filter some error modes
+in the histogram, and truncate the sum in
+Eq. \eqref{eq:error_equil} at $k = K$.
 
 
 
@@ -4356,10 +4356,11 @@ the inverse-time schedule,
 where $\lambda$ is a parameter to be optimized
 with $t_0 = 2/(\lambda \, \alpha_0)$.
 %
-This simple schedule
-allows us to predict the error analytically
-[cf. Appendix \ref{sec:invt_schedule}],
-and it serves as a model of verifying our theory.
+The error of this schedule
+can be computed analytically
+(cf. Appendix \ref{sec:invt_schedule}),
+and thus be tested against the theory.
+
 
 
 \subsubsection{Single-bin (WL) updating scheme}
@@ -4445,8 +4446,12 @@ depended non-trivially on the simulation length, $T$,
 in the global sampling case.
 %
 The optimal $1/\lambda$ gradually increased
-with simulation length, which is in agreement with
-the discussion in Sec. \ref{sec:optlambda}.
+with simulation length,
+which parallel the gradual shift of
+the instantaneous eigenvalue $\lambda(t)$
+as discussed in Sec. \ref{sec:optschedule}.
+%which is in agreement with
+%the discussion in Sec. \ref{sec:optlambda}.
 %
 For the local sampling case,
 the $T$-dependence was hardly visible
@@ -4608,9 +4613,8 @@ the optimal schedule from Eq. \eqref{eq:q_opt}.
 
 
 
-While the optimal schedules of the Gaussian updating schemes
-are rather complex,
-those of the bandpass updating schemes
+On the other hand,
+the optimal schedules of the bandpass updating schemes
 are always given by the inverse-time formula,
 Eq. \eqref{eq:alpha_invt1},
 with the optimal $t_0$
@@ -4645,13 +4649,12 @@ The kernel is a zigzag in the non-periodic case
 because of the term $(-1)^{n+K+l-1}$
 in Eq. \eqref{eq:mu_sinc_refl}.
 %
-However, the ruggedness disappears
+However, as shown in the inset of Fig. \ref{fig:sinc}(b),
+the ruggedness disappears
 in the actual updating matrix, Eq. \eqref{eq:w_band_refl},
 as the above oscillatory term for $l = i - j$
 is canceled by either the term for $l = i + j - 1$
 or that for $l = i + j - 2 \, n - 1$,
-as shown in the inset
-of Fig. \ref{fig:sinc}(b).
 
 
 \begin{figure}[h]
@@ -4661,16 +4664,17 @@ of Fig. \ref{fig:sinc}(b).
   }
   \caption{
     \label{fig:sinc}
-    (a) Optimal schedules of the bandpass
-    updating schemes for a periodic variable
-    with $K = 4$,
-    and for a non-periodic variable
-    with $K = 8$.
-    (b) Corresponding updating kernels
+    Bandpass updating schemes.
+    (a) Optimal schedule for a periodic variable
+    with $K = 3$,
+    and that for a non-periodic variable
+    with $K = 6$.
+    (b) Updating kernels
     compared to a Gaussian with a similar width,
     $\sigma = 5$.
     The lines are a guide to the eyes.
-    Inset. Updating matrix according to Eq. \eqref{eq:w_band_refl}.
+    Inset. Updating matrix in the non-periodic case
+    is free of the zigzaggedness shown in the kernel.
   }
 \end{center}
 \end{figure}
@@ -4694,21 +4698,25 @@ with different width, $\sigma$.
 %
 For the global sampling process,
 we see from Fig. \ref{fig:errsigscan}(a)
-that the lowest error was achieved
+that the minimal error was achieved
 by the widest window for the shorter simulation
 of $T = 10^8$,
-while the minimum moved to $\sigma = 0$
-as the simulation lengthens to $T = 10^{10}$.
+while the minimum around $\sigma = 0$
+became more favorable as the simulation lengthens.
 %
 However,
 the shift was hard to detect
 for the local sampling scheme,
 as shown in Fig. \ref{fig:errsigscan}(b).
+
+
+In contrast,
+the normalized error of the bandpass updating scheme
+was insensitive to the simulation length,
+in agreement with Eq. \eqref{eq:error_sinc}.
 %
-In all cases,
-the bandpass scheme
-appeared to be a superior
-alternative to the Gaussian updating scheme.
+Further, in all cases the bandpass scheme
+appeared to be superior to the Gaussian updating scheme.
 
 
 
@@ -4722,7 +4730,7 @@ alternative to the Gaussian updating scheme.
     Normalized error, $(T + t_0) \, E$,
     versus the width, $\sigma$,
     for the Gaussian
-    and the brick-wall bandpass updating schemes.
+    and the bandpass updating schemes.
     %
     In the latter case,
     $\sigma$ is given by Eq. \eqref{eq:sigma_equiv}.
@@ -4746,12 +4754,11 @@ for a general adaptive FDS simulation.
 %
 Adaptive FDS methods
 effectively sample a flat distribution
-along a quantity of interest, $z$,
-by constructing a bias potential along $z$
+by constructing a bias potential
 that offsets the PMF.
 %
 The optimal schedule ensures fastest convergence
-of the bias potential to the PMF.
+of the bias potential.
 %They differ by the updating schemes,
 %which specify how the bias potential is modified
 %in each updating step.
@@ -4764,9 +4771,14 @@ of the bias potential to the PMF.
 
 
 The optimal schedule computed from our method
-is identical to the inverse-time schedule,
+recovers the known inverse-time formula,
 Eq. \eqref{eq:alpha_invt1},
 for the single-bin (WL) case.
+%
+The origin of time, $t_0$, is better changed
+to the value given by Eq. \eqref{eq:t0_sinc},
+such that the initial updating magnitude
+is half of the previous equilibrium value.
 %
 For a general multiple-bin scheme,
 including the Gaussian one used in metadynamics,
@@ -4774,17 +4786,24 @@ the optimal schedule does not have a closed form,
 but is given by an equation of motion
 of a free particle with a position-dependent mass, Eq. \eqref{eq:q_opt}.
 %
-In the latter case,
+In this case,
 the optimal schedule and error
 are sensitive to the simulation length.
 
 
-We have also compared different updating schemes.
-%
-We have shown that in the long time limit
-the single-bin scheme belongs to a class of
-brick-wall bandpass updating schemes that are
+We have also shown that in the long time limit
+the single-bin scheme can be generalized
+to a class of bandpass updating schemes that are
 asymptotically optimal.
+%
+The bandpass updating schemes
+eliminate local noise in the bias potential
+without affecting the global convergence,
+and they appeared to outperform
+the Gaussian updating schemes.
+%
+Thus, the bandpass schemes
+may be useful in real metadynamics simulations.
 %
 %That is, the single-bin scheme
 %is asymptotically as efficient as
@@ -4812,32 +4831,36 @@ Inverse-time schedules}
 
 
 
-The optimal schedule predicted
-by the direct solution of Eq. \eqref{eq:q_opt}
-is complicated for a general
-multiple-bin updating scheme.
+As an alternative to the
+optimal schedule from Eq. \eqref{eq:q_opt},
 %
-Several previous studies\cite{marsili2006, barducci2008, dickson2011}
-have been focused on analytically simpler schedules.
-%
-In a similar spirit,
-we consider here
-the inverse-time formula,
+here we consider the inverse-time formula,
 Eq. \eqref{eq:alpha_invtlambda},
+with $\lambda$ optimized variationally.
 %
-with the proportionality constant, $\lambda$,
-to be optimized.
+This approach allows to obtain
+an explicit formula for the error,
+which can be tested against simulation.
 %
-We shall compute the error computed from
-this variationally optimized schedule
-and compare it with that from the optimal schedule.
-%
-We shall show that the optimal parameter, $\lambda$,
-is sensitive to the simulation time, $T$,
-which parallels the gradual shift of
-the instantaneous eigenvalue,
-$\lambda(t)$,
-as discussed in Sec. \ref{sec:optschedule}.
+%Several previous studies\cite{marsili2006, barducci2008, dickson2011}
+%have been focused on analytically simpler schedules.
+%%
+%In a similar spirit,
+%we consider here
+%the inverse-time formula,
+%Eq. \eqref{eq:alpha_invtlambda},
+%%
+%%
+%We shall compute the error computed from
+%this variationally optimized schedule
+%and compare it with that from the optimal schedule.
+%%
+%We shall show that the optimal parameter, $\lambda$,
+%is sensitive to the simulation time, $T$,
+%which parallels the gradual shift of
+%the instantaneous eigenvalue,
+%$\lambda(t)$,
+%as discussed in Sec. \ref{sec:optschedule}.
 
 
 
@@ -4860,15 +4883,18 @@ in Eq. \eqref{eq:error_asym1} yields
        {    2 \, \nu_k - 1   }
 \left[
   1 - \left(
-        1 + \frac{ T }{ t_0 }
-      \right)^{1 - 2 \, \nu_k}
+        \frac {     t_0 }
+              { T + t_0 }
+      \right)^{ 2 \, \nu_k - 1 }
 \right],
 \label{eq:error_asym_invt}
 \end{align}
 %
 where $\nu_k \equiv \lambda_k / \lambda$.
 %
-At long times, $T \to \infty$, we get
+The error is asymptotically minimal
+only if $2\,\nu_k > 1$ for every $k$.
+\note{At long times, $T \to \infty$, we get
 $$
 \begin{aligned}
   \Err_A
@@ -4906,72 +4932,69 @@ $$
 The last two cases
 are asymptotically suboptimal
 as they decay slower than $1/T$.
+}
 %
-Thus, by assuming exclusively the first case
-$\lambda < 2 \lambda_k$,
-the optimal $\lambda$
-satisfies $\lambda < 2 \min \lambda_k$,
-and can be identified as
+In this case,
+we can drop the second term
+in the square brackets,
+and identify the optimal $\lambda$ as
 the smallest real root of
 %
 \begin{equation}
-\sum_{k = 2}^n
-\frac{ \lambda_k - \lambda }
-{ \left(2 - \lambda/ \lambda_k \right)^2 }
-= 0.
-\label{eq:optimal_lambda_approx}
+  \sum_{k = 2}^n
+    \frac { \lambda_k - \lambda }
+          { \left(2 - \lambda/ \lambda_k \right)^2 }
+  = 0.
+\notag
+%\label{eq:optimal_lambda_approx}
 \end{equation}
-
-
-
-Under the approximation, we have
+%
+Since
 $$
+\frac{ \nu_k^2        }
+     { 2 \, \nu_k - 1 }
+=
 \frac{ \lambda_k^2 }
      { \lambda \, (2 \, \lambda_k - \lambda) }
 \ge 1,
 $$
-with the equality achieved only at $\lambda = \lambda_k$.
-For the equality to hold for all $k$'s,
-we must have
+with the equality achieved only at $\lambda = \lambda_k$,
+the optimal scheme must satisfy
 $\lambda_2 = \dots = \lambda_n = \lambda$.
 %
-Now a matrix with uniform eigenvalues
-is a multiple of the identity matrix,
-which corresponds to the single-bin updating scheme.
+%Now a matrix with uniform eigenvalues
+%is a multiple of the identity matrix,
+%which corresponds to the single-bin updating scheme.
 %
-The above result means that
-the single-bin updating scheme is best
-for the asymptotic convergence.
+%The above result means that
+%the single-bin updating scheme is best
+%for the asymptotic convergence.
 %
-This result is discussed in more details in
+%This result is discussed in more details in
+This again reflects the asymptotic optimality
+of the single-bin scheme, as discussed in
 Sec. \ref{sec:optWL}.
 
 
 
-Real simulations, however,
-can be relatively short
-and need not enter
-the asymptotic regime.
+For a finite-length simulation,
+we need to include the residual error, $\Err_R$.
 %
-Then, the residual error, $\Err_R$, is not negligible.
-%
-Note, however,
-since Eq. \eqref{eq:alpha_invtlambda}
-does not fix the endpoint value,
+By Eq. \eqref{eq:alpha_invtlambda}, we have
 %
 \begin{equation}
-q(T) = \frac{ 1 } { \lambda }
-\log\left(
-  \frac{ T + t_0 } { t_0 }
-\right),
-\label{eq:qt_invtlambda}
+  q(T)
+  =
+  \frac{ 1 } { \lambda }
+  \log\left(
+    \frac{ T + t_0 } { t_0 }
+  \right)
+  ,
+\notag
+%\label{eq:qt_invtlambda}
 \end{equation}
 %
-we have to include the residual error
-during the optimization.
-%
-From Eqs. \eqref{eq:error_res1} and \eqref{eq:qt_invtlambda},
-we get
+so that Eq. \eqref{eq:error_res1} becomes
 %
 \begin{equation}
 \Err_R
@@ -5111,6 +5134,7 @@ The total error is
 
 
 
+\note{
 
 \subsection{\label{sec:optlambda}
 Optimal proportionality constant
@@ -5119,21 +5143,18 @@ Optimal proportionality constant
 
 
 
-As shown in Sec. \ref{sec:optschedule},
-for the optimal schedule,
-the instantaneous eigenvalue, $\lambda(t)$,
-is on average smaller
-in a longer simulation.
-%
 Intuitively,
 we expect the optimal $\lambda$
 that minimizes the error of the inverse-time schedule,
 Eq. \eqref{eq:error_invt},
-to be a kind of time average of $\lambda(t)$,
-and thus also to decrease with
+to be a kind of time average of
+the instantaneous eigenvalue $\lambda(t)$
+in Sec. \ref{sec:optschedule}.
+%
+Thus, it should also decrease with
 the simulation length, $T$.
 %
-Below we show this is indeed the case.
+Below we show this is indeed so.
 
 Let us first rewrite Eq. \eqref{eq:error_invt} as
 %
@@ -5268,7 +5289,7 @@ where $\Gamma_k \equiv 1$ is a constant.
 If $\Gamma_k$ decreases too quickly with $k$,
 the shift can be hard to detect
 [see Eq. \eqref{eq:lambda_nn_onestep} for an example].
-
+}
 
 
 \subsection{Nearest-neighbor updating scheme}
@@ -5450,7 +5471,7 @@ $$
 }
 
 
-For the one-step sampling,
+For the one-step sampling process,
 we find from Eq. \eqref{eq:Gamma_onestep}
 that $\Gamma(p) = \cot^2 p$
 is peaked around $p \approx 0$,
@@ -5467,8 +5488,8 @@ $$
 \frac{            \left(1 - 4 \, \mu_1 \, \sin^2 p \right)^2         }
      { \lambda \, \left(2 - 8 \, \mu_1 \, \sin^2 p - \lambda \right) }
 \right|_{ p \approx 0 }
-\notag \\
-&
+%\notag \\
+%&
 \approx
 \frac{   2 \, n }
      { \pi \, T }
@@ -5874,7 +5895,7 @@ So it only works for a very small value of $\mu_1$.
 
 
 
-Note that Eq. \eqref{eq:lambda_nn_onestep}
+However, Eq. \eqref{eq:lambda_nn_onestep}
 is an approximation good only
 for sufficiently short simulations,
 since we have taken the limit of $n \to \infty$
@@ -5882,10 +5903,10 @@ for a fixed $T$.
 %
 For very long simulations,
 the optimal $\lambda$
-will ultimately approach
+will ultimately drift to
 the smallest eigenvalue,
-$\min \lambda_k = 1 - 4 \, \mu_1$
-according to the discussion in Sec. \ref{sec:optlambda}.
+$\min \lambda_k = 1 - 4 \, \mu_1$.
+%as discussed in Sec. \ref{sec:optlambda}.
 
 \bibliography{simul}
 \end{document}
