@@ -4371,7 +4371,7 @@ For the single-bin updating scheme,
 we chose $\alpha_0 = 0.0001$
 and ran the simulation for $t = 10^8$ steps.
 %
-As shown in Fig. \ref{fig:err_singlebin},
+As shown in Fig. \ref{fig:errsbin},
 the numerical results of the terminal error agreed well with
 the analytical prediction by Eq. \eqref{eq:error_invt}.
 %
@@ -4382,7 +4382,7 @@ verifying Eq. \eqref{eq:alpha_invt1}.
 %Recall that $1/\lambda$ in Eq. \eqref{eq:alpha_invtlambda}
 %represents the relative updating magnitude.
 %%
-%Figure \ref{fig:err_singlebin} also shows
+%Figure \ref{fig:errsbin} also shows
 %an asymmetry of the error curve.
 %A smaller than optimal value of
 %the updating magnitude, $1/\lambda$,
@@ -4391,8 +4391,7 @@ verifying Eq. \eqref{eq:alpha_invt1}.
 %suggesting that the over-updating
 %is generally preferable to the under-updating
 %when the optimal value is unknown.
-
-
+%
 The two error functions
 differed only by a multiplicative constant,
 again agreeing with the theory.
@@ -4411,7 +4410,7 @@ which gives rise to the above multiplicative constant.
     \includegraphics[angle=0, width=0.95\linewidth]{fig/errsbin.pdf}
   }
   \caption{
-    \label{fig:err_singlebin}
+    \label{fig:errsbin}
     Error, $E$, versus the
     relative updating magnitude,
     %proportionality constant,
@@ -4420,6 +4419,12 @@ which gives rise to the above multiplicative constant.
     for the single-bin (WL) scheme.
     %
     The results have been averaged over $1000$ independent runs.
+    %
+    \note{The figure is produced by \texttt{doc/fig/errsbin.gp}.
+      The data are produced by the script \texttt{invt2run.py},
+      and saved under \texttt{data/singlebin}
+      (see the \texttt{Makefile} there).
+    }
   }
 \end{center}
 \end{figure}

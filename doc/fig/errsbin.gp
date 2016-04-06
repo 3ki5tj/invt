@@ -3,8 +3,8 @@
 
 
 # error vs the proportionality constant c
-# as in the schedule of updating magnitude
-# alpha(t) = c / (t + t0)
+# of the inverse-time schedule of the updating magnitude
+#   alpha(t) = c / (t + t0)
 # for the single-bin (Wang-Landau) scheme
 
 

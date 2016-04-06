@@ -9,7 +9,7 @@
 
 typedef struct {
   int m; /* number of integration point */
-  double t; /* total simulation time */
+  double T; /* total simulation time */
   double *tarr; /* time grid */
   double *qarr;
   double *aarr;
@@ -22,7 +22,7 @@ typedef struct {
 
 
 
-static intq_t *intq_open(double t, int m,
+static intq_t *intq_open(double T, int m,
     int n, const double *lambda, const double *gamma)
 {
   intq_t *intq;
@@ -33,7 +33,7 @@ static intq_t *intq_open(double t, int m,
   xnew(intq->aarr, m + 1);
   xnew(intq->qarr, m + 1);
   xnew(intq->dinva, m + 1);
-  intq->t = t;
+  intq->T = T;
   intq->n = n;
   intq->lambda = lambda;
   intq->gamma = gamma;
@@ -93,7 +93,7 @@ static void intq_getq(intq_t *intq, double qt)
   }
 
   /* normalize the time array */
-  c = intq->t / intq->tarr[m];
+  c = intq->T / intq->tarr[m];
   for ( j = 1; j <= m; j++ ) {
     intq->tarr[j] *= c;
   }
@@ -279,7 +279,7 @@ static double intq_minerr(intq_t *intq, double a0,
   /* specify the initial bracket */
   qn = *qt;
   if ( qn <= 0 ) {
-    qn = log(1 + intq->t * a0);
+    qn = log(1 + intq->T * a0);
   }
   ql = 0.5 * qn;
   qm = 1.0 * qn;
@@ -415,21 +415,13 @@ __inline static double intq_interpa(intq_t *intq, double t, int *id)
 
 
 
-/* get the equivalent qt for the inverse time formula */
-__inline static double intq_getqt(double t, double c, double t0)
-{
-  return c * log( 1 + t / t0 );
-}
-
-
-
 /* save optimal protocol to file */
 __inline static int intq_save(intq_t *intq,
-    double c, double t0, const char *fn)
+    double c, const char *fn)
 {
   FILE *fp;
   int i, m = intq->m;
-  double a1, q1;
+  double a1, q1, T, qT, t0;
 
   if ( fn == NULL || fn[0] == '\0' ) {
     return -1;
@@ -440,15 +432,21 @@ __inline static int intq_save(intq_t *intq,
     return -1;
   }
 
+  T = intq->T;
+  qT = intq->qarr[m];
+  t0 = T / (exp(qT/c) - 1);
+
   /* differentiate 1/a(t) */
   intq_diffinva(intq);
 
-  fprintf(fp, "# %d %d %g %g %g\n",
-      m, intq->n, intq->E, intq->Ea, intq->Er);
+  fprintf(fp, "# %d %d %g %g %g %g %g %g\n",
+      m, intq->n, intq->E, intq->Ea, intq->Er,
+      T, qT, t0);
   for ( i = 0; i < m; i++ ) {
     a1 = c / (intq->tarr[i] + t0);
     q1 = c * log( 1 + intq->tarr[i] / t0 );
-    fprintf(fp, "%12.3f\t%20.8e\t%12.6f\t%20.8e\t%20.8e\t%12.6f\t%20.8e\n",
+    fprintf(fp, "%12.3f\t%20.8e\t%12.6f\t%20.8e\t"
+        "%20.8e\t%12.6f\t%20.8e\n",
         intq->tarr[i], intq->aarr[i], intq->qarr[i], intq->dinva[i],
         a1, q1, 1.0 / c);
   }
@@ -464,7 +462,7 @@ __inline static int intq_save(intq_t *intq,
 
 
 /* return the square-root error from the optimal schedule  */
-static double esterror_opt(double t, double a0, double *qt,
+static double esterror_opt(double T, double a0, double *qt,
     double qprec, int m, intq_t **intq_ptr,
     int n, double *xerr, const double *lambda, const double *gamma,
     int verbose)
@@ -472,7 +470,7 @@ static double esterror_opt(double t, double a0, double *qt,
   intq_t *intq;
   double err;
 
-  intq = intq_open(t, m, n, lambda, gamma);
+  intq = intq_open(T, m, n, lambda, gamma);
 
   /* compute the optimal schedule and error */
   err = intq_minerr(intq, a0, qt, qprec, verbose);

@@ -11,15 +11,10 @@
 
 
 /* compute the updating magntidue */
-static double getalpha(const invtpar_t *m, double t,
-    intq_t *intq, int fixa)
+static double getalpha(const invtpar_t *m, double t, intq_t *intq)
 {
   double a = 0;
   static int id = 0;
-
-  if ( fixa || m->fixa ) {
-    return m->alpha0;
-  }
 
   if ( intq != NULL ) {
     a = intq_interpa(intq, t, &id);
@@ -185,7 +180,11 @@ static double simulmeta(const invtpar_t *m, intq_t *intq,
     }
 
     /* compute the updating magnitude */
-    a = getalpha(m, (double) (t - m->nequil), intq, !prod);
+    if ( !prod || m->fixa ) {
+      a = m->alpha0;
+    } else {
+      a = getalpha(m, (double) (t - m->nequil), intq);
+    }
     a /= m->p[i];
 
     /* update the bias potential  */
@@ -318,7 +317,7 @@ static double invt_run(invtpar_t *m)
         errmin = errref;
 
         /* save the optimal schedule to file */
-        intq_save(intq, m->c, m->c / m->alpha0, m->fnalpha);
+        intq_save(intq, m->c, m->fnalpha);
       } else {
         /* compute the optimal error from the inverse-time formula */
         errref = esterror_invt(t, m->c, m->alpha0, m->n, xerr,

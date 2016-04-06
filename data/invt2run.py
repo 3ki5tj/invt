@@ -2,7 +2,14 @@
 
 
 
-''' Compute error over a range of c values '''
+'''
+Compute error over a range of c values
+for the inverse-time schedule, where
+
+  alpha(t) = c / (t + t0),
+
+with t0 assuming the default value
+'''
 
 
 
@@ -169,9 +176,10 @@ def main():
   cmd0 = "./%s %s %s" % (prog, fncfg, cmdopt)
   cmd0 = cmd0.strip()
 
-  # construct an array of c-values
+  # create a table of c-values
   cval = []
   if not lscan:
+    # linear c values
     c = cmin
     while c < cmax + cdel * 0.01:
       cval += [ c, ]
@@ -185,6 +193,7 @@ def main():
       cmin1 = 0
     cmax1 = cmax + cdel
   else:
+    # linear l values, c = 1/l
     l = lmin
     while l < lmax + ldel * 0.01:
       cval += [ 1.0 / l, ]
@@ -198,9 +207,9 @@ def main():
     else:
       cmax1 = 1 / lmin
 
-
   dc1 = 0.01
-  if cmin1 <= 0: cmin1 = dc1
+  if cmin1 <= 0:
+    cmin1 = dc1
   # generate the prediction result
   os.system("%s/predict %s %s --cmin=%s --cdel=%s --cmax=%s > %s"
       % (progdir, fncfg, cmdopt, cmin1, dc1, cmax1, fnprd) )
@@ -219,6 +228,7 @@ def main():
   sinfo = "# %s %s %s\n" % (fncfg, cmdopt, srange)
   txt += sinfo
 
+  # go over the predefined c-values
   for i in range(len(cval)):
     print "%d: testing for c-value %s..." % (i, cval[i])
 

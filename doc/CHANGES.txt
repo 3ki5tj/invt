@@ -6,6 +6,10 @@
 * Sec. II.A.1, add the distinction of equilibrium and adaptive flat-distribution sampling methods.
 * Sec. II.E.4, iterative method of stabilizing homogeneous updating schemes.
 * Sec. II.F.2, comparison of the error of equilibrium FDS method.
+* Bandpass updating schemes
+* Overall program of computing errors, and variable dependence
+* Optimal t0 is given by 2*c/alpha0
+* Periodic variables for the homogeneous updating scheme
 
 ### Notes
 
@@ -38,4 +42,8 @@
 * Add `erf.h` and `test_erf.c` for Visual C++ adoption
 * Add `plot_intqt.c`
 
+* For the optimal schedule, q(T) is now a parameter
+  that is to be adjusted variationally.
+
+* Bandpass (sinc) updating schemes, invoked by "--okmax="
 

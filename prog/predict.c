@@ -10,186 +10,221 @@
 
 
 static void invt_geterr(invtpar_t *m,
-    const double *lambda, const double *gamma)
+    const double *gamma)
 {
-  double t, qt = 0, err1, err2;
+  double T, qT = 0, err1, err2;
+  double *lambda;
   intq_t *intq;
 
-  t = (double) m->nsteps;
+  T = (double) m->nsteps;
 
-  /* compute the optimal c and the error for 1/t formula */
-  m->c = estbestc_invt(t, m->alpha0, m->n, lambda, gamma,
+  /* compute the eigenvalues of the updating matrix */
+  lambda = geteigvals(m->n, m->winn, m->win, m->pbc,
+      0, NULL, 1);
+  /* save updating kernel or window function */
+  if ( m->fnwin[0] != '\0' ) {
+    savewin(m->winn, m->win, m->fnwin);
+  }
+  /* save the updating matrix */
+  if ( m->fnwinmat[0] != '\0' ) {
+    savewinmat(m->winn, m->win, m->n, m->pbc, m->fnwinmat);
+  }
+
+  /* compute the optimal c and the error
+   * for the inverse-time formula */
+  m->c = estbestc_invt(T, m->alpha0, m->n, lambda, gamma,
       0, &err1, 0);
 
   /* compute the exact minimal error under the same condition */
-  err2 = esterror_opt(t, m->alpha0, &qt, m->qprec,
+  err2 = esterror_opt(T, m->alpha0, &qT, m->qprec,
       m->alpha_nint, &intq, m->n, NULL,
       lambda, gamma, m->verbose);
 
   /* save the optimal schedule to file */
-  intq_save(intq, m->c, m->c / m->alpha0, m->fnalpha);
+  intq_save(intq, m->c, m->fnalpha);
 
   printf("c %g, err %g, sqr %g (invt), %g, sqr %g (exact), %s\n",
       m->c, err1, err1 * err1, err2, err2 * err2, m->fnalpha);
 
   intq_close(intq);
+  free(lambda);
 }
 
 
 
 static void invt_scanc(invtpar_t *m,
-    const double *lambda, const double *gamma)
+    const double *gamma)
 {
-  double c, qt = 0, t, t0;
-  double err, err0, err1, err2;
+  double c, T, t0, qT = 0;
+  double err, erri, errf, err2;
+  double *lambda;
 
-  t = (double) m->nsteps;
+  T = (double) m->nsteps;
+
+  /* compute the eigenvalues of the updating matrix */
+  lambda = geteigvals(m->n, m->winn, m->win, m->pbc,
+      0, NULL, 1);
+
+  /* initial equilibrium error */
+  erri = esterror_eql(m->alpha0, m->n, NULL,
+      lambda, gamma);
+
+  /* compute the exact minimal error under the same condition */
+  err2 = esterror_opt(T, m->alpha0, &qT, m->qprec,
+      m->alpha_nint, NULL, m->n, NULL,
+      lambda, gamma, m->verbose);
+
+  /* print out a header */
+  printf("# c     \t  error  \t  init. error\t  final error\t  optimal error\n");
+
   for ( c = m->cmin; c < m->cmax + 0.001 * m->cdel; c += m->cdel ) {
-    t0 = c / m->alpha0;
-
-    /* c / (t + t0) */
-    err = esterror_invt(t, c, m->alpha0, m->n, NULL,
-        lambda, gamma);
-
-    /* initial equilibrium value */
-    err0 = esterror_eql(m->alpha0, m->n, NULL,
+    /* alpha(t) = c / (t + t0) */
+    err = esterror_invt(T, c, m->alpha0, m->n, NULL,
         lambda, gamma);
 
     /* final equilibrium value */
-    err1 = esterror_eql(c / (t0 + t), m->n, NULL,
+    t0 = 2 * c / m->alpha0;
+    errf = esterror_eql(c / (t0 + T), m->n, NULL,
         lambda, gamma);
 
-    /* compute the exact minimal error under the same condition */
-    err2 = esterror_opt(t, m->alpha0, &qt, m->qprec,
-        m->alpha_nint, NULL, m->n, NULL,
-        lambda, gamma, m->verbose);
-
-    printf("%g\t%g\t%g\t%g\t%g\n",
-        c, err, err0, err1, err2);
+    printf("%8.5f\t%10.6f\t%10.6f\t%10.6f\t%10.6f\n",
+        c, err, erri, errf, err2);
   }
+
+  free(lambda);
 }
 
 
 
-static void invt_scannb(invtpar_t *m,
-    const double *gamma)
+/* possible scan types */
+enum {
+  SCAN_NB,
+  SCAN_SIG,
+  SCAN_OK
+};
+
+
+
+static void invt_scan(invtpar_t *m,
+    const double *gamma, int scantype)
 {
-  double t, t0;
-  double nb, c, qt = 0, err1, err1norm, err2, err2norm;
-  double *lambda;
+  double nb, sig;
+  int ok, okmax = m->okmax, eigerr = 0;
+  double T, t0, c, qT = 0, err1, err1norm, err2, err2norm;
+  double *lambda = NULL;
 
-  t = (double) m->nsteps;
+  T = (double) m->nsteps;
 
-  for ( nb = m->nbmin; nb < m->nbmax + 0.001 * m->nbdel; nb += m->nbdel ) {
-    if ( fabs(nb) < DBL_EPSILON * 100 ) {
-      nb = 0;
+  /* initialize the scanning variable */
+  if ( scantype == SCAN_NB )
+  {
+    nb = m->nbmin;
+    printf("# nb    ");
+  }
+  else if ( scantype == SCAN_SIG )
+  {
+    sig = m->sigmin;
+    printf("# sigma ");
+  }
+  else if ( scantype == SCAN_OK )
+  {
+    ok = m->okdel;
+    printf("# Kmax  ");
+  }
+  /* print out a header */
+  printf("\t  c-value  \tinvt error\t(normalized)\t  opt. error\t(normalized)\t"
+      "   t0    \t   q(T)\n");
+
+  for ( ; ; ) {
+    if ( scantype == SCAN_NB )
+    {
+      /* avoid the round-off error in case
+       * we start from a negative value of nb */
+      if ( fabs(nb) < DBL_EPSILON * 100 ) {
+        nb = 0;
+      }
+
+      /* create the updating window */
+      m->winn = 2;
+      m->win[1] = nb;
+      m->win[0] = 1 - nb;
+      lambda = geteigvals(m->n, m->winn, m->win, m->pbc,
+          0, &eigerr, 1);
+    }
+    else if ( scantype == SCAN_SIG )
+    {
+      /* make the Gaussian window */
+      m->gaussig = sig;
+      invtpar_mkgauswin(m);
+      lambda = trimwindow(m->n, &m->winn, m->win, m->pbc, 0, m->verbose);
+    }
+    else if ( scantype == SCAN_OK )
+    {
+      /* make the bandpass sinc window */
+      m->okmax = ok;
+      invtpar_mksinrwin(m);
+      lambda = geteigvals(m->n, m->winn, m->win, m->pbc,
+          0, &eigerr, 1);
     }
 
-    /* initialize the window */
-    m->winn = 2;
-    m->win[1] = nb;
-    m->win[0] = 1 - nb;
-    lambda = geteigvals(m->n, m->winn, m->win, m->pbc,
-        0, NULL, 1);
+    if ( eigerr > 0 ) {
+      fprintf(stderr, "negative eigenvalues encountered\n");
+      free(lambda);
+    }
 
-    /* find the optimal c */
-    c = estbestc_invt(t, m->alpha0, m->n, lambda, gamma,
+    /* find the optimal c for the inverse-time schedule */
+    c = estbestc_invt(T, m->alpha0, m->n, lambda, gamma,
         0, &err1, 0);
 
-    t0 = c / m->alpha0;
-    err1norm = err1 * sqrt(t + t0);
+    t0 = 2 * c / m->alpha0;
+    err1norm = err1 * sqrt(T + t0);
 
     /* compute the exact minimal error under the same condition */
-    err2 = esterror_opt(t, m->alpha0, &qt, m->qprec,
+    err2 = esterror_opt(T, m->alpha0, &qT, m->qprec,
         m->alpha_nint, NULL, m->n, NULL,
         lambda, gamma, m->verbose);
 
-    err2norm = err2 * sqrt(t + t0);
+    t0 = T / (exp(qT) - 1);
+    err2norm = err2 * sqrt(T + t0);
 
-    printf("%+8.5f\t%10.6f\t%10.6f\t%g\t%10.6f\t%g\n",
-        nb, c, err1, err1norm, err2, err2norm);
-  }
-}
+    /* print the scanning variable */
+    if ( scantype == SCAN_NB )
+    {
+      printf("%+8.5f\t", nb);
+    }
+    else if ( scantype == SCAN_SIG )
+    {
+      printf("%+8.5f\t", sig);
+    }
+    else if ( scantype == SCAN_OK )
+    {
+      printf("%8d\t", ok);
+    }
 
+    printf("%10.6f\t%10.6f\t%10.4f\t%10.6f\t%10.4f\t%10g\t%10g\n",
+        c, err1, err1norm, err2, err2norm, t0, qT);
 
-
-static void invt_scansig(invtpar_t *m,
-    const double *gamma)
-{
-  double t, t0;
-  double sig, c, qt = 0, err1, err1norm, err2, err2norm;
-  double *lambda;
-
-  t = (double) m->nsteps;
-
-  for ( sig = m->sigmin; sig < m->sigmax + 0.001 * m->sigdel; sig += m->sigdel ) {
-    /* make the window */
-    m->gaussig = sig;
-    invtpar_mkgauswin(m);
-    //lambda = geteigvals(m->n, m->winn, m->win, m->pbc, 0, NULL, 1);
-    lambda = trimwindow(m->n, &m->winn, m->win, m->pbc, 0, m->verbose);
-
-    /* find the optimal c, according to the inverse time schedule */
-    c = estbestc_invt(t, m->alpha0, m->n, lambda, gamma,
-        0, &err1, 0);
-
-    /* compute the time-normalized error
-     * of the optimized inverse-time schedule */
-    t0 = c / m->alpha0;
-    err1norm = err1 * sqrt(t + t0);
-
-    /* compute the exact minimal error under the same condition */
-    err2 = esterror_opt(t, m->alpha0, &qt, m->qprec,
-        m->alpha_nint, NULL, m->n, NULL,
-        lambda, gamma, m->verbose);
-
-    /* compute the error of the optimal schedule */
-    err2norm = err2 * sqrt(t + t0);
-
-    printf("%8.5f\t%10.6f\t%10.6f\t%g\t%10.6f\t%g\n",
-        sig, c, err1, err1norm, err2, err2norm);
     free(lambda);
-  }
-}
 
-
-
-static void invt_scanok(invtpar_t *m,
-    const double *gamma)
-{
-  int ok, okmax = m->okmax;
-  double t, t0;
-  double c, qt = 0, err1, err1norm, err2, err2norm;
-  double *lambda;
-
-  t = (double) m->nsteps;
-
-  for ( ok = m->okdel; ok <= okmax; ok += m->okdel ) {
-    /* make the window */
-    m->okmax = ok;
-    invtpar_mksinrwin(m);
-    lambda = geteigvals(m->n, m->winn, m->win, m->pbc, 0, NULL, 1);
-
-    /* find the optimal c, according to the inverse time schedule */
-    c = estbestc_invt(t, m->alpha0, m->n, lambda, gamma,
-        0, &err1, 0);
-
-    /* compute the time-normalized error
-     * of the optimized inverse-time schedule */
-    t0 = c / m->alpha0;
-    err1norm = err1 * sqrt(t + t0);
-
-    /* compute the exact minimal error under the same condition */
-    err2 = esterror_opt(t, m->alpha0, &qt, m->qprec,
-        m->alpha_nint, NULL, m->n, NULL,
-        lambda, gamma, m->verbose);
-
-    /* compute the error of the optimal schedule */
-    err2norm = err2 * sqrt(t + t0);
-
-    printf("%8d\t%10.6f\t%10.6f\t%g\t%10.6f\t%g\n",
-        ok, c, err1, err1norm, err2, err2norm);
-    free(lambda);
+    /* update the scanning variable and stop */
+    if ( scantype == SCAN_NB )
+    {
+      nb += m->nbdel;
+      if ( nb > m->nbmax + 0.01 * m->nbdel )
+        break;
+    }
+    else if ( scantype == SCAN_SIG )
+    {
+      sig += m->sigdel;
+      if ( sig > m->sigmax + 0.01 * m->sigdel )
+        break;
+    }
+    else if ( scantype == SCAN_OK )
+    {
+      ok += m->okdel;
+      if ( ok > okmax )
+        break;
+    }
   }
 }
 
@@ -198,20 +233,11 @@ static void invt_scanok(invtpar_t *m,
 int main(int argc, char **argv)
 {
   invtpar_t m[1];
-  double *lambda = NULL, *gamma = NULL;
+  double *gamma = NULL;
 
   invtpar_init(m);
   invtpar_doargs(m, argc, argv);
   invtpar_dump(m);
-
-  lambda = geteigvals(m->n, m->winn, m->win, m->pbc,
-      0, NULL, 1);
-  if ( m->fnwin[0] != '\0' ) {
-    savewin(m->winn, m->win, m->fnwin);
-  }
-  if ( m->fnwinmat[0] != '\0' ) {
-    savewinmat(m->winn, m->win, m->n, m->pbc, m->fnwinmat);
-  }
 
   /* estimate or load the gamma values */
   gamma = estgamma(m->n, m->sampmethod, m->pbc, m->localg);
@@ -220,26 +246,25 @@ int main(int argc, char **argv)
   }
 
   if ( !m->cscan && !m->nbscan && !m->sigscan && !m->okscan ) {
-    invt_geterr(m, lambda, gamma);
+    invt_geterr(m, gamma);
   }
 
   if ( m->cscan ) {
-    invt_scanc(m, lambda, gamma);
+    invt_scanc(m, gamma);
   }
 
   if ( m->nbscan ) {
-    invt_scannb(m, gamma);
+    invt_scan(m, gamma, SCAN_NB);
   }
 
   if ( m->sigscan ) {
-    invt_scansig(m, gamma);
+    invt_scan(m, gamma, SCAN_SIG);
   }
 
   if ( m->okscan ) {
-    invt_scanok(m, gamma);
+    invt_scan(m, gamma, SCAN_OK);
   }
 
-  free(lambda);
   free(gamma);
 
   invtpar_finish(m);
