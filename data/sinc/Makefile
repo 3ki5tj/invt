@@ -1,0 +1,15 @@
+all: sincsingle
+
+prog=../../prog/predict
+
+fnmdgam=mdgamma.dat
+
+compile::
+	make -C ../../prog
+
+# for Figure sinc.gp
+sincsingle: compile
+	$(prog) --opta --okmax=6 --fnalpha=sinc_nonpbc_alpha.dat --fnwin=sinc_nonpbc_win.dat --fnwinmat=sinc_nonpbc_winmat.dat
+	$(prog) --opta --okmax=3 --pbc --fnalpha=sinc_pbc_alpha.dat --fnwin=sinc_pbc_win.dat
+
+

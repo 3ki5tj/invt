@@ -241,7 +241,8 @@ static double invt_run(invtpar_t *m)
   /* reference values */
   double errref = 0, err0ref, err1ref = 0; /* final, initial, final saturated */
   double optc, errmin = 0; /* optimal c, predicted minimal error */
-  double t;
+  double T;
+  double alphaf; /* final updating magnitude */
   double *lambda = NULL, *gamma = NULL;
   double *xerr0 = NULL, *xerr = NULL;
   intq_t *intq = NULL;
@@ -284,21 +285,14 @@ static double invt_run(invtpar_t *m)
     err = simulmeta(m, NULL, &err0, xerr0);
   } else {
     /* do multiple runs to compute the average error */
-    t = (double) m->nsteps;
+    T = (double) m->nsteps;
 
     printf("estimated initial error %g, sqr: %g\n",
         err0ref, err0ref * err0ref);
 
     if ( !m->fixa ) {
-      /* theoretical estimate of the final error */
-      err1ref = esterror_eql(m->c / (m->t0 + t), m->n, NULL,
-          lambda, gamma);
-
-      printf("estimated final saturated error %g, sqr: %g\n",
-          err1ref, err1ref * err1ref);
-
       /* compute the theoretically optimal c */
-      optc = estbestc_invt(t, m->alpha0, m->n, lambda, gamma,
+      optc = estbestc_invt(T, m->alpha0, m->n, lambda, gamma,
           0, &errmin, m->verbose - 1);
 
       /* use the theoretically optimal c */
@@ -308,31 +302,42 @@ static double invt_run(invtpar_t *m)
       }
 
       if ( m->opta ) {
-        double qt = 0;
+        double qT = 0;
 
         /* compute the theoretically optimal schedule */
-        errref = esterror_opt(t, m->alpha0, &qt, m->qprec,
+        errref = esterror_opt(T, m->alpha0, &qT, m->qprec,
             m->alpha_nint, &intq, m->n, xerr,
             lambda, gamma, m->verbose);
         errmin = errref;
 
+        m->t0 = intq_estt0(T, qT);
+        fprintf(stderr, "q(T) %g, estimated t0 = %g\n", qT, m->t0);
+
         /* save the optimal schedule to file */
-        intq_save(intq, m->c, m->fnalpha);
+        intq_save(intq, optc, 2 * optc / m->alpha0, m->fnalpha);
+
+        alphaf = intq->aarr[intq->m - 1];
       } else {
         /* compute the optimal error from the inverse-time formula */
-        errref = esterror_invt(t, m->c, m->alpha0, m->n, xerr,
+        errref = esterror_invt(T, m->c, m->alpha0, m->n, xerr,
             lambda, gamma);
 
         printf("predicted optimal c %g, err %g, sqr: %g\n",
             optc, errmin, errmin * errmin);
+
+        alphaf = m->c / (T + m->t0);
       }
 
-      printf("estimated final error %g, sqr: %g\n",
-          errref, errref * errref);
+      /* theoretical estimate of the final saturated error */
+      err1ref = esterror_eql(alphaf, m->n, NULL, lambda, gamma);
+      printf("estimated final saturated error %g, sqr: %g\n",
+          err1ref, err1ref * err1ref);
+
+      printf("estimated final error %g, sqr: %g, norm. sqr: %g\n",
+          errref, errref * errref, errref * errref * (T + m->t0));
 
       if ( m->verbose ) {
-        dumperror(m->n, lambda, gamma,
-            2, xerr0, xerr);
+        dumperror(m->n, lambda, gamma, 2, xerr0, xerr);
       }
     }
 
@@ -363,7 +368,7 @@ static double invt_run(invtpar_t *m)
           ave0, ave);
     }
 
-    /* statistics for the final error */
+    /* statistics for the final square error */
     ave = se / ntr;
     averr = sqrt( ave );
     stde = sqrt( see / ntr - ave * ave );
@@ -371,7 +376,7 @@ static double invt_run(invtpar_t *m)
       stde /= sqrt(ntr - 1.0) ;
     }
 
-    /* statistics for the initial error */
+    /* statistics for the initial square error */
     ave0 = se0 / ntr;
     averr0 = sqrt( ave0 );
     stde0 = sqrt( see0 / ntr - ave0 * ave0 );
@@ -379,10 +384,14 @@ static double invt_run(invtpar_t *m)
       stde0 /= sqrt(ntr - 1.0);
     }
 
-    printf("average error: %10.8f -> %10.8f, sqr %e -> %e, stdsqr %e -> %e\n",
-        averr0, averr, ave0, ave, stde0, stde);
-    printf("predicted val: %10.8f -> %10.8f, sqr %e -> %e\n",
-        err0ref, errref, err0ref * err0ref, errref * errref);
+    printf("average error: %10.8f -> %10.8f, sqr %e -> %e, "
+        "norm. sqr %e, stdsqr %e -> %e\n",
+        averr0, averr, ave0, ave,
+        ave * (T + m->t0), stde0, stde);
+    printf("predicted val: %10.8f -> %10.8f, sqr %e -> %e, "
+        "norm. sqr %e\n",
+        err0ref, errref, err0ref * err0ref, errref * errref,
+        errref * errref * (T + m->t0));
     printf("saturated val: %10.8f -> %10.8f, sqr %e -> %e\n",
         err0ref, err1ref, err0ref * err0ref, err1ref * err1ref);
   }

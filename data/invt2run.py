@@ -79,6 +79,7 @@ def doargs():
     usage()
 
   global fncfg, fnout, fnprd, cmdopt, verbose
+  global lscan
   global cmin, cdel, cmax
   global lmin, ldel, lmax
 
@@ -125,7 +126,7 @@ def geterror(out):
 
   # construct the pattern
   numpat = "([0-9][\.0-9e+-]+)"
-  pat = "average error: .*sqr %s -> %s, stdsqr %s -> %s" % (
+  pat = "average error: .*sqr %s -> %s,.*stdsqr %s -> %s" % (
       numpat, numpat, numpat, numpat)
 
   s = out.strip().split("\n")
@@ -154,7 +155,7 @@ def geterror(out):
 
 
 
-def main():
+def c_scan():
   global fncfg, fnout, fnprd, cmdopt, fnout
 
   progdir = "../prog"
@@ -260,5 +261,5 @@ def main():
 
 if __name__ == "__main__":
   doargs()
-  main()
+  c_scan()
 

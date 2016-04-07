@@ -692,7 +692,8 @@ static int invtpar_keymatch(invtpar_t *m,
     m->winmax = invtpar_getint(m, key, val);
   }
   else if ( strcmpfuzzy(key, "okmax") == 0
-         || strcmpfuzzy(key, "kmax") == 0 )
+         || strcmpfuzzy(key, "kmax") == 0
+         || strcmpfuzzy(key, "K") == 0 )
   {
     m->okmax = invtpar_getint(m, key, val);
   }

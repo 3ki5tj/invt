@@ -417,11 +417,11 @@ __inline static double intq_interpa(intq_t *intq, double t, int *id)
 
 /* save optimal protocol to file */
 __inline static int intq_save(intq_t *intq,
-    double c, const char *fn)
+    double c, double t0, const char *fn)
 {
   FILE *fp;
   int i, m = intq->m;
-  double a1, q1, T, qT, t0;
+  double a1, q1, T, qT;
 
   if ( fn == NULL || fn[0] == '\0' ) {
     return -1;
@@ -434,7 +434,8 @@ __inline static int intq_save(intq_t *intq,
 
   T = intq->T;
   qT = intq->qarr[m];
-  t0 = T / (exp(qT/c) - 1);
+  if ( t0 <= 0 )
+    t0 = T / (exp(qT/c) - 1);
 
   /* differentiate 1/a(t) */
   intq_diffinva(intq);
@@ -489,6 +490,16 @@ static double esterror_opt(double T, double a0, double *qt,
 
   return err;
 }
+
+
+
+/* estimate t0 for computing the normalized error
+ * (T + t0) * E */
+__inline static double intq_estt0(double T, double qT)
+{
+  return T / (exp(qT) - 1);
+}
+
 
 
 #endif /* INTQ_H__ */

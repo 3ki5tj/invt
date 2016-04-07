@@ -12,7 +12,7 @@
 static void invt_geterr(invtpar_t *m,
     const double *gamma)
 {
-  double T, qT = 0, err1, err2;
+  double T, t0, qT = 0, err1, err2;
   double *lambda;
   intq_t *intq;
 
@@ -41,10 +41,11 @@ static void invt_geterr(invtpar_t *m,
       lambda, gamma, m->verbose);
 
   /* save the optimal schedule to file */
-  intq_save(intq, m->c, m->fnalpha);
+  t0 = 2 * m->c / m->alpha0;
+  intq_save(intq, m->c, t0, m->fnalpha);
 
-  printf("c %g, err %g, sqr %g (invt), %g, sqr %g (exact), %s\n",
-      m->c, err1, err1 * err1, err2, err2 * err2, m->fnalpha);
+  printf("c %g, t0 %g, err %g, sqr %g (invt), %g, sqr %g (exact), %s\n",
+      m->c, t0, err1, err1 * err1, err2, err2 * err2, m->fnalpha);
 
   intq_close(intq);
   free(lambda);
@@ -184,7 +185,7 @@ static void invt_scan(invtpar_t *m,
         m->alpha_nint, NULL, m->n, NULL,
         lambda, gamma, m->verbose);
 
-    t0 = T / (exp(qT) - 1);
+    t0 = intq_estt0(T, qT);
     err2norm = err2 * sqrt(T + t0);
 
     /* print the scanning variable */

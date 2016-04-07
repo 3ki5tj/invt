@@ -23,7 +23,7 @@ set xlabel "{/Times 1 / }{/Symbol-Oblique l}" offset 0, 0.5
 set logscale y
 set format y "10^{%T}"
 set mytics 10
-set ylabel "Normalized error, {/Times (}{/Times-Italic t}{/Times + }{/Times-Italic t}_{/Times 0} {/Times )} {/Times-Italic E}"
+set ylabel "Normalized error, {/Times (}{/Times-Italic T}{/Times + }{/Times-Italic t}_{/Times 0} {/Times )} {/Times-Italic E}"
 
 # `width` to reduce the text length
 set key at 14, 2e4 Left reverse width -7 spacing 1.3

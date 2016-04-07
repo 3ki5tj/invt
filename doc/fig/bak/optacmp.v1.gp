@@ -44,14 +44,14 @@ set ylabel "{/Times-Italic d} {/Symbol-Oblique a}^{/*0.7 -1}({/Times-Italic t}) 
 
 set key left Left reverse
 
-#sig_c_g = `tail -n 1 ../../data/opta/sig10_g_alpha.dat | cut -f 7`
-#sig_c_l = `tail -n 1 ../../data/opta/sig10_l_alpha.dat | cut -f 7`
+sig_c_g = `tail -n 1 ../../data/scan/sig10_g_alpha.dat | cut -f 7`
+sig_c_l = `tail -n 1 ../../data/scan/sig10_l_alpha.dat | cut -f 7`
 
-plot [][:1] \
-    "../../data/opta/sig10_g_alpha.dat"  u 1:4 w l lt 1 lw 6 notitle, \
-    "../../data/opta/sig10_g_alpha.dat"  u 1:7 w l lt 2 lw 6 notitle, \
-    "../../data/opta/sig10_l_alpha.dat"  u 1:4 w l lt 1 lw 2 notitle, \
-    "../../data/opta/sig10_l_alpha.dat"  u 1:7 w l lt 2 lw 2 notitle, \
+plot [][:20] \
+    "../../data/scan/sig10_g_alpha.dat"  u 1:4 w l lt 1 lw 6 t "Global, optimal", \
+    sig_c_g                                    w l lt 2 lw 6 t "Global, inverse {/Times-Italic t}", \
+    "../../data/scan/sig10_l_alpha.dat"  u 1:4 w l lt 1 lw 2 t "Local, optimal", \
+    sig_c_l                                    w l lt 2 lw 2 t "Local, inverse {/Times-Italic t}", \
     -1 notitle
 
 
@@ -71,11 +71,11 @@ set ylabel "{/Symbol-Oblique a} ({/Times-Italic t})"
 
 set key left bottom Left reverse spacing 1.1
 
-plot [][3e-9:1e-4] \
-    "../../data/opta/sig10_g_alpha.dat"  u 1:($2) w l lt 1 lw 6 lc rgb "#000000"    t "Global, optimal", \
-    "../../data/opta/sig10_g_alpha.dat"  u 1:($5) w l lt 2 lw 6 lc rgb "#000000"    t "Global, inverse {/Times-Italic t}", \
-    "../../data/opta/sig10_l_alpha.dat"  u 1:($2) w l lt 1 lw 2 lc rgb "#000000"    t "Local, optimal", \
-    "../../data/opta/sig10_l_alpha.dat"  u 1:($5) w l lt 2 lw 2 lc rgb "#000000"    t "Local, inverse {/Times-Italic t}", \
+plot [][1e-9:1e-4] \
+    "../../data/scan/sig10_g_alpha.dat"  u 1:($2) w l lt 1 lw 6 lc rgb "#000000"    t "Global, optimal", \
+    "../../data/scan/sig10_g_alpha.dat"  u 1:($5) w l lt 2 lw 6 lc rgb "#000000"    t "Global, inverse {/Times-Italic t}", \
+    "../../data/scan/sig10_l_alpha.dat"  u 1:($2) w l lt 1 lw 2 lc rgb "#000000"    t "Local, optimal", \
+    "../../data/scan/sig10_l_alpha.dat"  u 1:($5) w l lt 2 lw 2 lc rgb "#000000"    t "Local, inverse {/Times-Italic t}", \
     -1 notitle
 
 

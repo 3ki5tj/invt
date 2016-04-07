@@ -1,63 +1,45 @@
-all: nbsingle sigsingle sincsingle nbscan sigscan okscan
+all: sigprd okprd sigrun okrun
 
-prog=../../prog/predict
+pred=../../prog/predict
 
 fnmdgam=mdgamma.dat
 
 compile::
 	make -C ../../prog
 
-# for the optimal alpha(t)
-nbsingle: compile $(fnmdgam)
-	$(prog) --nb=0.24 --samp=g --nint=10000 --fnalpha=nb0.24_g_alpha.dat
-	$(prog) --nb=0.24 --samp=l --nint=10000 --fnalpha=nb0.24_l_alpha.dat
-	$(prog) --nb=0.24 --samp=md --fngamma=$(fnmdgam) --nint=10000 --fnalpha=nb0.24_md_alpha.dat
-
-sigsingle: compile $(fnmdgam)
-	$(prog) --sig=10 --samp=g --nint=10000 --fnalpha=sig10_g_alpha.dat
-	$(prog) --sig=10 --samp=l --nint=10000 --fnalpha=sig10_l_alpha.dat
-	$(prog) --sig=10 --samp=md --fngamma=$(fnmdgam) --nint=10000 --fnalpha=sig10_md_alpha.dat
-
-
-# for Figure sinc.gp
-sincsingle: compile
-	$(prog) --opta --okmax=6 --fnalpha=sinc_nonpbc_alpha.dat --fnwin=sinc_nonpbc_win.dat --fnwinmat=sinc_nonpbc_winmat.dat
-	$(prog) --opta --okmax=3 --pbc --fnalpha=sinc_pbc_alpha.dat --fnwin=sinc_pbc_win.dat
-
 # for the error
-nbscan: compile $(fnmdgam)
-	$(prog) --nbmin=-1.0 --nbdel=0.001 --nbmax=0.25 --samp=g                        --nsteps=1e7  > nbscan_t1e7_g.dat
-	$(prog) --nbmin=-1.0 --nbdel=0.001 --nbmax=0.25 --samp=l                        --nsteps=1e7  > nbscan_t1e7_l.dat
-	$(prog) --nbmin=-1.0 --nbdel=0.001 --nbmax=0.25 --samp=md --fngamma=$(fnmdgam)  --nsteps=1e7  > nbscan_t1e7_l.dat
-	$(prog) --nbmin=-1.0 --nbdel=0.001 --nbmax=0.25 --samp=g                        --nsteps=1e8  > nbscan_t1e8_g.dat
-	$(prog) --nbmin=-1.0 --nbdel=0.001 --nbmax=0.25 --samp=l                        --nsteps=1e8  > nbscan_t1e8_l.dat
-	$(prog) --nbmin=-1.0 --nbdel=0.001 --nbmax=0.25 --samp=md --fngamma=$(fnmdgam)  --nsteps=1e8  > nbscan_t1e8_l.dat
-	$(prog) --nbmin=-1.0 --nbdel=0.001 --nbmax=0.25 --samp=g                        --nsteps=1e9  > nbscan_t1e9_g.dat
-	$(prog) --nbmin=-1.0 --nbdel=0.001 --nbmax=0.25 --samp=l                        --nsteps=1e9  > nbscan_t1e9_l.dat
-	$(prog) --nbmin=-1.0 --nbdel=0.001 --nbmax=0.25 --samp=md --fngamma=$(fnmdgam)  --nsteps=1e9  > nbscan_t1e9_l.dat
-	$(prog) --nbmin=-1.0 --nbdel=0.001 --nbmax=0.25 --samp=g                        --nsteps=1e10 > nbscan_t1e10_g.dat
-	$(prog) --nbmin=-1.0 --nbdel=0.001 --nbmax=0.25 --samp=l                        --nsteps=1e10 > nbscan_t1e10_l.dat
-	$(prog) --nbmin=-1.0 --nbdel=0.001 --nbmax=0.25 --samp=md --fngamma=$(fnmdgam)  --nsteps=1e10 > nbscan_t1e10_l.dat
+nbprd: compile $(fnmdgam)
+	$(pred) --nbmin=-1.0 --nbdel=0.001 --nbmax=0.25 --samp=g                        --nsteps=1e8  > nbscan_t1e8_g.dat
+	$(pred) --nbmin=-1.0 --nbdel=0.001 --nbmax=0.25 --samp=l                        --nsteps=1e8  > nbscan_t1e8_l.dat
+	$(pred) --nbmin=-1.0 --nbdel=0.001 --nbmax=0.25 --samp=md --fngamma=$(fnmdgam)  --nsteps=1e8  > nbscan_t1e8_l.dat
 
-sigopt=--sigdel=0.1 --sigmax=12
+sigprdopt=--sigdel=0.1 --sigmax=12
 
-sigscan: compile $(fnmdgam)
-	$(prog) $(sigopt) --samp=g                       --nsteps=1e8  > sigscan_t1e8_g.dat
-	$(prog) $(sigopt) --samp=l                       --nsteps=1e8  > sigscan_t1e8_l.dat
-	$(prog) $(sigopt) --samp=g                       --nsteps=1e10 > sigscan_t1e10_g.dat
-	$(prog) $(sigopt) --samp=l                       --nsteps=1e10 > sigscan_t1e10_l.dat
-	$(prog) $(sigopt) --samp=g                       --nsteps=1e11 > sigscan_t1e11_g.dat
-	$(prog) $(sigopt) --samp=l                       --nsteps=1e11 > sigscan_t1e11_l.dat
+sigprd: compile $(fnmdgam)
+	$(pred) $(sigprdopt) --samp=g                       --nsteps=1e8  > sigprd_t1e8_g.dat
+	$(pred) $(sigprdopt) --samp=l                       --nsteps=1e8  > sigprd_t1e8_l.dat
+	$(pred) $(sigprdopt) --samp=g                       --nsteps=1e11 > sigprd_t1e11_g.dat
+	$(pred) $(sigprdopt) --samp=l                       --nsteps=1e11 > sigprd_t1e11_l.dat
 
-okopt=--okscan=1 --okmax=99
+sigrunopt=--sig=0.5:0.5:12
 
-okscan: compile $(fnmdgam)
-	$(prog) $(okopt) --samp=g                       --nsteps=1e8  > okscan_t1e8_g.dat
-	$(prog) $(okopt) --samp=l                       --nsteps=1e8  > okscan_t1e8_l.dat
-	$(prog) $(okopt) --samp=g                       --nsteps=1e10 > okscan_t1e10_g.dat
-	$(prog) $(okopt) --samp=l                       --nsteps=1e10 > okscan_t1e10_l.dat
-	$(prog) $(okopt) --samp=g                       --nsteps=1e11 > okscan_t1e11_g.dat
-	$(prog) $(okopt) --samp=l                       --nsteps=1e11 > okscan_t1e11_l.dat
+sigrun: compile $(fnmdgam)
+	../invtscan.py $(sigrunopt) global.cfg --opt="--ntrials=5" -o sigrun_t1e8_g.dat
+	../invtscan.py $(sigrunopt) local.cfg  --opt="--ntrials=5" -o sigrun_t1e8_l.dat
+
+okprdopt=--okscan=1 --okmax=99
+
+okprd: compile $(fnmdgam)
+	$(pred) $(okprdopt) --samp=g                       --nsteps=1e8  > okprd_t1e8_g.dat
+	$(pred) $(okprdopt) --samp=l                       --nsteps=1e8  > okprd_t1e8_l.dat
+	$(pred) $(okprdopt) --samp=g                       --nsteps=1e11 > okprd_t1e11_g.dat
+	$(pred) $(okprdopt) --samp=l                       --nsteps=1e11 > okprd_t1e11_l.dat
+
+okrunopt=--ok=1:1:20
+
+okrun: compile $(fnmdgam)
+	../invtscan.py $(okrunopt) global.cfg -o okrun_t1e8_g.dat
+	../invtscan.py $(okrunopt) local.cfg  -o okrun_t1e8_l.dat
 
 # use `invt` to generate mdgamma.dat
 $(fnmdgam):

@@ -3903,7 +3903,8 @@ this allows to determine the optimal value
 of the free parameter, $t_0$.
 
 Assuming the system is initially equilibrated
-under a constant updating magnitude, $\alpha_0$,
+under a constant updating magnitude,
+$\alpha_0$,
 we may use Eq. \eqref{eq:error_res1} with
 $$
 q(T)
@@ -4286,7 +4287,7 @@ $v_i \equiv 0$,
 %
 and equilibrate the system under
 a constant updating magnitude,
-$\alpha_0$.
+$\alpha_0 = 10^{-4}$.
 %
 After this,
 we reset the origin of the time, $t$,
@@ -4420,8 +4421,8 @@ which gives rise to the above multiplicative constant.
     %
     The results have been averaged over $1000$ independent runs.
     %
-    \note{The figure is produced by \texttt{doc/fig/errsbin.gp}.
-      The data are produced by the script \texttt{invt2run.py},
+    \note{The figure was produced by \texttt{doc/fig/errsbin.gp}.
+      The data were produced by the script \texttt{data/invt2run.py},
       and saved under \texttt{data/singlebin}
       (see the \texttt{Makefile} there).
     }
@@ -4444,7 +4445,7 @@ between simulation and analytical results.
 A new feature is that the optimal $\lambda$
 depends on the simulation length, $T$.
 %
-As shown in Fig. \ref{fig:err_nnbr},
+As shown in Fig. \ref{fig:errnnbr},
 the normalized error, $(T + t_0) \, \Err$,
 hence the optimal value of $1/\lambda$,
 depended non-trivially on the simulation length, $T$,
@@ -4509,7 +4510,7 @@ as suggested by Eq. \eqref{eq:lambda_nn_onestep}.
     \includegraphics[angle=0, width=0.95\linewidth]{fig/errnnbr.pdf}
   }
   \caption{
-    \label{fig:err_nnbr}
+    \label{fig:errnnbr}
     Normalized error, $(T + t_0) \, E$,
     versus the %proportionality constant,
     relative updating magnitude,
@@ -4518,6 +4519,11 @@ as suggested by Eq. \eqref{eq:lambda_nn_onestep}.
     for the nearest-neighbor updating scheme with $\mu_1 = 0.24$.
     %
     The results have been averaged over $1000$ independent runs.
+    \note{This figure was produced by \texttt{doc/fig/errnnbr.gp}.
+      The data were produced by \texttt{data/invt2run.py},
+      saved under \texttt{data/nb0.24}
+      (see the \texttt{Makefile} there).
+    }
   }
 \end{center}
 \end{figure}
@@ -4585,12 +4591,20 @@ with the optimal $\lambda$.
     Eq. \eqref{eq:alpha_invtlambda}
     for the Gaussian updating scheme
     with $\sigma = 10$.
+    \note{This figure was produced by \texttt{doc/fig/optacmp.gp}.
+      The data were computed by the program \texttt{prog/predict},
+      see particularly the function \texttt{intq\_save()}
+      in \texttt{prog/intq.h}.
+      The data were saved under the directory \texttt{data/opta}.
+      See the \texttt{make} object \texttt{sigsingle}
+      in the \texttt{Makefile} there.
+    }
   }
 \end{center}
 \end{figure}
 
 As shown in Fig. \ref{fig:optacmp}(a),
-the optimal schedule has a more complex curvature
+the optimal schedule is a more complex curve
 than the optimized inverse-time schedule.
 %
 In Fig. \ref{fig:optacmp}(b),
@@ -4603,17 +4617,17 @@ as discussed in Sec. \ref{sec:optschedule}.
 The errors in the two cases were
 $2.7 \times 10^{-7}$
 and
-$5.9 \times 10^{-7}$,
+$6 \times 10^{-7}$,
 respectively,
 for the global sampling process,
 %
 or
 $9.1 \times 10^{-5}$
 and
-$1.67 \times 10^{-4}$,
+$1.7 \times 10^{-4}$,
 respectively
 for the local sampling process,
-suggesting a slight edge of
+showing the superiority of
 the optimal schedule from Eq. \eqref{eq:q_opt}.
 
 
@@ -4680,6 +4694,17 @@ or that for $l = i + j - 2 \, n - 1$,
     The lines are a guide to the eyes.
     Inset. Updating matrix in the non-periodic case
     is free of the zigzaggedness shown in the kernel.
+    \note{This figure was produced by \texttt{doc/fig/sinc.gp}.
+      The data were computed by the program \texttt{prog/predict},
+      see particularly the function \texttt{intq\_save()}
+      in \texttt{prog/intq.h} for panel (a),
+      and the functions \texttt{savewin()}
+      and \texttt{savewinmat()}
+      in \texttt{prog/invt.h} for panel (b),
+      The data were saved under the directory \texttt{data/sinc}.
+      See the \texttt{make} object \texttt{sincsingle}
+      in the \texttt{Makefile} there.
+    }
   }
 \end{center}
 \end{figure}
@@ -4705,9 +4730,10 @@ For the global sampling process,
 we see from Fig. \ref{fig:errsigscan}(a)
 that the minimal error was achieved
 by the widest window for the shorter simulation
-of $T = 10^8$,
-while the minimum around $\sigma = 0$
-became more favorable as the simulation lengthens.
+of $T = 10^8$.
+%
+However, as the simulation lengthens,
+the minimum at $\sigma = 0$ became more favorable.
 %
 However,
 the shift was hard to detect
@@ -4720,8 +4746,8 @@ the normalized error of the bandpass updating scheme
 was insensitive to the simulation length,
 in agreement with Eq. \eqref{eq:error_sinc}.
 %
-Further, in all cases the bandpass scheme
-appeared to be superior to the Gaussian updating scheme.
+Further, in all cases the bandpass updating scheme
+appeared to be superior to the Gaussian one.
 
 
 
@@ -4739,6 +4765,19 @@ appeared to be superior to the Gaussian updating scheme.
     %
     In the latter case,
     $\sigma$ is given by Eq. \eqref{eq:sigma_equiv}.
+    %
+    Here, we assumed $t_0 \equiv T/(e^{q(T)} - 1)$
+    for the optimal value of $q(T)$.
+    %
+    The points were obtained from averaging results
+    from 1000 independent simulations;
+    the curves are theoretical predictions.
+    %
+    \note{This figure was produced by
+      \texttt{doc/fig/errsigscan.gp}.
+      The data were saved under
+      \texttt{data/scan}.
+    }
   }
 \end{center}
 \end{figure}
@@ -5037,7 +5076,7 @@ The total error is
     \Gamma_k \, \nu_k \,
     \left[
       \nu_k
-      -
+      +
       (\nu_k - 1)
       \left(
         \frac{ t_0 } { T + t_0 }
@@ -5139,7 +5178,7 @@ The total error is
 
 
 
-\note{
+\note{The following subsection is deleted in the public version.
 
 \subsection{\label{sec:optlambda}
 Optimal proportionality constant
@@ -5177,15 +5216,17 @@ where the $k$th component is proportional to
 $$
 G\left( \nu_k, r \right)
 =
-\frac { \nu_k }
+\frac { \nu_k
+        \,
+        \left[
+          \nu_k
+          +
+          (\nu_k - 1) \,
+          r^{2 \, \nu_k - 1}
+        \right]
+      }
       { 2 \, \nu_k - 1 }
-\,
-\left[
-  \nu_k
-  -
-  (\nu_k - 1) \,
-  r^{2 \, \nu_k - 1}
-\right].
+.
 $$
 %
 As shown in Fig. \ref{fig:err_component},
@@ -5228,6 +5269,9 @@ and the total error is roughly twice $E_\mathrm{sat}$.
     versus $\nu_k = \lambda_k / \lambda$,
     where $r = t_0 / (T + t_0)$.
     %
+    \note{This figure is produced by
+      \texttt{doc/fig/errcomp.gp}.
+    }
   }
 \end{center}
 \end{figure}
