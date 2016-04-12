@@ -1051,11 +1051,11 @@ In order for this to hold for any $t$,
 we must have
 %
 \begin{equation}
-\ddot u\bigl( q(t') \bigr) = 0,
-\qquad
-\mathrm{or}
-\;\;
-\dot u\bigl( q(t') \bigr) = c,
+  \ddot u\bigl( q(t') \bigr) = 0,
+  \qquad
+  \mathrm{or}
+  \;\;
+  \dot u\bigl( q(t') \bigr) = c,
 \label{eq:ddu_eq_0}
 \end{equation}
 %
@@ -1105,6 +1105,10 @@ is given by
 \end{equation}
 and Eq. \eqref{eq:alpha_invt}
 is the case of $t_0 = 0$.
+%
+In Sec. \ref{sec:finlencorr},
+we show that $t_0$ can be adjusted
+to take into account for the initial error.
 
 
 
@@ -1121,9 +1125,8 @@ upon a visit to bin $j$,
 we update not only the bias potential at bin $j$,
 but also those at a few neighboring bins, $i$'s.
 %
-The update magnitudes are given by a matrix
-$\mathbf w$
-with elements $w_{ij}$.
+The relative update magnitudes, $w_{ij}$,
+constitute a matrix $\mathbf w$.
 %
 Then, Eq. \eqref{eq:vt_diffeq} is generalized to
 \begin{equation}
@@ -1175,7 +1178,7 @@ with eigenvalue $1$.
 %
 Thus, the transpose $\mathbf w^T$
 resembles a transition matrix,
-although the matrix elements can be negative.
+although the elements can be negative.
 
 
 
@@ -1203,22 +1206,15 @@ $\mathbf w$ with eigenvalue $1$.
 
 
 Further, by Eq. \eqref{eq:w_detailedbalance},
-we can define a symmetric matrix $\hat{\mathbf w}$
-as $\hat w_{ij} = \sqrt{p_i/p_j} \, w_{ij}$
-that can be diagonalized\cite{vankampen}
-with a set of orthonormal eigenvectors:
+we can diagonalize $\mathbf w$ with a set of
+eigenvectors
 %
-$\sum_{i = 1}^n \varphi_{ki} \, \hat w_{ij} = \lambda_k \, \varphi_{kj}$.
-%
-Thus,
-in terms of diagonalizing $\mathbf w$, we have
 \begin{equation}
   \sum_{i = 1}^n \phi_{ki} \, w_{ij} = \lambda_k \, \phi_{kj},
   \label{eq:eig_w}
 \end{equation}
-where the eigenvectors
-$$\phi_{ij} \equiv \sqrt{p_j} \, \varphi_{ij}$$
-satisfy the orthonormal conditions\cite{vankampen}:
+%
+satisfying the orthonormal conditions\cite{vankampen}:
 %
 \begin{align}
 \sum_{k = 1}^n \phi_{ki} \, \phi_{kj}
@@ -1229,7 +1225,21 @@ satisfy the orthonormal conditions\cite{vankampen}:
 &= \delta_{ij}.
 \label{eq:eig_orthonormal_rows}
 \end{align}
-
+%
+\note{We can define a symmetric matrix $\hat{\mathbf w}$
+as $\hat w_{ij} = \sqrt{p_i/p_j} \, w_{ij}$,
+which can be diagonalized\cite{vankampen}
+with a set of orthonormal eigenvectors:
+%
+$\sum_{i = 1}^n \varphi_{ki} \, \hat w_{ij} = \lambda_k \, \varphi_{kj}$.
+%
+Then,
+in terms of diagonalizing $\mathbf w$, we have
+$$\phi_{ij} \equiv \sqrt{p_j} \, \varphi_{ij}$$
+satisfying Eqs. \eqref{eq:eig_orthonormal_cols}
+and \eqref{eq:eig_orthonormal_rows}.
+%
+}%
 
 Particularly, there is always an eigenvector
 corresponding to the equilibrium distribution.
@@ -1416,18 +1426,18 @@ where,
 \note{The extremal condition of $\Err_A$ is given by
 %
 \begin{align}
-\sum_{k = 2}^n
-\lambda_k \, u_k\bigl( q(t) \bigr)
-\int_0^T
-  \ddot u_k \bigl( q(t') \bigr) \,
-  \kappa_k(t' - t) \, dt' = 0.
+  \sum_{k = 2}^n
+  \lambda_k \, u_k\bigl( q(t) \bigr)
+  \int_0^T
+    \ddot u_k \bigl( q(t') \bigr) \,
+    \kappa_k(t' - t) \, dt' = 0.
+  \tag{N1}
 \label{eq:optimal_mbin}
 \end{align}
 %
 If all $\lambda_k$, hence all $u_k$, are the same,
-the above condition can be satisfied
-by Eq. \eqref{eq:ddu_eq_0},
-which is the single-bin case.
+the above condition can be satisfied with $\ddot u_k = 0$,
+which recovers the single-bin case.
 %
 Unfortunately, the above expression
 appears to be useless in a general setting.
@@ -1508,7 +1518,9 @@ This is equivalent to saying that the Fourier transform
     \sum_{k = 1}^n
       \Gamma_k \, \lambda_k \,
       u_k\bigl( q(t) \bigr) \,
-      \ddot u_k\bigl( q(t) \bigr) = 0.
+      \ddot u_k\bigl( q(t) \bigr) = 0
+    .
+    \tag{N2}
     \label{eq:optimal_mbin1}
   \end{align}
   %
@@ -2471,11 +2483,11 @@ satisfies Eqs. \eqref{eq:w_sumj}-\eqref{eq:w_balance},
 for the flat distribution $p_i = 1/n$.
 %
 To find the eigenvectors,
-we note that for a periodic variable $\varphi_i$,
+we note that for a periodic variable, $\phi_i$,
 the out-of-boundary values are defined by
 %
 \begin{equation}
-  \varphi_i = \varphi_{i \pm n},
+  \phi_i = \phi_{i \pm n},
 \label{eq:phi_pbc}
 \end{equation}
 %
@@ -2485,13 +2497,13 @@ We then have
 %
 \begin{equation}
   \sum_{ j = 1 }^n
-    w_{ij} \, \varphi_j
+    w_{ij} \, \phi_j
   =
   \sum_{ j = 1 - n }^{ 2 \, n }
-    \mu_{i - j} \, \varphi_j
+    \mu_{i - j} \, \phi_j
   =
   \sum_{ l = -b }^{ b }
-    \mu_l \, \varphi_{ i - l}
+    \mu_l \, \phi_{ i - l}
   .
 \label{eq:wmul_to_convol}
 \end{equation}
@@ -2501,30 +2513,30 @@ We then have
 $$
 \begin{aligned}
   \sum_{j = 1}^n
-    w_{ij} \, \varphi_j
+    w_{ij} \, \phi_j
   &=
   \sum_{j = 1}^n
-    \mu_{i - j} \, \varphi_j
+    \mu_{i - j} \, \phi_j
   +
   \sum_{j = 1}^n
-    \mu_{i - j - n} \, \varphi_j
+    \mu_{i - j - n} \, \phi_j
   +
   \sum_{j = 1}^n
-    \mu_{i - j + n} \, \varphi_j
+    \mu_{i - j + n} \, \phi_j
   \\
   &=
   \sum_{j = 1}^n
-    \mu_{i - j} \, \varphi_j
+    \mu_{i - j} \, \phi_j
   +
   \sum_{j = 1+n}^{2 \, n}
-    \mu_{i - l} \, \varphi_l
+    \mu_{i - l} \, \phi_l
   +
   \sum_{j = 1-n}^0
-    \mu_{i - j + n} \, \varphi_j
+    \mu_{i - j + n} \, \phi_j
   \\
   &=
   \sum_{j = 1-n}^{2 \, n}
-    \mu_{i - j} \, \varphi_j
+    \mu_{i - j} \, \phi_j
   .
 \end{aligned}
 $$
@@ -2535,10 +2547,10 @@ Similarly,
 for the left eigenvector, we have
 $$
   \sum_{ i = 1 }^n
-    \varphi_i \, w_{ij}
+    \phi_i \, w_{ij}
   =
   \sum_{ l = -b }^b
-    \varphi_{j - l} \, \mu_{-l}
+    \phi_{j - l} \, \mu_{-l}
   .
 $$
 But due to the symmetry Eq. \eqref{eq:mu_symm},
@@ -2547,14 +2559,14 @@ it is identical to \eqref{eq:wmul_to_convol}.
 
 Thus,
 we may construct a set of orthonormal eigenvectors,
-$\pmb\varphi^{(1)}, \dots, \pmb\varphi^{(n)}$,
+$\pmb\phi^{(1)}, \dots, \pmb\phi^{(n)}$,
 as
 \begin{equation}
   \phi^{(k)}_j
   =
   \phi_{kj}
   =
-  \frac{1}{\sqrt n}
+  \frac 1 n
   \exp
   \left[
     \ii
@@ -2662,14 +2674,14 @@ are satisfied.
 
 Similar to Eq. \eqref{eq:phi_pbc},
 we define the out-of-boundary values
-of $\varphi_j$ as
+of $\phi_j$ as
 %
 \begin{equation}
-  \varphi_j
+  \phi_j
   =
   \begin{dcases}
-    \varphi_{ 1 - j }           & \mathrm{for \;} j \le 0, \\
-    \varphi_{ 2 \, n + 1 - j }  & \mathrm{for \;} j > n,
+    \phi_{ 1 - j }           & \mathrm{for \;} j \le 0, \\
+    \phi_{ 2 \, n + 1 - j }  & \mathrm{for \;} j > n,
   \end{dcases}
 \label{eq:phi_refl}
 \end{equation}
@@ -2681,49 +2693,48 @@ still holds.
   in this case is similar,
   $$
   \begin{aligned}
-    \sum_{j = 1}^n w_{ij} \, \varphi_j
+    \sum_{j = 1}^n w_{ij} \, \phi_j
     &=
     \sum_{j = 1}^n
-      \mu_{i - j} \, \varphi_j
+      \mu_{i - j} \, \phi_j
     +
     \sum_{j = 1}^n
-      \mu_{i + j - 1} \, \varphi_j
+      \mu_{i + j - 1} \, \phi_j
     +
     \sum_{j = 1}^n
-      \mu_{i + j - 2 \, n - 1} \, \varphi_j
+      \mu_{i + j - 2 \, n - 1} \, \phi_j
     \\
     &=
     \sum_{j = 1}^n
-      \mu_{i - j} \, \varphi_j
+      \mu_{i - j} \, \phi_j
     +
     \sum_{l = 1 - n}^0
-      \mu_{i - l} \, \varphi_l
+      \mu_{i - l} \, \phi_l
     +
     \sum_{l = n + 1}^{ 2 \, n }
-      \mu_{i - l} \, \varphi_l
+      \mu_{i - l} \, \phi_l
     \\
     &=
     \sum_{j = 1 - n}^{ 2 \, n}
-      \mu_{i - j} \, \varphi_j.
+      \mu_{i - j} \, \phi_j.
   \end{aligned}
   $$
 }
 %
 Thus, we also have $n$ orthonormal eigenvectors,
-$\pmb\varphi^{(1)}, \dots, \pmb\varphi^{(n)}$,
+$\pmb\phi^{(1)}, \dots, \pmb\phi^{(n)}$,
 as
 %
 \begin{equation}
-\varphi^{(k)}_i
-=
-\varphi_{k i}
-=
-\sqrt{
-    \frac{ 2 - \delta_{k, 1} }
-         {       n           }
-     }
-   \cos \frac{ ( k - 1) \, \left( i - \frac 1 2 \right) \, \pi}
-            {                  n                         }.
+  \phi^{(k)}_i
+  =
+  \phi_{k i}
+  =
+  \frac{ \sqrt{ 2 - \delta_{k, 1} } }
+       {             n              }
+  \cos \frac{ ( k - 1) \, \left( i - \frac 1 2 \right) \, \pi}
+            {                    n                           }
+  ,
 \notag
 %\label{eq:wband_eigenvector_refl}
 \end{equation}
@@ -2739,6 +2750,7 @@ with eigenvalues
   \sum_{l = 1}^b
     \mu_l
     \cos \frac{(k - 1)  \, l \pi}{n}
+  .
   \label{eq:wband_eigenvalue_refl}
 \end{align}
 %
@@ -2884,14 +2896,15 @@ with eigenvalues
   So
   $$
     \sum_{k = 1}^n
-    \varphi^{(k)}_i \, \varphi^{(k)}_j
+    \phi^{(k)}_i \, \phi^{(k)}_j
     =
-    \frac 2 n
+    \frac 2 { n^2 }
     \sum_{k = 1}^n
     \Phi^{(k)}_i \, \Phi^{(k)}_j
     -
-    \frac 1 n
+    \frac 1 { n^2 }
     =
+    \frac 1 n \,
     \delta_{i, j}.
   $$
 }
@@ -3287,7 +3300,8 @@ The inversion formula is derived from the cosine transform.
   %
   \begin{align}
     \lambda_{ 2 \, n + 1 - k } = \lambda_k.
-    \label{eq:lambda_reflection}
+    \tag{N3}
+    \label{neq:lambda_reflection}
   \end{align}
   %
   Thus,
@@ -3358,7 +3372,7 @@ The inversion formula is derived from the cosine transform.
     \right],
   \end{aligned}
   $$
-  where we have used Eq. \eqref{eq:lambda_reflection}
+  where we have used Eq. \eqref{neq:lambda_reflection}
   in the last step.
 
   However, we are usually given only $\lambda_1, \dots, \lambda_n$
@@ -3637,8 +3651,9 @@ recovers Eq. \eqref{eq:alpha_invt1}.
 \note{We add some steps for the above solution.
   Integrating $\dot u_k = c_k$ yields
   \begin{equation}
-  u_k(t) = c_k \left(t + t_{k0} \right).
-  \label{eq:ui_solution}
+    u_k(t) = c_k \left(t + t_{k0} \right).
+  \tag{N4}
+  \label{neq:ui_solution}
   \end{equation}
   Given that $u_k(T) = 1$ and $u_k(0) = e^{-\lambda_k \, q(T)}$,
   we have
@@ -3650,7 +3665,7 @@ recovers Eq. \eqref{eq:alpha_invt1}.
   =
   e^{ -\lambda_k \, q(T) }.
   $$
-  Taking the logarithm of Eq. \eqref{eq:ui_solution} yields
+  Taking the logarithm of Eq. \eqref{neq:ui_solution} yields
   $$
   -\lambda_k \, q(T) + \lambda_k \, q(t)
   = \log c_k + \log\left( t + t_{k0} \right).
@@ -3909,21 +3924,21 @@ and minimize the total error.
 For the bandpass updating schemes,
 this allows to determine the optimal value
 of the free parameter, $t_0$.
-
-Assuming the system is initially equilibrated
-under a constant updating magnitude,
-$\alpha_0$,
-we may use Eq. \eqref{eq:error_res1} with
+%
+%Assuming the system is initially equilibrated
+%under a constant updating magnitude,
+%$\alpha_0$,
+Assuming Eq. \eqref{eq:error_res1} with
 $$
 q(T)
 =
-\int \frac{ dt } { t + t_0 }
+\int_0^T \frac{ dt } { t + t_0 }
 =
 \ln \frac{ T + t_0 } { t_0 }.
 $$
 %
-Thus, from Eqs. \eqref{eq:error_split}
-and \eqref{eq:error_asym_sinc}, we have
+we have, from Eqs. \eqref{eq:error_split}
+and \eqref{eq:error_asym_sinc},
 %
 \begin{equation}
   E
@@ -4807,10 +4822,11 @@ we have proposed a method of computing
 the optimal schedule of the updating magnitude
 for a general adaptive FDS simulation.
 %
-Adaptive FDS methods
+Adaptive FDS methods,
+including the WL algorithm and metadynamics,
 effectively sample a flat distribution
 by constructing a bias potential
-that offsets the PMF.
+to offset the PMF.
 %
 The optimal schedule ensures fastest convergence
 of the bias potential.
@@ -4825,45 +4841,58 @@ of the bias potential.
 %is updated with relative weight specified by a Gaussian wave packet.
 
 
-The optimal schedule computed from our method
-recovers the known inverse-time formula,
-Eq. \eqref{eq:alpha_invt1},
-for the single-bin (WL) case.
+
+Each adaptive FDS method defines an updating scheme,
+or mathematically an updating matrix,
+whose elements $w_{ij}$ specifies the
+relative magnitude of updating the bias potential
+at bin $i$ upon a visit to bin $j$.
 %
-The origin of time, $t_0$, is better changed
-to the value given by Eq. \eqref{eq:t0_sinc},
-such that the initial updating magnitude
-is half of the previous equilibrium value.
+Our method computes the optimal schedule from
+the eigenvalues of the updating matrix,
+and the integrals of the correlation functions
+the corresponding eigenmodes.
+%
+For the single-bin (WL) scheme,
+the optimal schedule from our method
+is given by inverse-time formula,
+Eq. \eqref{eq:alpha_invt1}.
+%
+The parameter, $t_0$, can be adjusted
+according to Eq. \eqref{eq:t0_sinc},
+to take into account the initial error.
+%such that the initial updating magnitude
+%is half of the previous equilibrium value.
 %
 For a general multiple-bin scheme,
 including the Gaussian one used in metadynamics,
-the optimal schedule does not have a closed form,
+the optimal schedule has no closed form,
 but is given by an equation of motion
 of a free particle with a position-dependent mass, Eq. \eqref{eq:q_opt}.
 %
 In this case,
 the optimal schedule and error
-are sensitive to the simulation length.
+can be sensitive to the simulation length.
 
 
-We have also shown that in the long time limit
-the single-bin scheme can be generalized
-to a class of bandpass updating schemes that are
-asymptotically optimal.
+We have also shown that
+the single-bin scheme is optimal
+in the long time limit
+without a priori assumption
+of the smoothness of the PMF.
 %
-The bandpass updating schemes
-eliminate local noise in the bias potential
-without affecting the global convergence,
-and they appeared to outperform
-the Gaussian updating schemes.
+More generally, with perfect filtering
+of certain eigenmodes, we can construct a
+class of multiple-bin bandpass updating schemes
+that are also optimal for asymptotic convergence.
 %
-Thus, the bandpass schemes
-may be useful in real metadynamics simulations.
+The optimal schedule of these bandpass schemes
+is always given by the inverse-time formula.
 %
-%That is, the single-bin scheme
-%is asymptotically as efficient as
-%an equilibrium FDS simulation
-%with the exact bias potential.
+They appeared to outperform similar Gaussian schemes
+in our model study,
+suggesting that they can be useful
+in real metadynamics simulations.
 
 
 
@@ -5731,6 +5760,7 @@ which are
   \sqrt { \frac{ 2 - \lambda }
                { 8 \, \mu_1  } - 1 }
   .
+\tag{N5}
 \label{neq:nnint_local_zeros_part2}
 \end{equation}
 %
