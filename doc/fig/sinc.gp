@@ -48,8 +48,8 @@ set key right bottom Left reverse invert spacing 1.2 width -5
 plot [:100][-0.06:0.1] \
     0 lt 1 lw 0.1 lc rgb "#aaaaaa" notitle, \
     normd(x, 6) lt 1 lw 4 lc rgb "#cccccc" t "Gaussian, {/Symbol-Oblique s} = 6", \
-    "../../data/scan/sinc_nonpbc_win.dat" u 1:($2) w lp pt 1 ps 1.0 lt 1 lw 1.0 t "Non{/*0.7 -}periodic, {/Times-Italic K} = 6", \
-    "../../data/scan/sinc_pbc_win.dat"    u 1:($2) w lp pt 6        lt 1 lw 1.0 t "Periodic, {/Times-Italic K} = 3"
+    "../../data/sinc/sinc_nonpbc_win.dat" u 1:($2) w lp pt 1 ps 1.0 lt 1 lw 1.0 t "Non{/*0.7 -}periodic, {/Times-Italic K} = 6", \
+    "../../data/sinc/sinc_pbc_win.dat"    u 1:($2) w lp pt 6        lt 1 lw 1.0 t "Periodic, {/Times-Italic K} = 3"
 
 
 # inset
@@ -79,7 +79,7 @@ set lmargin 0
 set rmargin 0
 
 set pm3d map
-splot [:] "../../data/scan/sinc_nonpbc_winmat.dat" u 2:1:3 notitle
+splot [:] "../../data/sinc/sinc_nonpbc_winmat.dat" u 2:1:3 notitle
 
 unset pm3d
 reset
@@ -108,8 +108,8 @@ set key left bottom Left reverse noinvert spacing 1.2
 
 plot [][7e-9:5e-5] \
     1/(x + 20000) lw 2 t "1 / ({/Times-Italic t} + 2/{/Symbol-Oblique a}_0)", \
-    "../../data/scan/sinc_pbc_alpha.dat"    u 1:($2) every 300 w p pt 6 ps 1.5 lw 2 t "Periodic, {/Times-Italic K} = 3", \
-    "../../data/scan/sinc_nonpbc_alpha.dat" u 1:($2) every 300 w p pt 1 ps 1.5 lw 3 t "Non{/*0.7 -}periodic, {/Times-Italic K} = 6", \
+    "../../data/sinc/sinc_pbc_alpha.dat"    u 1:($2) every 300 w p pt 6 ps 1.5 lw 2 t "Periodic, {/Times-Italic K} = 3", \
+    "../../data/sinc/sinc_nonpbc_alpha.dat" u 1:($2) every 300 w p pt 1 ps 1.5 lw 3 t "Non{/*0.7 -}periodic, {/Times-Italic K} = 6", \
     -1 notitle
 
 

@@ -48,19 +48,23 @@
   %
   Both methods sample a flat distribution
   along a quantity of interest, $z$,
-  by constructing a bias potential that offsets
-  the potential of mean force (PMF) on the fly.
+  by adaptively constructing
+  \note{``incrementally building up''?}
+  a bias potential to offset
+  the potential of mean force (PMF).
   %
-  The two, however, differ by
+  The two differ by
   the manner of updating the bias potential:
   %
   the WL algorithm updates only
+  the bias potential of
   the bin containing the current $z$,
   while metadynamics updates also
-  several neighboring bins according to
+  those of neighboring bins according to
   a Gaussian wave packet.
   %
-  The error of the resulting PMF
+  The error of the final bias potential,
+  hence that of the PMF,
   is determined by the updating schedule,
   or the updating magnitude
   as a function of simulation time.
@@ -72,8 +76,7 @@
   %
   In this study,
   we give a method of computing the optimal schedule
-  for a general updating scheme
-  involving multiple bins.
+  for a general multiple-bin updating scheme.
   %
   We show that the optimal schedule of metadynamics
   depends on the simulation length
@@ -84,10 +87,14 @@
   Further,
   the single-bin updating scheme
   used in the WL algorithm
-  belongs to a class of multiple-bin updating schemes
-  optimal for asymptotic convergence,
-  and the optimal schedules of these schemes
-  are all given by the inverse-time formula.
+  belongs to a class of multiple-bin bandpass updating schemes
+  that are optimal for asymptotic convergence.
+  %
+  The optimal schedule of these schemes
+  is given by the inverse-time formula,
+  with a shifted origin of time such that
+  the initial updating magnitude is half of
+  the previous equilibrium value.
 \end{abstract}
 
 \maketitle
@@ -102,7 +109,7 @@ Free energy calculation\cite{frenkel, newman} is a central theme
 in computational physics and chemistry.
 %
 Given a system,
-the problem is to compute,
+the task is to compute,
 via either Monte Carlo\cite{frenkel, newman, landau_binder} (MC)
 and molecular dynamics\cite{frenkel, karplus2002} (MD) simulations,
 a distribution, $p^*(z)$,
@@ -123,12 +130,12 @@ under different umbrella or bias potentials
 along $z$\cite{mezei1987, berg1992, lee1993},
 and then piece together the entire curve.
 %
-This solution can be clumsy in practice
+This solution can be laborious % clumsy in practice
 and it often fails to converge quickly
 for a complex and glassy system,
 because the system can be trapped
-in a local free energy minimum
-for a long time.
+in a local free energy minimum.
+%for a long time.
 
 
 
@@ -144,7 +151,7 @@ a direction of slow motion.
 %
 To achieve a flat distribution, however,
 the method must be able to construct a
-bias potential that exactly cancels the PMF.
+bias potential that cancels the PMF.
 
 
 
@@ -153,11 +160,11 @@ and meta\-dy\-nam\-ics\cite{huber1994, laio2002,
 laio2008, barducci2011, sutto2012}
 are two widely-used and closely-related\cite{micheletti2004}
 techniques for this purpose,
-in which a bias potential is actively built up on-the-fly
+in which a bias potential is gradually built up
 during simulation.
 %
 These techniques employ updating loops
-that discourage future visits to configurations
+to discourage future visits to configurations
 with the current $z$ value
 by elevating the bias potential there.
 %
@@ -177,8 +184,8 @@ in deriving the bias force.
 %
 However, in both cases, the bias potential
 is updated frequently (usually every few MC or MD steps),
-which brings about a side effect
-of disrupting the underlying
+which % brings about a side effect of disrupting
+disrupts \note{``disturbs''?} the underlying
 equilibrium sampling dynamics\cite{laio2002}.
 %
 Thus, one often has to reduce
@@ -190,14 +197,14 @@ to decrease the error.
 
 The updating schedule,
 or the manner of reducing
-the updating magnitude\cite{liang2007,
+the updating magnitude,
+therefore,
+determines the precision of the final bias potential,
+hence that of the PMF\cite{liang2007,
 belardinelli2007, belardinelli2007jcp, belardinelli2008,
 morozov2007, zhou2008, morozov2009,
 komura2012, caparica2012, caparica2014,
-barducci2008, dickson2011, dama2014},
-therefore,
-determines the precision of the final bias potential,
-hence that of the PMF.
+barducci2008, dickson2011, dama2014}.
 %
 For the WL algorithm, it is known
 that the optimal updating magnitude, $\ln f$,
@@ -220,18 +227,19 @@ for a general updating scheme,
 including those used in WL and metadynamics simulations.
 %
 The method reproduces the inverse-time formula
-for the WL case.
+for the WL case,
+and gives the optimal value of the origin of time.
 %
 It also predicts, for metadynamics,
-a more algebraically complex schedule,
+a more complex schedule,
 which is sensitive to the simulation length
 and the width of the Gaussian wave packet.
 %
-Further, we show that
+Further, we generalize
 the single-bin updating scheme
 used by the WL algorithm
-can be generalized to class of multiple-bin updating schemes
-that are partially optimal for infinitely long simulations,
+to a class of multiple-bin updating schemes
+that are optimal for infinitely long simulations,
 and the inverse-time schedule is optimal for these schemes.
 %
 %For finite-length simulations, however,
@@ -242,7 +250,7 @@ and the inverse-time schedule is optimal for these schemes.
 The article is organized as follows.
 %
 We present the analytical results in Sec. \ref{sec:theory},
-numerically verify some key aspects
+numerically verify some aspects
 in Sec. \ref{sec:results},
 and conclude the article
 in Sec. \ref{sec:conclusion}.
@@ -4425,7 +4433,7 @@ which gives rise to the above multiplicative constant.
       The data were produced by the script \texttt{data/invt2run.py},
       and saved under \texttt{data/singlebin}
       (see the \texttt{Makefile} there).
-    }
+    }%
   }
 \end{center}
 \end{figure}
@@ -4519,11 +4527,12 @@ as suggested by Eq. \eqref{eq:lambda_nn_onestep}.
     for the nearest-neighbor updating scheme with $\mu_1 = 0.24$.
     %
     The results have been averaged over $1000$ independent runs.
+    %
     \note{This figure was produced by \texttt{doc/fig/errnnbr.gp}.
       The data were produced by \texttt{data/invt2run.py},
       saved under \texttt{data/nb0.24}
       (see the \texttt{Makefile} there).
-    }
+    }%
   }
 \end{center}
 \end{figure}
@@ -4591,6 +4600,7 @@ with the optimal $\lambda$.
     Eq. \eqref{eq:alpha_invtlambda}
     for the Gaussian updating scheme
     with $\sigma = 10$.
+    %
     \note{This figure was produced by \texttt{doc/fig/optacmp.gp}.
       The data were computed by the program \texttt{prog/predict},
       see particularly the function \texttt{intq\_save()}
@@ -4598,7 +4608,7 @@ with the optimal $\lambda$.
       The data were saved under the directory \texttt{data/opta}.
       See the \texttt{make} object \texttt{sigsingle}
       in the \texttt{Makefile} there.
-    }
+    }%
   }
 \end{center}
 \end{figure}
@@ -4694,6 +4704,7 @@ or that for $l = i + j - 2 \, n - 1$,
     The lines are a guide to the eyes.
     Inset. Updating matrix in the non-periodic case
     is free of the zigzaggedness shown in the kernel.
+    %
     \note{This figure was produced by \texttt{doc/fig/sinc.gp}.
       The data were computed by the program \texttt{prog/predict},
       see particularly the function \texttt{intq\_save()}
@@ -4704,7 +4715,7 @@ or that for $l = i + j - 2 \, n - 1$,
       The data were saved under the directory \texttt{data/sinc}.
       See the \texttt{make} object \texttt{sincsingle}
       in the \texttt{Makefile} there.
-    }
+    }%
   }
 \end{center}
 \end{figure}
@@ -4777,7 +4788,7 @@ appeared to be superior to the Gaussian one.
       \texttt{doc/fig/errsigscan.gp}.
       The data were saved under
       \texttt{data/scan}.
-    }
+    }%
   }
 \end{center}
 \end{figure}
@@ -4878,33 +4889,11 @@ Inverse-time schedules}
 As an alternative to the
 optimal schedule from Eq. \eqref{eq:q_opt},
 %
-here we consider the inverse-time formula,
-Eq. \eqref{eq:alpha_invtlambda},
+here we consider the analytically simpler
+inverse-time formula, Eq. \eqref{eq:alpha_invtlambda},
 with $\lambda$ optimized variationally.
 %
-This approach allows to obtain
-an explicit formula for the error,
-which can be tested against simulation.
-%
-%Several previous studies\cite{marsili2006, barducci2008, dickson2011}
-%have been focused on analytically simpler schedules.
-%%
-%In a similar spirit,
-%we consider here
-%the inverse-time formula,
-%Eq. \eqref{eq:alpha_invtlambda},
-%%
-%%
-%We shall compute the error computed from
-%this variationally optimized schedule
-%and compare it with that from the optimal schedule.
-%%
-%We shall show that the optimal parameter, $\lambda$,
-%is sensitive to the simulation time, $T$,
-%which parallels the gradual shift of
-%the instantaneous eigenvalue,
-%$\lambda(t)$,
-%as discussed in Sec. \ref{sec:optschedule}.
+This approach allows us to compute the error explicitly.
 
 
 
@@ -4938,6 +4927,7 @@ where $\nu_k \equiv \lambda_k / \lambda$.
 %
 The error is asymptotically minimal
 only if $2\,\nu_k > 1$ for every $k$.
+%
 \note{At long times, $T \to \infty$, we get
 $$
 \begin{aligned}
@@ -4976,7 +4966,7 @@ $$
 The last two cases
 are asymptotically suboptimal
 as they decay slower than $1/T$.
-}
+}%
 %
 In this case,
 we can drop the second term
@@ -5000,31 +4990,38 @@ $$
 =
 \frac{ \lambda_k^2 }
      { \lambda \, (2 \, \lambda_k - \lambda) }
-\ge 1,
+\ge 1
+,
 $$
 with the equality achieved only at $\lambda = \lambda_k$,
 the optimal scheme must satisfy
-$\lambda_2 = \dots = \lambda_n = \lambda$.
-%
-%Now a matrix with uniform eigenvalues
-%is a multiple of the identity matrix,
-%which corresponds to the single-bin updating scheme.
-%
-%The above result means that
-%the single-bin updating scheme is best
-%for the asymptotic convergence.
-%
-%This result is discussed in more details in
-This again reflects the asymptotic optimality
-of the single-bin scheme, as discussed in
-Sec. \ref{sec:optWL}.
+$\lambda_2 = \dots = \lambda_n$,
+corresponding to the single-bin scheme
+(cf. Sec. \ref{sec:optWL}).
 
 
 
 For a finite-length simulation,
 we need to include the residual error, $\Err_R$.
 %
-By Eq. \eqref{eq:alpha_invtlambda}, we have
+Assuming Eqs. \eqref{eq:error_res1} and \eqref{eq:t0_sinc},
+we get
+%
+\begin{equation}
+\Err_R
+=
+\sum_{k = 2}^n
+  \frac{ \Gamma_k \, \nu_k }
+       {        t_0   }
+  \left(
+      \frac{   t_0   }
+           { T + t_0 }
+   \right)^{ 2 \, \nu_k },
+\notag
+%\label{eq:error_res_invt}
+\end{equation}
+%
+with
 %
 \begin{equation}
   q(T)
@@ -5038,28 +5035,15 @@ By Eq. \eqref{eq:alpha_invtlambda}, we have
 %\label{eq:qt_invtlambda}
 \end{equation}
 %
-so that Eq. \eqref{eq:error_res1} becomes
+from integrating Eq. \eqref{eq:alpha_invtlambda}.
 %
-\begin{equation}
-\Err_R
-=
-\sum_{k = 2}^n
-  \frac{ \Gamma_k \, \nu_k }
-       {        t_0   }
-  \left(
-      \frac{   t_0   }
-           { T + t_0 }
-   \right)^{ 2 \, \nu_k },
-\label{eq:error_res_invt}
-\end{equation}
-%
-assuming that
-the system was initially equilibrated
-at a constant $\alpha_0$,
-such that the values of
-$\left\langle y_k^2(0) \right\rangle$
-can be computed from Eq. \eqref{eq:y2_eql},
-as well as Eq. \eqref{eq:t0_sinc}.
+%We assume that
+%the system was initially equilibrated
+%at a constant $\alpha_0$,
+%such that the values of
+%$\left\langle y_k^2(0) \right\rangle$
+%can be computed from Eq. \eqref{eq:y2_eql},
+%as well as Eq. \eqref{eq:t0_sinc}.
 %
 The total error is
 %
@@ -5479,20 +5463,26 @@ $$
 Minimizing the function yields
 %
 \begin{equation}
-\lambda = \frac{1 - 4 \, \mu_1} { 1 - 2 \, \mu_1 },
+  \lambda
+  =
+  \frac{ 1 - 4 \, \mu_1 }
+       { 1 - 2 \, \mu_1 }
+  ,
 \label{eq:lambda_nn_perfect}
 \end{equation}
 %
 and the asymptotic error in the optimal case is given by
 %
 \begin{equation}
-\Err_A
-=
-\frac{n}{T}
-\left(
-  1+ \frac{2 \, \mu_1^2}{1-4 \, \mu_1}
-\right).
-\label{eq:error_nn_prefect}
+  \Err_A
+  =
+  \frac{n}{T}
+  \left(
+    1+ \frac{2 \, \mu_1^2}{1-4 \, \mu_1}
+  \right)
+  .
+\notag
+%\label{eq:error_nn_perfect}
 \end{equation}
 %
 %From Eq. \eqref{eq:error_nn}, it is clear that
@@ -5732,17 +5722,19 @@ $$
 $$
 which are
 \begin{equation}
-z
-=
-\pm
-\sqrt { \frac{ 2 - \lambda }
-             { 8 \, \mu_1  } }
-\pm
-\sqrt { \frac{ 2 - \lambda }
-             { 8 \, \mu_1  } - 1 }.
-\label{eq:nnint_local_zeros_part2}
+  z
+  =
+  \pm
+  \sqrt { \frac{ 2 - \lambda }
+               { 8 \, \mu_1  } }
+  \pm
+  \sqrt { \frac{ 2 - \lambda }
+               { 8 \, \mu_1  } - 1 }
+  .
+\label{neq:nnint_local_zeros_part2}
 \end{equation}
-We share distinguish two cases.
+%
+We shall distinguish two cases.
 \textbf{Case A.}
 If $\lambda < 2 - 8 \, \mu_1$,
 two of the roots lie in the unit circle, namely
@@ -5813,18 +5805,20 @@ $$
 %
 \textbf{Case B.}
 If $2 - 8 \, \mu_1 \le \lambda < 2$,
-the four zeros in Eq. \eqref{eq:nnint_local_zeros_part2}:
+the four zeros in Eq. \eqref{neq:nnint_local_zeros_part2}:
 %
 \begin{equation}
-z
-=
-\pm
-\sqrt { \frac{ 2 - \lambda }
-             { 8 \, \mu_1  } }
-\pm i \,
-\sqrt { 1 - \frac{ 2 - \lambda }
-                 { 8 \, \mu_1  } },
-\label{eq:nnint_local_zeros_part2b}
+  z
+  =
+  \pm
+  \sqrt { \frac{ 2 - \lambda }
+               { 8 \, \mu_1  } }
+  \pm i \,
+  \sqrt { 1 - \frac{ 2 - \lambda }
+                   { 8 \, \mu_1  } }
+  ,
+\notag
+%\label{eq:nnint_local_zeros_part2b}
 \end{equation}
 %
 all satisfy $|z| = 1$, and hence

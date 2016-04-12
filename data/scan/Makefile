@@ -24,8 +24,8 @@ sigprd: compile $(fnmdgam)
 sigrunopt=--sig=0.5:0.5:12
 
 sigrun: compile $(fnmdgam)
-	../invtscan.py $(sigrunopt) global.cfg --opt="--ntrials=5" -o sigrun_t1e8_g.dat
-	../invtscan.py $(sigrunopt) local.cfg  --opt="--ntrials=5" -o sigrun_t1e8_l.dat
+	../invtscan.py $(sigrunopt) global.cfg -o sigrun_t1e8_g.dat
+	../invtscan.py $(sigrunopt) local.cfg  -o sigrun_t1e8_l.dat
 
 okprdopt=--okscan=1 --okmax=99
 

@@ -25,7 +25,7 @@ set xtics 2 offset 0, 0.3
 set mxtics 2
 #set xlabel "{/Symbol-Oblique s} (Gaussian) or {/Times-Italic n}/{/Times-Italic K}/{/Symbol \326}(2{/Symbol-Italic p}) (Bandpass)" offset 0, 0.5
 set xlabel "Width, {/Symbol-Oblique s}" offset 0, 0.5
-set xrange [0:10]
+set xrange [0:12]
 
 set logscale y
 set format y "10^{%T}"
@@ -61,6 +61,9 @@ set key Left reverse width -7.5 spacing 1.0 font "Times, 20"
 
 unset xlabel
 set format x ""
+
+#set logscale y
+#set format y "10^{%T}"
 
 set title "Global"
 
