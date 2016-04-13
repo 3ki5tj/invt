@@ -49,7 +49,7 @@
   Both methods sample a flat distribution
   along a quantity of interest, $z$,
   by adaptively constructing
-  \note{``incrementally building up''?}
+  \note{``incrementally building up''?}%
   a bias potential to offset
   the potential of mean force (PMF).
   %
@@ -1056,7 +1056,8 @@ we must have
   \mathrm{or}
   \;\;
   \dot u\bigl( q(t') \bigr) = c,
-\label{eq:ddu_eq_0}
+\notag
+%\label{eq:ddu_eq_0}
 \end{equation}
 %
 where $c$ is a constant of $t'$.
@@ -1521,7 +1522,7 @@ This is equivalent to saying that the Fourier transform
       \ddot u_k\bigl( q(t) \bigr) = 0
     .
     \tag{N2}
-    \label{eq:optimal_mbin1}
+    \label{neq:optimal_mbin1}
   \end{align}
   %
   If we interpret $u_k$ as the position,
@@ -1645,13 +1646,15 @@ for $k \ge 2$, we get
   \langle \zeta_j(t) \, \zeta_l(t') \rangle
   %
   = \delta(t - t'),
-  \label{eq:kappa_perfect}
+\notag
+%\label{eq:kappa_perfect}
 \end{equation}
 %
 where we have used
 Eqs. \eqref{eq:eig_orthonormal_rows},
 \eqref{eq:eigenmode1},
 \eqref{eq:eta_def},
+\eqref{eq:zz_perfect},
 and
 $$
   \sum_{j = 1}^n \phi_{kj}
@@ -1663,7 +1666,7 @@ $$
   0.
 $$
 %
-\note{To show Eq. \eqref{eq:kappa_perfect},
+\note{Proof.%Eq. \eqref{eq:kappa_perfect},
   $$
   \begin{aligned}
   \kappa_k(t - t')
@@ -1717,19 +1720,20 @@ or the next bin $i + 1$ with equal probability $1/2$.
 The transition matrix is
 %
 \begin{equation}
-\arraycolsep=3.6pt\def\arraystretch{1.4}
-\mathbf Q
-=
-\left(
-  \begin{array}{cccccccc}
-    \frac \sigma 2 & \frac 1 2 & 0 & \dots & \frac {1 - \sigma} 2 \\
-    \frac 1 2 & 0         & \frac 1 2 & \dots & 0 \\
-    \vdots & &  & & \vdots \\
-    0 & \dots & \frac 1 2 & 0  & \frac 1 2 \\
-    \frac {1 - \sigma} 2 & \dots & 0 & \frac 1 2 & \frac \sigma 2
-  \end{array}
-\right),
-\label{eq:T_nn}
+  \arraycolsep=3.6pt\def\arraystretch{1.4}
+  \mathbf Q
+  =
+  \left(
+    \begin{array}{cccccccc}
+      \frac \sigma 2 & \frac 1 2 & 0 & \dots & \frac {1 - \sigma} 2 \\
+      \frac 1 2 & 0         & \frac 1 2 & \dots & 0 \\
+      \vdots & &  & & \vdots \\
+      0 & \dots & \frac 1 2 & 0  & \frac 1 2 \\
+      \frac {1 - \sigma} 2 & \dots & 0 & \frac 1 2 & \frac \sigma 2
+    \end{array}
+  \right),
+\notag
+%\label{eq:T_nn}
 \end{equation}
 %
 where $\sigma = 0$ for a periodic variable, or $1$ otherwise.
@@ -1787,7 +1791,7 @@ Optimal schedule for the multiple-bin updating scheme}
 
 
 
-\subsubsection{\label{eq:eqlerr}
+\subsubsection{\label{sec:eqlerr}
 Equilibrium error under a constant updating magnitude
 }
 
@@ -1818,8 +1822,10 @@ the residual error becomes negligible, and
   { =\joinrel=\joinrel=\joinrel= }
   %
   \sum_{ k = 2 }^n
-    \frac 1 2 \, \Gamma_k \, \lambda_k \, \alpha_0.
-  \label{eq:error_eql}
+    \frac 1 2 \, \Gamma_k \, \lambda_k \, \alpha_0
+  .
+\notag
+%\label{eq:error_eql}
 \end{align}
 %
 In terms of the components, we have
@@ -2086,8 +2092,9 @@ Eq. \eqref{eq:dinvadt} as
   =
   \frac{                  1                     }
        { \lambda(t) \, \bigl[ t + t_0(t) \bigr] }
-,
-  \label{eq:alpha_approxinvt}
+  ,
+\notag
+%\label{eq:alpha_approxinvt}
 \end{equation}
 %
 where
@@ -2175,7 +2182,8 @@ the instantaneous eigenvalue
       \Gamma_k \, \lambda_k^2
   }
   ,
-  \label{eq:dinvadt_limit2}
+\notag
+%\label{eq:dinvadt_limit2}
 \end{equation}
 is an average of $\lambda_k$'s weighted
 by $\Gamma_k \, \lambda_k^2$,
@@ -2446,7 +2454,8 @@ Consider the following matrix, $\mathbf w$,
   +
   \mu_{i-j-n}
   ,
-\label{eq:w_band_pbc}
+\notag
+%\label{eq:w_band_pbc}
 \end{equation}
 %
 where
@@ -2683,7 +2692,8 @@ of $\phi_j$ as
     \phi_{ 1 - j }           & \mathrm{for \;} j \le 0, \\
     \phi_{ 2 \, n + 1 - j }  & \mathrm{for \;} j > n,
   \end{dcases}
-\label{eq:phi_refl}
+\notag
+%\label{eq:phi_refl}
 \end{equation}
 %
 such that Eq. \eqref{eq:wmul_to_convol}
@@ -2764,7 +2774,7 @@ with eigenvalues
   \cos \frac{ \left( i - \frac 1 2 \right) (k - 1) \, \pi}{n},
   $$
   which satisfies the reflective boundary condition,
-  Eq. \eqref{eq:phi_refl}.
+  %Eq. \eqref{eq:phi_refl}.
   %
   So
   $$
@@ -2989,7 +2999,8 @@ and the eigenvalues are
   \frac{ (k - 1) \, g \, \pi }
        {       2 \, n        }
   .
-\label{eq:wnn_eigenvalue}
+\notag
+%\label{eq:wnn_eigenvalue}
 \end{equation}
 %
 Thus, for this updating matrix to be stable,
@@ -3762,7 +3773,8 @@ we get
     n \, \sin \dfrac{ l \, \pi } { n }
   }
   .
-  \label{eq:mu_sinc_pbc}
+\notag
+%\label{eq:mu_sinc_pbc}
 \end{equation}
 \note{Derivation.
 $$

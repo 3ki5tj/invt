@@ -41,6 +41,7 @@ $(prj)docV$(ver).zip::
 	rsync -avz README.md old/V$(ver)/
 	rsync -avz deannote.py old/V$(ver)/
 	rsync -avz rmbiburl.py old/V$(ver)/
+	rsync -avz checkeq.py old/V$(ver)/
 	python rmbiburl.py -i simul.bib -o old/V$(ver)/simul.bib
 	cd old/V$(ver) && \
 	  ln -sf ../../fig* .
