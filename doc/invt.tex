@@ -61,7 +61,7 @@
   the bin containing the current $z$,
   while metadynamics updates also
   those of neighboring bins according to
-  a Gaussian wave packet.
+  a Gaussian window.
   %
   The error of the final bias potential,
   hence that of the PMF,
@@ -173,7 +173,7 @@ is that in the WL case,
 each updating step is limited to the bin
 containing the current $z$,
 while metadynamics adopts an extended
-Gaussian wave packet
+Gaussian window
 covering several neighboring bins.
 %
 The latter is more often used in MD simulations
@@ -233,7 +233,7 @@ and gives the optimal value of the origin of time.
 It also predicts, for metadynamics,
 a more complex schedule,
 which is sensitive to the simulation length
-and the width of the Gaussian wave packet.
+and the width of the Gaussian window.
 %
 Further, we generalize
 the single-bin updating scheme
@@ -347,7 +347,7 @@ a wider distribution, $p_i$.
 %Here, we refer to simulations that target
 %a flat or nearly flat distribution
 %as entropic or multicanonical sampling.
- 
+
 
 
 To do so, we introduce a bias potential, $V_i$,
@@ -492,7 +492,13 @@ For later convenience,
 we introduce a shifted bias potential
 %
 \begin{equation}
-  v_i \equiv V_i - \ln p^*_i + \ln p_i.
+  v_i
+  \equiv
+  V_i
+  +
+  \ln \frac { p_i }
+            { p^*_i }
+  .
   \label{eq:v_def}
 \end{equation}
 %
@@ -1515,10 +1521,11 @@ we can approximate $\kappa_k(t)$ as
 %
 \begin{equation}
   \kappa_k(t) \approx \Gamma_k \, \delta(t)
-  \label{eq:kappa_delta}
+  ,
+\label{eq:kappa_delta}
 \end{equation}
 %
-where,
+where
 \begin{equation}
   \Gamma_k = \int_{-\infty}^\infty \kappa_k(t) \, dt,
   \notag
@@ -1568,8 +1575,7 @@ This is equivalent to saying that the Fourier transform
   %
   Thus, we can assume Eq. \eqref{eq:kappa_delta},
   once $\alpha(t)$ has dropped below a certain level.
-}
-%
+}%
 \note{
   The extremal property, Eq. \eqref{eq:optimal_mbin},
   now becomes
@@ -1591,7 +1597,7 @@ This is equivalent to saying that the Fourier transform
   Thus, the extremal condition demands
   the total virial to be zero.
   $$\,$$
-}
+}%
 In this way,
 the underlying sampling process
 affects the error only through the set of numbers, $\Gamma_i$'s.
@@ -1603,7 +1609,7 @@ Integrals of the autocorrelation functions}
 
 
 
-We evaluate the integrals of the autocorrelation functions,
+We can evaluate the integrals of the autocorrelation functions,
 $\Gamma_k$'s,
 in two special cases.
 %
@@ -1615,18 +1621,27 @@ Eq. \eqref{eq:kappa_delta} is exact, and
   \label{eq:Gamma_perfect}
 \end{equation}
 %
-In this case,
+To see this, we note that
 the bin index $i$ is an independent random variable
-at each time step $t$, and
+at each time step $t$ in this case, and
 %
-\begin{equation}
+\begin{align}
   \left\langle
     \zeta_i(t) \, \zeta_j(t')
   \right\rangle
-  =
-  \left( p_i \, \delta_{ij} - p_i \, p_j \right) \, \delta(t - t'),
+  &=
+  \langle h_i(t) \, h_j(t') \rangle
+  -
+  \langle h_i(t) \rangle
+  \langle h_j(t') \rangle
+  \notag
+  \\
+  &=
+  \left( p_i \, \delta_{ij} - p_i \, p_j \right) \,
+  \delta_{t, t'}
+  ,
   \label{eq:zz_perfect}
-\end{equation}
+\end{align}
 %
 where $\delta(t - t')$ is the equivalent of $\delta_{t, t'}$
 in the continuous limit.
@@ -1699,64 +1714,54 @@ for $k \ge 2$, we get
 \begin{equation}
   \kappa_k(t - t')
   =
-  \sum_{j,l = 1}^n
+  \sum_{i,j = 1}^n
+  \frac{ \phi_{ki} } { p_i }
   \frac{ \phi_{kj} } { p_j }
-  \frac{ \phi_{kl} } { p_l }
-  \langle \zeta_j(t) \, \zeta_l(t') \rangle
+  \langle \zeta_i(t) \, \zeta_j(t') \rangle
   %
-  = \delta(t - t'),
+  = \delta_{t, t'},
 \notag
 %\label{eq:kappa_perfect}
 \end{equation}
 %
 where we have used
-Eqs. \eqref{eq:eig_orthonormal_rows},
-\eqref{eq:eigenmode1},
+Eqs. \eqref{eq:eig_orthonormal_rows}-\eqref{eq:ortho1},
 \eqref{eq:eta_def},
-\eqref{eq:zz_perfect},
 and
-$$
-  \sum_{j = 1}^n \phi_{kj}
-  =
-  \sum_{j = 1}^n \frac{ \phi_{kj} \, \phi_{1j} } { p_j }
-  =
-  \delta_{k1}
-  =
-  0.
-$$
+\eqref{eq:zz_perfect}.
 %
 \note{Proof.%Eq. \eqref{eq:kappa_perfect},
   $$
   \begin{aligned}
   \kappa_k(t - t')
   &=
-  \sum_{j,l = 1}^n
+  \sum_{i,j = 1}^n
+  \frac{ \phi_{ki} } { p_i }
   \frac{ \phi_{kj} } { p_j }
-  \frac{ \phi_{kl} } { p_l }
-  \langle \zeta_j(t) \, \zeta_l(t') \rangle
+  \langle \zeta_i(t) \, \zeta_j(t') \rangle
   \\
   %
   &=
-  \sum_{j,l = 1}^n
+  \sum_{i,j = 1}^n
+  \frac{ \phi_{ki} } { p_i }
   \frac{ \phi_{kj} } { p_j }
-  \frac{ \phi_{kl} } { p_l }
   \left(
-    p_j \, \delta_{j, l} - p_j \, p_l
+    p_i \, \delta_{i, j} - p_i \, p_j
   \right)
-  \, \delta(t - t')
+  \, \delta_{t, t'}
   \\
   &=
   \left(
     \sum_{j = 1}^n
     \frac{ \phi_{kj}^2 } { p_j }
     -
+    \sum_{i = 1}^n \phi_{ki}
     \sum_{j = 1}^n \phi_{kj}
-    \sum_{l = 1}^n \phi_{kl}
   \right)
-  \, \delta(t - t')
+  \, \delta_{t, t'}
   \\
   &=
-  (1 - 0 \cdot 0) \, \delta(t - t').
+  (1 - 0 \cdot 0) \, \delta_{t, t'}.
   \end{aligned}
   $$
   where,
@@ -1772,9 +1777,12 @@ $$
 }
 
 
-Another special case is the one-step process\cite{vankampen}:
-in each step, the system hops to the previous bin $i - 1$
-or the next bin $i + 1$ with equal probability $1/2$.
+Another special case is the
+one-dimensional one-step process\cite{vankampen},
+which models a local sampling process.
+In each step, the system hops to
+one of the two neighboring bins
+with equal probability $1/2$.
 %
 The transition matrix is
 %
@@ -1787,8 +1795,7 @@ The transition matrix is
       \frac \sigma 2 & \frac 1 2 & 0 & \dots & \frac {1 - \sigma} 2 \\
       \frac 1 2 & 0         & \frac 1 2 & \dots & 0 \\
       \vdots & &  & & \vdots \\
-      0 & \dots & \frac 1 2 & 0  & \frac 1 2 \\
-      \frac {1 - \sigma} 2 & \dots & 0 & \frac 1 2 & \frac \sigma 2
+      \frac {1 - \sigma} 2 & \dots &  & \frac 1 2 & \frac \sigma 2
     \end{array}
   \right),
 \notag
@@ -1797,11 +1804,11 @@ The transition matrix is
 %
 where $\sigma = 0$ for a periodic variable, or $1$ otherwise.
 %
-For a large class of updating schemes
+For many updating schemes
 (cf. Sec. \ref{sec:band-matrix}),
 we can further assume that
 the matrices $\mathbf Q$ and $\mathbf w$
-share eigvenvectors, but not eigenvalues.
+share the eigenvectors, but not the eigenvalues.
 %
 The eigenvalues of $\mathbf Q$ are
 $$
@@ -1821,32 +1828,34 @@ $g = 2$ for a periodic variable, or $1$ otherwise.
 In this case,
 the autocorrelation function $\kappa_k(t)$
 decays as $\kappa_k(0) \, \Lambda_k^t$,
-with the same-time value
-$\kappa_k(0) = 1$
-being the same as
-that in perfect sampling.
+with $\kappa_k(0) = 1$ being the same as
+the value in perfect sampling.
 %
 Thus,
 %$\Gamma_k$ is roughly twice the autocorrelation time, and
 from Eq. \eqref{eq:Gamma_sum}, we get
 %
 \begin{equation}
-\Gamma_k
-=
-1 + 2 \, \sum_{t = 1}^\infty \Lambda_k^t
-=
-\frac{ 1 + \Lambda_k } { 1 - \Lambda_k }
-=
-\cot^2 \left[ \frac{ (k - 1) \, \pi } { 2 \, n } \right].
+  \Gamma_k
+  =
+  1 + 2 \, \sum_{t = 1}^\infty \Lambda_k^t
+  =
+  \frac{ 1 + \Lambda_k }
+       { 1 - \Lambda_k }
+  =
+  \cot^2 \left[
+    \frac{ (k - 1) \, g \, \pi }
+         { 2 \, n }
+  \right]
+  .
 \label{eq:Gamma_onestep}
 \end{equation}
 %
-This case is intended to model a local sampling process.
 
 
 
 \subsection{\label{sec:mbin_opta}
-Optimal schedule for the multiple-bin updating scheme}
+Optimal schedule for multiple-bin updating schemes}
 
 
 
@@ -1855,11 +1864,11 @@ Equilibrium error under a constant updating magnitude
 }
 
 
-Before addressing the optimal $\alpha(t)$,
-we shall first consider a constant schedule
-$\alpha(t) \equiv \alpha_0$,
-and compute the equilibrium error, $\Err$,
-in this case.
+Before addressing the optimal schedule
+for a multiple-bin scheme,
+we shall first compute the equilibrium error
+under a constant schedule,
+$\alpha(t) = \alpha_0$.
 %
 After a long period $T'$,
 the residual error becomes negligible, and
@@ -1877,11 +1886,15 @@ the residual error becomes negligible, and
   \notag
   \\
   &
-  \stackrel{ T' \to \infty }
-  { =\joinrel=\joinrel=\joinrel= }
+  =
+  %\stackrel{ T' \to \infty }
+  %{ =\joinrel=\joinrel=\joinrel= }
   %
   \sum_{ k = 2 }^n
     \frac 1 2 \, \Gamma_k \, \lambda_k \, \alpha_0
+  ,
+  \qquad
+  ( T' \to \infty )
   .
 \notag
 %\label{eq:error_eql}
@@ -1903,8 +1916,9 @@ In terms of the components, we have
 We shall use this result to model the initial error
 before starting the schedule $\alpha(t)$ to be optimized.
 %
-That is, for $t < 0$, we assume
-$\alpha(t) = \alpha_0$, and
+That is, we assume
+$\alpha(t) = \alpha_0$
+for $t < 0$, and
 the system has entered the equilibrium
 under a fixed $\alpha_0$ at $t = 0$.
 %
@@ -1947,11 +1961,10 @@ is given by
 \end{equation}
 %
 Note that the residual error
-depends on the schedule $\alpha(t)$
-only through endpoint value of
+depends on $\alpha(t)$ only through
 the integral $q(T) = \int_0^T \alpha(t) \, dt$.
 %
-Thus, if we variate the schedule under a fixed $q(T)$,
+Thus, if we variate $\alpha(t)$ under a fixed $q(T)$,
 this residual part can be ignored,
 and the optimization can be done exclusively
 on the asymptotic part, $\Err_A$.
@@ -1962,7 +1975,7 @@ on the asymptotic part, $\Err_A$.
 Optimal schedule}
 
 
-As shown above, with fixed endpoint value, $q(T)$,
+As shown above, with a fixed value of $q(T)$,
 the optimization of the total error is equivalent to
 that of the asymptotic part.
 %
@@ -1999,14 +2012,14 @@ with a position-dependent mass.
 %
 Since the Lagrangian
 does not explicitly depend on time, $t$,
-the Hamiltonian,
+the Hamiltonian
 %
 \begin{equation}
   \mathcal H
   =
   \frac{ \partial \mathcal L }
        { \partial \dot q     }
-  \, \partial \dot q
+  \, \dot q
   -
   \mathcal L
   =
@@ -2035,12 +2048,13 @@ So we may set
   \dot q^2(t)
   =
   c^2
+  ,
   \quad
   (c > 0).
   \label{eq:Lagrangian_const}
 \end{equation}
 %
-Integrating the square root of the left-hand side, we get
+Integrating the square root, we get
 %
 \begin{equation}
   \int_{ 0 }^{ q(t) }
@@ -2080,19 +2094,17 @@ Thus, we have an implicit equation for $q(t)$,
 and hence the optimal schedule,
 $\alpha(t) = \dot q(t)$.
 %
-Since we only optimized the asymptotic error $E_A$,
-the parameter $q(T)$ can be further optimized
-such that total error, $E = E_R + E_A$, is minimal.
+Since we only optimized the asymptotic error, $E_A$,
+in th above,
+the parameter $q(T)$ can be further adjusted
+to minimize the total error, $E = E_R + E_A$.
 
 Unfortunately,
-Eq. \eqref{eq:q_opt} does not provide much information
-on the behavior of $\alpha(t)$,
-and the explicit solution
-can be formidable in the general case.
+Eq. \eqref{eq:q_opt} is not an explicit equation of $\alpha(t)$.
 %
-We can nonetheless obtain an expression regarding $\alpha(t)$
+However,
 by differentiating Eq. \eqref{eq:Lagrangian_const},
-which yields
+we have
 %
 \begin{equation}
   \frac{ d   }
@@ -2118,18 +2130,18 @@ which yields
   \label{eq:dinvadt}
 \end{equation}
 %
-The expression in the middle is a weighted average
+The expression in the middle is an average
 of the eigenvalues, $\lambda_k$'s,
-and we shall refer to it as the instantaneous
-eigenvalue, $\lambda(t)$.
+weighted by $\Gamma_k \, \lambda_k^2 \, u_k^2$.
 %
-It gives the rate of change of
-the inverse updating magnitude.
+We shall refer to the average as the instantaneous
+eigenvalue, $\lambda(t)$,
+which gives the rate of change of $\alpha^{-1}(t)$.
 
-
-For the single-bin scheme, $\lambda_k = 1$,
-and the instantaneous eigenvalue is always unity.
-Thus,
+\note{For the single-bin scheme, $\lambda_k = 1$,
+and $\lambda(t)$ is always unity.
+%
+So,
 $$
 \frac { d   }
       { d t }
@@ -2158,12 +2170,12 @@ Eq. \eqref{eq:dinvadt} as
 %
 where
 $t_0(t)$ is a slowly-varying function.
+}
 
 
-
-By differentiating Eq. \eqref{eq:dinvadt},
-we can show that instantaneous eigenvalue,
-$\lambda(t)$, is an increasing function.
+By further differentiating Eq. \eqref{eq:dinvadt},
+we can show that $\lambda(t)$
+is an increasing function.
 %
 \note{Proof that $\lambda(t)$ is an increasing function.
   Using $\dot u_k = \lambda_k \, u_k \, \alpha(t)$,
@@ -2212,22 +2224,18 @@ $\lambda(t)$, is an increasing function.
   $$
   The numerator of the fraction of the last expression
   is nonnegative by the Cauchy-Schwarz inequality,
-  or by the nonpositiveness of the discriminant
+  or by the nonpositivity of the discriminant
   of the following nonnegative definite quadratic form of $X$:
   $$
   \sum_{k = 2}^n \Gamma_k \, \lambda_k^2 \, u_k^2 \, (X - \lambda_k)^2 \ge 0.
   $$
   Thus, $\dot \lambda \ge 0$, and $\lambda(t)$ is monotonically increasing.
-}
+}%
 %
-Below we shall study the initial and final values
-of $\lambda(t)$.
+Below we shall study the initial and final values.
 %
-At the end of a simulation,
-we have $t = T$, and $u_k = 1$.
-%
-Thus,
-the instantaneous eigenvalue
+At the end of the simulation,
+$t = T$, we have $u_k = 1$, and
 %
 \begin{equation}
   \lambda(T)
@@ -2244,35 +2252,34 @@ the instantaneous eigenvalue
 \notag
 %\label{eq:dinvadt_limit2}
 \end{equation}
-is an average of $\lambda_k$'s weighted
-by $\Gamma_k \, \lambda_k^2$,
-and it is independent of the simulation length, $T$.
+is independent of the simulation length, $T$.
 %
-Further, it often occurs that $\Gamma_k$
-increases with $\lambda_k$,
+Further, $\Gamma_k$ often increases with $\lambda_k$,
 such that the relative weight $\Gamma_k \, \lambda_k^2$
 also increases with $\lambda_k$.
 %
 It follows that $\lambda(T)$ will be dominated
-the larger values of $\lambda_k$'s.
+by the larger values of $\lambda_k$'s.
 
 
 By contrast,
-at the beginning of a simulation,
+at the beginning of the simulation,
 the relative weight, $\Gamma_k \, \lambda_k^2 \, u_k^2(0)$,
 is heavily influenced by the exponential factor
-$u_k^2(0) = e^{ -2 \, \lambda_k \, q(T) }$,
-and hence is sensitive to the simulation length, $T$.
+$u_k^2(0) = e^{ -2 \, \lambda_k \, q(T) }$.
+%
+Thus, $\lambda(0)$
+is sensitive to the simulation length, $T$.
 %
 A longer simulation means a smaller $\lambda(0)$,
-and that $\lambda(t)$ would be small
+and that $\lambda(t)$ would stay small
 for longer near the beginning of the simulation.
 
 
 
 
 \subsubsection{\label{sec:measure_gamma}
-Measurement the integrals
+Measurement of the integrals
 of the autocorrelation functions}
 
 
@@ -2287,20 +2294,20 @@ and the underlying sampling process (MC or MD).
 %
 Below is a technique of measuring $\Gamma_k$'s.
 
-The idea is to measure $\Gamma_k$'s
-via a simulation with a constant schedule,
+The idea is to run
+a simulation with a constant schedule,
 $\alpha(t) = \alpha_0$,
-using Eq. \eqref{eq:y2_eql}.
+and then use Eq. \eqref{eq:y2_eql}.
 %
 A practical difficulty is that
 we often do not know the intrinsic distribution, $p^*_i$,
-beforehand, and thus cannot compute
+in advance to compute
 the shifted bias potential, $v_i$,
 from the original one, $V_i$
 (cf. Sec. \ref{sec:FDS}).
 %
-To circumvent the problem, we shall use
-the following modification:
+To circumvent the problem, we shall
+modify Eq. \eqref{eq:y2_eql} as
 %
 \begin{equation}
   \operatorname{var} Y_k
@@ -2334,16 +2341,16 @@ to rewrite Eq. \eqref{eq:x_def}
 as
 $$
 \begin{aligned}
-x_i
-&=
-(V_i - \bar V) + s_i
-\\
-s_i
-&=
-\ln \frac{ p_i } { p^*_i }
--
-\sum_{ j = 1 }^n
-  p_j \, \ln \frac{ p_j } { p^*_j }.
+  x_i
+  &=
+  (V_i - \bar V) + s_i,
+  \\
+  s_i
+  &=
+  \ln \frac{ p_i } { p^*_i }
+  -
+  \sum_{ j = 1 }^n
+    p_j \, \ln \frac{ p_j } { p^*_j }.
 \end{aligned}
 $$
 Thus, by Eqs. \eqref{eq:y_def} and \eqref{eq:Y_def},
@@ -2362,15 +2369,15 @@ $$
 \langle y_k^2 \rangle.
 $$
 Finally, by using Eq. \eqref{eq:y2_eql},
-we get Eq. \eqref{eq:varY}.
+we reach Eq. \eqref{eq:varY}.
 
-In practice, Eq. \eqref{eq:varY}
-may fail if some eigenvalue $\lambda_k$ is zero.
+\note{In practice, Eq. \eqref{eq:varY}
+in inapplicable to zero eigenvalues, $\lambda_k$'s.
 %
-However, the corresponding modes can be ignored
+However, these eigenmodes can be ignored
 as they do not contribute to the Lagrangian defined by
 Eq. \eqref{eq:error_asym_Lagrangian}.
-
+}
 
 
 \subsubsection{\label{sec:program}
@@ -2383,21 +2390,23 @@ the optimal schedule for a given updating scheme.
 \begin{enumerate}
 
 \item
-Given an updating matrix, $\mathbf w$,
+From the updating matrix, $\mathbf w$,
 compute the eigenvalues, $\lambda_k$'s.
 
 \item
 Run a preliminary adaptive FDS simulation
 using the updating scheme with a constant
 updating magnitude, $\alpha_0$.
-Use Eq. \eqref{eq:varY} to compute $\Gamma_k$'s.
+
+\item
+Compute $\Gamma_k$'s from Eq. \eqref{eq:varY}.
 
 \item
 Select an initial value of $q(T)$,
 e.g., $\ln(1 + \alpha_0 \, T)$.
 
 \item
-Compute the optimal schedule from
+Compute the optimal schedule by
 numerically integrating Eq. \eqref{eq:q_opt}.
 
 \item
@@ -2407,7 +2416,7 @@ Eqs. \eqref{eq:error_split},
   \eqref{eq:error_res1}.
 
 \item
-Modify the value of $q(T)$ and repeat the above two steps,
+Modify the value of $q(T)$ and repeat the previous two steps,
 until the minimal error $E$ is found.
 
 \end{enumerate}
@@ -2417,10 +2426,10 @@ The dependence of variables are shown in Fig. \ref{fig:vardep}.
 \begin{figure}
 \begin{tikzpicture}
   \node[draw, text width={width("Updating ")}]
-    (w) at (0, 3) {Updating \\matrix, $w$};
+    (w) at (0, 3) {Updating \\matrix, $\mathbf w$};
 
-  \node[draw, text width={width("System  11")}]
-    (sys) at (0, 1) {System \& \\sampling \\process};
+  \node[draw, text width={width("System and")}]
+    (sys) at (0, 1) {System and\\sampling \\process};
 
   \node[draw, text width={width("Eigenvalues, ")}]
     (lambda) at (2.5, 3) {Eigenvalues, \\$\lambda_2, \dots, \lambda_n$};
@@ -2432,18 +2441,31 @@ The dependence of variables are shown in Fig. \ref{fig:vardep}.
     (T) at (2.5, -0.5) {Simulation \\time, $T$};
 
   \node[draw, text width={width("Schedule ")}]
-    (alpha) at (5, 1) {Optimal schedule, \\ $\alpha(t)$};
+    (alpha) at (5.2, 1) {Optimal schedule, \\ $\alpha(t)$};
 
   \node[draw, text width={width("Error ")}]
     (err) at (7, 1) {Error, \\ $\Err$};
 
-  \draw[->] (w) edge (lambda)
-            (w) edge (gamma)
-            (sys) edge (gamma)
-            (lambda) edge (alpha)
-            (gamma) edge (alpha)
-            (T) edge (alpha)
-            (alpha) edge (err);
+  \node[inner sep=0, minimum size=0] (M1) at (3.7, 1) {};
+  \node[inner sep=0, minimum size=0] (M2) at (4.0, 1) {};
+  \node[inner sep=0, minimum size=0] (N2) at (4.0, -0.2) {};
+  \node[inner sep=0, minimum size=0] (N3) at (6.2, -0.2) {};
+  \node[inner sep=0, minimum size=0] (M3) at (6.2, 1) {};
+
+  \draw[->, >=latex, thick]
+    (w) edge (lambda)
+    (w) edge (gamma)
+    (sys) edge (gamma)
+    (alpha) edge (err);
+
+  \draw[->, >=latex, thick]
+    (lambda) -| (M1)
+    (gamma) -- (M1)
+    (T) -| (M1)
+    (M1) -- (alpha);
+  
+  \draw[->, >=latex, thick]
+    (M2) -- (N2) -- (N3) -- (M3);
 
 \end{tikzpicture}
 \caption{
@@ -2460,8 +2482,8 @@ Homogeneous updating schemes}
 
 
 Many commonly-used updating schemes
-can be characterized by a rigid wave packet
-whose center drifts with the current bin.
+can be characterized by a rigid window
+centered on the current bin.
 %
 We call these schemes homogeneous,
 or translationally invariant.
@@ -2473,7 +2495,7 @@ Homogeneous updating schemes have significantly fewer
 parameters than the general case,
 and the multiplication of the updating matrix,
 $\mathbf w$,
-can be reduced to a convolution with the wave packet,
+can be reduced to a convolution with the window,
 or the updating kernel.
 %
 Thus,
@@ -2483,26 +2505,29 @@ via the shape of the updating kernel.
 
 
 
-While the translational invariance of
-the updating scheme
-naturally suits a periodic variable\cite{dama2014},
-it can also be extended to a non-periodic variable
-by imposing the reflective boundary condition.
+\subsubsection{\label{sec:bandkernel}
+Updating kernel and eigenvalues}
+
+
+
+While translationally-invariant
+updating schemes
+naturally suit periodic variables\cite{
+dama2014},
+they can also be extended to non-periodic variables
+by imposing the reflective boundary condition\cite{
+bussi2006}.
 %
 For simplicity, we shall assume that the target
 distribution is flat, or $p_i = 1/n$, below.
 
 
 
-\subsubsection{\label{sec:bandkernel}
-Updating kernel and eigenvalues}
-
-
-
-It is natural to introduce a homogeneous updating scheme
+It is natural to introduce homogeneous updating schemes
 for a periodic variable\cite{dama2014}.
 %
-Consider the following matrix, $\mathbf w$,
+The updating matrix, $\mathbf w$,
+assume the following form
 %
 \begin{equation}
   w_{ij}
@@ -2527,7 +2552,7 @@ are a set of numbers satisfying
 \label{eq:mu_normalization}
 \end{equation}
 %
-and $\mu_l = 0$ for $l > b$.
+and $\mu_l = 0$ for $|l| > b$.
 %
 Particularly,
 we shall only consider symmetric kernels
@@ -2539,20 +2564,20 @@ that satisfy
 \label{eq:mu_symm}
 \end{equation}
 %
-If $b = n/2$, then $\mu_{-b}$ is dropped
-from Eq. \eqref{eq:mu_normalization}.
+If $b = n/2$, then $\mu_{-b}$ is removed 
+from the sum in Eq. \eqref{eq:mu_normalization}.
 %
-These numbers constitutes a \emph{updating kernel}.
+These numbers constitutes an \emph{updating kernel}.
 
 
-This above matrix, $\mathbf w$,
+The above matrix, $\mathbf w$,
 being symmetric to the indices $i$ and $j$,
 satisfies Eqs. \eqref{eq:w_sumj}-\eqref{eq:w_balance},
-for the flat distribution $p_i = 1/n$.
+for the flat distribution.
 %
 To find the eigenvectors,
-we note that for a periodic variable, $\phi_i$,
-the out-of-boundary values are defined by
+we define, for a periodic variable, $\phi_i$,
+out-of-boundary values by
 %
 \begin{equation}
   \phi_i = \phi_{i \pm n},
@@ -2561,7 +2586,7 @@ the out-of-boundary values are defined by
 %
 such that $i \pm n$ lies in between $1$ and $n$.
 %
-We then have
+Then
 %
 \begin{equation}
   \sum_{ j = 1 }^n
@@ -2628,7 +2653,7 @@ it is identical to \eqref{eq:wmul_to_convol}.
 Thus,
 we may construct a set of orthonormal eigenvectors,
 $\pmb\phi^{(1)}, \dots, \pmb\phi^{(n)}$,
-as
+compatible with Eq. \eqref{eq:phi_pbc},
 \begin{equation}
   \phi^{(k)}_j
   =
@@ -2645,7 +2670,8 @@ as
   \notag
 \end{equation}
 %
-with the eigenvalues being
+where $\ii^2 = -1$, and
+the eigenvalues are
 %
 \begin{equation}
   \lambda_k
@@ -2726,17 +2752,16 @@ and change the form of the updating matrix to
   \label{eq:w_band_refl}
 \end{equation}
 %
-Again the updating kernel satisfies
+Again the updating kernel should satisfy
 Eqs. \eqref{eq:mu_normalization}
-and \eqref{eq:mu_symm}.
-%
-However,
+and \eqref{eq:mu_symm},
+but
 the cutoff $b$ only need to be less than $n$.
 %
 The last two terms
-on the right-hand side of \eqref{eq:w_band_refl} are added
+on the right-hand side of Eq. \eqref{eq:w_band_refl} are added
 to avoid unintended distortion\cite{dickson2011, mcgovern2013}
-to the equilibrium distribution $p_i = 1/n$\cite{bussi2006},
+to the equilibrium distribution\cite{bussi2006},
 such that Eqs. \eqref{eq:w_sumj}-\eqref{eq:w_balance}
 are satisfied.
 
@@ -4040,8 +4065,8 @@ and at this point
 \begin{equation}
   E
   =
-  \frac{        1         }
-       { T + 2 / \alpha_0 }
+  \frac{   1     }
+       { T + t_0 }
   \sum_{ k = 2 }^K
     \Gamma_k
   .
@@ -4440,8 +4465,7 @@ in Sec. \ref{sec:Gamma}.
 
 
 
-We first tested the theory using
-the inverse-time schedule,
+We first studied the inverse-time schedule,
 %
 \begin{equation}
 \alpha(t) = \frac{1}{\lambda \, (t + t_0) },
@@ -4909,7 +4933,7 @@ of the bias potential.
 %the update is limited to the current bin;
 %while in the metadynamics case,
 %the bias potential of a neighborhood of the current one
-%is updated with relative weight specified by a Gaussian wave packet.
+%is updated with relative weight specified by a Gaussian window.
 
 
 
@@ -4963,7 +4987,7 @@ is always given by the inverse-time formula.
 They appeared to outperform similar Gaussian schemes
 in our model study,
 suggesting that they can be useful
-in real metadynamics simulations.
+in high-precision metadynamics simulations.
 
 
 
