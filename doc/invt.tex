@@ -116,7 +116,7 @@ a distribution, $p^*(z)$,
 along a quantity of interest $z$.
 %
 The negative logarithm,
-$-\log p^*(z)$,
+$-\ln p^*(z)$,
 defines a free energy,
 or the potential of mean force (PMF).
 %
@@ -284,10 +284,15 @@ of the known inverse-time formula.
 %
 Next, we turn to the general case
 of multiple-bin updating schemes
+and propose a method of computing
+the optimal schedule
 in Secs. \ref{sec:multiple-bin}
 to \ref{sec:band-matrix}.
 %
 Finally, we compare different updating schemes
+and show that the single-bin scheme
+and a class of generalized bandpass schemes
+are optimal for convergence
 in the long time limit
 in Sec. \ref{sec:cmpschemes}.
 
@@ -303,20 +308,21 @@ Flat-distribution sampling}
 
 
 
-Given a system,
-consider the problem of computing
+Consider the problem of computing
 the distribution, $p^*_i$,
-along a discrete quantity $i$.
+along a discrete quantity, $i$,
+for a given system.
 %
 %The discreteness of $i$ is natural
 %in discrete models.
 %
-For example, $i$ can be the energy $E$
+For example, $i$ can be the energy, $E$,
 in a lattice spin model; or the temperature index
-in a simulated tempering simulation.
+in a simulated tempering simulation\cite{
+marinari1992, lyubartsev1992}.
 %
 For a continuous quantity, $z$,
-which is typical in molecular systems,
+which is typical in a molecular system,
 we can discretize $z$
 such that the integer $i$ represents
 the index of a small interval, or a bin,
@@ -332,26 +338,28 @@ For a large system,
 the distribution $p^*_i$ tends to
 be localized,
 %
-and to find out the global shape,
+and to find out the global shape
+of the PMF, $-\ln p^*_i$,
 it is often advantageous to carry out
 a biased sampling that targets
-a wider distribution $p_i$.
+a wider distribution, $p_i$.
 %
 %Here, we refer to simulations that target
 %a flat or nearly flat distribution
 %as entropic or multicanonical sampling.
+ 
 
 
-
-To do so, we need to introduce a bias potential $V_i$
-to modify the target distribution to
+To do so, we introduce a bias potential, $V_i$,
+which changes the equilibrium distribution to
 %
 \begin{equation}
   \pi_i \propto p^*_i \, e^{-V_i}.
   \label{eq:pi_p_phi1}
 \end{equation}
 %
-Upon normalization, $\sum_{i = 1}^n \pi_i = 1$,
+Upon the normalization,
+$\sum_{i = 1}^n \pi_i = 1$,
 we get
 %
 \begin{equation}
@@ -364,15 +372,19 @@ we get
 \end{equation}
 %
 Particularly,
-to achieve a flat distribution $\pi_i$,
+to make $\pi_i$ flat,
 the bias potential $V_i$
-must coincide with $\log p^*_i$,
+must coincide with $\ln p^*_i$,
 up to an additive constant.
-
+%
+In practice, $V_i$ may contain error,
+and thus $\pi_i$ need not
+coincide with the intended distribution $p_i$.
 
 
 Here we shall call a simulation that targets
-a nearly flat distribution\cite{dayal2004, trebst2004, singh2011},
+a nearly flat distribution\cite{
+dayal2004, trebst2004, singh2011},
 $p_i$,
 a flat-distribution sampling (FDS) simulation.
 %
@@ -380,13 +392,15 @@ Roughly speaking, there are two types of FDS methods.
 %
 The first type,
 referred to as the equilibrium FDS, % (E-FDS) methods hereinafter,
-estimates the bias potential, $V_i$,
-before simulation,
-and fixes it during simulation.
+uses a fixed bias potential, $V_i$,
+(which is estimated beforehand)
+during simulation.
 %
 Examples include the original
-entropic or multicanonical sampling\cite{berg1992, lee1993}
-and simulated tempering\cite{marinari1992, lyubartsev1992}
+entropic or multicanonical sampling\cite{
+berg1992, lee1993}
+and simulated tempering\cite{
+marinari1992, lyubartsev1992}
 with $i$ being the index of energy
 and that of temperature, respectively.
 %
@@ -395,7 +409,7 @@ are often improved
 by the histogram, $H_i$, along $i$ accumulated
 during simulation.
 %
-Using $H_i$ as $\pi_i$ in
+Using $H_i$ as an estimate of $\pi_i$ in
 Eq. \eqref{eq:pi_p_phi1}
 allows us to correct $V_i$ as
 %
@@ -404,45 +418,49 @@ V^\mathrm{corr}_i
 =
 V_i
 +
-\log \frac{ H_i }
-          { p_i }.
+\ln \frac{ H_i }
+         { p_i }.
 \label{eq:vcorr_equil}
 \end{equation}
 %
 \note{This follows from
   $$
   \begin{aligned}
-    \pi_i &\propto p^*_i \, e^{-V_i}, \\
-    p_i &\propto p^*_i \, e^{-V^\mathrm{corr}_i}.
+    H_i \approx \pi_i
+    &\propto p^*_i \, e^{-V_i},
+    \\
+    p_i
+    &\propto p^*_i \, e^{-V^\mathrm{corr}_i}.
   \end{aligned}
   $$
 }
 For an unknown system,
-the main difficulty of the process
-is that it is hard to guess a sufficiently accurate
+it is often difficult
+to guess a sufficiently accurate
 $V_i$ to start with.
 %
 Thus,
 it can take many iterative rounds of simulations
 to achieve the desired flat distribution.
 %
-Further, a reasonably precise histogram
+\note{Further, a reasonably precise histogram
 requires an accumulation period
 longer than the autocorrelation time,
-which can also be hard to estimate beforehand.
+which can also be hard to estimate beforehand.}
 
 For this reason, the second type of methods,
 referred to as the adaptive FDS methods,
 were invented.
 %
 Examples include
-the WL and metadynamics methods.
+the WL algorithm and metadynamics.
 %
-These methods update the bias potential more frequently
-and can easily achieve a flat distribution.
+These methods update the bias potential
+incrementally in regular intervals
+and can easily achieve the target distribution.
 %
 However, they are less well understood theoretically,
-as the updating loops used there
+as the updating loops
 break the microscopic reversibility
 of the underlying sampling mechanism.
 %
@@ -453,14 +471,16 @@ of the underlying sampling mechanism.
 To minimize this effect,
 many adaptive methods gradually
 reduce the updating magnitude
-over the course of simulation\cite{marsili2006,
+over the course of simulation\cite{
+marsili2006,
 liang2007,
-belardinelli2007, belardinelli2007jcp, belardinelli2008}.
+belardinelli2007, belardinelli2007jcp, belardinelli2008,
+barducci2008}.
 %
 Thus, in late stages of a long simulation,
 the updating is negligible and
-such an adaptive simulation is rather similar
-to the corresponding equilibrium simulation.
+the adaptive simulation tends to
+the corresponding equilibrium one.
 %
 If the bias potential were converged to the exact value,
 this particular equilibrium simulation can be thought as
@@ -468,7 +488,8 @@ the optimal asymptotic limit of the adaptive counterpart,
 delivering the maximal efficiency.
 
 
-For later convenience, we introduce a shifted bias potential
+For later convenience,
+we introduce a shifted bias potential
 %
 \begin{equation}
   v_i \equiv V_i - \ln p^*_i + \ln p_i.
@@ -477,7 +498,8 @@ For later convenience, we introduce a shifted bias potential
 %
 Since the last two terms of Eq. \eqref{eq:v_def}
 remain constant during the course of simulation,
-updates to $V_i$'s are equivalent to those to $v_i$'s.
+the updates to $v_i$'s are
+the same as the updates to $V_i$'s.
 %
 In terms of $v_i$'s, Eq. \eqref{eq:pi_p_phi}
 becomes
@@ -493,9 +515,8 @@ becomes
 \end{equation}
 %
 According to Eq. \eqref{eq:pi_p_phi1},
-$v_i$ should approach a constant of $i$
-upon convergence (i.e., when $\pi_i \approx p_i$)
-of an adaptive FDS.
+$v_i$ should ideally be a constant of $i$
+such that $\pi_i \approx p_i$.
 
 
 
@@ -504,6 +525,8 @@ of an adaptive FDS.
 
 
 
+We shall mainly focus on the adaptive methods below.
+%
 In the WL algorithm\cite{wang2001, wang2001pre},
 the bias potential, $v_i(t)$, is updated
 in each MC step $t$ as
@@ -514,14 +537,15 @@ in each MC step $t$ as
   v_i(t)
   +
   \delta_{i, \, i(t)}
-  \frac{ \alpha(t) } { p_i }.
-  \label{eq:wl_update}
+  \frac{ \alpha(t) } { p_i }
+  ,
+\label{eq:wl_update}
 \end{equation}
 %
 where $i(t)$ is the bin at step $t$,
 and $\alpha(t)$ is the updating magnitude.
 %
-We refer to the above scheme as the \emph{single-bin scheme},
+We refer to this scheme as the \emph{single-bin scheme},
 for it applies only to the bias potential
 at the current bin, $i(t)$.
 %
@@ -534,33 +558,31 @@ several neighboring bins are updated:
   v_i(t)
   +
   w_{i, \, i(t)}
-  \frac{ \alpha(t) } { p_i },
+  \frac{ \alpha(t) }
+       { p_{i(t)} },
   \label{eq:mbin_update}
 \end{equation}
 %
 where $w_{ij}$ are a set of coefficients satisfying
-$\sum_{j=1}^n w_{ij} = 1$.
-%
-We shall discuss other restrictions on $w_{ij}$
+the restrictions to be discussed
 in Sec. \ref{sec:updating-matrix}.
 %
 The Gaussian updating scheme
-used by metadynamics
+used in metadynamics
 is a multiple-bin scheme.
 
 
 
 One can show that with a constant $\alpha(t) = \alpha > 0$,
 the distribution collected from
-the trajectory is identical to $p_i$ in long times.
+an adaptive FDS simulation
+is identical to $p_i$ in long times.
 %
 However, as the above updates
 change $v_i(t)$ continuously,
 Eq. \eqref{eq:pi_p_v} no longer holds
-at all times.
-%
-In other words,
-the error in $v_i(t)$
+at all times,
+and the error in $v_i(t)$
 depends on the updating magnitude\cite{
   zhou2005, liang2005, laio2005, bussi2006, poulain2006, liang2007,
   morozov2007, zhou2008, morozov2009, crespo2010,
@@ -579,34 +601,9 @@ depends on the updating magnitude\cite{
 %%
 %
 Thus, one has to decrease $\alpha$ over time
-to reduce the error of $v_i$,
-in order to get the unbiased distribution
-$\ln p_i^*$ via Eq. \eqref{eq:v_def}.
+to improve the estimate of the distribution,
+$p^*_i$. %via Eq. \eqref{eq:v_def}.
 
-
-
-
-
-In the original WL scheme,
-the updating magnitude $\alpha$ (or $\ln f$
-in the original paper) is kept as a constant
-for a period of time,
-referred to as a stage below.
-%
-The histogram collected in the stage is monitored.
-%
-Once the histogram is sufficiently flat,
-we are allowed to enter a new stage
-with $\alpha$
-reduced by a factor of one
-half\cite{wang2001, wang2001pre}.
-%
-This scheme works well for early stages.
-%
-However, it tends to reduce $\alpha$
-too quickly in late stages, making the asymptotic error
-saturate\cite{belardinelli2007, belardinelli2007jcp, belardinelli2008}.
-%
 
 
 
@@ -615,12 +612,35 @@ saturate\cite{belardinelli2007, belardinelli2007jcp, belardinelli2008}.
 
 
 
+In the original WL papers\cite{
+wang2001, wang2001pre},
+the updating magnitude $\alpha$
+(or $\ln f$ there)
+is controlled stage-wise.
+%
+In each stage, $\alpha$
+is kept as a constant,
+and the histogram along $i$
+is collected and monitored.
+%
+Once the histogram is sufficiently flat,
+we switch to a new stage
+with $\alpha$ reduced by a factor of $1/2$\cite{
+wang2001, wang2001pre}.
+%
+This scheme works well for early stages.
+%
+However, it tends to reduce $\alpha$
+too quickly in late stages, making the asymptotic error
+saturate\cite{belardinelli2007, belardinelli2007jcp, belardinelli2008}.
+
+
 %For the single-bin scheme
 %used in WL algorithm,
 Later,
 it was found that
 a better way
-of updating the schedule $\alpha(t)$
+of controlling the schedule $\alpha(t)$
 in late stages
 is to follow the formula
 %
@@ -629,9 +649,10 @@ is to follow the formula
   \label{eq:alpha_invt}
 \end{equation}
 %
-where $t$ is the number of steps
-from the beginning of the MC simulation,
-which shall be referred to as the ``time'' below.
+where $t$,
+referred to as the ``time'' below,
+is the number of steps
+from the beginning of the simulation.
 %
 This simple yet effective formula has attracted
 several studies\cite{belardinelli2007, belardinelli2007jcp, belardinelli2008,
@@ -641,7 +662,7 @@ komura2012, caparica2012, caparica2014}.
 There are, however, some reservation about
 the constant of proportionality:
 the optimal formula for $\alpha(t)$
-might be $C/t$ with a constant $C$
+might be $C/t$ with a $C$
 different from $1.0$\cite{
 morozov2007, zhou2008, morozov2009}.
 
@@ -650,19 +671,18 @@ As Eq. \eqref{eq:alpha_invt} was being developed for the WL algorithm,
 several similar ways of
 reducing the updating magnitude
 were developed for umbrella sampling and metadynamics,
-particularly the
-self-healing umbrella sampling
+particularly, the self-healing umbrella sampling
 and well-tempered metadynamics\cite{
   marsili2006, barducci2008, dickson2011, dama2014}.
 %
-Our aim below is to the optimal schedule $\alpha(t)$,
+Our aim below is to find the optimal schedule $\alpha(t)$,
 for a general updating scheme.
 
 
 
 
 \subsection{\label{sec:single-bin}
-Single-bin scheme}
+Single-bin updating scheme}
 
 
 
@@ -704,7 +724,7 @@ and
 \end{equation}
 is the instantaneous histogram,
 which is equal to $1.0$
-for the current bin $i(t)$
+for the bin $i(t)$ at time $t$
 or zero otherwise.
 
 
@@ -725,7 +745,7 @@ and have reached the same $v_i(t)$
 at time $t$.
 %
 The initial states and the stochastic forces
-during the process may, however, be different.
+during the process may differ, however.
 
 
 
@@ -789,7 +809,10 @@ $
 
 
 To proceed, we first observe that
-the average $\bar v = \sum_{i = 1}^n p_i \, v_i$
+the average
+$$
+\bar v = \sum_{i = 1}^n p_i \, v_i
+$$
 increases steadily over time:
 %
 \begin{equation}
@@ -801,7 +824,7 @@ increases steadily over time:
 \label{eq:dvbardt}
 \end{equation}
 %
-However, we expect the difference between $v_i$ and $\bar v$,
+However, we expect the difference %between $v_i$ and $\bar v$,
 %
 \begin{equation}
   x_i \equiv v_i - \bar v = v_i - \sum_{j = 1}^n p_j \, v_j,
@@ -812,21 +835,12 @@ to be small in the asymptotic regime.
 Expanding Eq. \eqref{eq:h_ave} in $x_i$ yields
 %
 \begin{align}
-\langle h_i(t) \rangle
-&\approx
-\frac{                 p_i \, e^{- x_i} }
-     { \sum_{ j = 1}^n p_j \, e^{- x_j} }
-\approx
-\frac{                 p_i (1 - x_i) }
-     { \sum_{ j = 1}^n p_j (1 - x_j) }
-\notag
-\\
-&\approx
-p_i \, \left(
-         1 - x_i + \sum_{j=1}^n p_j \, x_j
-       \right)
-=
-p_i \, (1 - x_i),
+  \langle h_i(t) \rangle
+  &\approx
+  \frac{                 p_i \, e^{- x_i} }
+       { \sum_{ j = 1}^n p_j \, e^{- x_j} }
+  \approx
+  p_i \, (1 - x_i),
 \label{eq:hdet_linearize}
 \end{align}
 %
@@ -838,7 +852,15 @@ and
   \label{eq:px_sum}
 \end{equation}
 which follows directly from Eq. \eqref{eq:x_def}.
-%
+\note{For \eqref{eq:hdet_linearize}. Following the second step
+$$
+\langle h_i(t) \rangle
+\approx
+\frac{                 p_i (1 - x_i) }
+     { \sum_{ j = 1}^n p_j (1 - x_j) }
+.
+$$
+}%
 From Eqs.
 \eqref{eq:vt_diffeq},
 \eqref{eq:h_split},
@@ -876,22 +898,21 @@ $$
 The total error of the bias potential can be written in
 terms of $x_i$,
 \begin{equation}
-\Err
-=
-\sum_{i = 1}^n p_i \, \langle x_i^2 \rangle
-=
-\sum_{i = 1}^n p_i \, \left\langle (v_i - \bar v)^2 \right\rangle,
+  \Err
+  =
+  \sum_{i = 1}^n p_i \, \langle x_i^2 \rangle
+  =
+  \sum_{i = 1}^n p_i \, \left\langle (v_i - \bar v)^2 \right\rangle
+  .
 \label{eq:error_sum}
 \end{equation}
-where
-$\bar v = \sum_{i = 1}^n p_i v_i$.
 %
 Our aim is to find the $\alpha(t)$
-that minimizes Eq. \eqref{eq:error_sum}.
+that minimizes the error $E$
+at the end of the simulation period $T$.
 %
-Fortunately, we find that it suffices to consider
-a simpler one-variable problem
-in this case.
+Fortunately, it suffices to consider
+a simpler one-variable problem.
 
 
 
@@ -903,7 +924,7 @@ Consider the following equation
 of a single variable:
 %
 \begin{equation}
-\dot x(t) = -\alpha(t) \, \lambda \left[ x(t) - \xi(t) \right],
+\dot x(t) = -\alpha(t) \, \left[ x(t) - \xi(t) \right],
 \label{eq:dxdt_alpha}
 \end{equation}
 %
@@ -911,16 +932,20 @@ where $\xi(t)$ is a generalized noise
 that is invariant under time translation:
 %
 \begin{equation}
-\left\langle \xi(t) \, \xi(t') \right\rangle
-=
-\kappa(t - t').
+  \left\langle \xi(t) \, \xi(t') \right\rangle
+  =
+  \kappa(t - t')
+  .
 \notag
 %\label{eq:noise_correlation}
 \end{equation}
 %
-Additionally, we require
+Additionally,
+we assume that $\kappa(t)$ is an even function and
 \begin{equation}
-  \lim_{t \rightarrow \pm\infty} \kappa(t) = 0.
+  \lim_{t \rightarrow \infty} \kappa(t)
+  = 0
+  .
   \label{eq:kappa_limit}
 \end{equation}
 %
@@ -933,8 +958,8 @@ of minimizing $\langle x^2(t) \rangle$ at long times
 is given by
 %
 \begin{equation}
-  \alpha(t) = \frac{1}{\lambda \, (t + t_0)}.
-\label{eq:alpha_opt}
+  \alpha(t) = \frac{ 1 }{ t + t_0 }.
+\label{eq:alpha_invt1}
 \end{equation}
 
 
@@ -945,7 +970,7 @@ the formal solution of Eq. \eqref{eq:dxdt_alpha}:
 \begin{equation}
 x(T)
 =
-x(0) \, e^{-\lambda \, q(T)}
+x(0) \, e^{-q(T)}
 +
 \int_0^T
   \dot u\bigl( q(t) \bigr) \, \xi(t) \, dt,
@@ -953,7 +978,7 @@ x(0) \, e^{-\lambda \, q(T)}
 %\label{eq:xt_solution}
 \end{equation}
 %
-where,
+where
 %
 \begin{equation}
 q(t) \equiv \int_0^t \alpha(t') \, dt',
@@ -966,7 +991,7 @@ and
 \begin{align}
 u(q')
 &\equiv
-e^{-\lambda \, q(T) + \lambda \, q'}.
+e^{q' - q(T)}.
 \label{eq:u_def}
 \end{align}
 At the end of period $T$, we have
@@ -974,7 +999,7 @@ At the end of period $T$, we have
 &\left\langle x^2(T) \right\rangle
 =
 \langle x^2(0) \,
-\rangle e^{-2 \, \lambda \, q(T)}
+\rangle e^{-2 \, q(T)}
 \notag
 \\
 &\qquad
@@ -991,14 +1016,14 @@ We now fix the endpoint value $q(T)$
 and variate the curve, $q(t)$ ($0 < t < T$).
 %
 This is equivalent to variating $u$
-with fixed endpoint values,
-$u\bigl( q(0) \bigr)  = e^{-\lambda \, q(T)}$
+with fixed endpoints,
+$u\bigl( q(0) \bigr)  = e^{- q(T)}$
 and
 $u\bigl( q(T) \bigr) = 1$.
 %
 Note also that the first term on the right-hand side
 of Eq. \eqref{eq:x2t_average} is fixed during
-the variation process.
+the process.
 %
 %We shall further demand that
 %%
@@ -1039,7 +1064,8 @@ $$
 \end{aligned}
 $$
 where we have dropped the boundary terms
-by using Eq. \eqref{eq:kappa_limit}.
+by assuming Eq. \eqref{eq:kappa_limit}
+and a large $T$.
 %
 %In fact, we can repeat the process $n$ times, and
 %$$
@@ -1065,7 +1091,7 @@ where $c$ is a constant of $t'$.
 Using Eq. \eqref{eq:u_def},
 we get
 $$
-e^{-\lambda \, q(T) + \lambda \, q(t')}
+e^{ q(t') - q(T) }
 =
 c \, (t' + t_0),
 $$
@@ -1074,60 +1100,50 @@ where $t_0$ is a constant.
 Taking the logarithm,
 and differentiating both sides
 with respect to $t'$
-yields Eq. \eqref{eq:alpha_opt}.
+yields Eq. \eqref{eq:alpha_invt1}.
 
 
 
-\subsubsection{Optimal $\alpha(t)$ for the single-bin scheme}
+\subsubsection{Optimal schedule for the single-bin scheme}
 
 
 
-Going back to the problem of
-minimizing Eq. \eqref{eq:error_sum}
-for the single-bin scheme.
-%
-Note that Eq. \eqref{eq:dxdt_WL}
+For the problem of
+minimizing the error defined in Eq. \eqref{eq:error_sum}
+for the single-bin scheme,
+we note that Eq. \eqref{eq:dxdt_WL}
 is of the form of Eq. \eqref{eq:dxdt_alpha}.
 %
-Thus, with $\lambda = 1$,
-Eq. \eqref{eq:alpha_opt}
-will optimize each term $\langle x_i^2 \rangle$,
-and hence the sum.
-%
-In other words, the optimal $\alpha(t)$
-is given by
-\begin{equation}
-\alpha(t)
-=
-\frac{    1     }
-     {  t + t_0 }
-,
-\label{eq:alpha_invt1}
-\end{equation}
-and Eq. \eqref{eq:alpha_invt}
-is the case of $t_0 = 0$.
+Thus,
+the optimal schedule $\alpha(t)$ is given by
+Eq. \eqref{eq:alpha_invt1}
+for it optimizes each term $\langle x_i^2 \rangle$,
+and hence the sum;
+Eq. \eqref{eq:alpha_invt}
+is the special case of $t_0 = 0$.
 %
 In Sec. \ref{sec:finlencorr},
 we show that $t_0$ can be adjusted
-to take into account for the initial error.
+to accommodate the initial error.
 
 
 
 \subsection{\label{sec:multiple-bin}
-Multiple-bin scheme}
+Multiple-bin updating scheme}
 
 
 
-We now consider the multiple-bin scheme,
-Eq. \eqref{eq:mbin_update}.
+We now consider a multiple-bin updating scheme,
+given in Eq. \eqref{eq:mbin_update}.
 %
 In this case,
 upon a visit to bin $j$,
 we update not only the bias potential at bin $j$,
 but also those at a few neighboring bins, $i$'s.
 %
-The relative update magnitudes, $w_{ij}$,
-constitute a matrix $\mathbf w$.
+The relative updating magnitudes,
+$w_{ij}$'s,
+form a matrix $\mathbf w$.
 %
 Then, Eq. \eqref{eq:vt_diffeq} is generalized to
 \begin{equation}
@@ -1138,10 +1154,9 @@ Then, Eq. \eqref{eq:vt_diffeq} is generalized to
 \end{equation}
 
 
-The optimization procedure is similar to the single-bin case,
-whereas the matrix nature brings about
-some technical complexities that require
-certain restrictions and approximations.
+The optimization procedure is similar to the single-bin case.
+However, we shall adopt some restrictions and approximations
+to simplify the discussion.
 
 
 
@@ -1159,8 +1174,7 @@ is the following.
 %
 In Eq. \eqref{eq:vt_diffeq_mbin},
 if $h_j(t)$ were the same as $p_j$,
-the rates of change $\dot v_i(t)$'s
-should be independent of $i$.
+the $\dot v_i(t)$ should be a constant independent of $i$.
 %
 This allows $v_i(t)$'s to grow uniformly
 in the asymptotic regime.
@@ -1169,17 +1183,18 @@ Thus, by a proper scaling of $\alpha(t)$,
 we may write this condition as
 %
 \begin{equation}
-  \sum_{j = 1}^n w_{ij} = 1.
-  \label{eq:w_sumj}
+  \sum_{j = 1}^n w_{ij} = 1
+  .
+\label{eq:w_sumj}
 \end{equation}
 %
-The above condition means that $(1, \dots, 1)^T$
+In other words, $(1, \dots, 1)^T$
 is a right eigenvector of $\mathbf w$
 with eigenvalue $1$.
 %
 Thus, the transpose $\mathbf w^T$
 resembles a transition matrix,
-although the elements can be negative.
+except that the elements can be negative.
 
 
 
@@ -1206,24 +1221,33 @@ $\mathbf w$ with eigenvalue $1$.
 
 
 
-Further, by Eq. \eqref{eq:w_detailedbalance},
+By assuming Eq. \eqref{eq:w_detailedbalance},
 we can diagonalize $\mathbf w$ with a set of
 eigenvectors
 %
 \begin{equation}
-  \sum_{i = 1}^n \phi_{ki} \, w_{ij} = \lambda_k \, \phi_{kj},
-  \label{eq:eig_w}
+  \sum_{i = 1}^n \phi_{ki} \, w_{ij}
+  =
+  \lambda_k \, \phi_{kj}
+  ,
+\label{eq:eig_w}
 \end{equation}
 %
 satisfying the orthonormal conditions\cite{vankampen}:
 %
 \begin{align}
-\sum_{k = 1}^n \phi_{ki} \, \phi_{kj}
-&= \delta_{ij} \, p_i,
-\label{eq:eig_orthonormal_cols}
-\\
-\sum_{k = 1}^n \frac{ \phi_{ik} \, \phi_{jk} }{ p_k }
-&= \delta_{ij}.
+  \sum_{k = 1}^n
+    \phi_{ki} \, \phi_{kj}
+  &=
+  \delta_{ij} \, p_i,
+  \label{eq:eig_orthonormal_cols}
+  \\
+  \sum_{i = 1}^n
+    \frac{ \phi_{ki} \, \phi_{li} }
+         { p_i }
+  &=
+  \delta_{kl}
+  .
 \label{eq:eig_orthonormal_rows}
 \end{align}
 %
@@ -1243,27 +1267,43 @@ and \eqref{eq:eig_orthonormal_rows}.
 }%
 
 Particularly, there is always an eigenvector
-corresponding to the equilibrium distribution.
+corresponding to the target distribution, $\mathbf p$.
 %
 We shall label this eigenvector as the first one,
 and
 %
 \begin{equation}
-\phi_{1k} = p_k,
+  \phi_{1i} = p_i,
 \label{eq:eigenmode1}
 \end{equation}
 %
-which satisfies Eq. \eqref{eq:eig_orthonormal_rows}.
+which satisfies Eq. \eqref{eq:eig_orthonormal_rows}
+for $k = l = 1$.
 %
-The corresponding eigenvalue is $\lambda_1 = 1$.
+The corresponding eigenvalue is $\lambda_1 = 1$
+by Eq. \eqref{eq:w_balance}.
+%
+Further, for $k \ge 2$, we have
+%
+\begin{equation}
+  \sum_{ i = 1 }^n \phi_{ki}
+  =
+  \sum_{ i = 1 }^n
+    \frac{ \phi_{ki} \, \phi_{1i} }
+         { p_i }
+  =
+  0
+  .
+\label{eq:ortho1}
+\end{equation}
 
 %It is worth pointing out
 Finally, there is a stability condition.
 %
 In a \emph{stable} updating scheme,
-no fluctuating mode can increase indefinitely,
-which means all eigenvalues $\lambda_k$ of $\mathbf w$
-must be nonnegative.
+no eigenmode grows indefinitely,
+which means all eigenvalues $\lambda_k$'s
+are nonnegative.
 
 
 
@@ -1281,18 +1321,19 @@ remain true, and
 %
 $$
 \begin{aligned}
-\dot x_i
-&= \alpha(t) \sum_{j=1}^n w_{ij}
-\left( \frac{ h_j } { p_j }  - 1 \right)
-\\
-&\approx
--\alpha(t) \sum_{j = 1}^n
-w_{ij} \left[ x_j(t) - \frac{\zeta_j (t)}{p_j} \right],
+  \dot x_i(t)
+  &= \alpha(t) \sum_{j=1}^n w_{ij}
+  \left( \frac{ h_j(t) } { p_j }  - 1 \right)
+  \\
+  &\approx
+  -\alpha(t) \sum_{j = 1}^n
+  w_{ij} \left[ x_j(t) - \frac{\zeta_j (t)}{p_j} \right],
 \end{aligned}
 $$
 where
 we have expanded the right-hand side
-in linear terms of $x_j$.
+in linear terms of $x_j$
+on the second line.
 
 \note{The proof of Eq. \eqref{eq:dvbardt},
 $$
@@ -1320,26 +1361,32 @@ Eq. \eqref{eq:x_def}.
 }
 
 Now by diagonalizing the matrix $\mathbf w$
-using the eigenvectors defined in Eqs. \eqref{eq:eig_w},
-\eqref{eq:eig_orthonormal_cols},
-and
-\eqref{eq:eig_orthonormal_rows},
+using the eigenvectors defined in Eqs.
+\eqref{eq:eig_w}-\eqref{eq:eig_orthonormal_rows},
 we get a set of decoupled equations
 %
 \begin{equation}
-\dot y_k(t)
-=
--\alpha(t) \, \lambda_k \, [y_k(t) - \theta_k(t)],
-\notag
-%\label{eq:yt_diffeq}
+  \dot y_k(t)
+  =
+  -\alpha(t) \, \lambda_k \, [y_k(t) - \theta_k(t)],
+\label{eq:yt_diffeq}
 \end{equation}
 %
 where
 \begin{align}
-  y_k &= \sum_{j=1}^n \phi_{kj} \, x_j,
+  y_k(t)
+  &=
+  \sum_{j=1}^n
+    \phi_{kj} \, x_j(t)
+  ,
   \label{eq:y_def}
   \\
-  \theta_k &= \sum_{j=1}^n \phi_{kj} \frac{ \zeta_j}{ p_j}.
+  \theta_k(t)
+  &=
+  \sum_{j=1}^n
+    \phi_{kj} \frac{ \zeta_j(t) }
+                   { p_j        }
+  .
   \label{eq:eta_def}
 \end{align}
 
@@ -1349,36 +1396,48 @@ where
 
 
 
-The error function can be obtained
-from Eq. \eqref{eq:eig_orthonormal_cols}
-as
+The error function defined in Eq. \eqref{eq:error_sum}
+can be rewritten in terms of the eigenmodes
 \begin{align}
   \Err
   \equiv
   \sum_{i = 1}^n p_i \,
-                 \langle x_i^2 \rangle
+    \left\langle x_i^2 \right\rangle
   =
   \sum_{i, j, k=1}^n \phi_{ki} \, \phi_{kj} \,
-                     \langle x_i \, x_j \rangle
+    \left\langle x_i \, x_j \right\rangle
   =
-  \sum_{k = 1}^n \langle y_k^2 \rangle,
-  \label{eq:y2_sum}
+  \sum_{k = 1}^n
+    \left\langle
+      y_k^2
+    \right\rangle
+  ,
+\notag
 \end{align}
 %
-which is a superposition of the components of the modes.
+where we have used Eq. \eqref{eq:eig_orthonormal_cols}.
 %
 From Eq. \eqref{eq:eigenmode1},
 the first eigenmode, $y_1 = \sum_{j=1}^n p_j \, x_j$,
 vanishes identically by Eq. \eqref{eq:px_sum}.
 %
-Thus, we can start the last sum in Eq. \eqref{eq:y2_sum}
-from $k = 2$.
-
-
+Thus, we can start the last sum %in Eq. \eqref{eq:y2_sum}
+from $k = 2$,
+\begin{equation}
+  \Err
+  =
+  \sum_{k = 2}^n
+    \left\langle
+      y_k^2
+    \right\rangle
+  .
+\label{eq:y2_sum}
+\end{equation}
 
 In analogous to Eq. \eqref{eq:x2t_average},
-we have, from Eq. \eqref{eq:y2_sum},
-the error after a period of $T$,
+we can write,
+from Eqs. \eqref{eq:yt_diffeq} and \eqref{eq:y2_sum},
+the error after a period $T$,
 %
 \begin{equation}
   \Err
@@ -1387,7 +1446,8 @@ the error after a period of $T$,
   \label{eq:error_split}
 \end{equation}
 %
-which is the sum of the residual error
+as the sum of the residual error
+(from the decay of the initial error)
 %
 \begin{equation}
   \Err_R
@@ -1398,7 +1458,6 @@ which is the sum of the residual error
   \label{eq:error_res}
 \end{equation}
 %
-from the decay of the initial error,
 and the asymptotic error
 \begin{equation}
   \Err_A
@@ -1411,7 +1470,7 @@ and the asymptotic error
   \label{eq:error_asym}
 \end{equation}
 %
-where,
+where
 \begin{align*}
   u_k(q')
   &\equiv
@@ -1441,7 +1500,7 @@ the above condition can be satisfied with $\ddot u_k = 0$,
 which recovers the single-bin case.
 %
 Unfortunately, the above expression
-appears to be useless in a general setting.
+appears to be useless in general.
 }
 
 
@@ -3679,7 +3738,7 @@ recovers Eq. \eqref{eq:alpha_invt1}.
   Taking the logarithm of Eq. \eqref{neq:ui_solution} yields
   $$
   -\lambda_k \, q(T) + \lambda_k \, q(t)
-  = \log c_k + \log\left( t + t_{k0} \right).
+  = \ln c_k + \ln \left( t + t_{k0} \right).
   $$
   Differentiating this with respect to $t$ yields
   $$
@@ -4073,8 +4132,8 @@ on the right-hand side of Eq. \eqref{eq:vcorr_equil},
     \sum_{ i = 1 }^ n
       p_i \,
       \left(
-        \log \frac { H_i }
-                   { p_i }
+        \ln \frac { H_i }
+                  { p_i }
       \right)^2
   \right\rangle
 %\notag
@@ -5068,7 +5127,7 @@ with
   q(T)
   =
   \frac{ 1 } { \lambda }
-  \log\left(
+  \ln\left(
     \frac{ T + t_0 } { t_0 }
   \right)
   ,
