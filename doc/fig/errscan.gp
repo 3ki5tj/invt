@@ -10,7 +10,7 @@ set encoding cp1250 # make the minus sign longer
 set terminal push
 # dl 2.0 make dashed line longer
 set terminal postscript eps enhanced dl 2.0 size 3.5, 5 font "Times, 26"
-set output "errsigscan.eps"
+set output "errscan.eps"
 set multiplot
 
 
@@ -37,15 +37,15 @@ set ylabel "Normalized error, ({/Times-Italic T} + {/Times-Italic t}_{0}) {/Time
 a0 = 0.0001
 fac = 2*100/sqrt(2*pi)
 
-set title "Local" offset 0, -0.5
+set title "MD" offset 0, -0.5
 
-plot [:][5e3:2e4] \
-    "../../data/scan/sigprd_t1e8_l.dat"  u 1:($6**2) w l lt 1 lw 2 notitle, \
-    "../../data/scan/sigrun_t1e8_l.dat"  u 1:($4)    w p pt 7      notitle, \
-    "../../data/scan/sigprd_t1e11_l.dat" u 1:($6**2) w l lt 1 lw 6 notitle, \
-    "../../data/scan/okrun_t1e8_l.dat"   u (fac/(2*$1)):($4)    w p  pt 5                             notitle, \
-    "../../data/scan/okprd_t1e8_l.dat"   u (fac/(2*$1)):($6**2) w l       lt 4 lw 4  lc rgb "#000000" notitle, \
-    "../../data/scan/okprd_t1e11_l.dat"  u (fac/(2*$1)):($6**2) w l       lt 2 lw 2  lc rgb "#a0a0a0" notitle, \
+plot [:][4e4:2e5] \
+    "../../data/scan/sigprd_t1e8_md.dat"  u 1:($6**2) w l lt 1 lw 2 notitle, \
+    "../../data/scan/sigrun_t1e8_md.dat"  u 1:($4)    w p pt 7      notitle, \
+    "../../data/scan/sigprd_t1e11_md.dat" u 1:($6**2) w l lt 1 lw 6 notitle, \
+    "../../data/scan/okrun_t1e8_md.dat"   u (fac/(2*$1)):($4)    w p  pt 5                             notitle, \
+    "../../data/scan/okprd_t1e8_md.dat"   u (fac/(2*$1)):($6**2) w l       lt 4 lw 4  lc rgb "#000000" notitle, \
+    "../../data/scan/okprd_t1e11_md.dat"  u (fac/(2*$1)):($6**2) w l       lt 2 lw 2  lc rgb "#a0a0a0" notitle, \
     -1 notitle
 
 
@@ -66,7 +66,7 @@ set format x ""
 #set logscale y
 #set format y "10^{%T}"
 
-set title "Global"
+set title "Global MC"
 
 plot [:][3:7e3] \
     "../../data/scan/sigprd_t1e8_g.dat"  u 1:($6**2)            w l       lt 1 lw 2                   notitle, \
