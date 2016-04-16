@@ -459,9 +459,9 @@ These methods update the bias potential
 incrementally in regular intervals
 and can easily achieve the target distribution.
 %
-However, they are less well understood theoretically,
-as the updating loops
-break the microscopic reversibility
+However,
+%they are less well understood theoretically, as
+the updating loops break the microscopic reversibility
 of the underlying sampling mechanism.
 %
 %Thus, for a conservative practitioner,
@@ -478,13 +478,14 @@ belardinelli2007, belardinelli2007jcp, belardinelli2008,
 barducci2008}.
 %
 Thus, in late stages of a long simulation,
-the updating is negligible and
-the adaptive simulation tends to
-the corresponding equilibrium one.
+the updating becomes negligible and
+%the adaptive simulation tends to
+%the corresponding equilibrium one.
 %
-If the bias potential were converged to the exact value,
-this particular equilibrium simulation can be thought as
-the optimal asymptotic limit of the adaptive counterpart,
+if the bias potential were converged to the exact value,
+this adaptive simulation tends to the ideal equilibrium simulation
+%particular equilibrium simulation can be thought as
+%the optimal asymptotic limit of the adaptive counterpart,
 delivering the maximal efficiency.
 
 
@@ -790,10 +791,10 @@ depend only on the time difference
   %\label{eq:zeta_zeta_correlation}
 \end{equation}
 %
-where $\sigma_{ij}(t)$ is an even function of $t$
+where $\sigma_{ij}(t)$ is an even function
 that vanishes at large $t$.
 %
-More explicitly,
+\note{More explicitly,
 if the transition matrix of a period $\tau$
 is $T^\tau_{ij}$,
 then
@@ -806,7 +807,7 @@ $
   =
   T^{t - t'}_{ij} \pi_j - \pi_i \, \pi_j.
 $
-
+}%
 
 
 
@@ -937,14 +938,12 @@ of a single variable:
 where $\xi(t)$ is a generalized noise
 that is invariant under time translation:
 %
-\begin{equation}
+$
   \left\langle \xi(t) \, \xi(t') \right\rangle
   =
   \kappa(t - t')
   .
-\notag
-%\label{eq:noise_correlation}
-\end{equation}
+$
 %
 Additionally,
 we assume that $\kappa(t)$ is an even function and
@@ -986,11 +985,9 @@ x(0) \, e^{-q(T)}
 %
 where
 %
-\begin{equation}
+$
 q(t) \equiv \int_0^t \alpha(t') \, dt',
-\notag
-%\label{eq:q_def}
-\end{equation}
+$
 %
 and
 %
@@ -1082,15 +1079,15 @@ and a large $T$.
 In order for this to hold for any $t$,
 we must have
 %
-\begin{equation}
-  \ddot u\bigl( q(t') \bigr) = 0,
-  \qquad
-  \mathrm{or}
-  \;\;
-  \dot u\bigl( q(t') \bigr) = c,
-\notag
-%\label{eq:ddu_eq_0}
-\end{equation}
+$
+\ddot u\bigl( q(t') \bigr) = 0
+,
+$
+or
+$
+\dot u\bigl( q(t') \bigr) = c
+,
+$
 %
 where $c$ is a constant of $t'$.
 %
@@ -2004,7 +2001,8 @@ where the Lagrangian,
   \sum_{ k = 2 }^n
     \Gamma_k \, \lambda_k^2 \, u_k^2 \bigl[ q(t) \bigr]
   \; \dot q^2( t ),
-  \label{eq:error_asym_Lagrangian}
+\notag
+%\label{eq:error_asym_Lagrangian}
 \end{align}
 %
 represents a free particle
@@ -2376,7 +2374,7 @@ in inapplicable to zero eigenvalues, $\lambda_k$'s.
 %
 However, these eigenmodes can be ignored
 as they do not contribute to the Lagrangian defined by
-Eq. \eqref{eq:error_asym_Lagrangian}.
+Eq. \eqref{eq:Lagrangian_const}.
 }
 
 
@@ -2499,9 +2497,9 @@ can be reduced to a convolution with the window,
 or the updating kernel.
 %
 Thus,
-the eigenvalues, $\lambda_k$'s, of $\mathbf w$
-can be readily computed and manipulated
-via the shape of the updating kernel.
+there is a one-to-one correspondence between
+the eigenvalues of $\mathbf w$
+and the updating kernel.
 
 
 
@@ -2577,7 +2575,7 @@ for the flat distribution.
 %
 To find the eigenvectors,
 we define, for a periodic variable, $\phi_i$,
-out-of-boundary values by
+the out-of-boundary values by
 %
 \begin{equation}
   \phi_i = \phi_{i \pm n},
@@ -2765,19 +2763,18 @@ to the equilibrium distribution\cite{bussi2006},
 such that Eqs. \eqref{eq:w_sumj}-\eqref{eq:w_balance}
 are satisfied.
 
-Similar to Eq. \eqref{eq:phi_pbc},
+Parallel to Eq. \eqref{eq:phi_pbc},
 we define the out-of-boundary values
-of $\phi_j$ as
+of $\phi_i$ as
 %
 \begin{equation}
-  \phi_j
+  \phi_i
   =
   \begin{dcases}
-    \phi_{ 1 - j }           & \mathrm{for \;} j \le 0, \\
-    \phi_{ 2 \, n + 1 - j }  & \mathrm{for \;} j > n,
+    \phi_{ 1 - i }           & \mathrm{for \;} i \le 0, \\
+    \phi_{ 2 \, n + 1 - i }  & \mathrm{for \;} i > n,
   \end{dcases}
-\notag
-%\label{eq:phi_refl}
+\label{eq:phi_refl}
 \end{equation}
 %
 such that Eq. \eqref{eq:wmul_to_convol}
@@ -2813,11 +2810,10 @@ still holds.
       \mu_{i - j} \, \phi_j.
   \end{aligned}
   $$
-}
-%
+}%
 Thus, we also have $n$ orthonormal eigenvectors,
 $\pmb\phi^{(1)}, \dots, \pmb\phi^{(n)}$,
-as
+compatible with Eq. \eqref{eq:phi_refl},
 %
 \begin{equation}
   \phi^{(k)}_i
@@ -2845,22 +2841,20 @@ with eigenvalues
     \mu_l
     \cos \frac{(k - 1)  \, l \pi}{n}
   .
-  \label{eq:wband_eigenvalue_refl}
+\label{eq:wband_eigenvalue_refl}
 \end{align}
 %
-\note{We derive the above two equations below.
-
-  To simplify the calculation,
-  let us first consider the unnormalized eigenvectors,
+\note{Derivation.
+  First consider the unnormalized eigenvectors,
   $$
   \Phi^{(k)}_i
   =
   \cos \frac{ \left( i - \frac 1 2 \right) (k - 1) \, \pi}{n},
   $$
   which satisfies the reflective boundary condition,
-  %Eq. \eqref{eq:phi_refl}.
+  Eq. \eqref{eq:phi_refl}.
   %
-  So
+  So, by Eq. \eqref{eq:wmul_to_convol},
   $$
   \begin{aligned}
   \sum_{i = 1}^n
@@ -3030,20 +3024,19 @@ where the degeneracy $g$ is $2$
 for the periodic case,
 or $1$ otherwise.
 %
-Equation \eqref{eq:wband_eigenvalue}
-shows that the eigenvalues, $\lambda_k$,
-of the updating scheme
+In both cases,
+the eigenvalues, $\lambda_k$'s,
 is the cosine transform of
 the updating kernel.
 %
-So, for the updating scheme to be stable,
+For the updating scheme to be stable,
 the cosine transform of the kernel
 must be nonnegative.
 %
-If this is not so,
+\note{If this is not so,
 we can modify the kernel
 using the technique described
-in Sec. \ref{sec:stabilize_wband}.
+in Sec. \ref{sec:stabilize_wband}.}
 
 We discuss two special cases below.
 
@@ -3087,22 +3080,24 @@ and the eigenvalues are
 %\label{eq:wnn_eigenvalue}
 \end{equation}
 %
-Thus, for this updating matrix to be stable,
-we need
-$\min \lambda_k = \lambda_n > 0$,
+Thus, this updating scheme is stable if
+$\min \lambda_k = \lambda_n \ge 0$,
 or
 \begin{equation}
-  \mu_1 <
+  \mu_1 \le
   \begin{dcases}
     \frac 1 4
-    & \mathrm{periodic, \;} n \mathrm{ \; even,}
+    & \mathrm{periodic \; and \;} n \mathrm{ \; even,}
     \\
     \frac 1 4
-    \cos^{-2}\frac{  \pi   }
-                  { 2 \, n }
+    \sec^2
+    \left( \frac{  \pi   }
+                { 2 \, n }
+    \right)
     & \mathrm{otherwise}.
   \end{dcases}
-\label{eq:nn_stable}
+\notag
+%\label{eq:nn_stable}
 \end{equation}
 
 
@@ -3114,99 +3109,96 @@ or
 
 
 
-The Gaussian updating kernel is commonly
-adopted by metadynamics simulations.
+The Gaussian updating scheme is commonly
+used in metadynamics simulations.
 %
-Below we show that the corresponding updating scheme
-is stable, albeit less effective
-in reducing short-wavelength noises.
+Below we shall show its stability
+in the continuous limit.
 
 
 
-We start by defining
-a continuous limit
-for $b = n - 1 \gg 1$:
-$x = l \, \Delta x$,
+For $n \gg 1$,
+we define
+$x = l \, g \, \Delta x$,
 and
 $\mu_l = \mu(x) \, \Delta x$,
 where
 $\Delta x = \pi/n$
 is the bin size.
 %
-Then
+Then,
+by assuming the largest $b \approx n/g$,
 Eq. \eqref{eq:wband_eigenvalue}
-can be approximated by an integral:
+can be approximated as an integral:
 %
 \begin{equation}
-\lambda_k
-=
-2 \int_0^\pi
-  \mu(x) \, \cos \bigl[ (k-1) \, x \bigr] \, dx,
-\label{eq:lambda_int}
+  \lambda_k
+  =
+  2 \int_0^\pi
+    \mu(x) \, \cos \bigl[ (k-1) \, x \bigr] \, dx,
+\notag
+%\label{eq:lambda_int}
 \end{equation}
 %
 with the normalization
 %
 \begin{equation}
-1 = 2 \int_0^\pi \mu(x) \, dx.
-\label{eq:mx_normalization}
+  1 = 2 \int_0^\pi \mu(x) \, dx.
+\notag
+%\label{eq:mx_normalization}
 \end{equation}
 
 
 
-Particularly,
-for the Gaussian updating kernel,
-if $\Delta x \ll \sigma \ll 1$,
+For the Gaussian updating kernel of width $\sigma$
+with $\Delta x \ll \sigma \ll 1$,
 we can extended
 the upper limit of the integrals
-in Eqs. \eqref{eq:lambda_int}
-and \eqref{eq:mx_normalization}
 to infinity, and
 %
 \begin{equation}
-\mu(x)
-=
-\frac{            1            }
-     { \sqrt{ 2 \pi \sigma^2 } }
-%
-\exp\left(
-      -\frac{       x^2     }
-            { 2 \, \sigma^2 }
-    \right),
+  \mu(x)
+  =
+  \frac{            1            }
+       { \sqrt{ 2 \pi \sigma^2 } }
+  %
+  \exp\left(
+        -\frac{       x^2     }
+              { 2 \, \sigma^2 }
+      \right)
+  .
 \notag
 \end{equation}
 %
 %
-The eigenvalues are given by
+If follows that all eigenvalues are positive:
 %
 \begin{align}
-\lambda_k
-&=
-\exp\left[
-      -\frac{ (k - 1)^2 \, \sigma^2 }
-            {           2           }
-    \right]
-\notag
-\\
-&=
-\exp\left[
-      -\frac{ \pi^2 }{ 2 }
-      \left(
-        \frac{ k - 1 }
-             {   n   }
-      \right)^2
-      \left(
-        \frac{  \sigma }
-             { \Delta x }
-      \right)^2
-    \right]
-.
+  \lambda_k
+  &=
+  \exp\left[
+        -\frac{ (k - 1)^2 \, \sigma^2 }
+              {           2           }
+      \right]
+  %\notag
+  %\\
+  %&=
+  %\exp\left[
+  %      -\frac{ \pi^2 }{ 2 }
+  %      \left(
+  %        \frac{ k - 1 }
+  %             {   n   }
+  %      \right)^2
+  %      \left(
+  %        \frac{  \sigma }
+  %             { \Delta x }
+  %      \right)^2
+  %    \right]
+  .
 \notag
 %\label{eq:lambda_Gaussian}
 \end{align}
-%
-The eigenvalues are all positive,
-suggesting stability of the updating scheme.
+
 
 
 %However,
@@ -3280,25 +3272,27 @@ Inversion and Stabilization}
 
 
 
-A practical problem of using homogeneous updating scheme
-is the following.
+%A practical problem of using homogeneous updating scheme
+%is the following.
 %
 A homogeneous updating scheme
-specified by an arbitrary set of numbers
-$\mu_1, \dots, \mu_b$, ($b < n - 1$),
+specified by an arbitrary kernel
 is not necessarily stable
 with all nonnegative eigenvalues.
 %
 %
-For example, the nearest-neighbor updating scheme
-is unstable if Eq. \eqref{eq:nn_stable} is violated.
-%
-Even the Gaussian updating scheme can be unstable
-if the updating kernel is truncated.
+\note{For example,
+  %the nearest-neighbor updating scheme
+  %is unstable if Eq. \eqref{eq:nn_stable} is violated.
+  %
+  %Even
+  the Gaussian updating scheme can be unstable
+  if the updating kernel is truncated.
+}%
 %
 Below we show how to minimally modify
 the updating kernel
-to meet the stability criteria.
+to stabilize it.
 %
 \note{The relative code is \texttt{trimwindow()} in \texttt{invt.h}.
 }
@@ -3307,9 +3301,9 @@ to meet the stability criteria.
 The key is the observation of Eq. \eqref{eq:wband_eigenvalue}
 that the eigenvalues are related to the updating kernel
 by a cosine transform,
-and thus the relationship can be readily inverted.
+and thus the relation can be readily inverted.
 %
-For the periodic case,
+In the periodic case,
 the inversion formula is
 %
 \begin{equation}
@@ -3325,8 +3319,8 @@ the inversion formula is
 \end{equation}
 
 
-For a non-periodic variable,
-the explicit inversion formula is
+In the non-periodic case,
+the formula is
 %
 \begin{align}
   \mu_l
@@ -3342,7 +3336,7 @@ the explicit inversion formula is
 %
 where
 we have defined
-$\lambda_k \equiv \lambda_{n + 2 - k}$
+$\lambda_k \equiv \lambda_{2 \, n + 2 - k}$
 for $k = n + 2, \dots, 2 \, n$,
 as well as
 %
@@ -3350,23 +3344,21 @@ as well as
   \lambda_{ n + 1 }
   =
   (-1)^{ n - 1 }
-  \left[
-    \lambda_1
-    +
-    2 \, \sum_{ k = 2 }^{ n }
-      (-1)^{k - 1} \, \lambda_k
-  \right]
+  \lambda_1
+  +
+  2 \, \sum_{ k = 2 }^{ n }
+      (-1)^{n - k} \, \lambda_k
   ,
 \label{eq:lambdan}
 \end{align}
 to satisfy the constraint $\mu_n = 0$.
 %
 \note{Eq. \eqref{eq:lambdan}
-ensures that the $\mu_n$
-computed from Eq. \eqref{eq:mu_from_lambda_refl}
-vanishes.
+  ensures that the $\mu_n$
+  computed from Eq. \eqref{eq:mu_from_lambda_refl}
+  vanishes.
 
-The inversion formula is derived from the cosine transform.
+  %The inversion formula is derived from the cosine transform.
   %
   If we define $\mu_n = 0$ and
   %
@@ -3394,7 +3386,7 @@ The inversion formula is derived from the cosine transform.
   and we have
   %
   \begin{align}
-    \lambda_{ 2 \, n + 1 - k } = \lambda_k.
+    \lambda_{ 2 \, n + 2 - k } = \lambda_k.
     \tag{N3}
     \label{neq:lambda_reflection}
   \end{align}
@@ -3502,11 +3494,11 @@ The inversion formula is derived from the cosine transform.
   $$
   \begin{aligned}
   \mu_0
-  &=
+  =
   \lambda_2,
-  \\
+  \qquad
   \mu_1
-  &=
+  =
   \frac{ \lambda_1 - \lambda_2 }
        {           2           }
   .
@@ -3520,82 +3512,65 @@ The inversion formula is derived from the cosine transform.
   $$
   \begin{aligned}
   \mu_0
-  &=
-  \frac{ 1 } { 3 }
-  \left(
-    \lambda_1 + 2 \, \lambda_3
-  \right)
+  =
+  \frac{ \lambda_1 + 2 \, \lambda_3 } { 3 }
   ,
-  \\
+  \quad
   \mu_1
-  &=
-  \frac{ 1 } { 3 }
-  \left(
-    \frac 3 2 \lambda_2
-    -
-    \frac 3 2 \lambda_3
-  \right)
+  =
+  \frac{ \lambda_2 - \lambda_3 } { 2 }
   ,
-  \\
+  \quad
   \mu_2
-  &=
-  \frac{ 1 } { 3 }
-  \left(
-    \lambda_1
-    -
-    \frac 3 2 \lambda_2
-    +
-    \frac 1 2 \lambda_3
-  \right)
+  =
+  \frac { 2 \, \lambda_1 - 3 \, \lambda_2 + \lambda_3 } { 6 }
   .
   \end{aligned}
   $$
 }
 
-Now given a updating kernel, $\mu_1, \dots, \mu_n$,
+Now given an updating kernel,
 we can compute the eigenvalues from
 Eq. \eqref{eq:wband_eigenvalue}.
 %
 By replacing negative eigenvalues with zeros and
 using Eq. \eqref{eq:mu_from_lambda_pbc}
 or \eqref{eq:mu_from_lambda_refl},
-we get a new updating kernel
-$\mu^\mathrm{new}_1, \dots, \mu^\mathrm{new}_{n - 1}$,
+we get a new updating kernel,
 which is stable by construction.
 %
-However, the new kernel
-is widened
-as it contains $n/g - 1$ instead of $b$ entries.
-If we truncate the new updating kernel
-at a radius of $b$ bins,
-the stability problem remains
-albeit, hopefully, becomes less severe
-(in terms of the most negative eigenvalue).
+However, the new kernel is widened
+as $\mu_l$ may be nonzero for $l > b$.
 %
-Thus, to obtain a stable updating kernel
-without increasing the radius $b$,
-we have to iterate the above process many times.
-The resulting algorithm is the following.
+If we truncate the new kernel at $\mu_b$,
+the stability problem remains,
+although the negative eigenvalues
+often become smaller in magnitude.
+%
+Thus, to stabilize the updating kernel
+without increasing the width,
+we need to iterate the above process many times,
+resulting the following algorithm.
 
 
 %
 \begin{enumerate}
   \item
-    Given a updating kernel $\mu_1, \dots, \mu_b$,
+    Given an updating kernel, $\mu_0, \dots, \mu_b$,
     compute the eigenvalues
-    $\lambda_0, \dots, \lambda_{n-1}$
-	from Eq. \eqref{eq:wband_eigenvalue}.
+    $\lambda_1, \dots, \lambda_n$
+    from Eq. \eqref{eq:wband_eigenvalue}.
   \item
     If all eigenvalues are nonnegative,
     we are done, and exit the loop.
   \item
     Otherwise, replace negative eigenvalues by zeros,
-    and compute a new updating kernel,
-    $\mu_1, \dots, \mu_b$ from
+    and compute the new kernel,
+    $\mu_0, \dots, \mu_b$, from
     Eq. \eqref{eq:mu_from_lambda_pbc}
     or
-    \eqref{eq:mu_from_lambda_refl}.
-    Set $\mu_l = 0$ for $l > b$.
+    \eqref{eq:mu_from_lambda_refl}
+    with $\mu_l = 0$ for $l > b$.
     Go to step 1.
 \end{enumerate}
 
@@ -3607,26 +3582,21 @@ Comparison of updating schemes}
 
 Now that we can compute the optimal schedule
 for a given updating scheme,
-can we also compare different updating schemes
-and pick the best one?
-%
-Below we address this question
-in the asymptotic, or long simulation time,
-limit.
+we shall turn to the problem of choosing
+optimal updating schemes below.
 
 
 \subsubsection{\label{sec:optWL}
-Asymptotic optimality of the single-bin (WL) scheme}
+Asymptotic optimality of the single-bin scheme}
 
 
 
-We shall first show,
-directly from Eq. \eqref{eq:error_asym1},
+We shall first show
 that the single-bin scheme is asymptotically optimal.
 %
 Consider a class of $\mathbf w$ matrices
 sharing the same set of eigenvectors,
-hence same $\Gamma_k$'s,
+hence the same $\Gamma_k$'s,
 but with different positive eigenvalues,
 $\lambda_k$'s.
 %
@@ -3671,7 +3641,7 @@ for any set of nonnegative numbers, $c_k$'s,
 \label{eq:CSineq}
 \end{align}
 %
-This inequality follows from the non-negativity of
+\note{This inequality follows from the non-negativity of
 the following quadratic polynomial of $Y$,
 $$
 \int_0^T
@@ -3679,18 +3649,19 @@ $$
     \left( \dot u_k \, Y - c_k \right)^2
   \equiv
   A \, Y^2 + B \, Y + C
-%\ge 0,
+  ,
 $$
 which implies a non-positive discriminant,
 $B^2 - 4 \, A \, C$.
+}%
 %
 Note that the last expression of \eqref{eq:CSineq}
 depends on the curve, $q(t)$ ($0 < t < T$),
 only through the endpoint value, $q(T)$,
-which is fixed in the variation process.
+which is fixed in the variational process.
 %
 Thus, the inequality sets a lower bound
-of the error $\Err$
+for the asymptotic error $\Err$
 given in Eq. \eqref{eq:error_asym1}.
 %
 The equality is achieved
@@ -3698,7 +3669,7 @@ if $\dot u_k\left( q(t) \right) = c_k$
 for all $k = 2, \dots, n$ at any $t$,
 up to a multiplicative factor.
 %
-Solving this set of equations yields
+Solving these equations yields
 %
 \begin{equation}
   \alpha(t) = \frac{              1             }
@@ -3715,16 +3686,17 @@ with
 Such a solution is possible only if
 %
 \begin{equation}
-\lambda_2 = \dots = \lambda_n.
+  \lambda_2 = \dots = \lambda_n.
+  \notag
 \end{equation}
 %
-In this case,
+Then, by Eq. \eqref{eq:tk0},
 all $t_{k0}$'s also share the same value,
-$t_0$ by Eq. \eqref{eq:tk0},
+$t_0$,
 such that
 $u_k = (t + t_0) / (T + t_0)$,
 and
-$c_k \propto 1/(T + t_0)$
+$c_k = 1/(T + t_0)$
 for $k \ge 2$.
 %
 The asymptotic error is then
@@ -3739,8 +3711,9 @@ The asymptotic error is then
 \label{eq:error_singlebin}
 \end{align}
 %
-If we further assume that $\lambda_2 = 1$,
-the optimal schedule given by Eq. \eqref{eq:alpha_invtk}
+If we further assume $\lambda_2 = 1$,
+%the optimal schedule given by
+Eq. \eqref{eq:alpha_invtk}
 recovers Eq. \eqref{eq:alpha_invt1}.
 %
 \note{We add some steps for the above solution.
@@ -3774,19 +3747,19 @@ recovers Eq. \eqref{eq:alpha_invt1}.
   $$
 }
 
-Since $\lambda_1$ corresponds to the mode
-of a uniform shift of all $v_k$,
+Since the first eigenmode corresponds to
+a uniform shift of all $v_k$'s,
 we can freely set $\lambda_1$ to $\lambda_2$
 without changing the nature of the updating scheme.
 %
-Now an updating matrix $\mathbf w$
+Now an updating matrix
 with identical eigenvalues
-is essentially a multiple of the identity matrix.
+is a multiple of the identity matrix.
 %
-Thus, if no eigenvalue $\lambda_k$ is zero,
-then in terms of asymptotic convergence,
-the single-bin scheme adopted in the WL algorithm
-is most efficient.
+Thus,
+the single-bin scheme is most efficient
+in asymptotic convergence
+if no eigenvalue $\lambda_k$ is zero.
 
 
 
@@ -3794,14 +3767,14 @@ is most efficient.
 Bandpass updating schemes}
 
 
-We can also generalize
+We can generalize
 the single-bin scheme to a class of
 perfect (brick-wall) \emph{bandpass} updating schemes
-that allow zero eigenvalues.
+to allow zero eigenvalues.
 %
 For example,
 if we can assume that the PMF is sufficiently smooth
-such that the error modes can be limited to $k \le K$.
+such that the eigenmodes can be limited to $k \le K$.
 %
 Then we can construct an updating scheme with
 $$
@@ -3824,13 +3797,13 @@ Eq. \eqref{eq:error_singlebin} is changed to
 \end{equation}
 %
 The optimal schedule of these schemes
-remains to be the inverse-time schedule,
+remains to be the inverse-time one
 given by Eq. \eqref{eq:alpha_invt1}.
 %
 Below, we construct these schemes for
 the homogeneous case.
 
-For a periodic variable, if we demand
+For a periodic variable, we demand
 %
 $$
 \begin{aligned}
@@ -3842,7 +3815,9 @@ $$
 \lambda_{K+2} = \cdots = \lambda_{n-K} = 0,
 \end{aligned}
 $$
-for $K \ge 1$, then by using
+for $K \ge 1$.
+%
+Then by using
 Eq. \eqref{eq:mu_from_lambda_pbc},
 we get
 \begin{equation}
@@ -3903,7 +3878,7 @@ $$
 \lambda_{K+2} = \cdots = \lambda_n = 0.
 $$
 Then Eq. \eqref{eq:lambdan} gives
-$\lambda_n = (-1)^{n+K-1}$,
+$\lambda_{n+1} = (-1)^{n+K-1}$,
 and from Eq. \eqref{eq:mu_from_lambda_refl},
 we have
 \begin{equation}
@@ -3919,7 +3894,7 @@ we have
            {         2 \, n        }
     }
     {
-      n \, \sin \dfrac{ l \, \pi } { 2 \, n }
+      \sin \dfrac{ l \, \pi } { 2 \, n }
     }
   \right]
   .
@@ -3946,7 +3921,7 @@ $$
 So
 $$
 \begin{aligned}
-  \lambda_l
+  \mu_l
   &=
   \frac{1}{2\,n}
   \left[
@@ -4009,16 +3984,15 @@ Finite-length correction}
 
 
 
-In the above, we have been focusing on
+In the above, we have focused on
 the asymptotic error.
 %
 For a finite-length simulation,
-we should include the residual part,
-Eq. \eqref{eq:error_res}
+we should include the residual part
 and minimize the total error.
 %
 For the bandpass updating schemes,
-this allows to determine the optimal value
+this leads to the optimal value
 of the free parameter, $t_0$.
 %
 %Assuming the system is initially equilibrated
@@ -4049,7 +4023,7 @@ and \eqref{eq:error_asym_sinc},
 %\label{eq:error_sinc0}
 \end{equation}
 %
-The optimal error is reached at
+The minimum is reached at
 %
 \begin{equation}
   t_0
@@ -4073,16 +4047,17 @@ and at this point
 \label{eq:error_sinc}
 \end{equation}
 %
-This means that at the beginning of the schedule,
+At the beginning of the schedule,
 the updating magnitude is
 $\alpha(0^+) = \alpha_0 / 2$,
 half of the previous equilibrium value.
 %
-Interestingly, this factor of $1/2$
-happens to coincide with the suggested
+This factor $1/2$
+happens to coincide with the
 reduction factor of updating magnitude
-in the original WL algorithm\cite{wang2001, wang2001pre}
-at stage transitions.
+at stage transitions
+in the original WL algorithm\cite{
+wang2001, wang2001pre}.
 
 
 
@@ -4111,43 +4086,41 @@ at stage transitions.
 Comparison to the error of the equilibrium FDS method}
 
 
-As discussed in Sec. \ref{sec:FDS},
-the asymptotic limit of an adaptive FDS method
-is the corresponding equilibrium FDS method
-with the bias potential fixed to the exact value.
-%
-Such a simulation delivers the maximal efficiency.
 
-A practical question now arises.
-%
+%As discussed in Sec. \ref{sec:FDS},
+%the asymptotic limit of an adaptive FDS method
+%is the corresponding equilibrium FDS method
+%with the bias potential fixed to the exact value.
+%%
+%Such a simulation delivers the maximal efficiency.
+
 In late stages of an adaptive FDS simulation,
-if we are confident that the bias potential
-is sufficiently accurate,
-will we be better off switching to the equilibrium FDS method
-to prevent possible efficiency loss
-due to the adaptive updates?
+the bias potential is often sufficiently precise.
+Some practitioners would then fix
+the bias potential and switch
+to the equilibrium method
+to prevent possible future efficiency loss
+due to the adaptive updates.
 %
-Below, we shall show that this is unnecessary
-if the simulation uses the single-bin (WL) updating scheme
+Below, we shall show that this practice is unnecessary
+if the simulation uses the single-bin updating scheme
 with the optimal schedule, Eq. \eqref{eq:alpha_invt1}.
 %
 That is, the bias potential obtained from
-an optimal single-bin scheme FDS simulation
+an optimal single-bin scheme adaptive simulation
 will be similar in precision to that from
-the ideal equilibrium FDS simulation
-in long times.
+the ideal equilibrium simulation
+for long times.
 %
-Thus, our demonstration below serves as an alternative proof
-of the optimality of the single-bin scheme.
+%Thus, our demonstration below serves as an alternative proof
+%of the optimality of the single-bin scheme.
 
 The error of the equilibrium FDS method
 depends on the precision of the histogram.
 %
-The error is minimized
-when $v_i$'s assume the exact values,
-%
-and in this case,
-the error came from the second term
+If all $v_i$'s are exact,
+the error is minimized, and can be computed
+from the second term
 on the right-hand side of Eq. \eqref{eq:vcorr_equil},
 %
 \begin{align}
@@ -4181,23 +4154,34 @@ $H_i = \frac{1}{T} \sum_{t = 1}^T h_i(t)$
 with
 $h_i(t)$ defined by Eq. \eqref{eq:h_def}.
 
-To make better comparison with
-the error of the single-bin case,
-we shall rewrite the error as
-a sum over the eigenmodes.
-We define
+We can rewrite the error as
+a sum of the eigenmode as
+%
 \begin{align}
+  E
+  =
+  \sum_{ k = 2 }^n
+    \left\langle
+      \Theta_k^2
+    \right\rangle
+  ,
+\notag
+%\label{eq:error_sbin_equil}
+\end{align}
+%
+where
+%
+$
   \Theta_k
   =
   \frac{ 1 } { T }
   \sum_{ t = 1 } ^ T
     \theta_k( t )
   ,
-\notag
-\end{align}
+$
 %
-with $\theta_k(t)$ defined by Eq. \eqref{eq:eta_def}
-and $\phi_{k i}$ by Eq. \eqref{eq:eig_orthonormal_cols}.
+with $\theta_k(t)$ defined by Eq. \eqref{eq:eta_def}.
+%and $\phi_{k i}$ by Eq. \eqref{eq:eig_orthonormal_cols}.
 %\begin{align}
 %\theta_k( t )
 %=
@@ -4214,19 +4198,6 @@ and $\phi_{k i}$ by Eq. \eqref{eq:eig_orthonormal_cols}.
 %  \phi_{k i} \, \phi_{k j}
 %  = p_i \, \delta_{i j}.
 %\end{align}
-%
-Then,
-%
-\begin{align}
-  E
-  =
-  \sum_{ k = 1 }^n
-    \left\langle
-      \Theta_k^2
-    \right\rangle.
-\notag
-%\label{eq:error_sbin_equil}
-\end{align}
 %
 \note{Because
 %
@@ -4299,18 +4270,17 @@ Then,
     \right)^2
 .
 \end{align*}
-}
-The sum can start from $k = 2$, for
-by Eq. \eqref{eq:eigenmode1}, we have
+}%
+The sum starts from $k = 2$, for
+by Eq. \eqref{eq:eigenmode1}, % we have
 $$
 \theta_1(t)
 =
 \sum_{ i = 1 }^n
   \phi_{1i} \, \frac{ h_i(t) - p_i } { p_i }
 =
-\sum_{ i = 1 }^n h_i(t)
--
-\sum_{ i = 1 }^n p_i = 0.
+\sum_{ i = 1 }^n \left[ h_i(t) - p_i \right]
+= 0.
 $$
 
 In the long-time limit,
@@ -4331,8 +4301,8 @@ In the long-time limit,
   %&=
   =
   \frac{1}{T}
-  \int_{-\infty}^\infty
-  \kappa_n(\tau) \, d\tau
+  \sum_{\tau = -\infty}^\infty
+    \kappa_n(\tau)
   =
   \frac{ \Gamma_k }{ T }
 .
@@ -4348,19 +4318,20 @@ Thus,
 \label{eq:error_equil}
 \end{equation}
 
-Now comparing this with the error of the single-bin scheme
-with the optimal schedule,
-Eq. \eqref{eq:error_singlebin},
-we find that the difference is negligible
+Now comparing this with the error of
+the optimal adaptive simulation,
+Eq. \eqref{eq:error_sinc} (with $K = n$),
+we find the difference to be negligible
 in the long time limit.
 
-Again, the above argument can be extended
+The above argument can be extended
 to the bandpass updating schemes.
 %
-If we are certain that
-the intrinsic PMF is sufficiently smooth,
-then we can explicitly filter some error modes
-in the histogram, and truncate the sum in
+If the intrinsic PMF is sufficiently smooth,
+we can explicitly filter out some error modes
+in the histogram,
+say those with $k >  K$,
+and truncate the sum in
 Eq. \eqref{eq:error_equil} at $k = K$.
 
 
@@ -4372,7 +4343,24 @@ Numerical results}
 
 
 
-\subsection{Test system and simulation protocol}
+We tested the above theory on a model system,
+which is to be described in Sec. \ref{sec:results_system}.
+%
+First, we verify the method of computing errors
+using an analytically simple schedule
+in Sec. \ref{sec:results_invt}.
+%
+We then study the optimal schedule from
+Eq. \eqref{eq:q_opt}
+in Sec. \ref{sec:results_optschedule}.
+%
+Finally, we compare the Gaussian and
+bandpass schemes of different widths
+in Sec. \ref{sec:results_cmpschemes}.
+
+
+\subsection{\label{sec:results_system}
+Test system and simulation protocol}
 
 
 Our test system is
@@ -4381,21 +4369,20 @@ of $n = 100$ bins,
 with a flat target distribution
 $p_i = 1/n$.
 %
-Unless specified otherwise,
-we assume $i$ is a non-periodic variable
-under the reflective boundary condition.
-%
 %Since in the asymptotic regime,
 %the distribution converges to $p_i$
 %no matter the intrinsic distribution, $p^*_i$,
 %we also set the latter to be flat for convenience.
-For convenience,
-the intrinsic distribution, $p^*_i$,
-is a set to be flat as well.
+The intrinsic distribution, $p^*_i$,
+is also assumed to be flat.
 %
-Our goal is to observe how the fluctuating error
-of the bias potential defined in Eq. \eqref{eq:error_sum}
-depends on the schedule, $\alpha(t)$,
+Unless specified otherwise,
+we assume $i$ to be non-periodic.
+%
+We wish to see how
+the schedule, $\alpha(t)$,
+affects the fluctuating error
+of the bias potential
 at the end of the simulation.
 
 
@@ -4461,7 +4448,8 @@ in Sec. \ref{sec:Gamma}.
 
 
 
-\subsection{Inverse-time schedule}
+\subsection{\label{sec:results_invt}
+Inverse-time schedule}
 
 
 
@@ -4472,8 +4460,8 @@ We first studied the inverse-time schedule,
 \label{eq:alpha_invtlambda}
 \end{equation}
 %
-where $\lambda$ is a parameter to be optimized
-with $t_0 = 2/(\lambda \, \alpha_0)$.
+where $\lambda$ is a free parameter,
+and $t_0 = 2/(\lambda \, \alpha_0)$.
 %
 The error of this schedule
 can be computed analytically
@@ -4482,7 +4470,7 @@ and thus be tested against the theory.
 
 
 
-\subsubsection{Single-bin (WL) updating scheme}
+%\subsubsection{Single-bin (WL) updating scheme}
 
 
 
@@ -4550,7 +4538,7 @@ which gives rise to the above multiplicative constant.
 
 
 
-\subsubsection{Nearest-neighbor updating scheme}
+%\subsubsection{Nearest-neighbor updating scheme}
 
 
 As an example of the multiple-bin schemes,
@@ -4685,7 +4673,8 @@ as suggested by Eq. \eqref{eq:lambda_nn_onestep}.
 %
 
 
-\subsection{Optimal schedule}
+\subsection{\label{sec:results_optschedule}
+Optimal schedule}
 
 
 We now turn to the optimal schedule
@@ -4834,7 +4823,8 @@ or that for $l = i + j - 2 \, n - 1$,
 
 
 
-\subsection{Comparison of updating schemes}
+\subsection{\label{sec:results_cmpschemes}
+Comparison of updating schemes}
 
 
 
@@ -4974,7 +4964,7 @@ We have also shown that
 the single-bin scheme is optimal
 in the long time limit
 without a priori assumption
-of the smoothness of the PMF.
+on the smoothness of the PMF.
 %
 More generally, with perfect filtering
 of certain eigenmodes, we can construct a
@@ -4988,6 +4978,20 @@ They appeared to outperform similar Gaussian schemes
 in our model study,
 suggesting that they can be useful
 in high-precision metadynamics simulations.
+
+
+Strictly speaking, our theory is valid
+only for long simulations.
+%
+This allows us to assume the sampling process
+to be a quasi-equilibrium one,
+and to represent the autocorrelation function
+of each eigenmode by a single number, $\Gamma_k$.
+%
+Although these assumptions appeared to work well
+on the model system,
+they may break down for relatively short simulations
+of glassy systems.
 
 
 
@@ -5012,12 +5016,11 @@ Inverse-time schedules}
 
 As an alternative to the
 optimal schedule from Eq. \eqref{eq:q_opt},
-%
-here we consider the analytically simpler
+here we consider the simpler
 inverse-time formula, Eq. \eqref{eq:alpha_invtlambda},
-with $\lambda$ optimized variationally.
+%with a free parameter $\lambda$.
 %
-This approach allows us to compute the error explicitly.
+whose error can be computed explicitly.
 
 
 
@@ -5481,26 +5484,27 @@ $\sum_i \to \frac{2 \, n}{\pi} \int dp$, and
 
 
 For perfect sampling,
-we have, from Eq. \eqref{eq:Gamma_perfect},
-$\Gamma(p) = 1$, and
+$\Gamma(p) = 1$ from Eq. \eqref{eq:Gamma_perfect},
+and
 $$
 \begin{aligned}
-\Err_A
-&=
-\frac{2 \, n}{\pi \, T}
-\int_0^{\pi/2}
-\frac{ \left(1 - 4 \, \mu_1 \, \sin^2 p \right)^2 }
-{ \lambda \, \left(2 - 8 \, \mu_1 \, \sin^2 p - \lambda \right) }
-\, dp
-\notag \\
-&=
-\frac{n}{4 \, T}
-\left(
-  \frac{2 - 4 \, \mu_1 + \lambda}{ \lambda }
-  +
-  \frac{ \lambda }
-  { \sqrt{ (2 - \lambda) (2 - 8 \, \mu_1 - \lambda) } }
-\right).
+  \Err_A
+  %&=
+  %\frac{2 \, n}{\pi \, T}
+  %\int_0^{\pi/2}
+  %\frac{ \left(1 - 4 \, \mu_1 \, \sin^2 p \right)^2 }
+  %{ \lambda \, \left(2 - 8 \, \mu_1 \, \sin^2 p - \lambda \right) }
+  %\, dp
+  %\notag \\
+  &=
+  \frac{n}{4 \, T}
+  \left(
+    \frac{2 - 4 \, \mu_1 + \lambda}{ \lambda }
+    +
+    \frac{ \lambda }
+    { \sqrt{ (2 - \lambda) (2 - 8 \, \mu_1 - \lambda) } }
+  \right)
+.
 \end{aligned}
 $$
 \note{The integral is evaluated by contour integration.
@@ -5509,22 +5513,23 @@ It is somewhat more convenient to change variable $p \to \frac{ \pi } { 2 } - p$
 and
 $$
 \begin{aligned}
-\Err_A
-&=
-\frac{n}{\lambda \, T}
-\frac{1}{2 \pi i}
-\int_0^{2 \, \pi}
-\frac{ \left(1 - 4 \, \mu_1 \, \cos^2 p \right)^2 }
-{ 2 - 8 \, \mu_1 \, \cos^2 p - \lambda }
-\, dp
-\\
-&=
-\frac{n}{\lambda \, T}
-\frac{1}{2 \pi i}
-\oint
-\frac{ \left[1 - \mu_1 \, \left(z+\frac{1}{z}\right)^2 \right]^2 }
-{ 2 - 2 \, \mu_1 \, \left(z + \frac{1}{z}\right)^2 - \lambda }
-\, \frac{dz}{z},
+  \Err_A
+  &=
+  \frac{n}{\lambda \, T}
+  \frac{1}{2 \pi i}
+  \int_0^{2 \, \pi}
+  \frac{ \left(1 - 4 \, \mu_1 \, \cos^2 p \right)^2 }
+  { 2 - 8 \, \mu_1 \, \cos^2 p - \lambda }
+  \, dp
+  \\
+  &=
+  \frac{n}{\lambda \, T}
+  \frac{1}{2 \pi i}
+  \oint
+  \frac{ \left[1 - \mu_1 \, \left(z+\frac{1}{z}\right)^2 \right]^2 }
+  { 2 - 2 \, \mu_1 \, \left(z + \frac{1}{z}\right)^2 - \lambda }
+  \, \frac{dz}{z}
+  ,
 \end{aligned}
 $$
 where the contour is the unit circle
@@ -5604,19 +5609,20 @@ and the asymptotic error in the optimal case is given by
   \left(
     1+ \frac{2 \, \mu_1^2}{1-4 \, \mu_1}
   \right)
-  .
+  ,
 \notag
 %\label{eq:error_nn_perfect}
 \end{equation}
 %
 %From Eq. \eqref{eq:error_nn}, it is clear that
-Clearly, the error
+which
 increases with the magnitude of $\mu_1$
 no matter its sign,
 and the minimal value, obtained at $\mu_1 = 0$,
 corresponds to the single-bin scheme.
 %
-Note that we have ignored the residual error
+\note{Note that
+we have ignored the residual error
 and assumed $\lambda < 2 \, \min \lambda_k = 2 - 8 \, \mu_1$
 for all $k$ in the above solution.
 %
@@ -5625,13 +5631,14 @@ the $\lambda$ from Eq. \eqref{eq:lambda_nn_perfect}
 satisfies this condition
 by the stability condition,
 $4 \, \mu_1 < 1$.
+}%
 \note{This is because,
 $$
 \frac{ 1 - 4 \, \mu_1 } { 1 - 2 \, \mu_1 } < 2 - 8 \, \mu_1
 \quad \leftrightarrow \quad
 1 < 2 - 4 \, \mu_1.
 $$
-}
+}%
 
 
 For the one-step sampling process,
@@ -5641,26 +5648,37 @@ is peaked around $p \approx 0$,
 %
 Then
 $$
+  \Err_A
+  \propto
+  \frac{   2 \, n }
+       { \pi \, T }
+  \frac{             1             }
+       {  \lambda \, (2 - \lambda) }
+  .
+$$
+\note{
+$$
 \begin{aligned}
-\Err_A
-&
-\propto
-\frac{   2 \, n }
-     { \pi \, T }
-\left.
-\frac{            \left(1 - 4 \, \mu_1 \, \sin^2 p \right)^2         }
-     { \lambda \, \left(2 - 8 \, \mu_1 \, \sin^2 p - \lambda \right) }
-\right|_{ p \approx 0 }
-%\notag \\
-%&
-\approx
-\frac{   2 \, n }
-     { \pi \, T }
-\frac{             1             }
-     {  \lambda \, (2 - \lambda) }
-.
+  \Err_A
+  &
+  \propto
+  \frac{   2 \, n }
+       { \pi \, T }
+  \left.
+  \frac{            \left(1 - 4 \, \mu_1 \, \sin^2 p \right)^2         }
+       { \lambda \, \left(2 - 8 \, \mu_1 \, \sin^2 p - \lambda \right) }
+  \right|_{ p \approx 0 }
+  \notag \\
+  &
+  \approx
+  \frac{   2 \, n }
+       { \pi \, T }
+  \frac{             1             }
+       {  \lambda \, (2 - \lambda) }
+  .
 \end{aligned}
 $$
+}%
 %
 The optimal $\lambda$ is therefore
 %
