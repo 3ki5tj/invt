@@ -2096,6 +2096,9 @@ Since we only optimized the asymptotic error, $E_A$,
 in th above,
 the parameter $q(T)$ can be further adjusted
 to minimize the total error, $E = E_R + E_A$.
+%
+A complete program of computing the optimal schedule
+is listed in Appendix \ref{sec:program}.
 
 Unfortunately,
 Eq. \eqref{eq:q_opt} is not an explicit equation of $\alpha(t)$.
@@ -2274,204 +2277,6 @@ and that $\lambda(t)$ would stay small
 for longer near the beginning of the simulation.
 
 
-
-
-\subsubsection{\label{sec:measure_gamma}
-Measurement of the integrals
-of the autocorrelation functions}
-
-
-
-To use Eq. \eqref{eq:q_opt} in a real simulation,
-we need to know both $\lambda_k$'s and $\Gamma_k$'s.
-%
-While the updating scheme alone
-determines the eigenmodes and $\lambda_k$'s,
-the values of $\Gamma_k$'s depend also on the system
-and the underlying sampling process (MC or MD).
-%
-Below is a technique of measuring $\Gamma_k$'s.
-
-The idea is to run
-a simulation with a constant schedule,
-$\alpha(t) = \alpha_0$,
-and then use Eq. \eqref{eq:y2_eql}.
-%
-A practical difficulty is that
-we often do not know the intrinsic distribution, $p^*_i$,
-in advance to compute
-the shifted bias potential, $v_i$,
-from the original one, $V_i$
-(cf. Sec. \ref{sec:FDS}).
-%
-To circumvent the problem, we shall
-modify Eq. \eqref{eq:y2_eql} as
-%
-\begin{equation}
-  \operatorname{var} Y_k
-  =
-  \frac{1}{2}
-  \alpha \, \Gamma_k \, \lambda_k,
-\label{eq:varY}
-\end{equation}
-%
-where
-``$\operatorname{var}$''
-means the variance from time averaging,
-and
-%
-\begin{align}
-Y_k
-&=
-\sum_{ i = 1 }^n
-  \phi_{k i} \, (V_i - \bar V),
-\label{eq:Y_def}
-\\
-\bar V
-&=
-\sum_{ j = 1 }^n p_j \, V_j.
-\notag
-\end{align}
-
-To show Eq. \eqref{eq:varY},
-we first use Eq. \eqref{eq:v_def}
-to rewrite Eq. \eqref{eq:x_def}
-as
-$$
-\begin{aligned}
-  x_i
-  &=
-  (V_i - \bar V) + s_i,
-  \\
-  s_i
-  &=
-  \ln \frac{ p_i } { p^*_i }
-  -
-  \sum_{ j = 1 }^n
-    p_j \, \ln \frac{ p_j } { p^*_j }.
-\end{aligned}
-$$
-Thus, by Eqs. \eqref{eq:y_def} and \eqref{eq:Y_def},
-we have
-$$
-y_k = Y_k + \sum_{i = 1}^n \phi_{k i} \, s_i.
-$$
-Since the second term on the right-hand side
-is a constant, and the average of $y_k$ is zero,
-we have
-$$
-\operatorname{var} Y_k
-=
-\operatorname{var} y_k
-=
-\langle y_k^2 \rangle.
-$$
-Finally, by using Eq. \eqref{eq:y2_eql},
-we reach Eq. \eqref{eq:varY}.
-
-\note{In practice, Eq. \eqref{eq:varY}
-in inapplicable to zero eigenvalues, $\lambda_k$'s.
-%
-However, these eigenmodes can be ignored
-as they do not contribute to the Lagrangian defined by
-Eq. \eqref{eq:Lagrangian_const}.
-}
-
-
-\subsubsection{\label{sec:program}
-Program}
-
-
-We can now give a complete program of computing
-the optimal schedule for a given updating scheme.
-
-\begin{enumerate}
-
-\item
-From the updating matrix, $\mathbf w$,
-compute the eigenvalues, $\lambda_k$'s.
-
-\item
-Run a preliminary adaptive FDS simulation
-using the updating scheme with a constant
-updating magnitude, $\alpha_0$.
-
-\item
-Compute $\Gamma_k$'s from Eq. \eqref{eq:varY}.
-
-\item
-Select an initial value of $q(T)$,
-e.g., $\ln(1 + \alpha_0 \, T)$.
-
-\item
-Compute the optimal schedule by
-numerically integrating Eq. \eqref{eq:q_opt}.
-
-\item
-Compute the error $E$ from
-Eqs. \eqref{eq:error_split},
-  \eqref{eq:error_asym1} and
-  \eqref{eq:error_res1}.
-
-\item
-Modify the value of $q(T)$ and repeat the previous two steps,
-until the minimal error $E$ is found.
-
-\end{enumerate}
-
-The dependence of variables are shown in Fig. \ref{fig:vardep}.
-
-\begin{figure}
-\begin{tikzpicture}
-  \node[draw, text width={width("Updating ")}]
-    (w) at (0, 3) {Updating \\matrix, $\mathbf w$};
-
-  \node[draw, text width={width("System and")}]
-    (sys) at (0, 1) {System and\\sampling \\process};
-
-  \node[draw, text width={width("Eigenvalues, ")}]
-    (lambda) at (2.5, 3) {Eigenvalues, \\$\lambda_2, \dots, \lambda_n$};
-
-  \node[draw, text width={width("Integrals, ")}]
-    (gamma) at (2.5, 1) {Integrals, \\$\Gamma_2, \dots, \Gamma_n$};
-
-  \node[draw, text width={width("Simulation ")}]
-    (T) at (2.5, -0.5) {Simulation \\time, $T$};
-
-  \node[draw, text width={width("Schedule ")}]
-    (alpha) at (5.2, 1) {Optimal schedule, \\ $\alpha(t)$};
-
-  \node[draw, text width={width("Error ")}]
-    (err) at (7, 1) {Error, \\ $\Err$};
-
-  \node[inner sep=0, minimum size=0] (M1) at (3.7, 1) {};
-  \node[inner sep=0, minimum size=0] (M2) at (4.0, 1) {};
-  \node[inner sep=0, minimum size=0] (N2) at (4.0, -0.2) {};
-  \node[inner sep=0, minimum size=0] (N3) at (6.2, -0.2) {};
-  \node[inner sep=0, minimum size=0] (M3) at (6.2, 1) {};
-
-  \draw[->, >=latex, thick]
-    (w) edge (lambda)
-    (w) edge (gamma)
-    (sys) edge (gamma)
-    (alpha) edge (err);
-
-  \draw[->, >=latex, thick]
-    (lambda) -| (M1)
-    (gamma) -- (M1)
-    (T) -| (M1)
-    (M1) -- (alpha);
-
-  \draw[->, >=latex, thick]
-    (M2) -- (N2) -- (N3) -- (M3);
-
-\end{tikzpicture}
-\caption{
-  \label{fig:vardep}
-  Dependence of variables in computing
-  the optimal schedule.
-}
-\end{figure}
 
 
 \subsection{\label{sec:band-matrix}
@@ -3033,10 +2838,10 @@ For the updating scheme to be stable,
 the cosine transform of the kernel
 must be nonnegative.
 %
-\note{If this is not so,
+If this is not so,
 we can modify the kernel
 using the technique described
-in Sec. \ref{sec:stabilize_wband}.}
+in Appendix \ref{sec:stabilize_wband}.
 
 We discuss two special cases below.
 
@@ -3142,12 +2947,9 @@ can be approximated as an integral:
 %
 with the normalization
 %
-\begin{equation}
+$
   1 = 2 \int_0^\pi \mu(x) \, dx.
-\notag
-%\label{eq:mx_normalization}
-\end{equation}
-
+$
 
 
 For the Gaussian updating kernel of width $\sigma$
@@ -3267,44 +3069,19 @@ If follows that all eigenvalues are positive:
 
 
 
-\subsubsection{\label{sec:stabilize_wband}
-Inversion and Stabilization}
+\subsubsection{\label{sec:invert_wband}
+Inversion}
 
 
 
-%A practical problem of using homogeneous updating scheme
-%is the following.
-%
-A homogeneous updating scheme
-specified by an arbitrary kernel
-is not necessarily stable
-with all nonnegative eigenvalues.
-%
-%
-\note{For example,
-  %the nearest-neighbor updating scheme
-  %is unstable if Eq. \eqref{eq:nn_stable} is violated.
-  %
-  %Even
-  the Gaussian updating scheme can be unstable
-  if the updating kernel is truncated.
-}%
-%
-Below we show how to minimally modify
-the updating kernel
-to stabilize it.
-%
-\note{The relative code is \texttt{trimwindow()} in \texttt{invt.h}.
-}
-
-
-The key is the observation of Eq. \eqref{eq:wband_eigenvalue}
-that the eigenvalues are related to the updating kernel
+Since the eigenvalues are related to the updating kernel
 by a cosine transform,
-and thus the relation can be readily inverted.
+Eq. \eqref{eq:wband_eigenvalue},
+the relation can be readily inverted.
 %
 In the periodic case,
-the inversion formula is
+we have
+%the inversion formula is
 %
 \begin{equation}
   \mu_l
@@ -3528,51 +3305,6 @@ to satisfy the constraint $\mu_n = 0$.
   \end{aligned}
   $$
 }
-
-Now given an updating kernel,
-we can compute the eigenvalues from
-Eq. \eqref{eq:wband_eigenvalue}.
-%
-By replacing negative eigenvalues with zeros and
-using Eq. \eqref{eq:mu_from_lambda_pbc}
-or \eqref{eq:mu_from_lambda_refl},
-we get a new updating kernel,
-which is stable by construction.
-%
-However, the new kernel is widened
-as $\mu_l$ may be nonzero for $l > b$.
-%
-If we truncate the new kernel at $\mu_b$,
-the stability problem remains,
-although the negative eigenvalues
-often become smaller in magnitude.
-%
-Thus, to stabilize the updating kernel
-without increasing the width,
-we need to iterate the above process many times,
-resulting the following algorithm.
-
-
-%
-\begin{enumerate}
-  \item
-    Given an updating kernel, $\mu_0, \dots, \mu_b$,
-    compute the eigenvalues
-    $\lambda_1, \dots, \lambda_n$
-    from Eq. \eqref{eq:wband_eigenvalue}.
-  \item
-    If all eigenvalues are nonnegative,
-    we are done, and exit the loop.
-  \item
-    Otherwise, replace negative eigenvalues by zeros,
-    and compute the new kernel,
-    $\mu_0, \dots, \mu_b$, from
-    Eq. \eqref{eq:mu_from_lambda_pbc}
-    or
-    \eqref{eq:mu_from_lambda_refl}
-    with $\mu_l = 0$ for $l > b$.
-    Go to step 1.
-\end{enumerate}
 
 
 
@@ -4047,7 +3779,12 @@ and at this point
 \label{eq:error_sinc}
 \end{equation}
 %
-At the beginning of the schedule,
+In Appendix \ref{sec:equilerr},
+we show that the above error tends
+to the error of the ideal equilibrium FDS simulation
+in the asymptotic limit.
+
+Note also that at the beginning of the schedule,
 the updating magnitude is
 $\alpha(0^+) = \alpha_0 / 2$,
 half of the previous equilibrium value.
@@ -4078,262 +3815,6 @@ wang2001, wang2001pre}.
 %before reaching the asymptotic regime,
 %especially if the updating matrix
 %has some $\lambda_k$'s close to $0$.
-
-
-
-
-\subsubsection{\label{sec:equilerr}
-Comparison to the error of the equilibrium FDS method}
-
-
-
-%As discussed in Sec. \ref{sec:FDS},
-%the asymptotic limit of an adaptive FDS method
-%is the corresponding equilibrium FDS method
-%with the bias potential fixed to the exact value.
-%%
-%Such a simulation delivers the maximal efficiency.
-
-In late stages of an adaptive FDS simulation,
-the bias potential is often sufficiently precise.
-Some practitioners would then fix
-the bias potential and switch
-to the equilibrium method
-to prevent possible future efficiency loss
-due to the adaptive updates.
-%
-Below, we shall show that this practice is unnecessary
-if the simulation uses the single-bin updating scheme
-with the optimal schedule, Eq. \eqref{eq:alpha_invt1}.
-%
-That is, the bias potential obtained from
-an optimal single-bin scheme adaptive simulation
-will be similar in precision to that from
-the ideal equilibrium simulation
-for long times.
-%
-%Thus, our demonstration below serves as an alternative proof
-%of the optimality of the single-bin scheme.
-
-The error of the equilibrium FDS method
-depends on the precision of the histogram.
-%
-If all $v_i$'s are exact,
-the error is minimized, and can be computed
-from the second term
-on the right-hand side of Eq. \eqref{eq:vcorr_equil},
-%
-\begin{align}
-  E
-  &=
-  \left\langle
-    \sum_{ i = 1 }^ n
-      p_i \,
-      \left(
-        \ln \frac { H_i }
-                  { p_i }
-      \right)^2
-  \right\rangle
-%\notag
-%\\
-  %&
-  \approx
-  \sum_{ i = 1 }^ n
-    p_i \,
-    \left\langle
-      \left(
-        \frac { H_i }
-              { p_i }
-        - 1
-      \right)^2
-    \right\rangle,
-\notag
-\end{align}
-where
-$H_i = \frac{1}{T} \sum_{t = 1}^T h_i(t)$
-with
-$h_i(t)$ defined by Eq. \eqref{eq:h_def}.
-
-We can rewrite the error as
-a sum of the eigenmode as
-%
-\begin{align}
-  E
-  =
-  \sum_{ k = 2 }^n
-    \left\langle
-      \Theta_k^2
-    \right\rangle
-  ,
-\notag
-%\label{eq:error_sbin_equil}
-\end{align}
-%
-where
-%
-$
-  \Theta_k
-  =
-  \frac{ 1 } { T }
-  \sum_{ t = 1 } ^ T
-    \theta_k( t )
-  ,
-$
-%
-with $\theta_k(t)$ defined by Eq. \eqref{eq:eta_def}.
-%and $\phi_{k i}$ by Eq. \eqref{eq:eig_orthonormal_cols}.
-%\begin{align}
-%\theta_k( t )
-%=
-%\sum_{ i = 1 }^ n
-%\phi_{k i} \left[
-%             \frac{ h_i(t) }
-%                  { p_i    }
-%             - 1
-%           \right],
-%\end{align}
-%and
-%\begin{align}
-%\sum_{ k = 1 }^n
-%  \phi_{k i} \, \phi_{k j}
-%  = p_i \, \delta_{i j}.
-%\end{align}
-%
-\note{Because
-%
-\begin{align*}
-\sum_{ k = 1 }^n
-  \Theta_k^2
-&=
-\frac{ 1 } { T^2 }
-\sum_{ t, t' = 1 }^T
-  \sum_{ k = 1 }^n
-    \theta_k( t ) \, \theta_k( t' )
-\\
-&=
-\frac{ 1 } { T^2 }
-\sum_{ t, t' = 1 }^T
-  \sum_{ i, j = 1 }^n
-    \left[
-      \frac{ h_i(t) }
-           { p_i    }
-      - 1
-    \right]
-    \left[
-      \frac{ h_j(t') }
-           { p_j     }
-      - 1
-    \right]
-    \sum_{ k = 1 }^n
-      \phi_{k \, i} \, \phi_{k \, j}
-\\
-&=
-\frac{ 1 } { T^2 }
-\sum_{ t, t' = 1 }^T
-  \sum_{ i, j = 1 }^n
-    \left[
-      \frac{ h_i(t) }
-           { p_i    }
-      - 1
-    \right]
-    \left[
-      \frac{ h_j(t') }
-           { p_j     }
-      - 1
-    \right]
-    p_i \, \delta_{i, j}
-\\
-&=
-\sum_{ i = 1 }^n
-\frac{ 1 } { T }
-\sum_{ t = 1 }^T
-    \left[
-      \frac{ h_i(t) }
-           { p_i    }
-      - 1
-    \right]
-\frac{ 1 } { T }
-\sum_{ t' = 1 }^T
-    \left[
-      \frac{ h_i(t') }
-           { p_i     }
-      - 1
-    \right]
-\\
-&=
-\sum_{ i = 1 }^n
-  p_i \,
-    \left(
-      \frac{ \bar h_i }
-           { p_i      }
-      - 1
-    \right)^2
-.
-\end{align*}
-}%
-The sum starts from $k = 2$, for
-by Eq. \eqref{eq:eigenmode1}, % we have
-$$
-\theta_1(t)
-=
-\sum_{ i = 1 }^n
-  \phi_{1i} \, \frac{ h_i(t) - p_i } { p_i }
-=
-\sum_{ i = 1 }^n \left[ h_i(t) - p_i \right]
-= 0.
-$$
-
-In the long-time limit,
-\begin{align*}
-  \left\langle
-    \Theta_k^2
-  \right\rangle
-  &=
-  \frac{1}{T^2}
-  \sum_{ t, t' = 1 }^T
-  \langle \theta_k(t) \, \theta_k(t') \rangle
-  %\\
-  %&\approx
-  %\frac{1}{T}
-  %\sum_{ \tau = -\infty }^{ \infty }
-  %\langle \theta_k(t) \, \theta_k(t + \tau) \rangle
-  %\\
-  %&=
-  =
-  \frac{1}{T}
-  \sum_{\tau = -\infty}^\infty
-    \kappa_n(\tau)
-  =
-  \frac{ \Gamma_k }{ T }
-.
-\end{align*}
-%
-Thus,
-\begin{equation}
-  E
-  =
-  \frac{ 1 } { T }
-  \sum_{ k = 2 }^n \Gamma_k
-  .
-\label{eq:error_equil}
-\end{equation}
-
-Now comparing this with the error of
-the optimal adaptive simulation,
-Eq. \eqref{eq:error_sinc} (with $K = n$),
-we find the difference to be negligible
-in the long time limit.
-
-The above argument can be extended
-to the bandpass updating schemes.
-%
-If the intrinsic PMF is sufficiently smooth,
-we can explicitly filter out some error modes
-in the histogram,
-say those with $k >  K$,
-and truncate the sum in
-Eq. \eqref{eq:error_equil} at $k = K$.
-
 
 
 
@@ -4945,7 +4426,7 @@ Eq. \eqref{eq:alpha_invt1}.
 %
 The parameter, $t_0$, can be adjusted
 according to Eq. \eqref{eq:t0_sinc},
-to take into account the initial error.
+to accommodate the initial error.
 %such that the initial updating magnitude
 %is half of the previous equilibrium value.
 %
@@ -5004,6 +4485,224 @@ for helpful discussions.
 
 
 \appendix
+
+
+
+\section{\label{sec:program}
+Program of computing the optimal schedule and error
+}
+
+
+Here we give a program of computing
+the optimal schedule and the error
+of a given adaptive FDS simulation.
+%
+Basically, we extract
+both $\lambda_i$'s and $\Gamma_i$'s
+from the input,
+and then feed them to Eq. \eqref{eq:q_opt}
+for the schedule.
+%
+The dependence of variables are shown in Fig. \ref{fig:vardep}.
+
+\begin{figure}[h]
+\begin{tikzpicture}
+  \node[draw, text width={width("Updating ")}]
+    (w) at (0, 3) {Updating \\matrix, $\mathbf w$};
+
+  \node[draw, text width={width("System and")}]
+    (sys) at (0, 1) {System and\\sampling \\process};
+
+  \node[draw, text width={width("Eigenvalues, ")}]
+    (lambda) at (2.5, 3) {Eigenvalues, \\$\lambda_2, \dots, \lambda_n$};
+
+  \node[draw, text width={width("Integrals, ")}]
+    (gamma) at (2.5, 1) {Integrals, \\$\Gamma_2, \dots, \Gamma_n$};
+
+  \node[draw, text width={width("Simulation ")}]
+    (T) at (2.5, -0.5) {Simulation \\time, $T$};
+
+  \node[draw, text width={width("Schedule ")}]
+    (alpha) at (5.2, 1) {Optimal schedule, \\ $\alpha(t)$};
+
+  \node[draw, text width={width("Error ")}]
+    (err) at (7, 1) {Error, \\ $\Err$};
+
+  \node[inner sep=0, minimum size=0] (M1) at (3.7, 1) {};
+  \node[inner sep=0, minimum size=0] (M2) at (4.0, 1) {};
+  \node[inner sep=0, minimum size=0] (N2) at (4.0, -0.2) {};
+  \node[inner sep=0, minimum size=0] (N3) at (6.2, -0.2) {};
+  \node[inner sep=0, minimum size=0] (M3) at (6.2, 1) {};
+
+  \draw[->, >=latex, thick]
+    (w) edge (lambda)
+    (w) edge (gamma)
+    (sys) edge (gamma)
+    (alpha) edge (err);
+
+  \draw[->, >=latex, thick]
+    (lambda) -| (M1)
+    (gamma) -- (M1)
+    (T) -| (M1)
+    (M1) -- (alpha);
+
+  \draw[->, >=latex, thick]
+    (M2) -- (N2) -- (N3) -- (M3);
+
+\end{tikzpicture}
+\caption{
+  \label{fig:vardep}
+  Dependence of variables in computing
+  the optimal schedule and the error.
+}
+\end{figure}
+
+
+
+%\subsection{\label{sec:measure_gamma}
+%Measurement of the integrals
+%of the autocorrelation functions}
+
+
+
+%To use Eq. \eqref{eq:q_opt} in a real simulation,
+%we need to know both $\lambda_k$'s and $\Gamma_k$'s.
+%
+While the updating scheme alone
+determines the eigenmodes and $\lambda_k$'s,
+the values of $\Gamma_k$'s depend also on the system
+and the underlying sampling process (MC or MD).
+%
+Below is a technique of measuring $\Gamma_k$'s.
+
+The idea is to run
+a simulation with a constant schedule,
+$\alpha(t) = \alpha_0$,
+and then use Eq. \eqref{eq:y2_eql}.
+%
+A practical difficulty is that
+we often do not know the intrinsic distribution, $p^*_i$,
+in advance to compute
+the shifted bias potential, $v_i$,
+from the original one, $V_i$
+(cf. Sec. \ref{sec:FDS}).
+%
+To circumvent the problem, we shall
+modify Eq. \eqref{eq:y2_eql} as
+%
+\begin{equation}
+  \operatorname{var} Y_k
+  =
+  \frac{1}{2}
+  \alpha \, \Gamma_k \, \lambda_k,
+\label{eq:varY}
+\end{equation}
+%
+where
+``$\operatorname{var}$''
+means the variance from time averaging,
+and
+%
+\begin{align}
+Y_k
+&=
+\sum_{ i = 1 }^n
+  \phi_{k i} \, (V_i - \bar V),
+\label{eq:Y_def}
+\\
+\bar V
+&=
+\sum_{ j = 1 }^n p_j \, V_j.
+\notag
+\end{align}
+
+To show Eq. \eqref{eq:varY},
+we first use Eq. \eqref{eq:v_def}
+to rewrite Eq. \eqref{eq:x_def}
+as
+$$
+\begin{aligned}
+  x_i
+  &=
+  (V_i - \bar V) + s_i,
+  \\
+  s_i
+  &=
+  \ln \frac{ p_i } { p^*_i }
+  -
+  \sum_{ j = 1 }^n
+    p_j \, \ln \frac{ p_j } { p^*_j }.
+\end{aligned}
+$$
+Thus, by Eqs. \eqref{eq:y_def} and \eqref{eq:Y_def},
+we have
+$$
+y_k = Y_k + \sum_{i = 1}^n \phi_{k i} \, s_i.
+$$
+Since the second term on the right-hand side
+is a constant, and the average of $y_k$ is zero,
+we have
+$$
+\operatorname{var} Y_k
+=
+\operatorname{var} y_k
+=
+\langle y_k^2 \rangle.
+$$
+Finally, by using Eq. \eqref{eq:y2_eql},
+we reach Eq. \eqref{eq:varY}.
+
+\note{In practice, Eq. \eqref{eq:varY}
+in inapplicable to zero eigenvalues, $\lambda_k$'s.
+%
+However, these eigenmodes can be ignored
+as they do not contribute to the Lagrangian defined by
+Eq. \eqref{eq:Lagrangian_const}.
+}
+
+
+%\subsection{\label{sec:program_list}
+%Program
+%}
+
+
+The complete program is the following.
+
+\begin{enumerate}
+
+\item
+From the updating matrix, $\mathbf w$,
+compute the eigenvalues, $\lambda_k$'s.
+
+\item
+Run a preliminary adaptive FDS simulation
+using the updating scheme with a constant
+updating magnitude, $\alpha_0$.
+
+\item
+Compute $\Gamma_k$'s from Eq. \eqref{eq:varY}.
+
+\item
+Select an initial value of $q(T)$,
+e.g., $\ln(1 + \alpha_0 \, T)$.
+
+\item
+Compute the optimal schedule by
+numerically integrating Eq. \eqref{eq:q_opt}.
+
+\item
+Compute the error $E$ from
+Eqs. \eqref{eq:error_split},
+  \eqref{eq:error_asym1} and
+  \eqref{eq:error_res1}.
+
+\item
+Modify the value of $q(T)$ and repeat the previous two steps,
+until the minimal error $E$ is found.
+
+\end{enumerate}
+
+
 
 
 
@@ -5668,8 +5367,8 @@ $$
   \frac{            \left(1 - 4 \, \mu_1 \, \sin^2 p \right)^2         }
        { \lambda \, \left(2 - 8 \, \mu_1 \, \sin^2 p - \lambda \right) }
   \right|_{ p \approx 0 }
-  \notag \\
-  &
+  %\notag \\
+  %&
   \approx
   \frac{   2 \, n }
        { \pi \, T }
@@ -5680,7 +5379,7 @@ $$
 $$
 }%
 %
-The optimal $\lambda$ is therefore
+The optimal $\lambda$ is, therefore,
 %
 \begin{equation}
 \lambda \approx 1.
@@ -6093,6 +5792,346 @@ will ultimately drift to
 the smallest eigenvalue,
 $\min \lambda_k = 1 - 4 \, \mu_1$.
 %as discussed in Sec. \ref{sec:optlambda}.
+
+
+
+
+
+
+\section{\label{sec:stabilize_wband}
+Stabilization of homogeneous updating schemes}
+
+
+
+%A practical problem of using homogeneous updating scheme
+%is the following.
+%
+A homogeneous updating scheme
+specified by an arbitrary kernel
+is not necessarily stable
+with all nonnegative eigenvalues.
+%
+%
+\note{For example,
+  %the nearest-neighbor updating scheme
+  %is unstable if Eq. \eqref{eq:nn_stable} is violated.
+  %
+  %Even
+  the Gaussian updating scheme can be unstable
+  if the updating kernel is truncated.
+}%
+%
+Here we show how to minimally modify
+the updating kernel
+to stabilize it.
+%
+\note{The relative code is \texttt{trimwindow()} in \texttt{invt.h}.
+}
+
+
+Given an updating kernel,
+we can compute the eigenvalues from
+Eq. \eqref{eq:wband_eigenvalue}.
+%
+By replacing negative eigenvalues with zeros and
+using Eq. \eqref{eq:mu_from_lambda_pbc}
+or \eqref{eq:mu_from_lambda_refl},
+we get a new updating kernel,
+which is stable by construction.
+%
+However, the new kernel is widened
+as $\mu_l$ may be nonzero for $l > b$.
+%
+If we truncate the new kernel at $\mu_b$,
+the stability problem remains,
+although the negative eigenvalues
+often become smaller in magnitude.
+%
+Thus, to stabilize the updating kernel
+without increasing the width,
+we need to iterate the above process many times,
+resulting the following algorithm.
+
+
+%
+\begin{enumerate}
+  \item
+    Given an updating kernel, $\mu_0, \dots, \mu_b$,
+    compute the eigenvalues
+    $\lambda_1, \dots, \lambda_n$
+    from Eq. \eqref{eq:wband_eigenvalue}.
+  \item
+    If all eigenvalues are nonnegative,
+    we are done, and exit the loop.
+  \item
+    Otherwise, replace negative eigenvalues by zeros,
+    and compute the new kernel,
+    $\mu_0, \dots, \mu_b$, from
+    Eq. \eqref{eq:mu_from_lambda_pbc}
+    or
+    \eqref{eq:mu_from_lambda_refl}
+    with $\mu_l = 0$ for $l > b$.
+    Go to step 1.
+\end{enumerate}
+
+
+
+\section{\label{sec:equilerr}
+Comparison to the error of the equilibrium FDS simulation}
+
+
+
+%As discussed in Sec. \ref{sec:FDS},
+%the asymptotic limit of an adaptive FDS method
+%is the corresponding equilibrium FDS method
+%with the bias potential fixed to the exact value.
+%%
+%Such a simulation delivers the maximal efficiency.
+
+In late stages of an adaptive FDS simulation,
+the bias potential is often sufficiently precise.
+Some practitioners would then fix
+the bias potential and switch
+to the equilibrium method
+to prevent possible future efficiency loss
+due to the adaptive updates.
+%
+Below, we shall show that this practice is unnecessary
+if the simulation uses the single-bin updating scheme
+with the optimal schedule, Eq. \eqref{eq:alpha_invt1}.
+%
+That is, the bias potential obtained from
+an optimal single-bin scheme adaptive simulation
+will be similar in precision to that from
+the ideal equilibrium simulation
+for long times.
+%
+%Thus, our demonstration below serves as an alternative proof
+%of the optimality of the single-bin scheme.
+
+The error of the equilibrium FDS method
+depends on the precision of the histogram.
+%
+If all $v_i$'s are exact,
+the error is minimized, and can be computed
+from the second term
+on the right-hand side of Eq. \eqref{eq:vcorr_equil},
+%
+\begin{align}
+  E
+  &=
+  \left\langle
+    \sum_{ i = 1 }^ n
+      p_i \,
+      \left(
+        \ln \frac { H_i }
+                  { p_i }
+      \right)^2
+  \right\rangle
+%\notag
+%\\
+  %&
+  \approx
+  \sum_{ i = 1 }^ n
+    p_i \,
+    \left\langle
+      \left(
+        \frac { H_i }
+              { p_i }
+        - 1
+      \right)^2
+    \right\rangle,
+\notag
+\end{align}
+where
+$H_i = \frac{1}{T} \sum_{t = 1}^T h_i(t)$
+with
+$h_i(t)$ defined by Eq. \eqref{eq:h_def}.
+
+We can rewrite the error as
+a sum of the eigenmode as
+%
+\begin{align}
+  E
+  =
+  \sum_{ k = 2 }^n
+    \left\langle
+      \Theta_k^2
+    \right\rangle
+  ,
+\notag
+%\label{eq:error_sbin_equil}
+\end{align}
+%
+where
+%
+$
+  \Theta_k
+  =
+  \frac{ 1 } { T }
+  \sum_{ t = 1 } ^ T
+    \theta_k( t )
+  ,
+$
+%
+with $\theta_k(t)$ defined by Eq. \eqref{eq:eta_def}.
+%and $\phi_{k i}$ by Eq. \eqref{eq:eig_orthonormal_cols}.
+%\begin{align}
+%\theta_k( t )
+%=
+%\sum_{ i = 1 }^ n
+%\phi_{k i} \left[
+%             \frac{ h_i(t) }
+%                  { p_i    }
+%             - 1
+%           \right],
+%\end{align}
+%and
+%\begin{align}
+%\sum_{ k = 1 }^n
+%  \phi_{k i} \, \phi_{k j}
+%  = p_i \, \delta_{i j}.
+%\end{align}
+%
+\note{Because
+%
+\begin{align*}
+\sum_{ k = 1 }^n
+  \Theta_k^2
+&=
+\frac{ 1 } { T^2 }
+\sum_{ t, t' = 1 }^T
+  \sum_{ k = 1 }^n
+    \theta_k( t ) \, \theta_k( t' )
+\\
+&=
+\frac{ 1 } { T^2 }
+\sum_{ t, t' = 1 }^T
+  \sum_{ i, j = 1 }^n
+    \left[
+      \frac{ h_i(t) }
+           { p_i    }
+      - 1
+    \right]
+    \left[
+      \frac{ h_j(t') }
+           { p_j     }
+      - 1
+    \right]
+    \sum_{ k = 1 }^n
+      \phi_{k \, i} \, \phi_{k \, j}
+\\
+&=
+\frac{ 1 } { T^2 }
+\sum_{ t, t' = 1 }^T
+  \sum_{ i, j = 1 }^n
+    \left[
+      \frac{ h_i(t) }
+           { p_i    }
+      - 1
+    \right]
+    \left[
+      \frac{ h_j(t') }
+           { p_j     }
+      - 1
+    \right]
+    p_i \, \delta_{i, j}
+\\
+&=
+\sum_{ i = 1 }^n
+\frac{ 1 } { T }
+\sum_{ t = 1 }^T
+    \left[
+      \frac{ h_i(t) }
+           { p_i    }
+      - 1
+    \right]
+\frac{ 1 } { T }
+\sum_{ t' = 1 }^T
+    \left[
+      \frac{ h_i(t') }
+           { p_i     }
+      - 1
+    \right]
+\\
+&=
+\sum_{ i = 1 }^n
+  p_i \,
+    \left(
+      \frac{ \bar h_i }
+           { p_i      }
+      - 1
+    \right)^2
+.
+\end{align*}
+}%
+The sum starts from $k = 2$, for
+by Eq. \eqref{eq:eigenmode1}, % we have
+$$
+\theta_1(t)
+=
+\sum_{ i = 1 }^n
+  \phi_{1i} \, \frac{ h_i(t) - p_i } { p_i }
+=
+\sum_{ i = 1 }^n \left[ h_i(t) - p_i \right]
+= 0.
+$$
+
+In the long-time limit,
+\begin{align*}
+  \left\langle
+    \Theta_k^2
+  \right\rangle
+  &=
+  \frac{1}{T^2}
+  \sum_{ t, t' = 1 }^T
+  \langle \theta_k(t) \, \theta_k(t') \rangle
+  %\\
+  %&\approx
+  %\frac{1}{T}
+  %\sum_{ \tau = -\infty }^{ \infty }
+  %\langle \theta_k(t) \, \theta_k(t + \tau) \rangle
+  %\\
+  %&=
+  =
+  \frac{1}{T}
+  \sum_{\tau = -\infty}^\infty
+    \kappa_n(\tau)
+  =
+  \frac{ \Gamma_k }{ T }
+.
+\end{align*}
+%
+Thus,
+\begin{equation}
+  E
+  =
+  \frac{ 1 } { T }
+  \sum_{ k = 2 }^n \Gamma_k
+  .
+\label{eq:error_equil}
+\end{equation}
+
+Now comparing this with the error of
+the optimal adaptive simulation,
+Eq. \eqref{eq:error_sinc} (with $K = n$),
+we find the difference to be negligible
+in the long time limit.
+
+The above argument can be extended
+to the bandpass updating schemes.
+%
+If the intrinsic PMF is sufficiently smooth,
+we can explicitly filter out some error modes
+in the histogram,
+say those with $k >  K$,
+and truncate the sum in
+Eq. \eqref{eq:error_equil} at $k = K$.
+
+
+
+
+
 
 \bibliography{simul}
 \end{document}
