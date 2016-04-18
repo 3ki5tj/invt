@@ -1,0 +1,2097 @@
+\documentclass[reprint, floatfix]{revtex4-1}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{upgreek}
+\usepackage[usenames,dvipsnames]{xcolor}
+\usepackage{tikz}
+\usepackage{hyperref}
+
+
+\hypersetup{
+  colorlinks,
+  linkcolor={red!30!black},
+  citecolor={green!20!black},
+  urlcolor={blue!80!black}
+}
+
+
+\definecolor{DarkBlue}{RGB}{0,0,64}
+\definecolor{DarkBrown}{RGB}{64,20,10}
+\definecolor{DarkGreen}{RGB}{0,64,0}
+\definecolor{DarkPurple}{RGB}{64,0,42}
+% annotation macros
+\newcommand{\repl}[2]{{\color{gray} [#1] }{\color{blue} #2}}
+\newcommand{\add}[1]{{\color{blue} #1}}
+\newcommand{\del}[1]{{\color{gray} [#1]}}
+\newcommand{\note}[1]{{\color{DarkGreen}\footnotesize \textsc{Note.} #1}}
+\newcommand{\answer}[1]{{\color{DarkBlue}\footnotesize \textsc{Answer.} #1}}
+\newcommand{\summary}[1]{{\color{DarkPurple}\footnotesize \textsc{Summary.} #1}}
+
+
+\newcommand{\Err}{E}
+\newcommand{\ii}{\mathrm{i}}
+
+
+
+\begin{document}
+
+
+
+\title{Additional notes: Optimal updating factor in Wang-Landau and metadynamics simulations}
+
+
+
+\section{Multiple-bin scheme: Error}
+
+
+
+\note{The extremal condition of $\Err_A$ is given by
+%
+\begin{align}
+  \sum_{k = 2}^n
+  \lambda_k \, u_k\bigl( q(t) \bigr)
+  \int_0^T
+    \ddot u_k \bigl( q(t') \bigr) \,
+    \kappa_k(t' - t) \, dt' = 0.
+  \tag{N1}
+\label{eq:optimal_mbin}
+\end{align}
+%
+If all $\lambda_k$, hence all $u_k$, are the same,
+the above condition can be satisfied with $\ddot u_k = 0$,
+which recovers the single-bin case.
+%
+Unfortunately, the above expression
+appears to be useless in general.
+}
+
+
+\note{The next order correction to Eq. \eqref{eq:kappa_delta}
+would lead to a correction to $\Err$
+that is about $\alpha_{\max}^2$ times as large,
+where $\alpha_{\max} = \max \alpha(t)$.
+%
+This is equivalent to saying that the Fourier transform
+  $$
+  \tilde \kappa_k(\omega) = \Gamma_k
+  $$
+  is a roughly constant.
+  %
+  For the next order correction we would have
+  $$
+  \tilde \kappa_k(\omega) = \Gamma_k + \Gamma^{(2)}_k \omega^2 + \dots,
+  $$
+  which leads to a correction to $\Err$
+  $$
+  \Gamma^{(2)}_k
+  \int_0^T \ddot u_k^2\bigl( q(t) \bigr) \, dt
+  \propto
+  \alpha^2 \, \Err.
+  $$
+  This correction is of order $\alpha^2$
+  compared to the main contribution in Eq. \eqref{eq:error_asym1}.
+  %
+  Thus, we can assume Eq. \eqref{eq:kappa_delta},
+  once $\alpha(t)$ has dropped below a certain level.
+}%
+
+\note{
+  The extremal property, Eq. \eqref{eq:optimal_mbin},
+  now becomes
+  %
+  \begin{align}
+    \sum_{k = 1}^n
+      \Gamma_k \, \lambda_k \,
+      u_k\bigl( q(t) \bigr) \,
+      \ddot u_k\bigl( q(t) \bigr) = 0
+    .
+    \tag{N2}
+    \label{neq:optimal_mbin1}
+  \end{align}
+  %
+  If we interpret $u_k$ as the position,
+  and $\Gamma_k \, \lambda_k$ as the mass,
+  then the right-hand side gives the virial.
+  %
+  Thus, the extremal condition demands
+  the total virial to be zero.
+  $$\,$$
+}%
+
+
+\section{Normalization of eigenmodes}
+
+
+
+By assuming Eq. \eqref{eq:w_detailedbalance},
+we can diagonalize $\mathbf w$ with a set of
+eigenvectors
+%
+\begin{equation}
+  \sum_{i = 1}^n \phi_{ki} \, w_{ij}
+  =
+  \lambda_k \, \phi_{kj}
+  ,
+\label{eq:eig_w}
+\end{equation}
+%
+satisfying the orthonormal conditions\cite{vankampen}:
+%
+\begin{align}
+  \sum_{k = 1}^n
+    \phi_{ki} \, \phi_{kj}
+  &=
+  \delta_{ij} \, p_i,
+  \label{eq:eig_orthonormal_cols}
+  \\
+  \sum_{i = 1}^n
+    \frac{ \phi_{ki} \, \phi_{li} }
+         { p_i }
+  &=
+  \delta_{kl}
+  .
+\label{eq:eig_orthonormal_rows}
+\end{align}
+%
+\note{We can define a symmetric matrix $\hat{\mathbf w}$
+as $\hat w_{ij} = \sqrt{p_i/p_j} \, w_{ij}$,
+which can be diagonalized\cite{vankampen}
+with a set of orthonormal eigenvectors:
+%
+$\sum_{i = 1}^n \varphi_{ki} \, \hat w_{ij} = \lambda_k \, \varphi_{kj}$.
+%
+Then,
+in terms of diagonalizing $\mathbf w$, we have
+$$\phi_{ij} \equiv \sqrt{p_j} \, \varphi_{ij}$$
+satisfying Eqs. \eqref{eq:eig_orthonormal_cols}
+and \eqref{eq:eig_orthonormal_rows}.
+%
+}%
+
+
+\section{Equilibrium error}
+
+
+In terms of the components, we have
+%
+\begin{equation}
+  \left\langle
+    y_k^2
+  \right\rangle
+  =
+  \frac 1 2 \, \Gamma_k \, \lambda_k \, \alpha_0.
+  \label{eq:y2_eql}
+\end{equation}
+%
+
+
+We shall use this result to model the initial error
+before starting the schedule $\alpha(t)$ to be optimized.
+%
+That is, we assume
+$\alpha(t) = \alpha_0$
+for $t < 0$, and
+the system has entered the equilibrium
+under a fixed $\alpha_0$ at $t = 0$.
+%
+We can then use Eq. \eqref{eq:y2_eql}
+for the $\langle y_k^2(0) \rangle$'s in Eq. \eqref{eq:error_res}.
+%
+\note{Another possible approximation
+  is to interpret $\Gamma_k$ as twice the autocorrelation time,
+  and the kernel is exponential
+  $$
+  \kappa_k(t) = \exp\left( - \frac{2}{\Gamma_k} |t| \right),
+  $$
+  then a slightly more accurate value is given by\cite{vankampen}
+  $$
+  \left\langle
+    y_k^2
+  \right\rangle
+  =
+  \frac{      ( \lambda_k \, \alpha_0 )^2     }
+       { \lambda_k \, \alpha_0 + 2 / \Gamma_k }.
+  $$
+  But it appears that the main error of Eq. \eqref{eq:y2_eql}
+  is an underestimate instead of an overestimate.
+  And a possible source of error might be from
+  converting a discrete sum to a continuous integral.
+}
+
+
+
+\section{
+Another characterization of the optimal schedule}
+
+
+The optimal schedule is given by
+\begin{equation}
+  \int_{ 0 }^{ q(t) }
+    \sqrt{
+      \textstyle\sum_{ k = 2 }^n
+        \Gamma_k \, \lambda_k^2
+        \, u_k^2( q' )
+    }
+    \;
+    d q'
+  =
+  c \, t
+  ,
+  \label{eq:q_opt}
+\end{equation}
+%
+where $c$ is to be determined by
+the boundary condition at $t = T$ as
+%
+\begin{equation}
+  c =
+  \frac 1 T
+  \int_{ 0 }^{ q(T) }
+    \sqrt{
+      \textstyle\sum_{ k = 2 }^n
+        \Gamma_k \, \lambda_k^2
+        \, u_k^2( q' )
+    }
+    \;
+    d q'
+  .
+  \notag
+\end{equation}
+%
+Unfortunately,
+Eq. \eqref{eq:q_opt} is not an explicit equation of $\alpha(t)$.
+%
+However,
+by differentiating Eq. \eqref{eq:Lagrangian_const},
+we have
+%
+\begin{equation}
+  \frac{ d   }
+       { d t }
+  \left[
+    \frac{       1     }
+         { \alpha( t ) }
+  \right]
+  =
+  \frac{
+    \sum_{ k = 2 }^n
+      \Gamma_k \, \lambda_k^3
+      \, u_k^2 \bigl[ q(t) \bigr]
+  }
+  {
+    \sum_{ k = 2 }^n
+      \Gamma_k \, \lambda_k^2
+      \, u_k^2 \bigl[ q(t) \bigr]
+  }
+  \equiv
+  \lambda(t)
+  .
+  \label{eq:dinvadt}
+\end{equation}
+%
+The expression in the middle is an average
+of the eigenvalues, $\lambda_k$'s,
+weighted by $\Gamma_k \, \lambda_k^2 \, u_k^2$.
+%
+We shall refer to the average as the instantaneous
+eigenvalue, $\lambda(t)$,
+which gives the rate of change of $\alpha^{-1}(t)$.
+
+\note{For the single-bin scheme, $\lambda_k = 1$,
+and $\lambda(t)$ is always unity.
+%
+So,
+$$
+\frac { d   }
+      { d t }
+\left[
+  \frac{      1    }
+       { \alpha(t) }
+\right]
+=
+1,
+$$
+which again leads to Eq. \eqref{eq:alpha_invt1}.
+
+
+For a general multiple-bin scheme,
+we can characterize the solution of
+Eq. \eqref{eq:dinvadt} as
+\begin{equation}
+  \alpha(t)
+  =
+  \frac{                  1                     }
+       { \lambda(t) \, \bigl[ t + t_0(t) \bigr] }
+  ,
+\notag
+%\label{eq:alpha_approxinvt}
+\end{equation}
+%
+where
+$t_0(t)$ is a slowly-varying function.
+}
+
+
+By further differentiating Eq. \eqref{eq:dinvadt},
+we can show that $\lambda(t)$
+is an increasing function.
+%
+\note{Proof that $\lambda(t)$ is an increasing function.
+  Using $\dot u_k = \lambda_k \, u_k \, \alpha(t)$,
+  we have
+  $$
+  \begin{aligned}
+    \dot \lambda
+    &=
+    \frac
+    {
+      \sum_{k = 2}^n 2 \, \Gamma_k \, \lambda_k^3 \, u_k \, \dot u_k
+    }
+    {
+      \sum_{k = 2}^n \Gamma_k \, \lambda_k^2 \, u_k^2
+    }
+    -
+    \frac
+    {
+      \sum_{k = 2}^n \Gamma_k \, \lambda_k^3 \, u_k^2
+      \sum_{k = 2}^n 2 \, \Gamma_k \, \lambda_k^2 \, u_k \, \dot u_k
+    }
+    {
+      \left(
+        \sum_{k = 2}^n \Gamma_k \, \lambda_k^2 \, u_k^2
+      \right)^2
+    }
+    \\
+    &=
+    \frac
+    {
+      \sum_{k = 2}^n \Gamma_k \, \lambda_k^4 \, u_k^2
+      \,
+      \sum_{k = 2}^n \Gamma_k \, \lambda_k^2 \, u_k^2
+      -
+      \left(
+        \sum_{k = 2}^n \Gamma_k \, \lambda_k^3 \, u_k^2
+      \right)^2
+    }
+    {
+      \left(
+        \sum_{k = 2}^n \Gamma_k \, \lambda_k^2 \, u_k^2
+      \right)^2
+    }
+    2 \alpha(t).
+  \end{aligned}
+  $$
+  The numerator of the fraction of the last expression
+  is nonnegative by the Cauchy-Schwarz inequality,
+  or by the nonpositivity of the discriminant
+  of the following nonnegative definite quadratic form of $X$:
+  $$
+  \sum_{k = 2}^n \Gamma_k \, \lambda_k^2 \, u_k^2 \, (X - \lambda_k)^2 \ge 0.
+  $$
+  Thus, $\dot \lambda \ge 0$, and $\lambda(t)$ is monotonically increasing.
+}%
+%
+Below we shall study the initial and final values.
+%
+At the end of the simulation,
+$t = T$, we have $u_k = 1$, and
+%
+\begin{equation}
+  \lambda(T)
+  =
+  \frac{
+    \sum_{ k = 2 }^n
+      \Gamma_k \, \lambda_k^3
+  }
+  {
+    \sum_{ k = 2 }^n
+      \Gamma_k \, \lambda_k^2
+  }
+  ,
+\notag
+%\label{eq:dinvadt_limit2}
+\end{equation}
+is independent of the simulation length, $T$.
+%
+Further, $\Gamma_k$ often increases with $\lambda_k$,
+such that the relative weight $\Gamma_k \, \lambda_k^2$
+also increases with $\lambda_k$.
+%
+It follows that $\lambda(T)$ will be dominated
+by the larger values of $\lambda_k$'s.
+
+
+By contrast,
+at the beginning of the simulation,
+the relative weight, $\Gamma_k \, \lambda_k^2 \, u_k^2(0)$,
+is heavily influenced by the exponential factor
+$u_k^2(0) = e^{ -2 \, \lambda_k \, q(T) }$.
+%
+Thus, $\lambda(0)$
+is sensitive to the simulation length, $T$.
+%
+A longer simulation means a smaller $\lambda(0)$,
+and that $\lambda(t)$ would stay small
+for longer near the beginning of the simulation.
+
+
+
+
+
+
+\section{
+Eigenmodes of a non-periodic variable}
+
+
+
+
+Parallel to Eq. \eqref{eq:phi_pbc},
+we define the out-of-boundary values
+of $\phi_i$ as
+%
+\begin{equation}
+  \phi_i
+  =
+  \begin{dcases}
+    \phi_{ 1 - i }           & \mathrm{for \;} i \le 0, \\
+    \phi_{ 2 \, n + 1 - i }  & \mathrm{for \;} i > n,
+  \end{dcases}
+\label{eq:phi_refl}
+\end{equation}
+%
+such that Eq. \eqref{eq:wmul_to_convol}
+still holds.
+%
+\note{The derivation of Eq. \eqref{eq:wmul_to_convol}
+  in this case is similar,
+  $$
+  \begin{aligned}
+    \sum_{j = 1}^n w_{ij} \, \phi_j
+    &=
+    \sum_{j = 1}^n
+      \mu_{i - j} \, \phi_j
+    +
+    \sum_{j = 1}^n
+      \mu_{i + j - 1} \, \phi_j
+    +
+    \sum_{j = 1}^n
+      \mu_{i + j - 2 \, n - 1} \, \phi_j
+    \\
+    &=
+    \sum_{j = 1}^n
+      \mu_{i - j} \, \phi_j
+    +
+    \sum_{l = 1 - n}^0
+      \mu_{i - l} \, \phi_l
+    +
+    \sum_{l = n + 1}^{ 2 \, n }
+      \mu_{i - l} \, \phi_l
+    \\
+    &=
+    \sum_{j = 1 - n}^{ 2 \, n}
+      \mu_{i - j} \, \phi_j.
+  \end{aligned}
+  $$
+}%
+Thus, we also have $n$ orthonormal eigenvectors,
+$\pmb\phi^{(1)}, \dots, \pmb\phi^{(n)}$,
+compatible with Eq. \eqref{eq:phi_refl},
+%
+\begin{equation}
+  \phi^{(k)}_i
+  =
+  \phi_{k i}
+  =
+  \frac{ \sqrt{ 2 - \delta_{k, 1} } }
+       {             n              }
+  \cos \frac{ ( k - 1) \, \left( i - \frac 1 2 \right) \, \pi}
+            {                    n                           }
+  ,
+\notag
+%\label{eq:wband_eigenvector_refl}
+\end{equation}
+%
+with eigenvalues
+%
+\begin{align}
+  \lambda_k
+  &=
+  \mu_0
+  +
+  2
+  \sum_{l = 1}^b
+    \mu_l
+    \cos \frac{(k - 1)  \, l \pi}{n}
+  .
+\label{eq:wband_eigenvalue_refl}
+\end{align}
+%
+\note{Derivation.
+  First consider the unnormalized eigenvectors,
+  $$
+  \Phi^{(k)}_i
+  =
+  \cos \frac{ \left( i - \frac 1 2 \right) (k - 1) \, \pi}{n},
+  $$
+  which satisfies the reflective boundary condition,
+  Eq. \eqref{eq:phi_refl}.
+  %
+  So, by Eq. \eqref{eq:wmul_to_convol},
+  $$
+  \begin{aligned}
+  \sum_{i = 1}^n
+    \Phi^{(k)}_i \, w_{ij}
+  &=
+  \sum_{l = -b}^b
+    \Phi^{(k)}_{j - l} \, \mu_l
+  \\
+  &=
+    \Phi^{(k)}_j \, \mu_0
+  + \sum_{l=0}^{b}
+    \mu_l \,
+    \left[
+      \Phi^{(k)}_{j-l}
+      +
+      \Phi^{(k)}_{j+l}
+    \right]
+  \\
+  &= \Phi^{(k)}_j \, \lambda_k,
+  \end{aligned}
+  $$
+  with $\lambda_k$ given by Eq. \eqref{eq:wband_eigenvalue_refl}.
+
+  \hrulefill
+
+  Next, let us compute the normalization factor.
+  %
+  If $k = 1$, $\Phi^{(1)}_i = 1$, and
+  $
+  \sum_{i = 1}^n \left( \Phi^{(1)}_i \right)^2 = n.
+  $
+  For $k \ge 2$,
+  $$
+  \begin{aligned}
+    \sum_{i = 1}^n \cos^2 \left[\left(i - \frac1 2 \right) a\right]
+    &=
+    \frac n 2
+    +
+    \frac 1 2
+    \sum_{i = 1}^n \cos\left[(2 i - 1)\, a \right]
+    =
+    \frac n 2,
+  \end{aligned}
+  $$
+  where $a = \frac{k-1}{n} \pi$.
+  Thus, the normalization factor $\sqrt{(2 - \delta_{k1})/n}$
+  encompasses both cases.
+
+  \hrulefill
+
+  To show the column-wise orthogonality,
+  we need a lemma, for $a = q \, \pi/n$,
+  with $q$ a positive integer.
+  $$
+  \begin{aligned}
+  \sum_{k = 1}^n \cos[(k - 1) \, a]
+  &=
+  1 + \cos a + \dots + \cos[(n - 1) \, a]
+  \\
+  &=
+  \frac{
+        \sin\frac a 2
+      + \sin \left[ \left( n - \frac 1 2 \right) a \right]
+      }
+      {
+        2 \, \sin \frac a 2
+      }
+  \\
+  &=
+  \frac{ 1 - (-1)^q } { 2 }
+  = \operatorname{odd}(q),
+  \end{aligned}
+  $$
+  %
+  where, we have used
+  $\sin \left[ \left( n - \frac 1 2 \right) a \right]
+  = \sin \left( q \, \pi - \frac a 2 \right)
+  = -(-)^q\sin\frac a 2.$
+  %
+  and $\operatorname{odd}(q)$
+  yields $1$ for odd $q$ or $0$ otherwise.
+  %
+  Adding the case of $q = 0$, where the sum yields $n$,
+  we get
+  $$
+  \sum_{k = 1}^n
+    \cos\left[(k - 1) \, \frac { q \, \pi } { n }  \right]
+  = n \, \delta_{q, 0}
+  + \operatorname{odd}(q).
+  $$
+
+  Now, for the orthogonality,
+  $$
+  \begin{aligned}
+    \sum_{k = 1}^n
+    \Phi^{(k)}_i \, \Phi^{(k)}_j
+    &=
+    \frac 1 2
+    \sum_{k = 1}^n
+    \left[
+      \cos \tfrac{ (i - j) (k - 1) \, \pi }
+                 {         n              }
+      +
+      \cos \tfrac{ (i + j - 1) (k - 1) \, \pi }
+                 {             n              }
+    \right]
+    \\
+    &=
+    \frac 1 2
+    \left[
+      n \, \delta_{i, j}
+      +
+      \operatorname{odd}(i - j)
+      +
+      \operatorname{odd}(i + j - 1)
+    \right]
+    \\
+    &=
+    \frac n 2 \, \delta_{i, j}
+    + \frac 1 2.
+  \end{aligned}
+  $$
+  where we have used the fact
+  that $i - j$ shares the parity with $i + j$
+  in the last step.
+  %
+  So
+  $$
+    \sum_{k = 1}^n
+    \phi^{(k)}_i \, \phi^{(k)}_j
+    =
+    \frac 2 { n^2 }
+    \sum_{k = 1}^n
+    \Phi^{(k)}_i \, \Phi^{(k)}_j
+    -
+    \frac 1 { n^2 }
+    =
+    \frac 1 n \,
+    \delta_{i, j}.
+  $$
+}
+%
+
+
+\section{Examples of the inversion formula
+for a non-periodic variable}
+
+
+In the non-periodic case,
+the formula is
+%
+\begin{align}
+  \mu_l
+  =
+  \frac 1 { 2 \, n }
+  \sum_{ k = 1 }^{ 2 \, n }
+    \lambda_{ k } \,
+    \cos \frac{ (k - 1) \, l \, \pi }
+              {            n        }
+  ,
+\label{eq:mu_from_lambda_refl}
+\end{align}
+%
+where
+we have defined
+$\lambda_k \equiv \lambda_{2 \, n + 2 - k}$
+for $k = n + 2, \dots, 2 \, n$,
+as well as
+%
+\begin{align}
+  \lambda_{ n + 1 }
+  =
+  (-1)^{ n - 1 }
+  \lambda_1
+  +
+  2 \, \sum_{ k = 2 }^{ n }
+      (-1)^{n - k} \, \lambda_k
+  ,
+\label{eq:lambdan}
+\end{align}
+to satisfy the constraint $\mu_n = 0$.
+%
+\note{Eq. \eqref{eq:lambdan}
+  ensures that the $\mu_n$
+  computed from Eq. \eqref{eq:mu_from_lambda_refl}
+  vanishes.
+
+  %The inversion formula is derived from the cosine transform.
+  %
+  If we define $\mu_n = 0$ and
+  %
+  \begin{align}
+    \mu_{ 2 n - l } = \mu_l
+    \quad
+    \mathrm{for\;} l = 1, \dots, n - 1,
+  \notag
+  %\label{eq:mu_reflection}
+  \end{align}
+  %
+  then Eq. \eqref{eq:wband_eigenvalue_refl} can be rewritten as
+  %
+  \begin{align}
+    \lambda_{k+1}
+    =
+    \sum_{ l = 0 }^{ 2 \, n - 1 }
+    \mu_l \, \cos \frac{ k \, l \, \pi } { n }.
+  \notag
+  %\label{eq:lambda_cosine_sum}
+  \end{align}
+  %
+  This formula for $\lambda_{k+1}$
+  can be readily extended to $k = 2 \, n - 1$,
+  and we have
+  %
+  \begin{align}
+    \lambda_{ 2 \, n + 2 - k } = \lambda_k.
+    \tag{N3}
+    \label{neq:lambda_reflection}
+  \end{align}
+  %
+  Thus,
+  %
+  $$
+  \begin{aligned}
+    \sum_{ k = 0 }^{ 2 \, n - 1 }
+      \lambda_{ k + 1 } \,
+      \cos \frac{ k \, p \, \pi }
+                {      n        }
+    &=
+    \sum_{ k = 0 }^{ 2 \, n - 1 }
+      \sum_{ l = 0 }^{ 2 \, n - 1 }
+        \mu_l \,
+        \cos \frac{ k \, l \, \pi }
+                  {      n        }
+        \cos \frac{ k \, p \, \pi }
+                  {      n        }
+    \\
+    &=
+    \sum_{ l = 0 }^{ 2 \, n - 1 }
+      \frac{ \mu_l } { 2 }
+      \sum_{ k = 0 }^{ 2 \, n - 1 }
+        \cos \frac{ k \, (p + l) \, \pi }
+                  {      n        }
+                  +
+        \cos \frac{ k \, (p - l) \, \pi }
+                  {      n        }
+    \\
+    &=
+    \sum_{ l = 0 }^{ 2 \, n - 1 }
+      \mu_l \, n \left(
+        \delta_{ p + l - 2 \, n, 0 }
+        +
+        \delta_{ p - l, 0 }
+      \right)
+    \\
+    &=
+    n \, \left( \mu_p + \mu_{ 2 \, n - p} \right)
+    =
+    2 \, n \, \mu_p.
+  \end{aligned}
+  $$
+  This entails
+  $$
+  \begin{aligned}
+    \mu_l
+    &=
+    \frac{    1   }
+         { 2 \, n }
+    \sum_{ k = 0 }^{ 2 \, n - 1 }
+      \lambda_{ k + 1 } \,
+      \cos \frac{ k \, l \, \pi }
+                {      n        }
+              \\
+    &=
+    \frac{    1   }
+         { 2 \, n }
+    \left[
+      \lambda_1
+      +
+      (-1)^l \, \lambda_{n + 1}
+      +
+      2 \sum_{ k = 1 }^{ n - 1 }
+        \lambda_{ k + 1 } \,
+        \cos \frac{ k \, l \, \pi }
+                  {      n        }
+    \right],
+  \end{aligned}
+  $$
+  where we have used Eq. \eqref{neq:lambda_reflection}
+  in the last step.
+
+  However, we are usually given only $\lambda_1, \dots, \lambda_n$
+  without $\lambda_{n + 1}$.
+  %
+  Fortunately, we can deduce the latter from
+  the condition that $\mu_n = 0$, which means
+  $$
+  \begin{aligned}
+    0 = \mu_n
+    =
+    \frac{1}{n}
+    \left[
+      \frac{ \lambda_1 + (-1)^n \, \lambda_{n+1} }
+           {               2                     }
+      +
+      \sum_{ k = 1 }^{ n - 1 }
+      \lambda_{k+1} (-1)^k
+    \right].
+  \end{aligned}
+  $$
+  This allows us to solve for $\lambda_{ n + 1 }$,
+  yielding Eq. \eqref{eq:lambdan}.
+
+
+  Some examples for checking.
+  For $n = 2$,
+  $\lambda_3
+  = \mu_0 - 2 \, \mu_1
+  = -(\lambda_1 - 2 \, \lambda_2)$,
+  and
+  $$
+  \begin{aligned}
+  \mu_0
+  =
+  \lambda_2,
+  \qquad
+  \mu_1
+  =
+  \frac{ \lambda_1 - \lambda_2 }
+       {           2           }
+  .
+  \end{aligned}
+  $$
+  For $n = 3$,
+  $\lambda_4
+  = \mu_0 - 2 \, \mu_1 + 2 \, \mu_2
+  = \lambda_1 - 2 \, \lambda_2 + 2 \, \lambda_3$,
+  and
+  $$
+  \begin{aligned}
+  \mu_0
+  =
+  \frac{ \lambda_1 + 2 \, \lambda_3 } { 3 }
+  ,
+  \quad
+  \mu_1
+  =
+  \frac{ \lambda_2 - \lambda_3 } { 2 }
+  ,
+  \quad
+  \mu_2
+  =
+  \frac { 2 \, \lambda_1 - 3 \, \lambda_2 + \lambda_3 } { 6 }
+  .
+  \end{aligned}
+  $$
+}
+
+
+
+\section{Bandpass scheme for a non-periodic variable}
+
+
+
+For a non-periodic variable, we demand
+$$
+\lambda_1 = \cdots = \lambda_{K+1} = 1,
+\qquad
+\lambda_{K+2} = \cdots = \lambda_n = 0.
+$$
+Then Eq. \eqref{eq:lambdan} gives
+$\lambda_{n+1} = (-1)^{n+K-1}$,
+and from Eq. \eqref{eq:mu_from_lambda_refl},
+we have
+\begin{equation}
+  \mu_l
+  =
+  \frac{1}{2 \, n}
+  \left[
+    (-1)^{n+K+l-1}
+    +
+    \frac{
+      \sin
+      \dfrac{ (2 K + 1) \, l \, \pi }
+           {         2 \, n        }
+    }
+    {
+      \sin \dfrac{ l \, \pi } { 2 \, n }
+    }
+  \right]
+  .
+\label{eq:mu_sinc_refl}
+\end{equation}
+\note{Derivation.
+$$
+\begin{aligned}
+  \lambda_{n+1}
+  &=
+  (-1)^{n-1}
+  \left[
+    \lambda_1
+    + 2 (-\lambda_2 + \lambda_3 - \cdots + (-1)^K \lambda_{K+1})
+  \right]
+  \\
+  &=
+  \begin{dcases}
+    (-1)^{n-1} & K \mathrm{\; even,} \\
+    (-1)^n     & K \mathrm{\; odd.}
+  \end{dcases}
+\end{aligned}
+$$
+So
+$$
+\begin{aligned}
+  \mu_l
+  &=
+  \frac{1}{2\,n}
+  \left[
+    1 +
+    2 \sum_{k=2}^{K+1}
+    \cos \frac { (k - 1) \, l \pi } { n }
+    +
+    (-1)^{n+K-1} (-1)^l
+  \right]
+  \\
+  &=
+  \frac{1}{2\,n}
+  \left[
+    (-1)^{n+K+l-1}
+    +
+    \sum_{k=-K}^{K}
+    \cos \frac { k \, l \pi } { n }
+  \right]
+  .
+\end{aligned}
+$$
+
+\hrulefill
+
+Example 1. If $n = 3, K = 1$,
+then $\lambda_1 = \lambda_2 = 1$, $\lambda_3 = 0$,
+and $\lambda_4 = \lambda_1 - 2 \, \lambda_2 + 2 \, \lambda_3 = -1$.
+%
+We can verify that $\mu_0 = 1/3, \mu_1 = 1/2, \mu_2 = -1/6$.
+%
+Although $\mu_1 > \mu_0$, the system will not be trapped
+in the current bin because of the reflective boundary condition.
+%
+Upon a visit to the middle bin, $j = 2$,
+$v_i$ at bin $i = 1$ or $3$ is updated by $1/2 - 1/6 = 1/3$,
+same as the update on bin $2$.
+Upon a visit to bin $i = 1$, the three bins are updated
+by $1/2 + 1/3 = 5/6$, $1/2 - 1/6 = 1/3$, and $-1/6$,
+respectively.
+
+\hrulefill
+
+Example 2. If $n = 3, K = 2$,
+then $\lambda_1 = \lambda_2 = \lambda_3 = 1$, $\lambda_4 = 1$.
+We have $\mu_0 = 1, \mu_1 = \mu_2 = 0$,
+recovering the single-bin scheme.
+
+\hrulefill
+
+Example 3. If $n = 4, K = 1$,
+then $\lambda_1 = \lambda_2 = 1, \lambda_3 = \lambda_4 = 0$,
+$\lambda_5 = (-1)(\lambda_1 - 2 \, \lambda_2 + 2 \, \lambda_3 - 2 \, \lambda_4 = 1$.
+The kernel is given by
+$\mu_0 = 1/2, \mu_1 = \sqrt{2}/8, \mu_2 = 1/4, \mu_3 = -\sqrt{2}/8$.
+}
+
+
+
+
+\section{\label{sec:invt_schedule}
+Inverse-time schedules}
+
+
+
+The following contains a more complete discussion
+on the inverse-time schedule
+
+
+\subsection{\label{sec:invt_error}
+Error
+}
+
+
+
+Using Eq. \eqref{eq:alpha_invtlambda}
+in Eq. \eqref{eq:error_asym1} yields
+%
+\begin{align}
+\Err_A
+&=
+\frac{    1    }
+     { T + t_0 }
+\sum_{k = 2}^n
+  \frac{ \Gamma_k \, \nu_k^2 }
+       {    2 \, \nu_k - 1   }
+\left[
+  1 - \left(
+        \frac {     t_0 }
+              { T + t_0 }
+      \right)^{ 2 \, \nu_k - 1 }
+\right],
+\label{eq:error_asym_invt}
+\end{align}
+%
+where $\nu_k \equiv \lambda_k / \lambda$.
+%
+The error is asymptotically minimal
+only if $2\,\nu_k > 1$ for every $k$.
+%
+At long times, $T \to \infty$, we get
+$$
+\begin{aligned}
+  \Err_A
+  =
+  \sum_{k = 2}^n
+  \begin{dcases}
+    \frac{    1    }
+         { T + t_0 }
+    \frac{ \Gamma_k \, \nu_k^2 }
+         {   2 \, \nu_k - 1    }
+    &
+    \mathrm{if \;} 2 \, \nu_k > 1,
+    \\%[1em]
+    %
+    %
+    \frac{    \Gamma_k    }
+         { 4 \, (T + t_0) }
+    \ln \frac{ T + t_0 }
+             {   t_0   }
+    &
+    \mathrm{if \;} 2 \, \nu_k = 1,
+    \\
+    %
+    %
+    \frac{  t_0^{ 2 \, \nu_k  - 1}  }
+         { (T + t_0)^{ 2 \, \nu_k } }
+    \frac{ \Gamma_k \, \nu_k^2 }
+         {   1 - 2 \, \nu_k    }
+    &
+    \mathrm{if \;} 2 \, \nu_k < 1.
+  \end{dcases}
+\end{aligned}
+$$
+%
+The last two cases
+are asymptotically suboptimal
+as they decay slower than $1/T$.
+%
+In this case,
+we can drop the second term
+in the square brackets,
+and identify the optimal $\lambda$ as
+the smallest real root of
+%
+\begin{equation}
+  \sum_{k = 2}^n
+    \frac { \lambda_k - \lambda }
+          { \left(2 - \lambda/ \lambda_k \right)^2 }
+  = 0.
+\notag
+%\label{eq:optimal_lambda_approx}
+\end{equation}
+%
+Since
+$$
+\frac{ \nu_k^2        }
+     { 2 \, \nu_k - 1 }
+=
+\frac{ \lambda_k^2 }
+     { \lambda \, (2 \, \lambda_k - \lambda) }
+\ge 1
+,
+$$
+with the equality achieved only at $\lambda = \lambda_k$,
+the optimal scheme must satisfy
+$\lambda_2 = \dots = \lambda_n$,
+corresponding to the single-bin scheme
+(cf. Sec. \ref{sec:optWL}).
+
+
+
+For a finite-length simulation,
+we need to include the residual error, $\Err_R$.
+%
+Assuming Eqs. \eqref{eq:error_res1} and \eqref{eq:t0_sinc},
+we get
+%
+\begin{equation}
+\Err_R
+=
+\sum_{k = 2}^n
+  \frac{ \Gamma_k \, \nu_k }
+       {        t_0   }
+  \left(
+      \frac{   t_0   }
+           { T + t_0 }
+   \right)^{ 2 \, \nu_k },
+\notag
+%\label{eq:error_res_invt}
+\end{equation}
+%
+with
+%
+\begin{equation}
+  q(T)
+  =
+  \frac{ 1 } { \lambda }
+  \ln\left(
+    \frac{ T + t_0 } { t_0 }
+  \right)
+  ,
+\notag
+%\label{eq:qt_invtlambda}
+\end{equation}
+%
+from integrating Eq. \eqref{eq:alpha_invtlambda}.
+%
+%We assume that
+%the system was initially equilibrated
+%at a constant $\alpha_0$,
+%such that the values of
+%$\left\langle y_k^2(0) \right\rangle$
+%can be computed from Eq. \eqref{eq:y2_eql},
+%as well as Eq. \eqref{eq:t0_sinc}.
+%
+The total error is
+%
+\begin{align}
+\Err
+&=
+\Err_R + \Err_A
+\notag
+\\
+&=
+\sum_{ k = 2 }^n
+  \frac
+  {
+    \Gamma_k \, \nu_k \,
+    \left[
+      \nu_k
+      +
+      (\nu_k - 1)
+      \left(
+        \frac{ t_0 } { T + t_0 }
+      \right)^{ 2 \, \nu_k - 1 }
+    \right]
+  }
+  {
+    (T + t_0) \, (2 \, \nu_k - 1)
+  }
+  .
+\label{eq:error_invt}
+\end{align}
+%
+%where
+%$$
+%\Err^f_k
+%\equiv
+%\left\langle
+%  y_k^2
+%\right\rangle_{ \alpha(t) }
+%=
+%\frac{  \Gamma_k \, \nu_k   }
+%     {    2 \, (T + t_0)    }
+%,
+%$$
+%is the equilibrium, or saturated, error of mode $k$
+%at the terminal updating magnitude
+%of $\alpha(T) = 1/[\lambda (T + t_0)]$.
+
+%\note{Derivation of Eq. \eqref{eq:error_invt}:
+%$$
+%\begin{aligned}
+%\Err_R
+%&=
+%\sum_{ k = 2 }^n
+%  \Err^f_k \left( \frac{   t_0   }
+%                       { T + t_0 }
+%          \right)^{ 2 \nu_k - 1 }
+%\\
+%\Err_A
+%&=
+%\sum_{ k = 2 }^n
+%  \frac{ 2 \, \Err^f_k \, \nu_k }
+%       {    2 \, \nu_k - 1      }
+%  \left[
+%    1 -
+%    \left(
+%      \tfrac{   t_0   }
+%            { T + t_0 }
+%      \right)^{2 \, \nu_k - 1}
+%  \right]
+%\\
+%&=
+%\sum_{ k = 2 }^n
+%  \Err^f_k \,
+%  \left[
+%    1 -
+%    \left(
+%      \tfrac{   t_0   }
+%            { T + t_0 }
+%      \right)^{2 \, \nu_k - 1}
+%  \right]
+%  +
+%  \frac{   \Err^f_k     }
+%       { 2 \, \nu_k - 1 }
+%  \left[
+%    1 -
+%    \left(
+%      \tfrac{   t_0   }
+%           { T + t_0 }
+%      \right)^{2 \, \nu_k - 1}
+%  \right].
+%\end{aligned}
+%$$
+%Adding the two yields Eq. \eqref{eq:error_invt}.
+%}
+
+
+
+%We give several remarks on Eq. \eqref{eq:error_invt}.
+%
+
+%Clearly, the final error is always greater than
+%the saturated equilibrium error
+%at the terminal $\alpha(T)$:
+%$$
+%E \ge E_\mathrm{sat} \equiv \sum_{k = 2}^n E^f_k,
+%$$
+%because the second term in the braces
+%of Eq. \eqref{eq:error_invt}
+%is nonnegative no matter the sign of $2 \, \nu_k - 1$
+%(in fact, it is a decreasing function
+%that vanishes only at $\nu_k \to +\infty$).
+%%
+%For a set of nonidentical $\lambda_k$'s,
+%the equality is reached only at $T = 0$.
+
+
+
+
+
+\subsection{\label{sec:optlambda}
+Optimal proportionality constant
+}
+
+
+
+
+Intuitively,
+we expect the optimal $\lambda$
+that minimizes the error of the inverse-time schedule,
+Eq. \eqref{eq:error_invt},
+to be a kind of time average of
+the instantaneous eigenvalue $\lambda(t)$
+in Sec. \ref{sec:optschedule}.
+%
+Thus, it should also decrease with
+the simulation length, $T$.
+%
+Below we show this is indeed so.
+
+Let us first rewrite Eq. \eqref{eq:error_invt} as
+%
+$$
+\Err
+=
+\sum_{ k = 2 }^n
+  \frac{ \Gamma_k  }
+       { (T + t_0) }
+  G\left( \nu_k, \frac{ t_0 } { T + t_0} \right),
+$$
+%
+where the $k$th component is proportional to
+%
+$$
+G\left( \nu_k, r \right)
+=
+\frac { \nu_k
+        \,
+        \left[
+          \nu_k
+          +
+          (\nu_k - 1) \,
+          r^{2 \, \nu_k - 1}
+        \right]
+      }
+      { 2 \, \nu_k - 1 }
+.
+$$
+%
+As shown in Fig. \ref{fig:err_component},
+the function $G(\nu_k, r)$ depends non-trivially on $\nu_k$.
+%
+For a fixed and sufficiently small $r = t_0 / (T + t_0)$,
+$G(\nu_k, r)$ has two local minima along $\nu_k$,
+one at $\nu_k = 0$,
+and the other shallower one around $\nu_k = 1$.
+%
+For a short simulation, or a large $r$,
+the minimal error may be achieved at $\nu_k \approx 0$,
+corresponding to a large value of $\lambda$
+($\lambda \gg \lambda_k$).
+%
+However, this minimum is unstable,
+for $G(\nu_k, r)$ increases rapidly
+with decreasing $r$, or increasing simulation length,
+under a fixed $\nu_k$.
+%
+In other words,
+asymptotically, the minimal error
+is always achieved at the other minimum,
+$\nu_k = 1$ or $\lambda = \lambda_k$.
+%
+In this case,
+$G(\nu_k, r) \to G(1, 0) = 2$
+and the total error is roughly twice $E_\mathrm{sat}$.
+
+
+
+\begin{figure}[h]
+\begin{center}
+  \makebox[\linewidth][c]{
+    \includegraphics[angle=0, width=0.95\linewidth]{fig/errcomp.pdf}
+  }
+  \caption{
+    \label{fig:err_component}
+    Component of the error, $G(\nu_k, r)$,
+    versus $\nu_k = \lambda_k / \lambda$,
+    where $r = t_0 / (T + t_0)$.
+    %
+    \note{This figure is produced by
+      \texttt{doc/fig/errcomp.gp}.
+    }
+  }
+\end{center}
+\end{figure}
+
+
+
+For a set of nonidentical eigenvalues,
+$\lambda_2, \dots, \lambda_n$,
+it is impossible to achieve $\lambda = \lambda_k$
+for every $k$,
+and we shall argue that
+the optimal $\lambda$
+tends to be biased toward
+the low end of the spectrum
+in a long simulation.
+%
+From Fig. \ref{fig:err_component},
+it is seen that around the minimum at $\nu_k = 1$,
+the error function $G(\nu_k, r)$
+has a steeper slope for the $\nu_k < 1$
+(or $\lambda > \lambda_k$) side
+than for the $\nu_k > 1$ (or $\lambda < \lambda_k$) side.
+%
+This means a smaller $\lambda$ is preferred
+in terms of minimizing the error.
+%
+Further, the difference in slopes
+between the two sides increases
+with the simulation length, $T$
+(or as $r$ decreases).
+%
+We thus expect the optimal $\lambda$
+to shift toward the smaller values of $\lambda_k$'s,
+and ultimately to approach $\min \lambda_k$
+in the infinite $T$ limit.
+
+The shift of the optimal $\lambda$
+is also affected by the values of $\Gamma_k$'s.
+%
+If large $\lambda_k$'s are associated with
+large $\Gamma_k$'s,
+these modes weight more in the error function,
+and the above shift toward smaller $\lambda$
+slows down.
+%
+For example,
+in the nearest-neighbor or Gaussian updating scheme
+discussed in Sec. \ref{sec:band-matrix},
+the index $k$ represents the wave number
+(or the inverse wave length)
+and $\lambda_k$ decreases with $k$.
+%
+As shown in Eq. \eqref{eq:Gamma_onestep},
+in the one-step sampling process,
+$\Gamma_k$ also decreases with $k$,
+and thus, $\lambda_k$ and $\Gamma_k$
+are positively correlated.
+%
+Therefore, we expect the shift of the optimal $\lambda$
+in the above case
+to be slower than in that in the case of perfect sampling,
+where $\Gamma_k \equiv 1$ is a constant.
+%
+If $\Gamma_k$ decreases too quickly with $k$,
+the shift can be hard to detect
+[see Eq. \eqref{eq:lambda_nn_onestep} for an example].
+
+
+
+\subsection{Nearest-neighbor updating scheme}
+
+
+For the nearest-neighbor updating scheme
+introduced in Sec. \ref{sec:nnscheme},
+we can find an analytical expression
+of the optimal value of $\lambda$
+in the limit of large $n$.
+%
+In this case,
+we convert Eq.
+\eqref{eq:error_asym_invt}
+%and
+%\eqref{eq:optimal_lambda_approx}
+to an integral,
+$\sum_i \to \frac{2 \, n}{\pi} \int dp$, and
+%
+\begin{align}
+\Err_A
+=
+\frac{2 \, n}{\pi \, T}
+\int_0^{\pi/2}
+  \frac{ \Gamma(p) \, \left(1 - 4 \, \mu_1 \, \sin^2 p \right)^2    }
+       {   \lambda \, \left(2 - 8 \, \mu_1 \, \sin^2 p - \lambda \right) }
+\, dp.
+\notag
+%\label{eq:error_nn_asym_int}
+\end{align}
+
+
+
+For perfect sampling,
+$\Gamma(p) = 1$ from Eq. \eqref{eq:Gamma_perfect},
+and
+$$
+\begin{aligned}
+  \Err_A
+  %&=
+  %\frac{2 \, n}{\pi \, T}
+  %\int_0^{\pi/2}
+  %\frac{ \left(1 - 4 \, \mu_1 \, \sin^2 p \right)^2 }
+  %{ \lambda \, \left(2 - 8 \, \mu_1 \, \sin^2 p - \lambda \right) }
+  %\, dp
+  %\notag \\
+  &=
+  \frac{n}{4 \, T}
+  \left(
+    \frac{2 - 4 \, \mu_1 + \lambda}{ \lambda }
+    +
+    \frac{ \lambda }
+    { \sqrt{ (2 - \lambda) (2 - 8 \, \mu_1 - \lambda) } }
+  \right)
+.
+\end{aligned}
+$$
+\note{The integral is evaluated by contour integration.
+%
+It is somewhat more convenient to change variable $p \to \frac{ \pi } { 2 } - p$,
+and
+$$
+\begin{aligned}
+  \Err_A
+  &=
+  \frac{n}{\lambda \, T}
+  \frac{1}{2 \pi i}
+  \int_0^{2 \, \pi}
+  \frac{ \left(1 - 4 \, \mu_1 \, \cos^2 p \right)^2 }
+  { 2 - 8 \, \mu_1 \, \cos^2 p - \lambda }
+  \, dp
+  \\
+  &=
+  \frac{n}{\lambda \, T}
+  \frac{1}{2 \pi i}
+  \oint
+  \frac{ \left[1 - \mu_1 \, \left(z+\frac{1}{z}\right)^2 \right]^2 }
+  { 2 - 2 \, \mu_1 \, \left(z + \frac{1}{z}\right)^2 - \lambda }
+  \, \frac{dz}{z}
+  ,
+\end{aligned}
+$$
+where the contour is the unit circle
+in the complex plane of $z$.
+%
+This integral has five poles, one at the origin,
+which produces a residue
+$\frac{2 - 4 \, \mu_1 - \lambda}{4}$
+(from series expansion of small $z$),
+and the other four at
+$$
+z + \frac{1}{z} = \pm\sqrt\frac{2-\lambda}{2 \, \mu_1},
+$$
+with two of them inside the unit circle:
+$$
+z_\pm = \pm \frac{\sqrt{2-\lambda} -\sqrt{2 - 8 \, \mu_1 - \lambda}}
+{\sqrt{8 \mu_1}}.
+$$
+Thus,
+$$
+\begin{aligned}
+\Err_A
+&=
+\frac{      n       }
+     { \lambda \, T }
+\left(
+ \frac{ 2 - 4 \, \mu_1 - \lambda }
+      {          4               }
+ +
+ \sum_{z = z_{\pm} }
+ \frac{ \left(z^2 - \mu_1 (1 + z^2)^2 \right)^2 }
+ { 2 z^4 (2 - 4 \mu_1 - \lambda - 4 \mu_1 z^2) }
+\right)
+\\
+&=
+\frac{       n      }
+     { \lambda \, t }
+\left(
+  \frac{ 2 - 4 \, \mu_1 - \lambda }
+       {          4               }
+ +
+ \frac{ \left(1 - \mu_1 \left(z + \frac{1}{z} \right)^2 \right)^2 }
+      { 2 - 4 \mu_1 - \lambda - 4 \mu_1 z_{\pm}^2                 }
+\right)
+\\
+&=
+\frac{       n      }
+     { \lambda \, T }
+\left(
+  \frac{ 2 - 4 \, \mu_1 - \lambda }
+       {          4               }
+ +
+ \frac{ (\lambda/2)^2 }
+ { \sqrt{(2-\lambda) (2 - 8 \mu_1 -\lambda)} }
+\right).
+\end{aligned}
+$$
+}
+%
+Minimizing the function yields
+%
+\begin{equation}
+  \lambda
+  =
+  \frac{ 1 - 4 \, \mu_1 }
+       { 1 - 2 \, \mu_1 }
+  ,
+\notag
+%\label{eq:lambda_nn_perfect}
+\end{equation}
+%
+and the asymptotic error in the optimal case is given by
+%
+\begin{equation}
+  \Err_A
+  =
+  \frac{n}{T}
+  \left(
+    1+ \frac{2 \, \mu_1^2}{1-4 \, \mu_1}
+  \right)
+  ,
+\notag
+%\label{eq:error_nn_perfect}
+\end{equation}
+%
+%From Eq. \eqref{eq:error_nn}, it is clear that
+which
+increases with the magnitude of $\mu_1$
+no matter its sign,
+and the minimal value, obtained at $\mu_1 = 0$,
+corresponds to the single-bin scheme.
+%
+\note{Note that
+we have ignored the residual error
+and assumed $\lambda < 2 \, \min \lambda_k = 2 - 8 \, \mu_1$
+for all $k$ in the above solution.
+%
+Fortunately,
+the above optimal $\lambda$ % from Eq. \eqref{eq:lambda_nn_perfect}
+satisfies this condition
+by the stability condition,
+$4 \, \mu_1 < 1$.
+}%
+\note{This is because,
+$$
+\frac{ 1 - 4 \, \mu_1 } { 1 - 2 \, \mu_1 } < 2 - 8 \, \mu_1
+\quad \leftrightarrow \quad
+1 < 2 - 4 \, \mu_1.
+$$
+}%
+
+
+For the one-step sampling process,
+we find from Eq. \eqref{eq:Gamma_onestep}
+that $\Gamma(p) = \cot^2 p$
+is peaked around $p \approx 0$,
+%
+Then
+$$
+  \Err_A
+  \propto
+  \frac{   2 \, n }
+       { \pi \, T }
+  \frac{             1             }
+       {  \lambda \, (2 - \lambda) }
+  .
+$$
+\note{
+$$
+\begin{aligned}
+  \Err_A
+  &
+  \propto
+  \frac{   2 \, n }
+       { \pi \, T }
+  \left.
+  \frac{            \left(1 - 4 \, \mu_1 \, \sin^2 p \right)^2         }
+       { \lambda \, \left(2 - 8 \, \mu_1 \, \sin^2 p - \lambda \right) }
+  \right|_{ p \approx 0 }
+  %\notag \\
+  %&
+  \approx
+  \frac{   2 \, n }
+       { \pi \, T }
+  \frac{             1             }
+       {  \lambda \, (2 - \lambda) }
+  .
+\end{aligned}
+$$
+}%
+%
+The optimal $\lambda$ is, therefore,
+%
+\begin{equation}
+\lambda \approx 1.
+\label{eq:lambda_nn_onestep}
+\end{equation}
+%
+\note{We can be a bit more precise here.
+%
+From Eq. \eqref{eq:Gamma_onestep}, we get
+%
+$$
+\Gamma(p) = \cot^2 p \approx \cos^2 p / (\sin^2 p + \delta^2),
+$$
+%
+where we have introduced
+$\delta \propto \sin[ \pi / (2 \, n) ] \sim 1/n$
+as a small parameter to avoid the divergence
+around the origin.
+%
+$$
+\begin{aligned}
+\Err_A
+&=
+\frac{   2 \, n }
+     { \pi \, t }
+\int_0^{\pi/2}
+    \frac{            \left(1 - 4 \, \mu_1 \, \sin^2 p \right)^2         }
+         { \lambda \, \left(2 - 8 \, \mu_1 \, \sin^2 p - \lambda \right) }
+    \frac{ \cos^2 p }
+         { \sin^2 p + \delta^2 }
+\, dp
+\notag \\
+&
+\stackrel{    \delta \ll 1     }
+         { =\joinrel=\joinrel= }
+\frac{   2 \, n }
+     { \pi \, t }
+\frac{             1             }
+     {  \lambda \, (2 - \lambda) }
+\frac{    1   }
+     { \delta }
+.
+\end{aligned}
+$$
+The integral is evaluated as follows.
+%
+We again change variable $p \to \frac{ \pi } { 2 } - p$,
+and
+$$
+\begin{aligned}
+\Err_A
+&=
+\frac{n}{\lambda \, t}
+\frac{1}{2 \pi i}
+\int_0^{2 \, \pi}
+\frac{ \left(1 - 4 \, \mu_1 \, \cos^2 p \right)^2 }
+     {       2 - 8 \, \mu_1 \, \cos^2 p - \lambda }
+\cdot
+\frac{ \sin^2 p            }
+     { \cos^2 p + \delta^2 }
+\, dp
+\\
+&=
+\frac{n}{\lambda \, t}
+\frac{1}{2 \pi i}
+\oint
+\frac{ \left[1 -      \mu_1 \, \left(z + \frac{1}{z}\right)^2 \right]^2 }
+     {       2 - 2 \, \mu_1 \, \left(z + \frac{1}{z}\right)^2 - \lambda }
+\cdot
+\frac{ 4 - \left( z + \frac 1 z \right)^2 }
+     { \left( z + \frac 1 z \right)^2 + 4 \, \delta^2 }
+\, \frac{dz}{z}
+\\
+&=
+\frac{n}{\lambda \, t}
+\frac{1}{2 \pi i}
+\oint
+\frac{ \left[z^2 -      \mu_1 \, (z^2 + 1)^2 \right]^2   }
+     {  (2 - \lambda) \, z^2 - 2 \, \mu_1 \, (z^2 + 1)^2 }
+\cdot
+\frac{ 4 \, z^2 - ( z^2 + 1 )^2 }
+     { ( z^2 + 1 )^2 + 4 \, \delta^2 \, z^2 }
+\, \frac{ dz }{ z^3 }
+\\
+&=
+\frac{ n } { \lambda \, t }
+\sum_l \operatorname{Res}_l
+,
+\end{aligned}
+$$
+where the contour is the unit circle
+in the complex plane of $z$,
+and the integral is reduced to a sum of residues
+around the poles within.
+
+The poles of the integral come from three sources,
+namely,
+% 1.
+$z = 0$,
+% 2.
+the zeros of
+$(2 - \lambda) \, z^2 - 2 \, \mu_1 \, (z^2 + 1)^2$,
+% 3.
+and the zeros of
+$( z^2 + 1 )^2 + 4 \, \delta^2 \, z^2$.
+
+For the first pole around the origin,
+we need to expand the integrand as
+$$
+\frac{ A + B \, z^2 + \cdots }
+     {          z^3          },
+$$
+then the residue is $B$.
+%
+Since
+$$
+\begin{aligned}
+\left[ z^2 - \mu_1 (z^2 + 1)^2 \right]^2
+&
+\approx
+[ - \mu_1 + (1 - 2 \, \mu_1) \, z^2]^2
+\\
+&
+\approx
+\mu_1^2
+\left[
+  1 + \left(4 - \tfrac { 2  } { \mu_1 } \right) z^2
+\right],
+\\
+%
+4 \, z^2 - ( z^2 + 1 )^2
+&
+\approx
+-( 1 - 2 \, z^2 ),
+\\
+%
+(2 - \lambda) \, z^2 - 2 \, \mu_1 \, (z^2 + 1)^2
+&
+\approx
+-2 \, \mu_1 \,
+\left[
+  1 + \left(
+        2 + \tfrac{ \lambda - 2 } { 2 \, \mu_1 }
+      \right)
+      \, z^2
+\right],
+\\
+%
+( z^2 + 1 )^2 + 4 \, \delta^2 \, z^2
+&
+\approx
+1 + (2 + 4 \, \delta^2) \, z^2,
+\end{aligned}
+$$
+the integrand is
+$$
+\begin{aligned}
+\frac{ \mu_1 }
+     {   2   }
+\left[
+  1 + \left(
+        - \frac{ 2 + \lambda } { 2 \, \mu_1 }
+        - 2 - 4 \, \delta^2
+      \right) \, z^2
+\right].
+\end{aligned}
+$$
+and the residue is
+$$
+\operatorname{Res}_1
+=
+  - \frac{ 2 + \lambda } { 4 }
+  - \mu_1 \, \left( 1 + 2 \, \delta^2 \right).
+$$
+
+
+For the second part,
+we have four roots of
+$$
+(2 - \lambda) \, z^2 = 2 \, \mu_1 \, (z^2 + 1)^2,
+$$
+which are
+\begin{equation}
+  z
+  =
+  \pm
+  \sqrt { \frac{ 2 - \lambda }
+               { 8 \, \mu_1  } }
+  \pm
+  \sqrt { \frac{ 2 - \lambda }
+               { 8 \, \mu_1  } - 1 }
+  .
+\tag{N5}
+\label{neq:nnint_local_zeros_part2}
+\end{equation}
+%
+We shall distinguish two cases.
+\textbf{Case A.}
+If $\lambda < 2 - 8 \, \mu_1$,
+two of the roots lie in the unit circle, namely
+$$
+z
+=
+\pm
+\left(
+\sqrt { \frac{ 2 - \lambda }
+             { 8 \, \mu_1  } }
+-
+\sqrt { \frac{ 2 - \lambda }
+             { 8 \, \mu_1  } - 1 }
+\right),
+$$
+which satisfy
+$$
+4 \, \mu_1 \, ( z^2 + 1)
+=
+2 - \lambda
+-
+\sqrt{ ( 2 - \lambda ) ( 2 - \lambda - 8 \, \mu_1 ) }.
+$$
+Thus,
+$$
+\begin{aligned}
+\left[ z^2 - \mu_1 \, \left( z^2 + 1 \right)^2 \right]^2
+&=
+\left( z^2 - \tfrac{ 2 - \lambda } { 2 } z^2 \right)^2
+=
+\frac{ \lambda^2 } { 4 } z^4.
+\\
+%
+4 z^2 - \left( z^2 + 1 \right)^2
+&=
+-\frac{ 2 - \lambda - 8 \, \mu_1  } { 2 \, \mu_1 } z^2,
+\\
+%
+\left( z^2 + 1 \right)^2 + 4 \, \delta^2 \, z^2
+&=
+\frac{ 2 - \lambda + 8 \, \mu_1 \, \delta^2 }
+     { 2 \, \mu_1 }
+     z^2,
+\\
+%
+(2 - \lambda) \, 2 \, z
+-
+8 \, \mu_1 \, \left( z^2 + 1 \right) \, z
+&=
+2 \, z \, \left[2 - \lambda - 4 \,  \mu_1 \, (z^2 + 1) \right]
+\\
+&= 2 \, z \, \sqrt{ (2 - \lambda) ( 2 - \lambda - 8 \, \mu_1 ) },
+\end{aligned}
+$$
+where we have used the L'H\^{o}pital's rule
+and taken the derivative for the last factor.
+%
+Note that the two roots within the unit share the same
+residue and the sum for this part is
+%
+$$
+\operatorname{Res}_2
+=
+-\frac{                 \lambda^2                     }
+      { 4 \, ( 2 + 8 \, \mu_1 \, \delta^2 - \lambda ) }
+\sqrt{ 1 - \frac{ 8 \, \mu_1 } { 2 - \lambda } }.
+$$
+%
+\textbf{Case B.}
+If $2 - 8 \, \mu_1 \le \lambda < 2$,
+the four zeros in Eq. \eqref{neq:nnint_local_zeros_part2}:
+%
+\begin{equation}
+  z
+  =
+  \pm
+  \sqrt { \frac{ 2 - \lambda }
+               { 8 \, \mu_1  } }
+  \pm i \,
+  \sqrt { 1 - \frac{ 2 - \lambda }
+                   { 8 \, \mu_1  } }
+  ,
+\notag
+%\label{eq:nnint_local_zeros_part2b}
+\end{equation}
+%
+all satisfy $|z| = 1$, and hence
+all lie on the border of the unit circle.
+%
+Thus, each contributes half of the residue there.
+%
+However, since the four zeros satisfy
+$$
+2 - \lambda - 4 \, \mu_1 \, ( z^2 + 1)
+=
+\pm i
+\sqrt{ ( 2 - \lambda ) ( 8 \, \mu_1 - 2 + \lambda ) },
+$$
+the sum of the four residues gives zero in this case:
+$$
+\operatorname{Res}_2 = 0.
+$$
+In summary,
+$$
+\operatorname{Res}_2
+=
+\begin{dcases}
+-\frac{                 \lambda^2                     }
+      { 4 \, ( 2 + 8 \, \mu_1 \, \delta^2 - \lambda ) }
+\sqrt{ 1 - \frac{ 8 \, \mu_1 } { 2 - \lambda } }
+&
+\mathrm{if \;}
+\lambda < 2 - 8 \, \mu_1,
+\\
+0
+&
+\mathrm{otherwise}.
+\end{dcases}
+$$
+
+
+For the last part,
+we have four roots of
+$(z^2 + 1)^2 = - 4 \, \delta^2 \, z^2$,
+with two of them lying in the unit circle:
+$$
+z = \pm i \left( \sqrt{ 1 + \delta^2 } - \delta \right),
+$$
+satisfying
+$$
+z^2 + 1 + 2 \, \delta^2 = 2 \, \delta \, \sqrt{1 + \delta^2}.
+$$
+Then,
+$$
+\begin{aligned}
+z^2 - \mu_1 \, \left( z^2 + 1 \right)^2
+&= z^2 \, (1 + 4 \, \mu_1 \, \delta^2),
+\\
+4 \, z^2 - \left( z^2 + 1 \right)^2
+&=
+4 \, z^2 \, (1 + \delta^2)
+\\
+%
+(2 - \lambda) \, z^2
+- 2 \, \mu_1 \, \left( z^2 + 1 \right)^2
+&=
+\left(
+  2 - \lambda + 8 \, \mu_1 \, \delta^2
+\right) \, z^2
+\\
+%
+4 \, z \, \left( z^2 + 1 \right)
++
+8 \, \delta^2 \, z
+&=
+4 \, z \, (z^2 + 1 + \delta^2)
+=
+8 \, z \, \delta \, \sqrt{ 1 + \delta^2 }.
+\end{aligned}
+$$
+Note that the above two roots share the same
+residue and the sum for this part is
+$$
+\operatorname{Res}_3
+=
+\frac{ \left( 1 + 4 \, \mu_1 \, \delta^2 \right)^2 }
+     {        2 + 8 \, \mu_1 \, \delta^2 - \lambda }
+\frac{ \sqrt{ 1 + \delta^2 } }
+     {        \delta         }.
+$$
+
+Now as $\delta \to 0$, the last contribution will dominate,
+and we have
+$$
+\Err_A
+\approx
+\frac{ n } { T }
+\frac{ (1 + 4 \, \mu_1 \, \delta^2)^2 }
+{ \lambda \, (2 + 8 \, \mu_1 \, \delta^2 - \lambda) }
+\frac{ 1 } { \delta }
+\approx
+\frac{ n } { T }
+\frac{ 1 }
+{ \lambda \, (2 - \lambda) }
+\frac{ 1 } { \delta },
+$$
+and the minimum is reached at $\lambda \approx 1$.
+
+The weakness of the above calculation is two fold.
+%
+First, it ignores the residual error.
+%
+Second, the simplified expression for the asymptotic error
+$E_A$ may also be misused.
+%
+Namely, with $\lambda \approx 1$,
+we cannot assume $\lambda < 2 \, \lambda_k$ in general.
+%
+So it only works for a very small value of $\mu_1$.
+}
+
+
+
+However, Eq. \eqref{eq:lambda_nn_onestep}
+is an approximation good only
+for sufficiently short simulations,
+since we have taken the limit of $n \to \infty$
+for a fixed $T$.
+%
+For very long simulations,
+the optimal $\lambda$
+will ultimately drift to
+the smallest eigenvalue,
+$\min \lambda_k = 1 - 4 \, \mu_1$.
+%as discussed in Sec. \ref{sec:optlambda}.
+
+
+
+
+
+
+\bibliography{simul}
+\end{document}

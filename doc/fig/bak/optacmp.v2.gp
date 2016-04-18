@@ -10,14 +10,14 @@
 set encoding cp1250 # make the minus sign longer
 set terminal push
 # dl 2.0 make dashed line longer
-set terminal postscript eps enhanced dl 2.0 size 3.5, 5.0 font "Times, 24"
+set terminal postscript eps enhanced dl 2.0 size 3.5, 4.5 font "Times, 24"
 set output "optacmp.eps"
 set multiplot
 
 
 reset
 
-htop = 0.5
+htop = 0.45
 hbot = 1 - htop
 
 dx = 0.01
@@ -30,31 +30,6 @@ set label "(b)" at screen dx, hbot - dy font "Times, 32"
 set size 1, hbot
 set origin 0, 0
 
-set xtics 10
-set mxtics 10
-set xlabel "{/Times-Italic q}({/Times-Italic T}) - {/Times-Italic q}"
-
-set logscale y
-set format y "10^{%T}"
-set ylabel "{/Times-Italic m}({/Times-Italic q}) = 1/({/Times-Italic T}{/Symbol-Oblique a})"
-
-set key right top Left reverse width -3 spacing 1.1
-
-plot [:30][1e-3:] \
-    "../../data/opta/sig10_g_alpha.dat"  u (494.499-$3):(1/(1e8*$2))           w l lt 1 lw 6  t "Gaussian, global", \
-    "../../data/opta/sig10_l_alpha.dat"  u (162.972-$3):(1/(1e8*$2))           w l lt 1 lw 2  t "Gaussian, local", \
-    "../../data/opta/wl_g_alpha.dat"     u (8.51733-$3):(1/(1e8*$2))           w l lt 4 lw 2  t "Single-bin, global", \
-    "../../data/opta/wl_l_alpha.dat"     u (8.51733-$3):(1/(1e8*$2)) every 500 w p pt 6 lw 2  t "Single-bin, local", \
-    0 notitle
-
-
-
-
-reset
-# top panel
-set origin 0, hbot
-set size 1, htop
-
 set logscale x
 set mxtics 10
 set format x "10^{%T}"
@@ -65,6 +40,32 @@ set logscale y
 set format y "10^{%T}"
 set mytics 10
 #set yrange [1e4:1e9]
+set ylabel "{/Times-Italic d} {/Symbol-Oblique a}^{/*0.7 -1}({/Times-Italic t}) / {/Times-Italic d t}"
+
+set key left Left reverse
+
+#sig_c_g = `tail -n 1 ../../data/opta/sig10_g_alpha.dat | cut -f 7`
+#sig_c_l = `tail -n 1 ../../data/opta/sig10_l_alpha.dat | cut -f 7`
+
+plot [][:1] \
+    "../../data/opta/sig10_g_alpha.dat"  u 1:4 w l lt 1 lw 6 notitle, \
+    "../../data/opta/sig10_g_alpha.dat"  u 1:7 w l lt 2 lw 6 notitle, \
+    "../../data/opta/sig10_l_alpha.dat"  u 1:4 w l lt 1 lw 2 notitle, \
+    "../../data/opta/sig10_l_alpha.dat"  u 1:7 w l lt 2 lw 2 notitle, \
+    -1 notitle
+
+
+# top panel
+set origin 0, hbot
+set size 1, htop
+
+set bmargin 0
+
+# the top panel share the same x-axis with
+# the bottom one
+unset xlabel
+set format x ""
+
 set ylabel "{/Symbol-Oblique a} ({/Times-Italic t})"
 
 

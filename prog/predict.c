@@ -243,7 +243,11 @@ int main(int argc, char **argv)
   /* estimate or load the gamma values */
   gamma = estgamma(m->n, m->sampmethod, m->pbc, m->localg);
   if ( m->fngamma[0] != '\0' ) {
-    loadgamma(m->n, gamma, m->fngamma);
+    if ( m->sampmethod == SAMPMETHOD_MD ) {
+      loadgamma(m->n, gamma, m->fngamma);
+    } else {
+      savegamma(m->n, gamma, m->fngamma);
+    }
   }
 
   if ( !m->cscan && !m->nbscan && !m->sigscan && !m->okscan ) {

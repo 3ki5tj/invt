@@ -6,9 +6,7 @@ figgps=$(wildcard fig/*.gp)
 pdffigs=$(patsubst %.gp,%.pdf, $(figgps))
 epsfigs=$(patsubst %.gp,%.eps, $(figgps))
 
-texpdf = $(prj).pdf
-
-#  $(prj)_notes.pdf
+texpdf = $(prj).pdf $(prj)_notes.pdf
 
 alltexpdf = $(patsubst %.tex,%.pdf, $(wildcard $(prj)*.tex))
 
@@ -37,6 +35,7 @@ zip: $(prj)docV$(ver).zip
 $(prj)docV$(ver).zip::
 	mkdir -p old/V$(ver)
 	rsync -avz $(prj).tex old/V$(ver)/$(prj)_annotatedV$(ver).tex
+	rsync -avz $(prj)_notes.tex old/V$(ver)/
 	rsync -avz Makefile old/V$(ver)/
 	rsync -avz README.md old/V$(ver)/
 	rsync -avz deannote.py old/V$(ver)/

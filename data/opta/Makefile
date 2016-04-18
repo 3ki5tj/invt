@@ -1,4 +1,4 @@
-all: nbsingle sigsingle
+all: wl nbsingle sigsingle
 
 prog=../../prog/predict
 
@@ -8,6 +8,11 @@ compile::
 	make -C ../../prog
 
 # for the optimal alpha(t)
+wlsingle: compile $(fnmdgam)
+	$(prog) --samp=g --nint=10000 --fnalpha=wl_g_alpha.dat
+	$(prog) --samp=l --nint=10000 --fnalpha=wl_l_alpha.dat
+	$(prog) --samp=md --fngamma=$(fnmdgam) --nint=10000 --fnalpha=wl_md_alpha.dat
+
 nbsingle: compile $(fnmdgam)
 	$(prog) --nb=0.24 --samp=g --nint=10000 --fnalpha=nb0.24_g_alpha.dat
 	$(prog) --nb=0.24 --samp=l --nint=10000 --fnalpha=nb0.24_l_alpha.dat
