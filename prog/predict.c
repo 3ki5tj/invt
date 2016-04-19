@@ -42,7 +42,7 @@ static void invt_geterr(invtpar_t *m,
 
   /* save the optimal schedule to file */
   t0 = 2 * m->c / m->alpha0;
-  intq_save(intq, m->c, t0, m->fnalpha);
+  intq_save(intq, m->c, t0, m->alpha_resample, m->fnalpha);
 
   printf("c %g, t0 %g, err %g, sqr %g (invt), %g, sqr %g (exact), %s\n",
       m->c, t0, err1, err1 * err1, err2, err2 * err2, m->fnalpha);

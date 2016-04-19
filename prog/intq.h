@@ -370,12 +370,11 @@ static double intq_minerr(intq_t *intq, double a0,
 
 
 
-/* compute the updating magnitude alpha at a given t
- * by interpolation
- * assuming intq_geta() has been called */
-__inline static double intq_interpa(intq_t *intq, double t, int *id)
+/* low level interpolation code */
+__inline static double intq_interp(double t, int *id,
+    int m, const double *tarr, const double *yarr)
 {
-  int i, m = intq->m;
+  int i;
   double r, a;
 
   /* find the proper bin */
@@ -383,14 +382,14 @@ __inline static double intq_interpa(intq_t *intq, double t, int *id)
   /* seek backward */
   if ( i < m ) {
     for ( ; i > 0; i-- ) {
-      if ( t >= intq->tarr[i] )
+      if ( t >= tarr[i] )
         break;
     }
   }
   /* seek forward */
   if ( i >= 0 ) {
     for ( ; i < m; i++ ) {
-      if ( t < intq->tarr[i + 1] )
+      if ( t < tarr[i + 1] )
         break;
     }
   }
@@ -405,23 +404,32 @@ __inline static double intq_interpa(intq_t *intq, double t, int *id)
   }
 
   /* interpolation formula */
-  r = ( t                 - intq->tarr[i] )
-    / ( intq->tarr[i + 1] - intq->tarr[i] );
+  r = ( t - tarr[i] ) / ( tarr[i + 1] - tarr[i] );
 
-  a = (1 - r) * intq->aarr[i] + r * intq->aarr[i + 1];
+  a = (1 - r) * yarr[i] + r * yarr[i + 1];
   if ( a < 0 ) a = 0;
   return a;
 }
 
 
 
+/* compute the updating magnitude alpha at a given t
+ * by interpolation
+ * assuming intq_geta() has been called */
+__inline static double intq_interpa(intq_t *intq, double t, int *id)
+{
+  return intq_interp(t, id, intq->m, intq->tarr, intq->aarr);
+}
+
+
+
 /* save optimal protocol to file */
 __inline static int intq_save(intq_t *intq,
-    double c, double t0, const char *fn)
+    double c, double t0, int resample, const char *fn)
 {
   FILE *fp;
-  int i, m = intq->m;
-  double a1, q1, T, qT;
+  int i, id, m = intq->m;
+  double a1, q1, t, a, q, dinva, T, qT;
 
   if ( fn == NULL || fn[0] == '\0' ) {
     return -1;
@@ -443,13 +451,24 @@ __inline static int intq_save(intq_t *intq,
   fprintf(fp, "# %d %d %g %g %g %g %g %g\n",
       m, intq->n, intq->E, intq->Ea, intq->Er,
       T, qT, t0);
-  for ( i = 0; i < m; i++ ) {
-    a1 = c / (intq->tarr[i] + t0);
-    q1 = c * log( 1 + intq->tarr[i] / t0 );
+  for ( i = 0; i <= m; i++ ) {
+    if ( resample ) {
+      t = T * i / m;
+      id = i;
+      a = intq_interp(t, &id, m, intq->tarr, intq->aarr);
+      q = intq_interp(t, &id, m, intq->tarr, intq->qarr);
+      dinva = intq_interp(t, &id, m, intq->tarr, intq->dinva);
+    } else {
+      t = intq->tarr[i];
+      a = intq->aarr[i];
+      q = intq->qarr[i];
+      dinva = intq->dinva[i];
+    }
+    a1 = c / (t + t0);
+    q1 = c * log( 1 + t / t0 );
     fprintf(fp, "%12.3f\t%20.8e\t%12.6f\t%20.8e\t"
         "%20.8e\t%12.6f\t%20.8e\n",
-        intq->tarr[i], intq->aarr[i], intq->qarr[i], intq->dinva[i],
-        a1, q1, 1.0 / c);
+        t, a, q, dinva, a1, q1, 1.0 / c);
   }
 
   fclose(fp);

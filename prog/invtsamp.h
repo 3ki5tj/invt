@@ -299,6 +299,7 @@ static double invtmd_tstat(invtmd_t *md)
 static int invtmd_vv(invtmd_t *md)
 {
   double dt = md->dt, x0, x1;
+  const double L = 2 * M_PI;
   int i;
 
   invtmd_tstat(md);
@@ -310,7 +311,7 @@ static int invtmd_vv(invtmd_t *md)
   x1 = md->x;
   if ( md->pbc ) {
     /* periodic boundary conditions */
-    md->x = fmod(md->x + 100 * 2 * M_PI, 2 * M_PI);
+    md->x = fmod(md->x + 100 * L, L);
   } else {
     /* reflective boundary conditions */
     do {
@@ -320,8 +321,8 @@ static int invtmd_vv(invtmd_t *md)
         md->v = -md->v;
         i = 1;
       }
-      if ( md->x >= 2 * M_PI ) {
-        md->x = 4 * M_PI - md->x;
+      if ( md->x >= L ) {
+        md->x = 2 * L - md->x;
         md->v = -md->v;
         i = 1;
       }

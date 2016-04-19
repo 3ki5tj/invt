@@ -314,7 +314,8 @@ static double invt_run(invtpar_t *m)
         fprintf(stderr, "q(T) %g, estimated t0 = %g\n", qT, m->t0);
 
         /* save the optimal schedule to file */
-        intq_save(intq, optc, 2 * optc / m->alpha0, m->fnalpha);
+        intq_save(intq, optc, 2 * optc / m->alpha0,
+            m->alpha_resample, m->fnalpha);
 
         alphaf = intq->aarr[intq->m - 1];
       } else {

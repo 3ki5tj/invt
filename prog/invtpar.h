@@ -31,6 +31,7 @@ typedef struct {
   int opta; /* use the analytically optimal alpha(t) */
   int alpha_nint; /* number of integration points for the exactly optimal alpha(t) */
   char fnalpha[FILENAME_MAX]; /* output file for the exactly optimal alpha */
+  int alpha_resample; /* even time grid */
   double qprec; /* target precision of the integral of alpha(t) */
 
   int pbc; /* periodic boundary condition */
@@ -139,6 +140,7 @@ static void invtpar_init(invtpar_t *m)
   m->opta = 0;
   m->alpha_nint = 10000;
   m->fnalpha[0] = '\0';
+  m->alpha_resample = 0;
   m->qprec = 1e-5;
 
   m->pbc = 0;
@@ -416,6 +418,7 @@ static void invtpar_help(const invtpar_t *m)
   fprintf(stderr, "  --opta:        use the exact optimal schedule alpha(t), default %d\n", m->opta);
   fprintf(stderr, "  --nint:        set the number of integration points for the exact optimal schedule alpha(t), default %d\n", m->alpha_nint);
   fprintf(stderr, "  --fnalpha=:    set the output file for the exact optimal schedule, alpha(t), default %s\n", m->fnalpha);
+  fprintf(stderr, "  --aresamp=:    resample uniform time grid for the above schedule, default %d\n", m->alpha_resample);
   fprintf(stderr, "  --qprec:       set the precision of the integral of the alpha(t), default %g\n", m->qprec);
   fprintf(stderr, "  --pbc:         use periodic boundary condition, default %d\n", m->pbc);
   fprintf(stderr, "  --nb=:         explicitly set the update window parameters, separated by comma, like --nb=0.2,0.4\n");
@@ -661,6 +664,11 @@ static int invtpar_keymatch(invtpar_t *m,
          || strcmpfuzzy(key, "fnalpha") == 0 )
   {
     strcpy(m->fnalpha, val);
+  }
+  else if ( strstartswith(key, "ares")
+         || strcmpfuzzy(key, "alpha_resample") == 0 )
+  {
+    m->alpha_resample = 1;
   }
   else if ( strcmpfuzzy(key, "qprec") == 0 )
   {

@@ -326,7 +326,7 @@ which is typical in a molecular system,
 we can discretize $z$
 such that the integer $i$ represents
 the index of a small interval, or a bin,
-$(z, z + dz)$.
+$(z, z + \delta z)$.
 %
 In both cases,
 the distribution is normalized as
@@ -3343,7 +3343,7 @@ at the end of the simulation.
 
 Initially,
 we set the bias potential to zero,
-$v_i \equiv 0$,
+$V_i \equiv 0$,
 %
 and equilibrate the system under
 a constant updating magnitude,
@@ -3351,7 +3351,7 @@ $\alpha_0 = 10^{-4}$.
 %
 After this,
 we reset the origin of the time, $t$,
-and started the target schedule.
+and started the testing schedule.
 %specified by either
 %Eq. \eqref{eq:q_opt}
 %or
@@ -3359,44 +3359,44 @@ and started the target schedule.
 
 
 For the Gaussian updating scheme,
-the kernel is truncated at
-$\min\{10 \, \sigma, n - 1\}$
+the kernel was truncated at
+$b = \min\{10 \, \sigma, n - 1\}$
 and numerically stabilized
 using the technique
-in Sec. \ref{sec:stabilize_wband}.
+in Appendix \ref{sec:stabilize_wband}.
 
 
 
 Since the error depends on
 the underlying sampling process,
-we have devised two sampling processes,
+we tested two sampling processes,
 a global one and a local one.
 %
-Both cases were based on
-Metropolis algorithm\cite{metropolis1953, newman, frenkel,
-landau_binder}:
+Both are based on
+Metropolis MC algorithm\cite{
+  metropolis1953, newman, frenkel,
+  landau_binder}:
 %
-in each step, a new bin index $j$ was proposed
+in each step, a new bin index $j$ is proposed
 and then accepted with probability
 %
 $
-A(i \to j) = \min\{ 1, \exp(v_i - v_j) \}.
+A(i \to j) = \min\{ 1, \exp(V_i - V_j) \}.
 $
 However,
-in the first and global sampling process,
+in the first or global sampling process,
 we choose the destination $j$
-randomly out of the $n$ bins.
+uniformly out of the $n$ bins.
 %
-This sampling process
+This process
 emulates the perfect sampling process
-discussed in Sec. \ref{sec:Gamma}
-in the long time limit.
+in Sec. \ref{sec:Gamma} asymptotically.
 %
-In the second or local process,
-we limit the destination $j$
-to the two neighbors of $i$,
-$i \pm 1$, with equal probability $1/2$,
-to mimic the one-step sampling process
+In the second or local sampling process,
+$j$ is either $i - 1$ or $i + 1$
+(adjusted by the boundary condition)
+with equal probability $1/2$,
+which mimics the one-step sampling process
 in Sec. \ref{sec:Gamma}.
 %
 
@@ -3419,7 +3419,7 @@ and $t_0 = 2/(\lambda \, \alpha_0)$.
 The error of this schedule
 can be computed analytically
 (cf. Appendix \ref{sec:invt_schedule}),
-and thus be tested against the theory.
+and tested against simulation.
 
 
 
@@ -3427,7 +3427,7 @@ and thus be tested against the theory.
 
 
 For the single-bin updating scheme,
-we chose $\alpha_0 = 0.0001$
+we chose $\alpha_0 = 10^{-4}$
 and ran the simulation for $T = 10^8$ steps.
 %
 As shown in Fig. \ref{fig:errsbin},
@@ -3436,7 +3436,7 @@ the analytical prediction by Eq. \eqref{eq:error_invt}.
 %
 For both global and local sampling processes,
 the optimal $\lambda$ occurred around $1.0$,
-verifying Eq. \eqref{eq:alpha_invt1}.
+verifying the optimality of Eq. \eqref{eq:alpha_invt1}.
 %
 %Recall that $1/\lambda$ in Eq. \eqref{eq:alpha_invtlambda}
 %represents the relative updating magnitude.
@@ -3453,10 +3453,10 @@ verifying Eq. \eqref{eq:alpha_invt1}.
 %
 The two error functions
 differed only by a multiplicative constant,
-again agreeing with the theory.
+which again agreed with the theory:
 %
-With identical eigenvalues,
-$\lambda_1 = \cdots = \lambda_n = 1$,
+with identical eigenvalues,
+$\lambda_2 = \cdots = \lambda_n = 1$,
 the error in Eq. \eqref{eq:error_invt}
 depends on the sampling process only through
 the sum $\sum_{ k = 2 }^n \Gamma_k$,
@@ -3477,7 +3477,7 @@ which gives rise to the above multiplicative constant.
     in Eq. \eqref{eq:alpha_invtlambda}
     for the single-bin (WL) scheme.
     %
-    The results have been averaged over $1000$ independent runs.
+    The results were averaged over $1000$ independent runs.
     %
     \note{The figure was produced by \texttt{doc/fig/errsbin.gp}.
       The data were produced by the script \texttt{data/invt2run.py},
@@ -3496,26 +3496,27 @@ As an example of the multiple-bin schemes,
 we chose the nearest-neighbor updating scheme
 described in Sec. \ref{sec:nnscheme}.
 %
-We again find good agreement
-between simulation and analytical results.
+We choose $\mu_1 = 0.24$ to the smallest eigenvalue
+close to zero.
 %
-A new feature is that the optimal $\lambda$
-depends on the simulation length, $T$.
+Again, simulation and theory agreed well,
+as shown in Fig. \ref{fig:errnnbr}.
 %
-As shown in Fig. \ref{fig:errnnbr},
-the normalized error, $(T + t_0) \, \Err$,
-hence the optimal value of $1/\lambda$,
-depended non-trivially on the simulation length, $T$,
-in the global sampling case.
+The normalized error
+and the optimal value of $1/\lambda$,
+depended on the simulation length, $T$,
+in the global sampling case,
+because of the near zero eigenvalues,
+as discussed in Appendix \ref{sec:invt_schedule}.
 %
 %The optimal $1/\lambda$ gradually increased
 %with simulation length,
 %as discussed in Sec. \ref{sec:optlambda}.
 %
-For the local sampling case,
-the $T$-dependence was hardly visible
-because of the predominantly large $\Gamma_k$'s
-of the small $k$ modes.
+However, for the local sampling case,
+the $T$-dependence was suppressed
+because of the dominance of large $\Gamma_k$'s
+of the small-$k$ modes.
 %
 The optimal $\lambda$ remained around $1.0$,
 as suggested by Eq. \eqref{eq:lambda_nn_onestep}.
@@ -3571,7 +3572,7 @@ as suggested by Eq. \eqref{eq:lambda_nn_onestep}.
     in Eq. \eqref{eq:alpha_invtlambda}
     for the nearest-neighbor updating scheme with $\mu_1 = 0.24$.
     %
-    The results have been averaged over $1000$ independent runs.
+    The results were averaged over $1000$ independent runs.
     %
     \note{This figure was produced by \texttt{doc/fig/errnnbr.gp}.
       The data were produced by \texttt{data/invt2run.py},
@@ -3613,7 +3614,7 @@ as suggested by Eq. \eqref{eq:lambda_nn_onestep}.
 %    in Eq. \eqref{eq:alpha_invtlambda}
 %    for the Gaussian updating scheme with $\sigma = 5$ bins.
 %    %
-%    The results have been averaged over $1000$ independent runs.
+%    The results were averaged over $1000$ independent runs.
 %  }
 %\end{center}
 %\end{figure}
@@ -3624,15 +3625,45 @@ as suggested by Eq. \eqref{eq:lambda_nn_onestep}.
 Optimal schedule}
 
 
+
 We now turn to the optimal schedule
 predicted by Eq. \eqref{eq:q_opt}.
 %
 For the Gaussian updating scheme
 with $\sigma = 10$,
-we computed the schedule,
+we computed the schedule for the local sampling process,
 and compared it with the inverse-time schedule
 Eq. \eqref{eq:alpha_invtlambda}
 with the optimal $\lambda$.
+%
+As shown in Fig. \ref{fig:optacmp}(a),
+the optimal schedule is a more complex curve
+than the optimized inverse-time schedule.
+%
+The complexity of the optimal schedule
+corresponds to the non-exponential tail
+of the mass distribution function,
+as shown Fig. \ref{fig:optacmp}(b)
+[cf. Sec. \ref{sec:mass_distr}].
+%
+The errors in the two cases were
+$9.1 \times 10^{-5}$
+and
+$1.7 \times 10^{-4}$,
+respectively,
+%for the local sampling process,
+showing the superiority of
+the optimal schedule from Eq. \eqref{eq:q_opt}.
+%
+Besides, we verified the scaling property
+discussed in Sec. \ref{sec:mass_distr},
+by comparison with a simulation [Fig. \ref{fig:optacmp}(a)]
+of half length, $T' = 5 \times 10^7$
+and doubled initial updating magnitude,
+$\alpha_0 = 2 \times 10^{-4}$,
+which left the normalized mass distribution invariant,
+as shown in Fig. \ref{fig:optacmp}(b).
+
 
 \begin{figure}[h]
 \begin{center}
@@ -3645,7 +3676,8 @@ with the optimal $\lambda$.
     versus the optimized inverse-time schedule
     Eq. \eqref{eq:alpha_invtlambda}
     for the Gaussian updating scheme
-    with $\sigma = 10$.
+    with $\sigma = 10$
+    and the local updating process.
     %
     \note{This figure was produced by \texttt{doc/fig/optacmp.gp}.
       The data were computed by the program \texttt{prog/predict},
@@ -3659,32 +3691,6 @@ with the optimal $\lambda$.
 \end{center}
 \end{figure}
 
-As shown in Fig. \ref{fig:optacmp}(a),
-the optimal schedule is a more complex curve
-than the optimized inverse-time schedule.
-%
-In Fig. \ref{fig:optacmp}(b),
-we show that in the former case,
-the rate of change of $\alpha^{-1}(t)$
-increases gradually
-from $\lambda(0)$ to $\lambda(T) \approx 1$,
-as discussed in Sec. \ref{sec:optschedule}.
-%
-The errors in the two cases were
-$2.7 \times 10^{-7}$
-and
-$6 \times 10^{-7}$,
-respectively,
-for the global sampling process,
-%
-or
-$9.1 \times 10^{-5}$
-and
-$1.7 \times 10^{-4}$,
-respectively
-for the local sampling process,
-showing the superiority of
-the optimal schedule from Eq. \eqref{eq:q_opt}.
 
 
 
@@ -3692,18 +3698,17 @@ On the other hand,
 the optimal schedules of the bandpass updating schemes
 are always given by the inverse-time formula,
 Eq. \eqref{eq:alpha_invt1},
-with the optimal $t_0$
-given by Eq. \eqref{eq:t0_sinc},
+with $t_0$ given by Eq. \eqref{eq:t0_sinc},
 as shown in Fig. \ref{fig:sinc}(a).
-
-
+%
 In Fig. \ref{fig:sinc}(b),
 we show that the updating kernels
 of the bandpass updating schemes
 are similar to Gaussian ones
 except the oscillatory tails.
 %
-The equivalent width, $\sigma$, is roughly given
+The equivalent width, $\sigma$, is roughly
+%
 \begin{equation}
   \sigma
   \approx
@@ -3717,6 +3722,7 @@ The equivalent width, $\sigma$, is roughly given
   ,
 \label{eq:sigma_equiv}
 \end{equation}
+%
 where $g = 2$ for the periodic case
 or $g = 1$ otherwise.
 %
@@ -3724,13 +3730,13 @@ The kernel is a zigzag in the non-periodic case
 because of the term $(-1)^{n+K+l-1}$
 in Eq. \eqref{eq:mu_sinc_refl}.
 %
-However, as shown in the inset of Fig. \ref{fig:sinc}(b),
+However, as shown in the inset, % of Fig. \ref{fig:sinc}(b),
 the ruggedness disappears
-in the actual updating matrix, Eq. \eqref{eq:w_band_refl},
+in the updating matrix by Eq. \eqref{eq:w_band_refl},
 as the above oscillatory term for $l = i - j$
-is canceled by either the term for $l = i + j - 1$
-or that for $l = i + j - 2 \, n - 1$,
-
+is canceled by the term for either $l = i + j - 1$
+or $l = i + j - 2 \, n - 1$
+with the opposite sign.
 
 \begin{figure}[h]
 \begin{center}
@@ -3746,7 +3752,9 @@ or that for $l = i + j - 2 \, n - 1$,
     with $K = 6$.
     (b) Updating kernels
     compared to a Gaussian with a similar width,
-    $\sigma = 5$.
+    $\sigma = 6$.
+    %
+    The local sampling process was used.
     The lines are a guide to the eyes.
     Inset. Updating matrix in the non-periodic case
     is free of the zigzaggedness shown in the kernel.
@@ -3780,32 +3788,32 @@ the optimal updating scheme
 depends on the simulation length, $T$,
 and other parameters.
 %
-To illustrate this,
+As an example,
 we compare Gaussian updating schemes
-with different width, $\sigma$.
+with different widths, $\sigma$.
 %
-For the global sampling process,
-we see from Fig. \ref{fig:errsigscan}(a)
+As shown in Fig. \ref{fig:errsigscan}(a)
 that the minimal error was achieved
 by the widest window for the shorter simulation
-of $T = 10^8$.
+of $T = 10^8$,
+for the global sampling process.
 %
-However, as the simulation lengthens,
+As the simulation lengthens,
 the minimum at $\sigma = 0$ became more favorable.
 %
 However,
-the shift was hard to detect
-for the local sampling scheme,
+the minimum stayed at zero width,
 as shown in Fig. \ref{fig:errsigscan}(b).
 
 
 In contrast,
-the normalized error of the bandpass updating scheme
-was insensitive to the simulation length,
+the normalized error of the bandpass updating schemes
+were insensitive to the simulation length,
 in agreement with Eq. \eqref{eq:error_sinc}.
 %
-Further, in all cases the bandpass updating scheme
-appeared to be superior to the Gaussian one.
+Besides, the bandpass updating schemes
+yielded smaller errors than
+the corresponding Gaussian ones.
 
 
 
@@ -4025,9 +4033,9 @@ The dependence of variables are shown in Fig. \ref{fig:vardep}.
 
 
 
-%\subsection{\label{sec:measure_gamma}
-%Measurement of the integrals
-%of the autocorrelation functions}
+\subsection{\label{sec:measure_gamma}
+Measurement of the integrals
+of the autocorrelation functions}
 
 
 
@@ -4077,31 +4085,33 @@ Y_k
 \sum_{ i = 1 }^n
   \phi_{k i} \, (V_i - \bar V),
 \label{eq:Y_def}
-\\
-\bar V
-&=
-\sum_{ j = 1 }^n p_j \, V_j.
-\notag
 \end{align}
+%
+with
+$
+\bar V
+\equiv
+\sum_{ j = 1 }^n p_j \, V_j.
+$
 
 To show Eq. \eqref{eq:varY},
 we first use Eq. \eqref{eq:v_def}
 to rewrite Eq. \eqref{eq:x_def}
 as
-$$
-\begin{aligned}
+$
   x_i
-  &=
+  =
   (V_i - \bar V) + s_i,
-  \\
+$
+where
+$
   s_i
-  &=
+  \equiv
   \ln \frac{ p_i } { p^*_i }
   -
   \sum_{ j = 1 }^n
     p_j \, \ln \frac{ p_j } { p^*_j }.
-\end{aligned}
-$$
+$
 Thus, by Eqs. \eqref{eq:y_def} and \eqref{eq:Y_def},
 we have
 $$
@@ -4129,9 +4139,59 @@ Eq. \eqref{eq:Lagrangian_const}.
 }
 
 
-%\subsection{\label{sec:program_list}
-%Program
-%}
+As an example, we used the method to compute
+the integrals, $\Gamma_k$'s, from an MD simulation,
+and compared them to those from
+the local MC sampling process
+[cf. Sec. \ref{sec:results_system}].
+%
+As shown in Fig. \ref{fig:gamcmp},
+the larger values of $\Gamma_k$'s
+with smaller $k$'s
+from the two sampling processes
+were almost proportional,
+suggesting similarity 
+of local sampling processes.
+
+
+
+\begin{figure}[h]
+\begin{center}
+  \makebox[\linewidth][c]{
+    \includegraphics[angle=0, width=0.95\linewidth]{fig/gamcmp.pdf}
+  }
+  \caption{
+    \label{fig:gamcmp}
+    Integrals of the autocorrelation functions
+    from an MD simulation versus those
+    from the local MC simulation.
+    %
+    The MD simulation was ran for $10^{10}$ steps with
+    the step size $\Delta t_\mathrm{MD} = 0.005$.
+    %
+    The bin size $\Delta z = 2\, \pi /n$ with $n = 100$,
+    and the temperature was $1.0$.
+    %
+    The velocity rescaling\cite{bussi2007} thermostat was
+    applied every MD step with the viscocity set to 20.
+    %
+    The reflective boundary condition was used.
+    %
+    \note{The figure was produced by \texttt{doc/fig/gamcmp.gp}.
+      Thee data were saved under \texttt{data/gamcmp}
+      (see the \texttt{Makefile} there).
+    }%
+  }
+\end{center}
+\end{figure}
+
+
+
+
+
+\subsection{\label{sec:program_list}
+Program
+}
 
 
 The complete program is the following.
@@ -4190,14 +4250,15 @@ is not necessarily stable,
 i.e., some eigenvalues may be negative.
 %
 %
-\note{For example,
+%\note{
+  %For example,
   %the nearest-neighbor updating scheme
   %is unstable if Eq. \eqref{eq:nn_stable} is violated.
   %
-  %Even
+  Even
   the Gaussian updating scheme can be unstable
   if the updating kernel is truncated.
-}%
+%}%
 %
 Here we show how to minimally modify
 the updating kernel
@@ -4634,15 +4695,16 @@ For the nearest-neighbor updating scheme
 introduced in Sec. \ref{sec:nnscheme},
 we can find an analytical expression
 of the optimal value of $\lambda$
-in the limit of large $n$.
+in the large-$n$ limit.
 %
 In this case,
-we convert Eq.
-\eqref{eq:error_asym_invt}
-%and
-%\eqref{eq:optimal_lambda_approx}
-to an integral,
-$\sum_i \to \frac{2 \, n}{\pi} \int dp$, and
+we
+drop the second term in the square brackets
+of Eq. \eqref{eq:error_asym_invt},
+which vanishes asymptotically if $2 \, \nu_k > 1$,
+and convert the asymptotic error
+to an integral:
+%$\sum_i \to \frac{2 \, n}{\pi} \int_0^{\pi/2} dp$, and
 %
 \begin{align}
 \Err_A
