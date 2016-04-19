@@ -39,7 +39,7 @@ set mxtics 5
 set xlabel "{/Times-Italic q}({/Times-Italic T}) - {/Times-Italic q}" offset 0, 0.3
 
 set logscale y
-set format y "10^{%T}" 
+set format y "10^{%T}"
 set ylabel "{/Times-Italic m}({/Times-Italic q}) = 1/({/Times-Italic T}{/Symbol-Oblique a})"
 
 set key right top Left reverse spacing 1.5 width -4
