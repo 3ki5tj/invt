@@ -11,9 +11,9 @@ typedef struct {
   int m; /* number of integration point */
   double T; /* total simulation time */
   double *tarr; /* time grid */
-  double *qarr;
-  double *aarr;
-  double *dinva; /* instantaneous eigenvalue */
+  double *qarr; /* q(t) */
+  double *aarr; /* alpha(t) */
+  double *dinva; /* instantaneous eigenvalue d(1/alpha(t))/dt */
   int n;
   const double *lambda; /* eigenvalues of the updating magnitude */
   const double *gamma; /* autocorrelation integrals */
@@ -265,6 +265,81 @@ static double intq_geterr(intq_t *intq, double a0,
 
 
 
+static double intq_optqtfunc(intq_t *intq, double a0, double qt, double *df)
+{
+  double f, dq, q, lambda, gamma, xp, y, mint, mass;
+  int i, k, m = intq->m;
+
+  dq = qt / m;
+  mint = 0;
+
+  /* compute Int M(Q) dQ */
+  for ( i = 0; i <= m; i++ ) {
+    q = i * dq;
+    y = 0;
+    for ( k = 0; k < intq->n; k++ ) {
+      gamma = intq->gamma[k];
+      lambda = intq->lambda[k];
+      xp = exp(-2 * lambda * q);
+      y += gamma * lambda * lambda * xp;
+    }
+    mass = sqrt( y );
+    if ( i == 0 || i == m ) {
+      mint += mass * dq * 0.5;
+    } else {
+      mint += mass * dq;
+    }
+  }
+  f = mint - mass * intq->T * a0 * 0.5;
+
+  for ( y = 0, k = 0; k < intq->n; k++ ) {
+      gamma = intq->gamma[k];
+      lambda = intq->lambda[k];
+      xp = exp(-2 * lambda * q);
+      y += gamma * lambda * lambda * lambda * xp;
+  }
+
+  *df = mass + y / mass * intq->T * a0 * 0.5;
+
+  //printf("qt %g, f %g, mass %g, df %g, y %g\n", qt, f, mass, *df, y);
+  return f;
+}
+
+
+/* compute the optimal q(t) by the Newton-Raphson method */
+static double intq_optqt(intq_t *intq, double a0,
+    double tol, int verbose)
+{
+  const double qtmax = 20.0;
+  double qt = log(1 + intq->T * a0), dq, f, df;
+  int i;
+
+  for ( i = 0; ; i++ ) {
+    f = intq_optqtfunc(intq, a0, qt, &df);
+    dq = -f/df;
+
+    /* limit the change */
+    if ( dq > qtmax ) {
+      dq = qtmax;
+    } else if (dq < -qtmax ) {
+      dq = -qtmax;
+    } else if ( fabs(dq) < tol ) {
+      break;
+    }
+
+    qt += dq;
+    if ( verbose ) {
+      fprintf(stderr, "%d: qt %g -> %g, dq %g, f %g, df %g\n",
+          i, qt, qt + dq, dq, f, df);
+    }
+    if ( qt < 0 ) qt = 0;
+  }
+  return qt;
+}
+
+
+
+#if 0 /* backup routine, replaced by intq_optqt() */
 /* variate the value of qt to compute
  * the optimal schedule alpha(t) and the error
  * this function is adapted from estbestc_invt()
@@ -367,6 +442,7 @@ static double intq_minerr(intq_t *intq, double a0,
 
   return em;
 }
+#endif
 
 
 
@@ -493,7 +569,8 @@ static double esterror_opt(double T, double a0, double *qt,
   intq = intq_open(T, m, n, lambda, gamma);
 
   /* compute the optimal schedule and error */
-  err = intq_minerr(intq, a0, qt, qprec, verbose);
+  *qt = intq_optqt(intq, a0, qprec, verbose);
+  err = intq_geterr(intq, a0, *qt);
 
   /* compute the error components */
   if ( xerr != NULL ) {

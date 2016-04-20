@@ -92,11 +92,12 @@ set size 1, htop
 
 set lmargin 7
 
-set logscale x
-set mxtics 10
-set format x "10^{%T}"
-set xrange [1e4:1e8]
-set xlabel "Simulation time, {/Times-Italic t}" offset 0, 0
+unset logscale x
+set xtics 0.2
+set mxtics 2
+#set format x "10^{%T}"
+#set xrange [1e4:1e8]
+set xlabel "Simulation time, {/Times-Italic t} ({/Symbol \264} 10^{/*0.7 8})" offset 0, 0
 
 set logscale y
 set format y "10^{%T}"
@@ -104,12 +105,13 @@ set mytics 10
 #set yrange [1e4:1e9]
 set ylabel "{/Symbol-Oblique a} ({/Times-Italic t})" offset 0, 0
 
-set key left bottom Left reverse noinvert spacing 1.2
+set key right top Left reverse noinvert spacing 1.2 width -4
 
-plot [][7e-9:5e-5] \
-    1/(x + 20000) lw 2 t "1 / ({/Times-Italic t} + 2/{/Symbol-Oblique a}_0)", \
-    "../../data/sinc/sinc_pbc_alpha.dat"    u 1:($2) every 300 w p pt 6 ps 1.5 lw 2 t "Periodic, {/Times-Italic K} = 3", \
-    "../../data/sinc/sinc_nonpbc_alpha.dat" u 1:($2) every 300 w p pt 1 ps 1.5 lw 3 t "Non{/*0.7 -}periodic, {/Times-Italic K} = 6", \
+T = 1e8
+plot [][7e-9:1e-4] \
+    1/(x*T + 20000) lw 2 t "1 / ({/Times-Italic t} + 2/{/Symbol-Oblique a}_{/*0.7 0})", \
+    "../../data/sinc/sinc_pbc_alpha.dat"    u ($1/T):($2) every 300 w p pt 6 ps 1.5 lw 2 t "Periodic, {/Times-Italic K} = 3", \
+    "../../data/sinc/sinc_nonpbc_alpha.dat" u ($1/T):($2) every 300 w p pt 1 ps 1.5 lw 3 t "Non{/*0.7 -}periodic, {/Times-Italic K} = 6", \
     -1 notitle
 
 

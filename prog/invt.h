@@ -461,7 +461,7 @@ static double esterror_invt1(double T, double c, double alpha0,
   double f, y, r, errsat, ea, er; /* errsat: saturated error */
 
   r = lambda * c;
-  
+
   if ( t0 <= 0 ) t0 = 2 * c / alpha0;
 
   if ( lambda < 0 ) lambda = 0;
