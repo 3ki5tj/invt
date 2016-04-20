@@ -37,64 +37,41 @@
 
 
 
-\title{Optimal updating factor in Wang-Landau and metadynamics simulations}
+\title{Optimal updating factor in adaptive flat-distribution-sampling simulations}
 
 
 
 \begin{abstract}
-  The Wang-Landau (WL) algorithm and metadynamics
-  are two closely-related techniques
-  in free energy calculations.
+  We present a method of computing the optimal schedule
+  of the updating magnitude
+  for adaptive flat-distribution sampling methods,
+  such as the Wang-Landau (WL) algorithm and metadynamics.
   %
-  Both methods sample a flat distribution
-  along a quantity of interest, $z$,
-  by adaptively constructing
-  \note{``incrementally building up''?}%
-  a bias potential to offset
-  the potential of mean force (PMF).
+  These sampling methods
+  construct a bias potential to offset
+  the potential of mean force
+  by incremental updating loops.
   %
-  The two differ by
-  the manner of updating the bias potential:
+  The updating magnitude should decrease over time
+  to reduce the fluctuation of the bias potential,
+  and the optimal schedule optimizes
+  the rate of convergence.
   %
-  the WL algorithm updates only
-  the bias potential of
-  the bin containing the current $z$,
-  while metadynamics updates also
-  those of neighboring bins according to
-  a Gaussian window.
+  We derive the optimal schedule from
+  an equation of motion
+  of a free particle with a position-dependent mass,
   %
-  The error of the final bias potential,
-  hence that of the PMF,
-  is determined by the updating schedule,
-  or the updating magnitude
-  as a function of simulation time.
-  %
-  In the WL case,
-  the optimal schedule
-  is known to be given by
-  the inverse simulation time.
-  %
-  In this study,
-  we give a method of computing the optimal schedule
-  for a general multiple-bin updating scheme.
-  %
-  We show that the optimal schedule of metadynamics
-  depends on the simulation length
-  and the width of the Gaussian.
-  %is solved from the equation of motion
-  %of a free particle with a position-dependent mass.
+  and show that
+  the initial updating magnitude is ideally half of
+  the previous equilibrium value.
   %
   Further,
-  the single-bin updating scheme
-  used in the WL algorithm
-  belongs to a class of multiple-bin bandpass updating schemes
-  that are optimal for asymptotic convergence.
+  we show that the WL updating scheme
+  belongs to a class of bandpass updating schemes
+  that are optimal for asymptotic convergence,
+  and the optimal schedule of these schemes
+  is given by a modified inverse-time formula.
   %
-  The optimal schedule of these schemes
-  is given by the inverse-time formula,
-  with a shifted origin of time such that
-  the initial updating magnitude is half of
-  the previous equilibrium value.
 \end{abstract}
 
 \maketitle
@@ -223,24 +200,30 @@ however, is less studied.
 In this study,
 we present a method of computing
 the optimal schedule
-for a general updating scheme,
+for a general adaptive flat-distribution sampling methods,
 including those used in WL and metadynamics simulations.
 %
-The method reproduces the inverse-time formula
-for the WL case,
-and gives the optimal value of the origin of time.
+In this method, the optimal schedule is derived
+from an equation of motion of a free particle,
+with the initial updating magnitude set to
+half of the previous equilibrium value.
 %
-It also predicts, for metadynamics,
-a more complex schedule,
-which is sensitive to the simulation length
+The optimal schedule in the WL case
+is shown to be given by
+the inverse-time formula,
+with the origin of time modified
+to satisfy the above optimal initial condition.
+%
+For metadynamics, however,
+the optimal schedule is more complex,
+and it can be sensitive to the simulation length
 and the width of the Gaussian window.
 %
 Further, we generalize
-the single-bin updating scheme
-used by the WL algorithm
-to a class of multiple-bin updating schemes
+the WL updating scheme
+to a class of bandpass updating schemes
 that are optimal for infinitely long simulations,
-and the inverse-time schedule is optimal for these schemes.
+and the modified inverse-time schedule is optimal for these schemes.
 %
 %For finite-length simulations, however,
 %metadynamics may deliver better performance.
@@ -326,7 +309,7 @@ which is typical in a molecular system,
 we can discretize $z$
 such that the integer $i$ represents
 the index of a small interval, or a bin,
-$(z, z + \delta z)$.
+$(z, z + \Delta z)$.
 %
 In both cases,
 the distribution is normalized as
@@ -3944,12 +3927,12 @@ Conclusions and Discussions}
 In conclusion,
 we have proposed a method of computing
 the optimal schedule of the updating magnitude
-for a general adaptive FDS simulation.
+for a general adaptive FDS simulation,
+e.g., the WL algorithm or metadynamics.
 %
-Adaptive FDS methods,
-including the WL algorithm and metadynamics,
+Adaptive FDS methods
 effectively sample a flat distribution
-by constructing a bias potential
+by incrementally updating the bias potential
 to offset the PMF.
 %
 The optimal schedule ensures fastest convergence
@@ -3966,7 +3949,8 @@ of the bias potential.
 
 
 
-Each adaptive FDS method defines an updating scheme,
+Each adaptive FDS method is associated with
+an updating scheme,
 or mathematically an updating matrix,
 whose elements $w_{ij}$ specifies the
 relative magnitude of updating the bias potential
@@ -3974,8 +3958,8 @@ at bin $i$ upon a visit to bin $j$.
 %
 Our method computes the optimal schedule from
 the eigenvalues of the updating matrix,
-and the integrals of the correlation functions
-the corresponding eigenmodes.
+and the integrals of the autocorrelation functions
+of the eigenmodes.
 %
 For the single-bin (WL) scheme,
 the optimal schedule from our method
@@ -4257,7 +4241,7 @@ of local sampling processes.
     and the temperature was $1.0$.
     %
     The velocity rescaling\cite{bussi2007} thermostat was
-    applied every MD step with the viscocity set to 20.
+    applied every MD step with viscocity 20.
     %
     The reflective boundary condition was used.
     %

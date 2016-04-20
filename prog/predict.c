@@ -12,7 +12,7 @@
 static void invt_geterr(invtpar_t *m,
     const double *gamma)
 {
-  double T, t0, qT = 0, err1, err2;
+  double T, c0, t0, qT = 0, err0, err1, err2;
   double *lambda;
   intq_t *intq;
 
@@ -30,9 +30,13 @@ static void invt_geterr(invtpar_t *m,
     savewinmat(m->winn, m->win, m->n, m->pbc, m->fnwinmat);
   }
 
+  c0 = m->c;
+  err0 = esterror_invt(T, m->c, m->alpha0, m->t0, m->n,
+      NULL, lambda, gamma);
+
   /* compute the optimal c and the error
    * for the inverse-time formula */
-  m->c = estbestc_invt(T, m->alpha0, m->n, lambda, gamma,
+  m->c = estbestc_invt(T, m->alpha0, 0, m->n, lambda, gamma,
       0, &err1, 0);
 
   /* compute the exact minimal error under the same condition */
@@ -44,8 +48,10 @@ static void invt_geterr(invtpar_t *m,
   t0 = 2 * m->c / m->alpha0;
   intq_save(intq, m->c, t0, m->alpha_resample, m->fnalpha);
 
-  printf("c %g, t0 %g, err %g, sqr %g (invt), %g, sqr %g (exact), %s\n",
-      m->c, t0, err1, err1 * err1, err2, err2 * err2, m->fnalpha);
+  printf("c %g, t0 %g, err %g, sqr %g (invt), "
+         "opt. c %g, err %g, sqr %g (opt. invt), %g, sqr %g (exact), %s\n",
+      c0, t0, err0, err0 * err0,
+      m->c, err1, err1 * err1, err2, err2 * err2, m->fnalpha);
 
   intq_close(intq);
   free(lambda);
@@ -80,7 +86,7 @@ static void invt_scanc(invtpar_t *m,
 
   for ( c = m->cmin; c < m->cmax + 0.001 * m->cdel; c += m->cdel ) {
     /* alpha(t) = c / (t + t0) */
-    err = esterror_invt(T, c, m->alpha0, m->n, NULL,
+    err = esterror_invt(T, c, m->alpha0, 0, m->n, NULL,
         lambda, gamma);
 
     /* final equilibrium value */
@@ -174,7 +180,7 @@ static void invt_scan(invtpar_t *m,
     }
 
     /* find the optimal c for the inverse-time schedule */
-    c = estbestc_invt(T, m->alpha0, m->n, lambda, gamma,
+    c = estbestc_invt(T, m->alpha0, 0, m->n, lambda, gamma,
         0, &err1, 0);
 
     t0 = 2 * c / m->alpha0;

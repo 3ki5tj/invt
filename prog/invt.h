@@ -455,14 +455,14 @@ static double esterror_eql(double alpha, int n, double *xerr,
  * and t0 = 2 c / alpha0.
  * */
 static double esterror_invt1(double T, double c, double alpha0,
-    double lambda, double gamma)
+    double t0, double lambda, double gamma)
 {
   const double tol = 1e-7;
-  double t0, r, errsat; /* errsat: saturated error */
+  double f, y, r, errsat, ea, er; /* errsat: saturated error */
 
-  t0 = 2 * c / alpha0;
   r = lambda * c;
-  errsat = gamma * r / (T + t0);
+  
+  if ( t0 <= 0 ) t0 = 2 * c / alpha0;
 
   if ( lambda < 0 ) lambda = 0;
 
@@ -471,9 +471,16 @@ static double esterror_invt1(double T, double c, double alpha0,
     r += tol;
   }
 
+  f = t0/(T + t0);
+  y = pow(f, r * 2 - 1);
+  errsat = gamma * r / (T + t0);
+
+  er = 0.5 * alpha0 * gamma * lambda * f * y;
+  ea = errsat * r / (r * 2 - 1) * (1 - y);
+  //fprintf(stderr, "error %g vs %g\n", er + ea, errsat * (r + (r - 1) * pow(t0 / (T + t0), 2 * r - 1) ) / (r * 2 - 1)); getchar();
   //fprintf(stderr, "r %g, 2*r-1 %g, errsat %g\n", r, 2*r - 1, errsat);
-  return errsat * (r + (r - 1) * pow(t0 / (T + t0), 2 * r - 1) )
-                / (r * 2 - 1);
+  //return errsat * (r + (r - 1) * pow(t0 / (T + t0), 2 * r - 1) ) / (r * 2 - 1);
+  return er + ea;
 }
 
 
@@ -487,14 +494,14 @@ static double esterror_invt1(double T, double c, double alpha0,
  * and t0 = 2 c / alpha0
  * */
 static double esterror_invt(double T, double c, double a0,
-    int n, double *xerr,
+    double t0, int n, double *xerr,
     const double *lambda, const double *gamma)
 {
   int i;
   double x, err = 0;
 
   for ( i = 1; i < n; i++ ) {
-    x = esterror_invt1(T, c, a0, lambda[i], gamma[i]);
+    x = esterror_invt1(T, c, a0, t0, lambda[i], gamma[i]);
     if ( xerr != NULL ) {
       xerr[i] = x;
     }
@@ -511,7 +518,7 @@ static double esterror_invt(double T, double c, double a0,
  * according to the analytical prediction
  * assuming a single local minimum
  * */
-static double estbestc_invt(double T, double a0,
+static double estbestc_invt(double T, double a0, double t0,
    int n, const double *lambda, const double *gamma,
    double prec, double *err, int verbose)
 {
@@ -530,9 +537,9 @@ static double estbestc_invt(double T, double a0,
   cr = 2.0;
 
   /* compute the values at the initial bracket */
-  el = esterror_invt(T, cl, a0, n, NULL, lambda, gamma);
-  em = esterror_invt(T, cm, a0, n, NULL, lambda, gamma);
-  er = esterror_invt(T, cr, a0, n, NULL, lambda, gamma);
+  el = esterror_invt(T, cl, a0, t0, n, NULL, lambda, gamma);
+  em = esterror_invt(T, cm, a0, t0, n, NULL, lambda, gamma);
+  er = esterror_invt(T, cr, a0, t0, n, NULL, lambda, gamma);
 
   for ( it = 1; ; it++ ) {
     if ( verbose >= 1 ) {
@@ -552,7 +559,7 @@ static double estbestc_invt(double T, double a0,
       cl = cl * 0.5; /* make sure cl > 0 */
       er = em;
       em = el;
-      el = esterror_invt(T, cl, a0, n, NULL, lambda, gamma);
+      el = esterror_invt(T, cl, a0, t0, n, NULL, lambda, gamma);
     } else if ( er < em && er < el ) {
       /* er is the least of the three, extend to the right */
       cl = cm;
@@ -560,7 +567,7 @@ static double estbestc_invt(double T, double a0,
       cr = cr * 2.0;
       el = em;
       em = er;
-      er = esterror_invt(T, cr, a0, n, NULL, lambda, gamma);
+      er = esterror_invt(T, cr, a0, t0, n, NULL, lambda, gamma);
     } else {
       /* break the loop */
       if ( cr - cl < prec ) {
@@ -571,7 +578,7 @@ static double estbestc_invt(double T, double a0,
       if ( cm - cl > cr - cm ) {
         /* refine the left side */
         cn = (cl + cm) * 0.5;
-        en = esterror_invt(T, cn, a0, n, NULL, lambda, gamma);
+        en = esterror_invt(T, cn, a0, t0, n, NULL, lambda, gamma);
         if ( en > em ) {
           /* L - (N - M - R) */
           cl = cn;
@@ -586,7 +593,7 @@ static double estbestc_invt(double T, double a0,
       } else {
         /* refine the right side */
         cn = (cm + cr) * 0.5;
-        en = esterror_invt(T, cn, a0, n, NULL, lambda, gamma);
+        en = esterror_invt(T, cn, a0, t0, n, NULL, lambda, gamma);
         if ( en > em ) {
           /* (L - M - N) - R */
           cr = cn;

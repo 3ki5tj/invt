@@ -21,6 +21,7 @@ static double getalpha(const invtpar_t *m, double t, intq_t *intq)
     //printf("a %g (a_invt: %g), id %d, t %g, %g\n", a, m->c/(t+m->t0), id, t, intq->tarr[id]);
   } else {
     a = m->c / (t + m->t0);
+    //printf("a %g, t %g, t0 %g, c %g\n", a, t, m->t0, m->c); getchar();
   }
   return a;
 }
@@ -292,7 +293,7 @@ static double invt_run(invtpar_t *m)
 
     if ( !m->fixa ) {
       /* compute the theoretically optimal c */
-      optc = estbestc_invt(T, m->alpha0, m->n, lambda, gamma,
+      optc = estbestc_invt(T, m->alpha0, 0, m->n, lambda, gamma,
           0, &errmin, m->verbose - 1);
 
       /* use the theoretically optimal c */
@@ -320,7 +321,7 @@ static double invt_run(invtpar_t *m)
         alphaf = intq->aarr[intq->m - 1];
       } else {
         /* compute the optimal error from the inverse-time formula */
-        errref = esterror_invt(T, m->c, m->alpha0, m->n, xerr,
+        errref = esterror_invt(T, m->c, m->alpha0, m->t0, m->n, xerr,
             lambda, gamma);
 
         printf("predicted optimal c %g, err %g, sqr: %g\n",
