@@ -1490,7 +1490,7 @@ Then, Eq. \eqref{eq:error_asym} is simplified as
   \int_0^T
   \sum_{k = 2}^n
   \Gamma_k \, \dot u_k^2\bigl( q(t) \bigr) \, dt.
-  \label{eq:error_asym1}
+\label{eq:error_asym1}
 \end{align}
 %
 In this way,
@@ -1513,7 +1513,7 @@ Eq. \eqref{eq:kappa_delta} is exact, and
 %
 \begin{equation}
   \Gamma_k = 1.
-  \label{eq:Gamma_perfect}
+\label{eq:Gamma_perfect}
 \end{equation}
 %
 To see this, we note that
@@ -1535,7 +1535,7 @@ at each time step $t$ in this case, and
   \left( p_i \, \delta_{ij} - p_i \, p_j \right) \,
   \delta_{t, t'}
   ,
-  \label{eq:zz_perfect}
+\label{eq:zz_perfect}
 \end{align}
 %
 where $\delta(t - t')$ is the equivalent of $\delta_{t, t'}$
@@ -1683,7 +1683,7 @@ The transition matrix is
 %
 \begin{equation}
   \arraycolsep=3.6pt\def\arraystretch{1.4}
-  \mathbf Q
+  \mathbf A
   =
   \left(
     \begin{array}{cccccccc}
@@ -1702,10 +1702,10 @@ where $\sigma = 0$ for a periodic variable, or $1$ otherwise.
 For many updating schemes
 (cf. Sec. \ref{sec:band-matrix}),
 we can further assume that
-the matrices $\mathbf Q$ and $\mathbf w$
+the matrices $\mathbf A$ and $\mathbf w$
 share the eigenvectors, but not the eigenvalues.
 %
-The eigenvalues of $\mathbf Q$ are
+The eigenvalues of $\mathbf A$ are
 $$
 \Lambda_k
 =
@@ -1860,9 +1860,10 @@ We can rewrite Eq. \eqref{eq:error_asym1} as an action
   =
   \int_0^T
     {\mathcal L} \bigl[ q(t)\bigr]
-    \, dt,
-  \notag
-  %\label{eq:error_asym_action}
+    \, dt
+  ,
+%\notag
+\label{eq:error_asym_Lagrangian}
 \end{equation}
 %
 where the Lagrangian,
@@ -1879,7 +1880,6 @@ where the Lagrangian,
     \Gamma_k \, \lambda_k^2 \, u_k^2 \bigl[ q(t) \bigr]
   \; \dot q^2( t ),
 \notag
-%\label{eq:error_asym_Lagrangian}
 \end{align}
 %
 represents a free particle
@@ -1985,39 +1985,42 @@ Characterization of the optimal schedule}
 
 
 We can characterize the optimal schedule
-geometrically
-through the normalized mass distribution
-along $q$ as
+geometrically as follows.
+%
+First, we define a mass function
+$$
+  M(Q)
+  =
+  \sqrt{
+    \textstyle\sum_{ k = 2 }^n \Gamma_k \, \lambda_k^2 \, e^{-2 \, \lambda_k \, Q}
+  }
+  .
+$$
+and a normalized mass distribution as
 \begin{equation}
-  m(q)
+  m(Q)
   =
   \frac{
-    \sqrt{
-      \sum_{k = 2}^n \Gamma_k \, \lambda_k^2 \, u_k^2(q)
-    }
+    M(Q)
   }
   {
-    \int_0^{ q(T) }
-      \sqrt{
-        \sum_{k = 2}^n \Gamma_k \, \lambda_k^2 \, u_k^2(q')
-      }
-      \, d q'
+    \int_0^{ q(T) } M(Q') \, d Q'
   }
   ,
 \label{eq:mass_distr}
 \end{equation}
 %
 such that
-$\int_0^{q(T)} m(q) = 1$.
+$\int_0^{q(T)} m(Q) \, dQ = 1$.
 %
-As shown in Fig. ,
-the distribution peaks at $q = q(T)$,
-and decreases with the difference $q(T) - q$.
+As shown in Fig. \ref{fig:massq},
+the distribution peaks at $Q = 0$,
+and decreases with $Q$.
 %
 According to Eq. \eqref{eq:q_opt},
-the ordinate of the distribution curve at $q$
+the ordinate of the distribution curve
 gives $1/(T\alpha) = 1/(T \dot q)$,
-and the area under the curve in the region $q' < q$
+and the area under the curve in the region $Q' < Q$
 gives $t/T$.
 %
 From this picture, we can draw several conclusions.
@@ -2032,13 +2035,73 @@ From this picture, we can draw several conclusions.
     \label{fig:massq}
     Geometric characterization of the optimal schedule,
     $\alpha(t)$,
-    via the normalized mass distribution, $m(q)$.
+    via the normalized mass distribution, $m(Q)$.
     %
     \note{The figure was produced by \texttt{doc/fig/massq.gp}.
     }%
   }
 \end{center}
 \end{figure}
+
+
+For the asymptotic error, we have,
+from Eqs.
+\eqref{eq:error_asym_Lagrangian}
+and
+\eqref{eq:Lagrangian_const},
+%
+\begin{equation}
+  E_A = c^2 \, T
+  =
+  \frac 1 T
+  \left(
+    \int_0^{ q(T) } M(Q) \, dQ
+  \right)^2
+  .
+\label{eq:error_asym2}
+\end{equation}
+%
+The optimal value of $q(T)$ that minimizes
+the total error satisfies
+\begin{equation}
+  m\bigl( q(T) \bigr)
+  =
+  \frac{1} { T \, \alpha_0 / 2 }
+  ,
+\label{eq:opt_qT}
+\end{equation}
+i.e., the initial updating magnitude
+should be half of $\alpha_0$.
+
+
+\note{Let $Q_c \equiv q(T)$,
+$$
+\begin{aligned}
+  \frac{
+    \partial E_R
+  }
+  {
+    \partial q(T)
+  }
+  &=
+  -\alpha_0 \, M^2(Q_c)
+  ,
+  \\
+  \frac{
+    \partial E_A
+  }
+  {
+    \partial q(T)
+  }
+  &=
+  \frac 2 T \,
+  M(Q_c) \,
+  \int_0^{ Q_c } M(Q) \, dQ
+  .
+\end{aligned}
+$$
+Then solve $\partial (E_R + E_A) / \partial q(T) = 0$.
+}
 
 
 First,
@@ -2060,6 +2123,8 @@ is an optimal schedule of the simulation of length $T_2$.
 %
 The asymptotic errors are related by
 $T_1 \, E_{A1} = T_2 \, E_{A2}$.
+
+
 
 
 
@@ -4052,45 +4117,56 @@ The dependence of variables are shown in Fig. \ref{fig:vardep}.
   \node[draw, text width={width("Updating ")}]
     (w) at (0, 3) {Updating \\matrix, $\mathbf w$};
 
-  \node[draw, text width={width("System and")}]
-    (sys) at (0, 1) {System and\\sampling \\process};
+  \node[draw, text width={width("sampling")}]
+    (sys) at (0, 1) {System\\and\\sampling\\process};
 
-  \node[draw, text width={width("Eigenvalues, ")}]
-    (lambda) at (2.5, 3) {Eigenvalues, \\$\lambda_2, \dots, \lambda_n$};
+  \node[draw, text width={width("Eigenvalues,")}]
+    (lambda) at (2.2, 3) {Eigenvalues,\\$\lambda_2, \dots, \lambda_n$};
 
   \node[draw, text width={width("Integrals, ")}]
-    (gamma) at (2.5, 1) {Integrals, \\$\Gamma_2, \dots, \Gamma_n$};
+    (gamma) at (2.2, 1) {Integrals, \\$\Gamma_2, \dots, \Gamma_n$};
 
-  \node[draw, text width={width("Simulation ")}]
-    (T) at (2.5, -0.5) {Simulation \\time, $T$};
+  \node[draw, text width={width("Simulation")}]
+    (T) at (2.2, -0.5) {Simulation\\time, $T$};
 
-  \node[draw, text width={width("Schedule ")}]
-    (alpha) at (5.2, 1) {Optimal schedule, \\ $\alpha(t)$};
+  \node[draw, text width={width("Optimal")}]
+    (qT) at (4.7, 1) {Optimal\\ $q(T)$};
 
-  \node[draw, text width={width("Error ")}]
-    (err) at (7, 1) {Error, \\ $\Err$};
+  \node[draw, text width={width("Schedule,")}]
+    (alpha) at (7, 2) {Optimal schedule,\\ $\alpha(t)$};
 
-  \node[inner sep=0, minimum size=0] (M1) at (3.7, 1) {};
-  \node[inner sep=0, minimum size=0] (M2) at (4.0, 1) {};
-  \node[inner sep=0, minimum size=0] (N2) at (4.0, -0.2) {};
-  \node[inner sep=0, minimum size=0] (N3) at (6.2, -0.2) {};
-  \node[inner sep=0, minimum size=0] (M3) at (6.2, 1) {};
+  \node[draw, text width={width("Error, $\Err$")}]
+    (err) at (7, 0) {Error, $\Err$};
+
+  \node[inner sep=0, minimum size=0] (M1) at (3.4, 1) {};
+
+  \node[inner sep=0, minimum size=0] (N1) at (5.9, 1) {};
+
+  %\node[inner sep=0, minimum size=0] (R1) at (3.6, 1) {};
+  %\node[inner sep=0, minimum size=0] (R2) at (4.6, 0) {};
+  %\node[inner sep=0, minimum size=0] (R3) at (5.7, 1) {};
 
   \draw[->, >=latex, thick]
     (w) edge (lambda)
     (w) edge (gamma)
-    (sys) edge (gamma)
-    (alpha) edge (err);
+    (sys) edge (gamma);
 
   \draw[->, >=latex, thick]
     (lambda) -| (M1)
-    (gamma) -- (M1)
-    (T) -| (M1)
-    (M1) -- (alpha);
+    (gamma)  -- (M1)
+    (T)      -| (M1)
+    (M1)     -- (qT);
 
   \draw[->, >=latex, thick]
-    (M2) -- (N2) -- (N3) -- (M3);
+    (qT) -- (N1)
+    (N1) |- (alpha);
 
+  \draw[->, >=latex, thick]
+    (N1) |- (err);
+
+  \draw[->, >=latex, thick]
+    (M1) edge[bend left=70] (N1);
+    %(R1) |- (R2) -| (R3);
 \end{tikzpicture}
 \caption{
   \label{fig:vardep}
@@ -4279,8 +4355,8 @@ updating magnitude, $\alpha_0$.
 Compute $\Gamma_k$'s from Eq. \eqref{eq:varY}.
 
 \item
-Select an initial value of $q(T)$,
-e.g., $\ln(1 + \alpha_0 \, T)$.
+Adjust $q(T)$,
+to satisfy Eq. \eqref{eq:opt_qT}.
 
 \item
 Compute the optimal schedule by
@@ -4289,12 +4365,9 @@ numerically integrating Eq. \eqref{eq:q_opt}.
 \item
 Compute the error $E$ from
 Eqs. \eqref{eq:error_split},
-  \eqref{eq:error_asym1} and
-  \eqref{eq:error_res1}.
-
-\item
-Modify the value of $q(T)$ and repeat the previous two steps,
-until the minimal error $E$ is found.
+  \eqref{eq:error_res1},
+  and
+  \eqref{eq:error_asym2}.
 
 \end{enumerate}
 

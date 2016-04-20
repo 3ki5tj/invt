@@ -15,10 +15,11 @@ set output "massq.eps"
 xmax = 2.5
 
 set xtics ("0" 0, "{/Times-Italic q}({/Times-Italic T})" xmax) offset 0, 0.2
-set xlabel "{/Times-Italic q}({/Times-Italic T}) - {/Times-Italic q}" offset 0, 0.6
+set xlabel "{/Times-Italic Q}" offset 0, 0.6
+#set xlabel "{/Times-Italic q}({/Times-Italic T}) - {/Times-Italic q}" offset 0, 0.6
 
 unset ytics
-set ylabel "{/Times-Italic m}({/Times-Italic q})"
+set ylabel "{/Times-Italic m}({/Times-Italic Q})"
 
 # `width` to reduce the text length
 set key Left reverse width -2 spacing 1.8
