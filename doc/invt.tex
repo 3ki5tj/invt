@@ -652,7 +652,7 @@ komura2012, caparica2012, caparica2014}.
 There are, however, some reservation about
 the constant of proportionality:
 the optimal formula for $\alpha(t)$
-might be $C/t$ with a $C$
+might be $c/t$ with a $c$
 different from $1.0$\cite{
 morozov2007, zhou2008, morozov2009}.
 
@@ -1916,23 +1916,25 @@ So we may set
 \begin{equation}
   \mathcal L
   =
-    \textstyle\sum_{ k = 2 }^n
+    \sum_{ k = 2 }^n
       \Gamma_k \, \lambda_k^2
       \, u_k^2 \bigl[ q(t) \bigr]
   \;
   \dot q^2(t)
   =
-  c^2
+  \left(
+    \frac C T
+  \right)^2
   ,
-  \quad
-  (c > 0).
   \label{eq:Lagrangian_const}
 \end{equation}
+%
+for some positive $C$.
 %
 Integrating the square root, we get
 %
 \begin{equation}
-  \int_{ 0 }^{ q(t) }
+  \int_{ 0 }^{ q(T) }
     \sqrt{
       \textstyle\sum_{ k = 2 }^n
         \Gamma_k \, \lambda_k^2
@@ -1941,7 +1943,7 @@ Integrating the square root, we get
     \;
     d q'
   =
-  c \, t
+  C \, \frac t T
   ,
   \label{eq:q_opt}
 \end{equation}
@@ -1950,9 +1952,8 @@ where $c$ is to be determined by
 the boundary condition at $t = T$ as
 %
 \begin{equation}
-  c =
-  \frac 1 T
-  \int_{ 0 }^{ q(T) }
+  C =
+  \int_{ 0 }^{ q(t) }
     \sqrt{
       \textstyle\sum_{ k = 2 }^n
         \Gamma_k \, \lambda_k^2
@@ -1980,14 +1981,14 @@ is listed in Appendix \ref{sec:program}.
 
 
 \subsubsection{\label{sec:mass_distr}
-Characterization of the optimal schedule}
+Characterization of optimal schedules}
 
 
 
 We can characterize the optimal schedule
 geometrically as follows.
 %
-First, we define a mass function
+First, we define the mass function as
 $$
   M(Q)
   =
@@ -1996,7 +1997,7 @@ $$
   }
   .
 $$
-and a normalized mass distribution as
+and the normalized mass distribution as
 \begin{equation}
   m(Q)
   =
@@ -2006,6 +2007,13 @@ and a normalized mass distribution as
   {
     \int_0^{ q(T) } M(Q') \, d Q'
   }
+  =
+  \frac{
+    M(Q)
+  }
+  {
+    C
+  }
   ,
 \label{eq:mass_distr}
 \end{equation}
@@ -2013,17 +2021,8 @@ and a normalized mass distribution as
 such that
 $\int_0^{q(T)} m(Q) \, dQ = 1$.
 %
-As shown in Fig. \ref{fig:massq},
-the distribution peaks at $Q = 0$,
-and decreases with $Q$.
-%
-According to Eq. \eqref{eq:q_opt},
-the ordinate of the distribution curve
-gives $1/(T\alpha) = 1/(T \dot q)$,
-and the area under the curve in the region $Q' < Q$
-gives $t/T$.
-%
-From this picture, we can draw several conclusions.
+Clearly,
+the distribution decreases monotonically with $Q$.
 
 
 \begin{figure}[h]
@@ -2044,36 +2043,125 @@ From this picture, we can draw several conclusions.
 \end{figure}
 
 
-For the asymptotic error, we have,
-from Eqs.
+Then, from Eq. \eqref{eq:q_opt},
+we find that for $Q = q(T) - q(t)$,
+%
+\begin{align}
+  m(Q)
+  &=
+  \frac{ 1 }
+       { T \, \alpha(t) }
+  ,
+\label{eq:mQ_invTa}
+  \\
+  \int_Q^{ q(T) }
+    m(Q') \, dQ'
+  &=
+  \frac t T
+  ,
+\label{eq:intmQ_tT}
+\end{align}
+%
+which means that each point $(t, \alpha(t))$
+on the schedule can be mapped
+to a point $(Q, m(Q))$ on the mass distribution,
+such that the ordinate of the latter curve
+gives $1/(T\alpha)$,
+and the area under the curve in the domain $[Q, q(T)]$
+is equal to $t/T$,
+as shown in Fig. \ref{fig:massq},
+
+This mapping allows us to classify all optimal schedules
+as follows.
+%
+We collect in each class optimal schedules
+computed from simulations with the same function $M(Q)$
+and cutoff value $q(T)$.
+%
+The former is determined by the values of
+$\lambda_k$'s and $\Gamma_k$'s,
+whereas the latter affects the distribution $m(Q)$
+via the normalization constant $C$.
+
+
+In each class, the updating magnitudes of two schedules
+of lengths $T_1$ and $T_2$
+at corresponding times $t_1/T_1 = t_2/T_2$
+are related by $T_1 \, \alpha_1 = T_2 \, \alpha_2$.
+%
+Further, by Eqs.
 \eqref{eq:error_asym_Lagrangian}
 and
 \eqref{eq:Lagrangian_const},
+we have
 %
 \begin{equation}
-  E_A = c^2 \, T
+  E_A
+  =
+  \frac { C^2 } { T }
   =
   \frac 1 T
   \left(
     \int_0^{ q(T) } M(Q) \, dQ
   \right)^2
-  .
+  ,
 \label{eq:error_asym2}
 \end{equation}
 %
-The optimal value of $q(T)$ that minimizes
+which means the asymptotic error
+is inversely proportional to the length
+for the same-class schedules,
+and we have the scaling relation
+$T_1 \, E_{A1} = T_2 \, E_{A2}$.
+
+
+%The optimal schedule has the following scaling property.
+%%
+%For two simulations of lengths $T_1$ and $T_2$,
+%if $q(T_1) = q(T_2)$
+%and they share the same $\lambda_k$'s and $\Gamma_k$'s,
+%the updating magnitudes at the corresponding times,
+%$t_1/T_1 = t_2/T_2$,
+%can be related as $T_1 \, \alpha_1 = T_2 \, \alpha_2$.
+%%
+%In other words,
+%if $\alpha(t_1)$ is
+%an optimal schedule of the simulation of length $T_1$,
+%then
+%$\frac{T_1}{T_2} \alpha\left( \frac{ T_1 } { T_2 } t_2 \right)$
+%is an optimal schedule of the simulation of length $T_2$.
+%%
+%The asymptotic errors are related by
+%$T_1 \, E_{A1} = T_2 \, E_{A2}$.
+
+
+
+\subsubsection{\label{sec:optinitalpha}
+  Optimal initial updating magnitude
+}
+
+
+Let us now consider simulations in which
+the system is initially equilibrated at the same
+constant updating magnitude $\alpha$.
+%
+For these simulations,
+we can adjust $q(T)$
+to minimize the total error.
+%
+From Eqs. \eqref{eq:error_res1}
+and \eqref{eq:error_asym2},
+we find that
+the $q(T)$ that minimizes
 the total error satisfies
 \begin{equation}
   m\bigl( q(T) \bigr)
   =
-  \frac{1} { T \, \alpha_0 / 2 }
-  ,
+  \frac{1} { T \, (\alpha_0 / 2) }
+  .
 \label{eq:opt_qT}
 \end{equation}
-i.e., the initial updating magnitude
-should be half of $\alpha_0$.
-
-
+%
 \note{Let $Q_c \equiv q(T)$,
 $$
 \begin{aligned}
@@ -2102,28 +2190,48 @@ $$
 $$
 Then solve $\partial (E_R + E_A) / \partial q(T) = 0$.
 }
+%
+Then, by Eqs. \eqref{eq:mQ_invTa} and \eqref{eq:intmQ_tT},
+we have
+\begin{equation}
+  \alpha( t = 0 )
+  =
+  \frac{ \alpha_0 }
+       { 2 }
+  ,
+\label{eq:half_alpha0}
+\end{equation}
+%
+i.e., the optimal initial updating magnitude
+is always half of the equilibration value.
+%
+This factor $1/2$
+happens to coincide with the
+reduction factor of updating magnitude
+at stage transitions
+in the original WL algorithm\cite{
+wang2001, wang2001pre}.
 
 
-First,
-the optimal schedule has the following scaling property.
+Besides,
+for simulations with the same $\alpha_0$,
+Eq. \eqref{eq:opt_qT} shows that
+the optimal $q(T)$ increases with
+the simulation length $T$.
 %
-For two simulations of lengths $T_1$ and $T_2$,
-if $q(T_1) = q(T_2)$
-and they share the same $\lambda_k$'s and $\Gamma_k$'s,
-the updating magnitudes at the corresponding times,
-$t_1/T_1 = t_2/T_2$,
-can be related as $T_1 \, \alpha_1 = T_2 \, \alpha_2$.
+If $M(Q)$ decays rapidly,
+the distribution $m(Q)$ does not critically
+depend on the cutoff $q(T)$,
+as long as $q(T)$ is sufficiently large.
 %
-In other words,
-if $\alpha(t_1)$ is
-an optimal schedule of the simulation of length $T_1$,
-then
-$\frac{T_1}{T_2} \alpha\left( \frac{ T_1 } { T_2 } t_2 \right)$
-is an optimal schedule of the simulation of length $T_2$.
+So the optimal schedules of these simulations
+approximately satisfy the scaling relations
+described in Sec. \ref{sec:mass_distr}.
 %
-The asymptotic errors are related by
-$T_1 \, E_{A1} = T_2 \, E_{A2}$.
-
+If, however, $M(Q)$ has a long tail
+because of some near-zero $\lambda_k$'s,
+increasing the simulation length $T$
+generally alters the shape of the optimal schedule.
 
 
 
@@ -3330,37 +3438,38 @@ and minimize the total error.
 %
 For the bandpass updating schemes,
 this leads to the optimal value
-of the free parameter, $t_0$.
+of the free parameter, $t_0$,
+which is, according to Eq. \eqref{eq:half_alpha0}
 %
-%Assuming the system is initially equilibrated
-%under a constant updating magnitude,
-%$\alpha_0$,
-Assuming Eq. \eqref{eq:error_res1} with
-$$
-q(T)
-=
-\int_0^T \frac{ dt } { t + t_0 }
-=
-\ln \frac{ T + t_0 } { t_0 }.
-$$
-%
-we have, from Eqs. \eqref{eq:error_split}
-and \eqref{eq:error_asym_sinc},
-%
-\begin{equation}
-  E
-  =
-  E_R + E_A
-  =
-  \frac { \frac 1 2 \alpha_0 \, t_0^2 + T }
-        {          ( T + t_0 )^2          }
-  \sum_{ k = 2 }^K \Gamma_k
-  .
-\notag
-%\label{eq:error_sinc0}
-\end{equation}
-%
-The minimum is reached at
+%%Assuming the system is initially equilibrated
+%%under a constant updating magnitude,
+%%$\alpha_0$,
+%Assuming Eq. \eqref{eq:error_res1} with
+%$$
+%q(T)
+%=
+%\int_0^T \frac{ dt } { t + t_0 }
+%=
+%\ln \frac{ T + t_0 } { t_0 }.
+%$$
+%%
+%we have, from Eqs. \eqref{eq:error_split}
+%and \eqref{eq:error_asym_sinc},
+%%
+%\begin{equation}
+%  E
+%  =
+%  E_R + E_A
+%  =
+%  \frac { \frac 1 2 \alpha_0 \, t_0^2 + T }
+%        {          ( T + t_0 )^2          }
+%  \sum_{ k = 2 }^K \Gamma_k
+%  .
+%\notag
+%%\label{eq:error_sinc0}
+%\end{equation}
+%%
+%The minimum is reached at
 %
 \begin{equation}
   t_0
@@ -3389,17 +3498,6 @@ we show that the above error tends
 to the error of the ideal equilibrium FDS simulation
 in the asymptotic limit.
 
-Note also that at the beginning of the schedule,
-the updating magnitude is
-$\alpha(0^+) = \alpha_0 / 2$,
-half of the previous equilibrium value.
-%
-This factor $1/2$
-happens to coincide with the
-reduction factor of updating magnitude
-at stage transitions
-in the original WL algorithm\cite{
-wang2001, wang2001pre}.
 
 
 
@@ -3638,7 +3736,7 @@ The normalized error
 and the optimal value of $1/\lambda$,
 depended on the simulation length, $T$,
 in the global sampling case,
-because of the near zero eigenvalues,
+because of the near-zero eigenvalues,
 as discussed in Appendix \ref{sec:invt_schedule}.
 %
 %The optimal $1/\lambda$ gradually increased
@@ -4355,8 +4453,7 @@ updating magnitude, $\alpha_0$.
 Compute $\Gamma_k$'s from Eq. \eqref{eq:varY}.
 
 \item
-Adjust $q(T)$
-to satisfy Eq. \eqref{eq:opt_qT}.
+Compute $q(T)$ from the root of Eq. \eqref{eq:opt_qT}.
 
 \item
 Compute the optimal schedule by
@@ -4457,7 +4554,7 @@ resulting the following algorithm.
 
 
 \section{\label{sec:equilerr}
-Comparison to the error of the equilibrium FDS simulation}
+Error of the ideal equilibrium FDS simulation}
 
 
 
@@ -4489,7 +4586,7 @@ for long times.
 %Thus, our demonstration below serves as an alternative proof
 %of the optimality of the single-bin scheme.
 
-The error of the equilibrium FDS method
+The error of the equilibrium FDS simulation
 depends on the precision of the histogram.
 %
 If all $v_i$'s are exact,
