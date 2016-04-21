@@ -143,7 +143,7 @@ static void invtpar_init(invtpar_t *m)
   m->alpha_nint = 10000;
   m->fnalpha[0] = '\0';
   m->alpha_resample = 0;
-  m->qprec = 1e-5;
+  m->qprec = 1e-10;
 
   m->pbc = 0;
   m->winn = 1; /* single bin update */

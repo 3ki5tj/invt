@@ -75,20 +75,20 @@ static double intq_getvel(intq_t *intq, double dq)
 /* compute the optimal schedule, in terms of q(t)
  * the results are saved to tarr[0..m], qarr[0..m]
  * */
-static void intq_getq(intq_t *intq, double qt)
+static void intq_getq(intq_t *intq, double qT)
 {
   double c, dq, y;
   int j, m = intq->m;
 
   /* integrate over q over uniform grid */
-  dq = qt / m;
+  dq = qT / m;
   intq->tarr[0] = 0;
   intq->qarr[0] = 0;
-  y = intq_getvel(intq, intq->qarr[0] - qt);
+  y = intq_getvel(intq, intq->qarr[0] - qT);
   for ( j = 1; j <= m; j++ ) {
     intq->qarr[j] = j * dq;
     intq->tarr[j] = intq->tarr[j - 1] + y * 0.5 * dq;
-    y = intq_getvel(intq, intq->qarr[j] - qt);
+    y = intq_getvel(intq, intq->qarr[j] - qT);
     intq->tarr[j] += y * 0.5 * dq;
   }
 
@@ -146,12 +146,12 @@ static void intq_diffinva(intq_t *intq)
 
 /* compute the optimal schedule, alpha(t)
  * for a period t, and fixed
- * qt = Integral {from 0 to t} alpha(t') dt'
+ * qT = Integral {from 0 to t} alpha(t') dt'
  * the results are saved to tarr[0..m], qarr[0..m], and aarr[0..m]
  * */
-static void intq_geta(intq_t *intq, double qt)
+static void intq_geta(intq_t *intq, double qT)
 {
-  intq_getq(intq, qt);
+  intq_getq(intq, qT);
 
   /* differentiate q(t) to get alpha(t) */
   intq_diffq(intq);
@@ -169,7 +169,7 @@ __inline static double intq_getinita(intq_t *intq)
 /* compute the square-root asymptotic error
  * assuming intq_geta() has been called
  * */
-static double intq_asymerr(intq_t *intq, double qt)
+static double intq_asymerr(intq_t *intq, double qT)
 {
   double err, y, dt;
   int j, m = intq->m;
@@ -177,7 +177,7 @@ static double intq_asymerr(intq_t *intq, double qt)
   /* compute the error */
   err = 0;
   for ( j = 0; j <= m; j++ ) {
-    y = intq_getvel(intq, intq->qarr[j] - qt) * intq->aarr[j];
+    y = intq_getvel(intq, intq->qarr[j] - qT) * intq->aarr[j];
     if ( j == 0 ) {
       dt = intq->tarr[1] - intq->tarr[0];
     } else if ( j == m ) {
@@ -196,14 +196,14 @@ static double intq_asymerr(intq_t *intq, double qt)
 
 
 /* compute the square-root residue error */
-static double intq_reserr(intq_t *intq, double a0, double qt)
+static double intq_reserr(intq_t *intq, double a0, double qT)
 {
   int i;
   double err = 0;
 
   for ( i = 1; i < intq->n; i++ ) {
     err += 0.5 * a0 * intq->gamma[i] * intq->lambda[i]
-         * exp(-2.0 * intq->lambda[i] * qt);
+         * exp(-2.0 * intq->lambda[i] * qT);
   }
   intq->Er = err;
   return sqrt( err );
@@ -213,7 +213,7 @@ static double intq_reserr(intq_t *intq, double a0, double qt)
 
 /* compute the error components */
 static double intq_errcomp(intq_t *intq, double a0,
-    double qt, double *xerr)
+    double qT, double *xerr)
 {
   int i, j, m = intq->m;
   double y, dq, dt, err, errtot = 0, lam, gam;
@@ -225,11 +225,11 @@ static double intq_errcomp(intq_t *intq, double a0,
     gam = intq->gamma[i];
 
     /* residual error */
-    err = 0.5 * a0 * gam * lam * exp(-2.0 * lam * qt);
+    err = 0.5 * a0 * gam * lam * exp(-2.0 * lam * qT);
 
     /* asymptotic error */
     for ( j = 0; j <= m; j++ ) {
-      dq = intq->qarr[j] - qt;
+      dq = intq->qarr[j] - qT;
       y = gam * lam * lam * exp( 2 * lam * dq ) * intq->aarr[j];
       if ( j == 0 ) {
         dt = intq->tarr[1] - intq->tarr[0];
@@ -253,19 +253,19 @@ static double intq_errcomp(intq_t *intq, double a0,
 
 /* compute the error from the optimal alpha(t) */
 static double intq_geterr(intq_t *intq, double a0,
-    double qt)
+    double qT)
 {
   /* compute the optimal schedule alpha(t) */
-  intq_geta(intq, qt);
+  intq_geta(intq, qT);
 
   /* compute the asymptotic error */
-  intq_asymerr(intq, qt);
+  intq_asymerr(intq, qT);
 
   /* compute the residual error */
-  intq_reserr(intq, a0, qt);
+  intq_reserr(intq, a0, qT);
 
   intq->E = intq->Ea + intq->Er;
-  //fprintf(stderr, "a0 %g, qt %g, Er %g Ea %g, E %g\n", a0, qt, intq->Er, intq->Ea, intq->E); getchar();
+  //fprintf(stderr, "a0 %g, qT %g, Er %g Ea %g, E %g\n", a0, qT, intq->Er, intq->Ea, intq->E); getchar();
 
   return sqrt( intq->E );
 }
@@ -273,18 +273,18 @@ static double intq_geterr(intq_t *intq, double a0,
 
 
 /* evaulation the function
- *   F(qt) = Int {0 to qt} M(Q) dQ - M(qt) T a0 / 2
+ *   F(qT) = Int {0 to qT} M(Q) dQ - M(qT) T a0 / 2
  * where
  *   M^2(Q) =  Sum_k Gamma_k lambda_k^2 e^{-2 lambda_k Q}.
  * and the derivative
- *  F'(qt) = M(qt) + (1/M(qt)) Sum_k Gamma_k lambda_k^3 e^{-2 lambda_k Q}
+ *  F'(qT) = M(qT) + (1/M(qT)) Sum_k Gamma_k lambda_k^3 e^{-2 lambda_k Q}
  * */
-static double intq_optqtfunc(intq_t *intq, double a0, double qt, double *df)
+static double intq_optqTfunc(intq_t *intq, double a0, double qT, double *df)
 {
   double f, dq, q, lambda, gamma, xp, y, mint, mass;
   int i, k, m = intq->m;
 
-  dq = qt / m;
+  dq = qT / m;
   mint = 0;
 
   /* compute Int M(Q) dQ */
@@ -315,61 +315,83 @@ static double intq_optqtfunc(intq_t *intq, double a0, double qt, double *df)
 
   *df = mass + y / mass * intq->T * a0 * 0.5;
 
-  //printf("qt %g, f %g, mass %g, df %g, y %g\n", qt, f, mass, *df, y);
+  //printf("qT %g, f %g, mass %g, df %g, y %g\n", qT, f, mass, *df, y);
   return f;
 }
 
 
-/* compute the optimal q(t) by the Newton-Raphson method
+/* compute the optimal q(t) for the a0
  * Solving the equation
- *   Int {0 to qt} M(Q) dQ - M(qt) T a0 / 2
+ *   Int {0 to qT} M(Q) dQ - M(qT) T a0 / 2
+ * by the Newton-Raphson method
  * */
-static double intq_optqt(intq_t *intq, double a0,
+static double intq_optqT(intq_t *intq, double a0,
     double tol, int verbose)
 {
-  const double qtmax = 20.0;
-  double qt = log(1 + intq->T * a0), dq, f, df;
+  const double dqTmax = 100.0;
+  double qT = log(1 + intq->T * a0), dq = tol * 2, f, df;
+  double qTmin = 0, qTmax = DBL_MAX;
+  double fleft = -DBL_MAX, fright = DBL_MAX;
   int i;
 
-  for ( i = 0; ; i++ ) {
-    f = intq_optqtfunc(intq, a0, qt, &df);
+  for ( i = 0; fabs(dq) > tol ; i++ ) {
+    f = intq_optqTfunc(intq, a0, qT, &df);
+
+    /* update the bracket */
+    if ( f > 0 ) {
+      if ( f < fright ) {
+        qTmax = qT;
+        fright = f;
+      }
+    } else {
+      if ( f > fleft ) {
+        qTmin = qT;
+        fleft = f;
+      }
+    }
+
     dq = -f/df;
 
     /* limit the change */
-    if ( dq > qtmax ) {
-      dq = qtmax;
-    } else if (dq < -qtmax ) {
-      dq = -qtmax;
-    } else if ( fabs(dq) < tol ) {
-      break;
+    if ( dq > dqTmax ) {
+      dq = dqTmax;
+    } else if (dq < -dqTmax ) {
+      dq = -dqTmax;
     }
 
-    qt += dq;
-    if ( verbose ) {
-      fprintf(stderr, "%d: qt %g -> %g, dq %g, f %g, df %g\n",
-          i, qt, qt + dq, dq, f, df);
+    qT += dq;
+
+    /* limit qT within the bracket */
+    if ( qT > qTmax ) {
+      qT = qTmax - 0.1 * (qTmax - qTmin);
+    } else if ( qT < qTmin ) {
+      qT = qTmin + 0.1 * (qTmax - qTmin);
     }
-    if ( qt < 0 ) qt = 0;
+
+    if ( verbose ) {
+      fprintf(stderr, "%d: qT %g -> %g (%g:%g, %g:%g), dq %g, f %g, df %g\n",
+          i, qT, qT + dq, qTmin, fleft, qTmax, fright, dq, f, df);
+    }
   }
-  return qt;
+  return qT;
 }
 
 
 
-#if 0 /* backup routine, replaced by intq_optqt() */
-/* variate the value of qt to compute
+#if 0 /* backup routine, replaced by intq_optqT() */
+/* variate the value of qT to compute
  * the optimal schedule alpha(t) and the error
  * this function is adapted from estbestc_invt()
  * in `invt.h` */
 static double intq_minerr(intq_t *intq, double a0,
-    double *qt, double prec, int verbose)
+    double *qT, double prec, int verbose)
 {
   double ql, qm, qr, qn;
   double el, em, er, en;
   int it;
 
   /* specify the initial bracket */
-  qn = *qt;
+  qn = *qT;
   if ( qn <= 0 ) {
     qn = log(1 + intq->T * a0);
   }
@@ -455,7 +477,7 @@ static double intq_minerr(intq_t *intq, double a0,
     }
   }
 
-  *qt = qm;
+  *qT = qm;
 
   return em;
 }
@@ -575,7 +597,7 @@ __inline static int intq_save(intq_t *intq,
 
 
 /* return the square-root error from the optimal schedule  */
-static double esterror_opt(double T, double a0, double *qt,
+static double esterror_opt(double T, double a0, double *qT,
     double qprec, int m, intq_t **intq_ptr,
     int n, double *xerr, const double *lambda, const double *gamma,
     int verbose)
@@ -586,14 +608,14 @@ static double esterror_opt(double T, double a0, double *qt,
   intq = intq_open(T, m, n, lambda, gamma);
 
   /* compute the optimal schedule and error */
-  if ( *qt <= 0 ) {
-    *qt = intq_optqt(intq, a0, qprec, verbose);
+  if ( *qT <= 0 ) {
+    *qT = intq_optqT(intq, a0, qprec, verbose);
   }
-  err = intq_geterr(intq, a0, *qt);
+  err = intq_geterr(intq, a0, *qT);
 
   /* compute the error components */
   if ( xerr != NULL ) {
-    intq_errcomp(intq, a0, *qt, xerr);
+    intq_errcomp(intq, a0, *qT, xerr);
   }
 
   if ( intq_ptr != NULL ) {
