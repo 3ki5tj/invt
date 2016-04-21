@@ -304,7 +304,7 @@ static double invt_run(invtpar_t *m)
 
       if ( m->opta ) {
         /* compute the theoretically optimal schedule */
-        errref = esterror_opt(T, m->alpha0, &m->qT, m->qprec,
+        errref = esterror_opt(T, m->alpha0, m->initalpha, &m->qT, m->qprec,
             m->alpha_nint, &intq, m->n, xerr,
             lambda, gamma, m->verbose);
         errmin = errref;

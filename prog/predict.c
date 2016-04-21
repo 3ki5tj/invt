@@ -41,7 +41,7 @@ static void invt_geterr(invtpar_t *m,
 
   /* compute the exact minimal error under the same condition */
   qT = m->qT;
-  err2 = esterror_opt(T, m->alpha0, &qT, m->qprec,
+  err2 = esterror_opt(T, m->alpha0, m->initalpha, &qT, m->qprec,
       m->alpha_nint, &intq, m->n, NULL,
       lambda, gamma, m->verbose);
   inita = intq_getinita(intq);
@@ -82,7 +82,7 @@ static void invt_scanc(invtpar_t *m,
 
   /* compute the exact minimal error under the same condition */
   qT = m->qT;
-  err2 = esterror_opt(T, m->alpha0, &qT, m->qprec,
+  err2 = esterror_opt(T, m->alpha0, m->initalpha, &qT, m->qprec,
       m->alpha_nint, NULL, m->n, NULL,
       lambda, gamma, m->verbose);
 
@@ -193,7 +193,7 @@ static void invt_scan(invtpar_t *m,
 
     /* compute the exact minimal error under the same condition */
     qT = 0; /* use the optimal qT */
-    err2 = esterror_opt(T, m->alpha0, &qT, m->qprec,
+    err2 = esterror_opt(T, m->alpha0, m->initalpha, &qT, m->qprec,
         m->alpha_nint, NULL, m->n, NULL,
         lambda, gamma, m->verbose);
 

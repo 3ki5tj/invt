@@ -23,13 +23,14 @@ typedef struct {
   double t0; /* inverse-time schedule c/(t + t0) */
   int n; /* number of bins */
   double *p; /* target distribution */
-  double alpha0; /* initial updating magnitude */
+  double alpha0; /* updating magnitude of equilibration */
   int fixa; /* fix alpha during the entire process */
 
   int optc; /* use the optimal proportionality constant for the 1/t schedule */
 
   int opta; /* use the analytically optimal alpha(t) */
   double qT; /* explicit value of q(T) */
+  double initalpha; /* alternative to q(T), specify the initial updating magnitdue */
   int alpha_nint; /* number of integration points for the exactly optimal alpha(t) */
   char fnalpha[FILENAME_MAX]; /* output file for the exactly optimal alpha */
   int alpha_resample; /* even time grid */
@@ -140,6 +141,7 @@ static void invtpar_init(invtpar_t *m)
 
   m->opta = 0;
   m->qT = 0;
+  m->initalpha = 0;
   m->alpha_nint = 10000;
   m->fnalpha[0] = '\0';
   m->alpha_resample = 0;
@@ -415,12 +417,13 @@ static void invtpar_help(const invtpar_t *m)
   fprintf(stderr, "Options:\n");
   fprintf(stderr, "  --n=:          set the number of bins, default %d\n", m->n);
   fprintf(stderr, "  --c=:          set c in alpha = c/(t + t0), default %g\n", m->c);
-  fprintf(stderr, "  --a0=:         set the initial alpha during equilibration, default %g\n", m->alpha0);
+  fprintf(stderr, "  --a0=:         set the updating magnitude alpha during equilibration, default %g\n", m->alpha0);
   fprintf(stderr, "  --t0=:         set t0 in alpha = c/(t + t0), if unset, t0 = c/a0, default %g\n", m->t0);
   fprintf(stderr, "  --fixa:        fix the alpha during the entire process, default %d\n", m->fixa);
   fprintf(stderr, "  --optc:        use the optimal proportionality constant c in the inverse-time schedule for alpha(t), default %d\n", m->optc);
   fprintf(stderr, "  --opta:        use the optimal schedule alpha(t), default %d\n", m->opta);
-  fprintf(stderr, "  --qT=:         set qT for the optimal schedule, default %g\n", m->qT);
+  fprintf(stderr, "  --qT=:         set q(T) for the optimal schedule, default %g\n", m->qT);
+  fprintf(stderr, "  --inita=:      alternative to q(T), set the initial updating magnitude, default %g\n", m->initalpha);
   fprintf(stderr, "  --nint:        set the number of integration points for the exact optimal schedule alpha(t), default %d\n", m->alpha_nint);
   fprintf(stderr, "  --fnalpha=:    set the output file for the exact optimal schedule, alpha(t), default %s\n", m->fnalpha);
   fprintf(stderr, "  --aresamp=:    resample uniform time grid for the above schedule, default %d\n", m->alpha_resample);
@@ -665,7 +668,16 @@ static int invtpar_keymatch(invtpar_t *m,
   {
     m->qT = invtpar_getdouble(m, key, val);
   }
-  else if ( strcmpfuzzy(key, "nint") == 0 )
+  else if ( strcmpfuzzy(key, "inita") == 0
+         || strcmpfuzzy(key, "initalpha") == 0
+         || strcmpfuzzy(key, "ainit") == 0
+         || strcmpfuzzy(key, "alphainit") == 0 )
+  {
+    m->initalpha = invtpar_getdouble(m, key, val);
+  }
+  else if ( strcmpfuzzy(key, "nint") == 0
+         || strcmpfuzzy(key, "anint") == 0
+         || strcmpfuzzy(key, "alphanint") == 0 )
   {
     m->alpha_nint = invtpar_getint(m, key, val);
   }

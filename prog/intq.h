@@ -273,13 +273,14 @@ static double intq_geterr(intq_t *intq, double a0,
 
 
 /* evaulation the function
- *   F(qT) = Int {0 to qT} M(Q) dQ - M(qT) T a0 / 2
+ *   F(qT) = Int {0 to qT} M(Q) dQ - M(qT) T initalpha
  * where
  *   M^2(Q) =  Sum_k Gamma_k lambda_k^2 e^{-2 lambda_k Q}.
  * and the derivative
  *  F'(qT) = M(qT) + (1/M(qT)) Sum_k Gamma_k lambda_k^3 e^{-2 lambda_k Q}
  * */
-static double intq_optqTfunc(intq_t *intq, double a0, double qT, double *df)
+static double intq_optqTfunc(intq_t *intq,
+    double initalpha, double qT, double *df)
 {
   double f, dq, q, lambda, gamma, xp, y, mint, mass;
   int i, k, m = intq->m;
@@ -304,7 +305,7 @@ static double intq_optqTfunc(intq_t *intq, double a0, double qT, double *df)
       mint += mass * dq;
     }
   }
-  f = mint - mass * intq->T * a0 * 0.5;
+  f = mint - mass * intq->T * initalpha;
 
   for ( y = 0, k = 0; k < intq->n; k++ ) {
       gamma = intq->gamma[k];
@@ -313,29 +314,32 @@ static double intq_optqTfunc(intq_t *intq, double a0, double qT, double *df)
       y += gamma * lambda * lambda * lambda * xp;
   }
 
-  *df = mass + y / mass * intq->T * a0 * 0.5;
+  *df = mass + y / mass * intq->T * initalpha;
 
   //printf("qT %g, f %g, mass %g, df %g, y %g\n", qT, f, mass, *df, y);
   return f;
 }
 
 
-/* compute the optimal q(t) for the a0
+
+/* compute the optimal q(T) such that the initial
+ * updating magnitude is initalpha
  * Solving the equation
- *   Int {0 to qT} M(Q) dQ - M(qT) T a0 / 2
+ *   Int {0 to q(T)} M(Q) dQ - M(q(T)) T initalpha == 0
  * by the Newton-Raphson method
  * */
-static double intq_optqT(intq_t *intq, double a0,
+static double intq_optqT(intq_t *intq, double initalpha,
     double tol, int verbose)
 {
-  const double dqTmax = 100.0;
-  double qT = log(1 + intq->T * a0), dq = tol * 2, f, df;
+  const double dqmax = 100000;
+  double qT = log(1 + intq->T * initalpha / 2), dq = tol * 2;
+  double f = DBL_MAX, df;
   double qTmin = 0, qTmax = DBL_MAX;
   double fleft = -DBL_MAX, fright = DBL_MAX;
   int i;
 
-  for ( i = 0; fabs(dq) > tol ; i++ ) {
-    f = intq_optqTfunc(intq, a0, qT, &df);
+  for ( i = 0; fabs(dq) > tol && fabs(f) > 1e-10; i++ ) {
+    f = intq_optqTfunc(intq, initalpha, qT, &df);
 
     /* update the bracket */
     if ( f > 0 ) {
@@ -353,10 +357,10 @@ static double intq_optqT(intq_t *intq, double a0,
     dq = -f/df;
 
     /* limit the change */
-    if ( dq > dqTmax ) {
-      dq = dqTmax;
-    } else if (dq < -dqTmax ) {
-      dq = -dqTmax;
+    if ( dq > dqmax ) {
+      dq = dqmax;
+    } else if (dq < -dqmax ) {
+      dq = -dqmax;
     }
 
     qT += dq;
@@ -588,8 +592,7 @@ __inline static int intq_save(intq_t *intq,
 
   fclose(fp);
 
-  fprintf(stderr, "saved optimal schedule to %s\n",
-     fn);
+  fprintf(stderr, "saved optimal schedule to %s\n", fn);
 
   return 0;
 }
@@ -597,8 +600,9 @@ __inline static int intq_save(intq_t *intq,
 
 
 /* return the square-root error from the optimal schedule  */
-static double esterror_opt(double T, double a0, double *qT,
-    double qprec, int m, intq_t **intq_ptr,
+static double esterror_opt(double T, double a0,
+    double initalpha, double *qT, double qprec,
+    int m, intq_t **intq_ptr,
     int n, double *xerr, const double *lambda, const double *gamma,
     int verbose)
 {
@@ -609,7 +613,13 @@ static double esterror_opt(double T, double a0, double *qT,
 
   /* compute the optimal schedule and error */
   if ( *qT <= 0 ) {
-    *qT = intq_optqT(intq, a0, qprec, verbose);
+    /* by default, the initial updating magnitude
+     * takes the optimal value, which is
+     * half of the equilibration value */
+    if ( initalpha <= 0 ) {
+      initalpha = a0 / 2;
+    }
+    *qT = intq_optqT(intq, initalpha, qprec, verbose);
   }
   err = intq_geterr(intq, a0, *qT);
 
