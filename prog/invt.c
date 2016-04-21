@@ -303,16 +303,14 @@ static double invt_run(invtpar_t *m)
       }
 
       if ( m->opta ) {
-        double qT = 0;
-
         /* compute the theoretically optimal schedule */
-        errref = esterror_opt(T, m->alpha0, &qT, m->qprec,
+        errref = esterror_opt(T, m->alpha0, &m->qT, m->qprec,
             m->alpha_nint, &intq, m->n, xerr,
             lambda, gamma, m->verbose);
         errmin = errref;
 
-        m->t0 = intq_estt0(T, qT);
-        fprintf(stderr, "q(T) %g, estimated t0 = %g\n", qT, m->t0);
+        m->t0 = intq_estt0(T, m->qT);
+        fprintf(stderr, "q(T) %g, estimated t0 = %g\n", m->qT, m->t0);
 
         /* save the optimal schedule to file */
         intq_save(intq, optc, 2 * optc / m->alpha0,

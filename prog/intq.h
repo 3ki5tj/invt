@@ -159,6 +159,13 @@ static void intq_geta(intq_t *intq, double qt)
 
 
 
+/* retrieve the initial updating magnitude */
+__inline static double intq_getinita(intq_t *intq)
+{
+  return intq->aarr[0];
+}
+
+
 /* compute the square-root asymptotic error
  * assuming intq_geta() has been called
  * */
@@ -265,6 +272,13 @@ static double intq_geterr(intq_t *intq, double a0,
 
 
 
+/* evaulation the function
+ *   F(qt) = Int {0 to qt} M(Q) dQ - M(qt) T a0 / 2
+ * where
+ *   M^2(Q) =  Sum_k Gamma_k lambda_k^2 e^{-2 lambda_k Q}.
+ * and the derivative
+ *  F'(qt) = M(qt) + (1/M(qt)) Sum_k Gamma_k lambda_k^3 e^{-2 lambda_k Q}
+ * */
 static double intq_optqtfunc(intq_t *intq, double a0, double qt, double *df)
 {
   double f, dq, q, lambda, gamma, xp, y, mint, mass;
@@ -306,7 +320,10 @@ static double intq_optqtfunc(intq_t *intq, double a0, double qt, double *df)
 }
 
 
-/* compute the optimal q(t) by the Newton-Raphson method */
+/* compute the optimal q(t) by the Newton-Raphson method
+ * Solving the equation
+ *   Int {0 to qt} M(Q) dQ - M(qt) T a0 / 2
+ * */
 static double intq_optqt(intq_t *intq, double a0,
     double tol, int verbose)
 {
@@ -569,7 +586,9 @@ static double esterror_opt(double T, double a0, double *qt,
   intq = intq_open(T, m, n, lambda, gamma);
 
   /* compute the optimal schedule and error */
-  *qt = intq_optqt(intq, a0, qprec, verbose);
+  if ( *qt <= 0 ) {
+    *qt = intq_optqt(intq, a0, qprec, verbose);
+  }
   err = intq_geterr(intq, a0, *qt);
 
   /* compute the error components */
