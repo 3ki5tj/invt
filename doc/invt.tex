@@ -3439,7 +3439,7 @@ and minimize the total error.
 For the bandpass updating schemes,
 this leads to the optimal value
 of the free parameter, $t_0$,
-which is, according to Eq. \eqref{eq:half_alpha0}
+which is, according to Eq. \eqref{eq:half_alpha0},
 %
 %%Assuming the system is initially equilibrated
 %%under a constant updating magnitude,
@@ -3575,9 +3575,10 @@ Initially,
 we set the bias potential to zero,
 $V_i \equiv 0$,
 %
-and equilibrate the system under
-a constant updating magnitude,
-$\alpha_0 = 10^{-4}$.
+and equilibrate the system for $10^7$ steps
+under a constant updating magnitude,
+$\alpha_0 = 10^{-4}$,
+unless specified otherwise.
 %
 After this,
 we reset the origin of the time, $t$,
@@ -3656,13 +3657,13 @@ and tested against simulation.
 %\subsubsection{Single-bin (WL) updating scheme}
 
 
-For the single-bin updating scheme,
-we chose $\alpha_0 = 10^{-4}$
-and ran the simulation for $T = 10^8$ steps.
+For the single-bin updating scheme, we
+%we chose $\alpha_0 = 10^{-4}$ and
+ran the simulation for $T = 10^8$ steps.
 %
 As shown in Fig. \ref{fig:errsbin},
 the numerical results of the terminal error agreed well with
-the analytical prediction by Eq. \eqref{eq:error_invt}.
+the analytical prediction.
 %
 For both global and local sampling processes,
 the optimal $\lambda$ occurred around $1.0$,
@@ -3683,14 +3684,9 @@ verifying the optimality of Eq. \eqref{eq:alpha_invt1}.
 %
 The two error functions
 differed only by a multiplicative constant,
-which again agreed with the theory:
+also in agreement with the theory
+(cf. Appendix \ref{sec:invt_singlebin}).
 %
-with identical eigenvalues,
-$\lambda_2 = \cdots = \lambda_n = 1$,
-the error in Eq. \eqref{eq:error_invt}
-depends on the sampling process only through
-the sum $\sum_{ k = 2 }^n \Gamma_k$,
-which gives rise to the above multiplicative constant.
 
 
 \begin{figure}[h]
@@ -3726,30 +3722,21 @@ As an example of the multiple-bin schemes,
 we chose the nearest-neighbor updating scheme
 described in Sec. \ref{sec:nnscheme}.
 %
-We choose $\mu_1 = 0.24$ to the smallest eigenvalue
+We chose $\mu_1 = 0.24$ to make the smallest eigenvalue
 close to zero.
 %
 Again, simulation and theory agreed well,
 as shown in Fig. \ref{fig:errnnbr}.
 %
-The normalized error
-and the optimal value of $1/\lambda$,
-depended on the simulation length, $T$,
-in the global sampling case,
-because of the near-zero eigenvalues,
-as discussed in Appendix \ref{sec:invt_schedule}.
+The optimal value of $1/\lambda$,
+increased with the simulation length, $T$,
+in the global sampling case
+(cf. Appendix \ref{sec:invt_deplength}).
 %
-%The optimal $1/\lambda$ gradually increased
-%with simulation length,
-%as discussed in Sec. \ref{sec:optlambda}.
-%
-However, for the local sampling case,
-the $T$-dependence was suppressed
-because of the dominance of large $\Gamma_k$'s
-of the small-$k$ modes.
-%
-The optimal $\lambda$ remained around $1.0$,
-as suggested by Eq. \eqref{eq:lambda_nn_onestep}.
+However, the shift was suppressed
+for the local sampling case,
+with the optimal $\lambda$ remained around $1.0$
+[cf. Eq. \eqref{eq:lambda_nn_onestep}].
 
 
 
@@ -4098,7 +4085,7 @@ effectively sample a flat distribution
 by incrementally updating the bias potential
 to offset the PMF.
 %
-The optimal schedule ensures fastest convergence
+The optimal schedule delivers fastest convergence
 of the bias potential.
 %They differ by the updating schemes,
 %which specify how the bias potential is modified
@@ -4114,10 +4101,10 @@ of the bias potential.
 
 Each adaptive FDS method is associated with
 an updating scheme,
-or mathematically an updating matrix,
-whose elements $w_{ij}$ specifies the
-relative magnitude of updating the bias potential
-at bin $i$ upon a visit to bin $j$.
+or mathematically an updating matrix.
+%whose elements $w_{ij}$ specifies the
+%relative magnitude of updating the bias potential
+%at bin $i$ upon a visit to bin $j$.
 %
 Our method computes the optimal schedule from
 the eigenvalues of the updating matrix,
@@ -4126,14 +4113,8 @@ of the eigenmodes.
 %
 For the single-bin (WL) scheme,
 the optimal schedule from our method
-is given by inverse-time formula,
+is given by the inverse-time formula,
 Eq. \eqref{eq:alpha_invt1}.
-%
-The parameter, $t_0$, can be adjusted
-according to Eq. \eqref{eq:t0_sinc},
-to accommodate the initial error.
-%such that the initial updating magnitude
-%is half of the previous equilibrium value.
 %
 For a general multiple-bin scheme,
 including the Gaussian one used in metadynamics,
@@ -4144,7 +4125,10 @@ of a free particle with a position-dependent mass, Eq. \eqref{eq:q_opt}.
 In this case,
 the optimal schedule and error
 can be sensitive to the simulation length.
-
+%
+The initial updating magnitude is always
+half of the previous equilibrium value.
+% the value used during equilibration.
 
 We have also shown that
 the single-bin scheme is optimal
@@ -4154,7 +4138,7 @@ on the smoothness of the PMF.
 %
 More generally, with perfect filtering
 of certain eigenmodes, we can construct a
-class of multiple-bin bandpass updating schemes
+class of bandpass updating schemes
 that are also optimal for asymptotic convergence.
 %
 The optimal schedule of these bandpass schemes
@@ -4162,11 +4146,21 @@ is always given by the inverse-time formula.
 %
 They appeared to outperform similar Gaussian schemes
 in our model study,
-suggesting that they can be useful
-in high-precision metadynamics simulations.
+and they can be useful
+for high-precision metadynamics simulations.
+%
+However, since the bandpass schemes
+update the bias potential globally,
+they can be more expensive than
+the Gaussian schemes.
+%
+Besides, the performance gain
+is relative small for a shorter simulation
+with a local sampling process such as MD.
 
 
-Strictly speaking, our theory is valid
+
+Strictly speaking, our method is valid
 only for long simulations.
 %
 This allows us to assume the sampling process
@@ -4175,7 +4169,7 @@ and to represent the autocorrelation function
 of each eigenmode by a single number, $\Gamma_k$.
 %
 Although these assumptions appeared to work well
-on the model system,
+on our test system,
 they may break down for relatively short simulations
 of glassy systems.
 
@@ -4202,8 +4196,8 @@ Here we give a program of computing
 the optimal schedule and the error
 of a given adaptive FDS simulation.
 %
-Basically, we extract
-both $\lambda_i$'s and $\Gamma_i$'s
+Basically, we need to extract
+$\lambda_i$'s and $\Gamma_i$'s
 from the input,
 and then feed them to Eq. \eqref{eq:q_opt}
 for the schedule.
@@ -4228,7 +4222,7 @@ The dependence of variables are shown in Fig. \ref{fig:vardep}.
     (T) at (2.2, -0.5) {Simulation\\time, $T$};
 
   \node[draw, text width={width("Optimal")}]
-    (qT) at (4.7, 1) {Optimal\\ $q(T)$};
+    (qT) at (4.6, 1.4) {Optimal\\ $q(T)$};
 
   \node[draw, text width={width("Schedule,")}]
     (alpha) at (7, 2) {Optimal schedule,\\ $\alpha(t)$};
@@ -4240,9 +4234,9 @@ The dependence of variables are shown in Fig. \ref{fig:vardep}.
 
   \node[inner sep=0, minimum size=0] (N1) at (5.9, 1) {};
 
-  %\node[inner sep=0, minimum size=0] (R1) at (3.6, 1) {};
-  %\node[inner sep=0, minimum size=0] (R2) at (4.6, 0) {};
-  %\node[inner sep=0, minimum size=0] (R3) at (5.7, 1) {};
+  \node[inner sep=0, minimum size=0] (R1) at (3.6, 1) {};
+  \node[inner sep=0, minimum size=0] (R2) at (4.6, 0.6) {};
+  \node[inner sep=0, minimum size=0] (R3) at (5.6, 1) {};
 
   \draw[->, >=latex, thick]
     (w) edge (lambda)
@@ -4253,18 +4247,21 @@ The dependence of variables are shown in Fig. \ref{fig:vardep}.
     (lambda) -| (M1)
     (gamma)  -- (M1)
     (T)      -| (M1)
-    (M1)     -- (qT);
+    (M1)     -- (R1)
+    (R1)     |- (qT);
 
   \draw[->, >=latex, thick]
-    (qT) -- (N1)
-    (N1) |- (alpha);
+    (qT)     -| (R3);
+
+  \draw[->, >=latex, thick]
+    (R3) -- (N1) |- (alpha);
 
   \draw[->, >=latex, thick]
     (N1) |- (err);
 
   \draw[->, >=latex, thick]
-    (M1) edge[bend left=70] (N1);
-    %(R1) |- (R2) -| (R3);
+    %(M1) edge[bend left=70] (N1);
+    (R1) |- (R2) -| (R3);
 \end{tikzpicture}
 \caption{
   \label{fig:vardep}
@@ -4835,53 +4832,54 @@ Using Eq. \eqref{eq:alpha_invtlambda}
 in Eq. \eqref{eq:error_asym1} yields
 %
 \begin{align}
-\Err_A
-&=
-\frac{    1    }
-     { T + t_0 }
-\sum_{k = 2}^n
-  \frac{ \Gamma_k \, \nu_k^2 }
-       {    2 \, \nu_k - 1   }
-\left[
-  1 - \left(
-        \frac {     t_0 }
-              { T + t_0 }
-      \right)^{ 2 \, \nu_k - 1 }
-\right],
+  \Err_A
+  &=
+  \frac{    1    }
+       { T + t_0 }
+  \sum_{k = 2}^n
+    \frac{ \Gamma_k \, \nu_k^2 }
+         {    2 \, \nu_k - 1   }
+  \left[
+    1 - \left(
+          \frac {     t_0 }
+                { T + t_0 }
+        \right)^{ 2 \, \nu_k - 1 }
+  \right]
+  ,
 \label{eq:error_asym_invt}
 \end{align}
 %
 where $\nu_k \equiv \lambda_k / \lambda$.
 %
-Assuming Eq. \eqref{eq:error_res1}
-for the residual error, and Eq. \eqref{eq:t0_sinc},
+From Eq. \eqref{eq:error_res1},
 we get
 %
 \begin{equation}
-\Err_R
-=
-\sum_{k = 2}^n
-  \frac{ \Gamma_k \, \nu_k }
-       {        t_0   }
+  \Err_R
+  =
+  \frac { \alpha_0 } { 2 }
+  \sum_{k = 2}^n
+  \Gamma_k \, \lambda_k \,
   \left(
       \frac{   t_0   }
            { T + t_0 }
-   \right)^{ 2 \, \nu_k },
-\notag
-%\label{eq:error_res_invt}
+  \right)^{ 2 \, \nu_k }
+  .
+\label{eq:error_res_invt}
 \end{equation}
 %
-with
-$
-  q(T)
-  =
-  ( 1 / \lambda )
-  \ln\left(
-    1 + T / t_0
-  \right)
-$
-%
-from integrating Eq. \eqref{eq:alpha_invtlambda}.
+The total error is the sum of the two.
+%with
+%$
+%  q(T)
+%  =
+%  ( 1 / \lambda )
+%  \ln\left(
+%    1 + T / t_0
+%  \right)
+%$
+%%
+%from integrating Eq. \eqref{eq:alpha_invtlambda}.
 %
 %We assume that
 %the system was initially equilibrated
@@ -4891,100 +4889,114 @@ from integrating Eq. \eqref{eq:alpha_invtlambda}.
 %can be computed from Eq. \eqref{eq:y2_eql},
 %as well as Eq. \eqref{eq:t0_sinc}.
 %
-The total error is
+%The total error is
+%%
+%\begin{align}
+%\Err
+%&=
+%\Err_R + \Err_A
+%\notag
+%\\
+%&=
+%\sum_{ k = 2 }^n
+%  \frac
+%  {
+%    \Gamma_k \, \nu_k \,
+%    \left[
+%      \nu_k
+%      +
+%      (\nu_k - 1)
+%      \left(
+%        \frac{ t_0 } { T + t_0 }
+%      \right)^{ 2 \, \nu_k - 1 }
+%    \right]
+%  }
+%  {
+%    (T + t_0) \, (2 \, \nu_k - 1)
+%  }
+%  .
+%%\notag
+%\label{eq:error_invt}
+%\end{align}
+
+
+
+
+\subsection{\label{sec:invt_singlebin}
+  Single-bin updating scheme
+}
+
+
+
+For the single-bin scheme, we have
+$\lambda_2 = \cdots = \lambda_n = 1$,
+and
+the errors
+%from Eqs. \eqref{eq:error_res_invt}
+%and \eqref{eq:error_asym_invt}
+depend on $\Gamma_k$'s only via the sum
+$\sum_{k = 2}^n \Gamma_k$,
+which serves as a multiplicative constant.
+
+In the asymptotic limit,
+we can focus on the asymptotic error
+and drop the second term in the square brackets
+of Eq. \eqref{eq:error_asym_invt}
+by assuming $\lambda < 2$.
 %
-\begin{align}
-\Err
-&=
-\Err_R + \Err_A
-\notag
-\\
-&=
-\sum_{ k = 2 }^n
-  \frac
-  {
-    \Gamma_k \, \nu_k \,
-    \left[
-      \nu_k
-      +
-      (\nu_k - 1)
-      \left(
-        \frac{ t_0 } { T + t_0 }
-      \right)^{ 2 \, \nu_k - 1 }
-    \right]
-  }
-  {
-    (T + t_0) \, (2 \, \nu_k - 1)
-  }
-  .
-\label{eq:error_invt}
-\end{align}
-%
-
-
-
-
-
-
-\subsection{\label{sec:deplength}
-Dependence on the simulation length}
-
-
-
-The parameter, $\lambda$, is equal to
-the difference
+Then,
 $$
-  \lambda
+  E_A
   =
-  \Delta \left( \frac{ 1 } { T \, \alpha } \right)
-  \equiv
-  \left.
-  \frac { 1 } { T \, \alpha(t) }
-  \right|_{t = 0}^{t = T}
-  .
+  \frac { 1 } { T + t_0 }
+  \frac {             1            }
+        { \lambda \, (2 - \lambda) }
+  \sum_{ k = 2 }^n \Gamma_k
+  ,
 $$
-which corresponds to the height difference
-of the normalized mass distribution
-$
-\left. m(q) \right|_{q = 0}^{q = q(T)}
-$
-in the optimal schedule
-(cf. Sec. \ref{sec:mass_distr}).
+is minimal at $\lambda = 1$.
 %
-Therefore, we expect the optimal $\lambda$
-to decrease with the span $q(T)$,
-hence the simulation length $T$,
-if the distribution has a long tail.
+\note{A higher-order correction:
+  $
+  \lambda = 1 -
+  \left[
+    1 - \frac 1 2 \alpha_0 \, (T+t_0)
+  \right] r \, \log r
+  ,
+  $
+  where $r = t_0 / (T + t_0)$.
+}
 
 
 
 
-\subsection{Nearest-neighbor updating scheme}
+\subsection{\label{eq:invt_nn}
+Nearest-neighbor updating scheme}
+
+
 
 
 For the nearest-neighbor updating scheme
 introduced in Sec. \ref{sec:nnscheme},
 we can find an analytical expression
 of the optimal value of $\lambda$
-in the large-$n$ limit.
+in the large-$n$ and asymptotic limit.
 %
 In this case,
-we
-drop the second term in the square brackets
-of Eq. \eqref{eq:error_asym_invt},
-which vanishes asymptotically if $2 \, \nu_k > 1$,
-and convert the asymptotic error
-to an integral:
+if $2 \, \nu_k > 1$ for every $k$,
+the asymptotic error is given by the integral
 %$\sum_i \to \frac{2 \, n}{\pi} \int_0^{\pi/2} dp$, and
 %
 \begin{align}
-\Err_A
-=
-\frac{2 \, n}{\pi \, T}
-\int_0^{\pi/2}
-  \frac{ \Gamma(p) \, \left(1 - 4 \, \mu_1 \, \sin^2 p \right)^2    }
-       {   \lambda \, \left(2 - 8 \, \mu_1 \, \sin^2 p - \lambda \right) }
-\, dp.
+  \Err_A
+  =
+  \frac{ 2 \, n  }
+       { \pi \, T }
+  \int_0^{\pi/2}
+    \frac{ \Gamma(p) \, \left(1 - 4 \, \mu_1 \, \sin^2 p \right)^2    }
+         {   \lambda \, \left(2 - 8 \, \mu_1 \, \sin^2 p - \lambda \right) }
+  \, dp
+  .
 \notag
 %\label{eq:error_nn_asym_int}
 \end{align}
@@ -5082,6 +5094,51 @@ the smallest eigenvalue,
 $\min \lambda_k = 1 - 4 \, \mu_1$.
 
 
+
+
+\subsection{\label{sec:invt_deplength}
+Dependence on the simulation length}
+
+
+
+For a finite-length simulation,
+we generally expect the optimal $\lambda$
+that minimizes the total error to
+decrease with the simulation length $T$.
+%
+From Eq. \eqref{eq:alpha_invt}, we have
+$$
+  \lambda
+  =
+  \Delta \left( \frac{ 1 } { T \, \alpha } \right)
+  \equiv
+  \left.
+  \frac { 1 } { T \, \alpha(t) }
+  \right|_{t = 0}^{t = T}
+  .
+$$
+This expression corresponds to the height difference
+of the mass distribution
+$
+\bigl. m(Q) \bigr|_{Q = q(T)}^{Q = 0}
+$
+in the optimal schedule
+(cf. Sec. \ref{sec:mass_distr}).
+%
+With a fixed $\alpha_0$,
+increasing the simulation length $T$
+also increases the optimal span $q(T)$ of the distribution
+(cf. Sec. \ref{sec:optinitalpha}),
+and thus reduces the height difference.
+%
+This effect is significant
+if the distribution $m(Q)$ has a long tail,
+or if some eigenvalues $\lambda_k$'s are near zero.
+%
+It is often suppressed in local sampling processes,
+because the eigenmodes with large $\lambda_k$'s
+are accompanied by large $\Gamma_k$'s,
+which shortens the distribution tail.
 
 
 
