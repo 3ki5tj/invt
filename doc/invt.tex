@@ -3178,6 +3178,70 @@ $$
 }%
 
 
+\begin{figure}[h]
+\begin{center}
+  \makebox[\linewidth][c]{
+    \includegraphics[angle=0, width=0.95\linewidth]{fig/sinc.pdf}
+  }
+  \caption{
+    \label{fig:sinc}
+    Updating kernels of the bandpass updating schemes
+    compared to a Gaussian with a similar width.
+    %
+    The lines are a guide to the eyes.
+    Inset. Updating matrix in the non-periodic case.
+    %
+    \note{This figure was produced by \texttt{doc/fig/sinc.gp}.
+      The data were computed by the program \texttt{prog/predict},
+      see particularly the function \texttt{intq\_save()}
+      in \texttt{prog/intq.h} for panel (a),
+      and the functions \texttt{savewin()}
+      and \texttt{savewinmat()}
+      in \texttt{prog/invt.h} for panel (b),
+      The data were saved under the directory \texttt{data/sinc}.
+      See the \texttt{make} object \texttt{sincsingle}
+      in the \texttt{Makefile} there.
+    }%
+  }
+\end{center}
+\end{figure}
+
+
+In Fig. \ref{fig:sinc},
+we give examples of the updating kernels
+of the bandpass updating schemes,
+compared to a Gaussian
+with a similar width, $\sigma$,
+%
+\begin{equation}
+  \sigma
+  \approx
+  \frac
+  {
+    n
+  }
+  {
+    \sqrt{ 2 \, \pi } \, g \, K
+  }
+  .
+\label{eq:sigma_equiv}
+\end{equation}
+%
+%where $g = 2$ for the periodic case
+%or $g = 1$ otherwise.
+%
+The kernel in the non-periodic case is a zigzag
+because of the term $(-1)^{n+K+l-1}$
+in Eq. \eqref{eq:mu_sinc_refl}.
+%
+However, as shown in the inset, % of Fig. \ref{fig:sinc}(b),
+the ruggedness disappears
+in the updating matrix by Eq. \eqref{eq:w_band_refl},
+as the above oscillatory term for $l = i - j$
+is canceled by the term for either $l = i + j - 1$
+or $l = i + j - 2 \, n - 1$
+with the opposite sign.
+
 
 
 \subsubsection{\label{sec:finlencorr}
@@ -3188,13 +3252,9 @@ Finite-length correction}
 In the above, we have focused on
 the asymptotic error.
 %
-For a finite-length simulation,
-we should include the residual part
-and minimize the total error.
-%
-For the bandpass updating schemes,
-this leads to the optimal value
-of the free parameter, $t_0$,
+By including the residual error
+and minimize the total,
+we get the optimal $t_0$,
 which is, according to Eq. \eqref{eq:half_alpha0},
 %
 %%Assuming the system is initially equilibrated
@@ -3303,30 +3363,21 @@ in Sec. \ref{sec:results_cmpschemes}.
 Test system and simulation protocol}
 
 
-Our test system is
-a model one-dimensional system
-of $n = 100$ bins,
-with a flat target distribution
-$p_i = 1/n$.
+In our test system,
+$i$ is the index of a one-dimensional
+non-periodic variable,
+and $n = 100$.
 %
-%Since in the asymptotic regime,
-%the distribution converges to $p_i$
-%no matter the intrinsic distribution, $p^*_i$,
-%we also set the latter to be flat for convenience.
-The intrinsic distribution, $p^*_i$,
-is also assumed to be flat.
+Both the target and intrinsic distributions
+are assumed to be flat:
+$p^*_i = p_i = 1/n$.
 %
-Unless specified otherwise,
-we assume $i$ to be non-periodic.
+%We wish to see how
+%the schedule, $\alpha(t)$,
+%affects the fluctuating error
+%of the bias potential
+%at the end of the simulation.
 %
-We wish to see how
-the schedule, $\alpha(t)$,
-affects the fluctuating error
-of the bias potential
-at the end of the simulation.
-
-
-
 Initially,
 we set the bias potential to zero,
 $V_i \equiv 0$,
@@ -3338,7 +3389,7 @@ unless specified otherwise.
 %
 After this,
 we reset the origin of the time, $t$,
-and started the testing schedule.
+and start the testing schedule.
 %specified by either
 %Eq. \eqref{eq:q_opt}
 %or
@@ -3354,10 +3405,10 @@ in Appendix \ref{sec:stabilize_wband}.
 
 
 
-Since the error depends on
-the underlying sampling process,
-we tested two sampling processes,
-a global one and a local one.
+%Since the error depends on
+%the underlying sampling process,
+We tested two sampling processes.
+%a global one and a local one.
 %
 Both are based on
 Metropolis MC algorithm\cite{
@@ -3375,16 +3426,20 @@ in the first or global sampling process,
 we choose the destination $j$
 uniformly out of the $n$ bins.
 %
-This process
-emulates the perfect sampling process
-in Sec. \ref{sec:Gamma} asymptotically.
-%
 In the second or local sampling process,
 $j$ is either $i - 1$ or $i + 1$
 (adjusted by the boundary condition)
-with equal probability $1/2$,
-which mimics the one-step sampling process
-in Sec. \ref{sec:Gamma}.
+with equal probability $1/2$.
+%
+Asymptotically,
+the above global and local sampling processes
+emulate the perfect and one-step processes
+discussed in Appendix \ref{sec:Gamma},
+respectively,
+and we shall use
+Eqs. \eqref{eq:Gamma_perfect}
+and \eqref{eq:Gamma_onestep}
+for the respective $\Gamma_k$'s.
 %
 
 
@@ -3478,43 +3533,15 @@ Optimal schedule}
 
 
 
-We now turn to the optimal schedule
-predicted by Eq. \eqref{eq:q_opt}.
+We computed the optimal schedule from Eq. \eqref{eq:q_opt}
+for the Gaussian (with $\sigma = 10$)
+and bandpass (with $K = 4$) updating schemes.
 %
-For the Gaussian updating scheme
-with $\sigma = 10$,
-we computed the schedule for the local sampling process,
-and compared it with the inverse-time schedule
-Eq. \eqref{eq:alpha_invtlambda}
-with the optimal $\lambda$.
-%
-As shown in Fig. \ref{fig:optacmp}(a),
-the optimal schedule is a more complex curve
-than the optimized inverse-time schedule.
-%
-The complexity of the optimal schedule
-corresponds to the non-exponential tail
-of the mass distribution function,
-as shown Fig. \ref{fig:optacmp}(b)
-[cf. Sec. \ref{sec:mass_distr}].
-%
-The errors in the two cases were
-$9.1 \times 10^{-5}$
-and
-$1.7 \times 10^{-4}$,
-respectively,
-%for the local sampling process,
-showing the superiority of
-the optimal schedule from Eq. \eqref{eq:q_opt}.
-%
-Besides, we verified the scaling property
-discussed in Sec. \ref{sec:mass_distr},
-by comparison with a simulation [Fig. \ref{fig:optacmp}(a)]
-of half length, $T' = 5 \times 10^7$
-and doubled initial updating magnitude,
-$\alpha_0 = 2 \times 10^{-4}$,
-which left the normalized mass distribution invariant,
-as shown in Fig. \ref{fig:optacmp}(b).
+As shown in Fig. \ref{fig:optacmp},
+while the optimal schedules of the bandpass scheme
+were always given by the inverse-time formula,
+those of the Gaussian updating scheme was complex
+and dependent on the sampling process.
 
 
 \begin{figure}[h]
@@ -3542,90 +3569,6 @@ as shown in Fig. \ref{fig:optacmp}(b).
   }
 \end{center}
 \end{figure}
-
-
-
-
-On the other hand,
-the optimal schedules of the bandpass updating schemes
-are always given by the inverse-time formula,
-Eq. \eqref{eq:alpha_invt1},
-with $t_0$ given by Eq. \eqref{eq:t0_sinc},
-as shown in Fig. \ref{fig:sinc}(a).
-%
-In Fig. \ref{fig:sinc}(b),
-we show that the updating kernels
-of the bandpass updating schemes
-are similar to Gaussian ones
-except the oscillatory tails.
-%
-The equivalent width, $\sigma$, is roughly
-%
-\begin{equation}
-  \sigma
-  \approx
-  \frac
-  {
-    n
-  }
-  {
-    \sqrt{ 2 \, \pi } \, g \, K
-  }
-  ,
-\label{eq:sigma_equiv}
-\end{equation}
-%
-where $g = 2$ for the periodic case
-or $g = 1$ otherwise.
-%
-The kernel is a zigzag in the non-periodic case
-because of the term $(-1)^{n+K+l-1}$
-in Eq. \eqref{eq:mu_sinc_refl}.
-%
-However, as shown in the inset, % of Fig. \ref{fig:sinc}(b),
-the ruggedness disappears
-in the updating matrix by Eq. \eqref{eq:w_band_refl},
-as the above oscillatory term for $l = i - j$
-is canceled by the term for either $l = i + j - 1$
-or $l = i + j - 2 \, n - 1$
-with the opposite sign.
-
-\begin{figure}[h]
-\begin{center}
-  \makebox[\linewidth][c]{
-    \includegraphics[angle=0, width=0.95\linewidth]{fig/sinc.pdf}
-  }
-  \caption{
-    \label{fig:sinc}
-    Bandpass updating schemes.
-    (a) Optimal schedule for a periodic variable
-    with $K = 3$,
-    and that for a non-periodic variable
-    with $K = 6$.
-    (b) Updating kernels
-    compared to a Gaussian with a similar width,
-    $\sigma = 6$.
-    %
-    The local sampling process was used.
-    The lines are a guide to the eyes.
-    Inset. Updating matrix in the non-periodic case
-    is free of the zigzaggedness shown in the kernel.
-    %
-    \note{This figure was produced by \texttt{doc/fig/sinc.gp}.
-      The data were computed by the program \texttt{prog/predict},
-      see particularly the function \texttt{intq\_save()}
-      in \texttt{prog/intq.h} for panel (a),
-      and the functions \texttt{savewin()}
-      and \texttt{savewinmat()}
-      in \texttt{prog/invt.h} for panel (b),
-      The data were saved under the directory \texttt{data/sinc}.
-      See the \texttt{make} object \texttt{sincsingle}
-      in the \texttt{Makefile} there.
-    }%
-  }
-\end{center}
-\end{figure}
-
 
 
 
@@ -4093,17 +4036,17 @@ Measurement via an adaptive FDS simulation
 %To use Eq. \eqref{eq:q_opt} in a real simulation,
 %we need to know both $\lambda_k$'s and $\Gamma_k$'s.
 %
-We can also
-use Eq. \eqref{eq:y2_eql}.
+For an unknown system,
+we can use Eq. \eqref{eq:y2_eql} to
 measure $\Gamma_k$'s in
-a simulation with a constant schedule,
+an adaptive FDS simulation
+with a constant schedule,
 $\alpha(t) = \alpha_0$.
 %
 %A practical difficulty is that
 However,
-we often do not know the intrinsic distribution, $p^*_i$,
-in advance to compute
-the shifted bias potential, $v_i$,
+without the intrinsic distribution, $p^*_i$,
+we cannot compute the shifted bias potential, $v_i$,
 from the original one, $V_i$
 (cf. Sec. \ref{sec:FDS}).
 %
@@ -4186,8 +4129,8 @@ Eq. \eqref{eq:Lagrangian_const}.
 As an example, we used the method to compute
 the integrals, $\Gamma_k$'s, from an MD simulation,
 and compared them to those from
-the local MC sampling process
-[cf. Sec. \ref{sec:results_system}].
+Eq. \eqref{eq:Gamma_onestep}.
+%the one-step sampling process.
 %
 As shown in Fig. \ref{fig:gamcmp},
 the larger values of $\Gamma_k$'s
@@ -4208,7 +4151,7 @@ of local sampling processes.
     \label{fig:gamcmp}
     Integrals of the autocorrelation functions
     from an MD simulation versus those
-    from the local MC simulation.
+    from the one-step process.
     %
     The MD simulation was ran for $10^{10}$ steps with
     the step size $\Delta t_\mathrm{MD} = 0.005$.
@@ -4255,11 +4198,11 @@ as shown in Fig. \ref{fig:vardep}.
 While the updating scheme alone
 determines $\lambda_k$'s,
 $\Gamma_k$'s depend also on the system
-and the underlying sampling process (MC or MD),
-and need to be measured using the technique
-in Sec. \ref{sec:Gamma_measure}.
+and the underlying sampling process (MC or MD).
 %
-The complete program is the following.
+By using the technique in Sec. \ref{sec:Gamma_measure}
+to measure $\Gamma_k$'s,
+we have the following program.
 
 
 \begin{figure}[h]
@@ -4339,8 +4282,8 @@ compute the eigenvalues, $\lambda_k$'s.
 
 \item
 Run a preliminary adaptive FDS simulation
-using the updating scheme with a constant
-updating magnitude, $\alpha_0$.
+%using the updating scheme
+with a constant updating magnitude, $\alpha_0$.
 
 \item
 Compute $\Gamma_k$'s from Eq. \eqref{eq:varY}.

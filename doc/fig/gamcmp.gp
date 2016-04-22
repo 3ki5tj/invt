@@ -15,11 +15,11 @@ set output "gamcmp.eps"
 set logscale x
 set format x "10^{%T}"
 set xtics 100 offset 0, 0.2
-set xlabel "{/Symbol G}^{ MC, local}"
+set xlabel "{/Symbol G}^{&{i}one{/*0.7 -}step}"
 
 set logscale y
 set format y "10^{%T}"
-set ylabel "{/Symbol G}^{ MD}"
+set ylabel "{/Symbol G}^{&{i}MD}"
 
 #set key Left reverse width -2 spacing 1.8
 

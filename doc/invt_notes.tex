@@ -1196,6 +1196,91 @@ with the optimal $\lambda$ remained around $1.0$
 
 
 
+\subsection{\label{sec:results_optschedule}
+Optimal schedule}
+
+
+
+We now turn to the optimal schedule
+predicted by Eq. \eqref{eq:q_opt}.
+%
+For the Gaussian updating scheme
+with $\sigma = 10$,
+we computed the schedule for the local sampling process,
+and compared it with the inverse-time schedule
+Eq. \eqref{eq:alpha_invtlambda}
+with the optimal $\lambda$.
+%
+As shown in Fig. \ref{fig:optacmp}(a),
+the optimal schedule is a more complex curve
+than the optimized inverse-time schedule.
+%
+The complexity of the optimal schedule
+corresponds to the non-exponential tail
+of the mass distribution function,
+as shown Fig. \ref{fig:optacmp}(b)
+[cf. Sec. \ref{sec:mass_distr}].
+%
+The errors in the two cases were
+$9.1 \times 10^{-5}$
+and
+$1.7 \times 10^{-4}$,
+respectively,
+%for the local sampling process,
+showing the superiority of
+the optimal schedule from Eq. \eqref{eq:q_opt}.
+%
+Besides, we verified the scaling property
+discussed in Sec. \ref{sec:mass_distr},
+by comparison with a simulation [Fig. \ref{fig:optacmp}(a)]
+of half length, $T' = 5 \times 10^7$
+and doubled initial updating magnitude,
+$\alpha_0 = 2 \times 10^{-4}$,
+which left the normalized mass distribution invariant,
+as shown in Fig. \ref{fig:optacmp}(b).
+
+
+\begin{figure}[h]
+\begin{center}
+  \makebox[\linewidth][c]{
+    \includegraphics[angle=0, width=0.95\linewidth]{fig/optacmp.pdf}
+  }
+  \caption{
+    \label{fig:optacmp}
+    Optimal schedules from Eq. \eqref{eq:q_opt},
+    versus the optimized inverse-time schedule
+    Eq. \eqref{eq:alpha_invtlambda}
+    for the Gaussian updating scheme
+    with $\sigma = 10$
+    and the local updating process.
+    %
+    \note{This figure was produced by \texttt{doc/fig/optacmp.gp}.
+      The data were computed by the program \texttt{prog/predict},
+      see particularly the function \texttt{intq\_save()}
+      in \texttt{prog/intq.h}.
+      The data were saved under the directory \texttt{data/opta}.
+      See the \texttt{make} object \texttt{sigsingle}
+      in the \texttt{Makefile} there.
+    }%
+  }
+\end{center}
+\end{figure}
+
+
+
+
+On the other hand,
+the optimal schedules of the bandpass updating schemes
+are always given by the inverse-time formula,
+Eq. \eqref{eq:alpha_invt1},
+with $t_0$ given by Eq. \eqref{eq:t0_sinc},
+as shown in Fig. \ref{fig:sinc}(a).
+%
+
+
+\appendix
+
+
 \section{\label{sec:invt_schedule}
 Inverse-time schedules}
 
