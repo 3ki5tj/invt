@@ -12,31 +12,35 @@ with t0 assuming the default value
 '''
 
 
-
+from math import *
 import sys, os, getopt, shutil, re
 import zcom
 
 
 
-fncfg = None
+fncfg = ""
 fnout = None
 fnprd = None
 cmdopt = ""
 verbose = 0
 
-# scan lambda = 1 / c instead of c
-lscan = 0
-
 # parameters for c scan
+cscan = 0
 cmin = 0.5
 cdel = 0.1
 cmax = 1.5
 
-# parameters for lambda scan
+# parameters for lambda = 1/c scan
+lscan = 0
 lmin = 0.5
 ldel = 0.1
 lmax = 1.5
 
+# parameters for the log c scan
+xscan = 0
+xmin = 0.1
+xdel = exp(log(10)/10)
+xmax = 10.0
 
 
 def usage():
@@ -52,6 +56,7 @@ def usage():
 
     --c=cmin:dc:cmax        set the c range in a c-scan
     --l=lmin:dl:lmax        set the lambda range in a lambda = 1/c scan
+    --x=xmin:dx:lmax        set the range in a log(c) scan
     -o                      set the output file
     --prd=                  set the prediction file
     --opt=                  set options to be passed to the command line
@@ -70,6 +75,7 @@ def doargs():
         "hvo:",
         [ "c=", "crange=",
           "l=", "lrange=", "lambda=",
+          "logc=", "x=", "xrange=",
           "output=", "opt=",
           "prd=", "predict=",
           "help", "verbose=",
@@ -80,8 +86,9 @@ def doargs():
 
   global fncfg, fnout, fnprd, cmdopt, verbose
   global lscan
-  global cmin, cdel, cmax
-  global lmin, ldel, lmax
+  global cmin, cdel, cmax, cscan
+  global lmin, ldel, lmax, lscan
+  global xmin, xdel, xmax, xscan
 
   for o, a in opts:
     if o in ("--c",):
@@ -96,6 +103,12 @@ def doargs():
       ldel = float( larr[1] )
       lmax = float( larr[2] )
       lscan = 1
+    elif o in ("--logc", "--x", "--xrange"):
+      xarr = a.split(':')
+      xmin = float( xarr[0] )
+      xdel = float( xarr[1] )
+      xmax = float( xarr[2] )
+      xscan = 1
     elif o in ("-v",):
       verbose += 1  # such that -vv gives verbose = 2
     elif o in ("--verbose",):
@@ -109,15 +122,17 @@ def doargs():
     elif o in ("-h", "--help"):
       usage()
 
-  if len(args) == 0:
-    usage()
-  fncfg = args[0]
+  if len(args) > 0:
+    fncfg = args[0]
 
-  if not fnout:
-    fnout = os.path.splitext(fncfg)[0] + "_err.dat"
+    if not fnout:
+      fnout = os.path.splitext(fncfg)[0] + "_err.dat"
 
-  if not fnprd:
-    fnprd = os.path.splitext(fncfg)[0] + "_prd.dat"
+    if not fnprd:
+      fnprd = os.path.splitext(fncfg)[0] + "_prd.dat"
+  else:
+    fnout = "cscan_err.dat"
+    fnprd = "cscan_prd.dat"
 
 
 
@@ -179,7 +194,7 @@ def c_scan():
 
   # create a table of c-values
   cval = []
-  if not lscan:
+  if cscan:
     # linear c values
     c = cmin
     while c < cmax + cdel * 0.01:
@@ -193,7 +208,7 @@ def c_scan():
     else:
       cmin1 = 0
     cmax1 = cmax + cdel
-  else:
+  elif lscan:
     # linear l values, c = 1/l
     l = lmin
     while l < lmax + ldel * 0.01:
@@ -207,6 +222,17 @@ def c_scan():
       cmax1 = 1 / (lmin - ldel)
     else:
       cmax1 = 1 / lmin
+  elif xscan:
+    # logarithm c vales
+    logc = log(xmin)
+    dlogc = xdel * log(10)
+    while logc < log(xmax) + dlogc * 0.01:
+      cval += [ exp(logc), ]
+      logc += dlogc
+    srange = "x=%s:%s:%s" % (xmin, xdel, xmax)
+
+    cmin1 = xmin
+    cmax1 = xmax
 
   dc1 = 0.01
   if cmin1 <= 0:
