@@ -188,7 +188,11 @@ static void invt_scan(invtpar_t *m,
     c = estbestc_invt(T, m->alpha0, 0, m->n, lambda, gamma,
         0, &err1, 0);
 
-    t0 = 2 * c / m->alpha0;
+    /* don't be smart about t0, for it affects
+     * the normalization constant, better a constant */
+    t0 = 2 / m->alpha0;
+
+    //t0 = 2 * c / m->alpha0;
     err1norm = err1 * sqrt(T + t0);
 
     /* compute the exact minimal error under the same condition */
@@ -197,7 +201,7 @@ static void invt_scan(invtpar_t *m,
         m->alpha_nint, NULL, m->n, NULL,
         lambda, gamma, m->verbose);
 
-    t0 = intq_estt0(T, qT);
+    // t0 = intq_estt0(T, qT);
     err2norm = err2 * sqrt(T + t0);
 
     /* print the scanning variable */

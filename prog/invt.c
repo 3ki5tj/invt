@@ -302,6 +302,11 @@ static double invt_run(invtpar_t *m)
         fprintf(stderr, "use the optimal c = %g\n", m->c);
       }
 
+      /* don't be smart about t0, we want a constant t0 as
+       * a part of the normalization factor
+       * even if the schedule is inverse-time, don't multiply c */
+      m->t0 = 2 / m->alpha0;
+
       if ( m->opta ) {
         /* compute the theoretically optimal schedule */
         errref = esterror_opt(T, m->alpha0, m->initalpha, &m->qT, m->qprec,
@@ -309,11 +314,12 @@ static double invt_run(invtpar_t *m)
             lambda, gamma, m->verbose);
         errmin = errref;
 
-        m->t0 = intq_estt0(T, m->qT);
-        fprintf(stderr, "q(T) %g, estimated t0 = %g\n", m->qT, m->t0);
+        //m->t0 = intq_estt0(T, m->qT);
+        //if ( m->initalpha > 0 ) m->t0 = 1 / m->initalpha;
+        fprintf(stderr, "q(T) %g, t0 = %g\n", m->qT, m->t0);
 
         /* save the optimal schedule to file */
-        intq_save(intq, optc, 2 * optc / m->alpha0,
+        intq_save(intq, optc, m->t0,
             m->alpha_resample, m->fnalpha);
 
         alphaf = intq->aarr[intq->m - 1];

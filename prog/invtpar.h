@@ -314,8 +314,8 @@ static void invtpar_compute(invtpar_t *m)
   }
 
   if ( fabs(m->t0) <= 0 ) { /* means t0 == 0 */
-    /* set the default t0 to 2 * c / alpha0 */
-    m->t0 = 2 * m->c / m->alpha0;
+    /* set the default t0 to 2 / alpha0 */
+    m->t0 = 2 / m->alpha0;
   }
 
   /* turn on correlation function computation

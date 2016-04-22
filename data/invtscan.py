@@ -10,7 +10,7 @@ the cutoff K of the bandpass updating scheme
 
 
 
-import sys, os, getopt, shutil, re
+import sys, os, getopt, shutil, re, math
 import zcom
 
 
@@ -24,7 +24,7 @@ verbose = 0
 sigscan = 0
 sigmin = 1
 sigdel = 1
-sigmax = 10
+sigmax = 12
 
 # parameters for ok scan
 okscan = 0
@@ -32,7 +32,12 @@ okmin = 1
 okdel = 1
 okmax = 20
 
-
+# parameters for inverse ok scan
+ikscan = 0
+ikmin = 1
+ikdel = 1
+ikmax = 12
+ikconst = 100 / math.sqrt(2 * math.pi)  # n / sqrt(2 * pi)
 
 def usage():
   ''' print usage and die '''
@@ -47,6 +52,8 @@ def usage():
 
     --sig=sigmin:sigdel:sigmax  set the range of width sigma for the Gaussian updating scheme
     --ok=okmin:okdel:okmax      set the range of the cutoff K for the bandpass (sinc) updating scheme
+    --ik=ikmin:ikdel:ikmax      set the range of 1/K for the bandpass (sinc) updating scheme
+    --ikC                       set the constant of proportionality of the above scan
     -o                          set the output file
     --opt=                      set options to be passed to the command line
     -v                          be verbose
@@ -64,6 +71,8 @@ def doargs():
         "hvo:",
         [ "sig=",
           "ok=", "okmax=", "K=",
+          "ik=", "invok=", "iK=", "invK=",
+          "ikC=", "iKC=",
           "output=", "opt=",
           "prd=", "predict=",
           "help", "verbose=",
@@ -75,6 +84,7 @@ def doargs():
   global fncfg, fnout, cmdopt, verbose
   global sigscan, sigmin, sigdel, sigmax
   global okscan, okmin, okdel, okmax
+  global ikscan, ikmin, ikdel, ikmax, ikconst
 
   for o, a in opts:
     if o in ("--sig",):
@@ -89,6 +99,14 @@ def doargs():
       okdel = float( okarr[1] )
       okmax = float( okarr[2] )
       okscan = 1
+    elif o in ("--ik", "--invok", "--iK", "--invK"):
+      ikarr = a.split(':')
+      ikmin = float( ikarr[0] )
+      ikdel = float( ikarr[1] )
+      ikmax = float( ikarr[2] )
+      ikscan = 1
+    elif o in ("--ikC", "--iKC"):
+      ikC = float(a)
     elif o in ("-v",):
       verbose += 1  # such that -vv gives verbose = 2
     elif o in ("--verbose",):
@@ -176,13 +194,28 @@ def scan():
     srange = "sig=%s:%s:%s" % (sigmin, sigdel, sigmax)
     varname = "Gaussian sigma"
 
-  else:
+  elif okscan:
     ok = okmin
     while ok < okmax + okdel * 0.01:
       cval += [ ok, ]
       ok += okdel
     srange = "ok=%s:%s:%s" % (okmin, okdel, okmax)
     varname = "bandpass cutoff K"
+
+  elif ikscan:
+    ik = ikmin
+    okold = -1
+    while ik < ikmax + ikdel * 0.01:
+      ok = int(ikconst / ik)
+      if ok != okold: # avoid redundancy
+        cval += [ ok, ]
+      ik += ikdel
+      okold = ok
+    srange = "ik=%s:%s:%s" % (ikmin, ikdel, ikmax)
+    varname = "inverse bandpass cutoff K"
+
+  else:
+    raise
 
   # we save data to a temporary file
   # and overwrite the actual file only at the end
@@ -207,8 +240,10 @@ def scan():
 
     if sigscan:
       cmd = "%s --sig=%s" % (cmd0, c)
-    else:
+    elif okscan or ikscan:
       cmd = "%s --okmax=%s" % (cmd0, c)
+    else:
+      raise
 
     ret, out, err = zcom.runcmd(cmd.strip(), capture = True)
     e, ei, enorm, stde, stdei = geterror(out)
