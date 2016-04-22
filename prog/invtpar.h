@@ -76,6 +76,8 @@ typedef struct {
   long nsteps; /* number of steps */
   long ntrials; /* number of trials */
 
+  char fnxerr[FILENAME_MAX]; /* file name for the error components */
+
 #ifdef SCAN /* for predict.c */
   int cscan;
   double cmin;
@@ -191,6 +193,8 @@ static void invtpar_init(invtpar_t *m)
   m->ntrials = 100;
   m->prog = "invt";
   m->verbose = 0;
+
+  m->fnxerr[0] = '\0';
 
 #ifdef SCAN /* for predict.c */
   m->cscan = 0;
@@ -450,6 +454,7 @@ static void invtpar_help(const invtpar_t *m)
   fprintf(stderr, "  --try=:        set the number of trials, default %ld\n", m->ntrials);
   fprintf(stderr, "  --nsteps=:     set the number of simulation steps, default %ld\n", m->nsteps);
   fprintf(stderr, "  --equil=:      set the number of equilibration steps, default %ld\n", m->nequil);
+  fprintf(stderr, "  --fnxerr=:     set the file name for the error components, default %s\n", m->fnxerr);
 #ifdef SCAN /* for predict.c */
   fprintf(stderr, "  --cmin=:       set the minimal c in c-scan, default %g\n", m->cmin);
   fprintf(stderr, "  --cmax=:       set the maximal c in c-scan, default %g\n", m->cmax);
@@ -850,6 +855,10 @@ static int invtpar_keymatch(invtpar_t *m,
   else if ( strcmpfuzzy(key, "verbose") == 0 )
   {
     m->verbose = invtpar_getbool(m, key, val);
+  }
+  else if ( strcmpfuzzy(key, "fnxerr") == 0 )
+  {
+    strcpy(m->fnxerr, val);
   }
 #ifdef SCAN /* for predict.c */
   /* c-scan paramerters */

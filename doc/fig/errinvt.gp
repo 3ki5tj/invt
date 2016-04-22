@@ -27,7 +27,7 @@ set mytics 10
 set ylabel "Error, {/Times-Italic E}"
 
 # `width` to reduce the text length
-set key left Left reverse width -5 spacing 1.0
+set key left Left reverse width -5 spacing 1.2
 
 # error bars are too small, no need to have them
 # to add them back use

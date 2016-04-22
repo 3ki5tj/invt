@@ -1726,7 +1726,7 @@ and hence the optimal schedule,
 $\alpha(t) = \dot q(t)$.
 %
 Since we only optimized the asymptotic error, $E_A$,
-in th above,
+in the above,
 the parameter $q(T)$ can be further adjusted
 to minimize the total error, $E = E_R + E_A$.
 %
@@ -1771,7 +1771,8 @@ and the normalized mass distribution as
     C
   }
   ,
-\label{eq:mass_distr}
+\notag
+%\label{eq:mass_distr}
 \end{equation}
 %
 such that
@@ -1818,9 +1819,12 @@ we find that for $Q = q(T) - q(t)$,
 \label{eq:intmQ_tT}
 \end{align}
 %
-which means that each point $(t, \alpha(t))$
+which means that each point
+$\bigl(t, \alpha(t)\bigr)$
 on the schedule can be mapped
-to a point $(Q, m(Q))$ on the mass distribution,
+to a point
+$\bigl(Q, m(Q)\bigr)$
+on the mass distribution,
 such that the ordinate of the latter curve
 gives $1/(T\alpha)$,
 and the area under the curve in the domain $[Q, q(T)]$
@@ -2478,7 +2482,7 @@ and the eigenvalues are
 %\label{eq:wnn_eigenvalue}
 \end{equation}
 %
-Thus, this updating scheme is stable if
+So this updating scheme is stable if
 $\min \lambda_k = \lambda_n \ge 0$,
 or
 \begin{equation}
@@ -2524,8 +2528,7 @@ where
 $\Delta x = \pi/n$
 is the bin size.
 %
-Then,
-by assuming the largest $b \approx n/g$,
+By assuming the largest $b \approx n/g$,
 Eq. \eqref{eq:wband_eigenvalue}
 can be approximated as an integral:
 %
@@ -2547,7 +2550,7 @@ $
 
 For the Gaussian updating kernel of width $\sigma$
 with $\Delta x \ll \sigma \ll 1$,
-we can extended
+we can extend
 the upper limit of the integrals
 to infinity, and
 %
@@ -2951,11 +2954,11 @@ If we further assume $\lambda_2 = 1$,
 Eq. \eqref{eq:alpha_invtk}
 recovers Eq. \eqref{eq:alpha_invt1}.
 %
-\note{We add some steps for the above solution.
+\note{Derivation.
   Integrating $\dot u_k = c_k$ yields
   \begin{equation}
     u_k(t) = c_k \left(t + t_{k0} \right).
-  \tag{N4}
+  \tag{UK}
   \label{neq:ui_solution}
   \end{equation}
   Given that $u_k(T) = 1$ and $u_k(0) = e^{-\lambda_k \, q(T)}$,
@@ -3014,17 +3017,22 @@ $$
 $$
 %
 Then,
-Eq. \eqref{eq:error_singlebin} is changed to
+we can change the upper limit of the sum in
+Eq. \eqref{eq:error_singlebin} to $K$.
 %
-\begin{equation}
-  E_A
-  =
-  \frac {       T     }
-        { (T + t_0)^2 }
-  \sum_{ k = 2 }^K
-    \Gamma_k.
-\label{eq:error_asym_sinc}
-\end{equation}
+%Then,
+%Eq. \eqref{eq:error_singlebin} is changed to
+%%
+%\begin{equation}
+%  E_A
+%  =
+%  \frac {       T     }
+%        { (T + t_0)^2 }
+%  \sum_{ k = 2 }^K
+%    \Gamma_k.
+%%\notag
+%\label{eq:error_asym_sinc}
+%\end{equation}
 %
 The optimal schedule of these schemes
 remains to be the inverse-time one
@@ -3457,7 +3465,8 @@ on the simple inverse-time schedule,
 \end{equation}
 %
 where $\lambda$ is a free parameter,
-and $t_0 = 2/\alpha_0$.
+and $t_0$ is given by Eq. \eqref{eq:t0_sinc}.
+%and $t_0 = 2/\alpha_0$.
 %
 The error of this schedule
 can be computed analytically
@@ -3466,7 +3475,7 @@ and tested against simulation.
 
 
 
-We performed FDS simulations
+We performed adaptive FDS simulations
 using the single-bin updating scheme
 and the triple-bin updating scheme with $\mu_1 = 0.24$.
 %
@@ -3622,13 +3631,11 @@ the corresponding Gaussian ones.
     Normalized error, $(T + t_0) \, E$,
     versus the width, $\sigma$,
     for the Gaussian
-    and the bandpass updating schemes.
+    and the bandpass updating schemes,
+    with $t_0$ given by Eq. \eqref{eq:t0_sinc}.
     %
     In the latter case,
     $\sigma$ is given by Eq. \eqref{eq:sigma_equiv}.
-    %
-    Here, we assumed $t_0 \equiv T/(e^{q(T)} - 1)$
-    for the optimal value of $q(T)$.
     %
     The points were obtained from averaging results
     from 1000 independent simulations;
@@ -4159,13 +4166,13 @@ of local sampling processes.
     The bin size $\Delta z = 2\, \pi /n$ with $n = 100$,
     and the temperature was $1.0$.
     %
-    The velocity rescaling\cite{bussi2007} thermostat was
-    applied every MD step with viscocity 20.
+    The velocity rescaling thermostat\cite{bussi2007} was
+    applied every MD step with viscosity $20$.
     %
     The reflective boundary condition was used.
     %
     \note{The figure was produced by \texttt{doc/fig/gamcmp.gp}.
-      Thee data were saved under \texttt{data/gamcmp}
+      The data were saved under \texttt{data/gamcmp}
       (see the \texttt{Makefile} there).
     }%
   }
@@ -4704,7 +4711,8 @@ we get
            { T + t_0 }
   \right)^{ 2 \, \nu_k }
   .
-\label{eq:error_res_invt}
+\notag
+%\label{eq:error_res_invt}
 \end{equation}
 %
 The total error is the sum of the two.
@@ -4770,9 +4778,7 @@ The total error is the sum of the two.
 For the single-bin scheme, we have
 $\lambda_2 = \cdots = \lambda_n = 1$,
 and
-$\Gamma_k$'s affect the errors
-%from Eqs. \eqref{eq:error_res_invt}
-%and \eqref{eq:error_asym_invt}
+$\Gamma_k$'s affect the error
 only via the sum, $\sum_{k = 2}^n \Gamma_k$,
 as a multiplicative constant.
 

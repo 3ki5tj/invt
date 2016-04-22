@@ -213,10 +213,11 @@ static double intq_reserr(intq_t *intq, double a0, double qT)
 
 /* compute the error components */
 static double intq_errcomp(intq_t *intq, double a0,
-    double qT, double *xerr)
+    double qT, double *xerr, double *xerr_r, double *xerr_a)
 {
   int i, j, m = intq->m;
-  double y, dq, dt, err, errtot = 0, lam, gam;
+  double err_r, err_a, err;
+  double y, dq, dt, errtot = 0, lam, gam;
 
   /* loop over modes, starting from mode 1
    * since mode 0 is always zero */
@@ -225,9 +226,10 @@ static double intq_errcomp(intq_t *intq, double a0,
     gam = intq->gamma[i];
 
     /* residual error */
-    err = 0.5 * a0 * gam * lam * exp(-2.0 * lam * qT);
+    err_r = 0.5 * a0 * gam * lam * exp(-2.0 * lam * qT);
 
     /* asymptotic error */
+    err_a = 0;
     for ( j = 0; j <= m; j++ ) {
       dq = intq->qarr[j] - qT;
       y = gam * lam * lam * exp( 2 * lam * dq ) * intq->aarr[j];
@@ -238,7 +240,17 @@ static double intq_errcomp(intq_t *intq, double a0,
       } else {
         dt = intq->tarr[j+1] - intq->tarr[j-1];
       }
-      err += y * y * 0.5 * dt;
+      err_a += y * y * 0.5 * dt;
+    }
+
+    err = err_r + err_a;
+
+    if ( xerr_r != NULL ) {
+      xerr_r[i] = err_r;
+    }
+
+    if ( xerr_a != NULL ) {
+      xerr_a[i] = err_a;
     }
 
     xerr[i] = err;
@@ -603,7 +615,7 @@ __inline static int intq_save(intq_t *intq,
 static double esterror_opt(double T, double a0,
     double initalpha, double *qT, double qprec,
     int m, intq_t **intq_ptr,
-    int n, double *xerr, const double *lambda, const double *gamma,
+    int n, const double *lambda, const double *gamma,
     int verbose)
 {
   intq_t *intq;
@@ -622,11 +634,6 @@ static double esterror_opt(double T, double a0,
     *qT = intq_optqT(intq, initalpha, qprec, verbose);
   }
   err = intq_geterr(intq, a0, *qT);
-
-  /* compute the error components */
-  if ( xerr != NULL ) {
-    intq_errcomp(intq, a0, *qT, xerr);
-  }
 
   if ( intq_ptr != NULL ) {
     *intq_ptr = intq;

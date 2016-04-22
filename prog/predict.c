@@ -9,8 +9,10 @@
 
 
 
+/* save the error components to file */
 static int save_xerr(invtpar_t *m, const char *fn,
-    const double *xerri, const double *xerrf, const double *xerrf2,
+    const double *xerri, const double *xerrf,
+    const double *xerrf_r, const double *xerrf_a,
     const double *lambda)
 {
   FILE *fp;
@@ -23,8 +25,8 @@ static int save_xerr(invtpar_t *m, const char *fn,
 
   fprintf(fp, "# %d\n", n);
   for ( i = 1; i < n; i++ ) {
-    fprintf(fp, "%4d %18.8e %18.8e %18.8e %10.8f\n",
-        i, xerri[i], xerrf[i], xerrf2[i],
+    fprintf(fp, "%4d %18.8e %18.8e %18.8e %18.8e %18.8e\n",
+        i, xerri[i], xerrf[i], xerrf_r[i], xerrf_a[i],
         lambda[i]);
   }
 
@@ -40,12 +42,13 @@ static void invt_geterr(invtpar_t *m,
   int n = m->n;
   double T, c0, t0, qT, inita, err0, err1, err2;
   double *lambda;
-  double *xerri, *xerrf, *xerrf_invt;
+  double *xerri, *xerrf, *xerrf_r, *xerrf_a;
   intq_t *intq;
 
   xnew(xerri, n);
   xnew(xerrf, n);
-  xnew(xerrf_invt, n);
+  xnew(xerrf_r, n);
+  xnew(xerrf_a, n);
 
   T = (double) m->nsteps;
 
@@ -66,7 +69,7 @@ static void invt_geterr(invtpar_t *m,
 
   c0 = m->c;
   err0 = esterror_invt(T, m->c, m->alpha0, m->t0, m->n,
-      xerrf_invt, lambda, gamma);
+      NULL, lambda, gamma);
 
   /* compute the optimal c and the error
    * for the inverse-time formula */
@@ -76,8 +79,7 @@ static void invt_geterr(invtpar_t *m,
   /* compute the exact minimal error under the same condition */
   qT = m->qT;
   err2 = esterror_opt(T, m->alpha0, m->initalpha, &qT, m->qprec,
-      m->alpha_nint, &intq, m->n, xerrf,
-      lambda, gamma, m->verbose);
+      m->alpha_nint, &intq, m->n, lambda, gamma, m->verbose);
   inita = intq_getinita(intq);
 
   /* save the optimal schedule to file */
@@ -90,14 +92,18 @@ static void invt_geterr(invtpar_t *m,
       c0, t0, err0, err0 * err0,
       m->c, err1, err1 * err1,
       qT, inita, err2, err2 * err2, m->fnalpha);
-
-  save_xerr(m, "xerr.dat", xerri, xerrf, xerrf_invt, lambda);
+  
+  if ( m->fnxerr[0] != '\0' ) {
+    intq_errcomp(intq, m->alpha0, m->qT, xerrf, xerrf_r, xerrf_a);
+    save_xerr(m, m->fnxerr, xerri, xerrf, xerrf_r, xerrf_a, lambda);
+  }
 
   intq_close(intq);
   free(lambda);
   free(xerri);
   free(xerrf);
-  free(xerrf_invt);
+  free(xerrf_r);
+  free(xerrf_a);
 }
 
 
@@ -122,8 +128,7 @@ static void invt_scanc(invtpar_t *m,
   /* compute the exact minimal error under the same condition */
   qT = m->qT;
   err2 = esterror_opt(T, m->alpha0, m->initalpha, &qT, m->qprec,
-      m->alpha_nint, NULL, m->n, NULL,
-      lambda, gamma, m->verbose);
+      m->alpha_nint, NULL, m->n, lambda, gamma, m->verbose);
 
   /* print out a header */
   printf("# c     \t  error  \t  init. error\t  final error\t  optimal error\n");
@@ -237,8 +242,7 @@ static void invt_scan(invtpar_t *m,
     /* compute the exact minimal error under the same condition */
     qT = 0; /* use the optimal qT */
     err2 = esterror_opt(T, m->alpha0, m->initalpha, &qT, m->qprec,
-        m->alpha_nint, NULL, m->n, NULL,
-        lambda, gamma, m->verbose);
+        m->alpha_nint, NULL, m->n, lambda, gamma, m->verbose);
 
     // t0 = intq_estt0(T, qT);
     err2norm = err2 * sqrt(T + t0);
