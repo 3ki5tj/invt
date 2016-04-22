@@ -1010,6 +1010,191 @@ $\mu_0 = 1/2, \mu_1 = \sqrt{2}/8, \mu_2 = 1/4, \mu_3 = -\sqrt{2}/8$.
 
 
 
+\section{Results}
+
+
+\subsection{\label{sec:results_invt}
+Inverse-time schedule}
+
+
+
+For the single-bin updating scheme, we
+%we chose $\alpha_0 = 10^{-4}$ and
+ran the simulation for $T = 10^8$ steps.
+%
+As shown in Fig. \ref{fig:errsbin},
+the numerical results of the terminal error agreed well with
+the analytical prediction.
+%
+For both global and local sampling processes,
+the optimal $\lambda$ occurred around $1.0$,
+verifying the optimality of Eq. \eqref{eq:alpha_invt1}.
+%
+%Recall that $1/\lambda$ in Eq. \eqref{eq:alpha_invtlambda}
+%represents the relative updating magnitude.
+%%
+%Figure \ref{fig:errsbin} also shows
+%an asymmetry of the error curve.
+%A smaller than optimal value of
+%the updating magnitude, $1/\lambda$,
+%tends to increase the error more rapidly
+%than a larger than optimal value,
+%suggesting that the over-updating
+%is generally preferable to the under-updating
+%when the optimal value is unknown.
+%
+The two error functions
+differed only by a multiplicative constant,
+also in agreement with the theory
+(cf. Appendix \ref{sec:invt_singlebin}).
+%
+
+
+\begin{figure}[h]
+\begin{center}
+  \makebox[\linewidth][c]{
+    \includegraphics[angle=0, width=0.95\linewidth]{fig/errsbin.pdf}
+  }
+  \caption{
+    \label{fig:errsbin}
+    Error, $E$, versus $\lambda$
+    in Eq. \eqref{eq:alpha_invtlambda}
+    for the single-bin (WL) scheme.
+    %
+    The results were averaged over $1000$ independent runs.
+    %
+    \note{The figure was produced by \texttt{doc/fig/errsbin.gp}.
+      The data were produced by the script \texttt{data/invtcscan.py},
+      and saved under \texttt{data/singlebin}
+      (see the \texttt{Makefile} there).
+    }%
+  }
+\end{center}
+\end{figure}
+
+
+As an example of multiple-bin schemes,
+we tested the Triple-bin updating scheme
+described in Sec. \ref{sec:nnscheme},
+%
+with
+$\mu_1 = 0.24$ to make the smallest eigenvalue
+close to zero.
+%
+Again, simulation and theory agreed well,
+as shown in Fig. \ref{fig:errnnbr}.
+%
+The optimal value of $1/\lambda$,
+increased with the simulation length, $T$,
+in the global sampling case
+(cf. Appendix \ref{sec:invt_deplength}).
+%
+However, the shift was suppressed
+for the local sampling case,
+with the optimal $\lambda$ remained around $1.0$
+[cf. Eq. \eqref{eq:lambda_nn_onestep}].
+
+
+
+%To understand this dependence,
+%we observe that for shorter simulations,
+%long-wavelength modes
+%(with larger $\lambda_k$ and smaller $k$),
+%dominate the error function in Eq. \eqref{eq:error_invt}
+%because of the prefactor $\lambda_k \, \Gamma_k$,
+%which is inherited from
+%the equilibrium error under a fixed updating magnitude,
+%Eq. \eqref{eq:error_eql}.
+%%
+%For longer simulations,
+%short-wavelength modes
+%(with smaller $\lambda_k$ and larger $k$)
+%become more important,
+%for $\lambda_k$ also gives the decay rate
+%of the $k$th mode.
+%%and errors in smaller $\lambda_k$ modes
+%%are harder to damp out.
+%%
+%This drives the optimal $\lambda$ to shift toward
+%a smaller $\lambda_k$ value
+%as the simulation lengthens.
+%%
+%Note also that while increasing $\lambda$
+%also increases the error of the long-wavelength modes,
+%this rate of increase is much smaller,
+%as shown in the $\nu_k > 1$ branch
+%in Fig. \ref{fig:err_component}.
+%%
+%The shift of $\lambda$, however, is less noticeable
+%under the local sampling scheme,
+%because longer-wavelength modes more heavily
+%weighted by much larger values of $\Gamma_k$.
+
+
+\begin{figure}[h]
+\begin{center}
+  \makebox[\linewidth][c]{
+    \includegraphics[angle=0, width=0.95\linewidth]{fig/errnnbr.pdf}
+  }
+  \caption{
+    \label{fig:errnnbr}
+    Normalized error, $(T + t_0) \, E$,
+    versus the %proportionality constant,
+    relative updating magnitude,
+    $1/\lambda$,
+    in Eq. \eqref{eq:alpha_invtlambda}
+    for the triple-bin updating scheme with $\mu_1 = 0.24$.
+    %
+    The results were averaged over $1000$ independent runs.
+    %
+    \note{This figure was produced by \texttt{doc/fig/errnnbr.gp}.
+      The data were produced by \texttt{data/invt2run.py},
+      saved under \texttt{data/nb0.24}
+      (see the \texttt{Makefile} there).
+    }%
+  }
+\end{center}
+\end{figure}
+
+
+
+
+
+%\subsection{Gaussian (metadynamics) updating scheme}
+%
+%
+%The error of Gaussian updating scheme is similar to
+%that of the triple-bin scheme,
+%as shown in Fig \ref{fig:err_sig5}.
+%%
+%The dependency of the simulation length is more prominent.
+%%
+%Even for local sampling,
+%there is now a visible shift of the optimal $\lambda$.
+%
+%
+%\begin{figure}[h]
+%\begin{center}
+%  \makebox[\linewidth][c]{
+%    \includegraphics[angle=0, width=0.95\linewidth]{fig/errsig5.pdf}
+%  }
+%  \caption{
+%    \label{fig:err_sig5}
+%    Normalized error, $(T + t_0) \, E$,
+%    versus the %proportionality constant,
+%    relative updating magnitude,
+%    $1/\lambda$,
+%    in Eq. \eqref{eq:alpha_invtlambda}
+%    for the Gaussian updating scheme with $\sigma = 5$ bins.
+%    %
+%    The results were averaged over $1000$ independent runs.
+%  }
+%\end{center}
+%\end{figure}
+%
+
+
+
 
 \section{\label{sec:invt_schedule}
 Inverse-time schedules}
@@ -1442,6 +1627,53 @@ where $\Gamma_k \equiv 1$ is a constant.
 If $\Gamma_k$ decreases too quickly with $k$,
 the shift can be hard to detect
 [see Eq. \eqref{eq:lambda_nn_onestep} for an example].
+
+
+\subsection{\label{sec:invt_deplength}
+Dependence on the simulation length}
+
+
+
+For a finite-length simulation,
+we generally expect the optimal $\lambda$
+that minimizes the total error to
+decrease with the simulation length $T$.
+%
+From Eq. \eqref{eq:alpha_invt}, we have
+$$
+  \lambda
+  =
+  \Delta \left( \frac{ 1 } { T \, \alpha } \right)
+  \equiv
+  \left.
+  \frac { 1 } { T \, \alpha(t) }
+  \right|_{t = 0}^{t = T}
+  .
+$$
+This expression corresponds to the height difference
+of the mass distribution
+$
+\bigl. m(Q) \bigr|_{Q = q(T)}^{Q = 0}
+$
+in the optimal schedule
+(cf. Sec. \ref{sec:mass_distr}).
+%
+With a fixed $\alpha_0$,
+increasing the simulation length $T$
+also increases the optimal span $q(T)$ of the distribution
+(cf. Sec. \ref{sec:optinitalpha}),
+and thus reduces the height difference.
+%
+This effect is significant
+if the distribution $m(Q)$ has a long tail,
+or if some eigenvalues $\lambda_k$'s are near zero.
+%
+It is often suppressed in local sampling processes,
+because the eigenmodes with large $\lambda_k$'s
+are accompanied by large $\Gamma_k$'s,
+which shortens the distribution tail.
+
+
 
 
 

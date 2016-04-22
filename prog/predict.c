@@ -9,12 +9,43 @@
 
 
 
+static int save_xerr(invtpar_t *m, const char *fn,
+    const double *xerri, const double *xerrf, const double *xerrf2,
+    const double *lambda)
+{
+  FILE *fp;
+  int i, n = m->n;
+
+  if ( (fp = fopen(fn, "w")) == NULL ) {
+    fprintf(stderr, "cannot write %s\n", fn);
+    return -1;
+  }
+
+  fprintf(fp, "# %d\n", n);
+  for ( i = 1; i < n; i++ ) {
+    fprintf(fp, "%4d %18.8e %18.8e %18.8e %10.8f\n",
+        i, xerri[i], xerrf[i], xerrf2[i],
+        lambda[i]);
+  }
+
+  fclose(fp);
+  return 0;
+}
+
+
+
 static void invt_geterr(invtpar_t *m,
     const double *gamma)
 {
+  int n = m->n;
   double T, c0, t0, qT, inita, err0, err1, err2;
   double *lambda;
+  double *xerri, *xerrf, *xerrf_invt;
   intq_t *intq;
+
+  xnew(xerri, n);
+  xnew(xerrf, n);
+  xnew(xerrf_invt, n);
 
   T = (double) m->nsteps;
 
@@ -30,9 +61,12 @@ static void invt_geterr(invtpar_t *m,
     savewinmat(m->winn, m->win, m->n, m->pbc, m->fnwinmat);
   }
 
+  /* initial errors */
+  esterror_eql(m->alpha0, m->n, xerri, lambda, gamma);
+
   c0 = m->c;
   err0 = esterror_invt(T, m->c, m->alpha0, m->t0, m->n,
-      NULL, lambda, gamma);
+      xerrf_invt, lambda, gamma);
 
   /* compute the optimal c and the error
    * for the inverse-time formula */
@@ -42,7 +76,7 @@ static void invt_geterr(invtpar_t *m,
   /* compute the exact minimal error under the same condition */
   qT = m->qT;
   err2 = esterror_opt(T, m->alpha0, m->initalpha, &qT, m->qprec,
-      m->alpha_nint, &intq, m->n, NULL,
+      m->alpha_nint, &intq, m->n, xerrf,
       lambda, gamma, m->verbose);
   inita = intq_getinita(intq);
 
@@ -57,8 +91,13 @@ static void invt_geterr(invtpar_t *m,
       m->c, err1, err1 * err1,
       qT, inita, err2, err2 * err2, m->fnalpha);
 
+  save_xerr(m, "xerr.dat", xerri, xerrf, xerrf_invt, lambda);
+
   intq_close(intq);
   free(lambda);
+  free(xerri);
+  free(xerrf);
+  free(xerrf_invt);
 }
 
 

@@ -37,7 +37,7 @@
 
 
 
-\title{Optimal updating factor in adaptive flat-distribution-sampling simulations}
+\title{Optimal updating factor in adaptive flat-distribution simulations}
 
 
 
@@ -2685,7 +2685,7 @@ We discuss two special cases below.
 
 
 \subsubsection{\label{sec:nnscheme}
-Nearest-neighbor updating scheme}
+Triple-bin updating scheme}
 
 
 
@@ -3637,7 +3637,7 @@ in Sec. \ref{sec:Gamma}.
 Inverse-time schedule}
 
 
-We first tested the theory of computing errors
+We tested the theory of computing errors
 on the simple inverse-time schedule,
 %
 \begin{equation}
@@ -3646,7 +3646,7 @@ on the simple inverse-time schedule,
 \end{equation}
 %
 where $\lambda$ is a free parameter,
-and $t_0 = 2/(\lambda \, \alpha_0)$.
+and $t_0 = 2/\alpha_0$.
 %
 The error of this schedule
 can be computed analytically
@@ -3655,189 +3655,66 @@ and tested against simulation.
 
 
 
-%\subsubsection{Single-bin (WL) updating scheme}
-
-
-For the single-bin updating scheme, we
-%we chose $\alpha_0 = 10^{-4}$ and
-ran the simulation for $T = 10^8$ steps.
+We performed FDS simulations
+using the single-bin updating scheme
+and the triple-bin updating scheme with $\mu_1 = 0.24$.
 %
-As shown in Fig. \ref{fig:errsbin},
-the numerical results of the terminal error agreed well with
-the analytical prediction.
+For each value of $\lambda$, we ran $1000$ independent simulations
+of $10^8$ steps, and averaged the results.
 %
-For both global and local sampling processes,
-the optimal $\lambda$ occurred around $1.0$,
-verifying the optimality of Eq. \eqref{eq:alpha_invt1}.
-%
-%Recall that $1/\lambda$ in Eq. \eqref{eq:alpha_invtlambda}
-%represents the relative updating magnitude.
-%%
-%Figure \ref{fig:errsbin} also shows
-%an asymmetry of the error curve.
-%A smaller than optimal value of
-%the updating magnitude, $1/\lambda$,
-%tends to increase the error more rapidly
-%than a larger than optimal value,
-%suggesting that the over-updating
-%is generally preferable to the under-updating
-%when the optimal value is unknown.
-%
-The two error functions
-differed only by a multiplicative constant,
-also in agreement with the theory
-(cf. Appendix \ref{sec:invt_singlebin}).
-%
+As shown in Fig. \ref{fig:errinvt},
+the errors from the simulations
+agreed well those from the theory.
 
 
 \begin{figure}[h]
 \begin{center}
   \makebox[\linewidth][c]{
-    \includegraphics[angle=0, width=0.95\linewidth]{fig/errsbin.pdf}
+    \includegraphics[angle=0, width=1.0\linewidth]{fig/errinvt.pdf}
   }
   \caption{
-    \label{fig:errsbin}
-    Error, $E$, versus the
-    relative updating magnitude,
-    %proportionality constant,
-    $1/\lambda$,
+    \label{fig:errinvt}
+    Error $E$ versus $\lambda$
     in Eq. \eqref{eq:alpha_invtlambda}
-    for the single-bin (WL) scheme.
+    for the inverse-time schedule.
     %
-    The results were averaged over $1000$ independent runs.
+    The points are results from averaging over $1000$ independent runs;
+    the curves are theoretical predictions.
     %
-    \note{The figure was produced by \texttt{doc/fig/errsbin.gp}.
-      The data were produced by the script \texttt{data/invt2run.py},
-      and saved under \texttt{data/singlebin}
+    \note{The figure was produced by \texttt{doc/fig/errinvt.gp}.
+      The data were produced by the script \texttt{data/invtcscan.py},
+      and saved under \texttt{data/invt}
       (see the \texttt{Makefile} there).
     }%
   }
 \end{center}
 \end{figure}
 
-
-
-%\subsubsection{Nearest-neighbor updating scheme}
-
-As an example of multiple-bin schemes,
-we tested the nearest-neighbor updating scheme
-described in Sec. \ref{sec:nnscheme},
+For the single-bin updating scheme,
+the optimal $\lambda$ occurred around $1.0$
+for both global and local sampling processes.
 %
-with
-$\mu_1 = 0.24$ to make the smallest eigenvalue
-close to zero.
+The sampling process affected the error function
+only by a multiplicative constant,
+%The error functions of the two sampling processes
+%differed only by a multiplicative constant,
+in agreement with the discussion in
+Appendix \ref{sec:invt_singlebin}.
 %
-Again, simulation and theory agreed well,
-as shown in Fig. \ref{fig:errnnbr}.
+For the triple-bin updating scheme,
+the optimal $\lambda$ was less than $1.0$
+for the global sampling process,
+although it remained around $1.0$
+for the local sampling process,
+as discussed in Appendix \ref{sec:invt_nn}.
 %
-The optimal value of $1/\lambda$,
-increased with the simulation length, $T$,
-in the global sampling case
-(cf. Appendix \ref{sec:invt_deplength}).
-%
-However, the shift was suppressed
-for the local sampling case,
-with the optimal $\lambda$ remained around $1.0$
-[cf. Eq. \eqref{eq:lambda_nn_onestep}].
+Thus, the inverse-time formula,
+Eq. \eqref{eq:alpha_invt1},
+is optimal for the single-bin updating scheme,
+but not necessarily so for a general updating scheme.
 
 
 
-%To understand this dependence,
-%we observe that for shorter simulations,
-%long-wavelength modes
-%(with larger $\lambda_k$ and smaller $k$),
-%dominate the error function in Eq. \eqref{eq:error_invt}
-%because of the prefactor $\lambda_k \, \Gamma_k$,
-%which is inherited from
-%the equilibrium error under a fixed updating magnitude,
-%Eq. \eqref{eq:error_eql}.
-%%
-%For longer simulations,
-%short-wavelength modes
-%(with smaller $\lambda_k$ and larger $k$)
-%become more important,
-%for $\lambda_k$ also gives the decay rate
-%of the $k$th mode.
-%%and errors in smaller $\lambda_k$ modes
-%%are harder to damp out.
-%%
-%This drives the optimal $\lambda$ to shift toward
-%a smaller $\lambda_k$ value
-%as the simulation lengthens.
-%%
-%Note also that while increasing $\lambda$
-%also increases the error of the long-wavelength modes,
-%this rate of increase is much smaller,
-%as shown in the $\nu_k > 1$ branch
-%in Fig. \ref{fig:err_component}.
-%%
-%The shift of $\lambda$, however, is less noticeable
-%under the local sampling scheme,
-%because longer-wavelength modes more heavily
-%weighted by much larger values of $\Gamma_k$.
-
-
-\begin{figure}[h]
-\begin{center}
-  \makebox[\linewidth][c]{
-    \includegraphics[angle=0, width=0.95\linewidth]{fig/errnnbr.pdf}
-  }
-  \caption{
-    \label{fig:errnnbr}
-    Normalized error, $(T + t_0) \, E$,
-    versus the %proportionality constant,
-    relative updating magnitude,
-    $1/\lambda$,
-    in Eq. \eqref{eq:alpha_invtlambda}
-    for the nearest-neighbor updating scheme with $\mu_1 = 0.24$.
-    %
-    The results were averaged over $1000$ independent runs.
-    %
-    \note{This figure was produced by \texttt{doc/fig/errnnbr.gp}.
-      The data were produced by \texttt{data/invt2run.py},
-      saved under \texttt{data/nb0.24}
-      (see the \texttt{Makefile} there).
-    }%
-  }
-\end{center}
-\end{figure}
-
-
-
-
-
-%\subsection{Gaussian (metadynamics) updating scheme}
-%
-%
-%The error of Gaussian updating scheme is similar to
-%that of the nearest neighbor scheme,
-%as shown in Fig \ref{fig:err_sig5}.
-%%
-%The dependency of the simulation length is more prominent.
-%%
-%Even for local sampling,
-%there is now a visible shift of the optimal $\lambda$.
-%
-%
-%\begin{figure}[h]
-%\begin{center}
-%  \makebox[\linewidth][c]{
-%    \includegraphics[angle=0, width=0.95\linewidth]{fig/errsig5.pdf}
-%  }
-%  \caption{
-%    \label{fig:err_sig5}
-%    Normalized error, $(T + t_0) \, E$,
-%    versus the %proportionality constant,
-%    relative updating magnitude,
-%    $1/\lambda$,
-%    in Eq. \eqref{eq:alpha_invtlambda}
-%    for the Gaussian updating scheme with $\sigma = 5$ bins.
-%    %
-%    The results were averaged over $1000$ independent runs.
-%  }
-%\end{center}
-%\end{figure}
-%
 
 
 \subsection{\label{sec:results_optschedule}
@@ -3998,7 +3875,7 @@ with the opposite sign.
 
 
 \subsection{\label{sec:results_cmpschemes}
-Comparison of updating schemes}
+Optimal updating schemes}
 
 
 
@@ -4489,7 +4366,7 @@ i.e., some eigenvalues may be negative.
 %
 %\note{
   %For example,
-  %the nearest-neighbor updating scheme
+  %the triple-bin updating scheme
   %is unstable if Eq. \eqref{eq:nn_stable} is violated.
   %
   Even
@@ -4933,12 +4810,11 @@ The total error is the sum of the two.
 For the single-bin scheme, we have
 $\lambda_2 = \cdots = \lambda_n = 1$,
 and
-the errors
+$\Gamma_k$'s affect the errors
 %from Eqs. \eqref{eq:error_res_invt}
 %and \eqref{eq:error_asym_invt}
-depend on $\Gamma_k$'s only via the sum
-$\sum_{k = 2}^n \Gamma_k$,
-which serves as a multiplicative constant.
+only via the sum, $\sum_{k = 2}^n \Gamma_k$,
+as a multiplicative constant.
 
 In the asymptotic limit,
 we can focus on the asymptotic error
@@ -4972,14 +4848,14 @@ is minimal at $\lambda = 1$.
 
 
 
-\subsection{\label{eq:invt_nn}
-Nearest-neighbor updating scheme}
+\subsection{\label{sec:invt_nn}
+Triple-bin updating scheme}
 
 
 
 
-For the nearest-neighbor updating scheme
-introduced in Sec. \ref{sec:nnscheme},
+For the triple-bin updating scheme,
+%introduced in Sec. \ref{sec:nnscheme},
 we can find an analytical expression
 of the optimal value of $\lambda$
 in the large-$n$ and asymptotic limit.
@@ -5051,17 +4927,18 @@ and the asymptotic error in the optimal case is given by
 %
 %From Eq. \eqref{eq:error_nn}, it is clear that
 which
-increases with the magnitude of $\mu_1$
-no matter its sign,
-and the minimal value, obtained at $\mu_1 = 0$,
-corresponds to the single-bin scheme.
+is minimal at $\mu_1 = 0$, the single-bin case.
+%increases with the magnitude of $\mu_1$
+%no matter its sign,
+%and the minimal value, obtained at $\mu_1 = 0$,
+%corresponds to the single-bin scheme.
 %
 
 
 For the one-step sampling process,
 we find from Eq. \eqref{eq:Gamma_onestep}
 that $\Gamma(p) = \cot^2 p$
-is peaked around $p \approx 0$,
+peaks around $p \approx 0$,
 %
 Then
 $$
@@ -5076,15 +4953,17 @@ $$
 %
 The optimal $\lambda$ is, therefore,
 %
-\begin{equation}
-\lambda \approx 1.
-\label{eq:lambda_nn_onestep}
-\end{equation}
+$
+%\begin{equation}
+  \lambda \approx 1.
+%\label{eq:lambda_nn_onestep}
+%\end{equation}
+$
 %
 
-
-However, Eq. \eqref{eq:lambda_nn_onestep}
-is an approximation good only
+\note{
+However, the above result %Eq. \eqref{eq:lambda_nn_onestep}
+is only good
 for sufficiently short simulations,
 since we have taken the limit of $n \to \infty$
 for a fixed $T$.
@@ -5094,54 +4973,7 @@ the optimal $\lambda$
 will ultimately drift to
 the smallest eigenvalue,
 $\min \lambda_k = 1 - 4 \, \mu_1$.
-
-
-
-
-\subsection{\label{sec:invt_deplength}
-Dependence on the simulation length}
-
-
-
-For a finite-length simulation,
-we generally expect the optimal $\lambda$
-that minimizes the total error to
-decrease with the simulation length $T$.
-%
-From Eq. \eqref{eq:alpha_invt}, we have
-$$
-  \lambda
-  =
-  \Delta \left( \frac{ 1 } { T \, \alpha } \right)
-  \equiv
-  \left.
-  \frac { 1 } { T \, \alpha(t) }
-  \right|_{t = 0}^{t = T}
-  .
-$$
-This expression corresponds to the height difference
-of the mass distribution
-$
-\bigl. m(Q) \bigr|_{Q = q(T)}^{Q = 0}
-$
-in the optimal schedule
-(cf. Sec. \ref{sec:mass_distr}).
-%
-With a fixed $\alpha_0$,
-increasing the simulation length $T$
-also increases the optimal span $q(T)$ of the distribution
-(cf. Sec. \ref{sec:optinitalpha}),
-and thus reduces the height difference.
-%
-This effect is significant
-if the distribution $m(Q)$ has a long tail,
-or if some eigenvalues $\lambda_k$'s are near zero.
-%
-It is often suppressed in local sampling processes,
-because the eigenmodes with large $\lambda_k$'s
-are accompanied by large $\Gamma_k$'s,
-which shortens the distribution tail.
-
+}
 
 
 
