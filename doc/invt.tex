@@ -1495,257 +1495,13 @@ Then, Eq. \eqref{eq:error_asym} is simplified as
 %
 In this way,
 the underlying sampling process
-affects the error only through the set of numbers, $\Gamma_i$'s.
-
-
-
-\subsubsection{\label{sec:Gamma}
-Integrals of the autocorrelation functions}
-
-
-
-We can evaluate the integrals of the autocorrelation functions,
-$\Gamma_k$'s,
-in two special cases.
+affects the error only through the set of numbers,
+$\Gamma_k$'s.
 %
-First, if the sampling is perfect,
-Eq. \eqref{eq:kappa_delta} is exact, and
-%
-\begin{equation}
-  \Gamma_k = 1.
-\label{eq:Gamma_perfect}
-\end{equation}
-%
-To see this, we note that
-the bin index $i$ is an independent random variable
-at each time step $t$ in this case, and
-%
-\begin{align}
-  \left\langle
-    \zeta_i(t) \, \zeta_j(t')
-  \right\rangle
-  &=
-  \langle h_i(t) \, h_j(t') \rangle
-  -
-  \langle h_i(t) \rangle
-  \langle h_j(t') \rangle
-  \notag
-  \\
-  &=
-  \left( p_i \, \delta_{ij} - p_i \, p_j \right) \,
-  \delta_{t, t'}
-  ,
-\label{eq:zz_perfect}
-\end{align}
-%
-where $\delta(t - t')$ is the equivalent of $\delta_{t, t'}$
-in the continuous limit.
-%
-\note{To show Eq. \eqref{eq:zz_perfect}, we first note that
-  with $t \ne t'$ (going back to the discrete time case),
-  $$
-  \begin{aligned}
-  \left\langle
-    \zeta_i(t) \, \zeta_j(t')
-  \right\rangle
-  &=
-  \left\langle
-    \zeta_i(t)
-  \right\rangle
-  \left\langle
-    \zeta_j(t')
-  \right\rangle
-  \\
-  &=
-  \bigl\langle h_i(t)  - \langle h_i(t)  \rangle \bigr\rangle
-  \bigl\langle h_j(t') - \langle h_j(t') \rangle \bigr\rangle
-  =
-  0.
-  \end{aligned}
-  $$
-  Next, for $t = t'$, we have
-  $$
-  \zeta_i(t)
-  = h_i(t) - \langle h_i(t) \rangle
-  = \delta_{i, i(t)} - p_i,
-  $$
-  and
-  $$
-  \begin{aligned}
-  \left\langle
-    \zeta_i(t) \, \zeta_j(t)
-  \right\rangle
-  &=
-  \left\langle
-    \delta_{i, i(t)} \, \delta_{j, i(t)}
-  \right\rangle
-  -
-  p_i \, p_j
-  \\
-  &=
-  \left\langle
-    \delta_{i, i(t)}
-  \right\rangle
-  \delta_{i, j}
-  -
-  p_i \, p_j
-  =
-  p_i \, \delta_{ij}
-  - p_i \, p_j.
-  \end{aligned}
-  $$
-  %
-  The average
-  $\left\langle \delta_{i, i(t)} \right\rangle$ is $p_i$,
-  because as $i(t)$ goes through $1$ to $n$,
-  $\delta_{i, i(t)}$ gives $1$
-  if $i(t)$ matches $i$ with probability $p_i$,
-  or $0$ otherwise.
-}
-%
-Thus,
-for $k \ge 2$, we get
-%
-\begin{equation}
-  \kappa_k(t - t')
-  =
-  \sum_{i,j = 1}^n
-  \frac{ \phi_{ki} } { p_i }
-  \frac{ \phi_{kj} } { p_j }
-  \langle \zeta_i(t) \, \zeta_j(t') \rangle
-  %
-  = \delta_{t, t'},
-\notag
-%\label{eq:kappa_perfect}
-\end{equation}
-%
-where we have used
-Eqs. \eqref{eq:eig_orthonormal_rows}-\eqref{eq:ortho1},
-\eqref{eq:eta_def},
-and
-\eqref{eq:zz_perfect}.
-%
-\note{Proof.%Eq. \eqref{eq:kappa_perfect},
-  $$
-  \begin{aligned}
-  \kappa_k(t - t')
-  &=
-  \sum_{i,j = 1}^n
-  \frac{ \phi_{ki} } { p_i }
-  \frac{ \phi_{kj} } { p_j }
-  \langle \zeta_i(t) \, \zeta_j(t') \rangle
-  \\
-  %
-  &=
-  \sum_{i,j = 1}^n
-  \frac{ \phi_{ki} } { p_i }
-  \frac{ \phi_{kj} } { p_j }
-  \left(
-    p_i \, \delta_{i, j} - p_i \, p_j
-  \right)
-  \, \delta_{t, t'}
-  \\
-  &=
-  \left(
-    \sum_{j = 1}^n
-    \frac{ \phi_{kj}^2 } { p_j }
-    -
-    \sum_{i = 1}^n \phi_{ki}
-    \sum_{j = 1}^n \phi_{kj}
-  \right)
-  \, \delta_{t, t'}
-  \\
-  &=
-  (1 - 0 \cdot 0) \, \delta_{t, t'}.
-  \end{aligned}
-  $$
-  where,
-  we have used
-  Eq. \eqref{eq:eta_def}
-  on the first line,
-  %
-  Eq. \eqref{eq:zz_perfect}
-  on the second line,
-  and
-  Eq. \eqref{eq:eig_orthonormal_rows}
-  on the last line.
-}
-
-
-Another special case is the
-one-dimensional one-step process\cite{vankampen},
-which models a local sampling process.
-In each step, the system hops to
-one of the two neighboring bins
-with equal probability $1/2$.
-%
-The transition matrix is
-%
-\begin{equation}
-  \arraycolsep=3.6pt\def\arraystretch{1.4}
-  \mathbf A
-  =
-  \left(
-    \begin{array}{cccccccc}
-      \frac \sigma 2 & \frac 1 2 & 0 & \dots & \frac {1 - \sigma} 2 \\
-      \frac 1 2 & 0         & \frac 1 2 & \dots & 0 \\
-      \vdots & &  & & \vdots \\
-      \frac {1 - \sigma} 2 & \dots &  & \frac 1 2 & \frac \sigma 2
-    \end{array}
-  \right),
-\notag
-%\label{eq:T_nn}
-\end{equation}
-%
-where $\sigma = 0$ for a periodic variable, or $1$ otherwise.
-%
-For many updating schemes
-(cf. Sec. \ref{sec:band-matrix}),
-we can further assume that
-the matrices $\mathbf A$ and $\mathbf w$
-share the eigenvectors, but not the eigenvalues.
-%
-The eigenvalues of $\mathbf A$ are
-$$
-\Lambda_k
-=
-1 -
-2 \sin^2 \frac{ (k - 1) \, g \, \pi }
-              {       2 \, n        }
-,
-$$
-where
-$g = 2$ for a periodic variable, or $1$ otherwise.
-%Note that these $\Lambda_k$'s are
-%not to be confused with the eigenvalues of $\mathbf w$,
-%$\lambda_k$'s.
-%
-In this case,
-the autocorrelation function $\kappa_k(t)$
-decays as $\kappa_k(0) \, \Lambda_k^t$,
-with $\kappa_k(0) = 1$ being the same as
-the value in perfect sampling.
-%
-Thus,
-%$\Gamma_k$ is roughly twice the autocorrelation time, and
-from Eq. \eqref{eq:Gamma_sum}, we get
-%
-\begin{equation}
-  \Gamma_k
-  =
-  1 + 2 \, \sum_{t = 1}^\infty \Lambda_k^t
-  =
-  \frac{ 1 + \Lambda_k }
-       { 1 - \Lambda_k }
-  =
-  \cot^2 \left[
-    \frac{ (k - 1) \, g \, \pi }
-         { 2 \, n }
-  \right]
-  .
-\label{eq:Gamma_onestep}
-\end{equation}
-%
+In Appendix \ref{sec:Gamma},
+we evaluate $\Gamma_k$'s in two special cases,
+and show how to measure them
+from an adaptive FDS simulation.
 
 
 
@@ -4065,113 +3821,283 @@ for helpful discussions.
 \appendix
 
 
+\section{\label{sec:Gamma}
+Integrals of the autocorrelation functions}
 
-\section{\label{sec:program}
-Program of computing the optimal schedule and error
+
+
+Here, we evaluate the integrals of
+the autocorrelation functions,
+$\Gamma_k$'s,
+in two special cases
+in Secs. \ref{sec:Gamma_perfect}
+and \ref{sec:Gamma_onestep},
+and describe a general method of measuring them
+in Sec. \ref{sec:Gamma_measure}.
+
+
+
+\subsection{\label{sec:Gamma_perfect}
+Perfect sampling}
+
+
+First, if the sampling is perfect,
+Eq. \eqref{eq:kappa_delta} is exact, and
+%
+\begin{equation}
+  \Gamma_k = 1.
+\label{eq:Gamma_perfect}
+\end{equation}
+%
+To see this, we note that
+the bin index $i$ is an independent random variable
+at each time step $t$ in this case, and
+%
+\begin{align}
+  \left\langle
+    \zeta_i(t) \, \zeta_j(t')
+  \right\rangle
+  &=
+  \langle h_i(t) \, h_j(t') \rangle
+  -
+  \langle h_i(t) \rangle
+  \langle h_j(t') \rangle
+  \notag
+  \\
+  &=
+  \left( p_i \, \delta_{ij} - p_i \, p_j \right) \,
+  \delta_{t, t'}
+  ,
+\label{eq:zz_perfect}
+\end{align}
+%
+where $\delta(t - t')$ is the equivalent of $\delta_{t, t'}$
+in the continuous limit.
+%
+\note{To show Eq. \eqref{eq:zz_perfect}, we first note that
+  with $t \ne t'$ (going back to the discrete time case),
+  $$
+  \begin{aligned}
+  \left\langle
+    \zeta_i(t) \, \zeta_j(t')
+  \right\rangle
+  &=
+  \left\langle
+    \zeta_i(t)
+  \right\rangle
+  \left\langle
+    \zeta_j(t')
+  \right\rangle
+  \\
+  &=
+  \bigl\langle h_i(t)  - \langle h_i(t)  \rangle \bigr\rangle
+  \bigl\langle h_j(t') - \langle h_j(t') \rangle \bigr\rangle
+  =
+  0.
+  \end{aligned}
+  $$
+  Next, for $t = t'$, we have
+  $$
+  \zeta_i(t)
+  = h_i(t) - \langle h_i(t) \rangle
+  = \delta_{i, i(t)} - p_i,
+  $$
+  and
+  $$
+  \begin{aligned}
+  \left\langle
+    \zeta_i(t) \, \zeta_j(t)
+  \right\rangle
+  &=
+  \left\langle
+    \delta_{i, i(t)} \, \delta_{j, i(t)}
+  \right\rangle
+  -
+  p_i \, p_j
+  \\
+  &=
+  \left\langle
+    \delta_{i, i(t)}
+  \right\rangle
+  \delta_{i, j}
+  -
+  p_i \, p_j
+  =
+  p_i \, \delta_{ij}
+  - p_i \, p_j.
+  \end{aligned}
+  $$
+  %
+  The average
+  $\left\langle \delta_{i, i(t)} \right\rangle$ is $p_i$,
+  because as $i(t)$ goes through $1$ to $n$,
+  $\delta_{i, i(t)}$ gives $1$
+  if $i(t)$ matches $i$ with probability $p_i$,
+  or $0$ otherwise.
+}
+%
+Thus,
+for $k \ge 2$, we get
+%
+\begin{equation}
+  \kappa_k(t - t')
+  =
+  \sum_{i,j = 1}^n
+  \frac{ \phi_{ki} } { p_i }
+  \frac{ \phi_{kj} } { p_j }
+  \langle \zeta_i(t) \, \zeta_j(t') \rangle
+  %
+  = \delta_{t, t'},
+\notag
+%\label{eq:kappa_perfect}
+\end{equation}
+%
+where we have used
+Eqs. \eqref{eq:eig_orthonormal_rows}-\eqref{eq:ortho1},
+\eqref{eq:eta_def},
+and
+\eqref{eq:zz_perfect}.
+%
+\note{Proof.%Eq. \eqref{eq:kappa_perfect},
+  $$
+  \begin{aligned}
+  \kappa_k(t - t')
+  &=
+  \sum_{i,j = 1}^n
+  \frac{ \phi_{ki} } { p_i }
+  \frac{ \phi_{kj} } { p_j }
+  \langle \zeta_i(t) \, \zeta_j(t') \rangle
+  \\
+  %
+  &=
+  \sum_{i,j = 1}^n
+  \frac{ \phi_{ki} } { p_i }
+  \frac{ \phi_{kj} } { p_j }
+  \left(
+    p_i \, \delta_{i, j} - p_i \, p_j
+  \right)
+  \, \delta_{t, t'}
+  \\
+  &=
+  \left(
+    \sum_{j = 1}^n
+    \frac{ \phi_{kj}^2 } { p_j }
+    -
+    \sum_{i = 1}^n \phi_{ki}
+    \sum_{j = 1}^n \phi_{kj}
+  \right)
+  \, \delta_{t, t'}
+  \\
+  &=
+  (1 - 0 \cdot 0) \, \delta_{t, t'}.
+  \end{aligned}
+  $$
+  where,
+  we have used
+  Eq. \eqref{eq:eta_def}
+  on the first line,
+  %
+  Eq. \eqref{eq:zz_perfect}
+  on the second line,
+  and
+  Eq. \eqref{eq:eig_orthonormal_rows}
+  on the last line.
 }
 
 
-Here we give a program of computing
-the optimal schedule and the error
-of a given adaptive FDS simulation.
+\subsection{\label{sec:Gamma_onestep}
+One-step process}
+
+
+Another special case is the
+one-dimensional one-step process\cite{vankampen},
+which models a local sampling process.
+In each step, the system hops to
+one of the two neighboring bins
+with equal probability $1/2$.
 %
-Basically, we need to extract
-$\lambda_i$'s and $\Gamma_i$'s
-from the input,
-and then feed them to Eq. \eqref{eq:q_opt}
-for the schedule.
+The transition matrix is
 %
-The dependence of variables are shown in Fig. \ref{fig:vardep}.
+\begin{equation}
+  \arraycolsep=3.6pt\def\arraystretch{1.4}
+  \mathbf A
+  =
+  \left(
+    \begin{array}{cccccccc}
+      \frac \sigma 2 & \frac 1 2 & 0 & \dots & \frac {1 - \sigma} 2 \\
+      \frac 1 2 & 0         & \frac 1 2 & \dots & 0 \\
+      \vdots & &  & & \vdots \\
+      \frac {1 - \sigma} 2 & \dots &  & \frac 1 2 & \frac \sigma 2
+    \end{array}
+  \right),
+\notag
+%\label{eq:T_nn}
+\end{equation}
+%
+where $\sigma = 0$ for a periodic variable, or $1$ otherwise.
+%
+For many updating schemes
+(cf. Sec. \ref{sec:band-matrix}),
+we can further assume that
+the matrices $\mathbf A$ and $\mathbf w$
+share the eigenvectors, but not the eigenvalues.
+%
+The eigenvalues of $\mathbf A$ are
+$$
+\Lambda_k
+=
+1 -
+2 \sin^2 \frac{ (k - 1) \, g \, \pi }
+              {       2 \, n        }
+,
+$$
+where
+$g = 2$ for a periodic variable, or $1$ otherwise.
+%Note that these $\Lambda_k$'s are
+%not to be confused with the eigenvalues of $\mathbf w$,
+%$\lambda_k$'s.
+%
+In this case,
+the autocorrelation function $\kappa_k(t)$
+decays as $\kappa_k(0) \, \Lambda_k^t$,
+with $\kappa_k(0) = 1$ being the same as
+the value in perfect sampling.
+%
+Thus,
+%$\Gamma_k$ is roughly twice the autocorrelation time, and
+from Eq. \eqref{eq:Gamma_sum}, we get
+%
+\begin{equation}
+  \Gamma_k
+  =
+  1 + 2 \, \sum_{t = 1}^\infty \Lambda_k^t
+  =
+  \frac{ 1 + \Lambda_k }
+       { 1 - \Lambda_k }
+  =
+  \cot^2 \left[
+    \frac{ (k - 1) \, g \, \pi }
+         { 2 \, n }
+  \right]
+  .
+\label{eq:Gamma_onestep}
+\end{equation}
 
-\begin{figure}[h]
-\begin{tikzpicture}
-  \node[draw, text width={width("Updating ")}]
-    (w) at (0, 3) {Updating \\matrix, $\mathbf w$};
 
-  \node[draw, text width={width("sampling")}]
-    (sys) at (0, 1) {System\\and\\sampling\\process};
-
-  \node[draw, text width={width("Eigenvalues,")}]
-    (lambda) at (2.2, 3) {Eigenvalues,\\$\lambda_2, \dots, \lambda_n$};
-
-  \node[draw, text width={width("Integrals, ")}]
-    (gamma) at (2.2, 1) {Integrals, \\$\Gamma_2, \dots, \Gamma_n$};
-
-  \node[draw, text width={width("Simulation")}]
-    (T) at (2.2, -0.5) {Simulation\\time, $T$};
-
-  \node[draw, text width={width("Optimal")}]
-    (qT) at (4.6, 1.4) {Optimal\\ $q(T)$};
-
-  \node[draw, text width={width("Schedule,")}]
-    (alpha) at (7, 2) {Optimal schedule,\\ $\alpha(t)$};
-
-  \node[draw, text width={width("Error, $\Err$")}]
-    (err) at (7, 0) {Error, $\Err$};
-
-  \node[inner sep=0, minimum size=0] (M1) at (3.4, 1) {};
-
-  \node[inner sep=0, minimum size=0] (N1) at (5.9, 1) {};
-
-  \node[inner sep=0, minimum size=0] (R1) at (3.6, 1) {};
-  \node[inner sep=0, minimum size=0] (R2) at (4.6, 0.6) {};
-  \node[inner sep=0, minimum size=0] (R3) at (5.6, 1) {};
-
-  \draw[->, >=latex, thick]
-    (w) edge (lambda)
-    (w) edge (gamma)
-    (sys) edge (gamma);
-
-  \draw[->, >=latex, thick]
-    (lambda) -| (M1)
-    (gamma)  -- (M1)
-    (T)      -| (M1)
-    (M1)     -- (R1)
-    (R1)     |- (qT);
-
-  \draw[->, >=latex, thick]
-    (qT)     -| (R3);
-
-  \draw[->, >=latex, thick]
-    (R3) -- (N1) |- (alpha);
-
-  \draw[->, >=latex, thick]
-    (N1) |- (err);
-
-  \draw[->, >=latex, thick]
-    %(M1) edge[bend left=70] (N1);
-    (R1) |- (R2) -| (R3);
-\end{tikzpicture}
-\caption{
-  \label{fig:vardep}
-  Dependence of variables in computing
-  the optimal schedule and the error.
+\subsection{\label{sec:Gamma_measure}
+Measurement via an adaptive FDS simulation
 }
-\end{figure}
-
-
-
-\subsection{\label{sec:measure_gamma}
-Measurement of the integrals
-of the autocorrelation functions}
 
 
 
 %To use Eq. \eqref{eq:q_opt} in a real simulation,
 %we need to know both $\lambda_k$'s and $\Gamma_k$'s.
 %
-While the updating scheme alone
-determines the eigenmodes and $\lambda_k$'s,
-the values of $\Gamma_k$'s depend also on the system
-and the underlying sampling process (MC or MD).
-%
-%Below is a technique of measuring $\Gamma_k$'s.
-%
-%The idea is to run
-To measure $\Gamma_k$'s, we can run
+We can also
+use Eq. \eqref{eq:y2_eql}.
+measure $\Gamma_k$'s in
 a simulation with a constant schedule,
-$\alpha(t) = \alpha_0$,
-and then use Eq. \eqref{eq:y2_eql}.
+$\alpha(t) = \alpha_0$.
 %
 %A practical difficulty is that
 However,
@@ -4307,12 +4233,103 @@ of local sampling processes.
 
 
 
-\subsection{\label{sec:program_list}
-Program
+
+\section{\label{sec:program}
+Program of computing the optimal schedule and error
 }
 
 
+Here we give a program of computing
+the optimal schedule and the error
+of a given adaptive FDS simulation.
+%
+Basically, we need to extract
+$\lambda_i$'s and $\Gamma_i$'s
+from the input,
+and then feed them to Eq. \eqref{eq:q_opt}
+for the schedule,
+as shown in Fig. \ref{fig:vardep}.
+%
+%The dependence of variables are shown in Fig. \ref{fig:vardep}.
+%
+While the updating scheme alone
+determines $\lambda_k$'s,
+$\Gamma_k$'s depend also on the system
+and the underlying sampling process (MC or MD),
+and need to be measured using the technique
+in Sec. \ref{sec:Gamma_measure}.
+%
 The complete program is the following.
+
+
+\begin{figure}[h]
+\begin{tikzpicture}
+  \node[draw, text width={width("Updating ")}]
+    (w) at (0, 3) {Updating \\matrix, $\mathbf w$};
+
+  \node[draw, text width={width("sampling")}]
+    (sys) at (0, 1) {System\\and\\sampling\\process};
+
+  \node[draw, text width={width("Eigenvalues,")}]
+    (lambda) at (2.2, 3) {Eigenvalues,\\$\lambda_2, \dots, \lambda_n$};
+
+  \node[draw, text width={width("Integrals, ")}]
+    (gamma) at (2.2, 1) {Integrals, \\$\Gamma_2, \dots, \Gamma_n$};
+
+  \node[draw, text width={width("Simulation")}]
+    (T) at (2.2, -0.5) {Simulation\\time, $T$};
+
+  \node[draw, text width={width("Optimal")}]
+    (qT) at (4.6, 1.4) {Optimal\\ $q(T)$};
+
+  \node[draw, text width={width("Schedule,")}]
+    (alpha) at (7, 2) {Optimal schedule,\\ $\alpha(t)$};
+
+  \node[draw, text width={width("Error, $\Err$")}]
+    (err) at (7, 0) {Error, $\Err$};
+
+  \node[inner sep=0, minimum size=0] (M1) at (3.4, 1) {};
+
+  \node[inner sep=0, minimum size=0] (N1) at (5.9, 1) {};
+
+  \node[inner sep=0, minimum size=0] (R1) at (3.6, 1) {};
+  \node[inner sep=0, minimum size=0] (R2) at (4.6, 0.6) {};
+  \node[inner sep=0, minimum size=0] (R3) at (5.6, 1) {};
+
+  \draw[->, >=latex, thick]
+    (w) edge (lambda)
+    (w) edge (gamma)
+    (sys) edge (gamma);
+
+  \draw[->, >=latex, thick]
+    (lambda) -| (M1)
+    (gamma)  -- (M1)
+    (T)      -| (M1)
+    (M1)     -- (R1)
+    (R1)     |- (qT);
+
+  \draw[->, >=latex, thick]
+    (qT)     -| (R3);
+
+  \draw[->, >=latex, thick]
+    (R3) -- (N1) |- (alpha);
+
+  \draw[->, >=latex, thick]
+    (N1) |- (err);
+
+  \draw[->, >=latex, thick]
+    %(M1) edge[bend left=70] (N1);
+    (R1) |- (R2) -| (R3);
+\end{tikzpicture}
+\caption{
+  \label{fig:vardep}
+  Dependence of variables in computing
+  the optimal schedule and the error.
+}
+\end{figure}
+
+
+
 
 \begin{enumerate}
 
