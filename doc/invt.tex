@@ -3527,11 +3527,11 @@ Numerical results}
 
 
 
-We tested the above theory on a model system,
-which is to be described in Sec. \ref{sec:results_system}.
+We tested the above theory on a model system
+described in Sec. \ref{sec:results_system}.
 %
 First, we verify the method of computing errors
-using an analytically simple schedule
+%using an inverse-time schedule
 in Sec. \ref{sec:results_invt}.
 %
 We then study the optimal schedule from
@@ -3539,7 +3539,7 @@ Eq. \eqref{eq:q_opt}
 in Sec. \ref{sec:results_optschedule}.
 %
 Finally, we compare the Gaussian and
-bandpass schemes of different widths
+bandpass updating schemes %of different widths
 in Sec. \ref{sec:results_cmpschemes}.
 
 
@@ -3637,7 +3637,8 @@ in Sec. \ref{sec:Gamma}.
 Inverse-time schedule}
 
 
-We first studied the inverse-time schedule,
+We first tested the theory of computing errors
+on the simple inverse-time schedule,
 %
 \begin{equation}
 \alpha(t) = \frac{1}{\lambda \, (t + t_0) },
@@ -3718,11 +3719,12 @@ also in agreement with the theory
 
 %\subsubsection{Nearest-neighbor updating scheme}
 
-As an example of the multiple-bin schemes,
-we chose the nearest-neighbor updating scheme
-described in Sec. \ref{sec:nnscheme}.
+As an example of multiple-bin schemes,
+we tested the nearest-neighbor updating scheme
+described in Sec. \ref{sec:nnscheme},
 %
-We chose $\mu_1 = 0.24$ to make the smallest eigenvalue
+with
+$\mu_1 = 0.24$ to make the smallest eigenvalue
 close to zero.
 %
 Again, simulation and theory agreed well,

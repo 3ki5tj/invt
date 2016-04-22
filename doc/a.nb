@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[    101363,       2796]
-NotebookOptionsPosition[     97641,       2672]
-NotebookOutlinePosition[     97978,       2687]
-CellTagsIndexPosition[     97935,       2684]
+NotebookDataLength[    106289,       2947]
+NotebookOptionsPosition[    102323,       2815]
+NotebookOutlinePosition[    102664,       2830]
+CellTagsIndexPosition[    102621,       2827]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -2668,10 +2668,153 @@ Cell[BoxData["1"], "Output",
    3.6688615128896503`*^9, 3.668861538228257*^9}}]
 }, Open  ]]
 }, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Asymptotical error for the single-bin updating scheme", "Subsection",
+ CellChangeTimes->{{3.6623261001727057`*^9, 3.662326128875046*^9}, {
+  3.670266455495023*^9, 3.6702664685907784`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{
+   RowBox[{"EA", "[", 
+    RowBox[{"nu_", ",", "r_"}], "]"}], " ", ":=", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"nu", "^", "2"}], "/", 
+     RowBox[{"(", 
+      RowBox[{
+       RowBox[{"2", "nu"}], "-", "1"}], ")"}]}], 
+    RowBox[{
+     RowBox[{"(", 
+      RowBox[{"1", "-", 
+       RowBox[{"r", "^", 
+        RowBox[{"(", 
+         RowBox[{
+          RowBox[{"2", "nu"}], "-", "1"}], ")"}]}]}], ")"}], "/", 
+     RowBox[{"(", 
+      RowBox[{"T", "+", "t0"}], ")"}]}]}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"ER", "[", 
+    RowBox[{"nu_", ",", "r_", ",", "a0_"}], "]"}], ":=", 
+   RowBox[{
+    RowBox[{"a0", "/", "2"}], " ", 
+    RowBox[{"r", "^", 
+     RowBox[{"(", 
+      RowBox[{
+       RowBox[{"2", "nu"}], "-", "1"}], ")"}]}]}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{"Series", "[", 
+  RowBox[{
+   RowBox[{"EA", "[", 
+    RowBox[{
+     RowBox[{"1", "+", "x"}], ",", "r"}], "]"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"x", ",", "0", ",", "3"}], "}"}]}], 
+  "]"}], "\[IndentingNewLine]", 
+ RowBox[{"Series", "[", 
+  RowBox[{
+   RowBox[{"ER", "[", 
+    RowBox[{
+     RowBox[{"1", "+", "x"}], ",", "r", ",", "a0"}], "]"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"x", ",", "0", ",", "3"}], "}"}]}], "]"}]}], "Input",
+ CellChangeTimes->{{3.670266477914248*^9, 3.670266581525989*^9}, {
+  3.670266825275614*^9, 3.6702668493157873`*^9}, {3.6702669492439404`*^9, 
+  3.6702669520511227`*^9}, {3.670267320367857*^9, 3.670267325870968*^9}}],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   FractionBox[
+    RowBox[{"1", "-", "r"}], 
+    RowBox[{"T", "+", "t0"}]], "-", 
+   FractionBox[
+    RowBox[{"2", " ", 
+     RowBox[{"(", 
+      RowBox[{"r", " ", 
+       RowBox[{"Log", "[", "r", "]"}]}], ")"}], " ", "x"}], 
+    RowBox[{"T", "+", "t0"}]], "+", 
+   FractionBox[
+    RowBox[{
+     RowBox[{"(", 
+      RowBox[{"1", "-", "r", "-", 
+       RowBox[{"2", " ", "r", " ", 
+        SuperscriptBox[
+         RowBox[{"Log", "[", "r", "]"}], "2"]}]}], ")"}], " ", 
+     SuperscriptBox["x", "2"]}], 
+    RowBox[{"T", "+", "t0"}]], "-", 
+   FractionBox[
+    RowBox[{"2", " ", 
+     RowBox[{"(", 
+      RowBox[{"3", "-", 
+       RowBox[{"3", " ", "r"}], "+", 
+       RowBox[{"3", " ", "r", " ", 
+        RowBox[{"Log", "[", "r", "]"}]}], "+", 
+       RowBox[{"2", " ", "r", " ", 
+        SuperscriptBox[
+         RowBox[{"Log", "[", "r", "]"}], "3"]}]}], ")"}], " ", 
+     SuperscriptBox["x", "3"]}], 
+    RowBox[{"3", " ", 
+     RowBox[{"(", 
+      RowBox[{"T", "+", "t0"}], ")"}]}]], "+", 
+   InterpretationBox[
+    SuperscriptBox[
+     RowBox[{"O", "[", "x", "]"}], "4"],
+    SeriesData[$CellContext`x, 0, {}, 0, 4, 1],
+    Editable->False]}],
+  SeriesData[$CellContext`x, 
+   0, {(1 - $CellContext`r)/($CellContext`T + $CellContext`t0), (-2) \
+$CellContext`r ($CellContext`T + $CellContext`t0)^(-1) 
+    Log[$CellContext`r], ($CellContext`T + $CellContext`t0)^(-1) (
+     1 - $CellContext`r - 2 $CellContext`r Log[$CellContext`r]^2), 
+    Rational[-2, 3] ($CellContext`T + $CellContext`t0)^(-1) (3 - 
+     3 $CellContext`r + 3 $CellContext`r Log[$CellContext`r] + 
+     2 $CellContext`r Log[$CellContext`r]^3)}, 0, 4, 1],
+  Editable->False]], "Output",
+ CellChangeTimes->{3.670266540238513*^9, 3.6702668500785723`*^9, 
+  3.670266953447846*^9, 3.6702673268110323`*^9}],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   FractionBox[
+    RowBox[{"a0", " ", "r"}], "2"], "+", 
+   RowBox[{"a0", " ", "r", " ", 
+    RowBox[{"Log", "[", "r", "]"}], " ", "x"}], "+", 
+   RowBox[{"a0", " ", "r", " ", 
+    SuperscriptBox[
+     RowBox[{"Log", "[", "r", "]"}], "2"], " ", 
+    SuperscriptBox["x", "2"]}], "+", 
+   RowBox[{
+    FractionBox["2", "3"], " ", "a0", " ", "r", " ", 
+    SuperscriptBox[
+     RowBox[{"Log", "[", "r", "]"}], "3"], " ", 
+    SuperscriptBox["x", "3"]}], "+", 
+   InterpretationBox[
+    SuperscriptBox[
+     RowBox[{"O", "[", "x", "]"}], "4"],
+    SeriesData[$CellContext`x, 0, {}, 0, 4, 1],
+    Editable->False]}],
+  SeriesData[$CellContext`x, 0, {
+   Rational[1, 
+      2] $CellContext`a0 $CellContext`r, $CellContext`a0 $CellContext`r 
+    Log[$CellContext`r], $CellContext`a0 $CellContext`r Log[$CellContext`r]^2,
+     Rational[2, 3] $CellContext`a0 $CellContext`r Log[$CellContext`r]^3}, 0, 
+   4, 1],
+  Editable->False]], "Output",
+ CellChangeTimes->{3.670266540238513*^9, 3.6702668500785723`*^9, 
+  3.670266953447846*^9, 3.670267326813959*^9}]
+}, Open  ]]
 }, Open  ]]
 },
 WindowSize->{1114, 649},
-WindowMargins->{{0, Automatic}, {Automatic, 0}},
+WindowMargins->{{Automatic, -22}, {145, Automatic}},
 FrontEndVersion->"10.3 for Linux x86 (64-bit) (December 10, 2015)",
 StyleDefinitions->"Default.nb"
 ]
@@ -2796,6 +2939,14 @@ Cell[93548, 2581, 1617, 35, 224, "Output"],
 Cell[95168, 2618, 1769, 38, 226, "Output"],
 Cell[96940, 2658, 661, 9, 31, "Output"]
 }, Open  ]]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[97662, 2674, 194, 2, 47, "Subsection"],
+Cell[CellGroupData[{
+Cell[97881, 2680, 1497, 48, 99, "Input"],
+Cell[99381, 2730, 1819, 50, 57, "Output"],
+Cell[101203, 2782, 1092, 29, 80, "Output"]
 }, Open  ]]
 }, Open  ]]
 }
