@@ -85,7 +85,7 @@ static void invt_geterr(invtpar_t *m,
   inita = intq_getinita(intq);
 
   /* save the optimal schedule to file */
-  t0 = 2 * m->c / m->alpha0;
+  t0 = 2 / m->alpha0;
   intq_save(intq, m->c, t0, m->alpha_resample, m->fnalpha);
 
   printf("c %g, t0 %g, err %g, sqr %g (invt), "
@@ -134,7 +134,7 @@ static void invt_scanc(invtpar_t *m,
       m->alpha_nint, NULL, m->n, lambda, gamma, m->verbose);
 
   /* print out a header */
-  printf("# c     \t  error  \t  init. error\t  final error\t  optimal error\n");
+  printf("# c     \t  final error\t  init. error\t  final equil\t  optimal error\n");
 
   for ( c = m->cmin; c < m->cmax + 0.001 * m->cdel; c += m->cdel ) {
     /* alpha(t) = c / (t + t0) */
@@ -142,7 +142,7 @@ static void invt_scanc(invtpar_t *m,
         lambda, gamma);
 
     /* final equilibrium value */
-    t0 = 2 * c / m->alpha0;
+    t0 = 2 / m->alpha0;
     errf = esterror_eql(c / (t0 + T), m->n, NULL,
         lambda, gamma);
 

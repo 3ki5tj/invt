@@ -452,7 +452,7 @@ static double esterror_eql(double alpha, int n, double *xerr,
  *
  * currently, assuming initial values of < x^2 >
  * are given by the equilibirium ones at alpha0,
- * and t0 = 2 c / alpha0.
+ * and the default t0 = 2 / alpha0.
  * */
 static double esterror_invt1(double T, double c, double alpha0,
     double t0, double lambda, double gamma)
@@ -462,7 +462,7 @@ static double esterror_invt1(double T, double c, double alpha0,
 
   r = lambda * c;
 
-  if ( t0 <= 0 ) t0 = 2 * c / alpha0;
+  if ( t0 <= 0 ) t0 = 2 / alpha0;
 
   if ( lambda < 0 ) lambda = 0;
 
@@ -491,7 +491,6 @@ static double esterror_invt1(double T, double c, double alpha0,
  *
  * currently, assuming initial values of < x^2 >
  * are given by the equilibrium ones at alpha0,
- * and t0 = 2 c / alpha0
  * */
 static double esterror_invt(double T, double c, double a0,
     double t0, int n, double *xerr,

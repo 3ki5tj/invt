@@ -9,8 +9,8 @@
 
 set encoding cp1250 # make the minus sign longer
 set terminal push
-# dl 4 make dashed line longer
-set terminal postscript eps enhanced dl 4 size 3.7, 3.7 font "Times, 24"
+# dl 3 make dashed line longer
+set terminal postscript eps enhanced dl 3 size 3.7, 3.7 font "Times, 24"
 set output "sinc.eps"
 set multiplot
 
@@ -38,10 +38,10 @@ set ylabel "{/Symbol-Oblique m}_{/Times-Italic i}" offset 2, -1
 set key right bottom Left reverse invert spacing 1.2 width -8
 
 plot [:100][-0.04:0.07] \
-    0 lt 4 lw 0.1 lc rgb "#cccccc" notitle, \
+    0 lt 1 lw 0.1 lc rgb "#cccccc" notitle, \
     normd(x, 10) lt 1 lw 5 lc rgb "#aaaaaa" t "Gaussian, {/Symbol-Oblique s} = 10", \
     "../../data/sinc/sinc_nonpbc_win.dat" u 1:($2) w lp pt 4 ps 1.0 lt 1 lw 1.0 t "Bandpass, non{/*0.7 -}periodic, {/Times-Italic K} = 4", \
-    "../../data/sinc/sinc_pbc_win.dat"    u 1:($2) w  p pt 5        lt 1 lw 1.0 t "Bandpass, periodic, {/Times-Italic K} = 2"
+    "../../data/sinc/sinc_pbc_win.dat"    u 1:($2) w lp pt 5        lt 4 lw 1.0 t "Bandpass, periodic, {/Times-Italic K} = 2"
 
 
 # inset
