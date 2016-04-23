@@ -23,7 +23,7 @@ set mxtics 2
 set xlabel "{/Times 1 / }{/Symbol-Oblique l}" offset 0, 0.5
 
 set logscale y
-set format y "10^{%T}"
+set format y "10^{/*0.7 %T}"
 set mytics 10
 set ylabel "Normalized error, {/Times (}{/Times-Italic T}{/Times + }{/Times-Italic t}_{/Times 0} {/Times )} {/Times-Italic E}"
 
@@ -39,14 +39,14 @@ a0 = 0.0001
 #   "u 1:2 w p"
 
 plot [0:14][:6e4] \
-    "../../data/nb0.24/nb0.24_g_err.dat"     u 1:($2*(1e8+$1/a0))     w p pt 5 ps 2.0  lc rgb "#000000"    t "Global, {/Times-Italic T} = 10^8, simulation", \
-    "../../data/nb0.24/nb0.24_g_prd.dat"     u 1:($2**2*(1e8+$1/a0))  w l lt 1 lw 2    lc rgb "#000000"    t "Global, {/Times-Italic T} = 10^8, theory", \
-    "../../data/nb0.24/nb0.24t1e7_g_err.dat" u 1:($2*(1e7+$1/a0))     w p pt 5 ps 2.0  lc rgb "#808080"    t "Global, {/Times-Italic T} = 10^7, simulation", \
-    "../../data/nb0.24/nb0.24t1e7_g_prd.dat" u 1:($2**2*(1e7+$1/a0))  w l lt 1 lw 2    lc rgb "#808080"    t "Global, {/Times-Italic T} = 10^7, theory", \
-    "../../data/nb0.24/nb0.24_l_err.dat"     u 1:($2*(1e8+$1/a0))     w p pt 7 ps 2.0  lc rgb "#000000"    t "Local, {/Times-Italic T} = 10^8, simulation", \
-    "../../data/nb0.24/nb0.24_l_prd.dat"     u 1:($2**2*(1e8+$1/a0))  w l lt 2 lw 2    lc rgb "#000000"    t "Local, {/Times-Italic T} = 10^8, theory", \
-    "../../data/nb0.24/nb0.24t1e7_l_err.dat" u 1:($2*(1e7+$1/a0))     w p pt 7 ps 2.0  lc rgb "#808080"    t "Local, {/Times-Italic T} = 10^7, simulation", \
-    "../../data/nb0.24/nb0.24t1e7_l_prd.dat" u 1:($2**2*(1e7+$1/a0))  w l lt 2 lw 2    lc rgb "#808080"    t "Local, {/Times-Italic T} = 10^7, theory", \
+    "../../data/invt/nb0.24/nb0.24_g_err.dat"     u 1:($2*(1e8+$1/a0))     w p pt 5 ps 2.0  lc rgb "#000000"    t "Global, {/Times-Italic T} = 10^8, simulation", \
+    "../../data/invt/nb0.24/nb0.24_g_prd.dat"     u 1:($2**2*(1e8+$1/a0))  w l lt 1 lw 2    lc rgb "#000000"    t "Global, {/Times-Italic T} = 10^8, theory", \
+    "../../data/invt/nb0.24/nb0.24t1e7_g_err.dat" u 1:($2*(1e7+$1/a0))     w p pt 5 ps 2.0  lc rgb "#808080"    t "Global, {/Times-Italic T} = 10^7, simulation", \
+    "../../data/invt/nb0.24/nb0.24t1e7_g_prd.dat" u 1:($2**2*(1e7+$1/a0))  w l lt 1 lw 2    lc rgb "#808080"    t "Global, {/Times-Italic T} = 10^7, theory", \
+    "../../data/invt/nb0.24/nb0.24_l_err.dat"     u 1:($2*(1e8+$1/a0))     w p pt 7 ps 2.0  lc rgb "#000000"    t "Local, {/Times-Italic T} = 10^8, simulation", \
+    "../../data/invt/nb0.24/nb0.24_l_prd.dat"     u 1:($2**2*(1e8+$1/a0))  w l lt 2 lw 2    lc rgb "#000000"    t "Local, {/Times-Italic T} = 10^8, theory", \
+    "../../data/invt/nb0.24/nb0.24t1e7_l_err.dat" u 1:($2*(1e7+$1/a0))     w p pt 7 ps 2.0  lc rgb "#808080"    t "Local, {/Times-Italic T} = 10^7, simulation", \
+    "../../data/invt/nb0.24/nb0.24t1e7_l_prd.dat" u 1:($2**2*(1e7+$1/a0))  w l lt 2 lw 2    lc rgb "#808080"    t "Local, {/Times-Italic T} = 10^7, theory", \
     -1 notitle
 
 

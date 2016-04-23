@@ -17,8 +17,6 @@ set xtics 0.5 offset 0, 0.3
 set mxtics 5
 set xlabel "{/Times {/Symbol-Oblique n}_{/Times-Italic k} = {/Symbolic-Oblique l}_{/Times-Italic k} / {/Symbolic-Oblique l} }" offset 0, 0.5
 
-#set logscale y
-#set format y "10^{%T}"
 set ytics 2
 set mytics 2
 set ylabel "{/Times {/Times-Italic G}({/Symbol-Oblique n}_{/Times-Italic k}, {/Times-Italic r})}" offset 1, 0

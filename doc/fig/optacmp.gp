@@ -28,13 +28,13 @@ set lmargin 7
 set logscale x
 #set xtics 0.2 offset 0, 0.2
 #set mxtics 2
-set format x "10^{%T}"
+set format x "10^{/*0.7 %T}"
 set mxtics 10
 set xrange [1e4:1e8]
 set xlabel "Shifted simulation time, {/Times-Italic t} + 2/{/Symbol-Oblique a}_{/*0.7 0}"
 
 set logscale y
-set format y "10^{%T}"
+set format y "10^{/*0.7 %T}"
 set mytics 10
 set yrange [3e-9:1e-4]
 set ylabel "{/Symbol-Oblique a} ({/Times-Italic t})"

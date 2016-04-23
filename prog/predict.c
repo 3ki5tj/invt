@@ -13,7 +13,8 @@
 static int save_xerr(invtpar_t *m, const char *fn,
     const double *xerri, const double *xerrf,
     const double *xerrf_r, const double *xerrf_a,
-    const double *lambda)
+    const double *lambda, const double *gamma,
+    double qT, double a0)
 {
   FILE *fp;
   int i, n = m->n;
@@ -23,11 +24,12 @@ static int save_xerr(invtpar_t *m, const char *fn,
     return -1;
   }
 
-  fprintf(fp, "# %d\n", n);
+  fprintf(fp, "# %d qT %.6f a0 %.8e nint %d\n",
+      n, qT, a0, m->alpha_nint);
   for ( i = 1; i < n; i++ ) {
-    fprintf(fp, "%4d %18.8e %18.8e %18.8e %18.8e %18.8e\n",
+    fprintf(fp, "%4d %18.8e %18.8e %18.8e %18.8e %10.8f %18.8f\n",
         i, xerri[i], xerrf[i], xerrf_r[i], xerrf_a[i],
-        lambda[i]);
+        lambda[i], gamma[i]);
   }
 
   fclose(fp);
@@ -94,8 +96,9 @@ static void invt_geterr(invtpar_t *m,
       qT, inita, err2, err2 * err2, m->fnalpha);
   
   if ( m->fnxerr[0] != '\0' ) {
-    intq_errcomp(intq, m->alpha0, m->qT, xerrf, xerrf_r, xerrf_a);
-    save_xerr(m, m->fnxerr, xerri, xerrf, xerrf_r, xerrf_a, lambda);
+    intq_errcomp(intq, m->alpha0, qT, xerrf, xerrf_r, xerrf_a);
+    save_xerr(m, m->fnxerr, xerri, xerrf, xerrf_r, xerrf_a,
+        lambda, gamma, qT, inita);
   }
 
   intq_close(intq);

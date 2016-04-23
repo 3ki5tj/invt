@@ -21,7 +21,7 @@ set mxtics 2
 set xlabel "{/Times 1 / }{/Symbol-Oblique l}" offset 0, 0.5
 
 set logscale y
-set format y "10^{%T}"
+set format y "10^{/*0.7 %T}"
 set mytics 10
 set ylabel "Error, {/Times-Italic E}"
 
@@ -35,10 +35,10 @@ set key Left reverse width -5 spacing 1.0
 #   "u 1:2 w p"
 
 plot [0:5][5e-7:0.006] \
-    "../../data/singlebin/singlebin_g_err.dat" u 1:2 every 2 w p pt 5 ps 2.5  t "Global, simulation", \
-    "../../data/singlebin/singlebin_g_prd.dat" u 1:($2**2)   w l lt 1 lw 2    t "Global, theory", \
-    "../../data/singlebin/singlebin_l_err.dat" u 1:2 every 2 w p pt 7 ps 2.5  t "Local, simulation", \
-    "../../data/singlebin/singlebin_l_prd.dat" u 1:($2**2)   w l lt 2 lw 2    t "Local, theory"
+    "../../data/invt/singlebin/singlebin_g_err.dat" u 1:2 every 2 w p pt 5 ps 2.5  t "Global, simulation", \
+    "../../data/invt/singlebin/singlebin_g_prd.dat" u 1:($2**2)   w l lt 1 lw 2    t "Global, theory", \
+    "../../data/invt/singlebin/singlebin_l_err.dat" u 1:2 every 2 w p pt 7 ps 2.5  t "Local, simulation", \
+    "../../data/invt/singlebin/singlebin_l_prd.dat" u 1:($2**2)   w l lt 2 lw 2    t "Local, theory"
 
 unset output
 set terminal pop

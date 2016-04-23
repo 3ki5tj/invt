@@ -28,9 +28,9 @@ set xlabel "Width, {/Symbol-Oblique s}" offset 0, 0.5
 set xrange [0:12]
 
 set logscale y
-set format y "10^{%T}"
+set format y "10^{/*0.7 %T}"
 #set ytics 1e3
-#set format y "%.0t{/Symbol \264}10^{%T}"
+#set format y "%.0t{/Symbol \264}10^{/*0.7 %T}"
 #set mytics 2
 set ylabel "Normalized error, ({/Times-Italic T} + {/Times-Italic t}_{0}) {/Times-Italic E}"
 
@@ -62,9 +62,6 @@ set key Left reverse width -7.5 spacing 1.0 font "Times, 20"
 
 unset xlabel
 set format x ""
-
-#set logscale y
-#set format y "10^{%T}"
 
 set title "Global"
 

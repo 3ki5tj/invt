@@ -13,12 +13,12 @@ set terminal postscript eps enhanced dl 4.0 size 5, 3.5 font "Times, 32"
 set output "gamcmp.eps"
 
 set logscale x
-set format x "10^{%T}"
+set format x "10^{/*0.7 %T}"
 set xtics 100 offset 0, 0.2
 set xlabel "{/Symbol G}^{&{i}one{/*0.7 -}step}"
 
 set logscale y
-set format y "10^{%T}"
+set format y "10^{/*0.7 %T}"
 set ylabel "{/Symbol G}^{&{i}MD}"
 
 #set key Left reverse width -2 spacing 1.8
