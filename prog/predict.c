@@ -94,7 +94,7 @@ static void invt_geterr(invtpar_t *m,
       c0, t0, err0, err0 * err0,
       m->c, err1, err1 * err1,
       qT, inita, err2, err2 * err2, m->fnalpha);
-  
+
   if ( m->fnxerr[0] != '\0' ) {
     intq_errcomp(intq, m->alpha0, qT, xerrf, xerrf_r, xerrf_a);
     save_xerr(m, m->fnxerr, xerri, xerrf, xerrf_r, xerrf_a,

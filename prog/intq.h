@@ -57,7 +57,7 @@ static void intq_close(intq_t *intq)
 
 
 /* compute the integrand for `intq` */
-static double intq_getvel(intq_t *intq, double dq)
+static double intq_getmass(intq_t *intq, double dq)
 {
   int i, n = intq->n;
   double lam, y = 0;
@@ -84,11 +84,11 @@ static void intq_getq(intq_t *intq, double qT)
   dq = qT / m;
   intq->tarr[0] = 0;
   intq->qarr[0] = 0;
-  y = intq_getvel(intq, intq->qarr[0] - qT);
+  y = intq_getmass(intq, intq->qarr[0] - qT);
   for ( j = 1; j <= m; j++ ) {
     intq->qarr[j] = j * dq;
     intq->tarr[j] = intq->tarr[j - 1] + y * 0.5 * dq;
-    y = intq_getvel(intq, intq->qarr[j] - qT);
+    y = intq_getmass(intq, intq->qarr[j] - qT);
     intq->tarr[j] += y * 0.5 * dq;
   }
 
@@ -177,15 +177,15 @@ static double intq_asymerr(intq_t *intq, double qT)
   /* compute the error */
   err = 0;
   for ( j = 0; j <= m; j++ ) {
-    y = intq_getvel(intq, intq->qarr[j] - qT) * intq->aarr[j];
+    y = intq_getmass(intq, intq->qarr[j] - qT) * intq->aarr[j];
     if ( j == 0 ) {
-      dt = intq->tarr[1] - intq->tarr[0];
+      dt = 0.5 * (intq->tarr[1] - intq->tarr[0]);
     } else if ( j == m ) {
-      dt = intq->tarr[m] - intq->tarr[m - 1];
+      dt = 0.5 * (intq->tarr[m] - intq->tarr[m - 1]);
     } else {
-      dt = intq->tarr[j+1] - intq->tarr[j-1];
+      dt = 0.5 * (intq->tarr[j+1] - intq->tarr[j-1]);
     }
-    err += y * y * 0.5 * dt;
+    err += y * y * dt;
   }
 
   intq->Ea = err;
@@ -217,7 +217,7 @@ static double intq_errcomp(intq_t *intq, double a0,
 {
   int i, j, m = intq->m;
   double err_r, err_a, err;
-  double y, dq, dt, errtot = 0, lam, gam;
+  double a, y, dq, dt, errtot = 0, lam, gam;
 
   /* loop over modes, starting from mode 1
    * since mode 0 is always zero */
@@ -232,15 +232,16 @@ static double intq_errcomp(intq_t *intq, double a0,
     err_a = 0;
     for ( j = 0; j <= m; j++ ) {
       dq = intq->qarr[j] - qT;
-      y = gam * lam * lam * exp( 2 * lam * dq ) * intq->aarr[j];
+      a = intq->aarr[j];
+      y = gam * lam * lam * exp( 2 * lam * dq ) * a * a;
       if ( j == 0 ) {
-        dt = intq->tarr[1] - intq->tarr[0];
+        dt = 0.5 * (intq->tarr[1] - intq->tarr[0]);
       } else if ( j == m ) {
-        dt = intq->tarr[m] - intq->tarr[m - 1];
+        dt = 0.5 * (intq->tarr[m] - intq->tarr[m - 1]);
       } else {
-        dt = intq->tarr[j+1] - intq->tarr[j-1];
+        dt = 0.5 * (intq->tarr[j+1] - intq->tarr[j-1]);
       }
-      err_a += y * y * 0.5 * dt;
+      err_a += y * dt;
     }
 
     err = err_r + err_a;
@@ -280,6 +281,44 @@ static double intq_geterr(intq_t *intq, double a0,
   //fprintf(stderr, "a0 %g, qT %g, Er %g Ea %g, E %g\n", a0, qT, intq->Er, intq->Ea, intq->E); getchar();
 
   return sqrt( intq->E );
+}
+
+
+
+/* evaulate
+ *   mint = Integrate M(Q) dQ,
+ * where
+ *   M(Q) = sqrt{ Sum_k Gamma_k lambda_k^2 e^{-2 lambda_k Q} }.
+ * Ea should be equal to mint^2 / T.
+ * */
+__inline static double intq_getmint(intq_t *intq, double qT)
+{
+  double dq, q, lambda, gamma, xp, y, mint, mass;
+  int i, k, m = intq->m;
+
+  dq = qT / m;
+  mint = 0;
+
+  /* compute Int M(Q) dQ */
+  for ( i = 0; i <= m; i++ ) {
+    q = i * dq;
+    y = 0;
+    for ( k = 0; k < intq->n; k++ ) {
+      gamma = intq->gamma[k];
+      lambda = intq->lambda[k];
+      xp = exp(-2 * lambda * q);
+      y += gamma * lambda * lambda * xp;
+    }
+    mass = sqrt( y );
+    if ( i == 0 || i == m ) {
+      mint += mass * dq * 0.5;
+    } else {
+      mint += mass * dq;
+    }
+  }
+
+  //printf("qT %g, f %g, mass %g, df %g, y %g\n", qT, f, mass, *df, y);
+  return mint;
 }
 
 
