@@ -2,7 +2,7 @@
 
 
 
-# Error components for the Gaussian updating scheme
+# Normalized error vs the width of the Gaussian updating scheme
 
 
 
@@ -28,7 +28,7 @@ set xtics 5 offset 0, 0.3
 set mxtics 5
 #set xlabel "{/Symbol-Oblique s} (Gaussian) or {/Times-Italic n}/{/Times-Italic K}/{/Symbol \326}(2{/Symbol-Italic p}) (Bandpass)" offset 0, 0.5
 set xlabel "Eigenmode" offset 0, 0.7
-set xrange [0:17]
+set xrange [0:18]
 
 set logscale y
 set format y "10^{/*0.7 %T}"
@@ -44,7 +44,7 @@ set title "Global" offset 0, -0.5
 
 set key at screen 0.19, 0.1 Left reverse samplen 1.5 width -4 maxrows 1
 
-plot [:][1e-10:1e-4] \
+plot [:][1e-11:1e-4] \
     "../../data/xerr/xerr_t1e8_g.dat"   u 1:($2) w lp lt 1 lw 1 pt 12                  t "Initial", \
     "../../data/xerr/xerr_t1e8_g.dat"   u 1:($3) w lp lt 1 lw 1 pt 13 lc rgb "#bbbbbb" notitle, \
     "../../data/xerr/xerr_t1e9_g.dat"   u 1:($3) w lp lt 1 lw 1 pt 13 lc rgb "#555555" notitle, \
@@ -66,7 +66,7 @@ set title "Local"
 
 set key at screen 0.98, 0.1 Left reverse samplen 1.5 width -2 maxrows 1
 
-plot [:][1e-9:1] \
+plot [:][1e-10:1] \
     "../../data/xerr/xerr_t1e8_l.dat"   u 1:($2) w lp lt 1 lw 1 pt 12                  notitle, \
     "../../data/xerr/xerr_t1e8_l.dat"   u 1:($3) w lp lt 1 lw 1 pt 13 lc rgb "#bbbbbb" t "{/Times-Italic T} = 10^{/*0.7 8}", \
     "../../data/xerr/xerr_t1e9_l.dat"   u 1:($3) w lp lt 1 lw 1 pt 13 lc rgb "#555555" t "{/Times-Italic T} = 10^{/*0.7 9}", \
