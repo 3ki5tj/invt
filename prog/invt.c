@@ -266,7 +266,7 @@ static double invt_run(invtpar_t *m)
     savewinmat(m->winn, m->win, m->n, m->pbc, m->fnwinmat);
   }
 
-  /* estimate the integrals of correlations
+  /* estimate the integrals of the autocorrelation functions
    * of the eigenmodes for the updating scheme */
   gamma = estgamma(m->n, m->sampmethod, m->pbc, m->localg);
 

@@ -39,6 +39,13 @@ ikdel = 1
 ikmax = 12
 ikconst = 100 / math.sqrt(2 * math.pi)  # n / sqrt(2 * pi)
 
+# parameters for the initial updating magnitude scan
+iascan = 0
+iamin = 5e-7
+iamax = 2e-2
+iadel = 0.2
+
+
 def usage():
   ''' print usage and die '''
 
@@ -53,6 +60,7 @@ def usage():
     --sig=sigmin:sigdel:sigmax  set the range of width sigma for the Gaussian updating scheme
     --ok=okmin:okdel:okmax      set the range of the cutoff K for the bandpass (sinc) updating scheme
     --ik=ikmin:ikdel:ikmax      set the range of 1/K for the bandpass (sinc) updating scheme
+    --ia=iamin:iadel:iamax      set the range of the initial updating magnitude, increase by a factor of 10^iadel
     --ikC                       set the constant of proportionality of the above scan
     -o                          set the output file
     --opt=                      set options to be passed to the command line
@@ -73,6 +81,7 @@ def doargs():
           "ok=", "okmax=", "K=",
           "ik=", "invok=", "iK=", "invK=",
           "ikC=", "iKC=",
+          "ia=", "inita=",
           "output=", "opt=",
           "prd=", "predict=",
           "help", "verbose=",
@@ -85,6 +94,7 @@ def doargs():
   global sigscan, sigmin, sigdel, sigmax
   global okscan, okmin, okdel, okmax
   global ikscan, ikmin, ikdel, ikmax, ikconst
+  global iascan, iamin, iadel, iamax
 
   for o, a in opts:
     if o in ("--sig",):
@@ -107,6 +117,12 @@ def doargs():
       ikscan = 1
     elif o in ("--ikC", "--iKC"):
       ikC = float(a)
+    elif o in ("--ia", "--inita",):
+      iaarr = a.split(':')
+      iamin = float( iaarr[0] )
+      iadel = float( iaarr[1] )
+      iamax = float( iaarr[2] )
+      iascan = 1
     elif o in ("-v",):
       verbose += 1  # such that -vv gives verbose = 2
     elif o in ("--verbose",):
@@ -214,6 +230,15 @@ def scan():
     srange = "ik=%s:%s:%s" % (ikmin, ikdel, ikmax)
     varname = "inverse bandpass cutoff K"
 
+  elif iascan:
+    ia = iamin
+    iafac = 10.0 ** iadel
+    while ia < iamax * iafac:
+      cval += [ ia, ]
+      ia *= iafac
+    srange = "ia=%s:%s:%s" % (iamin, iadel, iamax)
+    varname = "initial updating magnitude, alpha(0)"
+
   else:
     raise
 
@@ -242,6 +267,8 @@ def scan():
       cmd = "%s --sig=%s" % (cmd0, c)
     elif okscan or ikscan:
       cmd = "%s --okmax=%s" % (cmd0, c)
+    elif iascan:
+      cmd = "%s --opta --inita=%s" % (cmd0, c)
     else:
       raise
 

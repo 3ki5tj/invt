@@ -146,10 +146,51 @@ static void invt_scanc(invtpar_t *m,
     errf = esterror_eql(c / (t0 + T), m->n, NULL,
         lambda, gamma);
 
-    printf("%8.5f\t%10.6f\t%10.6f\t%10.6f\t%10.6f\n",
+    printf("%8.5f\t%14.10f\t%14.10f\t%14.10f\t%10.6f\n",
         c, err, erri, errf, err2);
   }
 
+  free(lambda);
+}
+
+
+
+/* scanning the initial updating magntidue */
+static void invt_scania(invtpar_t *m,
+    const double *gamma)
+{
+  double T, qT;
+  double inita, iafac;
+  double err, erri;
+  double *lambda;
+  intq_t *intq;
+
+  T = (double) m->nsteps;
+
+  /* compute the eigenvalues of the updating matrix */
+  lambda = geteigvals(m->n, m->winn, m->win, m->pbc,
+      0, NULL, 1);
+
+  /* initial equilibrium error */
+  erri = esterror_eql(m->alpha0, m->n, NULL,
+      lambda, gamma);
+
+  intq = intq_open(T, m->alpha_nint, m->n, lambda, gamma);
+
+  /* print out a header */
+  printf("# inita \t  final error\t  init. error\t   qT\n");
+
+  iafac = pow(10.0, m->iadel);
+  for ( inita = m->iamin; inita < m->iamax * iafac; inita *= iafac ) {
+    /* compute the exact minimal error  */
+    qT = intq_optqT(intq, inita, m->qprec, m->verbose);
+    err = intq_geterr(intq, m->alpha0, qT);
+
+    printf("%14.6e\t%14.10f\t%14.10f\t%14.6e\n",
+        inita, err, erri, qT);
+  }
+
+  intq_close(intq);
   free(lambda);
 }
 
@@ -312,12 +353,20 @@ int main(int argc, char **argv)
     }
   }
 
-  if ( !m->cscan && !m->nbscan && !m->sigscan && !m->okscan ) {
+  if ( !m->cscan
+    && !m->iascan
+    && !m->nbscan
+    && !m->sigscan
+    && !m->okscan ) {
     invt_geterr(m, gamma);
   }
 
   if ( m->cscan ) {
     invt_scanc(m, gamma);
+  }
+
+  if ( m->iascan ) {
+    invt_scania(m, gamma);
   }
 
   if ( m->nbscan ) {

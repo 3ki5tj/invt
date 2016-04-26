@@ -84,6 +84,11 @@ typedef struct {
   double cdel;
   double cmax;
 
+  int iascan;
+  double iamin;
+  double iadel; /* ia is multiplied by 10^iadel each step */
+  double iamax;
+
   int nbscan;
   double nbmin;
   double nbdel;
@@ -201,6 +206,11 @@ static void invtpar_init(invtpar_t *m)
   m->cmin = 0.1;
   m->cdel = 0.01;
   m->cmax = 5.0;
+
+  m->iascan = 0;
+  m->iamin = 5e-7;
+  m->iadel = 0.2;
+  m->iamax = 1e-2;
 
   m->nbscan = 0;
   m->nbmin = 0.0;
@@ -459,6 +469,9 @@ static void invtpar_help(const invtpar_t *m)
   fprintf(stderr, "  --cmin=:       set the minimal c in c-scan, default %g\n", m->cmin);
   fprintf(stderr, "  --cmax=:       set the maximal c in c-scan, default %g\n", m->cmax);
   fprintf(stderr, "  --dc=:         set the increment of c in c-scan, default %g\n", m->cdel);
+  fprintf(stderr, "  --iamin=:      set the minimal initial updating magnitude in ia-scan, default %g\n", m->iamin);
+  fprintf(stderr, "  --iamax=:      set the maximal initial updating magnitude in ia-scan, default %g\n", m->iamax);
+  fprintf(stderr, "  --dia=:        set the increment of initial updating magnitude in ia-scan, default %g\n", m->iadel);
   fprintf(stderr, "  --nbmin=:      set the minimal nearest-neighbor updating magnitude nb in nb-scan, default %g\n", m->nbmin);
   fprintf(stderr, "  --nbmax=:      set the maximal nearest-neighbor updating magnitude nb in nb-scan, default %g\n", m->nbmax);
   fprintf(stderr, "  --dnb=:        set the increment of nb in nb-scan, default %g\n", m->nbdel);
@@ -878,6 +891,23 @@ static int invtpar_keymatch(invtpar_t *m,
     m->cmax = invtpar_getdouble(m, key, val);
     m->cscan = 1;
   }
+  /* ia-scan (initial updating magnitude) parameter */
+  else if ( strcmpfuzzy(key, "iamin") == 0 )
+  {
+    m->iamin = invtpar_getdouble(m, key, val);
+    m->iascan = 1;
+  }
+  else if ( strcmpfuzzy(key, "iadel") == 0
+         || strcmpfuzzy(key, "dia") == 0 )
+  {
+    m->iadel = invtpar_getdouble(m, key, val);
+    m->iascan = 1;
+  }
+  else if ( strcmpfuzzy(key, "iamax") == 0 )
+  {
+    m->iamax = invtpar_getdouble(m, key, val);
+    m->iascan = 1;
+  }
   /* nb-scan parameters */
   else if ( strcmpfuzzy(key, "nbmin") == 0 )
   {
@@ -1107,6 +1137,11 @@ static void invtpar_dump(const invtpar_t *m)
   if ( m->cscan ) {
     fprintf(stderr, "c-scan window: %g:%g:%g\n",
         m->cmin, m->cdel, m->cmax);
+  }
+
+  if ( m->iascan ) {
+    fprintf(stderr, "ia-scan window: %g:%g:%g\n",
+        m->iamin, m->iadel, m->iamax);
   }
 
   if ( m->nbscan ) {
