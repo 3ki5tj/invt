@@ -29,7 +29,7 @@ set key at 5e-3, 1.95 Left reverse
 a0 = 0.0001
 fac = 2*100/sqrt(2*pi)
 
-emin_g = 0.0005192 ** 2 
+emin_g = 0.0005192 ** 2
 emin_l = 0.009561 ** 2
 
 plot [:][0.8:2] \

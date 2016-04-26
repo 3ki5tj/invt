@@ -3456,11 +3456,11 @@ for the respective $\Gamma_k$'s.
 
 
 \subsection{\label{sec:results_invt}
-Inverse-time schedule}
+Modified inverse-time schedule}
 
 
 We tested the theory of computing errors
-on the simple inverse-time schedule,
+on the modified inverse-time schedule,
 %
 \begin{equation}
 \alpha(t) = \frac{1}{\lambda \, (t + t_0) },
@@ -3584,22 +3584,33 @@ and dependent on the sampling process.
 
 
 For the Gaussian updating scheme,
-we listed the from different schedules.
+we listed the errors from different schedules,
+in Table \ref{tab:error_Gaussian}.
+%
+Clearly,
+the optimal schedules yielded the smallest errors.
 
 \begin{table}[h]
   \caption{\label{tab:error_Gaussian}
-    Error of the Gaussian updating scheme of $\sig = 10$.
+    Error of the Gaussian updating scheme of $\sigma = 10$.
     $t_0$ is given by Eq. \eqref{eq:t0_sinc}.
+    \note{ Use the simulation data.  }%
   }
-  \begin{tabular} { l l l }
+  \setlength{\tabcolsep}{5pt}
+  \begin{tabular} { l | p{2cm} p{2.5cm} p{1.8cm} }
+    \hline
+      Schedule
     &
-    Eq. \eqref{eq:alpha_invt1}
+      Inverse-time, Eq. \eqref{eq:alpha_invt1}
     &
-    Eq. \eqref{eq:alpha_invtlambda}
-    with optimal $\lambda$
+      Modified inverse-time,
+      Eq.~\eqref{eq:alpha_invtlambda} 
+      with optimized $\lambda$
     &
-    Optimal
+      Optimal,
+      Eq. \eqref{eq:q_opt}
     \\
+    \hline
     Global
     &
     $4.2 \times 10^{-6}$
@@ -3608,6 +3619,7 @@ we listed the from different schedules.
     &
     $2.7 \times 10^{-7}$
     \\
+    \hline
     Local
     &
     $3.7 \times 10^{-4}$
@@ -3615,8 +3627,51 @@ we listed the from different schedules.
     $1.7 \times 10^{-4}$
     &
     $9.1 \times 10^{-5}$
+    \\
+    \hline
   \end{tabular}
 \end{table}
+
+
+To verify Eq. \eqref{eq:half_alpha0},
+we computed the optimal schedules
+for different values of $q(T)$,
+and plotted the final error
+against the initial updating magnitude, $\alpha(0)$.
+%
+As shown in Fig. \ref{fig:erriascan},
+The minimal error is reached at
+$\alpha(0) = \alpha/2 = 5 \times 10^{-5}$.
+
+
+\begin{figure}[h]
+\begin{center}
+  \makebox[\linewidth][c]{
+    \includegraphics[angle=0, width=1.0\linewidth]{fig/erriascan.pdf}
+  }
+  \caption{
+    \label{fig:erriascan}
+    Relative error
+    versus the initial updating magnitude, $\alpha(0)$,
+    for optimal schedules with different $q(T)$.
+    Assuming the Gaussian updating scheme
+    with $\sigma = 10$,
+    and $\alpha_0 = 10^{-4}$.
+    %
+    The points were obtained from averaging results
+    from 1000 independent simulations;
+    the curves are theoretical predictions.
+    %
+    \note{This figure was produced by
+      \texttt{doc/fig/erriascan.gp}.
+      The data were saved under
+      \texttt{data/iascan}.
+    }%
+  }
+\end{center}
+\end{figure}
+
+
 
 
 
