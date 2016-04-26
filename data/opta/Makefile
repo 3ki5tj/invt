@@ -1,4 +1,4 @@
-all: wl nb sig sinc
+all: sig sigK
 
 prog=../../prog/predict
 
@@ -31,6 +31,14 @@ sig: compile $(fnmdgam)
 	$(prog) --sig=10 --samp=g                        --nint=10000           --nsteps=50000000 --a0=2e-4 --fnalpha=sig10_g_t5e7_alpha_q.dat
 	$(prog) --sig=10 --samp=l                        --nint=10000           --nsteps=50000000 --a0=2e-4 --fnalpha=sig10_l_t5e7_alpha_q.dat
 	$(prog) --sig=10 --samp=md --fngamma=$(fnmdgam)  --nint=10000           --nsteps=50000000 --a0=2e-4 --fnalpha=sig10_md_t5e7_alpha_q.dat
+
+sigK: compile $(fnmdgam)
+	$(prog) --sig=10 --kcutoff=4 --samp=g                        --nint=10000 --aresamp                 --fnalpha=sig10k4_g_alpha.dat
+	$(prog) --sig=10 --kcutoff=4 --samp=l                        --nint=10000 --aresamp                 --fnalpha=sig10k4_l_alpha.dat
+	$(prog) --sig=10 --kcutoff=4 --samp=md --fngamma=$(fnmdgam)  --nint=10000 --aresamp                 --fnalpha=sig10k4_md_alpha.dat
+	$(prog) --sig=10 --kcutoff=4 --samp=g                        --nint=10000                           --fnalpha=sig10k4_g_alpha_q.dat
+	$(prog) --sig=10 --kcutoff=4 --samp=l                        --nint=10000                           --fnalpha=sig10k4_l_alpha_q.dat
+	$(prog) --sig=10 --kcutoff=4 --samp=md --fngamma=$(fnmdgam)  --nint=10000                           --fnalpha=sig10k4_md_alpha_q.dat
 
 sinc: compile
 	$(prog) --okmax=4 --samp=g                       --nint=10000 --aresamp                             --fnalpha=sinc_g_alpha.dat

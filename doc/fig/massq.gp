@@ -46,8 +46,8 @@ set samples 2000
 
 plot [0:xmax][0:1.1] \
     (x >= x1 && x <= qT ? f(x) : 1/0) w filledcu x1 lc rgb "#cccccc" notitle, \
-    f(x) lt 4 lw 1 lc rgb "#888888" notitle, \
-    (x <= qT ? f(x) : 1/0) lt 1 lw 5 notitle, \
+    f(x)                   lt 4 lw 4 lc rgb "#888888" notitle, \
+    (x <= qT ? f(x) : 1/0) lt 1 lw 4 notitle, \
     -1 notitle
 
 # make the xtics on top of the plot

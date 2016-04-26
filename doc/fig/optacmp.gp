@@ -31,7 +31,7 @@ set logscale x
 set format x "10^{/*0.8 %T}"
 set mxtics 10
 set xrange [1e4:1e8]
-set xlabel "Shifted simulation time, {/Times-Italic t} + 2/{/Symbol-Oblique a}_{/*0.8 0}"
+set xlabel "Shifted simulation time, {/Times-Italic t} + {/Times-Italic t}_{/*0.8 0}"
 
 set logscale y
 set format y "10^{/*0.8 %T}"
@@ -40,16 +40,17 @@ set yrange [3e-9:1e-4]
 set ylabel "{/Symbol-Oblique a} ({/Times-Italic t})"
 
 
-set key at 4e7, 2e-7 Left reverse font "Times, 22"
+set key at 4.5e7, 14e-7 Left reverse font "Times, 22" spacing 1.2
 
 alpha0 = 1e-4
 t0 = 2 / alpha0
 
 plot [:][:] \
-    "../../data/opta/sig10_g_alpha_q.dat"      u ($1+t0):($2) w l lt 1 lw 5 lc rgb "#000000"    t "Gaussian, global", \
-    "../../data/opta/sig10_l_alpha_q.dat"      u ($1+t0):($2) w l lt 1 lw 2 lc rgb "#000000"    t "Gaussian, local", \
-    "../../data/opta/sinc_g_alpha_q.dat"       u ($1+t0):($2) w l lt 2 lw 7 lc rgb "#000000"    t "Bandpass, global", \
-    "../../data/opta/sinc_l_alpha_q.dat"       u ($1+t0):($2) w l lt 4 lw 2 lc rgb "#888888"    t "Bandpass, local", \
+    "../../data/opta/sig10_g_alpha_q.dat"      u ($1+t0):($2) w l lt 1 lw 5 lc rgb "#000000"    t "Global", \
+    "../../data/opta/sig10_l_alpha_q.dat"      u ($1+t0):($2) w l lt 1 lw 2 lc rgb "#000000"    t "Local", \
+    "../../data/opta/sig10k4_g_alpha_q.dat"    u ($1+t0):($2) w l lt 2 lw 5 lc rgb "#000000"    t "Global, modified", \
+    "../../data/opta/sig10k4_l_alpha_q.dat"    u ($1+t0):($2) w l lt 2 lw 2 lc rgb "#000000"    t "Local, modified", \
+    1/x lc rgb "#606060" t "1 / ( {/Times-Italic t} + {/Times-Italic t}_{/*0.8 0 })", \
     -1 notitle
 
 

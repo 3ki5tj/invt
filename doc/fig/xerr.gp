@@ -26,8 +26,7 @@ set bmargin 5
 
 set xtics 5 offset 0, 0.3
 set mxtics 5
-#set xlabel "{/Symbol-Oblique s} (Gaussian) or {/Times-Italic n}/{/Times-Italic K}/{/Symbol \326}(2{/Symbol-Italic p}) (Bandpass)" offset 0, 0.5
-set xlabel "Eigenmode" offset 0, 0.7
+set xlabel "Eigenmode, {/Times-Italic K}" offset 0, 0.7
 set xrange [0:17]
 
 set logscale y
@@ -42,15 +41,12 @@ fac = 2*100/sqrt(2*pi)
 
 set title "Global" offset 0, -0.5
 
-set key at screen 0.19, 0.1 Left reverse samplen 1.5 width -4 maxrows 1
+set key at screen 0.22, 0.1 Left reverse samplen 3.0 width -4 maxrows 1
 
-plot [:][1e-11:1e-4] \
-    "../../data/xerr/xerr_sig10_t1e8_g.dat"   u 1:($2) w lp lt 1 lw 1 pt 12                  t "Initial", \
-    "../../data/xerr/xerr_sig10_t1e8_g.dat"   u 1:($3) w lp lt 1 lw 1 pt 13 lc rgb "#808080" notitle, \
-    "../../data/xerr/xerr_sig10_t1e10_g.dat"  u 1:($3) w lp lt 1 lw 1 pt 13                  notitle, \
-    "../../data/xerr/xerr_sinc_t1e8_g.dat"    u 1:($2) w lp lt 4 lw 1 pt  4 ps 0.8                  t "Initial", \
-    "../../data/xerr/xerr_sinc_t1e8_g.dat"    u 1:($3) w lp lt 4 lw 1 pt  5 ps 0.8 lc rgb "#808080" notitle, \
-    "../../data/xerr/xerr_sinc_t1e10_g.dat"   u 1:($3) w lp lt 4 lw 1 pt  5 ps 0.8                  notitle, \
+plot [:][1e-9:1e-4] \
+    "../../data/xerr/xerr_sig10_t1e8_g.dat"     u 1:($2) w lp lt 1 lw 1 pt 12 ps 1.4 t "Initial", \
+    "../../data/xerr/xerr_sig10_t1e8_g.dat"     u 1:($3) w lp lt 1 lw 1 pt 13 ps 1.4 notitle, \
+    "../../data/xerr/xerr_sig10invt_t1e8_g.dat" u 1:($3) w lp lt 4 lw 1 pt  5 lc rgb "#808080" notitle, \
     -1 notitle
 
 
@@ -66,16 +62,14 @@ unset ylabel
 
 set title "Local"
 
-set key at screen 0.98, 0.1 Left reverse samplen 1.5 width -2 maxrows 1
+set key at screen 0.98, 0.1 Left reverse samplen 3.0 width -2 maxrows 1
 
-plot [:][1e-9:1] \
-    "../../data/xerr/xerr_sig10_t1e8_l.dat"   u 1:($2) w lp lt 1 lw 1 pt 12                  notitle, \
-    "../../data/xerr/xerr_sig10_t1e8_l.dat"   u 1:($3) w lp lt 1 lw 1 pt 13 lc rgb "#808080" t "{/Times-Italic T} = 10^{/*0.8 8}", \
-    "../../data/xerr/xerr_sig10_t1e10_l.dat"  u 1:($3) w lp lt 1 lw 1 pt 13                  t "{/Times-Italic T} = 10^{/*0.8 10}", \
-    "../../data/xerr/xerr_sinc_t1e8_l.dat"    u 1:($2) w lp lt 4 lw 1 pt  4 ps 0.8                  notitle, \
-    "../../data/xerr/xerr_sinc_t1e8_l.dat"    u 1:($3) w lp lt 4 lw 1 pt  5 ps 0.8 lc rgb "#808080" notitle, \
-    "../../data/xerr/xerr_sinc_t1e10_l.dat"   u 1:($3) w lp lt 4 lw 1 pt  5 ps 0.8                  notitle, \
+plot [:][1e-7:1] \
+    "../../data/xerr/xerr_sig10_t1e8_l.dat"     u 1:($2) w lp lt 1 lw 1 pt 12 ps 1.4 notitle, \
+    "../../data/xerr/xerr_sig10_t1e8_l.dat"     u 1:($3) w lp lt 1 lw 1 pt 13 ps 1.4 t "Optimal", \
+    "../../data/xerr/xerr_sig10invt_t1e8_l.dat" u 1:($3) w lp lt 4 lw 1 pt  5 lc rgb "#808080" t "Eq. (21)", \
     -1 notitle
+
 
 
 unset multiplot

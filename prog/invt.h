@@ -454,15 +454,14 @@ static double esterror_eql(double alpha, int n, double *xerr,
  * are given by the equilibirium ones at alpha0,
  * and the default t0 = 2 / alpha0.
  * */
-static double esterror_invt1(double T, double c, double alpha0,
-    double t0, double lambda, double gamma)
+static double esterror_invt1(double T, double c, double a0,
+    double t0, double *ea, double *er,
+    double lambda, double gamma)
 {
   const double tol = 1e-7;
-  double f, y, r, errsat, ea, er; /* errsat: saturated error */
+  double f, y, r, errsat; /* errsat: saturated error */
 
   r = lambda * c;
-
-  if ( t0 <= 0 ) t0 = 2 / alpha0;
 
   if ( lambda < 0 ) lambda = 0;
 
@@ -475,12 +474,12 @@ static double esterror_invt1(double T, double c, double alpha0,
   y = pow(f, r * 2 - 1);
   errsat = gamma * r / (T + t0);
 
-  er = 0.5 * alpha0 * gamma * lambda * f * y;
-  ea = errsat * r / (r * 2 - 1) * (1 - y);
+  *er = 0.5 * a0 * gamma * lambda * f * y;
+  *ea = errsat * r / (r * 2 - 1) * (1 - y);
   //fprintf(stderr, "error %g vs %g\n", er + ea, errsat * (r + (r - 1) * pow(t0 / (T + t0), 2 * r - 1) ) / (r * 2 - 1)); getchar();
   //fprintf(stderr, "r %g, 2*r-1 %g, errsat %g\n", r, 2*r - 1, errsat);
   //return errsat * (r + (r - 1) * pow(t0 / (T + t0), 2 * r - 1) ) / (r * 2 - 1);
-  return er + ea;
+  return *er + *ea;
 }
 
 
@@ -490,24 +489,45 @@ static double esterror_invt1(double T, double c, double alpha0,
  * according to the analytical prediction
  *
  * currently, assuming initial values of < x^2 >
- * are given by the equilibrium ones at alpha0,
+ * are given by the equilibrium ones at a0,
  * */
-static double esterror_invt(double T, double c, double a0,
-    double t0, int n, double *xerr,
+#define esterror_invt(T, c, a0, t0, n, xerr, lambda, gamma) \
+    esterror_invt_x(T, c, a0, t0, n, NULL, NULL, \
+        xerr, NULL, NULL, lambda, gamma)
+
+static double esterror_invt_x(double T, double c, double a0,
+    double t0, int n, double *errr, double *erra,
+    double *xerr, double *xerrr, double *xerra,
     const double *lambda, const double *gamma)
 {
   int i;
-  double x, err = 0;
+  double x, xr, xa, E = 0, Er = 0, Ea = 0;
+
+  if ( t0 <= 0 ) t0 = 2 / a0;
 
   for ( i = 1; i < n; i++ ) {
-    x = esterror_invt1(T, c, a0, t0, lambda[i], gamma[i]);
+    x = esterror_invt1(T, c, a0, t0, &xr, &xa, lambda[i], gamma[i]);
     if ( xerr != NULL ) {
       xerr[i] = x;
     }
-    err += x;
+    if ( xerrr != NULL ) {
+      xerrr[i] = xr;
+    }
+    if ( xerra != NULL ) {
+      xerra[i] = xa;
+    }
+    E += x;
+    Er += xr;
+    Ea += xa;
   }
 
-  return sqrt( err );
+  if ( errr != NULL ) {
+    *errr = sqrt( Er );
+  }
+  if ( erra != NULL ) {
+    *erra = sqrt( Ea );
+  }
+  return sqrt( E );
 }
 
 

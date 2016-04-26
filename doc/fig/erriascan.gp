@@ -24,7 +24,7 @@ set ytics 0.5 offset 0.3, 0
 set mytics 5
 set ylabel "Relative error, {/Times-Italic E} / {/Times-Italic E}{/*0.6 min}" offset 2.5, 0.0
 
-set key at 5e-3, 1.95 Left reverse
+set key at 4e-3, 1.95 Left reverse
 
 a0 = 0.0001
 fac = 2*100/sqrt(2*pi)
@@ -41,7 +41,7 @@ plot [:][0.8:2] \
 
 
 # phantom plot for the legend
-set key at 2e-4, 1.95
+set key at 1.6e-4, 1.95
 plot [:][0.8:2] \
     -1 w p pt 13 ps 1.4 t " ", \
     -1 w p pt 12 ps 1.4 t " "

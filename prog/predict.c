@@ -42,7 +42,7 @@ static void invt_geterr(invtpar_t *m,
     const double *gamma)
 {
   int n = m->n;
-  double T, c0, t0, qT, inita, err0, err1, err2;
+  double T, c0, c1, t0, qT, inita, err0, err1, err2;
   double *lambda;
   double *xerri, *xerrf, *xerrf_r, *xerrf_a;
   intq_t *intq;
@@ -75,10 +75,11 @@ static void invt_geterr(invtpar_t *m,
 
   /* compute the optimal c and the error
    * for the inverse-time formula */
-  m->c = estbestc_invt(T, m->alpha0, 0, m->n, lambda, gamma,
+  c1 = estbestc_invt(T, m->alpha0, 0, m->n, lambda, gamma,
       0, &err1, 0);
 
-  /* compute the exact minimal error under the same condition */
+  /* compute the minimal error from the optimal schedule
+   * under the same condition */
   qT = m->qT;
   err2 = esterror_opt(T, m->alpha0, m->initalpha, &qT, m->qprec,
       m->alpha_nint, &intq, m->n, m->kcutoff, m->pbc,
@@ -87,17 +88,24 @@ static void invt_geterr(invtpar_t *m,
 
   /* save the optimal schedule to file */
   t0 = 2 / m->alpha0;
-  intq_save(intq, m->c, t0, m->alpha_resample, m->fnalpha);
+  intq_save(intq, c1, t0, m->alpha_resample, m->fnalpha);
 
   printf("c %g, t0 %g, err %g, sqr %g (invt), "
          "opt. c %g, err %g, sqr %g (opt. invt), "
          "qT %g, a(0) %g, err %g, sqr %g (exact), %s\n",
       c0, t0, err0, err0 * err0,
-      m->c, err1, err1 * err1,
+      c1, err1, err1 * err1,
       qT, inita, err2, err2 * err2, m->fnalpha);
 
   if ( m->fnxerr[0] != '\0' ) {
-    intq_errcomp(intq, m->alpha0, qT, xerrf, xerrf_r, xerrf_a);
+    if ( m->opta ) {
+      /* optimal schedule */
+      intq_errcomp(intq, m->alpha0, qT, xerrf, xerrf_r, xerrf_a);
+    } else {
+      /* inverse-time schedule */
+      err0 = esterror_invt_x(T, m->c, m->alpha0, m->t0, m->n,
+          NULL, NULL, xerrf, xerrf_r, xerrf_a, lambda, gamma);
+    }
     save_xerr(m, m->fnxerr, xerri, xerrf, xerrf_r, xerrf_a,
         lambda, gamma, qT, inita);
   }

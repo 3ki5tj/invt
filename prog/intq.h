@@ -393,7 +393,7 @@ static double intq_optqTfunc(intq_t *intq,
 
   *df = mass + y / mass * intq->T * initalpha;
 
-  printf("qT %g, f %g, mass %g, df %g, y %g\n", qT, f, mass, *df, y);
+  //printf("qT %g, f %g, mass %g, df %g, y %g\n", qT, f, mass, *df, y);
   return f;
 }
 

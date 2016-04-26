@@ -367,7 +367,7 @@ coincide with the intended distribution $p_i$.
 
 Here we shall call a simulation that targets
 a nearly flat distribution\cite{
-dayal2004, trebst2004, singh2011},
+dayal2004, trebst2004, zhang2007, barducci2008, singh2011},
 $p_i$,
 a flat-distribution sampling (FDS) simulation.
 %
@@ -3391,19 +3391,23 @@ $p^*_i = p_i = 1/n$.
 Initially,
 we set the bias potential to zero,
 $V_i \equiv 0$,
-%
 and equilibrate the system for $10^7$ steps
 under a constant updating magnitude,
-$\alpha_0 = 10^{-4}$,
-unless specified otherwise.
+$\alpha_0 = 10^{-4}$.
 %
 After this,
 we reset the origin of the time, $t$,
-and start the testing schedule.
+and start the testing schedule
+for $T = 10^8$ steps.
+%
+We repeat the above process $1000$ times
+and average the results.
 %specified by either
 %Eq. \eqref{eq:q_opt}
 %or
 %Eq. \eqref{eq:alpha_invtlambda}.
+Unless specified otherwise,
+the above parameters were used.
 
 
 
@@ -3482,8 +3486,9 @@ We performed adaptive FDS simulations
 using the single-bin updating scheme
 and the triple-bin updating scheme with $\mu_1 = 0.24$.
 %
-For each value of $\lambda$, we ran $1000$ independent simulations
-of $10^8$ steps, and averaged the results.
+%For each value of $\lambda$,
+%we ran $1000$ independent simulations
+%of $10^8$ steps, and averaged the results.
 %
 As shown in Fig. \ref{fig:errinvt},
 the errors from the simulations
@@ -3498,8 +3503,8 @@ agreed well those from the theory.
   \caption{
     \label{fig:errinvt}
     Error $E$ versus $\lambda$
-    in Eq. \eqref{eq:alpha_invtlambda}
-    for the inverse-time schedule.
+    for the modified inverse-time schedule,
+    Eq. \eqref{eq:alpha_invtlambda}.
     %
     The points are results from averaging over $1000$ independent runs;
     the curves are theoretical predictions.
@@ -3545,50 +3550,45 @@ Optimal schedule}
 
 
 
-We computed the optimal schedule from Eq. \eqref{eq:q_opt}
-for the Gaussian (with $\sigma = 10$)
-and bandpass (with $K = 4$) updating schemes.
+To demonstrate the optimal schedule from Eq. \eqref{eq:q_opt},
+we used the Gaussian (with $\sigma = 10$) updating scheme
+as an example.
 %
-As shown in Fig. \ref{fig:optacmp},
-while the optimal schedules of the bandpass scheme
-were always given by the inverse-time formula,
-those of the Gaussian updating scheme was complex
-and dependent on the sampling process.
-
-
-\begin{figure}[h]
-\begin{center}
-  \makebox[\linewidth][c]{
-    \includegraphics[angle=0, width=0.95\linewidth]{fig/optacmp.pdf}
-  }
-  \caption{
-    \label{fig:optacmp}
-    Optimal schedules from Eq. \eqref{eq:q_opt},
-    versus the optimized inverse-time schedule
-    Eq. \eqref{eq:alpha_invtlambda}
-    for the Gaussian updating scheme
-    with $\sigma = 10$
-    and the local updating process.
-    %
-    \note{This figure was produced by \texttt{doc/fig/optacmp.gp}.
-      The data were computed by the program \texttt{prog/predict},
-      see particularly the function \texttt{intq\_save()}
-      in \texttt{prog/intq.h}.
-      The data were saved under the directory \texttt{data/opta}.
-      See the \texttt{make} object \texttt{sigsingle}
-      in the \texttt{Makefile} there.
-    }%
-  }
-\end{center}
-\end{figure}
-
-
-For the Gaussian updating scheme,
-we listed the errors from different schedules,
-in Table \ref{tab:error_Gaussian}.
+In Table \ref{tab:error_Gaussian},
+we showed that the optimal schedule
+produced smaller errors than
+the inverse-time schedules.
 %
-Clearly,
-the optimal schedules yielded the smallest errors.
+However, the optimal schedules
+decayed more slowly than
+the inverse-time formula, Eq. \eqref{eq:alpha_invt1},
+and depended on the sampling process,
+as shown in Fig. \ref{fig:optacmp}.
+%
+The impeded decay of the optimal schedule
+was necessary in order to
+damp out the short-wavelength eigenmodes
+(i.e., local noises),
+as shown in Fig. \ref{fig:xerr}.
+%
+If, however, we could ignore these local eigenmodes
+(by explicitly filtering out
+them in the biased potential),
+then we can modify the optimal schedule
+from Eq. \eqref{eq:q_opt}
+and limit the sum
+to the first few eigenmodes.
+%
+The resulting schedule
+would became similar to the inverse-time schedule,
+Eq. \eqref{eq:alpha_invt1},
+as shown in Fig. \ref{fig:optacmp}.
+%
+\note{A more thorough approach is
+to use the bandpass updating scheme
+to be discussed later.
+}
+
 
 \begin{table}[h]
   \caption{\label{tab:error_Gaussian}
@@ -3604,7 +3604,7 @@ the optimal schedules yielded the smallest errors.
       Inverse-time, Eq. \eqref{eq:alpha_invt1}
     &
       Modified inverse-time,
-      Eq.~\eqref{eq:alpha_invtlambda} 
+      Eq.~\eqref{eq:alpha_invtlambda}
       with optimized $\lambda$
     &
       Optimal,
@@ -3633,6 +3633,64 @@ the optimal schedules yielded the smallest errors.
 \end{table}
 
 
+\begin{figure}[h]
+\begin{center}
+  \makebox[\linewidth][c]{
+    \includegraphics[angle=0, width=1.0\linewidth]{fig/optacmp.pdf}
+  }
+  \caption{
+    \label{fig:optacmp}
+    Optimal schedules from Eq. \eqref{eq:q_opt}
+    for the Gaussian updating scheme
+    with $\sigma = 10$.
+    %
+    The modified schedules, produced by
+    limiting the sum in Eq. \eqref{eq:q_opt}
+    to the first four terms,
+    became similar to the inverse-time schedule,
+    Eq. \eqref{eq:alpha_invt1}.
+    %
+    \note{This figure was produced by \texttt{doc/fig/optacmp.gp}.
+      The data were computed by the program \texttt{prog/predict},
+      see particularly the function \texttt{intq\_save()}
+      in \texttt{prog/intq.h}.
+      The data were saved under the directory \texttt{data/opta}.
+    }%
+  }
+\end{center}
+\end{figure}
+
+
+\begin{figure}[h]
+\begin{center}
+  \makebox[\linewidth][c]{
+    \includegraphics[angle=0, width=1.0\linewidth]{fig/xerr.pdf}
+  }
+  \caption{
+    \label{fig:xerr}
+    Error components for the Gaussian updating scheme
+    with $\sigma = 10$
+    from the optimal schedule
+    and the inverse-time schedule, Eq. \eqref{eq:alpha_invt1}.
+    %
+    The latter schedule failed to damp out the errors
+    from the long-wavelength (local) eigenmodes
+    with $K \ge 5$.
+    %
+    For longer simulations,
+    the error components from the optimal schedule
+    would roughly maintain the same shape,
+    but ``intersect'' with the initial error curve
+    at a lower level (not shown).
+    %
+    \note{This figure was produced by \texttt{doc/fig/xerr.gp}.
+      The data were saved under the directory \texttt{data/xerr}.
+    }%
+  }
+\end{center}
+\end{figure}
+
+
 To verify Eq. \eqref{eq:half_alpha0},
 we computed the optimal schedules
 for different values of $q(T)$,
@@ -3640,7 +3698,7 @@ and plotted the final error
 against the initial updating magnitude, $\alpha(0)$.
 %
 As shown in Fig. \ref{fig:erriascan},
-The minimal error is reached at
+The minimal error was reached at
 $\alpha(0) = \alpha/2 = 5 \times 10^{-5}$.
 
 
@@ -3705,13 +3763,16 @@ as shown in Fig. \ref{fig:errsigscan}(b).
 
 
 In contrast,
-the normalized error of the bandpass updating schemes
+the normalized errors of the bandpass updating schemes
 were insensitive to the simulation length,
 in agreement with Eq. \eqref{eq:error_sinc}.
 %
 Besides, the bandpass updating schemes
 yielded smaller errors than
-the corresponding Gaussian ones.
+the corresponding Gaussian ones,
+although the differences tended to
+be small for shorter simulations
+with the local sampling process.
 
 
 
@@ -3797,7 +3858,7 @@ Eq. \eqref{eq:alpha_invt1}.
 %
 For a general multiple-bin scheme,
 including the Gaussian one used in metadynamics,
-the optimal schedule has no closed form,
+the optimal schedule permits no simple closed form,
 but is given by an equation of motion
 of a free particle with a position-dependent mass, Eq. \eqref{eq:q_opt}.
 %
@@ -3822,20 +3883,27 @@ that are also optimal for asymptotic convergence.
 %
 The optimal schedule of these bandpass schemes
 is always given by the inverse-time formula.
-%
-They appeared to outperform similar Gaussian schemes
+
+Although the bandpass updating schemes
+appeared to outperform similar Gaussian schemes
 in our model study,
-and they can be useful
-for high-precision metadynamics simulations.
-%
-However, since the bandpass schemes
-update the bias potential globally,
-they can be more expensive than
-the Gaussian schemes.
+they are global in nature
+and hence more expensive.
 %
 Besides, the performance gain
 is relative small for a shorter simulation
 with a local sampling process such as MD.
+%
+\note{
+One way to improve the Gaussian updating schemes
+is to use it with a hard cutoff of eigenmodes
+(as we did for Fig. \ref{fig:optacmp}).
+%
+Then the optimal schedule
+would be similar to the inverse-time one,
+and the error, with the short-wavelength eigenmodes filtered,
+would be close to that of the bandpass scheme.
+}
 
 
 
@@ -3856,8 +3924,7 @@ of glassy systems.
 
 \section{Acknowledgments}
 
-We thanks
-Dr. Y. Mei, Dr. J. Ma,
+We thank Dr. J. Ma, Dr. Y. Mei,
 J. Drake, O. Nassar, Dr. C. Lai and Dr. S. Ou
 for helpful discussions.
 
@@ -4237,9 +4304,12 @@ As shown in Fig. \ref{fig:gamcmp},
 the larger values of $\Gamma_k$'s
 with smaller $k$'s
 from the two sampling processes
-were almost proportional,
-suggesting similarity
-of local sampling processes.
+were almost proportional.
+%
+This suggests that
+the optimal schedule
+from simulations using local sampling processes
+would be similar in general properties.
 
 
 
@@ -4432,6 +4502,7 @@ i.e., some eigenvalues may be negative.
   %
   Even
   the Gaussian updating scheme can be unstable
+  in practice
   if the updating kernel is truncated.
 %}%
 %
@@ -4748,7 +4819,7 @@ Eq. \eqref{eq:error_equil} at $k = K$.
 
 
 \section{\label{sec:invt_schedule}
-Inverse-time schedules}
+Modified inverse-time schedules}
 
 
 
