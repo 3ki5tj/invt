@@ -21,7 +21,7 @@ set mxtics 5
 set xlabel "{/Times 1 / }{/Symbol-Oblique l}" offset 0, 0.5
 
 set logscale y
-set format y "10^{/*0.7 %T}"
+set format y "10^{/*0.8 %T}"
 set mytics 10
 set ylabel "Normalized error, {/Times (}{/Times-Italic t}{/Times + }{/Times-Italic t}_{/Times 0} {/Times )} {/Times-Italic E}"
 

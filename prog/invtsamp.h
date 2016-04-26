@@ -378,9 +378,8 @@ static invtsamp_t *invtsamp_open(const invtpar_t *m)
   is->costab = mkcostab(n, m->pbc);
 
   /* randomize the error */
-  /* initialize the magnitude of the Fourier modes
-   * up to the cutoff wave number */
-  for ( i = 0; i < m->kcutoff; i++ ) {
+  /* initialize the magnitude of the Fourier modes */
+  for ( i = 0; i < n; i++ ) {
     is->u[i] = randgaus();
   }
   /* combine the modes */

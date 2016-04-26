@@ -21,7 +21,7 @@ wright = 1 - wleft
 set size wleft, 1
 set origin 0, 0
 
-set rmargin 1
+set rmargin 0.5
 set bmargin 5
 
 set xtics 5 offset 0, 0.3
@@ -31,8 +31,8 @@ set xlabel "Eigenmode" offset 0, 0.7
 set xrange [0:17]
 
 set logscale y
-set format y "10^{/*0.7 %T}"
-set ytics 10000 offset 0.5, 0
+set format y "10^{/*0.8 %T}"
+set ytics 100 offset 0.5, 0
 #set format y "%.0t{/Symbol \264}10^{%T}"
 #set mytics 2
 set ylabel "Error component" offset 1, 0
@@ -44,11 +44,13 @@ set title "Global" offset 0, -0.5
 
 set key at screen 0.19, 0.1 Left reverse samplen 1.5 width -4 maxrows 1
 
-plot [:][1e-10:1e-4] \
-    "../../data/xerr/xerr_t1e8_g.dat"   u 1:($2) w lp lt 1 lw 1 pt 12                  t "Initial", \
-    "../../data/xerr/xerr_t1e8_g.dat"   u 1:($3) w lp lt 1 lw 1 pt 13 lc rgb "#bbbbbb" notitle, \
-    "../../data/xerr/xerr_t1e9_g.dat"   u 1:($3) w lp lt 1 lw 1 pt 13 lc rgb "#555555" notitle, \
-    "../../data/xerr/xerr_t1e10_g.dat"  u 1:($3) w lp lt 1 lw 1 pt 13                  notitle, \
+plot [:][1e-11:1e-4] \
+    "../../data/xerr/xerr_sig10_t1e8_g.dat"   u 1:($2) w lp lt 1 lw 1 pt 12                  t "Initial", \
+    "../../data/xerr/xerr_sig10_t1e8_g.dat"   u 1:($3) w lp lt 1 lw 1 pt 13 lc rgb "#808080" notitle, \
+    "../../data/xerr/xerr_sig10_t1e10_g.dat"  u 1:($3) w lp lt 1 lw 1 pt 13                  notitle, \
+    "../../data/xerr/xerr_sinc_t1e8_g.dat"    u 1:($2) w lp lt 4 lw 1 pt  4 ps 0.8                  t "Initial", \
+    "../../data/xerr/xerr_sinc_t1e8_g.dat"    u 1:($3) w lp lt 4 lw 1 pt  5 ps 0.8 lc rgb "#808080" notitle, \
+    "../../data/xerr/xerr_sinc_t1e10_g.dat"   u 1:($3) w lp lt 4 lw 1 pt  5 ps 0.8                  notitle, \
     -1 notitle
 
 
@@ -67,10 +69,12 @@ set title "Local"
 set key at screen 0.98, 0.1 Left reverse samplen 1.5 width -2 maxrows 1
 
 plot [:][1e-9:1] \
-    "../../data/xerr/xerr_t1e8_l.dat"   u 1:($2) w lp lt 1 lw 1 pt 12                  notitle, \
-    "../../data/xerr/xerr_t1e8_l.dat"   u 1:($3) w lp lt 1 lw 1 pt 13 lc rgb "#bbbbbb" t "{/Times-Italic T} = 10^{/*0.7 8}", \
-    "../../data/xerr/xerr_t1e9_l.dat"   u 1:($3) w lp lt 1 lw 1 pt 13 lc rgb "#555555" t "{/Times-Italic T} = 10^{/*0.7 9}", \
-    "../../data/xerr/xerr_t1e10_l.dat"  u 1:($3) w lp lt 1 lw 1 pt 13                  t "{/Times-Italic T} = 10^{/*0.7 10}", \
+    "../../data/xerr/xerr_sig10_t1e8_l.dat"   u 1:($2) w lp lt 1 lw 1 pt 12                  notitle, \
+    "../../data/xerr/xerr_sig10_t1e8_l.dat"   u 1:($3) w lp lt 1 lw 1 pt 13 lc rgb "#808080" t "{/Times-Italic T} = 10^{/*0.8 8}", \
+    "../../data/xerr/xerr_sig10_t1e10_l.dat"  u 1:($3) w lp lt 1 lw 1 pt 13                  t "{/Times-Italic T} = 10^{/*0.8 10}", \
+    "../../data/xerr/xerr_sinc_t1e8_l.dat"    u 1:($2) w lp lt 4 lw 1 pt  4 ps 0.8                  notitle, \
+    "../../data/xerr/xerr_sinc_t1e8_l.dat"    u 1:($3) w lp lt 4 lw 1 pt  5 ps 0.8 lc rgb "#808080" notitle, \
+    "../../data/xerr/xerr_sinc_t1e10_l.dat"   u 1:($3) w lp lt 4 lw 1 pt  5 ps 0.8                  notitle, \
     -1 notitle
 
 

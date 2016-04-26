@@ -3367,8 +3367,10 @@ bandpass updating schemes %of different widths
 in Sec. \ref{sec:results_cmpschemes}.
 
 
+
 \subsection{\label{sec:results_system}
 Test system and simulation protocol}
+
 
 
 In our test system,
@@ -3402,6 +3404,7 @@ and start the testing schedule.
 %Eq. \eqref{eq:q_opt}
 %or
 %Eq. \eqref{eq:alpha_invtlambda}.
+
 
 
 For the Gaussian updating scheme,
@@ -3578,6 +3581,42 @@ and dependent on the sampling process.
   }
 \end{center}
 \end{figure}
+
+
+For the Gaussian updating scheme,
+we listed the from different schedules.
+
+\begin{table}[h]
+  \caption{\label{tab:error_Gaussian}
+    Error of the Gaussian updating scheme of $\sig = 10$.
+    $t_0$ is given by Eq. \eqref{eq:t0_sinc}.
+  }
+  \begin{tabular} { l l l }
+    &
+    Eq. \eqref{eq:alpha_invt1}
+    &
+    Eq. \eqref{eq:alpha_invtlambda}
+    with optimal $\lambda$
+    &
+    Optimal
+    \\
+    Global
+    &
+    $4.2 \times 10^{-6}$
+    &
+    $7.1 \times 10^{-7}$
+    &
+    $2.7 \times 10^{-7}$
+    \\
+    Local
+    &
+    $3.7 \times 10^{-4}$
+    &
+    $1.7 \times 10^{-4}$
+    &
+    $9.1 \times 10^{-5}$
+  \end{tabular}
+\end{table}
 
 
 

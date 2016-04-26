@@ -81,7 +81,8 @@ static void invt_geterr(invtpar_t *m,
   /* compute the exact minimal error under the same condition */
   qT = m->qT;
   err2 = esterror_opt(T, m->alpha0, m->initalpha, &qT, m->qprec,
-      m->alpha_nint, &intq, m->n, lambda, gamma, m->verbose);
+      m->alpha_nint, &intq, m->n, m->kcutoff, m->pbc,
+      lambda, gamma, m->verbose);
   inita = intq_getinita(intq);
 
   /* save the optimal schedule to file */
@@ -131,7 +132,8 @@ static void invt_scanc(invtpar_t *m,
   /* compute the exact minimal error under the same condition */
   qT = m->qT;
   err2 = esterror_opt(T, m->alpha0, m->initalpha, &qT, m->qprec,
-      m->alpha_nint, NULL, m->n, lambda, gamma, m->verbose);
+      m->alpha_nint, NULL, m->n, m->kcutoff, m->pbc,
+      lambda, gamma, m->verbose);
 
   /* print out a header */
   printf("# c     \t  final error\t  init. error\t  final equil\t  optimal error\n");
@@ -175,7 +177,8 @@ static void invt_scania(invtpar_t *m,
   erri = esterror_eql(m->alpha0, m->n, NULL,
       lambda, gamma);
 
-  intq = intq_open(T, m->alpha_nint, m->n, lambda, gamma);
+  intq = intq_open(T, m->alpha_nint, m->n,
+      m->kcutoff, m->pbc, lambda, gamma);
 
   /* print out a header */
   printf("# inita \t  final error\t  init. error\t   qT\n");
@@ -286,7 +289,8 @@ static void invt_scan(invtpar_t *m,
     /* compute the exact minimal error under the same condition */
     qT = 0; /* use the optimal qT */
     err2 = esterror_opt(T, m->alpha0, m->initalpha, &qT, m->qprec,
-        m->alpha_nint, NULL, m->n, lambda, gamma, m->verbose);
+        m->alpha_nint, NULL, m->n, m->kcutoff, m->pbc,
+        lambda, gamma, m->verbose);
 
     // t0 = intq_estt0(T, qT);
     err2norm = err2 * sqrt(T + t0);

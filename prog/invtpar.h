@@ -169,7 +169,7 @@ static void invtpar_init(invtpar_t *m)
   m->okmax = -1; /* disable the optimal updating scheme */
 
   m->initrand = 0;
-  m->kcutoff = 0;
+  m->kcutoff = -1;
   m->sampmethod = 0;
   m->localg = 0.5;
   m->tcorr = 1.0; /* only used for the Ornstein-Uhlenbeck process */
@@ -396,11 +396,6 @@ static void invtpar_compute(invtpar_t *m)
   xnew(m->p, m->n);
   for ( i = 0; i < m->n; i++ ) {
     m->p[i] = 1.0 / m->n;
-  }
-
-  /* set the initial cutoff wave number */
-  if ( m->kcutoff <= 0 ) {
-    m->kcutoff = m->n;
   }
 
   if ( m->localg > 0.5 ) {

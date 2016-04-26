@@ -222,7 +222,7 @@ def scan():
     ik = ikmin
     okold = -1
     while ik < ikmax + ikdel * 0.01:
-      ok = int(ikconst / ik)
+      ok = int(ikconst / ik + 0.5)
       if ok != okold: # avoid redundancy
         cval += [ ok, ]
       ik += ikdel

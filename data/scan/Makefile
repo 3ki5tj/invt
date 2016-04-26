@@ -19,9 +19,9 @@ sigprd: compile $(fnmdgam)
 	$(pred) $(sigprdopt) --samp=g                       --nsteps=1e8  > sigprd_t1e8_g.dat
 	$(pred) $(sigprdopt) --samp=l                       --nsteps=1e8  > sigprd_t1e8_l.dat
 	$(pred) $(sigprdopt) --samp=md --fngamma=$(fnmdgam) --nsteps=1e8  > sigprd_t1e8_md.dat
-	$(pred) $(sigprdopt) --samp=g                       --nsteps=1e11 > sigprd_t1e11_g.dat
-	$(pred) $(sigprdopt) --samp=l                       --nsteps=1e11 > sigprd_t1e11_l.dat
-	$(pred) $(sigprdopt) --samp=md --fngamma=$(fnmdgam) --nsteps=1e11 > sigprd_t1e11_md.dat
+	$(pred) $(sigprdopt) --samp=g                       --nsteps=1e10 > sigprd_t1e10_g.dat
+	$(pred) $(sigprdopt) --samp=l                       --nsteps=1e10 > sigprd_t1e10_l.dat
+	$(pred) $(sigprdopt) --samp=md --fngamma=$(fnmdgam) --nsteps=1e10 > sigprd_t1e10_md.dat
 
 sigrunopt=--sig=0.5:0.5:12
 
@@ -36,9 +36,9 @@ okprd: compile $(fnmdgam)
 	$(pred) $(okprdopt) --samp=g                       --nsteps=1e8  > okprd_t1e8_g.dat
 	$(pred) $(okprdopt) --samp=l                       --nsteps=1e8  > okprd_t1e8_l.dat
 	$(pred) $(okprdopt) --samp=md --fngamma=$(fnmdgam) --nsteps=1e8  > okprd_t1e8_md.dat
-	$(pred) $(okprdopt) --samp=g                       --nsteps=1e11 > okprd_t1e11_g.dat
-	$(pred) $(okprdopt) --samp=l                       --nsteps=1e11 > okprd_t1e11_l.dat
-	$(pred) $(okprdopt) --samp=md --fngamma=$(fnmdgam) --nsteps=1e11 > okprd_t1e11_md.dat
+	$(pred) $(okprdopt) --samp=g                       --nsteps=1e10 > okprd_t1e10_g.dat
+	$(pred) $(okprdopt) --samp=l                       --nsteps=1e10 > okprd_t1e10_l.dat
+	$(pred) $(okprdopt) --samp=md --fngamma=$(fnmdgam) --nsteps=1e10 > okprd_t1e10_md.dat
 
 okrunopt=--ok=1:1:20
 
@@ -46,6 +46,13 @@ okrun: compile $(fnmdgam)
 	../invtscan.py $(okrunopt) global.cfg -o okrun_t1e8_g.dat
 	../invtscan.py $(okrunopt) local.cfg  -o okrun_t1e8_l.dat
 	../invtscan.py $(okrunopt) md.cfg     -o okrun_t1e8_md.dat
+
+ikrunopt=--ik=0.5:0.5:12
+
+ikrun: compile $(fnmdgam)
+	../invtscan.py $(ikrunopt) global.cfg -o ikrun_t1e8_g.dat
+	../invtscan.py $(ikrunopt) local.cfg  -o ikrun_t1e8_l.dat
+	../invtscan.py $(ikrunopt) md.cfg     -o ikrun_t1e8_md.dat
 
 # use `invt` to generate mdgamma.dat
 $(fnmdgam):

@@ -22,7 +22,7 @@ set logscale x
 set xlabel "{/Symbol-Oblique l}" offset 0, 0.5
 
 set logscale y
-set format y "10^{/*0.7 %T}"
+set format y "10^{/*0.8 %T}"
 set mytics 10
 set ylabel "Error, {/Times-Italic E}"
 
