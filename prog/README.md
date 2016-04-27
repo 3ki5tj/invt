@@ -43,6 +43,8 @@ invtsamp.h| sampling routines
 intq.h    | optimal schedule by integrating the equation of motion
 cosmodes.h| eigenmode decomposition
 corr.h    | correlation of eigenmodes
+invt.cfg  | sample configuration file
+
 
 
 Compilation
