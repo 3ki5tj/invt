@@ -145,7 +145,7 @@ to discourage future visits to configurations
 with the current $z$ value
 by elevating the bias potential there.
 %
-The main difference between the two
+The main difference
 is that in the WL case,
 each updating step is limited to the bin
 containing the current $z$,
@@ -161,14 +161,15 @@ in deriving the bias force.
 %
 However, in both cases, the bias potential
 is updated frequently (usually every few MC or MD steps),
-which % brings about a side effect of disrupting
+%which % brings about a side effect of disrupting
+and the fluctuation
 disrupts \note{``disturbs''?} the underlying
 equilibrium sampling dynamics\cite{laio2002}.
 %
 Thus, one often has to reduce
 the updating magnitude
 over the course of simulation
-to decrease the error.
+to decrease the effect.
 
 
 
@@ -184,12 +185,11 @@ komura2012, caparica2012, caparica2014,
 barducci2008, dickson2011, dama2014}.
 %
 For the WL algorithm, it is known
-that the optimal updating magnitude, $\ln f$,
+that the optimal schedule
 is given by the product of the
 inverse time\cite{liang2007,
 belardinelli2007, belardinelli2007jcp, belardinelli2008,
 morozov2007, zhou2008}
-and the number of bins
 (with ``time'' being
 the number of simulation steps).
 %
@@ -200,8 +200,7 @@ however, is less studied.
 In this study,
 we present a method of computing
 the optimal schedule
-for a general adaptive flat-distribution sampling methods,
-including those used in WL and metadynamics simulations.
+for a general adaptive flat-distribution sampling method.
 %
 In this method, the optimal schedule is derived
 from an equation of motion of a free particle,
@@ -222,7 +221,7 @@ and the width of the Gaussian window.
 Further, we generalize
 the WL updating scheme
 to a class of bandpass updating schemes
-that are optimal for infinitely long simulations,
+that are optimal for long simulations,
 and the modified inverse-time schedule is optimal for these schemes.
 %
 %For finite-length simulations, however,
@@ -389,7 +388,7 @@ and that of temperature, respectively.
 %
 The estimated bias potential, $V_i$,
 are often improved
-by the histogram, $H_i$, along $i$ accumulated
+by the histogram, $H_i$, accumulated
 during simulation.
 %
 Using $H_i$ as an estimate of $\pi_i$ in
@@ -655,6 +654,10 @@ the optimal formula for $\alpha(t)$
 might be $c/t$ with a $c$
 different from $1.0$\cite{
 morozov2007, zhou2008, morozov2009}.
+%
+Here we will show that the ideal $c$
+is $1.0$, but the origin of $t$ should be shifted
+to accommodate the initial error.
 
 
 As Eq. \eqref{eq:alpha_invt} was being developed for the WL algorithm,
@@ -1067,10 +1070,11 @@ $
 ,
 $
 or
-$
-\dot u\bigl( q(t') \bigr) = c
-,
-$
+\begin{equation}
+  \dot u\bigl( q(t') \bigr) = c
+  ,
+\label{eq:dudt_const}
+\end{equation}
 %
 where $c$ is a constant of $t'$.
 %
@@ -1273,8 +1277,8 @@ Finally, there is a stability condition.
 %
 In a \emph{stable} updating scheme,
 no eigenmode grows indefinitely,
-which means all eigenvalues $\lambda_k$'s
-are nonnegative.
+which means that no eigenvalue $\lambda_k$
+can be negative.
 
 
 
@@ -1495,7 +1499,7 @@ Then, Eq. \eqref{eq:error_asym} is simplified as
 %
 In this way,
 the underlying sampling process
-affects the error only through the set of numbers,
+affects the error only through the numbers,
 $\Gamma_k$'s.
 %
 In Appendix \ref{sec:Gamma},
@@ -1574,9 +1578,9 @@ the system has entered the equilibrium
 under a fixed $\alpha_0$ at $t = 0$.
 %
 We can then use Eq. \eqref{eq:y2_eql}
-for the $\langle y_k^2(0) \rangle$'s in Eq. \eqref{eq:error_res}.
-%
-Then,
+for the $\langle y_k^2(0) \rangle$'s
+in Eq. \eqref{eq:error_res},
+and
 the residual error at the end of period $T$
 is given by
 %
@@ -1643,7 +1647,9 @@ with a position-dependent mass.
 %
 Since the Lagrangian
 does not explicitly depend on time, $t$,
-the Hamiltonian
+the Hamiltonian is conserved.
+%
+But the Hamiltonian
 %
 \begin{equation}
   \mathcal H
@@ -1664,8 +1670,7 @@ the Hamiltonian
   %\label{eq:error_asym_Hamiltonian}
 \end{equation}
 %
-which coincides with the Lagrangian,
-is conserved.
+coincides with the Lagrangian.
 %
 So we may set
 %
@@ -1685,12 +1690,15 @@ So we may set
   \label{eq:Lagrangian_const}
 \end{equation}
 %
-for some positive $C$.
+for some positive $C$,
 %
-Integrating the square root, we get
+%We may treat Eq. \eqref{eq:Lagrangian_const}
+as a generalization of Eq. \eqref{eq:dudt_const}.
+%
+By integrating the square root, we get
 %
 \begin{equation}
-  \int_{ 0 }^{ q(T) }
+  \int_{ 0 }^{ q(t) }
     \sqrt{
       \textstyle\sum_{ k = 2 }^n
         \Gamma_k \, \lambda_k^2
@@ -1704,12 +1712,12 @@ Integrating the square root, we get
   \label{eq:q_opt}
 \end{equation}
 %
-where $c$ is to be determined by
+where $C$ is to be determined by
 the boundary condition at $t = T$ as
 %
 \begin{equation}
   C =
-  \int_{ 0 }^{ q(t) }
+  \int_{ 0 }^{ q(T) }
     \sqrt{
       \textstyle\sum_{ k = 2 }^n
         \Gamma_k \, \lambda_k^2
@@ -1728,7 +1736,8 @@ $\alpha(t) = \dot q(t)$.
 Since we only optimized the asymptotic error, $E_A$,
 in the above,
 the parameter $q(T)$ can be further adjusted
-to minimize the total error, $E = E_R + E_A$.
+to minimize the total error, $E = E_R + E_A$
+(cf. Sec. \ref{sec:optinitalpha}).
 %
 A complete program of computing the optimal schedule
 is listed in Appendix \ref{sec:program}.
@@ -1779,7 +1788,7 @@ such that
 $\int_0^{q(T)} m(Q) \, dQ = 1$.
 %
 Clearly,
-the distribution decreases monotonically with $Q$.
+both $M(Q)$ and $m(Q)$ decrease monotonically with $Q$.
 
 
 \begin{figure}[h]
@@ -1869,9 +1878,9 @@ we have
 \end{equation}
 %
 which means the asymptotic error
-is inversely proportional to the length
+is inversely proportional to the simulation length
 for the same-class schedules,
-and we have the scaling relation
+i.e., we have the scaling relation
 $T_1 \, E_{A1} = T_2 \, E_{A2}$.
 
 
@@ -2011,7 +2020,11 @@ or translationally invariant.
 An example is the Gaussian updating scheme
 used in metadynamics.
 %
-Homogeneous updating schemes have significantly fewer
+Homogeneous updating schemes
+share the same set of eigenvectors
+but not the corresponding eigenvalues.
+%
+They have significantly fewer
 parameters than the general case,
 and the multiplication of the updating matrix,
 $\mathbf w$,
@@ -2085,7 +2098,8 @@ that satisfy
 \end{equation}
 %
 If $b = n/2$, then $\mu_{-b}$ is removed
-from the sum in Eq. \eqref{eq:mu_normalization}.
+from the sum in Eq. \eqref{eq:mu_normalization}
+to avoid double counting.
 %
 These numbers constitutes an \emph{updating kernel}.
 
@@ -2548,7 +2562,8 @@ $
 $
 
 
-For the Gaussian updating kernel of width $\sigma$
+For the Gaussian updating kernel,
+if the width $\sigma$ satisifies
 with $\Delta x \ll \sigma \ll 1$,
 we can extend
 the upper limit of the integrals
@@ -2991,8 +3006,8 @@ is a multiple of the identity matrix.
 %
 Thus,
 the single-bin scheme is most efficient
-in asymptotic convergence
-if no eigenvalue $\lambda_k$ is zero.
+in asymptotic convergence.
+%if no eigenvalue $\lambda_k$ is zero.
 
 
 
@@ -3006,10 +3021,12 @@ perfect (brick-wall) \emph{bandpass} updating schemes
 to allow zero eigenvalues.
 %
 For example,
-if we can assume that the PMF is sufficiently smooth
-such that the eigenmodes can be limited to $k \le K$.
+%if we can assume
+by assuming
+that the PMF is sufficiently smooth
+such that the eigenmodes can be limited to $k \le K$,
 %
-Then we can construct an updating scheme with
+we can construct an updating scheme with
 $$
 \lambda_1 = \cdots = \lambda_K = 1,
 \mathrm{\; and \;}
@@ -3750,14 +3767,15 @@ with different widths, $\sigma$.
 %
 As shown in Fig. \ref{fig:errsigscan}(a)
 that the minimal error was achieved
-by the widest window for the shorter simulation
-of $T = 10^8$,
-for the global sampling process.
+by the widest window %for the shorter simulation of $T = 10^8$,
+for the global sampling process,
 %
-As the simulation lengthens,
-the minimum at $\sigma = 0$ became more favorable.
+although
+the minimum at $\sigma = 0$ became more favorable
+as the simulation lengthens.
 %
 However,
+for the local sampling process,
 the minimum stayed at zero width,
 as shown in Fig. \ref{fig:errsigscan}(b).
 
@@ -4825,7 +4843,7 @@ Modified inverse-time schedules}
 
 As an alternative to the
 optimal schedule from Eq. \eqref{eq:q_opt},
-here we consider the simpler
+here we consider the modified
 inverse-time formula, Eq. \eqref{eq:alpha_invtlambda},
 %with a free parameter $\lambda$.
 %
@@ -5038,8 +5056,8 @@ Minimizing the function yields
   \frac{ 1 - 4 \, \mu_1 }
        { 1 - 2 \, \mu_1 }
   ,
-\notag
-%\label{eq:lambda_nn_perfect}
+%\notag
+\label{eq:lambda_nn_perfect}
 \end{equation}
 %
 and the asymptotic error in the optimal case is given by
@@ -5064,6 +5082,15 @@ is minimal at $\mu_1 = 0$, the single-bin case.
 %and the minimal value, obtained at $\mu_1 = 0$,
 %corresponds to the single-bin scheme.
 %
+Note that the value given by
+Eq. \eqref{eq:lambda_nn_perfect}
+was less than the observed optimal value
+from Fig. \ref{fig:errinvt},
+and the latter would decrease
+with the simulation length.
+%
+
+
 
 
 For the one-step sampling process,

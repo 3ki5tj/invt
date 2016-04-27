@@ -35,7 +35,6 @@ zip: $(prj)docV$(ver).zip
 $(prj)docV$(ver).zip::
 	mkdir -p old/V$(ver)
 	rsync -avz $(prj).tex old/V$(ver)/$(prj)_annotatedV$(ver).tex
-	rsync -avz $(prj)_notes.tex old/V$(ver)/
 	rsync -avz Makefile old/V$(ver)/
 	rsync -avz README.md old/V$(ver)/
 	rsync -avz deannote.py old/V$(ver)/
@@ -52,7 +51,7 @@ $(prj)docV$(ver).zip::
 	       $(epsfigs) $(pdffigs) $(figgps) Makefile README.md
 
 #	rsync -avz $(prj)_notes.tex old/V$(ver)/$(prj)_notesV$(ver).tex
-#
+
 
 $(prj)doc.zip: $(prj).tex $(prj).pdf \
   	       $(prj)_notes.tex $(prj)_notes.pdf \
