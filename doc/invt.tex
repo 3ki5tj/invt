@@ -4,6 +4,7 @@
 \usepackage{upgreek}
 \usepackage[usenames,dvipsnames]{xcolor}
 \usepackage{tikz}
+\usetikzlibrary{calc}
 \usepackage{hyperref}
 
 
@@ -1193,7 +1194,7 @@ we shall further impose the
 detailed balance condition:
 %
 \begin{equation}
-  p_i \, w_{ij} = p_j \, w_{ji}.
+  \rho_i \, w_{ij} = \rho_j \, w_{ji}.
   \label{eq:w_detailedbalance}
 \end{equation}
 %
@@ -1793,18 +1794,51 @@ both $M(Q)$ and $m(Q)$ decrease monotonically with $Q$.
 
 \begin{figure}[h]
 \begin{center}
-  \makebox[\linewidth][c]{
-    \includegraphics[angle=0, width=0.9\linewidth]{fig/massq.pdf}
-  }
-  \caption{
-    \label{fig:massq}
-    Geometric characterization of the optimal schedule,
-    $\alpha(t)$,
-    via the normalized mass distribution, $m(Q)$.
-    %
-    \note{The figure was produced by \texttt{doc/fig/massq.gp}.
-    }%
-  }
+  \begin{tikzpicture}[very thick, scale=2.5, every node/.style={scale=1.5}]
+    % distribution
+    \draw[domain=0:2.5, variable=\x, dashed, gray, ultra thick] 
+      plot({\x}, {1.5*exp(-0.5*\x*\x)});
+
+    % shade
+    \fill [gray!30!white, domain=0.7:2.2, variable=\x]
+      (0.7, 0) --
+      plot ({\x}, {1.5*exp(-0.5*\x*\x)}) 
+      -- (2.2, 0) -- cycle;
+ 
+    % thick curve
+    \draw[domain=0:2.2, variable=\x, ultra thick]
+      plot({\x}, {1.5*exp(-0.5*\x*\x)});
+
+    % label for the shaded area
+    \node[] at (1.1, 0.5) {$\dfrac{t}{T}$};
+
+    \draw[<->] (0.6, 0)  --
+               node[left, inner sep=1mm]
+               {$\dfrac{1}{T \, \alpha}$}
+               (0.6, 1.174);
+    % label for the ordinate
+    %\node[fill=white] at (0.4, 0.7) {$\dfrac{1}{Ta}$};
+
+    \draw[] (0.5, 1.174) -- (0.7, 1.1740);
+    \draw[->] (0, 0) -- node[below, inner sep=5mm] {$Q$} (2.8, 0);
+    \draw[->] (0, 0) -- node[above, rotate=90] {$M(Q)$} (0, 1.8);
+
+    % xtics
+    \draw[] (0.0, 0.1) -- (0.0, 0.0) node[below] {$0$};
+    \draw[] (2.2, 0.1) -- (2.2, 0.0) node[below] {$q(T)$};
+  \end{tikzpicture}
+  %\makebox[\linewidth][c]{
+  %  \includegraphics[angle=0, width=0.9\linewidth]{fig/massq.pdf}
+  %}
+  %\caption{
+  %  \label{fig:massq}
+  %  Geometric characterization of the optimal schedule,
+  %  $\alpha(t)$,
+  %  via the normalized mass distribution, $m(Q)$.
+  %  %
+  %  \note{The figure was produced by \texttt{doc/fig/massq.gp}.
+  %  }%
+  %}
 \end{center}
 \end{figure}
 
@@ -1912,7 +1946,7 @@ $T_1 \, E_{A1} = T_2 \, E_{A2}$.
 
 Let us now consider simulations in which
 the system is initially equilibrated at the same
-constant updating magnitude $\alpha$.
+constant updating magnitude $\alpha_0$.
 %
 For these simulations,
 we can adjust $q(T)$
@@ -1958,10 +1992,9 @@ $$
 \end{aligned}
 $$
 Then solve $\partial (E_R + E_A) / \partial q(T) = 0$.
-}
-%
-Then, by Eqs. \eqref{eq:mQ_invTa} and \eqref{eq:intmQ_tT},
-we have
+}%
+By Eqs. \eqref{eq:mQ_invTa} and \eqref{eq:intmQ_tT},
+we can rewrite the condition as
 \begin{equation}
   \alpha( t = 0 )
   =
@@ -2017,6 +2050,8 @@ centered on the current bin.
 We call these schemes homogeneous,
 or translationally invariant.
 %
+Naturally, $\rho_i = 1/n$ in this case.
+%
 An example is the Gaussian updating scheme
 used in metadynamics.
 %
@@ -2043,20 +2078,20 @@ Updating kernel and eigenvalues}
 
 
 
-While translationally-invariant
-updating schemes
-naturally suit periodic variables\cite{
-dama2014},
-they can also be extended to non-periodic variables
-by imposing the reflective boundary condition\cite{
-bussi2006}.
-%
-For simplicity, we shall assume that the target
-distribution is flat, or $p_i = 1/n$, below.
+%While translationally-invariant
+%updating schemes
+%naturally suit periodic variables\cite{
+%dama2014},
+%they can also be extended to non-periodic variables
+%by imposing the reflective boundary condition\cite{
+%bussi2006}.
+%%
+%For simplicity, we shall assume that the target
+%distribution is flat, or $p_i = 1/n$, below.
 
 
 
-It is natural to introduce homogeneous updating schemes
+It is natural to first introduce homogeneous updating schemes
 for a periodic variable\cite{dama2014}.
 %
 The updating matrix, $\mathbf w$,
@@ -3471,7 +3506,8 @@ respectively,
 and we shall use
 Eqs. \eqref{eq:Gamma_perfect}
 and \eqref{eq:Gamma_onestep}
-for the respective $\Gamma_k$'s.
+for the respective $\Gamma_k$'s
+in the theoretical predictions.
 %
 
 
@@ -3634,20 +3670,20 @@ to be discussed later.
     \hline
     Global
     &
-    $4.2 \times 10^{-6}$
+    $4.4(1) \times 10^{-6}$
     &
     $7.1 \times 10^{-7}$
     &
-    $2.7 \times 10^{-7}$
+    $2.6(1) \times 10^{-7}$
     \\
     \hline
     Local
     &
-    $3.7 \times 10^{-4}$
+    $3.8(2) \times 10^{-4}$
     &
-    $1.7 \times 10^{-4}$
+    $1.8(1) \times 10^{-4}$
     &
-    $9.1 \times 10^{-5}$
+    $1.0(1) \times 10^{-4}$
     \\
     \hline
   \end{tabular}
@@ -3701,7 +3737,7 @@ to be discussed later.
     For longer simulations,
     the error components from the optimal schedule
     would roughly maintain the same shape,
-    but ``intersect'' with the initial error curve
+    but join the initial error curve
     at a lower level (not shown).
     %
     \note{This figure was produced by \texttt{doc/fig/xerr.gp}.
@@ -4278,11 +4314,11 @@ as
 $
   x_i
   =
-  (V_i - \bar V) + s_i,
+  (V_i - \bar V) + \chi_i,
 $
 where
 $
-  s_i
+  \chi_i
   \equiv
   \ln \frac{ p_i } { p^*_i }
   -
@@ -4292,7 +4328,7 @@ $
 Thus, by Eqs. \eqref{eq:y_def} and \eqref{eq:Y_def},
 we have
 $$
-y_k = Y_k + \sum_{i = 1}^n \phi_{k i} \, s_i.
+y_k = Y_k + \sum_{i = 1}^n \phi_{k i} \, \chi_i.
 $$
 Since the second term on the right-hand side
 is a constant, and the average of $y_k$ is zero,
@@ -4319,8 +4355,8 @@ Eq. \eqref{eq:Lagrangian_const}.
 As an example, we used the method to compute
 the integrals, $\Gamma_k$'s, from an MD simulation,
 and compared them to those from
-Eq. \eqref{eq:Gamma_onestep}.
-%the one-step sampling process.
+%Eq. \eqref{eq:Gamma_onestep}.
+the local MC sampling process.
 %
 As shown in Fig. \ref{fig:gamcmp},
 the larger values of $\Gamma_k$'s
@@ -4344,16 +4380,18 @@ would be similar in general properties.
     \label{fig:gamcmp}
     Integrals of the autocorrelation functions
     from an MD simulation versus those
-    from the one-step process.
+    from the local MC simulation.
     %
-    The MD simulation was ran for $10^{10}$ steps with
+    Each simulation was ran for $10^{10}$ steps.
+    %
+    The bin size $\Delta z = 2\, \pi /n$ with $n = 100$.
+    %
+    For the MD simulation,
     the step size $\Delta t_\mathrm{MD} = 0.005$.
     %
-    The bin size $\Delta z = 2\, \pi /n$ with $n = 100$,
-    and the temperature was $1.0$.
-    %
     The velocity rescaling thermostat\cite{bussi2007} was
-    applied every MD step with viscosity $20$.
+    applied for the unit reduced temperature
+    every MD step with viscosity $20$.
     %
     The reflective boundary condition was used.
     %
