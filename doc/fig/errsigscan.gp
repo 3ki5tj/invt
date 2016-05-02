@@ -43,7 +43,7 @@ plot [:][5e3:1.4e4] \
     "../../data/scan/sigprd_t1e8_l.dat"  u 1:($6**2) w l lt 1 lw 4 notitle, \
     "../../data/scan/sigrun_t1e8_l.dat"  u 1:($4)    w p pt 13 ps 1.4      notitle, \
     "../../data/scan/sigprd_t1e10_l.dat" u 1:($6**2) w l lt 1 lw 2 notitle, \
-    "../../data/scan/okrun_t1e8_l.dat"   u (fac/(2*$1)):($4)    w p  pt 5                             notitle, \
+    "../../data/scan/ikrun_t1e8_l.dat"   u (fac/(2*$1)):($4)    w p  pt 5                             notitle, \
     "../../data/scan/okprd_t1e8_l.dat"   u (fac/(2*$1)):($6**2) w l       lt 4 lw 4  lc rgb "#000000" notitle, \
     "../../data/scan/okprd_t1e10_l.dat"  u (fac/(2*$1)):($6**2) w l       lt 2 lw 2  lc rgb "#a0a0a0" notitle, \
     -1 notitle
@@ -71,7 +71,7 @@ plot [:][:] \
     "../../data/scan/sigprd_t1e8_g.dat"  u 1:($6**2)            w l        lt 1 lw 4                   t "Gaussian, {/Times-Italic T} = 10^{/*0.8 8}", \
     "../../data/scan/sigrun_t1e8_g.dat"  u 1:($4)               w p  pt 13 ps 1.4                      notitle, \
     "../../data/scan/sigprd_t1e10_g.dat" u 1:($6**2)            w l        lt 1 lw 2                   t "Gaussian, {/Times-Italic T} = 10^{/*0.8 10}", \
-    "../../data/scan/okrun_t1e8_g.dat"   u (fac/(2*$1)):($4)    w p  pt 5                             notitle, \
+    "../../data/scan/ikrun_t1e8_g.dat"   u (fac/(2*$1)):($4)    w p  pt 5                             notitle, \
     "../../data/scan/okprd_t1e8_g.dat"   u (fac/(2*$1)):($6**2) w l        lt 4 lw 4  lc rgb "#000000" t "Bandpass, {/Times-Italic T} = 10^{/*0.8 8}", \
     "../../data/scan/okprd_t1e10_g.dat"  u (fac/(2*$1)):($6**2) w l        lt 2 lw 2  lc rgb "#a0a0a0" t "Bandpass, {/Times-Italic T} = 10^{/*0.8 10}", \
     -1 notitle

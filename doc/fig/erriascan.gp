@@ -23,6 +23,7 @@ set xrange [1e-6:1e-2]
 set ytics 0.5 offset 0.3, 0
 set mytics 5
 set ylabel "Relative error, {/Times-Italic E} / {/Times-Italic E}{/*0.6 min}" offset 2.5, 0.0
+set yrange [0.9:2]
 
 set key at 4e-3, 1.95 Left reverse
 
@@ -32,7 +33,7 @@ fac = 2*100/sqrt(2*pi)
 emin_g = 0.0005192 ** 2
 emin_l = 0.009561 ** 2
 
-plot [:][0.8:2] \
+plot [:][:] \
     "../../data/iascan/iarun_sig10_g.dat" u 1:($2    / emin_g)  w p pt 13 ps 1.4      notitle, \
     "../../data/iascan/iaprd_sig10_g.dat" u 1:($2**2 / emin_g)  w l lt 1 lw 4         t "Global", \
     "../../data/iascan/iarun_sig10_l.dat" u 1:($2    / emin_l)  w p pt 12 ps 1.4      notitle, \
@@ -42,7 +43,7 @@ plot [:][0.8:2] \
 
 # phantom plot for the legend
 set key at 1.6e-4, 1.95
-plot [:][0.8:2] \
+plot [:][:] \
     -1 w p pt 13 ps 1.4 t " ", \
     -1 w p pt 12 ps 1.4 t " "
 

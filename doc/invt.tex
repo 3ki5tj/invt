@@ -38,14 +38,14 @@
 
 
 
-\title{Optimal updating factor in adaptive flat-distribution simulations}
+\title{Optimal updating factor in adaptive flat-distribution-sampling simulations}
 
 
 
 \begin{abstract}
   We present a method of computing the optimal schedule
   of the updating magnitude
-  for adaptive flat-distribution sampling methods,
+  for adaptive flat-distribution-sampling methods,
   such as the Wang-Landau (WL) algorithm and metadynamics.
   %
   These sampling methods
@@ -802,70 +802,115 @@ $
 
 
 
-To proceed, we first observe that
-the average
-$$
-\bar v = \sum_{i = 1}^n p_i \, v_i
-$$
-increases steadily over time:
-%
+To proceed, we first define an average\cite{
+dama2014},
 \begin{equation}
-\frac{ d \bar v } { d t }
-=
-\sum_{i = 1}^n p_i \dot v_i
-=
-\alpha(t) \sum_{i = 1}^n h_i(t) = \alpha(t).
-\label{eq:dvbardt}
+  \bar v(t)
+  = \sum_{i = 1}^n \rho_i \, v_i(t)
+\label{eq:vbar_def}
 \end{equation}
+for some distribution,
+$\pmb \rho = (\rho_1, \dots, \rho_n)$.
 %
-However, we expect the difference %between $v_i$ and $\bar v$,
+This distribution $\pmb \rho$
+will be used to measure the error,
+and is independent of
+the target distribution $\mathbf p$.
+%
+For example,
+in well-tempered metadynamics,
+$\pmb\rho$ is always flat,
+while $\mathbf p$ is an attenuated version of
+$\mathbf p^*$\cite{
+barducci2008, dama2014}.
+%
+Then, we expect the difference %between $v_i$ and $\bar v$,
 %
 \begin{equation}
-  x_i \equiv v_i - \bar v = v_i - \sum_{j = 1}^n p_j \, v_j,
-  \label{eq:x_def}
+  x_i \equiv v_i - \bar v
+  %=
+  %v_i - \sum_{j = 1}^n \rho_j \, v_j
+  ,
+\label{eq:x_def}
 \end{equation}
 %
 to be small in the asymptotic regime.
+%
+It follows that
+\begin{equation}
+  \sum_{i = 1}^n \rho_i \, x_i = 0
+  ,
+\label{eq:rhox_sum}
+\end{equation}
+and
+\begin{equation}
+  \frac{ d \bar v (t) }
+       { d t }
+  =
+  \alpha(t)
+  \sum_{ r = 1 }^n \frac{ h_r(t) } { p_r }
+  .
+\label{eq:dvbardt}
+\end{equation}
+%
 Expanding Eq. \eqref{eq:h_ave} in $x_i$ yields
 %
 \begin{align}
-  \langle h_i(t) \rangle
+  \frac{
+    \langle h_i(t) \rangle
+  }
+  {
+    p_i
+  }
   &\approx
-  \frac{                 p_i \, e^{- x_i} }
+  \frac{                        e^{- x_i} }
        { \sum_{ j = 1}^n p_j \, e^{- x_j} }
   \approx
-  p_i \, (1 - x_i),
+  1 - x_i + \sum_{r = 1}^n p_r \, x_r
+  ,
 \label{eq:hdet_linearize}
 \end{align}
 %
-where we have used $\sum_{j=1}^n p_j = 1$,
-and
+where we have used $\sum_{j=1}^n p_j = 1$.
 %
-\begin{equation}
-  \sum_{i = 1}^n p_i \, x_i = 0,
-  \label{eq:px_sum}
-\end{equation}
-which follows directly from Eq. \eqref{eq:x_def}.
 \note{For \eqref{eq:hdet_linearize}. Following the second step
 $$
 \langle h_i(t) \rangle
 \approx
-\frac{                 p_i (1 - x_i) }
-     { \sum_{ j = 1}^n p_j (1 - x_j) }
+\frac{                  p_i (1 - x_i) }
+     { \sum_{ r = 1 }^n p_r (1 - x_r) }
+=
+\frac{                      p_i (1 - x_i) }
+     { 1 - \sum_{ r = 1 }^n p_r \, x_r }
 .
 $$
 }%
 From Eqs.
 \eqref{eq:vt_diffeq},
 \eqref{eq:h_split},
-\eqref{eq:dvbardt}-\eqref{eq:hdet_linearize},
+\eqref{eq:x_def}-\eqref{eq:hdet_linearize},
 we get a set of decoupled equations
 %
 \begin{equation}
   \dot x_i(t)
   =
-  -\alpha(t) \, \left[ x_i(t) - \frac{ \zeta_i(t) } { p_i } \right].
-  \label{eq:dxdt_WL}
+  -\alpha(t) \, \left[ x_i(t) - \xi_i(t) \right]
+  ,
+\label{eq:dxdt_WL}
+\end{equation}
+where
+\begin{equation}
+  \xi_i(t)
+  =
+  \frac{ \zeta_i(t) }
+       { p_i }
+  -
+  \sum_{ r = 1 }^n
+    \rho_r
+    \frac{ \zeta_r(t) }
+         {     p_r    }
+  .
+\label{eq:xi_def}
 \end{equation}
 \note{The derivation:
 $$
@@ -876,27 +921,40 @@ $$
   \dot v_i - \dot{ \bar v }
   \stackrel{\mathrm{Eqs.\; \eqref{eq:vt_diffeq}\; and\; \eqref{eq:dvbardt}}}
             {=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=}
-  \alpha(t) \left( \frac{ h_i } { p_i } - 1 \right)
+  \alpha(t) \left(
+    \frac{ h_i } { p_i }
+    -
+    \sum_{ r = 1 }^n
+      \rho_r \frac{ h_r } { p_r }
+  \right)
   \\
   &\stackrel{\mathrm{Eq.\; \eqref{eq:h_split}}}
             {=\joinrel=\joinrel=\joinrel=\joinrel=}
-  \alpha(t) \left( \frac{ \langle h_i \rangle } { p_i } + \frac{ \zeta_i } { p_i } - 1 \right)
-  \stackrel{\mathrm{Eq.\; \eqref{eq:hdet_linearize}}}
-            {=\joinrel=\joinrel=\joinrel=\joinrel=}
-  \alpha(t) \left[ -x_i(t) + \frac{ \zeta_i } { p_i } \right].
+  \alpha(t) \left(
+    \frac{ \langle h_i \rangle } { p_i }
+    -
+    \sum_{ r = 1 }^n
+      \rho_r \frac{ \langle h_r \rangle } { p_r }
+    +
+    \xi_i(t)
+  \right)
+  \\
+  &\stackrel{\mathrm{Eqs.\; \eqref{eq:rhox_sum} \;and\; \eqref{eq:hdet_linearize}}}
+            {=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=}
+  \alpha(t) \left[ -x_i(t) + \xi_i(t) \right].
 \end{aligned}
 $$
 }
 
 
-The total error of the bias potential can be written in
-terms of $x_i$,
+We define
+the total error of the bias potential as
 \begin{equation}
   \Err
   =
-  \sum_{i = 1}^n p_i \, \langle x_i^2 \rangle
+  \sum_{i = 1}^n \rho_i \, \langle x_i^2 \rangle
   =
-  \sum_{i = 1}^n p_i \, \left\langle (v_i - \bar v)^2 \right\rangle
+  \sum_{i = 1}^n \rho_i \, \left\langle (v_i - \bar v)^2 \right\rangle
   .
 \label{eq:error_sum}
 \end{equation}
@@ -1198,16 +1256,20 @@ detailed balance condition:
   \label{eq:w_detailedbalance}
 \end{equation}
 %
+for the distribution $\pmb \rho$
+introduced in Eq. \eqref{eq:vbar_def}.
+%
 It follows that
 \begin{equation}
-  \sum_{i = 1}^n p_i \, w_{ij}
+  \sum_{i = 1}^n \rho_i \, w_{ij}
   =
-  \sum_{i = 1}^n p_j \, w_{ji}
-  = p_j,
+  \sum_{i = 1}^n \rho_j \, w_{ji}
+  =
+  \rho_j,
   \label{eq:w_balance}
 \end{equation}
 %
-i.e., $\mathbf p$ is a left eigenvector of
+i.e., $\mathbf \rho$ is a left eigenvector of
 $\mathbf w$ with eigenvalue $1$.
 
 
@@ -1230,12 +1292,12 @@ satisfying the orthonormal conditions\cite{vankampen}:
   \sum_{k = 1}^n
     \phi_{ki} \, \phi_{kj}
   &=
-  \delta_{ij} \, p_i,
+  \delta_{ij} \, \rho_i,
   \label{eq:eig_orthonormal_cols}
   \\
   \sum_{i = 1}^n
     \frac{ \phi_{ki} \, \phi_{li} }
-         { p_i }
+         { \rho_i }
   &=
   \delta_{kl}
   .
@@ -1243,13 +1305,13 @@ satisfying the orthonormal conditions\cite{vankampen}:
 \end{align}
 
 Particularly, there is always an eigenvector
-corresponding to the target distribution, $\mathbf p$.
+corresponding to the distribution, $\pmb \rho$.
 %
 We shall label this eigenvector as the first one,
 and
 %
 \begin{equation}
-  \phi_{1i} = p_i,
+  \phi_{1i} = \rho_i,
 \label{eq:eigenmode1}
 \end{equation}
 %
@@ -1266,7 +1328,7 @@ Further, for $k \ge 2$, we have
   =
   \sum_{ i = 1 }^n
     \frac{ \phi_{ki} \, \phi_{1i} }
-         { p_i }
+         { \rho_i }
   =
   0
   .
@@ -1290,50 +1352,71 @@ can be negative.
 
 We can now simplify Eq. \eqref{eq:vt_diffeq_mbin}.
 %
-By using Eq. \eqref{eq:w_balance},
-we can show that
-Eqs. \eqref{eq:dvbardt} and \eqref{eq:px_sum}
-remain true, and
+By using Eqs. \eqref{eq:vbar_def}
+and \eqref{eq:w_balance},
+we can show that Eq. \eqref{eq:dvbardt}
+remains true,
+and by using Eqs.
+\eqref{eq:x_def},
+\eqref{eq:rhox_sum},
+\eqref{eq:hdet_linearize},
+\eqref{eq:xi_def},
+and \eqref{eq:w_sumj}, we get
 %
 $$
 \begin{aligned}
   \dot x_i(t)
   &= \alpha(t) \sum_{j=1}^n w_{ij}
-  \left( \frac{ h_j(t) } { p_j }  - 1 \right)
+  \left(
+    \frac{ h_j(t) } { p_j }
+    -
+    \sum_{r = 1}^n
+      \rho_r \frac{ h_r(t) } { p_r }
+  \right)
   \\
   &\approx
   -\alpha(t) \sum_{j = 1}^n
-  w_{ij} \left[ x_j(t) - \frac{\zeta_j (t)}{p_j} \right],
+  w_{ij} \left[ x_j(t) - \xi_j (t) \right]
+  .
 \end{aligned}
 $$
-where
-we have expanded the right-hand side
-in linear terms of $x_j$
-on the second line.
+%where
+%we have expanded the right-hand side
+%in linear terms of $x_j$
+%on the second line.
 
 \note{The proof of Eq. \eqref{eq:dvbardt},
 $$
 \begin{aligned}
   \dot{ \bar v }
-  &=
-  \sum_{i = 1}^n p_i \, \dot v_i
+  &
+  \stackrel{\mathrm{Eq.\; \eqref{eq:vbar_def}}}
+  {=\joinrel=\joinrel=\joinrel=\joinrel=}
+  \sum_{i = 1}^n \rho_i \, \dot v_i
   %
   \stackrel{\mathrm{Eq.\; \eqref{eq:vt_diffeq_mbin}}}
   {=\joinrel=\joinrel=\joinrel=\joinrel=}
   %
-  \sum_{j = 1}^n \alpha(t) \, \frac{ h_j(t) } { p_j }
-                 \sum_{ i = 1 }^{n} p_i \, w_{ij}
+  \alpha(t)
+  \sum_{j = 1}^n \frac{ h_j } { p_j }
+                 \sum_{ i = 1 }^{n} \rho_i \, w_{ij}
   \\
   &
   \stackrel{\mathrm{Eq.\; \eqref{eq:w_balance}}}
   {=\joinrel=\joinrel=\joinrel=\joinrel=}
-  \sum_{j = 1}^n \alpha(t) \, h_j(t)
-  =
-  \alpha(t).
+  \alpha(t)
+  \sum_{j = 1}^n \rho_j
+    \, \frac{ h_j } { p_j }
+  %
+  \stackrel{\mathrm{Eq.\; \eqref{eq:w_sumj}}}
+  {=\joinrel=\joinrel=\joinrel=\joinrel=}
+  \alpha(t)
+  \sum_{j = 1}^n w_{ij}
+  \sum_{r = 1}^n \rho_r
+    \, \frac{ h_r } { p_r }
+  .
 \end{aligned}
 $$
-Equation \eqref{eq:px_sum} follows directly from the definition
-Eq. \eqref{eq:x_def}.
 }
 
 Now by diagonalizing the matrix $\mathbf w$
@@ -1360,8 +1443,7 @@ where
   \theta_k(t)
   &=
   \sum_{j=1}^n
-    \phi_{kj} \frac{ \zeta_j(t) }
-                   { p_j        }
+    \phi_{kj} \, \xi_j(t)
   .
   \label{eq:eta_def}
 \end{align}
@@ -1377,7 +1459,7 @@ can be rewritten in terms of the eigenmodes
 \begin{align}
   \Err
   \equiv
-  \sum_{i = 1}^n p_i \,
+  \sum_{i = 1}^n \rho_i \,
     \left\langle x_i^2 \right\rangle
   =
   \sum_{i, j, k=1}^n \phi_{ki} \, \phi_{kj} \,
@@ -1394,8 +1476,9 @@ can be rewritten in terms of the eigenmodes
 where we have used Eq. \eqref{eq:eig_orthonormal_cols}.
 %
 From Eq. \eqref{eq:eigenmode1},
-the first eigenmode, $y_1 = \sum_{j=1}^n p_j \, x_j$,
-vanishes identically by Eq. \eqref{eq:px_sum}.
+the first eigenmode,
+$y_1 = \sum_{j=1}^n \rho_j \, x_j$,
+vanishes identically by Eq. \eqref{eq:rhox_sum}.
 %
 Thus, we can start the last sum %in Eq. \eqref{eq:y2_sum}
 from $k = 2$,
@@ -1796,15 +1879,15 @@ both $M(Q)$ and $m(Q)$ decrease monotonically with $Q$.
 \begin{center}
   \begin{tikzpicture}[very thick, scale=2.5, every node/.style={scale=1.5}]
     % distribution
-    \draw[domain=0:2.5, variable=\x, dashed, gray, ultra thick] 
+    \draw[domain=0:2.5, variable=\x, dashed, gray, ultra thick]
       plot({\x}, {1.5*exp(-0.5*\x*\x)});
 
     % shade
     \fill [gray!30!white, domain=0.7:2.2, variable=\x]
       (0.7, 0) --
-      plot ({\x}, {1.5*exp(-0.5*\x*\x)}) 
+      plot ({\x}, {1.5*exp(-0.5*\x*\x)})
       -- (2.2, 0) -- cycle;
- 
+
     % thick curve
     \draw[domain=0:2.2, variable=\x, ultra thick]
       plot({\x}, {1.5*exp(-0.5*\x*\x)});
@@ -1837,7 +1920,8 @@ both $M(Q)$ and $m(Q)$ decrease monotonically with $Q$.
     via the normalized mass distribution, $m(Q)$.
     %
     \note{
-      The figure was produced by \texttt{tikz}. % doc/fig/massq.gp}.
+      The figure was produced by \texttt{tikz}.
+      % Gnuplot version by doc/fig/massq.gp
     }%
   }
 \end{center}
@@ -2051,19 +2135,23 @@ centered on the current bin.
 We call these schemes homogeneous,
 or translationally invariant.
 %
-Naturally, $\rho_i = 1/n$ in this case.
-%
 An example is the Gaussian updating scheme
 used in metadynamics.
+
+By the translational invariance,
+homogeneous updating schemes
+satisfy detailed balance,
+Eq. \eqref{eq:w_detailedbalance},
+for the flat distribution, $\rho_i = 1/n$,
+i.e., the updating matrix, $\mathbf w$,
+is symmetric.
 %
-Homogeneous updating schemes
-share the same set of eigenvectors
-but not the corresponding eigenvalues.
+Besides, the updating matrices
+share the same set of eigenvectors,
+and thus are completely determined
+by the eigenvalues.
 %
-They have significantly fewer
-parameters than the general case,
-and the multiplication of the updating matrix,
-$\mathbf w$,
+Further, the multiplication of $\mathbf w$
 can be reduced to a convolution with the window,
 or the updating kernel.
 %
@@ -3671,7 +3759,7 @@ to be discussed later.
     \hline
     Global
     &
-    $4.4(1) \times 10^{-6}$
+    $4.36(9) \times 10^{-6}$
     &
     $7.1(1) \times 10^{-7}$
     &
@@ -3680,11 +3768,11 @@ to be discussed later.
     \hline
     Local
     &
-    $3.8(2) \times 10^{-4}$
+    $3.83(7) \times 10^{-4}$
     &
-    $1.8(1) \times 10^{-4}$
+    $1.72(4) \times 10^{-4}$
     &
-    $1.0(1) \times 10^{-4}$
+    $9.1(2) \times 10^{-5}$
     \\
     \hline
   \end{tabular}
@@ -3738,7 +3826,7 @@ to be discussed later.
     For longer simulations,
     the error components from the optimal schedule
     would roughly maintain the same shape,
-    but join the initial error curve
+    but meet the initial error curve
     at a lower level (not shown).
     %
     \note{This figure was produced by \texttt{doc/fig/xerr.gp}.
@@ -4001,7 +4089,8 @@ the autocorrelation functions,
 $\Gamma_k$'s,
 in two special cases
 in Secs. \ref{sec:Gamma_perfect}
-and \ref{sec:Gamma_onestep},
+and \ref{sec:Gamma_onestep}
+in the asymptotic limit,
 and describe a general method of measuring them
 in Sec. \ref{sec:Gamma_measure}.
 
@@ -4025,85 +4114,89 @@ at each time step $t$ in this case, and
 %
 \begin{align}
   \left\langle
-    \zeta_i(t) \, \zeta_j(t')
+    \xi_i(t) \, \xi_j(t')
   \right\rangle
+  %&=
+  %\left\langle
+  %  \left(
+  %    \frac{ h_i(t) } { p_i }
+  %    -
+  %    \sum_{ r = 1 }^n
+  %      \rho_r \frac{ h_r(t) } { p_r }
+  %  \right)
+  %\right.
+  %\notag \\
+  %&\hphantom{==}\cdot
+  %\left.
+  %  \left(
+  %    \frac{ h_j(t') } { p_i }
+  %    -
+  %    \sum_{ s = 1 }^n
+  %      \rho_s \frac{ h_s(t') } { p_s }
+  %  \right)
+  %\right\rangle
+  %\notag
+  %\\
   &=
-  \langle h_i(t) \, h_j(t') \rangle
-  -
-  \langle h_i(t) \rangle
-  \langle h_j(t') \rangle
-  \notag
-  \\
-  &=
-  \left( p_i \, \delta_{ij} - p_i \, p_j \right) \,
+  \left(
+    \frac{ \delta_{ij} } { p_i }
+    -
+    \frac{ \rho_i } { p_i }
+    -
+    \frac{ \rho_j } { p_j }
+    +
+    \sum_{r = 1}^n
+    \frac{ \rho_r^2 } { p_r }
+  \right) \,
   \delta_{t, t'}
   ,
 \label{eq:zz_perfect}
 \end{align}
 %
-where $\delta(t - t')$ is the equivalent of $\delta_{t, t'}$
-in the continuous limit.
+where
+we have assumed the asymptotic limit
+such that $\langle h_i(t) \rangle = p_i$,
+which leads to,
+by Eqs. \eqref{eq:h_split} and \eqref{eq:xi_def},
+$$
+  \xi_i(t)
+  =
+  \frac{ h_i(t) } { p_i }
+  -
+  \sum_{ r = 1 }^n
+    \rho_r \frac{ h_r(t) } { p_r }
+  .
+$$
+%$\delta(t - t')$ is the equivalent of $\delta_{t, t'}$
+%in the continuous limit.
 %
 \note{To show Eq. \eqref{eq:zz_perfect}, we first note that
   with $t \ne t'$ (going back to the discrete time case),
   $$
   \begin{aligned}
   \left\langle
-    \zeta_i(t) \, \zeta_j(t')
+    \xi_i(t) \, \xi_j(t')
   \right\rangle
   &=
   \left\langle
-    \zeta_i(t)
+    \xi_i(t)
   \right\rangle
   \left\langle
-    \zeta_j(t')
+    \xi_j(t')
   \right\rangle
-  \\
-  &=
-  \bigl\langle h_i(t)  - \langle h_i(t)  \rangle \bigr\rangle
-  \bigl\langle h_j(t') - \langle h_j(t') \rangle \bigr\rangle
   =
   0.
   \end{aligned}
   $$
   Next, for $t = t'$, we have
   $$
-  \zeta_i(t)
-  = h_i(t) - \langle h_i(t) \rangle
-  = \delta_{i, i(t)} - p_i,
+  \langle
+    h_i(t) \, h_j(t)
+  \rangle
+  = \delta_{ij} \, p_i
+  ,
   $$
-  and
-  $$
-  \begin{aligned}
-  \left\langle
-    \zeta_i(t) \, \zeta_j(t)
-  \right\rangle
-  &=
-  \left\langle
-    \delta_{i, i(t)} \, \delta_{j, i(t)}
-  \right\rangle
-  -
-  p_i \, p_j
-  \\
-  &=
-  \left\langle
-    \delta_{i, i(t)}
-  \right\rangle
-  \delta_{i, j}
-  -
-  p_i \, p_j
-  =
-  p_i \, \delta_{ij}
-  - p_i \, p_j.
-  \end{aligned}
-  $$
-  %
-  The average
-  $\left\langle \delta_{i, i(t)} \right\rangle$ is $p_i$,
-  because as $i(t)$ goes through $1$ to $n$,
-  $\delta_{i, i(t)}$ gives $1$
-  if $i(t)$ matches $i$ with probability $p_i$,
-  or $0$ otherwise.
+  which leads to Eq. \eqref{eq:zz_perfect}.
 }
 %
 Thus,
@@ -4113,17 +4206,17 @@ for $k \ge 2$, we get
   \kappa_k(t - t')
   =
   \sum_{i,j = 1}^n
-  \frac{ \phi_{ki} } { p_i }
-  \frac{ \phi_{kj} } { p_j }
-  \langle \zeta_i(t) \, \zeta_j(t') \rangle
+  \phi_{ki} \phi_{kj}
+  \langle \xi_i(t) \, \xi_j(t') \rangle
   %
-  = \delta_{t, t'},
+  = \sum_{i = 1}^n \frac{ \phi_{ki}^2 } { p_i }
+  \delta_{t, t'},
 \notag
 %\label{eq:kappa_perfect}
 \end{equation}
 %
 where we have used
-Eqs. \eqref{eq:eig_orthonormal_rows}-\eqref{eq:ortho1},
+Eqs. \eqref{eq:ortho1},
 \eqref{eq:eta_def},
 and
 \eqref{eq:zz_perfect}.
@@ -4134,32 +4227,27 @@ and
   \kappa_k(t - t')
   &=
   \sum_{i,j = 1}^n
-  \frac{ \phi_{ki} } { p_i }
-  \frac{ \phi_{kj} } { p_j }
-  \langle \zeta_i(t) \, \zeta_j(t') \rangle
+  \phi_{ki}
+  \phi_{kj}
+  \langle \xi_i(t) \, \xi_j(t') \rangle
   \\
   %
   &=
   \sum_{i,j = 1}^n
-  \frac{ \phi_{ki} } { p_i }
-  \frac{ \phi_{kj} } { p_j }
+  \phi_{ki}
+  \phi_{kj}
   \left(
-    p_i \, \delta_{i, j} - p_i \, p_j
-  \right)
-  \, \delta_{t, t'}
-  \\
-  &=
-  \left(
-    \sum_{j = 1}^n
-    \frac{ \phi_{kj}^2 } { p_j }
+    \frac{ \delta_{ij} } { p_i }
     -
-    \sum_{i = 1}^n \phi_{ki}
-    \sum_{j = 1}^n \phi_{kj}
-  \right)
+    \frac{ \rho_i } { p_i }
+    -
+    \frac{ \rho_j } { p_j }
+    +
+    \sum_{r = 1}^n
+    \frac{ \rho_r^2 } { p_r }
+  \right) \,
   \, \delta_{t, t'}
-  \\
-  &=
-  (1 - 0 \cdot 0) \, \delta_{t, t'}.
+  .
   \end{aligned}
   $$
   where,
@@ -4168,11 +4256,18 @@ and
   on the first line,
   %
   Eq. \eqref{eq:zz_perfect}
-  on the second line,
-  and
-  Eq. \eqref{eq:eig_orthonormal_rows}
-  on the last line.
+  on the second line.
+  %
+  With Eq. \eqref{eq:ortho1},
+  only the first term in the parentheses survives.
 }
+Particularly, if $p_i = \rho_i$, then, by
+Eq. \eqref{eq:eig_orthonormal_rows}
+$$
+\kappa_k(t - t') = 1.
+$$
+
+
 
 
 \subsection{\label{sec:Gamma_onestep}
@@ -4210,16 +4305,17 @@ For many updating schemes
 (cf. Sec. \ref{sec:band-matrix}),
 we can further assume that
 the matrices $\mathbf A$ and $\mathbf w$
-share the eigenvectors, but not the eigenvalues.
+share the eigenvectors,
+with $\rho_i = p_i = 1/n$.
+%but not the eigenvalues.
 %
 The eigenvalues of $\mathbf A$ are
 $$
-\Lambda_k
-=
-1 -
-2 \sin^2 \frac{ (k - 1) \, g \, \pi }
-              {       2 \, n        }
-,
+  \Lambda_k
+  =
+  \cos \frac{ (k - 1) \, g \, \pi }
+            {       2 \, n        }
+  ,
 $$
 where
 $g = 2$ for a periodic variable, or $1$ otherwise.
@@ -4668,23 +4764,30 @@ on the right-hand side of Eq. \eqref{eq:vcorr_equil},
   &=
   \left\langle
     \sum_{ i = 1 }^ n
-      p_i \,
+      \rho_i \,
       \left(
         \ln \frac { H_i }
                   { p_i }
+        -
+        \sum_{r = 1}^n \rho_r
+        \ln \frac { H_r }
+                  { p_r }
       \right)^2
   \right\rangle
-%\notag
-%\\
-  %&
+  \notag
+  \\
+  &
   \approx
   \sum_{ i = 1 }^ n
-    p_i \,
+    \rho_i \,
     \left\langle
       \left(
         \frac { H_i }
               { p_i }
-        - 1
+        -
+        \sum_{r = 1}^n \rho_r
+            \frac { H_r }
+                  { p_r }
       \right)^2
     \right\rangle,
 \notag
@@ -4742,74 +4845,73 @@ with $\theta_k(t)$ defined by Eq. \eqref{eq:eta_def}.
 \note{Because
 %
 \begin{align*}
-\sum_{ k = 1 }^n
-  \Theta_k^2
-&=
-\frac{ 1 } { T^2 }
-\sum_{ t, t' = 1 }^T
   \sum_{ k = 1 }^n
-    \theta_k( t ) \, \theta_k( t' )
-\\
-&=
-\frac{ 1 } { T^2 }
-\sum_{ t, t' = 1 }^T
-  \sum_{ i, j = 1 }^n
-    \left[
-      \frac{ h_i(t) }
-           { p_i    }
-      - 1
-    \right]
-    \left[
-      \frac{ h_j(t') }
-           { p_j     }
-      - 1
-    \right]
+    \Theta_k^2
+  &=
+  \frac{ 1 } { T^2 }
+  \sum_{ t, t' = 1 }^T
     \sum_{ k = 1 }^n
-      \phi_{k \, i} \, \phi_{k \, j}
-\\
-&=
-\frac{ 1 } { T^2 }
-\sum_{ t, t' = 1 }^T
-  \sum_{ i, j = 1 }^n
-    \left[
-      \frac{ h_i(t) }
-           { p_i    }
-      - 1
-    \right]
-    \left[
-      \frac{ h_j(t') }
-           { p_j     }
-      - 1
-    \right]
-    p_i \, \delta_{i, j}
-\\
-&=
-\sum_{ i = 1 }^n
-\frac{ 1 } { T }
-\sum_{ t = 1 }^T
-    \left[
-      \frac{ h_i(t) }
-           { p_i    }
-      - 1
-    \right]
-\frac{ 1 } { T }
-\sum_{ t' = 1 }^T
-    \left[
-      \frac{ h_i(t') }
-           { p_i     }
-      - 1
-    \right]
-\\
-&=
-\sum_{ i = 1 }^n
-  p_i \,
-    \left(
-      \frac{ \bar h_i }
-           { p_i      }
-      - 1
-    \right)^2
-.
+      \theta_k( t ) \, \theta_k( t' )
+  \\
+  &=
+  \frac{ 1 } { T^2 }
+  \sum_{ t, t' = 1 }^T
+    \sum_{ i, j = 1 }^n
+      \xi_i(t) \, \xi_j(t')
+      %\left[
+      %  \frac{ h_i(t) }
+      %       { p_i    }
+      %  - 1
+      %\right]
+      %\left[
+      %  \frac{ h_j(t') }
+      %       { p_j     }
+      %  - 1
+      %\right]
+      \sum_{ k = 1 }^n
+        \phi_{k \, i} \, \phi_{k \, j}
+  \\
+  &=
+  \frac{ 1 } { T^2 }
+  \sum_{ t, t' = 1 }^T
+    \sum_{ i, j = 1 }^n
+      \xi_i(t) \, \xi_j(t') \,
+      \rho_i \, \delta_{i, j}
+  \\
+  &=
+  \sum_{ i = 1 }^n
+  \frac{ 1 } { T }
+  \sum_{ t = 1 }^T \xi_i(t)
+  \;
+  \frac{ 1 } { T }
+  \sum_{ t' = 1 }^T \xi_i(t')
+  \\
+  &=
+  \sum_{ i = 1 }^n
+    \rho_i \,
+      \left(
+        \frac{ H_i }
+             { p_i }
+        -
+        \sum_{r = 1}^n \rho_r
+        \frac{ H_r }
+             { p_r }
+      \right)^2
+  ,
 \end{align*}
+where we have used
+$$
+  \frac{1}{T}
+  \sum_{t = 1}^T \xi_i(t)
+  =
+  \frac{ H_i }
+       { p_i }
+  -
+  \sum_{r = 1}^n \rho_r
+  \frac{ H_r }
+       { p_r }
+  .
+$$
 }%
 The sum starts from $k = 2$, for
 by Eq. \eqref{eq:eigenmode1}, % we have
@@ -4817,9 +4919,13 @@ $$
 \theta_1(t)
 =
 \sum_{ i = 1 }^n
-  \phi_{1i} \, \frac{ h_i(t) - p_i } { p_i }
-=
-\sum_{ i = 1 }^n \left[ h_i(t) - p_i \right]
+  \phi_{1i} \, \left(
+    \frac{ h_i(t) } { p_i }
+    -
+    \sum_{r = 1}^n
+    \rho_r
+    \frac{ h_r(t) } { p_r }
+  \right)
 = 0.
 $$
 
