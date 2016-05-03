@@ -91,45 +91,55 @@ the task is to compute,
 via either Monte Carlo\cite{frenkel, newman, landau_binder} (MC)
 and molecular dynamics\cite{frenkel, karplus2002} (MD) simulations,
 a distribution, $p^*(z)$,
-along a quantity of interest $z$.
+along a collective variable $z$.
 %
-The negative logarithm,
-$-\ln p^*(z)$,
-defines a free energy,
-or the potential of mean force (PMF).
+However, $z$
+often represents a slow variable
+with a localized or multi-modal distribution, $p^*(z)$.
 %
-Normally, the distribution $p^*(z)$ is
-limited in one or a few narrow $z$ regions.
+Thus,
+to capture the global shape of the free energy surface
+in terms of the potential of mean force (PMF), $-\ln p^*(z)$,
+an effective strategy is to sample a flat distribution
+along $z$ by introducing a bias potential that
+cancels the PMF.
+%The negative logarithm,
+%$-\ln p^*(z)$,
+%defines a free energy,
+%or the potential of mean force (PMF).
+%%
+%Normally, the distribution $p^*(z)$ is
+%limited in one or a few narrow $z$ regions.
+%%
+%Therefore, to capture the global shape
+%of the PMF,
+%one has to run multiple independent simulations
+%under different umbrella or bias potentials
+%along $z$\cite{mezei1987, berg1992, lee1993},
+%and then piece together the entire curve.
+%%
+%This solution can be laborious % clumsy in practice
+%and it often fails to converge quickly
+%for a complex and glassy system,
+%because the system can be trapped
+%in a local free energy minimum.
+%%for a long time.
 %
-Therefore, to capture the global shape
-of the PMF,
-one has to run multiple independent simulations
-under different umbrella or bias potentials
-along $z$\cite{mezei1987, berg1992, lee1993},
-and then piece together the entire curve.
 %
-This solution can be laborious % clumsy in practice
-and it often fails to converge quickly
-for a complex and glassy system,
-because the system can be trapped
-in a local free energy minimum.
-%for a long time.
-
-
-
-A better solution is to artificially flatten
-the target distribution along $z$\cite{mezei1987, berg1992, lee1993,
-wang2001, wang2001pre, laio2002, laio2008, barducci2011, sutto2012}.
 %
-This alleviates the above problem of local trapping
-by forcing the system to travel more
-deliberately along $z$,
-which often represents
-a direction of slow motion.
-%
-To achieve a flat distribution, however,
-the method must be able to construct a
-bias potential that cancels the PMF.
+%A better solution is to artificially flatten
+%the target distribution along $z$\cite{mezei1987, berg1992, lee1993,
+%wang2001, wang2001pre, laio2002, laio2008, barducci2011, sutto2012}.
+%%
+%This alleviates the above problem of local trapping
+%by forcing the system to travel more
+%deliberately along $z$,
+%which often represents
+%a direction of slow motion.
+%%
+%To achieve a flat distribution, however,
+%the method must be able to construct a
+%bias potential that cancels the PMF.
 
 
 
@@ -137,45 +147,42 @@ The Wang-Landau (WL) algorithm\cite{wang2001, wang2001pre}
 and meta\-dy\-nam\-ics\cite{huber1994, laio2002,
 laio2008, barducci2011, sutto2012}
 are two widely-used and closely-related\cite{micheletti2004}
-techniques for this purpose,
-in which a bias potential is gradually built up
-during simulation.
+flat-distribution-sampling (FDS) techniques
+that build the bias potential on the fly.
 %
-These techniques employ updating loops
+These techniques employ regular updating loops
 to discourage future visits to configurations
 with the current $z$ value
 by elevating the bias potential there.
 %
-The main difference
-is that in the WL case,
-each updating step is limited to the bin
-containing the current $z$,
-while metadynamics adopts an extended
-Gaussian window
-covering several neighboring bins.
+%The main difference
+%is that in the WL case,
+%each updating step is limited to the bin
+%containing the current $z$,
+%while metadynamics adopts an extended
+%Gaussian window
+%covering several neighboring bins.
+%%
+%The latter is more often used in MD simulations
+%as it guarantees a smooth profile
+%of the bias potential
+%suitable for numerical differentiation
+%in deriving the bias force.
 %
-The latter is more often used in MD simulations
-as it guarantees a smooth profile
-of the bias potential
-suitable for numerical differentiation
-in deriving the bias force.
-%
-However, in both cases, the bias potential
-is updated frequently (usually every few MC or MD steps),
-%which % brings about a side effect of disrupting
-and the fluctuation
-disrupts \note{``disturbs''?} the underlying
-equilibrium sampling dynamics\cite{laio2002}.
-%
-Thus, one often has to reduce
+However,
+since the frequent updates to the bias potential
+%in both cases, the bias potential
+%is updated frequently (usually every few MC or MD steps),
+%and the fluctuation
+disrupts the underlying
+equilibrium sampling dynamics\cite{laio2002},
+one often has to gradually decrease
 the updating magnitude
-over the course of simulation
-to decrease the effect.
+to reduce the effect.
 
 
 
-The updating schedule,
-or the manner of reducing
+The schedule of reducing
 the updating magnitude,
 therefore,
 determines the precision of the final bias potential,
@@ -201,22 +208,23 @@ however, is less studied.
 In this study,
 we present a method of computing
 the optimal schedule
-for a general adaptive flat-distribution sampling method.
+for a general adaptive FDS method,
+including the WL algorithm and metadynamics.
 %
-In this method, the optimal schedule is derived
+We derive the optimal schedule
 from an equation of motion of a free particle,
-with the initial updating magnitude set to
+and show that the initial updating magnitude
+should be set to
 half of the previous equilibrium value.
 %
 The optimal schedule in the WL case
 is shown to be given by
 the inverse-time formula,
-with the origin of time modified
-to satisfy the above optimal initial condition.
+with a modified origin of time.
 %
-For metadynamics, however,
-the optimal schedule is more complex,
-and it can be sensitive to the simulation length
+However,
+the optimal schedule for metadynamics is more complex
+and sensitive to the simulation length
 and the width of the Gaussian window.
 %
 Further, we generalize
@@ -227,6 +235,9 @@ and the modified inverse-time schedule is optimal for these schemes.
 %
 %For finite-length simulations, however,
 %metadynamics may deliver better performance.
+%
+These results may help practitioners
+plan and optimize FDS simulations.
 
 
 
@@ -250,11 +261,10 @@ We develop the theory
 in the following order.
 %
 In Sec. \ref{sec:background},
-we first review the basics of
-flat-distribution sampling
+we first review the basics of FDS
 and some known aspects on the optimal schedule.
 %
-This also helps fixing the notations.
+%This also helps fixing the notations.
 %
 Then, in Sec. \ref{sec:single-bin},
 we illustrate the method of
@@ -369,7 +379,7 @@ Here we shall call a simulation that targets
 a nearly flat distribution\cite{
 dayal2004, trebst2004, zhang2007, barducci2008, singh2011},
 $p_i$,
-a flat-distribution sampling (FDS) simulation.
+an FDS simulation.
 %
 Roughly speaking, there are two types of FDS methods.
 %
@@ -3714,8 +3724,8 @@ damp out the short-wavelength eigenmodes
 as shown in Fig. \ref{fig:xerr}.
 %
 If, however, we could ignore these local eigenmodes
-(by explicitly filtering out
-them in the biased potential),
+(by explicitly filtering
+them from the biased potential),
 then we can modify the optimal schedule
 from Eq. \eqref{eq:q_opt}
 and limit the sum
@@ -3814,7 +3824,7 @@ to be discussed later.
   }
   \caption{
     \label{fig:xerr}
-    Error components for the Gaussian updating scheme
+    Predicted error components for the Gaussian updating scheme
     with $\sigma = 10$
     from the optimal schedule
     and the inverse-time schedule, Eq. \eqref{eq:alpha_invt1}.
@@ -3972,8 +3982,10 @@ effectively sample a flat distribution
 by incrementally updating the bias potential
 to offset the PMF.
 %
-The optimal schedule delivers fastest convergence
-of the bias potential.
+The optimal schedule delivers the fastest convergence
+of the bias potential,
+and thus helps minimize the computational effort
+of the adaptive FDS simulation.
 %They differ by the updating schemes,
 %which specify how the bias potential is modified
 %in each updating step.
@@ -4058,7 +4070,7 @@ Strictly speaking, our method is valid
 only for long simulations.
 %
 This allows us to assume the sampling process
-to be a quasi-equilibrium one,
+to be a quasi-equilibrium one\cite{barducci2008, dama2014},
 and to represent the autocorrelation function
 of each eigenmode by a single number, $\Gamma_k$.
 %
@@ -4450,20 +4462,20 @@ Eq. \eqref{eq:Lagrangian_const}.
 
 
 As an example, we used the method to compute
-the integrals, $\Gamma_k$'s, from an MD simulation,
-and compared them to those from
-%Eq. \eqref{eq:Gamma_onestep}.
-the local MC sampling process.
+the integrals, $\Gamma_k$'s, from
+a local MC simulation
+(cf. Sec. \ref{sec:results_system})
+and an MD simulation,
+and compared them with those from
+the one-step sampling process.
 %
 As shown in Fig. \ref{fig:gamcmp},
-the larger values of $\Gamma_k$'s
-with smaller $k$'s
-from the two sampling processes
-were almost proportional.
-%
-This suggests that
+the $\Gamma_k$'s of the small-$k$ eigenmodes
+from the three sampling processes
+were almost proportional,
+suggesting that
 the optimal schedule
-from simulations using local sampling processes
+for simulations using local sampling processes
 would be similar in general properties.
 
 
@@ -4476,8 +4488,8 @@ would be similar in general properties.
   \caption{
     \label{fig:gamcmp}
     Integrals of the autocorrelation functions
-    from an MD simulation versus those
-    from the local MC simulation.
+    from a local MC simulation
+    and an MD simulation.
     %
     Each simulation was ran for $10^{10}$ steps.
     %
@@ -4757,7 +4769,7 @@ depends on the precision of the histogram.
 If all $v_i$'s are exact,
 the error is minimized, and can be computed
 from the second term
-on the right-hand side of Eq. \eqref{eq:vcorr_equil},
+on the right-hand side of Eq. \eqref{eq:vcorr_equil} as
 %
 \begin{align}
   E
