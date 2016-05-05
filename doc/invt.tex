@@ -270,15 +270,13 @@ Then, in Sec. \ref{sec:single-bin},
 we illustrate the method of
 computing the optimal schedule
 on the simplest case of
-single-bin (WL) updating scheme.
-%
-We shall prove the optimality
+single-bin updating scheme
+used by the WL algorithm,
+by proving the optimality
 of the known inverse-time formula.
 %
-Next, we turn to the general case
-of multiple-bin updating schemes
-and propose a method of computing
-the optimal schedule
+Next, we extend the method to the general case
+of a multiple-bin updating scheme
 in Secs. \ref{sec:multiple-bin}
 to \ref{sec:band-matrix}.
 %
@@ -1226,14 +1224,13 @@ Updating matrix}
 
 The matrix $\mathbf w$ is not arbitrary.
 %
-A necessary condition to sample
+First, to sample
 the desired distribution
-$\mathbf p = (p_1, \dots, p_n)$
-is the following.
-%
-In Eq. \eqref{eq:vt_diffeq_mbin},
-if $h_j(t)$ were the same as $p_j$,
-the $\dot v_i(t)$ should be a constant independent of $i$.
+$\mathbf p = (p_1, \dots, p_n)$,
+the $\dot v_i(t)$
+in Eq. \eqref{eq:vt_diffeq_mbin}
+should be a constant independent of $i$,
+if $h_j(t)$ were the same as $p_j$.
 %
 This allows $v_i(t)$'s to grow uniformly
 in the asymptotic regime.
@@ -1258,11 +1255,13 @@ except that the elements can be negative.
 
 
 To simplify the ensuing discussion,
-we shall further impose the
-detailed balance condition:
+we shall limit ourselves to $\mathbf w$'s
+that satisfy
+the detailed balance condition,
 %
 \begin{equation}
-  \rho_i \, w_{ij} = \rho_j \, w_{ji}.
+  \rho_i \, w_{ij} = \rho_j \, w_{ji}
+  ,
   \label{eq:w_detailedbalance}
 \end{equation}
 %
@@ -1613,6 +1612,7 @@ Equilibrium error under a constant updating magnitude
 }
 
 
+
 Before addressing the optimal schedule
 for a multiple-bin scheme,
 we shall first compute the equilibrium error
@@ -1621,44 +1621,57 @@ $\alpha(t) = \alpha_0$.
 %
 After a long period $T'$,
 the residual error becomes negligible, and
+the $k$th component of the asymptotic error
+is given by
+%
+%\begin{align}
+%  \Err
+%  &=
+%  \Err_A
+%  =
+%  \int_0^{T'}
+%    \sum_{k = 2}^n
+%      \Gamma_k \, (\lambda_k \, \alpha_0)^2 \,
+%      e^{ 2 \, \lambda_k \, \alpha_0 \, (t - T') }
+%    \, dt
+%  \notag
+%  \\
+%  &
+%  =
+%  %\stackrel{ T' \to \infty }
+%  %{ =\joinrel=\joinrel=\joinrel= }
+%  %
+%  \sum_{ k = 2 }^n
+%    \frac 1 2 \, \Gamma_k \, \lambda_k \, \alpha_0
+%  ,
+%  \qquad
+%  ( T' \to \infty )
+%  .
+%\notag
+%%\label{eq:error_eql}
+%\end{align}
+%
+%In terms of the components, we have
 %
 \begin{align}
-  \Err
+  \left\langle
+    y_k^2
+  \right\rangle
   &=
-  \Err_A
-  =
   \int_0^{T'}
-    \sum_{k = 2}^n
-      \Gamma_k \, (\lambda_k \, \alpha_0)^2 \,
+    \Gamma_k \, (\lambda_k \, \alpha_0)^2 \,
       e^{ 2 \, \lambda_k \, \alpha_0 \, (t - T') }
     \, dt
   \notag
   \\
-  &
-  =
-  %\stackrel{ T' \to \infty }
-  %{ =\joinrel=\joinrel=\joinrel= }
-  %
-  \sum_{ k = 2 }^n
-    \frac 1 2 \, \Gamma_k \, \lambda_k \, \alpha_0
+  &=
+  \frac 1 2 \, \Gamma_k \, \lambda_k \, \alpha_0
   ,
   \qquad
   ( T' \to \infty )
   .
-\notag
-%\label{eq:error_eql}
+\label{eq:y2_eql}
 \end{align}
-%
-In terms of the components, we have
-%
-\begin{equation}
-  \left\langle
-    y_k^2
-  \right\rangle
-  =
-  \frac 1 2 \, \Gamma_k \, \lambda_k \, \alpha_0.
-  \label{eq:y2_eql}
-\end{equation}
 %
 
 
@@ -1784,7 +1797,7 @@ So we may set
   \label{eq:Lagrangian_const}
 \end{equation}
 %
-for some positive $C$,
+for some positive constant $C$,
 %
 %We may treat Eq. \eqref{eq:Lagrangian_const}
 as a generalization of Eq. \eqref{eq:dudt_const}.
@@ -1806,7 +1819,7 @@ By integrating the square root, we get
   \label{eq:q_opt}
 \end{equation}
 %
-where $C$ is to be determined by
+where $C$ is determined by
 the boundary condition at $t = T$ as
 %
 \begin{equation}
@@ -1820,7 +1833,7 @@ the boundary condition at $t = T$ as
     \;
     d q'
   .
-  \notag
+  \label{eq:mint}
 \end{equation}
 %
 Thus, we have an implicit equation for $q(t)$,
@@ -1848,14 +1861,15 @@ We can characterize the optimal schedule
 geometrically as follows.
 %
 First, we define the mass function as
-$$
+\begin{equation}
   M(Q)
   =
   \sqrt{
     \textstyle\sum_{ k = 2 }^n \Gamma_k \, \lambda_k^2 \, e^{-2 \, \lambda_k \, Q}
   }
   .
-$$
+\label{eq:mass_func}
+\end{equation}
 and the normalized mass distribution as
 \begin{equation}
   m(Q)
@@ -1881,8 +1895,6 @@ and the normalized mass distribution as
 such that
 $\int_0^{q(T)} m(Q) \, dQ = 1$.
 %
-Clearly,
-both $M(Q)$ and $m(Q)$ decrease monotonically with $Q$.
 
 
 \begin{figure}[h]
@@ -2008,7 +2020,7 @@ we have
 %
 which means the asymptotic error
 is inversely proportional to the simulation length
-for the same-class schedules,
+for schedules in the same class,
 i.e., we have the scaling relation
 $T_1 \, E_{A1} = T_2 \, E_{A2}$.
 
@@ -2067,7 +2079,7 @@ $$
     \partial E_R
   }
   {
-    \partial q(T)
+    \partial Q_c
   }
   &=
   -\alpha_0 \, M^2(Q_c)
@@ -2077,7 +2089,7 @@ $$
     \partial E_A
   }
   {
-    \partial q(T)
+    \partial Q_c
   }
   &=
   \frac 2 T \,
@@ -2086,7 +2098,7 @@ $$
   .
 \end{aligned}
 $$
-Then solve $\partial (E_R + E_A) / \partial q(T) = 0$.
+Then solve $\partial (E_R + E_A) / \partial Q_c = 0$.
 }%
 By Eqs. \eqref{eq:mQ_invTa} and \eqref{eq:intmQ_tT},
 we can rewrite the condition as
@@ -2110,25 +2122,33 @@ in the original WL algorithm\cite{
 wang2001, wang2001pre}.
 
 
-Besides,
-for simulations with the same $\alpha_0$,
+Now consider
+simulations with the same $\alpha_0$.
+%
+Since both $M(Q)$ and $m(Q)$ decrease monotonically with $Q$,
 Eq. \eqref{eq:opt_qT} shows that
 the optimal $q(T)$ increases with
-the simulation length $T$.
+the simulation length $T$,
+more so if $M(Q)$ has a long tail.
 %
-If $M(Q)$ decays rapidly,
-the distribution $m(Q)$ does not critically
-depend on the cutoff $q(T)$,
-as long as $q(T)$ is sufficiently large.
+This means that, if many $\lambda_k$'s are near zero,
+both the optimal schedule and
+normalized asymptotic error, $E_A \cdot T$,
+would be sensitive to the simulation length, $T$.
 %
-So the optimal schedules of these simulations
-approximately satisfy the scaling relations
-described in Sec. \ref{sec:mass_distr}.
-%
-If, however, $M(Q)$ has a long tail
-because of some near-zero $\lambda_k$'s,
-increasing the simulation length $T$
-generally alters the shape of the optimal schedule.
+%If $M(Q)$ decays rapidly,
+%the distribution $m(Q)$ does not critically
+%depend on the cutoff $q(T)$,
+%once $q(T)$ is sufficiently large.
+%%
+%So the optimal schedules of these simulations
+%approximately satisfy the scaling relations
+%described in Sec. \ref{sec:mass_distr}.
+%%
+%If, however, $M(Q)$ has a long tail
+%because of some near-zero $\lambda_k$'s,
+%increasing the simulation length $T$
+%generally alters the shape of the optimal schedule.
 
 
 
@@ -2659,8 +2679,12 @@ or
 
 
 
-The Gaussian updating scheme is commonly
-used in metadynamics simulations.
+We define a Gaussian updating scheme
+as an updating scheme with a
+Gaussian-shaped kernel.
+%
+This updating scheme is commonly
+used in metadynamics.
 %
 Below we shall show its stability
 in the continuous limit.
@@ -3095,7 +3119,7 @@ The asymptotic error is then
   \sum_{ k = 2 }^n
     \Gamma_k
   .
-\label{eq:error_singlebin}
+\label{eq:error_asym_singlebin}
 \end{align}
 %
 If we further assume $\lambda_2 = 1$,
@@ -3139,9 +3163,16 @@ with identical eigenvalues
 is a multiple of the identity matrix.
 %
 Thus,
-the single-bin scheme is most efficient
+the corresponding updating scheme,
+the single-bin scheme, is most efficient
 in asymptotic convergence.
 %if no eigenvalue $\lambda_k$ is zero.
+%
+In Appendix \ref{sec:upperbound},
+we shall show that the opposite limit of
+a set of well-separated eigenvalues
+will provide an upper bound for
+the asymptotic error, Eq. \eqref{eq:error_asym_ubound}.
 
 
 
@@ -3169,21 +3200,21 @@ $$
 %
 Then,
 we can change the upper limit of the sum in
-Eq. \eqref{eq:error_singlebin} to $K$.
+Eq. \eqref{eq:error_asym_singlebin} to $K$:
 %
 %Then,
 %Eq. \eqref{eq:error_singlebin} is changed to
-%%
-%\begin{equation}
-%  E_A
-%  =
-%  \frac {       T     }
-%        { (T + t_0)^2 }
-%  \sum_{ k = 2 }^K
-%    \Gamma_k.
-%%\notag
-%\label{eq:error_asym_sinc}
-%\end{equation}
+%
+\begin{equation}
+  E_A
+  =
+  \frac {       T     }
+        { (T + t_0)^2 }
+  \sum_{ k = 2 }^K
+    \Gamma_k.
+%\notag
+\label{eq:error_asym_sinc}
+\end{equation}
 %
 The optimal schedule of these schemes
 remains to be the inverse-time one
@@ -3191,6 +3222,8 @@ given by Eq. \eqref{eq:alpha_invt1}.
 %
 Below, we construct these schemes for
 the homogeneous case.
+%
+The definition of $K$ will be modified.
 
 For a periodic variable, we demand
 %
@@ -3455,7 +3488,11 @@ which is, according to Eq. \eqref{eq:half_alpha0},
 \label{eq:t0_sinc}
 \end{equation}
 %
-and at this point
+and at this point, we get
+from Eqs. \eqref{eq:error_split},
+\eqref{eq:error_res1},
+\eqref{eq:tk0},
+\eqref{eq:error_asym_sinc},
 %
 \begin{equation}
   E
@@ -3831,13 +3868,15 @@ to be discussed later.
     %
     The latter schedule failed to damp out the errors
     from the long-wavelength (local) eigenmodes
-    with $K \ge 5$.
+    with $k \ge 5$.
     %
     For longer simulations,
     the error components from the optimal schedule
-    would roughly maintain the same shape,
+    would roughly maintain the relatively flat profile,
     but meet the initial error curve
-    at a lower level (not shown).
+    at a lower level (not shown),
+    where $\lambda_k \approx 1/q(T)$
+    (cf. Appendix \ref{sec:upperbound}).
     %
     \note{This figure was produced by \texttt{doc/fig/xerr.gp}.
       The data were saved under the directory \texttt{data/xerr}.
@@ -4113,16 +4152,16 @@ Perfect sampling}
 
 
 First, if the sampling is perfect,
-Eq. \eqref{eq:kappa_delta} is exact, and
+%Eq. \eqref{eq:kappa_delta} is exact, and
 %
-\begin{equation}
-  \Gamma_k = 1.
-\label{eq:Gamma_perfect}
-\end{equation}
+%\begin{equation}
+%  \Gamma_k = 1.
+%\label{eq:Gamma_perfect}
+%\end{equation}
 %
-To see this, we note that
+%To see this, we note that
 the bin index $i$ is an independent random variable
-at each time step $t$ in this case, and
+at each time step $t$, and
 %
 \begin{align}
   \left\langle
@@ -4221,8 +4260,9 @@ for $k \ge 2$, we get
   \phi_{ki} \phi_{kj}
   \langle \xi_i(t) \, \xi_j(t') \rangle
   %
-  = \sum_{i = 1}^n \frac{ \phi_{ki}^2 } { p_i }
-  \delta_{t, t'},
+  =
+  \sum_{i = 1}^n \frac{ \phi_{ki}^2 } { p_i }
+  \, \delta_{t, t'},
 \notag
 %\label{eq:kappa_perfect}
 \end{equation}
@@ -4278,6 +4318,19 @@ Eq. \eqref{eq:eig_orthonormal_rows}
 $$
 \kappa_k(t - t') = 1.
 $$
+Thus, Eq. \eqref{eq:kappa_delta} is exact,
+with
+$$
+\Gamma_k
+=
+\sum_{ i = 1}^n \frac{ \phi_{ki}^2 } { p_i },
+$$
+or if $\mathbf p = \pmb \rho$,
+\begin{equation}
+  \Gamma_k = 1
+  .
+\label{eq:Gamma_perfect}
+\end{equation}
 
 
 
@@ -4629,7 +4682,7 @@ with a constant updating magnitude, $\alpha_0$.
 Compute $\Gamma_k$'s from Eq. \eqref{eq:varY}.
 
 \item
-Compute $q(T)$ from the root of Eq. \eqref{eq:opt_qT}.
+Compute the optimal $q(T)$ by solving Eq. \eqref{eq:opt_qT}.
 
 \item
 Compute the optimal schedule by
@@ -4661,7 +4714,7 @@ Stabilization of homogeneous updating schemes}
 A homogeneous updating scheme
 specified by an arbitrary kernel
 is not necessarily stable,
-i.e., some eigenvalues may be negative.
+i.e., some eigenvalues can be negative.
 %
 %
 %\note{
@@ -4716,7 +4769,7 @@ resulting the following algorithm.
     from Eq. \eqref{eq:wband_eigenvalue}.
   \item
     If all eigenvalues are nonnegative,
-    we are done, and exit the loop.
+    we are done. % and exit the loop.
   \item
     Otherwise, replace negative eigenvalues by zeros,
     and compute the new kernel,
@@ -4727,6 +4780,199 @@ resulting the following algorithm.
     with $\mu_l = 0$ for $l > b$.
     Go to step 1.
 \end{enumerate}
+
+
+\section{\label{sec:upperbound}
+Asymptotic error for an updating scheme
+with a set of well-separated eigenvalues}
+
+
+We shall derive here an upper bound of the asymptotic error
+that can be associated to updating schemes
+with a set of well-separated eigenvalues,
+in parallel to the lower bound reachable by
+the single-bin scheme with a set of identical eigenvalues
+(cf. Sec. \ref{sec:optWL}).
+
+
+Starting from the definition Eq. \eqref{eq:mass_func}, we have
+$$
+  M(Q)
+  \le
+  \sum_{k = 2}^n
+  \sqrt{ \Gamma_k } \, \lambda_k \, e^{ -\lambda_k \, Q }
+  .
+$$
+Thus,
+it follows from Eq. \eqref{eq:mint} that, as $q(T) \to \infty$,
+\begin{equation}
+  C
+  \le
+  \sum_{k = 2}^n \sqrt{ \Gamma_k }
+  ,
+  \label{eq:mint_ubound}
+\end{equation}
+and the asymptotic error from Eq. \eqref{eq:error_asym2}
+is bounded as
+\begin{equation}
+  E_A
+  =
+  \frac{ C^2 } { T }
+  \le
+  \frac 1 T
+  \left(
+    \sum_{k=2}^n \sqrt{ \Gamma_k }
+  \right)^2
+  .
+  \label{eq:error_asym_ubound}
+\end{equation}
+
+
+Next, we show that this bound represents
+updating schemes with a set of very different eigenvalues.
+%
+First, observe that the summand of Eq. \eqref{eq:mass_func},
+$\Gamma_k \, \left( \lambda_k e^{-\lambda_k \, Q} \right)^2$
+is a function that peaks at $\lambda_k = 1/Q$,
+so that the sum is dominated by the term at $k = k(Q)$ with
+%
+\begin{equation}
+  \lambda_{k(Q)}
+  \approx
+  \frac 1 Q
+  .
+  \label{eq:kQ_def}
+\end{equation}
+%
+Thus,
+\begin{align}
+  M(Q)
+  &
+  \gtrsim
+  %\approx
+  \sqrt{ \Gamma_{ k(Q) } } \,
+  \lambda_{ k(Q) } \,
+  e^{ -\lambda_{ k(Q) } \, Q }
+\label{eq:MQ_lbound1}
+  \\
+  &
+  \approx
+  \frac{ \sqrt{ \Gamma_{ k(Q) } } }
+       { Q }
+  e^{ -\lambda_{ k(Q) } \, Q }
+  .
+\label{eq:MQ_lbound}
+\end{align}
+
+
+Now consider the $k$th error component, % of the asymptotic error,
+\begin{equation}
+  \left\langle
+    y_k^2
+  \right\rangle_A
+  =
+  \frac C T \,
+  \Gamma_k \, \lambda_k^2
+  \int_0^\infty
+    \frac{ e^{-2 \, \lambda_k \, Q} }
+         { M(Q) }
+    \, dQ
+  .
+\notag
+\end{equation}
+%
+Using Eq. \eqref{eq:MQ_lbound}, we have
+$$
+\begin{aligned}
+  \left\langle
+    y_k^2
+  \right\rangle_A
+  &
+  \lesssim
+  \frac C T \, \Gamma_k \, \lambda_k^2
+  \int_0^\infty
+    \frac{ Q } { \sqrt{ \Gamma_{ k(Q) } } }
+    e^{-\left[ 2\,\lambda_k - \lambda_k(Q) \right] Q }
+    \, dQ
+  \\
+  &
+  \approx
+  \frac C T \,
+  \frac{ \Gamma_k } { \sqrt{ \Gamma_{ k(Q^*) } } }
+  \left[
+    \frac{ \lambda_k } { 2 \, \lambda_k - \lambda_{ k(Q^*) } }
+  \right]^2
+  ,
+\end{aligned}
+$$
+where we have approximated $k(Q)$
+by its value around the peak of the integrand
+$$
+  Q^*
+  =
+  \frac{ 1 } { 2 \, \lambda_k - \lambda_{ k(Q^*) } }
+  .
+$$
+%
+Comparing this to Eq. \eqref{eq:kQ_def},
+we identify $k(Q^*) \approx k$, so
+\begin{equation}
+  \left\langle
+    y_k^2
+  \right\rangle_A
+  \lesssim
+  %\approx
+  \frac C T
+  \sqrt{ \Gamma_k }
+  .
+  \label{eq:y2_ubound}
+\end{equation}
+%
+This result shows that with a set of well-separated eigenvalues,
+the asymptotic error profile would be
+independent of $\lambda_k$'s and
+be flatter than the initial one from
+Eq. \eqref{eq:y2_eql}
+(cf. Fig. \ref{fig:xerr}
+for a Gaussian example).
+%
+Note that we can turn Eq, \eqref{eq:y2_ubound}
+to an inequality by choosing $k(Q) \to k$
+for Eq. \eqref{eq:MQ_lbound1}.
+%
+Then by summing over $k$
+and using Eq. \eqref{eq:mint_ubound},
+we recover Eq. \eqref{eq:error_asym_ubound}.
+
+
+For a finite-length simulation,
+the integrals $\int_0^{q(T)} dQ$
+can be extended to infinity
+only if $q(T) \gg Q^*$.
+%
+In other words,
+the above asymptotic limit fails around
+$Q^* \approx q(T)$, or equivalently
+around mode $k^* = k\bigl( q(T) \bigr)$,
+where $\lambda_{ k^* } \approx 1/q(T)$.
+%
+\note{This case also exemplifies
+  the sensitivity to the simulation length.
+  %
+  In this limit,
+  $M(Q) \propto 1/Q$ by Eq. \eqref{eq:MQ_lbound},
+  and $C \propto \ln\bigl[ q(T) / q_0 \bigr]$
+  for some $q_0$,
+  and we expect that with fixed $\alpha_0$,
+  $q(T)$ to increase almost linearly with $T$
+  by Eq. \eqref{eq:opt_qT}.
+  %
+  So the normalized asymptotic error,
+  $E_A \cdot T \propto \bigl( \ln[ q(T)/q_0 ] \bigr)^2 \sim (\ln T)^2$,
+  is sensitive to the simulation length,
+  and worse than the ideal case of a constant.
+}
+
 
 
 
@@ -4751,7 +4997,7 @@ to prevent possible future efficiency loss
 due to the adaptive updates.
 %
 Below, we shall show that this practice is unnecessary
-if the simulation uses the single-bin updating scheme
+if the simulation uses the single-bin or a bandpass updating scheme
 with the optimal schedule, Eq. \eqref{eq:alpha_invt1}.
 %
 That is, the bias potential obtained from
@@ -5191,7 +5437,7 @@ the asymptotic error is given by the integral
 
 
 
-For perfect sampling,
+For perfect sampling, with $\mathbf p = \pmb \rho$,
 $\Gamma(p) = 1$ from Eq. \eqref{eq:Gamma_perfect},
 and
 $$
