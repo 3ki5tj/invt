@@ -181,7 +181,7 @@ __inline static double intq_getinita(intq_t *intq)
 }
 
 
-/* compute the square-root asymptotic error
+/* compute the asymptotic error
  * assuming intq_geta() has been called
  * */
 static double intq_asymerr(intq_t *intq, double qT)
@@ -312,33 +312,56 @@ static double intq_geterr(intq_t *intq, double a0,
  *   M(Q) = sqrt{ Sum_k Gamma_k lambda_k^2 e^{-2 lambda_k Q} }.
  * Ea should be equal to mint^2 / T.
  * */
-__inline static double intq_getmint(intq_t *intq, double qT)
+__inline static double intq_getmint(intq_t *intq, double qT,
+    double *mint_ubound, const char *fnmass)
 {
   int i, k, m = intq->m, n = intq->n;
-  double dq, q, lambda, gamma, xp, y, mint, mass;
+  double dq, q, lambda, gamma, xp, y, mass, mint;
+  double mass_ub, mint_ub;
+  FILE *fpmass = NULL;
 
   dq = qT / m;
   mint = 0;
+  mint_ub = 0;
+
+  if ( fnmass != NULL &&
+      (fpmass = fopen(fnmass, "w")) == NULL ) {
+    fprintf(stderr, "cannot write %s\n", fnmass);
+  }
 
   /* compute Int M(Q) dQ */
   for ( i = 0; i <= m; i++ ) {
     q = i * dq;
     y = 0;
+    mass_ub = 0;
     for ( k = 0; k < n; k++ ) {
       gamma = intq->gamma[k];
       lambda = intq->lambda[k];
       xp = exp(-2 * lambda * q);
       y += gamma * lambda * lambda * xp;
+      mass_ub += lambda * sqrt(gamma * xp);
     }
     mass = sqrt( y );
     if ( i == 0 || i == m ) {
       mint += mass * dq * 0.5;
+      mint_ub += mass_ub * dq * 0.5;
     } else {
       mint += mass * dq;
+      mint_ub += mass_ub * dq;
+    }
+    if ( fpmass != NULL ) {
+      fprintf(fpmass, "%g\t%g\t%g\t%g\t%g\n", q, mass, mint, mass_ub, mint_ub);
     }
   }
 
-  //printf("qT %g, f %g, mass %g, df %g, y %g\n", qT, f, mass, *df, y);
+  if ( mint_ubound != NULL ) {
+    *mint_ubound = mint_ub;
+  }
+  fprintf(stderr, "qT %g, mint %g <= %g\n", qT, mint, mint_ub);
+
+  if ( fpmass != NULL ) {
+    fclose(fpmass);
+  }
   return mint;
 }
 

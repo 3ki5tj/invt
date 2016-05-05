@@ -41,7 +41,7 @@ static int save_xerr(invtpar_t *m, const char *fn,
 static void invt_geterr(invtpar_t *m,
     const double *gamma)
 {
-  int n = m->n;
+  int n = m->n, err;
   double T, c0, c1, t0, qT, inita, err0, err1, err2;
   double *lambda;
   double *xerri, *xerrf, *xerrf_r, *xerrf_a;
@@ -56,7 +56,14 @@ static void invt_geterr(invtpar_t *m,
 
   /* compute the eigenvalues of the updating matrix */
   lambda = geteigvals(m->n, m->winn, m->win, m->pbc,
-      0, NULL, 1);
+      0, &err, 1);
+  if ( err ) {
+    lambda = trimwindow(m->n, &m->winn, m->win, m->pbc, 0, 1);
+  }
+
+  /* models of well-separated eigenvalues */
+  //{ int i; for ( i = 1; i < n; i++ ) lambda[i] = pow(0.1, i); // pow(0.3, i*i*0.5); }
+
   /* save updating kernel or window function */
   if ( m->fnwin[0] != '\0' ) {
     savewin(m->winn, m->win, m->fnwin);
@@ -96,6 +103,9 @@ static void invt_geterr(invtpar_t *m,
       c0, t0, err0, err0 * err0,
       c1, err1, err1 * err1,
       qT, inita, err2, err2 * err2, m->fnalpha);
+
+  /* print out the mass distribution */
+  //intq_getmint(intq, qT, NULL, "mass.dat");
 
   if ( m->fnxerr[0] != '\0' ) {
     if ( m->opta ) {

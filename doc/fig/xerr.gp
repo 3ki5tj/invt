@@ -26,7 +26,7 @@ set bmargin 5
 
 set xtics 5 offset 0, 0.3
 set mxtics 5
-set xlabel "Eigenmode, {/Times-Italic K}" offset 0, 0.7
+set xlabel "Eigenmode, {/Times-Italic k}" offset 0, 0.7
 set xrange [0:17]
 
 set logscale y
