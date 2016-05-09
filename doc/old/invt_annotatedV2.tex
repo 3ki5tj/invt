@@ -6,7 +6,7 @@
 \usepackage{tikz}
 \usetikzlibrary{calc}
 \usepackage{hyperref}
-\usepackage{setspace}
+
 
 \hypersetup{
   colorlinks,
@@ -46,11 +46,11 @@
   We present a method of computing the optimal schedule
   of the updating magnitude
   for the class of adaptive sampling methods including
-  the Wang-Landau (WL) algorithm and metadynamics.
+   the Wang-Landau (WL) algorithm and metadynamics.
   %
   These sampling methods
   construct a bias potential to offset
-  the potential of mean force by histogram-based adaptive updates.
+  the potential of mean force by adaptively updating a histogram.
   %
   The updating magnitude should decrease over time
   to help reduce the noise in the bias potential,
@@ -70,7 +70,7 @@
   belongs to a class of bandpass updating schemes
   that are optimal for asymptotic convergence,
   and the optimal schedule of these schemes
-  is the inverse of the time or number of sampling steps with a proper shift.
+  is a function of the inverse of the time or number of sampling steps.
   %
 \end{abstract}
 
@@ -100,7 +100,7 @@ to capture the global shape of the free energy surface
 in terms of the potential of mean force (PMF), $-\ln p^*(z)$,
 an effective strategy is to introduce a bias potential that
 cancels the PMF, which is equivalent to sampling a flat distribution
-along $z$\cite{mezei1987, berg1992, lee1993,
+along $z$ \cite{mezei1987, berg1992, lee1993,
 wang2001, wang2001pre, laio2002, laio2008, barducci2011, sutto2012}.
 %The negative logarithm,
 %$-\ln p^*(z)$,
@@ -168,7 +168,7 @@ by incrementally elevating the bias potential there.
 %in deriving the bias force.
 %
 However,
-frequent updates to the bias potential
+ frequent updates to the bias potential
 %in both cases, the bias potential
 %is updated frequently (usually every few MC or MD steps),
 %and the fluctuation
@@ -282,7 +282,7 @@ Finally, we compare different updating schemes
 and show that the single-bin scheme
 and a class of generalized bandpass schemes
 are optimal for convergence
-in the long time or extensive sampling limit
+in the long time limit or extensive sampling
 in Sec. \ref{sec:cmpschemes}.
 
 
@@ -323,7 +323,7 @@ $\sum_{i = 1}^n p^*_i = 1$.
 
 
 
-For a large system at temperatures of interest,
+For a large system at tempertures of interest,
 the distribution $p^*_i$ often tends to
 be localized,
 %
@@ -366,7 +366,7 @@ the bias potential $V_i$
 must coincide with $\ln p^*_i$,
 up to an additive constant.
 %
-In practice, $V_i$ may be non-optimal or contain error,
+In practice, $V_i$ may be non optimal or contain error,
 and thus $\pi_i$ need not
 coincide with the intended distribution $p_i$.
 
@@ -395,7 +395,7 @@ and that of temperature, respectively.
 %
 The estimated bias potentials at bin $i$, $V_i$,
 are often improved
-with the histogram of the sampling, $H_i$, accumulated
+with histogram of the sampling, $H_i$, accumulated
 during simulation.
 %
 Using $H_i$ as an estimate of $\pi_i$ in
@@ -445,7 +445,7 @@ Examples include
 the WL algorithm and metadynamics.
 %
 These methods incrementally update the bias potential
-and can approximately sample the target distribution.
+and can thus approximate the target distribution.
 %
 However,
 %they are less well understood theoretically, as
@@ -457,7 +457,7 @@ of the underlying sampling mechanism. Further failure to properly reduce the siz
 %once a sufficiently accurate bias potential is available.
 %
 To minimize this effect,
-many adaptive methods adopt a schedule to 
+many adaptive methods adopt a schedule to
 reduce the updating magnitude
 over the course of simulation\cite{
 marsili2006,
@@ -471,7 +471,7 @@ the updating becomes smaller and
 %the corresponding equilibrium one.
 %
 if the bias potential were converged to the exact value,
-this adaptive FDS tends to the ideal equilibrium counterpart,
+this adaptive simulation tends to  ideal flat equilibrium sampling
 %particular equilibrium simulation can be thought as
 %the optimal asymptotic limit of the adaptive counterpart,
 delivering the maximal efficiency.
@@ -614,7 +614,7 @@ the updating magnitude $\alpha$
 is controlled in stages.
 %
 At each stage, $\alpha$
-is kept constant,
+is kept  constant,
 and the histogram along $i$
 is collected and monitored.
 %
@@ -662,7 +662,7 @@ different from $1$\cite{
 morozov2007, zhou2008, morozov2009}.
 %
 Here we will show that the ideal $c$
-is unity, but the origin of $t$ should be shifted
+is unnity, but the origin of $t$ should be shifted
 to accommodate the initial error.
 
 
@@ -1461,7 +1461,7 @@ where
 
 
 The error function defined in Eq. \eqref{eq:error_sum}
-can be rewritten in terms of the eigenmodes of $\mathbf w$
+can be rewritten in terms of the eigenmodes of $w$
 \begin{align}
   \Err
   \equiv
@@ -1588,8 +1588,8 @@ Then, Eq. \eqref{eq:error_asym} is simplified as
 %
 In this way,
 the underlying sampling process
-affects the error only through the
-$\Gamma_k$'s.
+affects the error only through the set of
+$\Gamma_k$.
 %
 In Appendix \ref{sec:Gamma},
 we evaluate $\Gamma_k$'s in two special cases,
@@ -1677,7 +1677,7 @@ before starting the schedule $\alpha(t)$ to be optimized.
 That is, we assume
 $\alpha(t) = \alpha_0$
 for $t < 0$, and
-the system has entered the sampling equilibrium
+the system has entered the sampling
 under a fixed $\alpha_0$ at $t = 0$.
 %
 We can then use Eq. \eqref{eq:y2_eql}
@@ -1747,6 +1747,8 @@ where the Lagrangian,
 %
 represents a free particle
 with a position-dependent mass.
+
+%(Cheng: In the Hamiltonian or Newtonian version it seems that the position dependence of the mass could as easily be described by another conservative force at constant mass.)
 %
 Since the Lagrangian
 does not explicitly depend on time, $t$,
@@ -1842,8 +1844,8 @@ the parameter $q(T)$ can be further adjusted
 to minimize the total error, $E = E_R + E_A$
 (cf. Sec. \ref{sec:optinitalpha}).
 %
-A complete procedure of computing the optimal schedule
-is listed in Appendix \ref{sec:procedure}.
+A complete program of computing the optimal schedule
+is listed in Appendix \ref{sec:program}.
 
 
 
@@ -2682,7 +2684,7 @@ Gaussian-shaped kernel.
 This updating scheme is commonly
 used in metadynamics.
 %
-Below we show its stability
+Below we F show its stability
 in the continuous limit.
 
 
@@ -3399,8 +3401,7 @@ In Fig. \ref{fig:sinc},
 we give examples of the updating kernels
 of the bandpass updating schemes,
 compared to a Gaussian
-with a similar width, $\sigma$,
-\note{(cheng, the inset in figure two should be replotted to fix the dynamic range of the gray scale.)}
+with a similar width, $\sigma$, (cheng, the inset in figure two should be replotted to fix the dynamic range of the gray scale.)
 %
 \begin{equation}
   \sigma
@@ -3558,9 +3559,9 @@ Test system and simulation protocol}
 
 
 
-\note{(Cheng, we should give a  description of the test system)}
-Our test system is a one-dimensional model system, in which
-$i$ represents a non-periodic variable,
+In our test system, (Cheng, we should give a  description of the test system)
+$i$ represents a one-dimensional
+non-periodic variable,
 and $n = 100$.
 %
 Both the target and intrinsic distributions
@@ -3585,12 +3586,14 @@ we reset the origin of the time, $t$,
 and start the testing schedule
 for $T = 10^8$ steps.
 %
-We repeat the above process $1000$ times (unless specified otherwise)
+We repeat the above process $1000$ times
 and average the results.
 %specified by either
 %Eq. \eqref{eq:q_opt}
 %or
 %Eq. \eqref{eq:alpha_invtlambda}.
+Unless specified otherwise,
+the above parameters were used.
 
 
 
@@ -4109,7 +4112,7 @@ of each eigenmode by a single number, $\Gamma_k$.
 Although these assumptions appeared to work well
 on our test system,
 they may break down for relatively short simulations
-of glassy systems.  Our immediate interest is to apply these relations to
+of glassy systems. Our immediate interest is to apply these relations to
 problems containing aqueous mixtures of proteins and nucleic acids.
 
 
@@ -4117,7 +4120,8 @@ problems containing aqueous mixtures of proteins and nucleic acids.
 
 We thank Dr. J. Ma, Dr. Y. Mei,
 J. Drake, O. Nassar, Dr. C. Lai and Dr. S. Ou
-for helpful discussions.  We gratefully acknowledge the Robert A. Welch Foundation (H-0037), the National Science Foundation (CHE-1152876) and the National Institutes of Health (GM-037657) for partial support of this work.  This research used computing resources of the National Science Foundation XSEDE grid.
+for helpful discussions. We gratefully acknowledge the Robert A. Welch Foundation (H-0037), the National Science Foundation (CHE-1152876) and the National Institutes of Health (GM-037657) for partial support of this work.  This research used computing resources of the National Science Foundation XSEDE grid.
+
 
 \appendix
 
@@ -4562,7 +4566,7 @@ would be similar in general properties.
 
 
 
-\section{\label{sec:procedure}
+\section{\label{sec:program}
 Procedure for computing the optimal schedule and error
 }
 
@@ -4591,9 +4595,7 @@ we have the following procedure.
 
 
 \begin{figure}[h]
-\begin{singlespace}
-  \fontsize{10pt}{\baselineskip}
-  \begin{tikzpicture}
+\begin{tikzpicture}
   \node[draw, text width={width("Updating ")}]
     (w) at (0, 3) {Updating \\matrix, $\mathbf w$};
 
@@ -4651,7 +4653,6 @@ we have the following procedure.
     %(M1) edge[bend left=70] (N1);
     (R1) |- (R2) -| (R3);
 \end{tikzpicture}
-\end{singlespace}
 \caption{
   \label{fig:vardep}
   Dependence of variables in computing
