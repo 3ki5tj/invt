@@ -51,9 +51,9 @@ set size 0.48, 0.57
 
 set title "{/Times-Italic w_{ij}}" offset 0, -0.7 font "Times, 20"
 #unset colorbox
-set cbrange [-0.05:0.2]
-set cbtics 0.1 offset -1, 0 font "Times, 14"
-set mcbtics 2
+set cbrange [-0.03:0.09]
+set cbtics 0.05 offset -1, 0 font "Times, 14"
+set mcbtics 5
 
 set xtics 20 offset 0, 0.8 font "Times, 14"
 set mxtics 2
