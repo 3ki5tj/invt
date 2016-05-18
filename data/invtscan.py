@@ -53,7 +53,7 @@ def usage():
     %s [OPTIONS] input.cfg""" % sys.argv[0]
 
   print """
-  Compute the error over a range of width sigma, or cutoff K,
+  Compute the error over a range of width sigma, or cutoff K
 
   OPTIONS:
 
@@ -179,7 +179,7 @@ def geterror(out):
 
 
 def scan():
-  global fncfg, fnout, cmdopt, fnout
+  global fncfg, fnout, cmdopt 
 
   progdir = "../prog"
   if not os.path.isdir(progdir):
