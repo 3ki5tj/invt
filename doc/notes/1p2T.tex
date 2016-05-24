@@ -1,9 +1,18 @@
 \documentclass[12pt]{article}
 \usepackage{amsmath}
+\usepackage{xcolor}
 \usepackage{hyperref}
+
+\hypersetup{
+    colorlinks,
+    linkcolor={red!30!black},
+    citecolor={blue!50!black},
+    urlcolor={blue!80!black}
+}
+
 \begin{document}
 
-\title{Statistical Redundancy $1 + 2T$}
+\title{Statistical Redundancy $1 + 2 \, \tau$}
 \author{}
 \date{\vspace{-10ex}}
 \maketitle
@@ -14,8 +23,8 @@
 
 In molecular simulations, we compute trajectory averages.
 %
-The simulation engine,
-running either Monte Carlo (MC) or molecular dynamics (MD),
+The simulation engine
+%running either Monte Carlo (MC) or molecular dynamics (MD),
 generates a trajectory of molecular configurations,
 and saves the trajectory frames in regular intervals.
 %
@@ -24,88 +33,48 @@ we can compute the average of a quantity of interest, $x$,
 %
 \begin{equation}
   \bar x = S / n,
-  \label{eq:xbar}
+  \notag
+  %\label{eq:xbar}
 \end{equation}
 %
 and
 %
 \begin{equation}
   S = x_1 + \cdots + x_n,
-  \label{eq:sumx}
+  \notag
+  %\label{eq:sumx}
 \end{equation}
 %
 where $n$ is the number of saved frames,
 and $x_i$ is the value of $x$ from frame $i$.
 
-Ideally, the frames are independent,
-but it is rarely so in practice.
+However, successive trajectory frames are usually correlated.
 %
-Since the autocorrelation time is often unknown beforehand,
-or sometimes formidably long,
-we often end up saving frames in an interval shorter than
-the autocorrelation time.
-%
-While successive correlation does not affect the expected value
+While this correlation does not affect the expected value
 of the average, it affects the variance, which represents
 the statistical redundancy of the trajectory.
 
-There is, however, a charmingly simple formula
+There is, however, a simple formula
 which accurately measures the statistical redundancy, $R$,
 relative to a perfectly independent trajectory:
 %
 \begin{equation}
-  R = 1 + 2 \, T,
+  R = 1 + 2 \, \tau,
   \label{eq:1p2T}
 \end{equation}
 %
-where $T$ is the autocorrelation time measured
+where $\tau$ is the integral autocorrelation time measured
 in multiples of frame separations.
 %
 In this article, we shall show why Eq. \eqref{eq:1p2T} is true.
 
 
-\section{Example}
-
-
-If the above description is too abstract,
-here is a more friendly example that may help illustrate
-the meaning of Eq. \eqref{eq:1p2T}.
-
-Alice flips a coin every day.
-%
-If the result is a head, she writes $+1$ on her notebook;
-otherwise, she writes $-1$.
-%
-At the end of the year, she adds the numbers up.
-
-Bob does pretty much the same thing, except that he is lazier.
-%
-So every day there is one half chance that he does not flip the coin
-and simply copies yesterday's result.
-%
-At the end of the year, Bob also adds the numbers up.
-
-Now Eq. \eqref{eq:1p2T} says that on average,
-Bob's end-of-year number would be roughly $\sqrt 3$
-as large as Alice's in magnitude, because in this case
-Bob's numbers have an autocorrelation time of $T = 1$,
-and hence the variance is $3$ times as large.
-
-
-
 \section{Proof}
 
 
-To save the reader's time,
-we shall first sketch the proof of Eq. \eqref{eq:1p2T}
-in a special case in this section,
-and then supplement details and generalizations
-in later sections.
-
-We shall assume that the $x_i$'s are exponentially correlated
-(this assumption will be relaxed later).
+We shall first sketch the proof of Eq. \eqref{eq:1p2T}.
 %
-To make life easier, we further assume that the averages satisfy
+For simplicity, we assume that
 %
 \begin{equation}
   \left\langle x_i \right\rangle = 0,
@@ -125,189 +94,102 @@ Our argument has three steps.
 
 \begin{enumerate}
 \item
-The autocorrelation time is given by
+The integral autocorrelation time is given by
 %
 \begin{equation}
-  T
-  = (z + 2 \, z^2 + 3 \, z^3 + \cdots ) ( 1 - z )
-  = \frac{ z } { 1 - z },
-  \label{eq:act_exp}
+  \tau
+  =
+  \sum_{k = 1}^\infty c_k
+  ,
+  \label{eq:act}
 \end{equation}
 %
-where $z = \langle x_i \, x_{i + 1} \rangle$
-for any two successive frames.
+where $c_k$
+is the normalized autocorrelation function with $c_0 = 1$, and
+\begin{equation}
+  c_k = \langle x_{i + k} \, x_i \rangle
+  .
+  \label{eq:ck_def}
+\end{equation}
 
 \item
 The statistical redundancy is given by
 %
 \begin{equation}
   R
-  = 1 + 2 \, z + 2 \, z^2 + \cdots
-  = 1 + \frac{ 2 \, z } { 1 - z },
-  \label{eq:redund_exp}
+  = \sum_{k = -\infty}^\infty c_k
+  = 1 + 2 \, \sum_{k = 1}^\infty c_k
+  ,
+  \label{eq:redund}
 \end{equation}
 %
-which represents
-the contributions of $x_i$ to the variance of $\bar x$ or $S$, i.e.,
-$\langle x_i^2 \rangle$,
-$\langle x_i \, x_{i \pm 1} \rangle$,
-$\langle x_i \, x_{i \pm 2} \rangle$, $\dots$.
 
 \item
 The desired result, Eq. \eqref{eq:1p2T},
-follows from Eqs. \eqref{eq:act_exp} and \eqref{eq:redund_exp}.
+follows from Eqs. \eqref{eq:act} and \eqref{eq:redund}.
 
 \end{enumerate}
 
 
-\section{Autocorrelation time}
+\section{Integral autocorrelation time}
 
 
-We shall prove Eq. \eqref{eq:act_exp} in this section.
-%
-But before computing the autocorrelation time,
-we shall first build an underlying model
-for the exponential correlation in the data.
-%
-The model is the following Markov process.
+We shall prove Eq. \eqref{eq:act} in this section
+by building an underlying model for the correlation.
 %
 In each frame,
 $x_{ i + 1 }$
 can either inherit the previous value, $x_i$
-with probability $z$,
+with probability $c_1$,
 or be an independent data point
-with probability $1 - z$.
+with probability $c_0 - c_1 = 1 - c_1$.
 %
-In the former case, $x_{i + 2}, x_{i + 3}, \dots$
-may inherit $x_i$,
-with probabilities $z^2, z^3, \dots$,
-respectively.
+In the former case,
+$x_{i + 2}$ may hold on to the value of $x_i$,
+with a smaller probability $c_2 \le c_1$,
+and so on.
 %
-In other words,
-the probability for $x_i$ to survive in the series for precisely
+Generally,
+the probability for $x_i$ to survive in the sequence for precisely
 the next $k$ frames is given by
 %
 \begin{equation}
-  p_k = z^k - z^{ k + 1 },
-  \label{eq:pk_exp}
+  p_k = c_k - c_{k + 1}
+  .
+  \notag
+  %\label{eq:pk}
 \end{equation}
 %
-In this way, we can define the autocorrelation time as
-the average value of $k$,
+So we can define the integral autocorrelation time as
+the average of the life span, $k$,
 %
-\begin{equation}
-  T
-  =
-  \sum_{k = 0}^\infty
-    k \, p_k
-  =
-  \left[
-  \sum_{k = 0}^\infty
-    k \, z^k
-  \right]
-  \, (1 - z),
-\end{equation}
-which is Eq. \eqref{eq:act_exp}.
-%
-To evaluate the sum in the square brackets, we note that
-%
-\begin{align*}
-  Q
-  &=
-  0 + 1 \cdot z + 2 \cdot z^2 + 3 \cdot z^3 + \cdots
-  \\
-  \frac{ Q } { z }
-  &=
-  1 + 2 \cdot z + 3 \cdot z^2 + 4 \cdot z^3 + \cdots,
-\end{align*}
-%
-and by subtracting the two, we get
-%
-\begin{equation*}
-  \left( \frac 1 z - 1 \right) Q
-  =
-  1 + z + z^2 + z^3 + \cdots
-  =
-  \frac { 1 } { 1 - z }
-\end{equation*}
-%
-Thus
-%
-\begin{equation*}
-  Q
-  =
-  \frac{ z } { (1 - z)^2 },
-  \quad
-  \mathrm{and}
-  \quad
-  T
-  =
-  Q \, (1 - z)
-  =
-  \frac{ z } { 1 - z },
-\end{equation*}
-%
-which agrees with the last expression of Eq. \eqref{eq:act_exp}.
-%
-[I thought that the autocorrelation time was $-1/\log z$,
-but that was wrong.
-This formula was borrowed directly
-from the continuous-time limit ($z \to 1$)
-without proper discretization.]
-
-
-\section{Autocorrelation function}
-
-
-We can also use the above model to compute the full autocorrelation function.
-%
-First, from Eqs. \eqref{eq:ave_xi} and \eqref{eq:var_xi}, we have
 $$
-\left\langle x_{i + 1} \, x_i \right\rangle
-=
-z \, \left\langle x_i \, x_i \right\rangle
+  \tau = \sum_{k = 0}^\infty k \, p_k.
+$$
+
+To show Eq. \eqref{eq:act} is true, we note that
+$$
+\begin{aligned}
+\tau
+&=
+\sum_{ k = 0 }^\infty k \, c_k
+- \sum_{ k = 0 }^\infty k \, c_{k + 1}
+\\
+&=
+\sum_{ k = 1 }^\infty k \, c_k
+- \sum_{ k = 0 }^\infty (k + 1 - 1) \, c_{k + 1}
+\\
+&=
+\sum_{ k = 1 }^\infty k \, c_k
+-
+\sum_{ k = 0 }^\infty (k + 1) \, c_{ k + 1 }
 +
-(1 - z) \, \left\langle x_i \right\rangle
-        \, \left\langle x_{i + 1} \right\rangle
-= z,
+\sum_{ k = 0 }^\infty c_{k + 1}
+\\
+&=
+\sum_{ k = 1 }^\infty c_k,
+\end{aligned}
 $$
-where the two terms in the middle expression represent
-the two cases, $x_i = x_{i + 1}$ and $x_i \ne x_{i + 1}$,
-respectively.
-%
-Note, however, a subtle abuse of symbols:
-by $x_i \ne x_{i + 1}$, we actually mean that
-the $i$th and $(i + 1)$th frames are independent,
-whereas $x_i$ and $x_{i+1}$ may happen to be the same numerically,
-especially when $x$ is a discrete random variable
-with very limited options.
-%
-Similarly, we have
-$$
-\left\langle x_{i + 2} \, x_i \right\rangle
-= z^2,
-$$
-corresponding to the case of $x_i = x_{i + 1} = x_{i + 2}$,
-which happens with probability $z \cdot z = z^2$.
-%
-In all other cases,
-$x_i$ and $x_{i + 2}$ are independent, and
-$
-\langle x_i \, x_{i + 2} \rangle
-=
-\langle x_i \rangle \, \langle x_{i + 2} \rangle
-= 0.
-$
-
-More generally,
-%
-\begin{equation}
-  \left\langle x_{i + k} \, x_i \right\rangle = z^k,
-  \label{eq:xxk_exp}
-\end{equation}
-%
-which shows that the data are indeed exponentially correlated.
-
 
 
 \section{\label{sec:redund}
@@ -315,12 +197,13 @@ Statistical redundancy}
 
 
 In this section,
-we shall prove Eq. \eqref{eq:redund_exp}.
+we shall prove Eq. \eqref{eq:redund}.
 %
-We shall first define the statistical redundancy
+We shall first give an intuitive definition
+of the statistical redundancy
 and then show it is given by the variance.
 %
-To do so, consider two trajectories generated by
+Consider two trajectories generated by
 different simulation methods with the same length.
 %
 The two simulations produce
@@ -339,6 +222,7 @@ by a linear combination of $S$ and $S'$, i.e.,
   \hat S
   =
   c \, S + c' \, S',
+  \notag
 \end{equation}
 %
 with normalized coefficients
@@ -369,13 +253,13 @@ $$
 =
 \lambda,
 $$
-which shows that the coefficients of combination 
+which shows that the coefficients of combination
 are inversely proportional to the respective variances.
 %
 In other words, the variance serves as the discounting factor
 for statistical redundancy in an optimal combination.
 
-We can now show Eq. \eqref{eq:redund_exp},
+We can now show Eq. \eqref{eq:redund},
 %
 $$
 \begin{aligned}
@@ -391,12 +275,12 @@ $$
 \sum_{i = 1}^n
 \left(
 \sum_{j = 1}^n
-z^{ | j - i | }
+c_{ |j - i| }
 \right),
 \end{aligned}
 $$
 %
-where we have used Eq. \eqref{eq:xxk_exp}
+where we have used Eq. \eqref{eq:ck_def}
 in the last step.
 %
 For a very large $n$,
@@ -404,9 +288,9 @@ the inner sum is peaked around $j = i$,
 and except for a few $i$ around $1$ or $n$,
 we have
 $$
-\sum_{j = 1}^n z^{ | j - i | }
+\sum_{j = 1}^n c_{ | j - i | }
 \approx
-\cdots + z^2 + z + 1 + z + z^2 + \cdots,
+\cdots + c_2 + c_1 + 1 + c_1 + c_2 + \cdots,
 $$
 where the sum extends to infinity in both ends.
 %
@@ -414,85 +298,28 @@ Thus,
 \begin{equation}
   \operatorname{var} S
   =
-  n \times ( 1 + 2 \, z + 2 \, z^2 + 2 \, z^3 + \cdots ).
+  n \times ( 1 + 2 \, c_1 + 2 \, c_2 + \cdots ).
   \label{eq:varS}
 \end{equation}
-If the data points are independent, then $z = 0$,
+If the data points are independent, then $c_1 = c_2 = \cdots = 0$,
 and this serves as the reference value
 \begin{equation}
-  \operatorname{var} S^\mathrm{ref.}
+  \operatorname{var} S^\mathrm{perfect}
   =
   n
+  .
 \end{equation}
 %
 The ratio of the two yields the relative statistical redundancy,
 $$
 R \equiv
 \frac{ \operatorname{var} S }
-     { \operatorname{var} S^{ \mathrm{ref.} } }
+     { \operatorname{var} S^{ \mathrm{perfect} } }
 =
-1 + 2 \, z + 2 \, z^2 + \cdots.
+1 + 2 \, c_1 + 2 \, c_2 + \cdots
+,
 $$
-This is the expression used in Eq. \eqref{eq:redund_exp}.
+which is Eq. \eqref{eq:redund}.
 
 
-\section{Non-exponential autocorrelation function}
-
-
-In the above, we have assumed exponentially correlated data.
-%
-Surprisingly, Eq. \eqref{eq:1p2T} is true for any type of correlation.
-%
-To show this, we first generalize Eq. \eqref{eq:xxk_exp} to
-%
-\begin{equation}
-  \langle x_{i + k} \, x_i \rangle
-  =
-  c_k,
-\end{equation}
-where $c_k$ means the survival probability of $x_i$
-after $k$ rounds of selection, or the probability of
-$x_i = x_{i + 1} = \cdots = x_{i + k}$.
-%
-The numerical value of $c_k$ is arbitrary,
-as long as it decreases with $k$ and satisfies
-$c_0 = 1$, and $c_\infty = 0$.
-%
-Then, the survival probability of $x_k$ for \emph{exactly} $k$ rounds, or that of
-$x_i = \cdots = x_{i + k} \ne x_{i + k + 1}$ is given by
-$$
-  p_k = c_k - c_{k + 1},
-$$
-and the integral autocorrelation time is 
-$$
-  T = \sum_{k = 0}^\infty k \, p_k.
-$$
-
-Repeating the steps in Sec. \ref{sec:redund}, we found that the relative redundancy is given by
-%
-$$
-R = 1 + 2 \, \sum_{k = 1}^\infty c_k,
-$$
-Now to show Eq. \eqref{eq:1p2T} is true, we only need to note that
-$$
-\begin{aligned}
-T
-&=
-\sum_{ k = 1 }^\infty k \, c_k
-- \sum_{ k = 0 }^\infty (k + 1 - 1) \, c_{k + 1}
-\\
-&=
-\sum_{ k = 1 }^\infty k \, c_k
--
-\sum_{ k = 0 }^\infty (k + 1) \, c_{ k + 1 }
-+
-\sum_{ k = 0 }^\infty c_{k + 1}
-\\
-&=
-\sum_{ k = 1 }^\infty c_k,
-\end{aligned}
-$$
-Note the first two terms on the right-hand side of
-the second line cancel.
-This completes our proof.
 \end{document}
