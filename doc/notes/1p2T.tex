@@ -221,14 +221,14 @@ by a linear combination of $S$ and $S'$, i.e.,
 \begin{equation}
   \hat S
   =
-  c \, S + c' \, S',
+  w \, S + w' \, S',
   \notag
 \end{equation}
 %
 with normalized coefficients
 %
 \begin{equation}
-  c + c' = 1.
+  w + w' = 1.
   \label{eq:csum}
 \end{equation}
 %
@@ -237,19 +237,19 @@ Eq. \eqref{eq:csum}.  Then the target function is
 $$
 \operatorname{var} \hat S - \lambda \, (c + c')
 =
-c^2 \, \operatorname{var} S
+w^2 \, \operatorname{var} S
 +
-c'^2 \, \operatorname{var} S'
+w'^2 \, \operatorname{var} S'
 -
-\lambda \, (c + c'),
+\lambda \, (w + w'),
 $$
 with $\lambda$ being a Lagrange multiplier.
 %
-Differentiating the expression with respect to $c$ and $c'$ yields
+Differentiating the expression with respect to $w$ and $w'$ yields
 $$
-2 \, c \, \operatorname{var} S
+2 \, w \, \operatorname{var} S
 =
-2 \, c' \, \operatorname{var} S'
+2 \, w' \, \operatorname{var} S'
 =
 \lambda,
 $$
