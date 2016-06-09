@@ -2,7 +2,7 @@
 \usepackage{amsmath}
 \usepackage{mathtools}
 \usepackage{upgreek}
-\usepackage[usenames,dvipsnames]{xcolor}
+\usepackage[table,usenames,dvipsnames]{xcolor}
 \usepackage{tikz}
 \usetikzlibrary{calc}
 \usepackage{hyperref}
@@ -20,6 +20,7 @@
 \definecolor{DarkBrown}{RGB}{64,20,10}
 \definecolor{DarkGreen}{RGB}{0,64,0}
 \definecolor{DarkPurple}{RGB}{64,0,42}
+\definecolor{LightGray}{gray}{0.85}
 % annotation macros
 \newcommand{\repl}[2]{{\color{gray} [#1] }{\color{blue} #2}}
 \newcommand{\add}[1]{{\color{blue} #1}}
@@ -1451,7 +1452,7 @@ where
   \sum_{j=1}^n
     \phi_{kj} \, \xi_j(t)
   .
-  \label{eq:eta_def}
+  \label{eq:theta_def}
 \end{align}
 
 
@@ -3907,7 +3908,7 @@ $\alpha(0) = \alpha/2 = 5 \times 10^{-5}$.
     and $\alpha_0 = 10^{-4}$.
     %
     The points were obtained from averaging results
-    from 1000 independent simulations;
+    from over 10000 independent simulations;
     the curves are theoretical predictions.
     %
     \note{This figure was produced by
@@ -4261,7 +4262,7 @@ for $k \ge 2$, we get
 %
 where we have used
 Eqs. \eqref{eq:ortho1},
-\eqref{eq:eta_def},
+\eqref{eq:theta_def},
 and
 \eqref{eq:zz_perfect}.
 %
@@ -4296,7 +4297,7 @@ and
   $$
   where,
   we have used
-  Eq. \eqref{eq:eta_def}
+  Eq. \eqref{eq:theta_def}
   on the first line,
   %
   Eq. \eqref{eq:zz_perfect}
@@ -5076,7 +5077,7 @@ $
   ,
 $
 %
-with $\theta_k(t)$ defined by Eq. \eqref{eq:eta_def}.
+with $\theta_k(t)$ defined by Eq. \eqref{eq:theta_def}.
 %and $\phi_{k i}$ by Eq. \eqref{eq:eig_orthonormal_cols}.
 %\begin{align}
 %\theta_k( t )
@@ -5201,7 +5202,7 @@ In the long-time limit,
   =
   \frac{1}{T}
   \sum_{\tau = -\infty}^\infty
-    \kappa_n(\tau)
+    \kappa_k(\tau)
   =
   \frac{ \Gamma_k }{ T }
 .
@@ -5536,6 +5537,64 @@ $\min \lambda_k = 1 - 4 \, \mu_1$.
 }
 
 
+\note{The table of symbols is listed in Table \ref{tab:symbols}.
+  \begin{table*}\footnotesize
+  \centering
+  \rowcolors{1}{white}{LightGray}
+  \setlength{\tabcolsep}{4pt} % column separation
+  %
+  \caption{\label{tab:symbols}Table of symbols.}
+  \begin{tabular}{l | p{12cm} }
+    Symbol          &   Description \\
+    \hline
+    $\mathbf{A}$    &   Transition matrix. \\
+    $\alpha$        &   Updating magnitude. \\
+    $b$             &   Cutoff of the kernel of homogeneous updating schemes. \\
+    $C$             &   $C \equiv \int_0^{ q(T) } M(Q) \, dQ$.  \\
+    $\delta$        &   Dirac's $\delta$-function. \\
+    $c$             &   Constant. \\
+    $\Err$          &   Error. \\
+    $\ln f$         &   Updating factor in the WL algorithm.  \\
+    $\phi_{ki}$     &   Eigenvectors of the updating matrix. \\
+    $g$             &   Degeneracy factor, $2$ for a periodic variable, or $1$ a non-periodic one. \\
+    $\Gamma_k$      &   Integral of the autocorrelation function of mode $k$. \\
+    $h_i(t)$        &   Histogram.  \\
+    $H_i$           &   Average histogram.  \\
+    $i, j$          &   Bin indices. \\
+    $\lambda_k$     &   The $k$th eigenvalue of the updating matrix. \\
+    $k, l$          &   Mode indices. \\
+    $K$             &   Cutoff wave number of bandpass updating schemes.  \\
+    $\kappa_k(t)$   &   Autocorrelation function of mode $k$. \\
+    $M(Q)$          &   Mass function, Eq. \eqref{eq:mass_func}.   \\
+    $m(Q)$          &   Mass distribution,
+                        $m(Q) \equiv M(Q)/\int_0^{ q(T) } M(Q') \, dQ'$.  \\
+    $\mu_i$         &   Updating kernel of a homogeneous updating scheme. \\
+    $n$             &   Number of bins. \\
+    $\nu_k$         &   $\nu_k \equiv \lambda_k / \lambda$. \\
+    $p_i$           &   Distribution. \\
+    $\pi_i$         &   (Instantaneous) distribution, Eq. \eqref{eq:pi_p_phi} \\
+    $q(t)$          &   $\int_0^t \alpha(t') \, dt'$.  \\
+    $Q$             &   $q(T) - q(t)$.  \\
+    $\theta_k(t)$   &   Noise of mode $k$, Eq. \eqref{eq:theta_def}. \\
+    $\rho_i$        &   Distribution used to define the error. \\
+    $\sigma_{ij}(t)$   &   Autocorrelation function of $\zeta_i(t)$. \\
+    $\sigma$        &   Width of the Gaussian updating scheme. \\
+    $t, \tau$       &   Time. \\
+    $T$             &   Simulation length. \\
+    $u_i(q')$       &   $u_i(q') \equiv e^{\lambda \, [q - q(T)]}$. \\
+    $V_i(t)$        &   Original bias potential. \\
+    $v_i(t)$        &   Shifted bias potential. \\
+    $\mathbf w$     &   Updating matrix. \\
+    $x_i(t)$        &   Average-deducted bias potential, Eq. \eqref{eq:x_def}. \\
+    $\xi_i(t)$      &   The noise, Eq. \eqref{eq:xi_def}. \\
+    $\chi_i$        &   $\chi_i \equiv \ln \frac{ p_i } { p^*_i } - \sum_{ j = 1 }^n p_j \, \ln \frac{ p_j } { p^*_j }$. \\
+    $y_k(t)$        &   Mode of the shifted bias potential, Eq. \eqref{eq:y_def}. \\
+    $Y_k$           &   Mode of the original bias potential, Eq. \eqref{eq:Y_def}. \\
+    $z$             &   Reaction coordinate. \\
+    $\zeta_i(t)$    &   The noise part of the instantaneous histogram, $h_i(t)$.
+  \end{tabular}
+  \end{table*}
+}
 
 \bibliography{simul}
 \end{document}
