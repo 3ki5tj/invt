@@ -132,7 +132,7 @@ def loadf(fn, dic):
 def ave(fnins, fnout):
   if not fnins: return
   # get the number of lines
-  n = len(open(fnins[0]).readlines())
+  n = max(len(open(fn).readlines()) for fn in fnins)
   # allocate the dictionary
   mydic = [0]*n
   tag = ""

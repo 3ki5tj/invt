@@ -18,7 +18,7 @@ set xtics offset 0, 0.3 nomirror
 set mxtics 10
 set format x "10^{/*0.8 %T}"
 set xlabel "Initial updating magnitude, {/Symbol-Oblique a}(0)" offset 0, 0.5
-set xrange [1e-6:1e-2]
+set xrange [4e-6:1e-2]
 
 set ytics 0.5 offset 0.3, 0
 set mytics 5
