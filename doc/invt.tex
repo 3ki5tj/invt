@@ -810,6 +810,7 @@ $
 
 To proceed, we first define an average\cite{
 dama2014},
+%
 \begin{equation}
   \bar v(t)
   = \sum_{i = 1}^n \rho_i \, v_i(t)
@@ -843,12 +844,15 @@ Then, we expect the difference %between $v_i$ and $\bar v$,
 to be small in the asymptotic regime.
 %
 It follows that
+%
 \begin{equation}
   \sum_{i = 1}^n \rho_i \, x_i = 0
   ,
 \label{eq:rhox_sum}
 \end{equation}
+%
 and
+%
 \begin{equation}
   \frac{ d \bar v (t) }
        { d t }
@@ -955,6 +959,7 @@ $$
 
 We define
 the total error of the bias potential as
+%
 \begin{equation}
   \Err
   =
@@ -1267,6 +1272,7 @@ for the distribution $\pmb \rho$
 introduced in Eq. \eqref{eq:vbar_def}.
 %
 It follows that
+%
 \begin{equation}
   \sum_{i = 1}^n \rho_i \, w_{ij}
   =
@@ -3401,7 +3407,6 @@ we give examples of the updating kernels
 of the bandpass updating schemes,
 compared to a Gaussian
 with a similar width, $\sigma$,
-\note{(cheng, the inset in figure two should be replotted to fix the dynamic range of the gray scale.)}
 %
 \begin{equation}
   \sigma
@@ -3559,14 +3564,15 @@ Test system and simulation protocol}
 
 
 
-\note{(Cheng, we should give a  description of the test system)}
 Our test system is a one-dimensional model system, in which
 $i$ represents a non-periodic variable,
 and $n = 100$.
 %
 Both the target and intrinsic distributions
 are assumed to be flat:
-$p^*_i = p_i = 1/n$.
+$p^*_i = p_i = 1/n$,
+so is the distribution $\rho_i$ used in Eqs.
+\eqref{eq:vbar_def} and \eqref{eq:error_sum}.
 %
 %We wish to see how
 %the schedule, $\alpha(t)$,
@@ -3581,8 +3587,14 @@ and equilibrate the system for $10^7$ steps
 under a constant updating magnitude,
 $\alpha_0 = 10^{-4}$.
 %
-After this,
-we reset the origin of the time, $t$,
+At the end of the equilibration,
+the bias potential would deviate from the correct value
+and our aim to see how well
+the bias potential is restored
+at the end of the testing schedule.
+%
+After the equilibration,
+we reset the origin of the time, $t$, to zero,
 and start the testing schedule
 for $T = 10^8$ steps.
 %
@@ -3785,8 +3797,9 @@ to be discussed later.
       the program \texttt{invt}.
     }%
   }
-  \setlength{\tabcolsep}{5pt}
-  \begin{tabular} { l | p{2cm} p{2.5cm} p{1.8cm} }
+  \setlength{\tabcolsep}{2pt}
+  \renewcommand\arraystretch{1.2}
+  \begin{tabular} { l | p{2.2cm} p{2.4cm} p{2.0cm} }
     \hline
       Schedule
     &
@@ -4110,8 +4123,9 @@ of each eigenmode by a single number, $\Gamma_k$.
 Although these assumptions appeared to work well
 on our test system,
 they may break down for relatively short simulations
-of glassy systems.  Our immediate interest is to apply these relations to
-problems containing aqueous mixtures of proteins and nucleic acids.
+of glassy systems.
+%Our immediate interest is to apply these relations to
+%problems containing aqueous mixtures of proteins and nucleic acids.
 
 
 \section{Acknowledgments}

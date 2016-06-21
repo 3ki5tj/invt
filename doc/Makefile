@@ -42,7 +42,7 @@ $(prj)docV$(ver).zip::
 	rsync -avz checkeq.py old/V$(ver)/
 	python rmbiburl.py -i simul.bib -o old/V$(ver)/simul.bib
 	cd old/V$(ver) && \
-	  ln -sf ../../fig* .
+	  ln -sf ../../fig .
 	cd old/V$(ver) && \
 	  python deannote.py -v -c -i $(prj)_annotatedV$(ver).tex -o $(prj)V$(ver).tex
 	make all -C old/V$(ver)/
@@ -61,5 +61,5 @@ $(prj)doc.zip: $(prj).tex $(prj).pdf \
 	zip -r $@ $^
 
 Bossman: zip
-	rsync -avL $(prj)doc.zip \
-	  cz1@129.109.88.204:/Bossman/cz1/fclus/doc/
+	cp $(prj)docV$(ver).zip /Bossman/cz1/invt/doc/
+	#rsync -avL $(prj)docV$(ver).zip cz1@129.109.88.204:/Bossman/cz1/invt/doc/

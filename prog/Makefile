@@ -20,6 +20,9 @@ clean:
 	  a.out *~ .*.un~ */*~ */.*.un~ *.dat *.pos *.log
 	rstrip.py -Rlv
 
+Bossman: clean
+	rsync -avz --exclude=bak * ../data/*.py /Bossman/cz1/invt/prog/
+
 Dropbox: clean
 	$(MAKE) -C .. $@
 

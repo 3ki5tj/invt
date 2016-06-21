@@ -45,14 +45,14 @@ plot [:100][-0.04:0.07] \
 
 
 # inset
-set origin 0.48, 0.51
+set origin 0.46, 0.515
 set size 0.48, 0.57
 
 
 set title "{/Times-Italic w_{ij}}" offset 0, -0.7 font "Times, 20"
 #unset colorbox
-set cbrange [-0.03:0.09]
-set cbtics 0.05 offset -1, 0 font "Times, 14"
+set cbrange [-0.0204:0.09]
+set cbtics 0.02 offset -0.8, 0 font "Times, 14"
 set mcbtics 5
 
 set xtics 20 offset 0, 0.8 font "Times, 14"
