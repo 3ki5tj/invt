@@ -36,11 +36,11 @@ set xlabel "Shifted simulation time, {/Times-Italic t} + {/Times-Italic t}_{/*0.
 set logscale y
 set format y "10^{/*0.8 %T}"
 set mytics 10
-set yrange [3e-9:1e-4]
+set yrange [2e-9:1e-4]
 set ylabel "{/Symbol-Oblique a} ({/Times-Italic t})"
 
 
-set key at 4.5e7, 14e-7 Left reverse font "Times, 22" spacing 1.2
+set key at 1.5e8, 7e-7 Left reverse font "Times, 22" spacing 1.1
 
 alpha0 = 1e-4
 t0 = 2 / alpha0
@@ -48,8 +48,8 @@ t0 = 2 / alpha0
 plot [:][:] \
     "../../data/opta/sig10_g_alpha_q.dat"      u ($1+t0):($2) w l lt 1 lw 5 lc rgb "#000000"    t "Global", \
     "../../data/opta/sig10_l_alpha_q.dat"      u ($1+t0):($2) w l lt 1 lw 2 lc rgb "#000000"    t "Local", \
-    "../../data/opta/sig10k4_g_alpha_q.dat"    u ($1+t0):($2) w l lt 2 lw 5 lc rgb "#000000"    t "Global, modified", \
-    "../../data/opta/sig10k4_l_alpha_q.dat"    u ($1+t0):($2) w l lt 2 lw 2 lc rgb "#000000"    t "Local, modified", \
+    "../../data/opta/sig10k4_g_alpha_q.dat"    u ($1+t0):($2) w l lt 2 lw 5 lc rgb "#000000"    t "Global, mode-limited", \
+    "../../data/opta/sig10k4_l_alpha_q.dat"    u ($1+t0):($2) w l lt 2 lw 2 lc rgb "#000000"    t "Local, mode-limited", \
     1/x lc rgb "#606060" t "1 / ( {/Times-Italic t} + {/Times-Italic t}_{/*0.8 0 })", \
     -1 notitle
 

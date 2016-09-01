@@ -655,16 +655,10 @@ several studies\cite{belardinelli2007, belardinelli2007jcp, belardinelli2008,
 morozov2007, zhou2008, morozov2009,
 komura2012, caparica2012, caparica2014}.
 %
-There are, however, some reservation about
-the constant of proportionality;
-the optimal formula for $\alpha(t)$
-might be $c/t$ with a $c$
-different from $1$\cite{
-morozov2007, zhou2008, morozov2009}.
-%
-Here we will show that the ideal $c$
-is unity, but the origin of $t$ should be shifted
-to accommodate the initial error.
+Here we will re-derive this formula
+and suggest a slight modification
+whereby the origin of $t$ is shifted
+according to the initial error.
 
 
 As Eq. \eqref{eq:alpha_invt} was being developed for the WL algorithm,
@@ -3587,9 +3581,11 @@ and equilibrate the system for $10^7$ steps
 under a constant updating magnitude,
 $\alpha_0 = 10^{-4}$.
 %
-At the end of the equilibration,
-the bias potential would deviate from the correct value
-and our aim to see how well
+Although the bias potential is correct initially,
+it would deviate from the correct value
+at the end of the equilibration.
+%
+Our aim is to see how well
 the bias potential is restored
 at the end of the testing schedule.
 %
@@ -3699,7 +3695,7 @@ agreed well those from the theory.
   }
   \caption{
     \label{fig:errinvt}
-    Error $E$ versus $\lambda$
+    Error $E$ versus parameter $\lambda$
     for the modified inverse-time schedule,
     Eq. \eqref{eq:alpha_invtlambda}.
     %
@@ -3846,10 +3842,10 @@ to be discussed later.
     for the Gaussian updating scheme
     with $\sigma = 10$.
     %
-    The modified schedules, produced by
+    The mode-limited schedules were produced by
     limiting the sum in Eq. \eqref{eq:q_opt}
-    to the first four terms,
-    became similar to the inverse-time schedule,
+    to the first four terms.
+    They became similar to the inverse-time schedule,
     Eq. \eqref{eq:alpha_invt1}.
     %
     \note{This figure was produced by \texttt{doc/fig/optacmp.gp}.
@@ -4131,7 +4127,7 @@ of glassy systems.
 \section{Acknowledgments}
 
 We thank Dr. J. Ma, Dr. Y. Mei, J. Wang,
-J. Drake, O. Nassar, Dr. C. Lai and Dr. S. Ou
+J. Drake, O. Nassar, Dr. C. Lai, Dr. S. Ou and D. Stuhlsatz
 for helpful discussions.  We gratefully acknowledge the Robert A. Welch Foundation (H-0037), the National Science Foundation (CHE-1152876) and the National Institutes of Health (GM-037657) for partial support of this work.  This research used computing resources of the National Science Foundation XSEDE grid.
 
 \appendix
@@ -5148,6 +5144,7 @@ with $\theta_k(t)$ defined by Eq. \eqref{eq:theta_def}.
   \\
   &=
   \sum_{ i = 1 }^n
+  \rho_i \,
   \frac{ 1 } { T }
   \sum_{ t = 1 }^T \xi_i(t)
   \;
@@ -5428,7 +5425,7 @@ in the large-$n$ and asymptotic limit.
 %
 In this case,
 if $2 \, \nu_k > 1$ for every $k$,
-the asymptotic error is given by the integral
+the asymptotic error is implicitly given by the integral
 %$\sum_i \to \frac{2 \, n}{\pi} \int_0^{\pi/2} dp$, and
 %
 \begin{align}
@@ -5567,10 +5564,10 @@ $\min \lambda_k = 1 - 4 \, \mu_1$.
     $C$             &   $C \equiv \int_0^{ q(T) } M(Q) \, dQ$.  \\
     $\delta$        &   Dirac's $\delta$-function. \\
     $c$             &   Constant. \\
-    $\Err$          &   Error. \\
+    $\Err, \Err_R, \Err_A$          &   Error, residual error, asymptotic error. \\
     $\ln f$         &   Updating factor in the WL algorithm.  \\
     $\phi_{ki}$     &   Eigenvectors of the updating matrix. \\
-    $g$             &   Degeneracy factor, $2$ for a periodic variable, or $1$ a non-periodic one. \\
+    $g$             &   Degeneracy factor, $2$ for a periodic variable, or for $1$ a non-periodic one. \\
     $\Gamma_k$      &   Integral of the autocorrelation function of mode $k$. \\
     $h_i(t)$        &   Histogram.  \\
     $H_i$           &   Average histogram.  \\
@@ -5586,7 +5583,7 @@ $\min \lambda_k = 1 - 4 \, \mu_1$.
     $n$             &   Number of bins. \\
     $\nu_k$         &   $\nu_k \equiv \lambda_k / \lambda$. \\
     $p_i$           &   Distribution. \\
-    $\pi_i$         &   (Instantaneous) distribution, Eq. \eqref{eq:pi_p_phi} \\
+    $\pi_i$         &   (Instantaneous) distribution, Eq. \eqref{eq:pi_p_phi}. \\
     $q(t)$          &   $\int_0^t \alpha(t') \, dt'$.  \\
     $Q$             &   $q(T) - q(t)$.  \\
     $\theta_k(t)$   &   Noise of mode $k$, Eq. \eqref{eq:theta_def}. \\
