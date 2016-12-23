@@ -62,12 +62,12 @@ unset ylabel
 
 set title "Local"
 
-set key at screen 0.98, 0.1 Left reverse samplen 3.0 width -2 maxrows 1
+set key at screen 0.9, 0.1 Left reverse samplen 3.0 width -6.5 maxrows 1
 
 plot [:][1e-7:1] \
     "../../data/xerr/xerr_sig10_t1e8_l.dat"     u 1:($2) w lp lt 1 lw 1 pt 12 ps 1.4 notitle, \
     "../../data/xerr/xerr_sig10_t1e8_l.dat"     u 1:($3) w lp lt 1 lw 1 pt 13 ps 1.4 t "Optimal", \
-    "../../data/xerr/xerr_sig10invt_t1e8_l.dat" u 1:($3) w lp lt 4 lw 1 pt  5 lc rgb "#808080" t "Eq. (23)", \
+    "../../data/xerr/xerr_sig10invt_t1e8_l.dat" u 1:($3) w lp lt 4 lw 1 pt  5 lc rgb "#808080" t "Inverse Time", \
     -1 notitle
 
 

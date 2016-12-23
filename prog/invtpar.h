@@ -1063,7 +1063,7 @@ static int invtpar_doargs(invtpar_t *m, int argc, char **argv)
         /* handle options that require an argument */
         q = p = argv[i] + j + 1;
         if ( *p != '\0' ) {
-          /* the argument follows immediately after the option
+          /* the argument follows the option immediately
            * e.g., -oa.dat */
           q = p;
         } else if ( ++i < argc ) {
@@ -1082,13 +1082,13 @@ static int invtpar_doargs(invtpar_t *m, int argc, char **argv)
         } else if ( ch == 'c' ) { /* constant for inverse time */
           m->c = atof(q);
         }
-        break; /* skip the rest of the characters in the option */
+        break; /* skip the remaining characters in the option */
       } else if ( ch == 'v' ) {
         m->verbose++;
       } else if ( ch == 'h' ) {
         invtpar_help(m);
       } else {
-        fprintf(stderr, "unknown option %s, j %d, ch %c\n", argv[i], j, ch);
+        fprintf(stderr, "Unknown option %s, j %d, ch %c\n", argv[i], j, ch);
         invtpar_help(m);
       }
     }

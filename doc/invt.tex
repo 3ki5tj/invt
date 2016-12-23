@@ -41,28 +41,36 @@
 
 \title{Optimal updating factor in adaptive flat-distribution-sampling simulations}
 
+\author{Cheng Zhang}
+\author{B. Montgomery Pettitt}
+\email{bmpettitt@utmb.edu}
+\affiliation{
+Sealy Center for Structural Biology and Molecular Biophysics,
+The University of Texas Medical Branch,
+Galveston, Texas 77555-0304, USA}
+
 
 
 \begin{abstract}
   We present a method of computing the optimal schedule
   of the updating magnitude
-  for the class of adaptive sampling methods including
+  for a class of free energy calculation methods including
   the Wang-Landau (WL) algorithm and metadynamics.
   %
-  These sampling methods
-  construct a bias potential to offset
+  These methods rely on adaptive construction of
+  a bias potential that offsets
   the potential of mean force by histogram-based adaptive updates.
   %
   The updating magnitude should decrease over time
-  to help reduce the noise in the bias potential,
-  and the optimal schedule maximizes
-  the rate of convergence.
+  to reduce the noise in the bias potential,
+  and one may speed up the convergence by choosing an optimal schedule
+  of the updating magnitude.
   %
-  We derive the optimal schedule from
+  Here, we derive the optimal schedule from
   an equation of motion
-  of a free particle with a position-dependent mass,
+  of a free particle with a position-dependent mass.
   %
-  and show that
+  Our results show that
   the initial updating magnitude is ideally half of
   the previous equilibrium value.
   %
@@ -71,7 +79,8 @@
   belongs to a class of bandpass updating schemes
   that are optimal for asymptotic convergence,
   and the optimal schedule of these schemes
-  is the inverse of the time or number of sampling steps with a proper shift.
+  is the inverse number of sampling steps with a proper shift,
+  as given by the $1/t$ prescription.
   %
 \end{abstract}
 
@@ -92,15 +101,17 @@ a distribution, $p^*(z)$,
 along a collective variable $z$ by sampling via either Monte Carlo\cite{frenkel, newman, landau_binder} (MC)
 or molecular dynamics\cite{frenkel, karplus2002} (MD) simulations.
 %
-However, $z$
-often represents a slow variable
-with a localized or multi-modal distribution.
+The logarithm, $\ln p^*(z)$,
+defines a free energy, or a potential of mean force (PMF).
+%
+Difficulty arises, however, when $z$
+represents a collective variable
+that tends to move locally in a multi-modal distribution.
 %
 Thus,
 to capture the global shape of the free energy surface
-in terms of the potential of mean force (PMF), $-\ln p^*(z)$,
 an effective strategy is to introduce a bias potential that
-cancels the PMF, which is equivalent to sampling a flat distribution
+cancels the PMF, resulting sampling of a flat distribution
 along $z$\cite{mezei1987, berg1992, lee1993,
 wang2001, wang2001pre, laio2002, laio2008, barducci2011, sutto2012}.
 %The negative logarithm,
@@ -144,17 +155,23 @@ wang2001, wang2001pre, laio2002, laio2008, barducci2011, sutto2012}.
 
 
 The Wang-Landau (WL) algorithm\cite{wang2001, wang2001pre}
-and meta\-dy\-nam\-ics\cite{huber1994, laio2002,
+and metadynamics\cite{huber1994, laio2002,
 laio2008, barducci2011, sutto2012}
 are two widely-used and closely-related\cite{micheletti2004}
 flat-distribution-sampling (FDS) techniques
 that build the bias potential adaptively or on the fly.
 %
-These techniques employ regular updating of the bias potential
+Both techniques employ regular updating of the bias potential
 to discourage future visits to the current configuration
 by incrementally elevating the bias potential there.
 %
-%The main difference
+The difference lies
+in the updating hill function,
+which takes the form of a localized
+$\delta$-function in the WL case,
+or that of a Gaussian
+in the metadynamics.
+%
 %is that in the WL case,
 %each updating step is limited to the bin
 %containing the current $z$,
@@ -168,14 +185,14 @@ by incrementally elevating the bias potential there.
 %suitable for numerical differentiation
 %in deriving the bias force.
 %
-However,
-frequent updates to the bias potential
+In both cases,
+regular updates to the bias potential
 %in both cases, the bias potential
 %is updated frequently (usually every few MC or MD steps),
 %and the fluctuation
-disrupts the underlying
+disrupts the underlying equilibrium
 sampling\cite{laio2002},
-and near convergence
+and for convergence
 one  has to gradually decrease
 the updating magnitude.
 
@@ -183,8 +200,8 @@ the updating magnitude.
 
 The schedule of reducing
 the updating magnitude,
-therefore,
-determines the precision of the final bias potential,
+therefore, is critical in improving
+the precision of the final bias potential,
 hence that of the PMF\cite{liang2007,
 belardinelli2007, belardinelli2007jcp, belardinelli2008,
 morozov2007, zhou2008, morozov2009,
@@ -198,7 +215,7 @@ inverse time\cite{liang2007,
 belardinelli2007, belardinelli2007jcp, belardinelli2008,
 morozov2007, zhou2008}
 or
-the number of simulation steps.
+the inverse number of simulation steps.
 %
 The optimal schedule for the metadynamics case,
 however, is less studied.
@@ -229,13 +246,14 @@ and the width of the Gaussian window.
 Further, we generalize
 the WL updating scheme
 to a class of bandpass updating schemes
-that are optimal for extensive sampling or long simulations,
-and the modified inverse-time schedule presented is optimal for these schemes.
+that are optimal for long simulations,
+and the above origin-modified inverse-time schedule
+turns out to be optimal for these schemes.
 %
 %For finite-length simulations, however,
 %metadynamics may deliver better performance.
 %
-These results allow one to better
+These results may hopefully help one to better
 plan and optimize FDS simulations.
 
 
@@ -276,6 +294,7 @@ of the known inverse-time formula.
 %
 Next, we extend the method to the general case
 of a multiple-bin updating scheme
+that encompasses metadynamics
 in Secs. \ref{sec:multiple-bin}
 to \ref{sec:band-matrix}.
 %
@@ -330,7 +349,7 @@ be localized,
 %
 and to explore the global shape
 of the PMF, $-\ln p^*_i$,
-it is often advantageous to carry out
+it is often advantageous to perform
 biased sampling that targets
 a wider distribution, $p_i$.
 %
@@ -614,7 +633,7 @@ the updating magnitude $\alpha$
 (or $\ln f$ there)
 is controlled in stages.
 %
-At each stage, $\alpha$
+In each stage, $\alpha$
 is kept constant,
 and the histogram along $i$
 is collected and monitored.
@@ -659,6 +678,10 @@ Here we will re-derive this formula
 and suggest a slight modification
 whereby the origin of $t$ is shifted
 according to the initial error.
+%
+Interestingly, we may reach the same result
+from optimally planning the simulation lengths in the stages,
+and the reduction factor, as shown in Appendix \ref{sec:wltoinvt}.
 
 
 As Eq. \eqref{eq:alpha_invt} was being developed for the WL algorithm,
@@ -734,9 +757,8 @@ and a stochastic part,
 The deterministic part can be related
 to the ``ensemble average'' of $h_i$,
 where the ensemble consists of many similar simulation copies
-that have experienced the same schedule $\alpha(t)$
-and have reached the same $v_i(t)$
-at time $t$.
+sharing the same schedule $\alpha(t)$
+the same $v_i(t)$ at time $t$.
 %
 The initial states and the stochastic forces
 during the process may differ, however.
@@ -802,16 +824,43 @@ $
 
 
 
-To proceed, we first define an average\cite{
+The bias potential, $v_i(t)$, following Eq. \eqref{eq:vt_diffeq}
+generally grows overtime.
+%
+While a uniform increase of $v_i(t)$ does not affect the 
+resulting distribution $\pi_i(t)$ as given by Eq. \eqref{eq:h_ave},
+%
+it is convenient to express the error of $v_i(t)$,
+from the difference between $v_i(t)$ and a baseline value, $\bar v(t)$,
+that represents the average growth\cite{
 dama2014},
+%
+\begin{equation}
+  x_i(t) \equiv v_i(t) - \bar v(t)
+  %=
+  %v_i - \sum_{j = 1}^n \rho_j \, v_j
+  ,
+\label{eq:x_def}
+\end{equation}
+%
+where
 %
 \begin{equation}
   \bar v(t)
   = \sum_{i = 1}^n \rho_i \, v_i(t)
+  ,
 \label{eq:vbar_def}
 \end{equation}
 for some distribution,
 $\pmb \rho = (\rho_1, \dots, \rho_n)$.
+%
+Apparently,
+%
+\begin{equation}
+  \sum_{i = 1}^n \rho_i \, x_i(t) = 0
+  .
+\label{eq:rhox_sum}
+\end{equation}
 %
 This distribution $\pmb \rho$
 will be used to measure the error,
@@ -820,42 +869,27 @@ the target distribution $\mathbf p$.
 %
 For example,
 in well-tempered metadynamics,
-$\pmb\rho$ is always flat,
+$\pmb\rho$ is a flat distribution,
 while $\mathbf p$ is an attenuated version of
 $\mathbf p^*$\cite{
 barducci2008, dama2014}.
 %
-Then, we expect the difference %between $v_i$ and $\bar v$,
-%
-\begin{equation}
-  x_i \equiv v_i - \bar v
-  %=
-  %v_i - \sum_{j = 1}^n \rho_j \, v_j
-  ,
-\label{eq:x_def}
-\end{equation}
-%
-to be small in the asymptotic regime.
-%
-It follows that
-%
-\begin{equation}
-  \sum_{i = 1}^n \rho_i \, x_i = 0
-  ,
-\label{eq:rhox_sum}
-\end{equation}
-%
-and
-%
+The rate of growth of $v(t)$ is given by
 \begin{equation}
   \frac{ d \bar v (t) }
        { d t }
   =
   \alpha(t)
-  \sum_{ r = 1 }^n \frac{ h_r(t) } { p_r }
+  \sum_{ r = 1 }^n \rho_r \, \frac{ h_r(t) } { p_r }
   .
 \label{eq:dvbardt}
 \end{equation}
+%
+
+
+In the asymptotic regime,
+we expect the deviation $x_i(t)$
+to be small.
 %
 Expanding Eq. \eqref{eq:h_ave} in $x_i$ yields
 %
@@ -877,14 +911,16 @@ Expanding Eq. \eqref{eq:h_ave} in $x_i$ yields
 %
 where we have used $\sum_{j=1}^n p_j = 1$.
 %
-\note{For \eqref{eq:hdet_linearize}. Following the second step
+\note{
+The second step of Eq. \eqref{eq:hdet_linearize} follows
 $$
-\langle h_i(t) \rangle
+\frac{ \langle h_i(t) \rangle }
+     { p_i }
 \approx
-\frac{                  p_i (1 - x_i) }
+\frac{                       1 - x_i  }
      { \sum_{ r = 1 }^n p_r (1 - x_r) }
 =
-\frac{                      p_i (1 - x_i) }
+\frac{                       1 - x_i  }
      { 1 - \sum_{ r = 1 }^n p_r \, x_r }
 .
 $$
@@ -973,7 +1009,8 @@ a simple one-variable problem.
 
 
 
-\subsubsection{Optimization of a one-variable problem}
+\subsubsection{\label{sec:onevar}
+Optimization of a one-variable problem}
 
 
 
@@ -1047,7 +1084,9 @@ u(q')
 e^{q' - q(T)}.
 \label{eq:u_def}
 \end{align}
+%
 At the end of period $T$, we have
+%
 \begin{align}
 &\left\langle x^2(T) \right\rangle
 =
@@ -1252,7 +1291,7 @@ except that the elements can be negative.
 
 
 To simplify the ensuing discussion,
-we  limit ourselves to $\mathbf w$'s
+we  limit ourselves to matrices % $\mathbf w$'s
 that satisfy
 the detailed balance condition,
 %
@@ -1857,7 +1896,7 @@ Characterization of optimal schedules}
 We can characterize the optimal schedule
 geometrically as follows.
 %
-First, we define the mass function as
+First, we define a mass function as
 \begin{equation}
   M(Q)
   =
@@ -1867,7 +1906,7 @@ First, we define the mass function as
   .
 \label{eq:mass_func}
 \end{equation}
-and the normalized mass distribution as
+and a normalized mass distribution as
 \begin{equation}
   m(Q)
   =
@@ -1923,7 +1962,7 @@ $\int_0^{q(T)} m(Q) \, dQ = 1$.
 
     \draw[] (0.5, 1.174) -- (0.7, 1.1740);
     \draw[->] (0, 0) -- node[below, inner sep=5mm] {$Q$} (2.8, 0);
-    \draw[->] (0, 0) -- node[above, rotate=90] {$M(Q)$} (0, 1.8);
+    \draw[->] (0, 0) -- node[above, rotate=90] {$m(Q)$} (0, 1.8);
 
     % xtics
     \draw[] (0.0, 0.1) -- (0.0, 0.0) node[below] {$0$};
@@ -2048,6 +2087,9 @@ $T_1 \, E_{A1} = T_2 \, E_{A2}$.
 }
 
 
+The above characterization allows us to determine
+the optimal initial updating magnitude.
+%
 Let us now consider simulations in which
 the system is initially equilibrated at the same
 constant updating magnitude $\alpha_0$.
@@ -2156,7 +2198,8 @@ Homogeneous updating schemes}
 
 
 Many commonly-used updating schemes
-can be characterized by a rigid window
+can be characterized by a hill function,
+which is a rigid window
 centered on the current bin.
 %
 We call these schemes homogeneous,
@@ -3695,12 +3738,16 @@ agreed well those from the theory.
   }
   \caption{
     \label{fig:errinvt}
-    Error $E$ versus parameter $\lambda$
+    Error $E$ versus the parameter $\lambda$
     for the modified inverse-time schedule,
     Eq. \eqref{eq:alpha_invtlambda}.
     %
     The points are results from averaging over $1000$ independent runs;
     the curves are theoretical predictions.
+    %
+    For the single-bin (WL) updating scheme,
+    the minimal should occur at $\lambda = 1$,
+    while it is not necessarily the case for a general updating scheme.
     %
     \note{The figure was produced by \texttt{doc/fig/errinvt.gp}.
       The data were produced by the script \texttt{data/invtcscan.py},
@@ -3799,13 +3846,14 @@ to be discussed later.
     \hline
       Schedule
     &
-      Inverse-time, Eq. \eqref{eq:alpha_invt1}
+      Inverse-time, \newline
+      Eq. \eqref{eq:alpha_invt1}
     &
       Modified inverse-time,
       Eq.~\eqref{eq:alpha_invtlambda}
       with optimized $\lambda$
     &
-      Optimal,
+      Optimal, \newline
       Eq. \eqref{eq:q_opt}
     \\
     \hline
@@ -3920,6 +3968,10 @@ $\alpha(0) = \alpha/2 = 5 \times 10^{-5}$.
     from over 10000 independent simulations;
     the curves are theoretical predictions.
     %
+    The minimal should always occur at
+    $\alpha(0) = \alpha_0/2 = 5 \times 10^{-5}$,
+    as predicted by Eq. \eqref{eq:half_alpha0}.
+    %
     \note{This figure was produced by
       \texttt{doc/fig/erriascan.gp}.
       The data were saved under
@@ -4018,12 +4070,15 @@ Conclusions and Discussions}
 In conclusion,
 we have proposed a method of computing
 the optimal schedule of the updating magnitude
-for a general adaptive FDS simulation,
-e.g., the WL algorithm or metadynamics.
+for a general class of free energy calculation methods,
+which we refer to as adaptive flat-distribution sampling (FDS) methods,
+including the Wang-Landau (WL) algorithm or metadynamics.
 %
 Adaptive FDS methods
- incrementally update a bias potential
-to offset the PMF and thereby sample a flat distribution.
+incrementally update a bias potential
+along a collective variable
+to offset the potential of mean force (PMF)
+and thereby sample a flat distribution.
 %
 The optimal schedule delivers the fastest convergence
 of the bias potential,
@@ -4040,13 +4095,19 @@ of the adaptive FDS simulation.
 %is updated with relative weight specified by a Gaussian window.
 
 
-
-Each adaptive FDS method is associated with
-an updating scheme,
-or mathematically an updating matrix.
-%whose elements $w_{ij}$ specifies the
-%relative magnitude of updating the bias potential
-%at bin $i$ upon a visit to bin $j$.
+The optimal schedule depends on the updating hill function,
+which is limited to a single-bin in the WL case,
+but can be extended to several neighboring bins
+taking a Gaussian shape in the metadynamics case.
+%
+More generally,
+each adaptive FDS method is associated with
+an updating scheme
+that can be mathematically characterized
+by an updating matrix.
+%
+Each column of the matrix gives the normalized
+hill function for the bin corresponding to the column.
 %
 Our method computes the optimal schedule from
 the eigenvalues of the updating matrix,
@@ -4060,8 +4121,8 @@ Eq. \eqref{eq:alpha_invt1}.
 %
 For a general multiple-bin scheme,
 including the Gaussian one used in metadynamics,
-the optimal schedule permits no simple closed form,
-but is given by an equation of motion
+the optimal schedule is not given by a simple closed form,
+but is implicitly given by an equation of motion
 of a free particle with a position-dependent mass, Eq. \eqref{eq:q_opt}.
 %
 In this case,
@@ -4109,7 +4170,8 @@ would be close to that of the bandpass scheme.
 
 
 
-Our method is most useful for long simulations to achieve relatively precise answers.
+Our method is most useful for long simulations
+to achieve relatively precise results.
 %
 This allows us to assume the sampling process
 to be a quasi-equilibrium one\cite{barducci2008, dama2014},
@@ -4131,6 +4193,207 @@ J. Drake, O. Nassar, Dr. C. Lai, Dr. S. Ou and D. Stuhlsatz
 for helpful discussions.  We gratefully acknowledge the Robert A. Welch Foundation (H-0037), the National Science Foundation (CHE-1152876) and the National Institutes of Health (GM-037657) for partial support of this work.  This research used computing resources of the National Science Foundation XSEDE grid.
 
 \appendix
+
+
+
+\section{\label{sec:wltoinvt}
+Inverse-time schedule as the optimal limit of the WL algorithm}
+
+
+
+We may understand the inverse-time schedule %, Eq. \eqref{eq:},
+as an optimal limit of the stage-wise WL updating scheme.
+%
+Our calculation below will focus on the one-variable problem,
+as done in Sec. \ref{sec:onevar}.
+
+To begin, we split the entire simulation into $S$ stages,
+each with a fixed magnitude, $\alpha_s$ ($1 \le s \le S$).
+%
+We denote the number of steps in stage $s$ as $T_s$, and
+$\sum_{s=1}^S T_s = T$.
+%
+%\begin{equation}
+%  \sum_{s = 1}^S T_s = T
+%  ,
+%  \label{eq:sumT}
+%\end{equation}
+%
+We assume that
+the magnitude decreases geometrically,
+%
+\begin{equation}
+  \alpha_s = a \, r^s
+  ,
+  \label{eq:alphas}
+\end{equation}
+%
+with $0 < r < 1$.
+%
+%and that the system is properly equilibrated
+%under a constant magnitude initially.
+%
+We wish to find the best distribution of the simulation time
+into the $S$ stages
+as well as
+the optimal number of stages and $r$. 
+
+
+If we denote the error at the end of stage $s$ as $E_s$,
+then from Eq. \eqref{eq:x2t_average}, we have
+%
+\begin{align}
+  E_s
+  &=
+  E_{s - 1} \, e^{-2 \, \alpha_s \, T_s }
+  \notag\\
+  &\phantom{=}
+  +
+  \int_0^{T_s} \int_0^{T_s}
+  \alpha_s^2 \,
+  e^{ -\alpha_s \, (T_s - t) }
+  e^{ -\alpha_s \, (T_s - t') }
+  \kappa( t - t' ) \, dt \, dt'
+  \notag
+  \\
+  &=
+  \left(
+    E_{s - 1} - \frac{ \Gamma \, \alpha_s } { 2 }
+  \right)
+  e^{ - 2 \, \alpha_s \, T_s }
+  +
+  \frac{ \Gamma \, \alpha_s } { 2 }
+  .
+  \label{eq:errorstage}
+\end{align}
+%
+where we have assumed
+$\kappa(t) = \Gamma \, \delta(t)$
+and
+$q(t) = \alpha_s \, t$.
+%
+Our aim is to minimize $E_S$
+of the final stage.
+%
+To do so, consider moving $\delta T$ simulation time from
+stage $s+1$ to stage $s$,
+then $E_{s+1}$ is affected as
+%
+\begin{align*}
+  \delta E_{s+1}
+  =
+\left[
+  2 \, \alpha_{s+1}
+  \left(
+    E_s - \tfrac{ \Gamma \, \alpha_{s+1} } { 2 }
+  \right)
+  +
+  \frac{ \partial E_s } { \partial T_s }
+\right]
+e^{-2 \, \alpha_{s+1} \, T_{s+1} }
+\,
+\delta T
+,
+\end{align*}
+%
+Since this variation does not directly affect the error of later stages,
+the above expression must be zero to minimize the final error, i.e,
+%
+\begin{align*}
+  2 \, \alpha_{s+1}
+  \left(
+    E_s - \frac{ \Gamma \, \alpha_{s+1} } { 2 }
+  \right)
+  &=
+  -\frac{ \partial E_s } { \partial T_s }
+  %\\
+  %&=
+  %2 \, \alpha_s \, e^{-2 \, \alpha_s \, T_s}
+  %\left(
+  %  E_{s-1} - \frac{ \Gamma \, \alpha_s } { 2 }
+  %\right)
+  %\\
+  =
+  2 \, \alpha_s \, \left(E_s - \frac{ \Gamma \, \alpha_s } { 2 }  \right)
+  ,
+\end{align*}
+%
+where we have used Eq. \eqref{eq:errorstage}
+in the second step.
+%
+Thus,
+\begin{equation}
+  E_s
+  =
+  \frac{ \Gamma } { 2 } \, ( \alpha_s + \alpha_{s+1} )
+  =
+  \frac{ \Gamma } { 2 } \, \alpha_s ( 1 + r )
+  .
+  \label{eq:Es}
+\end{equation}
+%
+Using Eqs. \eqref{eq:Es} and \eqref{eq:alphas}
+in Eq. \eqref{eq:errorstage}, we get
+%
+\begin{equation}
+  e^{-\alpha_s \, T_s } = r
+  .
+  \label{eq:exp_r}
+\end{equation}
+%
+
+To compute the optimal schedule,
+we map the simulation time $t$ to the stage number $s$ as
+%
+$$
+t = \sum_{s' = 1}^s T_{s'}
+= \frac{ 1 - r^s } { 1 - r } \, T_s
+= \frac{ \ln(1/r) } { 1 - r } \,
+\left(
+  \frac{1}{\alpha_s}
+  -
+  \frac{1}{a}
+\right)
+,
+$$
+where we have used Eq. \eqref{eq:exp_r} in the last step.
+%
+Thus,
+%
+\begin{equation}
+\alpha_s = \frac{1}{
+  \frac{1 -r }{ \ln(1/r) } t + \frac{1}{a}
+},
+\label{eq:alphas}
+\end{equation}
+%
+Thus, the final error is given by
+%
+\begin{align}
+  E_S
+  =
+  \frac{\Gamma}{2}
+  \frac{ 1 + r }
+  {
+    \frac{1}{a}
+    +
+    \frac{1-r}{\ln(1/r)} \,
+    T
+  }
+  ,
+  \notag
+\end{align}
+%
+which is minimized at $r \to 1$,
+for a large $T$.
+%
+If we identify the parameter $a$ as the initial updating magnitude $\alpha(t = 0)$,
+then this result agrees with Eqs. \eqref{eq:half_alpha0} and \eqref{eq:t0_sinc},
+and the optimal $t_0 = 1/a$.
+%
+Thus, in this limit,
+the schedule given by Eq. \eqref{eq:alphas}
+is identical to that from Eq. \eqref{eq:alpha_invt1}.
 
 
 \section{\label{sec:Gamma}
@@ -4436,8 +4699,9 @@ $\alpha(t) = \alpha_0$.
 %
 %A practical difficulty is that
 However,
-without the intrinsic distribution, $p^*_i$,
-we cannot compute the shifted bias potential, $v_i$,
+we often do not know a priori the intrinsic distribution, $p^*_i$,
+and hence
+cannot compute the shifted bias potential, $v_i$,
 from the original one, $V_i$
 (cf. Sec. \ref{sec:FDS}).
 %
@@ -4796,7 +5060,7 @@ with a set of well-separated eigenvalues}
 We shall derive here an upper bound of the asymptotic error
 that can be associated to updating schemes
 with a set of well-separated eigenvalues,
-in parallel to the lower bound reachable by
+in parallel to the lower bound reached by
 the single-bin scheme with a set of identical eigenvalues
 (cf. Sec. \ref{sec:optWL}).
 
@@ -4813,6 +5077,9 @@ Thus,
 it follows from Eq. \eqref{eq:mint} that, as $q(T) \to \infty$,
 \begin{equation}
   C
+  =
+  \int_0^\infty
+  M(q') \, dq'
   \le
   \sum_{k = 2}^n \sqrt{ \Gamma_k }
   ,
@@ -4832,6 +5099,18 @@ is bounded as
   .
   \label{eq:error_asym_ubound}
 \end{equation}
+%
+It is readily seen that this bound is always
+greater than the lower bound given by Eq. \eqref{eq:error_asym_singlebin},
+$$
+\frac{T}{(T+t_0)^2} \, \sum_{k=2}^n \Gamma_k
+\le
+\frac{1}{T} \sum_{k=2}^n \Gamma_k
+\le
+\frac{1}{T} \left( \sum_{k=2}^n \sqrt{ \Gamma_k } \right)^2
+.
+$$
+
 
 
 Next, we show that this bound represents
@@ -5588,6 +5867,7 @@ $\min \lambda_k = 1 - 4 \, \mu_1$.
     $Q$             &   $q(T) - q(t)$.  \\
     $\theta_k(t)$   &   Noise of mode $k$, Eq. \eqref{eq:theta_def}. \\
     $\rho_i$        &   Distribution used to define the error. \\
+    $s, S$          &   Stage index and the total number of stages in the Wang-Landau algorithm. \\
     $\sigma_{ij}(t)$   &   Autocorrelation function of $\zeta_i(t)$. \\
     $\sigma$        &   Width of the Gaussian updating scheme. \\
     $t, \tau$       &   Time. \\
