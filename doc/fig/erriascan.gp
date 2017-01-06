@@ -33,6 +33,9 @@ fac = 2*100/sqrt(2*pi)
 emin_g = 0.0005192 ** 2
 emin_l = 0.009561 ** 2
 
+set arrow 1 from a0/2, 0.9 to a0/2, 2 lt 2 lc rgb "#808080" nohead back
+set label 1 '{/Times-Italic a}_{/*0.6 0 }{/*0.8 /}{/*0.7 }{/*0.8 2}' at graph 0.26, 1.07
+
 plot [:][:] \
     "../../data/iascan/iarun_sig10_g.dat" u 1:($2    / emin_g)  w p pt 13 ps 1.4      notitle, \
     "../../data/iascan/iaprd_sig10_g.dat" u 1:($2**2 / emin_g)  w l lt 1 lw 4         t "Global", \
@@ -46,8 +49,6 @@ set key at 1.6e-4, 1.95
 plot [:][:] \
     -1 w p pt 13 ps 1.4 t " ", \
     -1 w p pt 12 ps 1.4 t " "
-
-
 
 unset multiplot
 unset output

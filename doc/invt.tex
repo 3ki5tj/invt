@@ -167,8 +167,9 @@ by incrementally elevating the bias potential there.
 %
 The difference lies
 in the updating hill function,
-which takes the form of a localized
-$\delta$-function in the WL case,
+which takes the form of a discrete 
+$\delta$-function (or a boxcar function one histogram bin wide)
+in the WL case,
 or that of a Gaussian
 in the metadynamics.
 %
@@ -200,7 +201,7 @@ the updating magnitude.
 
 The schedule of reducing
 the updating magnitude,
-therefore, is critical in improving
+therefore, critically affects
 the precision of the final bias potential,
 hence that of the PMF\cite{liang2007,
 belardinelli2007, belardinelli2007jcp, belardinelli2008,
@@ -227,14 +228,14 @@ the optimal schedule
 for a general adaptive FDS method,
 including the WL algorithm and metadynamics.
 %
-We derive the optimal schedule
+We will show that the optimal schedule can be derived
 from an equation of motion of a free particle,
-and show that the initial updating magnitude
+and the initial updating magnitude
 should be set to
 half of the previous equilibrium value.
 %
-The optimal schedule in the WL case
-is shown to be given by
+Particularly, the optimal schedule in the WL case
+is given by
 an inverse-time formula,
 with a modified origin of time.
 %
@@ -253,7 +254,7 @@ turns out to be optimal for these schemes.
 %For finite-length simulations, however,
 %metadynamics may deliver better performance.
 %
-These results may hopefully help one to better
+These results may help to better
 plan and optimize FDS simulations.
 
 
@@ -331,7 +332,7 @@ in a simulated tempering simulation\cite{
 marinari1992, lyubartsev1992}.
 %
 For a continuous quantity, $z$,
-which is typical in a molecular system,
+which is often the case in a (classical) molecular system,
 we can discretize $z$
 such that the integer $i$ represents
 the index of a small interval, or a bin,
@@ -394,7 +395,7 @@ coincide with the intended distribution $p_i$.
 Here we shall call a simulation that targets
 a nearly flat distribution\cite{
 dayal2004, trebst2004, zhang2007, barducci2008, singh2011},
-$p_i$,
+$p_i$ constant for all $i$'s,
 an FDS simulation.
 %
 Roughly speaking, there are two types of FDS methods.
@@ -446,7 +447,7 @@ V_i
 For an unknown system,
 it is often difficult
 to guess a sufficiently accurate
-$V_i$ to start with.
+$V_i$ with which to start.
 %
 Thus,
 it can take many iterative rounds of simulations
@@ -469,8 +470,10 @@ and can approximately sample the target distribution.
 %
 However,
 %they are less well understood theoretically, as
-as mentioned, the updates  break the microscopic reversibility
-of the underlying sampling mechanism. Further failure to properly reduce the size of the histogram increments would lead to roughness or errors in the final estimate.
+as mentioned, the on-the-fly updates break the microscopic reversibility
+of the underlying sampling mechanism.
+Further, failure to properly reduce the size of the histogram increments
+would lead to roughness or errors in the final estimate.
 %
 %Thus, for a conservative practitioner,
 %the E-FDS methods appear more appealing
@@ -486,7 +489,7 @@ belardinelli2007, belardinelli2007jcp, belardinelli2008,
 barducci2008}.
 %
 Thus, in late stages of a long simulation,
-the updating becomes smaller and
+the updating becomes negligible and
 %the adaptive simulation tends to
 %the corresponding equilibrium one.
 %
@@ -588,7 +591,7 @@ is a multiple-bin scheme.
 
 
 
-One can show that with a constant $\alpha(t) = \alpha > 0$,
+One can show that with a constant magnitude $\alpha(t) = \alpha > 0$,
 the distribution collected from
 an adaptive FDS simulation
 is identical to $p_i$ in long times.
@@ -615,7 +618,7 @@ depends on the updating magnitude\cite{
 %that underlies Eq. \eqref{eq:pi_p_v}.
 %%
 %
-Thus, one has to decrease $\alpha$ over time
+Thus, one has to reduce the magnitude $\alpha$ over time
 to improve the estimate of the distribution,
 $p^*_i$. %via Eq. \eqref{eq:v_def}.
 
@@ -725,29 +728,30 @@ by a differential equation
 %
 \begin{equation}
   \dot v_i(t)
+  \equiv
+  \frac{ dv_i(t) } { dt }
   =
   \alpha(t) \, \frac{ h_i(t) } { p_i },
   \label{eq:vt_diffeq}
 \end{equation}
 %
-where
-$\dot v_i(t) \equiv dv_i(t)/dt$,
+with
 %
-and
 \begin{equation}
   h_i(t) = \delta_{i, i(t)}
   ,
   \label{eq:h_def}
 \end{equation}
-is the instantaneous histogram,
+%
+being the instantaneous histogram,
 which is equal to $1.0$
 for the bin $i(t)$ at time $t$
 or zero otherwise.
 
 
 
-Next, we split $h_i(t)$ into a deterministic part
-and a stochastic part,
+Next, we split $h_i(t)$ into a deterministic averaged part
+and a stochastic part, $\zeta_i(t)$,
 %
 \begin{equation}
   h_i(t) = \langle h_i(t) \rangle + \zeta_i(t).
@@ -785,7 +789,8 @@ for the deterministic part
 %
 %
 %
-For the random noise part, we have
+For the random noise part,
+the average is zero by definition,
 $\langle \zeta_i(t) \rangle = 0$,
 %
 %The noise is not necessarily white,
@@ -827,10 +832,10 @@ $
 The bias potential, $v_i(t)$, following Eq. \eqref{eq:vt_diffeq}
 generally grows overtime.
 %
-While a uniform increase of $v_i(t)$ does not affect the 
+Since a uniform increase of $v_i(t)$ does not affect the
 resulting distribution $\pi_i(t)$ as given by Eq. \eqref{eq:h_ave},
 %
-it is convenient to express the error of $v_i(t)$,
+the real error in $v_i(t)$ is more readily defined
 from the difference between $v_i(t)$ and a baseline value, $\bar v(t)$,
 that represents the average growth\cite{
 dama2014},
@@ -854,7 +859,7 @@ where
 for some distribution,
 $\pmb \rho = (\rho_1, \dots, \rho_n)$.
 %
-Apparently,
+So we have,
 %
 \begin{equation}
   \sum_{i = 1}^n \rho_i \, x_i(t) = 0
@@ -912,7 +917,7 @@ Expanding Eq. \eqref{eq:h_ave} in $x_i$ yields
 where we have used $\sum_{j=1}^n p_j = 1$.
 %
 \note{
-The second step of Eq. \eqref{eq:hdet_linearize} follows
+The second step of Eq. \eqref{eq:hdet_linearize} follows from
 $$
 \frac{ \langle h_i(t) \rangle }
      { p_i }
@@ -1000,12 +1005,15 @@ the total error of the bias potential as
 \label{eq:error_sum}
 \end{equation}
 %
+The expression depends implicitly on the function $\alpha(t)$.
+%
 Our aim is to find the $\alpha(t)$
 that minimizes the error $E$
 at the end of the simulation period $T$.
 %
 It suffices to consider
-a simple one-variable problem.
+a one-variable problem that
+minimizes each individual $\left\langle x_i^2 \right\rangle$.
 
 
 
@@ -1014,7 +1022,7 @@ Optimization of a one-variable problem}
 
 
 
-Consider the following equation
+Consider the following stochastic differential equation
 of a single variable:
 %
 \begin{equation}
@@ -1104,6 +1112,8 @@ At the end of period $T$, we have
 \end{align}
 
 
+This is a functional of the curve $q(t)$.
+%
 We now fix the endpoint value $q(T)$
 and vary the curve, $q(t)$ ($0 < t < T$).
 %
@@ -1216,7 +1226,8 @@ Eq. \eqref{eq:alpha_invt}
 is the special case of $t_0 = 0$.
 %
 In Sec. \ref{sec:finlencorr},
-we show that $t_0$ can be adjusted
+we show that % $t_0$ can be adjusted
+one can further improve the schedule by adjusting $t_0$
 to accommodate the initial error.
 
 
@@ -1248,7 +1259,8 @@ Then, Eq. \eqref{eq:vt_diffeq} is generalized to
 
 
 The optimization procedure is similar to the single-bin case.
-However, we shall adopt some restrictions and approximations
+%
+However, we shall assume some restrictions and approximations
 to simplify the discussion.
 
 
@@ -1265,7 +1277,7 @@ the desired distribution
 $\mathbf p = (p_1, \dots, p_n)$,
  $\dot v_i(t)$
 in Eq. \eqref{eq:vt_diffeq_mbin}
-should be a constant independent of $i$,
+should be a constant of $i$,
 if $h_j(t)$ were the same as $p_j$.
 %
 This allows $v_i(t)$'s to grow uniformly
@@ -1286,8 +1298,11 @@ with eigenvalue $1$.
 %
 Thus, the transpose $\mathbf w^T$
 resembles a transition matrix,
-except that the elements can be negative.
-
+except that some elements can be negative.
+%
+Below we shall take advantage of the analogy
+and borrow techniques used
+in studying transition matrices\cite{vankampen}.
 
 
 To simplify the ensuing discussion,
@@ -1541,7 +1556,8 @@ from $k = 2$,
 
 In analogy to Eq. \eqref{eq:x2t_average},
 using Eqs. \eqref{eq:yt_diffeq} and \eqref{eq:y2_sum}, we can write
-the error after a period $T$,
+the error after a period $T$
+as a sum of two contributions,
 %
 \begin{equation}
   \Err
@@ -1550,8 +1566,9 @@ the error after a period $T$,
   \label{eq:error_split}
 \end{equation}
 %
-as the sum of the residual error
+where the residual error
 (from the decay of the initial error)
+is given by
 %
 \begin{equation}
   \Err_R
@@ -1563,6 +1580,7 @@ as the sum of the residual error
 \end{equation}
 %
 and the asymptotic error
+is given by
 \begin{equation}
   \Err_A
   =
@@ -1574,7 +1592,7 @@ and the asymptotic error
   \label{eq:error_asym}
 \end{equation}
 %
-where
+with
 \begin{align*}
   u_k(q')
   &\equiv
@@ -1594,7 +1612,7 @@ where
 
 
 In the asymptotic regime
-(i.e., if the simulation length, $T$, is sufficiently long),
+(i.e., if the simulation period, $T$, is sufficiently long),
 we can approximate $\kappa_k(t)$ as
 %
 \begin{equation}
@@ -1629,7 +1647,7 @@ Then, Eq. \eqref{eq:error_asym} is simplified as
 In this way,
 the underlying sampling process
 affects the error only through the
-$\Gamma_k$'s.
+few numbers $\Gamma_k$'s.
 %
 In Appendix \ref{sec:Gamma},
 we evaluate $\Gamma_k$'s in two special cases,
@@ -1653,7 +1671,7 @@ Before addressing the optimal schedule
 for a multiple-bin scheme,
 we shall first compute the equilibrium error
 under a constant schedule,
-$\alpha(t) = \alpha_0$.
+$\alpha(t) = a_0$.
 %
 After a long period $T'$,
 the residual error becomes negligible, and
@@ -1667,8 +1685,8 @@ is given by
 %  =
 %  \int_0^{T'}
 %    \sum_{k = 2}^n
-%      \Gamma_k \, (\lambda_k \, \alpha_0)^2 \,
-%      e^{ 2 \, \lambda_k \, \alpha_0 \, (t - T') }
+%      \Gamma_k \, (\lambda_k \, a_0)^2 \,
+%      e^{ 2 \, \lambda_k \, a_0 \, (t - T') }
 %    \, dt
 %  \notag
 %  \\
@@ -1678,7 +1696,7 @@ is given by
 %  %{ =\joinrel=\joinrel=\joinrel= }
 %  %
 %  \sum_{ k = 2 }^n
-%    \frac 1 2 \, \Gamma_k \, \lambda_k \, \alpha_0
+%    \frac 1 2 \, \Gamma_k \, \lambda_k \, a_0
 %  ,
 %  \qquad
 %  ( T' \to \infty )
@@ -1695,13 +1713,13 @@ is given by
   \right\rangle
   &=
   \int_0^{T'}
-    \Gamma_k \, (\lambda_k \, \alpha_0)^2 \,
-      e^{ 2 \, \lambda_k \, \alpha_0 \, (t - T') }
+    \Gamma_k \, (\lambda_k \, a_0)^2 \,
+      e^{ 2 \, \lambda_k \, a_0 \, (t - T') }
     \, dt
   \notag
   \\
   &=
-  \frac 1 2 \, \Gamma_k \, \lambda_k \, \alpha_0
+  \frac 1 2 \, \Gamma_k \, \lambda_k \, a_0
   ,
   \qquad
   ( T' \to \infty )
@@ -1715,10 +1733,10 @@ We will use this result to model the initial error
 before starting the schedule $\alpha(t)$ to be optimized.
 %
 That is, we assume
-$\alpha(t) = \alpha_0$
+$\alpha(t) = a_0$
 for $t < 0$, and
 the system has entered the sampling equilibrium
-under a fixed $\alpha_0$ at $t = 0$.
+under a fixed $a_0$ at $t = 0$.
 %
 We can then use Eq. \eqref{eq:y2_eql}
 for the $\langle y_k^2(0) \rangle$'s
@@ -1731,7 +1749,7 @@ is given by
   \Err_R
   =
   \sum_{k = 2}^n
-      \frac 1 2 \, \alpha_0 \, \Gamma_k \, \lambda_k \,
+      \frac 1 2 \, a_0 \, \Gamma_k \, \lambda_k \,
       e^{  - 2 \, \lambda_k \, q(T) }
   .
   \label{eq:error_res1}
@@ -1776,9 +1794,10 @@ where the Lagrangian,
   &=
   \sum_{ k = 2 }^n
     \Gamma_k \, \dot u_k^2\bigl[ q(t) \bigr]
-  \notag
-  \\
-  &=
+  %\notag
+  %\\
+  %&=
+  =
   \sum_{ k = 2 }^n
     \Gamma_k \, \lambda_k^2 \, u_k^2 \bigl[ q(t) \bigr]
   \; \dot q^2( t ),
@@ -1792,7 +1811,7 @@ Since the Lagrangian
 does not explicitly depend on time, $t$,
 the Hamiltonian is conserved.
 %
-But the Hamiltonian
+But in this case the Hamiltonian
 %
 \begin{equation}
   \mathcal H
@@ -1833,9 +1852,9 @@ So we may set
   \label{eq:Lagrangian_const}
 \end{equation}
 %
-for some positive constant $C$,
+for some positive constant $C$.
 %
-%We may treat Eq. \eqref{eq:Lagrangian_const}
+This serves
 as a generalization of Eq. \eqref{eq:dudt_const}.
 %
 By integrating the square root, we get
@@ -1878,7 +1897,7 @@ $\alpha(t) = \dot q(t)$.
 %
 Since we only optimized the asymptotic error, $E_A$,
 in the above,
-the parameter $q(T)$ can be further adjusted
+the value of $q(T)$ can be further adjusted
 to minimize the total error, $E = E_R + E_A$
 (cf. Sec. \ref{sec:optinitalpha}).
 %
@@ -2017,7 +2036,7 @@ and the area under the curve in the domain $[Q, q(T)]$
 is equal to $t/T$,
 as shown in Fig. \ref{fig:massq},
 
-This mapping allows us to classify all optimal schedules
+This mapping allows us to classify optimal schedules
 as follows.
 %
 We collect in each class optimal schedules
@@ -2092,7 +2111,7 @@ the optimal initial updating magnitude.
 %
 Let us now consider simulations in which
 the system is initially equilibrated at the same
-constant updating magnitude $\alpha_0$.
+constant updating magnitude $a_0$.
 %
 For these simulations,
 we can adjust $q(T)$
@@ -2106,7 +2125,7 @@ the total error satisfies
 \begin{equation}
   m\bigl( q(T) \bigr)
   =
-  \frac{1} { T \, (\alpha_0 / 2) }
+  \frac{1} { T \, (a_0 / 2) }
   .
 \label{eq:opt_qT}
 \end{equation}
@@ -2121,7 +2140,7 @@ $$
     \partial Q_c
   }
   &=
-  -\alpha_0 \, M^2(Q_c)
+  -a_0 \, M^2(Q_c)
   ,
   \\
   \frac{
@@ -2144,7 +2163,7 @@ we can rewrite the condition as
 \begin{equation}
   \alpha( t = 0 )
   =
-  \frac{ \alpha_0 }
+  \frac{ a_0 }
        { 2 }
   ,
 \label{eq:half_alpha0}
@@ -2155,14 +2174,14 @@ is always half of the equilibration value.
 %
 This factor $1/2$
 happens to coincide with the
-reduction factor of updating magnitude
+recommended reduction factor of updating magnitude
 at stage transitions
 in the original WL algorithm\cite{
 wang2001, wang2001pre}.
 
 
-Now consider
-simulations with the same $\alpha_0$.
+Let us now consider
+simulations with the same $a_0$.
 %
 Since both $M(Q)$ and $m(Q)$ decrease monotonically with $Q$,
 Eq. \eqref{eq:opt_qT} shows that
@@ -2222,7 +2241,7 @@ and thus are completely determined
 by the eigenvalues.
 %
 Further, the multiplication of $\mathbf w$
-can be reduced to a convolution with the window,
+can be reduced to a convolution with the hill function,
 or the updating kernel.
 %
 Thus,
@@ -2254,7 +2273,7 @@ It is natural to first introduce homogeneous updating schemes
 for a periodic variable\cite{dama2014}.
 %
 The updating matrix, $\mathbf w$,
-assume the following form
+assumes the following form
 %
 \begin{equation}
   w_{ij}
@@ -2281,9 +2300,7 @@ are a set of numbers satisfying
 %
 and $\mu_l = 0$ for $|l| > b$.
 %
-Particularly,
-we shall only consider symmetric kernels
-that satisfy
+We shall further impose the symmetry
 %
 \begin{equation}
   \mu_i = \mu_{-i}
@@ -2349,11 +2366,21 @@ $$
   \sum_{j = 1}^n
     \mu_{i - j} \, \phi_j
   +
-  \sum_{j = 1+n}^{2 \, n}
-    \mu_{i - l} \, \phi_l
+  \sum_{l = 1+n}^{2 \, n}
+    \mu_{i - l} \, \phi_{l - n}
   +
-  \sum_{j = 1-n}^0
-    \mu_{i - j + n} \, \phi_j
+  \sum_{l = 1-n}^0
+    \mu_{i - l} \, \phi_{l + n}
+  \\
+  &=
+  \sum_{j = 1}^n
+    \mu_{i - j} \, \phi_j
+  +
+  \sum_{l = 1+n}^{2 \, n}
+    \mu_{i - l} \, \phi_{l}
+  +
+  \sum_{l = 1-n}^0
+    \mu_{i - l} \, \phi_{l}
   \\
   &=
   \sum_{j = 1-n}^{2 \, n}
@@ -2636,7 +2663,7 @@ or $1$ otherwise.
 %
 In both cases,
 the eigenvalues, $\lambda_k$'s,
-is the cosine transform of
+are the cosine transform of
 the updating kernel.
 %
 For the updating scheme to be stable,
@@ -2691,7 +2718,7 @@ and the eigenvalues are
 \end{equation}
 %
 So this updating scheme is stable if
-$\min \lambda_k = \lambda_n \ge 0$,
+$\min \lambda_k \ge 0$,
 or
 \begin{equation}
   \mu_1 \le
@@ -2710,6 +2737,26 @@ or
 %\label{eq:nn_stable}
 \end{equation}
 
+\note{
+If the variable is periodic ($g = 2$) and $n$ is even,
+the minimum is achieved at $k = n/2$.
+
+If the variable is periodic ($g = 2$) but $n$ is odd,
+the minimum is achieved at $k = (n+1)/2$.
+$$
+\sin^2\left(
+  \frac{n-1}{2n} \pi
+\right)
+=
+\cos^2\left(
+  \frac{\pi}{2n}
+\right)
+.
+$$
+
+If the variable is nonperiodic ($g = 1$)
+the minimum is achieved at $k = n$.
+}
 
 
 
@@ -2733,16 +2780,16 @@ in the continuous limit.
 
 For $n \gg 1$,
 we define
-$x = l \, g \, \Delta x$,
+$x = l \, \Delta x$,
 and
 $\mu_l = \mu(x) \, \Delta x$,
 where
-$\Delta x = \pi/n$
+$\Delta x = g \, \pi/n$
 is the bin size.
 %
 By assuming the largest $b \approx n/g$,
-Eq. \eqref{eq:wband_eigenvalue}
-can be approximated as an integral:
+we can approximate Eq. \eqref{eq:wband_eigenvalue}
+as an integral:
 %
 \begin{equation}
   \lambda_k
@@ -2758,10 +2805,24 @@ with the normalization
 $
   1 = 2 \int_0^\pi \mu(x) \, dx.
 $
-
+\note{
+\begin{align*}
+  \lambda_k
+  &\approx
+  \int_0^b \mu_l \, \cos[(k-1) \, x] \, dl
+  \\
+  &=
+  \int_0^b \mu(x) \, \cos[(k-1) \, x] \, \Delta x \, dl
+  \\
+  &=
+  \int_0^{b \, \Delta x} \mu(x) \, \cos[(k-1) \, x] \, dx
+\end{align*}
+The upper limit
+$b \, \Delta x \approx (n/g) \, (g\,\pi/n) = \pi$.
+}
 
 For the Gaussian updating kernel,
-if the width $\sigma$ satisifies
+if the width $\sigma$ is satisified
 with $\Delta x \ll \sigma \ll 1$,
 we can extend
 the upper limit of the integrals
@@ -3195,10 +3256,10 @@ recovers Eq. \eqref{eq:alpha_invt1}.
 
 Since the first eigenmode corresponds to
 a uniform shift of all $v_k$'s,
-we can freely set $\lambda_1$ to $\lambda_2$
+we can freely set $\lambda_1$ to be the same as $\lambda_2$
 without changing the nature of the updating scheme.
 %
-Now an updating matrix
+Note, an updating matrix
 with identical eigenvalues
 is a multiple of the identity matrix.
 %
@@ -3263,7 +3324,8 @@ given by Eq. \eqref{eq:alpha_invt1}.
 Below, we construct these schemes for
 the homogeneous case.
 %
-The definition of $K$ will be modified.
+The definition of $K$ will be modified
+for mathematical convenience.
 
 For a periodic variable, we demand
 %
@@ -3485,13 +3547,13 @@ In the above, we have focused on
 the asymptotic error.
 %
 By including the residual error
-and minimize the total,
+and minimizing the total,
 we get the optimal $t_0$,
 which is, according to Eq. \eqref{eq:half_alpha0},
 %
 %%Assuming the system is initially equilibrated
 %%under a constant updating magnitude,
-%%$\alpha_0$,
+%%$a_0$,
 %Assuming Eq. \eqref{eq:error_res1} with
 %$$
 %q(T)
@@ -3509,7 +3571,7 @@ which is, according to Eq. \eqref{eq:half_alpha0},
 %  =
 %  E_R + E_A
 %  =
-%  \frac { \frac 1 2 \alpha_0 \, t_0^2 + T }
+%  \frac { \frac 1 2 a_0 \, t_0^2 + T }
 %        {          ( T + t_0 )^2          }
 %  \sum_{ k = 2 }^K \Gamma_k
 %  .
@@ -3522,8 +3584,8 @@ which is, according to Eq. \eqref{eq:half_alpha0},
 \begin{equation}
   t_0
   =
-  \frac{     2    }
-       { \alpha_0 }
+  \frac{  2  }
+       { a_0 }
   ,
 \label{eq:t0_sinc}
 \end{equation}
@@ -3556,7 +3618,7 @@ in the asymptotic limit.
 
 %
 %For example, consider a system that is initially
-%prepared under a fixed $\alpha_0$
+%prepared under a fixed $a_0$
 %at the beginning of the schedule $\alpha(t)$.
 %%
 %Then for shorter times, $T \approx 0$,
@@ -3608,7 +3670,7 @@ and $n = 100$.
 Both the target and intrinsic distributions
 are assumed to be flat:
 $p^*_i = p_i = 1/n$,
-so is the distribution $\rho_i$ used in Eqs.
+so is the distribution $\rho_i$ in Eqs.
 \eqref{eq:vbar_def} and \eqref{eq:error_sum}.
 %
 %We wish to see how
@@ -3622,7 +3684,7 @@ we set the bias potential to zero,
 $V_i \equiv 0$,
 and equilibrate the system for $10^7$ steps
 under a constant updating magnitude,
-$\alpha_0 = 10^{-4}$.
+$a_0 = 10^{-4}$.
 %
 Although the bias potential is correct initially,
 it would deviate from the correct value
@@ -3661,7 +3723,7 @@ We tested two sampling processes.
 %a global one and a local one.
 %
 Both are based on
-Metropolis MC algorithm\cite{
+a Metropolis MC algorithm\cite{
   metropolis1953, newman, frenkel,
   landau_binder}:
 %
@@ -3709,7 +3771,7 @@ on the modified inverse-time schedule,
 %
 where $\lambda$ is a free parameter,
 and $t_0$ is given by Eq. \eqref{eq:t0_sinc}.
-%and $t_0 = 2/\alpha_0$.
+%and $t_0 = 2/a_0$.
 %
 The error of this schedule
 can be computed analytically
@@ -3780,7 +3842,7 @@ Thus, the inverse-time formula,
 Eq. \eqref{eq:alpha_invt1},
 is optimal for the single-bin updating scheme,
 but not necessarily so for a general updating scheme.
-
+%
 
 
 
@@ -3820,7 +3882,7 @@ and limit the sum
 to the first few eigenmodes.
 %
 The resulting schedule
-would became similar to the inverse-time schedule,
+would become similar to the inverse-time schedule,
 Eq. \eqref{eq:alpha_invt1},
 as shown in Fig. \ref{fig:optacmp}.
 %
@@ -3947,7 +4009,7 @@ against the initial updating magnitude, $\alpha(0)$.
 %
 As shown in Fig. \ref{fig:erriascan},
 The minimal error was reached at
-$\alpha(0) = \alpha/2 = 5 \times 10^{-5}$.
+$\alpha(0) = a_0/2 = 5 \times 10^{-5}$.
 
 
 \begin{figure}[h]
@@ -3962,14 +4024,14 @@ $\alpha(0) = \alpha/2 = 5 \times 10^{-5}$.
     for optimal schedules with different $q(T)$.
     Assuming the Gaussian updating scheme
     with $\sigma = 10$,
-    and $\alpha_0 = 10^{-4}$.
+    and $a_0 = 10^{-4}$.
     %
     The points were obtained from averaging results
     from over 10000 independent simulations;
     the curves are theoretical predictions.
     %
     The minimal should always occur at
-    $\alpha(0) = \alpha_0/2 = 5 \times 10^{-5}$,
+    $\alpha(0) = a_0/2 = 5 \times 10^{-5}$,
     as predicted by Eq. \eqref{eq:half_alpha0}.
     %
     \note{This figure was produced by
@@ -4072,7 +4134,7 @@ we have proposed a method of computing
 the optimal schedule of the updating magnitude
 for a general class of free energy calculation methods,
 which we refer to as adaptive flat-distribution sampling (FDS) methods,
-including the Wang-Landau (WL) algorithm or metadynamics.
+including the Wang-Landau (WL) algorithm and metadynamics.
 %
 Adaptive FDS methods
 incrementally update a bias potential
@@ -4205,7 +4267,7 @@ We may understand the inverse-time schedule %, Eq. \eqref{eq:},
 as an optimal limit of the stage-wise WL updating scheme.
 %
 Our calculation below will focus on the one-variable problem,
-as done in Sec. \ref{sec:onevar}.
+as in Sec. \ref{sec:onevar}.
 
 To begin, we split the entire simulation into $S$ stages,
 each with a fixed magnitude, $\alpha_s$ ($1 \le s \le S$).
@@ -4220,7 +4282,7 @@ $\sum_{s=1}^S T_s = T$.
 %\end{equation}
 %
 We assume that
-the magnitude decreases geometrically,
+the magnitude falls geometrically,
 %
 \begin{equation}
   \alpha_s = a \, r^s
@@ -4236,11 +4298,12 @@ with $0 < r < 1$.
 We wish to find the best distribution of the simulation time
 into the $S$ stages
 as well as
-the optimal number of stages and $r$. 
+the optimal number of stages and $r$.
 
 
 If we denote the error at the end of stage $s$ as $E_s$,
 then from Eq. \eqref{eq:x2t_average}, we have
+$q(t) = \alpha_s \, t$, and
 %
 \begin{align}
   E_s
@@ -4269,13 +4332,12 @@ then from Eq. \eqref{eq:x2t_average}, we have
 %
 where we have assumed
 $\kappa(t) = \Gamma \, \delta(t)$
-and
-$q(t) = \alpha_s \, t$.
+in the second step.
 %
-Our aim is to minimize $E_S$
-of the final stage.
+Our aim is to minimize error
+of the final stage, $E_S$.
 %
-To do so, consider moving $\delta T$ simulation time from
+To do so, let us consider moving $\delta T$ simulation time from
 stage $s+1$ to stage $s$,
 then $E_{s+1}$ is affected as
 %
@@ -4293,7 +4355,7 @@ then $E_{s+1}$ is affected as
 e^{-2 \, \alpha_{s+1} \, T_{s+1} }
 \,
 \delta T
-,
+.
 \end{align*}
 %
 Since this variation does not directly affect the error of later stages,
@@ -4361,13 +4423,17 @@ where we have used Eq. \eqref{eq:exp_r} in the last step.
 Thus,
 %
 \begin{equation}
-\alpha_s = \frac{1}{
-  \frac{1 -r }{ \ln(1/r) } t + \frac{1}{a}
-},
-\label{eq:alphas}
+  \alpha_s =
+  \left[
+    \frac{1}{a} +
+    \frac{1 -r }{ \ln(1/r) } t
+  \right]^{-1}
+  ,
+  \notag
+  %\label{eq:alphas2}
 \end{equation}
 %
-Thus, the final error is given by
+and the final error is given by
 %
 \begin{align}
   E_S
@@ -4384,7 +4450,7 @@ Thus, the final error is given by
   \notag
 \end{align}
 %
-which is minimized at $r \to 1$,
+which is minimized as $r \to 1$,
 for a large $T$.
 %
 If we identify the parameter $a$ as the initial updating magnitude $\alpha(t = 0)$,
@@ -4427,7 +4493,22 @@ First, if the sampling is perfect,
 %
 %To see this, we note that
 the bin index $i$ is an independent random variable
-at each time step $t$, and
+at each time step $t$.
+%
+Further, in the asymptotic limit,
+$\langle h_i(t) \rangle = p_i$,
+we find from Eqs. \eqref{eq:h_split} and \eqref{eq:xi_def} that
+$$
+  \xi_i(t)
+  =
+  \frac{ h_i(t) } { p_i }
+  -
+  \sum_{ r = 1 }^n
+    \rho_r \frac{ h_r(t) } { p_r }
+  ,
+$$
+%
+and
 %
 \begin{align}
   \left\langle
@@ -4466,24 +4547,10 @@ at each time step $t$, and
     \frac{ \rho_r^2 } { p_r }
   \right) \,
   \delta_{t, t'}
-  ,
+  .
 \label{eq:zz_perfect}
 \end{align}
 %
-where
-we have assumed the asymptotic limit
-such that $\langle h_i(t) \rangle = p_i$,
-which leads to,
-by Eqs. \eqref{eq:h_split} and \eqref{eq:xi_def},
-$$
-  \xi_i(t)
-  =
-  \frac{ h_i(t) } { p_i }
-  -
-  \sum_{ r = 1 }^n
-    \rho_r \frac{ h_r(t) } { p_r }
-  .
-$$
 %$\delta(t - t')$ is the equivalent of $\delta_{t, t'}$
 %in the continuous limit.
 %
@@ -4695,7 +4762,7 @@ we can use Eq. \eqref{eq:y2_eql} to
 measure $\Gamma_k$'s in
 an adaptive FDS simulation
 with a constant schedule,
-$\alpha(t) = \alpha_0$.
+$\alpha(t) = a_0$.
 %
 %A practical difficulty is that
 However,
@@ -4767,7 +4834,7 @@ $$
 =
 \operatorname{var} y_k
 =
-\langle y_k^2 \rangle.
+\left\langle y_k^2 \right\rangle.
 $$
 Finally, by using Eq. \eqref{eq:y2_eql},
 we reach Eq. \eqref{eq:varY}.
@@ -4848,7 +4915,7 @@ of a given adaptive FDS simulation.
 %
 Basically, we need to extract
 $\lambda_i$'s and $\Gamma_i$'s
-from the input,
+from the given system and updating scheme (input),
 and then apply them to Eq. \eqref{eq:q_opt}
 for the schedule,
 as shown in Fig. \ref{fig:vardep}.
@@ -4946,7 +5013,7 @@ compute the eigenvalues, $\lambda_k$'s.
 \item
 Run a preliminary adaptive FDS simulation
 %using the updating scheme
-with a constant updating magnitude, $\alpha_0$.
+with a constant updating magnitude, $a_0$.
 
 \item
 Compute $\Gamma_k$'s from Eq. \eqref{eq:varY}.
@@ -5011,7 +5078,8 @@ we can compute the eigenvalues from
 Eq. \eqref{eq:wband_eigenvalue}.
 %
 By replacing negative eigenvalues with zeros and
-using Eq. \eqref{eq:mu_from_lambda_pbc}
+using the inversion formula,
+Eq. \eqref{eq:mu_from_lambda_pbc}
 or \eqref{eq:mu_from_lambda_refl},
 we get a new updating kernel,
 which is stable by construction.
@@ -5022,7 +5090,7 @@ as $\mu_l$ may be nonzero for $l > b$.
 If we truncate the new kernel at $\mu_b$,
 the stability problem remains,
 although the negative eigenvalues
-often become smaller in magnitude.
+tend to be smaller in magnitude.
 %
 Thus, to stabilize the updating kernel
 without increasing the width,
@@ -5038,7 +5106,7 @@ resulting the following algorithm.
     $\lambda_1, \dots, \lambda_n$
     from Eq. \eqref{eq:wband_eigenvalue}.
   \item
-    If all eigenvalues are nonnegative,
+    If all eigenvalues are nonnegative within the numerical error,
     we are done. % and exit the loop.
   \item
     Otherwise, replace negative eigenvalues by zeros,
@@ -5248,7 +5316,7 @@ where $\lambda_{ k^* } \approx 1/q(T)$.
   $M(Q) \propto 1/Q$ by Eq. \eqref{eq:MQ_lbound},
   and $C \propto \ln\bigl[ q(T) / q_0 \bigr]$
   for some $q_0$,
-  and we expect that with fixed $\alpha_0$,
+  and we expect that with fixed $a_0$,
   $q(T)$ to increase almost linearly with $T$
   by Eq. \eqref{eq:opt_qT}.
   %
@@ -5336,12 +5404,13 @@ on the right-hand side of Eq. \eqref{eq:vcorr_equil} as
 \notag
 \end{align}
 where
+we have defined a time-averaged histogram
 $H_i = \frac{1}{T} \sum_{t = 1}^T h_i(t)$
-with
+with the instantaneous histogram 
 $h_i(t)$ defined by Eq. \eqref{eq:h_def}.
 
 We can rewrite the error as
-a sum of the eigenmode as
+a sum of the eigenmodes as
 %
 \begin{align}
   E
@@ -5534,24 +5603,28 @@ Modified inverse-time schedules}
 
 
 
-As an alternative to the
-optimal schedule from Eq. \eqref{eq:q_opt},
-here we consider the modified
-inverse-time formula, Eq. \eqref{eq:alpha_invtlambda},
+Here we compute the error of the schedule given by
+the modified inverse-time formula,
+Eq. \eqref{eq:alpha_invtlambda}.
+%As an alternative to the
+%optimal schedule from Eq. \eqref{eq:q_opt},
+%here we consider the modified
+%inverse-time formula, Eq. \eqref{eq:alpha_invtlambda},
 %with a free parameter $\lambda$.
 %
-whose error can be computed explicitly.
+%whose error can be computed explicitly.
 
 
 
 \subsection{\label{sec:invt_error}
-Error
+General results
 }
 
 
 
 Using Eq. \eqref{eq:alpha_invtlambda}
 in Eq. \eqref{eq:error_asym1} yields
+the asymptotic error
 %
 \begin{align}
   \Err_A
@@ -5574,12 +5647,12 @@ in Eq. \eqref{eq:error_asym1} yields
 where $\nu_k \equiv \lambda_k / \lambda$.
 %
 From Eq. \eqref{eq:error_res1},
-we get
+we get the residual error
 %
 \begin{equation}
   \Err_R
   =
-  \frac { \alpha_0 } { 2 }
+  \frac { a_0 } { 2 }
   \sum_{k = 2}^n
   \Gamma_k \, \lambda_k \,
   \left(
@@ -5606,7 +5679,7 @@ The total error is the sum of the two.
 %
 %We assume that
 %the system was initially equilibrated
-%at a constant $\alpha_0$,
+%at a constant $a_0$,
 %such that the values of
 %$\left\langle y_k^2(0) \right\rangle$
 %can be computed from Eq. \eqref{eq:y2_eql},
@@ -5680,7 +5753,7 @@ is minimal at $\lambda = 1$.
   $
   \lambda = 1 -
   \left[
-    1 - \frac 1 2 \alpha_0 \, (T+t_0)
+    1 - \frac 1 2 a_0 \, (T+t_0)
   \right] r \, \log r
   ,
   $
@@ -5753,7 +5826,11 @@ Minimizing the function yields
 \label{eq:lambda_nn_perfect}
 \end{equation}
 %
-and the asymptotic error in the optimal case is given by
+which shows that the original inverse-time formula,
+Eq. \eqref{eq:alpha_invt1},
+is not optimal in this case.
+%
+The asymptotic error is given by
 %
 \begin{equation}
   \Err_A
@@ -5828,7 +5905,8 @@ $\min \lambda_k = 1 - 4 \, \mu_1$.
 
 
 \note{The table of symbols is listed in Table \ref{tab:symbols}.
-  \begin{table*}\footnotesize
+  \begin{table*}
+  \footnotesize
   \centering
   \rowcolors{1}{white}{LightGray}
   \setlength{\tabcolsep}{4pt} % column separation
@@ -5841,7 +5919,7 @@ $\min \lambda_k = 1 - 4 \, \mu_1$.
     $\alpha$        &   Updating magnitude. \\
     $b$             &   Cutoff of the kernel of homogeneous updating schemes. \\
     $C$             &   $C \equiv \int_0^{ q(T) } M(Q) \, dQ$.  \\
-    $\delta$        &   Dirac's $\delta$-function. \\
+    $\delta$        &   Dirac's or discrete $\delta$-function. \\
     $c$             &   Constant. \\
     $\Err, \Err_R, \Err_A$          &   Error, residual error, asymptotic error. \\
     $\ln f$         &   Updating factor in the WL algorithm.  \\

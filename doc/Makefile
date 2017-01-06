@@ -1,6 +1,6 @@
 prj=invt
 
-ver=3.1
+ver=3.3
 
 figgps=$(wildcard fig/*.gp)
 pdffigs=$(patsubst %.gp,%.pdf, $(figgps))
@@ -45,6 +45,7 @@ $(prj)docV$(ver).zip::
 	  ln -sf ../../fig .
 	cd old/V$(ver) && \
 	  python deannote.py -v -c -i $(prj)_annotatedV$(ver).tex -o $(prj)V$(ver).tex
+	make diff 
 	make all -C old/V$(ver)/
 	cd old/V$(ver) && \
 	  zip -r ../../$(prj)docV$(ver).zip *.tex *.pdf simul.bib *.py \
@@ -59,6 +60,17 @@ $(prj)doc.zip: $(prj).tex $(prj).pdf \
 	       $(epsfigs) $(pdffigs) $(figgps) \
 	       Makefile README.md
 	zip -r $@ $^
+
+refver=3.2
+
+diff::
+	mkdir -p old/V$(ver)
+	#module load perl
+	cd old/V$(ver) && latexdiff \
+	  --config="PICTUREENV=(?:picture|DIFnomarkup|align|equation|table)[\w\d*@]*" \
+	  ../V$(refver)/invt_annotatedV$(refver).tex invt_annotatedV$(ver).tex > invt_diffV$(ver).tex
+	make -C old/V$(ver) invt_diffV$(ver).pdf
+
 
 Bossman: zip
 	cp $(prj)docV$(ver).zip /Bossman/cz1/invt/doc/
