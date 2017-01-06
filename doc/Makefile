@@ -1,6 +1,6 @@
 prj=invt
 
-ver=3.3
+ver=4
 
 figgps=$(wildcard fig/*.gp)
 pdffigs=$(patsubst %.gp,%.pdf, $(figgps))
@@ -61,7 +61,7 @@ $(prj)doc.zip: $(prj).tex $(prj).pdf \
 	       Makefile README.md
 	zip -r $@ $^
 
-refver=3.2
+refver=3.4
 
 diff::
 	mkdir -p old/V$(ver)

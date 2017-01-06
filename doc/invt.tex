@@ -1,4 +1,4 @@
-\documentclass[preprint, floatfix]{revtex4-1}
+\documentclass[preprint, superscriptaddress, floatfix]{revtex4-1}
 \usepackage{amsmath}
 \usepackage{mathtools}
 \usepackage{upgreek}
@@ -42,6 +42,18 @@
 \title{Optimal updating factor in adaptive flat-distribution-sampling simulations}
 
 \author{Cheng Zhang}
+\author{Justin A. Drake}
+\affiliation{
+Sealy Center for Structural Biology and Molecular Biophysics,
+The University of Texas Medical Branch,
+Galveston, Texas 77555-0304, USA}
+\author{Jianpeng Ma}
+\affiliation{
+Department of Biochemistry and Molecular Biology,
+Baylor College of Medicine, Houston, Texas 77030, USA}
+\affiliation{
+Department of Bioengineering,
+Rice University, Houston, Texas 77005, USA}
 \author{B. Montgomery Pettitt}
 \email{bmpettitt@utmb.edu}
 \affiliation{
@@ -66,16 +78,23 @@ Galveston, Texas 77555-0304, USA}
   and one may speed up the convergence by choosing an optimal schedule
   of the updating magnitude.
   %
-  Here, we derive the optimal schedule from
-  an equation of motion
-  of a free particle with a position-dependent mass.
+  Here, we will show that the optimal schedule
+  can be derived
+  from a mechanical analogy, in which
+  the schedule corresponds to
+  the velocity of a free particle with a position-dependent mass
+  and the final error serves as the action.
   %
-  Our results show that
-  the initial updating magnitude is ideally half of
+  Therefore, the optimal schedule follows from
+  the equation of motion of the particle.
+  %
+  We will show that although
+  the optimal schedule depends on the updating scheme (WL or metadynamics),
+  the initial updating magnitude should always be half of
   the previous equilibrium value.
   %
   Further,
-  we show that the WL updating scheme
+  the WL updating scheme
   belongs to a class of bandpass updating schemes
   that are optimal for asymptotic convergence,
   and the optimal schedule of these schemes
@@ -166,7 +185,7 @@ to discourage future visits to the current configuration
 by incrementally elevating the bias potential there.
 %
 The difference lies
-in the updating hill function,
+in the updating window function,
 which takes the form of a discrete 
 $\delta$-function (or a boxcar function one histogram bin wide)
 in the WL case,
@@ -228,27 +247,34 @@ the optimal schedule
 for a general adaptive FDS method,
 including the WL algorithm and metadynamics.
 %
-We will show that the optimal schedule can be derived
-from an equation of motion of a free particle,
-and the initial updating magnitude
-should be set to
-half of the previous equilibrium value.
+Our method maps the optimization problem to a mechanic one,
+in which the schedule becomes the velocity of a free particle,
+and the final error plays the role of the action.
 %
-Particularly, the optimal schedule in the WL case
-is given by
-an inverse-time formula,
-with a modified origin of time.
+In this way, the optimal schedule follows the equation of motion
+of the particle that minimizes the action.
 %
-However,
+We will show that the optimal schedule
+depends on how the bias potential is updated,
+and hence is different in the WL and metadynamics cases.
+%
+While the optimal schedule in the WL case
+is given by the known inverse-time formula,
 the optimal schedule for metadynamics is more complex
 and sensitive to the simulation length
 and the width of the Gaussian window.
 %
-Further, we generalize
+In either case, however,
+the initial updating magnitude
+should be set to
+half of the previous equilibrium value,
+which amounts to a shift of the origin of time in the WL case.
+%
+Further, we can generalize
 the WL updating scheme
 to a class of bandpass updating schemes
 that are optimal for long simulations,
-and the above origin-modified inverse-time schedule
+and the above origin-shifted inverse-time schedule
 turns out to be optimal for these schemes.
 %
 %For finite-length simulations, however,
@@ -392,7 +418,7 @@ and thus $\pi_i$ need not
 coincide with the intended distribution $p_i$.
 
 
-Here we shall call a simulation that targets
+Here we will call a simulation that targets
 a nearly flat distribution\cite{
 dayal2004, trebst2004, zhang2007, barducci2008, singh2011},
 $p_i$ constant for all $i$'s,
@@ -543,7 +569,7 @@ such that $\pi_i \approx p_i$.
 
 
 
-We shall mainly focus on the adaptive methods below.
+We will mainly focus on the adaptive methods below.
 %
 In the WL algorithm\cite{wang2001, wang2001pre},
 the bias potential, $v_i(t)$, is updated
@@ -707,12 +733,12 @@ Single-bin updating scheme}
 
 
 In this section,
-we shall derive the optimal $\alpha(t)$
+we will derive the optimal $\alpha(t)$
 for the single-bin scheme,
 Eq. \eqref{eq:wl_update}.
 %
 To do so,
-we shall first express the error of
+we will first express the error of
 the shifted bias potential, $v_i(t)$,
 as a functional of $\alpha(t)$,
 and then minimize it by variation.
@@ -1127,7 +1153,7 @@ Note also that the first term on the right-hand side
 of Eq. \eqref{eq:x2t_average} is fixed during
 the process.
 %
-%We shall further demand that
+%We will further demand that
 %%
 %\begin{equation}
 %  \lim_{t \to \infty} q(t) \to \infty.
@@ -1260,7 +1286,7 @@ Then, Eq. \eqref{eq:vt_diffeq} is generalized to
 
 The optimization procedure is similar to the single-bin case.
 %
-However, we shall assume some restrictions and approximations
+However, we will assume some restrictions and approximations
 to simplify the discussion.
 
 
@@ -1300,7 +1326,7 @@ Thus, the transpose $\mathbf w^T$
 resembles a transition matrix,
 except that some elements can be negative.
 %
-Below we shall take advantage of the analogy
+Below we will take advantage of the analogy
 and borrow techniques used
 in studying transition matrices\cite{vankampen}.
 
@@ -1368,7 +1394,7 @@ satisfying the orthonormal conditions\cite{vankampen}:
 In particular, there is always an eigenvector
 corresponding to the distribution, $\pmb \rho$.
 %
-We shall label this eigenvector as the first one,
+We will label this eigenvector as the first one,
 and
 %
 \begin{equation}
@@ -1647,7 +1673,7 @@ Then, Eq. \eqref{eq:error_asym} is simplified as
 In this way,
 the underlying sampling process
 affects the error only through the
-few numbers $\Gamma_k$'s.
+few $\Gamma_k$'s.
 %
 In Appendix \ref{sec:Gamma},
 we evaluate $\Gamma_k$'s in two special cases,
@@ -1669,7 +1695,7 @@ Equilibrium error under a constant updating magnitude
 
 Before addressing the optimal schedule
 for a multiple-bin scheme,
-we shall first compute the equilibrium error
+we will first compute the equilibrium error
 under a constant schedule,
 $\alpha(t) = a_0$.
 %
@@ -1775,6 +1801,7 @@ the optimization of the total error is equivalent to
 that of the asymptotic part.
 %
 We can rewrite Eq. \eqref{eq:error_asym1} much like an action
+of particle whose position is given by $q(t)$:
 %
 \begin{equation}
   \Err_A
@@ -1787,7 +1814,7 @@ We can rewrite Eq. \eqref{eq:error_asym1} much like an action
 \label{eq:error_asym_Lagrangian}
 \end{equation}
 %
-where the Lagrangian,
+where the Lagrangian is
 %
 \begin{align}
   {\mathcal L} \bigl[ q(t) \bigr]
@@ -1800,12 +1827,18 @@ where the Lagrangian,
   =
   \sum_{ k = 2 }^n
     \Gamma_k \, \lambda_k^2 \, u_k^2 \bigl[ q(t) \bigr]
-  \; \dot q^2( t ),
+  \; \dot q^2( t )
+  .
 \notag
 \end{align}
 %
+As the schedule, $\dot q(t) = \alpha(t)$,
+corresponds to the velocity of the particle,
+the above Lagrangian contains only the kinetic energy.
+%
+Thus, the above mechanical analogy
 represents a free particle
-with a position-dependent mass.
+carrying a position-dependent mass.
 %
 Since the Lagrangian
 does not explicitly depend on time, $t$,
@@ -2217,8 +2250,7 @@ Homogeneous updating schemes}
 
 
 Many commonly-used updating schemes
-can be characterized by a hill function,
-which is a rigid window
+can be characterized by a rigid window
 centered on the current bin.
 %
 We call these schemes homogeneous,
@@ -2236,12 +2268,13 @@ i.e., the updating matrix, $\mathbf w$,
 is symmetric.
 %
 Besides, the updating matrices
-share the same set of eigenvectors,
+share the same set of eigenvectors
+(sines and cosines of different frequencies),
 and thus are completely determined
 by the eigenvalues.
 %
 Further, the multiplication of $\mathbf w$
-can be reduced to a convolution with the hill function,
+can be reduced to a convolution with the window function,
 or the updating kernel.
 %
 Thus,
@@ -2264,7 +2297,7 @@ Updating kernel and eigenvalues}
 %by imposing the reflective boundary condition\cite{
 %bussi2006}.
 %%
-%For simplicity, we shall assume that the target
+%For simplicity, we will assume that the target
 %distribution is flat, or $p_i = 1/n$, below.
 
 
@@ -2300,7 +2333,7 @@ are a set of numbers satisfying
 %
 and $\mu_l = 0$ for $|l| > b$.
 %
-We shall further impose the symmetry
+We will further impose the symmetry
 %
 \begin{equation}
   \mu_i = \mu_{-i}
@@ -2313,13 +2346,13 @@ from the sum in Eq. \eqref{eq:mu_normalization}
 to avoid double counting.
 %
 These numbers constitute an \emph{updating kernel}.
-
-
-The above matrix, $\mathbf w$,
+%
+In this way, the matrix, $\mathbf w$,
 being symmetric with respect to the indices $i$ and $j$,
 satisfies Eqs. \eqref{eq:w_sumj}-\eqref{eq:w_balance},
 for the flat distribution.
-%
+
+
 To find the eigenvectors,
 we define, for a periodic variable, $\phi_i$,
 the out-of-boundary values by
@@ -2331,7 +2364,8 @@ the out-of-boundary values by
 %
 such that $i \pm n$ lies in between $1$ and $n$.
 %
-Then
+Then, the multiplication of the matrix, $\mathbf w$,
+is equivalent to a convolution with the kernel:
 %
 \begin{equation}
   \sum_{ j = 1 }^n
@@ -2404,11 +2438,15 @@ $$
 But due to the symmetry Eq. \eqref{eq:mu_symm},
 it is identical to \eqref{eq:wmul_to_convol}.
 }
-
-Thus,
-we may construct a set of orthonormal eigenvectors,
+%
+As a result, the characteristic equation,
+$\mathbf w \, \pmb\phi = \lambda \, \pmb\phi$,
+can be solved by discrete Fourier transform.
+%
+We may construct a set of orthonormal eigenvectors,
 $\pmb\phi^{(1)}, \dots, \pmb\phi^{(n)}$,
-compatible with Eq. \eqref{eq:phi_pbc},
+compatible with the periodicity, Eq. \eqref{eq:phi_pbc},
+%
 \begin{equation}
   \phi^{(k)}_j
   =
@@ -2427,6 +2465,7 @@ compatible with Eq. \eqref{eq:phi_pbc},
 %
 where $\ii^2 = -1$, and
 the eigenvalues are
+the Fourier or cosine transform of the updating kernel:
 %
 \begin{equation}
   \lambda_k
@@ -2503,22 +2542,24 @@ and change the form of the updating matrix to
   +
   \mu_{ i + j - 1 }
   +
-  \mu_{ i + j - 2 n - 1 },
+  \mu_{ i + j - 2 n - 1 }
+  ,
   \label{eq:w_band_refl}
 \end{equation}
+%
+where the last two terms on the right hand side,
+representing two reflective mirrors at
+$j = 1/2$ and $j = n + 1/2$,
+are added to avoid unintended distortion\cite{dickson2011, mcgovern2013}
+to the equilibrium distribution\cite{bussi2006},
+such that Eqs. \eqref{eq:w_sumj}-\eqref{eq:w_balance}
+are satisfied.
 %
 Again the updating kernel should satisfy
 Eqs. \eqref{eq:mu_normalization}
 and \eqref{eq:mu_symm},
 but
 the cutoff $b$ only needs to be less than $n$.
-%
-The last two terms
-on the right-hand side of Eq. \eqref{eq:w_band_refl} are added
-to avoid unintended distortion\cite{dickson2011, mcgovern2013}
-to the equilibrium distribution\cite{bussi2006},
-such that Eqs. \eqref{eq:w_sumj}-\eqref{eq:w_balance}
-are satisfied.
 
 Parallel to Eq. \eqref{eq:phi_pbc},
 we define the out-of-boundary values
@@ -2534,8 +2575,8 @@ of $\phi_i$ as
 \label{eq:phi_refl}
 \end{equation}
 %
-such that Eq. \eqref{eq:wmul_to_convol}
-still holds.
+such that the matrix multiplication is still equivalent to
+a convolution as Eq. \eqref{eq:wmul_to_convol}.
 %
 \note{The derivation of Eq. \eqref{eq:wmul_to_convol}
   in this case is similar,
@@ -2568,9 +2609,14 @@ still holds.
   \end{aligned}
   $$
 }%
-Thus, we also have $n$ orthonormal eigenvectors,
+We note that Eq. \eqref{eq:phi_refl}
+defines a periodic variable of period $2 \, n$
+with a reflective symmetry around $i = 1/2$.
+%
+Accordingly, the eigenvectors,
 $\pmb\phi^{(1)}, \dots, \pmb\phi^{(n)}$,
-compatible with Eq. \eqref{eq:phi_refl},
+must share the same periodicity,
+and be even functions about the axis $i = 1/2$:
 %
 \begin{equation}
   \phi^{(k)}_i
@@ -2579,14 +2625,16 @@ compatible with Eq. \eqref{eq:phi_refl},
   =
   \frac{ \sqrt{ 2 - \delta_{k, 1} } }
        {             n              }
-  \cos \frac{ ( k - 1) \, \left( i - \frac 1 2 \right) \, \pi}
-            {                    n                           }
+  \cos \frac{ ( k - 1) \, \left( i - \frac 1 2 \right) \, 2 \, \pi}
+            {                    2 \, n                           }
   ,
 \notag
 %\label{eq:wband_eigenvector_refl}
 \end{equation}
 %
-with eigenvalues
+The eigenvalues can be borrowed from
+Eq. \eqref{eq:wband_eigenvalue_pbc},
+with the periodic $n$ doubled:
 %
 \begin{align}
   \lambda_k
@@ -2596,7 +2644,7 @@ with eigenvalues
   2
   \sum_{l = 1}^b
     \mu_l
-    \cos \frac{(k - 1)  \, l \pi}{n}
+    \cos \frac{(k - 1)  \, l \, 2 \, \pi}{ 2 \, n }
   .
 \label{eq:wband_eigenvalue_refl}
 \end{align}
@@ -2634,14 +2682,9 @@ with eigenvalues
   $$
   with $\lambda_k$ given by Eq. \eqref{eq:wband_eigenvalue_refl}.
 }%
-
-
-Note that Eq. \eqref{eq:wband_eigenvalue_refl}
-differs from Eq. \eqref{eq:wband_eigenvalue_pbc}
-by a factor of $2$
-in the argument of the cosine function.
 %
-We may unify the two as
+We may unify Eqs. \eqref{eq:wband_eigenvalue_refl}
+and \eqref{eq:wband_eigenvalue_pbc} as
 %
 \begin{equation}
   \lambda_k
@@ -3094,7 +3137,7 @@ Comparison of updating schemes}
 
 Now that we can compute the optimal schedule
 for a given updating scheme,
-we shall turn to the problem of choosing
+we will turn to the problem of choosing
 optimal updating schemes below.
 
 
@@ -3103,7 +3146,7 @@ Asymptotic optimality of the single-bin scheme}
 
 
 
-We shall first show
+We will first show
 that the single-bin scheme is asymptotically optimal.
 %
 Consider a class of $\mathbf w$ matrices
@@ -3270,7 +3313,7 @@ in asymptotic convergence.
 %if no eigenvalue $\lambda_k$ is zero.
 %
 In Appendix \ref{sec:upperbound},
-we shall show that the opposite limit of
+we will show that the opposite limit of
 a set of well-separated eigenvalues
 will provide an upper bound for
 the asymptotic error, Eq. \eqref{eq:error_asym_ubound}.
@@ -3748,7 +3791,7 @@ the above global and local sampling processes
 emulate the perfect and one-step processes
 discussed in Appendix \ref{sec:Gamma},
 respectively,
-and we shall use
+and we will use
 Eqs. \eqref{eq:Gamma_perfect}
 and \eqref{eq:Gamma_onestep}
 for the respective $\Gamma_k$'s
@@ -4157,7 +4200,7 @@ of the adaptive FDS simulation.
 %is updated with relative weight specified by a Gaussian window.
 
 
-The optimal schedule depends on the updating hill function,
+The optimal schedule depends on the updating window function,
 which is limited to a single-bin in the WL case,
 but can be extended to several neighboring bins
 taking a Gaussian shape in the metadynamics case.
@@ -4169,7 +4212,7 @@ that can be mathematically characterized
 by an updating matrix.
 %
 Each column of the matrix gives the normalized
-hill function for the bin corresponding to the column.
+window function for the bin corresponding to the column.
 %
 Our method computes the optimal schedule from
 the eigenvalues of the updating matrix,
@@ -4251,16 +4294,18 @@ of glassy systems.
 \section{Acknowledgments}
 
 We thank Dr. J. Ma, Dr. Y. Mei, J. Wang,
-J. Drake, O. Nassar, Dr. C. Lai, Dr. S. Ou and D. Stuhlsatz
+O. Nassar, Dr. C. Lai, Dr. S. Ou, D. Stuhlsatz, C. Myers, and O. Samoylova
 for helpful discussions.  We gratefully acknowledge the Robert A. Welch Foundation (H-0037), the National Science Foundation (CHE-1152876) and the National Institutes of Health (GM-037657) for partial support of this work.  This research used computing resources of the National Science Foundation XSEDE grid.
 
 \appendix
 
 
+\section{\label{sec:invt_discussion}
+On the inverse-time schedule}
 
-\section{\label{sec:wltoinvt}
+
+\subsection{\label{sec:wltoinvt}
 Inverse-time schedule as the optimal limit of the WL algorithm}
-
 
 
 We may understand the inverse-time schedule %, Eq. \eqref{eq:},
@@ -4285,7 +4330,7 @@ We assume that
 the magnitude falls geometrically,
 %
 \begin{equation}
-  \alpha_s = a \, r^s
+  \alpha_s = \alpha_0 \, r^s
   ,
   \label{eq:alphas}
 \end{equation}
@@ -4414,7 +4459,7 @@ t = \sum_{s' = 1}^s T_{s'}
 \left(
   \frac{1}{\alpha_s}
   -
-  \frac{1}{a}
+  \frac{1}{\alpha_0}
 \right)
 ,
 $$
@@ -4425,7 +4470,7 @@ Thus,
 \begin{equation}
   \alpha_s =
   \left[
-    \frac{1}{a} +
+    \frac{1}{\alpha_0} +
     \frac{1 -r }{ \ln(1/r) } t
   \right]^{-1}
   ,
@@ -4441,7 +4486,7 @@ and the final error is given by
   \frac{\Gamma}{2}
   \frac{ 1 + r }
   {
-    \frac{1}{a}
+    \frac{1}{\alpha_0}
     +
     \frac{1-r}{\ln(1/r)} \,
     T
@@ -4450,16 +4495,27 @@ and the final error is given by
   \notag
 \end{align}
 %
-which is minimized as $r \to 1$,
+which is minimized as $r \to 1$
 for a large $T$.
 %
-If we identify the parameter $a$ as the initial updating magnitude $\alpha(t = 0)$,
+If we identify the parameter $\alpha_0$ as the initial updating magnitude $\alpha(t = 0)$,
 then this result agrees with Eqs. \eqref{eq:half_alpha0} and \eqref{eq:t0_sinc},
-and the optimal $t_0 = 1/a$.
+and the optimal $t_0 = 1/\alpha_0$.
 %
 Thus, in this limit,
 the schedule given by Eq. \eqref{eq:alphas}
 is identical to that from Eq. \eqref{eq:alpha_invt1}.
+
+
+\subsection{\label{sec:adaptinvt}
+Inverse-time schedule from adaptive averaging
+}
+
+Result of the increase of the sample size.
+
+Final bias potential is already the average,
+No further trajectory averaging is needed.
+Fixed magnitude, improvable by trajectory averaging.
 
 
 \section{\label{sec:Gamma}
@@ -4646,7 +4702,7 @@ and
   With Eq. \eqref{eq:ortho1},
   only the first term in the parentheses survives.
 }
-Particularly, if $p_i = \rho_i$, then, by
+In particular, if $p_i = \rho_i$, then, by
 Eq. \eqref{eq:eig_orthonormal_rows}
 $$
 \kappa_k(t - t') = 1.
@@ -4712,7 +4768,7 @@ $$
   \Lambda_k
   =
   \cos \frac{ (k - 1) \, g \, \pi }
-            {       2 \, n        }
+            {            n        }
   ,
 $$
 where
@@ -4778,8 +4834,8 @@ modify Eq. \eqref{eq:y2_eql} as
 \begin{equation}
   \operatorname{var} Y_k
   =
-  \frac{1}{2}
-  \alpha \, \Gamma_k \, \lambda_k,
+  \frac{1}{2} \,
+  a_0 \, \Gamma_k \, \lambda_k,
 \label{eq:varY}
 \end{equation}
 %
@@ -5125,7 +5181,7 @@ Asymptotic error for an updating scheme
 with a set of well-separated eigenvalues}
 
 
-We shall derive here an upper bound of the asymptotic error
+We will derive here an upper bound of the asymptotic error
 that can be associated to updating schemes
 with a set of well-separated eigenvalues,
 in parallel to the lower bound reached by
@@ -5349,7 +5405,7 @@ to the equilibrium method
 to prevent possible future efficiency loss
 due to the adaptive updates.
 %
-Below, we shall show that this practice is unnecessary
+Below, we will show that this practice is unnecessary
 if the simulation uses the single-bin or a bandpass updating scheme
 with the optimal schedule, Eq. \eqref{eq:alpha_invt1}.
 %
@@ -5617,7 +5673,7 @@ Eq. \eqref{eq:alpha_invtlambda}.
 
 
 \subsection{\label{sec:invt_error}
-General results
+General results on error
 }
 
 
