@@ -45,7 +45,7 @@ $(prj)docV$(ver).zip::
 	  ln -sf ../../fig .
 	cd old/V$(ver) && \
 	  python deannote.py -v -c -i $(prj)_annotatedV$(ver).tex -o $(prj)V$(ver).tex
-	make diff 
+	make diff
 	make all -C old/V$(ver)/
 	cd old/V$(ver) && \
 	  zip -r ../../$(prj)docV$(ver).zip *.tex *.pdf simul.bib *.py \
