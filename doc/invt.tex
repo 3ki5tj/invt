@@ -433,7 +433,7 @@ a flat-distribution-sampling (FDS) simulation.
 To fulfill this goal, the bias potential must satisfy
 %
 \begin{equation}
-  V_i = \ln p^*_i - \ln p_i + \mathrm{const.}
+  V_i \to \ln p^*_i - \ln p_i + \mathrm{const.}
   ,
   \label{eq:Vi_target}
 \end{equation}
@@ -442,14 +442,23 @@ according to Eq. \eqref{eq:pi_p_V1}.
 %which allows us to deduce the PMF, $-\ln p^*_i$,
 %directly from the bias potential.
 %
-This relation thus furnishes a practical aim of convergence for FDS
+This relation thus sets a practical goal for the convergence of FDS
 methods---adjusting the bias potential to make the
-observed distribution, which can be computed from the normalized histogram,
+observed distribution, or the normalized histogram,
 match the intended one.
 %
 Once this aim is achieved,
 the PMF, $-\ln p^*_i$, can be naturally
 deduced from the bias potential. % $V_i$.
+\note{
+  For example, in the context of simulated tempering\cite{zhang2007},
+  $p^*_i$ is replaced by $\ln Z_i$,
+  $p_i$ is the weight $\zeta_i$,
+  and the bias potential $V_i$ is $\ln (\tilde Z_i / \zeta_i)$.
+  Upon convergence, we have $\ln \tilde Z_i \to \ln Z_i$
+  up to a constant shift.
+}
+
 
 
 Roughly speaking, there are two types of FDS methods.
@@ -470,7 +479,7 @@ and that of temperature, respectively.
 %
 The estimated bias potentials at bin $i$, $V_i$,
 are often improved
-with the histogram of the sampling, $H_i$, accumulated
+with the normalized histogram of the sampling, $H_i$, accumulated
 during simulation.
 %
 Using $H_i$ as an estimate of $\pi_i$ in
@@ -478,13 +487,13 @@ Eq. \eqref{eq:pi_p_V1}
 allows us to correct $V_i$ as
 %
 \begin{equation}
-V^\mathrm{corr}_i
-=
-V_i
-+
-\ln \frac{ H_i }
-         { p_i }.
-\label{eq:vcorr_equil}
+  V^\mathrm{corr}_i
+  =
+  V_i
+  +
+  \ln \frac{ H_i }
+           { p_i }.
+  \label{eq:vcorr_equil}
 \end{equation}
 %
 \note{This follows from
@@ -514,13 +523,13 @@ which in turn depends on the simulation length
 that must be decided in advance.
 %
 Thus, the rigidity of this framework disallows
-continual improvement of the bias potential, hence that of the PMF,
+continuous improvement of the bias potential, hence that of the PMF,
 as simulation lengthens.
 
 The second type of methods,
 which we will refer to as the adaptive FDS methods,
 address the above shortcomings
-by continually and incrementally update the target distribution.
+by continuously and incrementally update the target distribution.
 %For this reason, the second type of methods,
 %referred to as the adaptive FDS methods,
 %were invented.
@@ -619,7 +628,7 @@ several neighboring bins are updated:
   \label{eq:mbin_update}
 \end{equation}
 %
-where $w_{ij}$ are a set of coefficients satisfying
+where the elements, $w_{ij}$'s, are a set of coefficients satisfying
 the restrictions to be discussed
 in Sec. \ref{sec:updating-matrix}.
 %
@@ -757,11 +766,135 @@ and then minimize it by variation.
 
 
 
+\subsubsection{Error}
+
+
+
+First, we need to define the error in the bias potential.
+%
+This is done by subtracting from the bias potential
+two contributions.
+%
+The first contribution comes from the target value,
+Eq. \eqref{eq:Vi_target}.
+%
+For this purpose,
+we introduce a shifted bias potential
+%
+\begin{equation}
+  v_i(t)
+  \equiv
+  V_i(t)
+  -
+  \ln \frac { p^*_i }
+            { p_i }
+  ,
+  \label{eq:v_def}
+\end{equation}
+%
+which should tend to a constant of $i$
+upon convergence.
+Note that the updates to $v_i$'s are
+the same as the updates to $V_i$'s,
+since the shift
+remains a constant during the course of simulation,
+%%
+%In terms of $v_i$'s, Eq. \eqref{eq:pi_p_V}
+%becomes
+%%
+%\begin{equation}
+%  \pi_i
+%  =
+%  \frac{                p_i \, e^{-v_i} }
+%       { \sum_{j = 1}^n p_j \, e^{-v_j} }
+%  \propto
+%  p_i \, e^{-v_i}.
+%  \label{eq:pi_p_v}
+%\end{equation}
+%%
+%According to Eq. \eqref{eq:pi_p_V1},
+
+
+Second, the bias potential following Eq. \eqref{eq:wl_update}
+generally grows over time.
+%
+Since a uniform increase of $V_i(t)$, or, equivalently, that of $v_i(t)$,
+does not affect the
+resulting distribution $\pi_i(t)$,
+%
+the real deviation is more readily defined
+from the difference between $v_i(t)$ and a baseline value, $\bar v(t)$,
+that represents the average growth\cite{
+dama2014},
+%
+\begin{equation}
+  x_i(t) \equiv v_i(t) - \bar v(t)
+  %=
+  %v_i - \sum_{j = 1}^n \rho_j \, v_j
+  ,
+\label{eq:x_def}
+\end{equation}
+%
+where
+%
+\begin{equation}
+  \bar v(t)
+  = \sum_{i = 1}^n \rho_i \, v_i(t)
+  ,
+\label{eq:vbar_def}
+\end{equation}
+for some distribution,
+$\pmb \rho = (\rho_1, \dots, \rho_n)$.
+%
+In this way,
+the variables, $x_i(t)$'s,
+represent the error of the bias potential,
+and are expected to vanish on convergence.
+%
+We, therefore, define
+the error of the bias potential as
+%
+\begin{equation}
+  \Err
+  =
+  \sum_{i = 1}^n \rho_i \, \langle x_i^2 \rangle
+  =
+  \sum_{i = 1}^n \rho_i \, \left\langle (v_i - \bar v)^2 \right\rangle
+  .
+\label{eq:error_sum}
+\end{equation}
+
+
+
+
+Note that the distribution, $\pmb \rho$,
+introduced above is independent of
+the target distribution $\mathbf p$.
+%
+For example,
+in well-tempered metadynamics,
+$\pmb\rho$ is a flat distribution,
+while $\mathbf p$ is an attenuated version of
+$\mathbf p^*$\cite{
+barducci2008, dama2014}.
+%
+From Eqs. \eqref{eq:x_def} and \eqref{eq:vbar_def},
+we have
+%
+\begin{equation}
+  \sum_{i = 1}^n \rho_i \, x_i(t) = 0
+  .
+\label{eq:rhox_sum}
+\end{equation}
+%
+
+
 \subsubsection{Differential equation}
 
 
 
-We first approximate the finite difference Eq. \eqref{eq:wl_update}
+To proceed, we will
+approximate the finite difference Eq. \eqref{eq:wl_update}
 by a differential equation
 %
 \begin{equation}
@@ -775,11 +908,14 @@ by a differential equation
 %
 with
 %
-\begin{equation}
-  h_i(t) = \delta_{i, i(t)}
-  ,
-  \label{eq:h_def}
-\end{equation}
+$
+h_i(t) = \delta_{i, i(t)}
+$
+%\begin{equation}
+%  h_i(t) = \delta_{i, i(t)}
+%  ,
+%  \label{eq:h_def}
+%\end{equation}
 %
 being the instantaneous histogram,
 which is equal to $1.0$
@@ -815,17 +951,44 @@ the sampling process is approximately Markovian, % of a finite order,
 and we may assume Eq. \eqref{eq:pi_p_V}
 for the deterministic part
 %
-\begin{equation}
+\begin{align}
   \langle h_i(t) \rangle
-  \approx
+  &\approx
   \pi_i(t)
   =
-  \frac{                p^*_i \, e^{-V_i(t)} }
-       { \sum_{j = 1}^n p^*_j \, e^{-V_j(t)} }.
+  \frac{                p_i \, e^{-x_i(t)} }
+       { \sum_{j = 1}^n p_j \, e^{-x_j(t)} }
+  \notag
+  \\
+  &\approx
+  p_i \,
+  \left(
+    1 - x_i + \sum_{r=1}^n p_r \, x_r
+  \right)
+  ,
   \label{eq:h_ave}
-\end{equation}
+\end{align}
 %
+where we have assumed the smallness
+of $x_i(t)$ in the linear expansion
+and used $\sum_{j=1}^n p_j = 1$
+on the second line.
 %
+\note{
+The second step follows from
+$$
+\frac{ \langle h_i(t) \rangle }
+     { p_i }
+\approx
+\frac{                       1 - x_i  }
+     { \sum_{ r = 1 }^n p_r (1 - x_r) }
+=
+\frac{                       1 - x_i  }
+     { 1 - \sum_{ r = 1 }^n p_r \, x_r }
+.
+$$
+}%
+
 %
 For the random noise part,
 the average is zero by definition,
@@ -863,116 +1026,6 @@ $
 
 
 
-\subsubsection{Error and linear approximation}
-
-
-
-Next, we need to define the error in the bias potential.
-%
-This is done by subtracting from the bias potential
-two contributions.
-%
-The first contribution comes from the target value,
-Eq. \eqref{eq:Vi_target}.
-%
-For this purpose,
-we introduce a shifted bias potential
-%
-\begin{equation}
-  v_i(t)
-  \equiv
-  V_i(t)
-  -
-  \ln \frac { p^*_i }
-            { p_i }
-  ,
-  \label{eq:v_def}
-\end{equation}
-%
-which should tend to a constant of $i$
-upon convergence.
-%Since the last two terms of Eq. \eqref{eq:v_def}
-%remain constant during the course of simulation,
-%the updates to $v_i$'s are
-%the same as the updates to $V_i$'s.
-%%
-%In terms of $v_i$'s, Eq. \eqref{eq:pi_p_V}
-%becomes
-%%
-%\begin{equation}
-%  \pi_i
-%  =
-%  \frac{                p_i \, e^{-v_i} }
-%       { \sum_{j = 1}^n p_j \, e^{-v_j} }
-%  \propto
-%  p_i \, e^{-v_i}.
-%  \label{eq:pi_p_v}
-%\end{equation}
-%%
-%According to Eq. \eqref{eq:pi_p_V1},
-
-
-
-
-Second, the bias potential following Eq. \eqref{eq:vt_diffeq}
-generally grows over time.
-%
-Since a uniform increase of $V_i(t)$, or, equivalently, that of $v_i(t)$,
-does not affect the
-resulting distribution $\pi_i(t)$ as given by Eq. \eqref{eq:h_ave},
-%
-the real deviation is more readily defined
-from the difference between $v_i(t)$ and a baseline value, $\bar v(t)$,
-that represents the average growth\cite{
-dama2014},
-%
-\begin{equation}
-  x_i(t) \equiv v_i(t) - \bar v(t)
-  %=
-  %v_i - \sum_{j = 1}^n \rho_j \, v_j
-  ,
-\label{eq:x_def}
-\end{equation}
-%
-where
-%
-\begin{equation}
-  \bar v(t)
-  = \sum_{i = 1}^n \rho_i \, v_i(t)
-  ,
-\label{eq:vbar_def}
-\end{equation}
-for some distribution,
-$\pmb \rho = (\rho_1, \dots, \rho_n)$.
-%
-In this way,
-the variables, $x_i(t)$'s,
-represent the error of the bias potential,
-and are expected to vanish on convergence.
-%
-
-Note that the distribution, $\pmb \rho$,
-introduced above
-will be used to measure the error,
-and is independent of
-the target distribution $\mathbf p$.
-%
-For example,
-in well-tempered metadynamics,
-$\pmb\rho$ is a flat distribution,
-while $\mathbf p$ is an attenuated version of
-$\mathbf p^*$\cite{
-barducci2008, dama2014}.
-%
-From Eqs. \eqref{eq:x_def} and \eqref{eq:vbar_def},
-we have
-%
-\begin{equation}
-  \sum_{i = 1}^n \rho_i \, x_i(t) = 0
-  .
-\label{eq:rhox_sum}
-\end{equation}
-%
 The average growth rate of $v(t)$ is given by
 \begin{equation}
   \frac{ d \bar v (t) }
@@ -986,48 +1039,14 @@ The average growth rate of $v(t)$ is given by
 %
 
 
-In the asymptotic regime,
-we expect the deviation $x_i(t)$
-to be small.
-%
-Expanding Eq. \eqref{eq:h_ave} in $x_i$ yields
-%
-\begin{align}
-  \frac{
-    \langle h_i(t) \rangle
-  }
-  {
-    p_i
-  }
-  &\approx
-  \frac{                        e^{- x_i} }
-       { \sum_{ j = 1}^n p_j \, e^{- x_j} }
-  \approx
-  1 - x_i + \sum_{r = 1}^n p_r \, x_r
-  ,
-\label{eq:hdet_linearize}
-\end{align}
-%
-where we have used $\sum_{j=1}^n p_j = 1$.
-%
-\note{
-The second step of Eq. \eqref{eq:hdet_linearize} follows from
-$$
-\frac{ \langle h_i(t) \rangle }
-     { p_i }
-\approx
-\frac{                       1 - x_i  }
-     { \sum_{ r = 1 }^n p_r (1 - x_r) }
-=
-\frac{                       1 - x_i  }
-     { 1 - \sum_{ r = 1 }^n p_r \, x_r }
-.
-$$
-}%
 From Eqs.
-\eqref{eq:vt_diffeq},
-\eqref{eq:h_split},
-\eqref{eq:x_def}-\eqref{eq:hdet_linearize},
+\eqref{eq:x_def},
+\eqref{eq:rhox_sum}-\eqref{eq:dvbardt},
+%\eqref{eq:rhox_sum},
+%\eqref{eq:vt_diffeq},
+%\eqref{eq:h_split}
+%\eqref{eq:h_ave},
+%\eqref{eq:dvbardt},
 we get a set of decoupled equations
 %
 \begin{equation}
@@ -1078,7 +1097,7 @@ $$
     \xi_i(t)
   \right)
   \\
-  &\stackrel{\mathrm{Eqs.\; \eqref{eq:rhox_sum} \;and\; \eqref{eq:hdet_linearize}}}
+  &\stackrel{\mathrm{Eqs.\; \eqref{eq:rhox_sum} \;and\; \eqref{eq:h_ave}}}
             {=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=}
   \alpha(t) \left[ -x_i(t) + \xi_i(t) \right].
 \end{aligned}
@@ -1086,23 +1105,12 @@ $$
 }
 
 
-We define
-the total error of the bias potential as
-%
-\begin{equation}
-  \Err
-  =
-  \sum_{i = 1}^n \rho_i \, \langle x_i^2 \rangle
-  =
-  \sum_{i = 1}^n \rho_i \, \left\langle (v_i - \bar v)^2 \right\rangle
-  .
-\label{eq:error_sum}
-\end{equation}
-%
-The expression depends implicitly on the function $\alpha(t)$.
+The total error defined in Eq. \eqref{eq:error_sum}
+now depends implicitly on the function $\alpha(t)$
+via $x_i(t)$.
 %
 Our aim is to find the $\alpha(t)$
-that minimizes the error $E$
+that minimizes the error
 at the end of the simulation period $T$.
 %
 It suffices to consider
@@ -1344,8 +1352,9 @@ $w_{ij}$'s,
 form a matrix $\mathbf w$.
 %
 Then, Eq. \eqref{eq:vt_diffeq} is generalized to
+%
 \begin{equation}
-  \dot v_i(t)
+  \dot V_i(t)
   =
   \alpha(t) \sum_{j=1}^n \, w_{ij} \frac{ h_j(t) } { p_j }.
   \label{eq:vt_diffeq_mbin}
@@ -1369,12 +1378,12 @@ The matrix $\mathbf w$ is not arbitrary.
 First, to sample
 the desired distribution
 $\mathbf p = (p_1, \dots, p_n)$,
- $\dot v_i(t)$
+ $\dot V_i(t)$
 in Eq. \eqref{eq:vt_diffeq_mbin}
 should be a constant of $i$,
 if $h_j(t)$ were the same as $p_j$.
 %
-This allows $v_i(t)$'s to grow uniformly
+This allows the bias potential to grow uniformly
 in the asymptotic regime.
 %
 Thus, by a proper scaling of $\alpha(t)$,
@@ -1514,7 +1523,7 @@ remains true,
 and by using Eqs.
 \eqref{eq:x_def},
 \eqref{eq:rhox_sum},
-\eqref{eq:hdet_linearize},
+\eqref{eq:h_ave},
 \eqref{eq:xi_def},
 and \eqref{eq:w_sumj}, we get
 %
@@ -1865,6 +1874,7 @@ on the asymptotic part, $\Err_A$.
 
 \subsubsection{\label{sec:optschedule}
 Optimal schedule}
+
 
 
 As shown above, with a fixed value of $q(T)$,
@@ -2936,8 +2946,7 @@ $b \, \Delta x \approx (n/g) \, (g\,\pi/n) = \pi$.
 }
 
 For the Gaussian updating kernel,
-if the width $\sigma$ is satisified
-with $\Delta x \ll \sigma \ll 1$,
+if the width $\sigma$ satisfies $\Delta x \ll \sigma \ll 1$,
 we can extend
 the upper limit of the integrals
 to infinity, and
@@ -3371,7 +3380,7 @@ recovers Eq. \eqref{eq:alpha_invt1}.
 %
 
 Since the first eigenmode corresponds to
-a uniform shift of all $v_k$'s,
+a uniform shift of the bias potential,
 we can freely set $\lambda_1$ to be the same as $\lambda_2$
 without changing the nature of the updating scheme.
 %
@@ -3400,7 +3409,8 @@ Bandpass updating schemes}
 We can generalize
 the single-bin scheme to a class of
 perfect (brick-wall) \emph{bandpass} updating schemes
-that ignore high-frequency eigenmodes.
+that ignore short-wave eigenmodes,
+which are typically local noises.
 %
 Mathematically, these updating schemes will have
 zero eigenvalues for the ignored modes,
@@ -3711,10 +3721,11 @@ which is, according to Eq. \eqref{eq:half_alpha0},
 \label{eq:t0_sinc}
 \end{equation}
 %
-and at this point, we get
+and at this point, we get,
 from Eqs. \eqref{eq:error_split},
 \eqref{eq:error_res1},
 \eqref{eq:tk0},
+and
 \eqref{eq:error_asym_sinc},
 %
 \begin{equation}
@@ -3728,10 +3739,10 @@ from Eqs. \eqref{eq:error_split},
 \label{eq:error_sinc}
 \end{equation}
 %
-In Appendix \ref{sec:equilerr},
-we show that the above error tends
-to the error of the ideal equilibrium FDS simulation
-in the asymptotic limit.
+%In Appendix \ref{sec:equilerr},
+%we show that the above error tends
+%to the error of the ideal equilibrium FDS simulation
+%in the asymptotic limit.
 
 
 
@@ -4226,6 +4237,7 @@ with the local sampling process.
     with $t_0$ given by Eq. \eqref{eq:t0_sinc}.
     %
     In the latter case,
+    the equivalent width
     $\sigma$ is given by Eq. \eqref{eq:sigma_equiv}.
     %
     The points were obtained from averaging results
@@ -4353,16 +4365,22 @@ would be close to that of the bandpass scheme.
 
 
 
-Our method of analysis is most useful for long simulations
-to achieve relatively precise results.
+In this analysis, we have ignored the \emph{systematic} error\cite{zhou2005}
+caused by the updates in adaptive FDS methods.
+%
+This is a valid assumption in the asymptotic regime,
+where the random error is much greater than the systematic one.
+%
+%Our method of analysis is most useful for long simulations
+%to achieve relatively precise results.
 %
 This allows us to assume the sampling process
 to be a quasi-equilibrium one\cite{barducci2008, dama2014},
 and to represent the autocorrelation function
 of each eigenmode by a single number, $\Gamma_k$.
 %
-Although these assumptions appeared to work well
-on our test system,
+Although this assumption appeared to work well
+on our test system for modeling long simulations,
 they may break down for relatively short simulations
 of glassy systems.
 %Our immediate interest is to apply these relations to
@@ -4372,10 +4390,179 @@ of glassy systems.
 \section{Acknowledgments}
 
 We thank Dr. J. Ma, Dr. Y. Mei, J. Wang,
-O. Nassar, Dr. C. Lai, Dr. S. Ou, D. Stuhlsatz, C. Myers, and O. Samoylova
+O. Nassar, Dr. C. Lai, Dr. S. Ou, D. Stuhlsatz,
+Dr. C. Myers, and Dr. O. Samoylova
 for helpful discussions.  We gratefully acknowledge the Robert A. Welch Foundation (H-0037), the National Science Foundation (CHE-1152876) and the National Institutes of Health (GM-037657) for partial support of this work.  This research used computing resources of the National Science Foundation XSEDE grid.
 
 \appendix
+
+
+
+
+\section{\label{sec:equilerr}
+Inverse-time schedule as a result of increasing sample size
+in a runtime average
+}
+
+
+
+We can understand the optimality of the inverse-time schedule
+as a result of the stabilization of a runtime average
+with respect to the increase of sample size\cite{marsili2006, barducci2008}.
+%
+Consider a sample, $\{X^{(1)}, \dots, X^{(N)}\}$,
+with a dynamically growing size.
+%
+The runtime average
+%
+\begin{equation*}
+  {\bar X}^{(N)}
+  =
+  \frac{ X^{(1)} + \cdots + X^{(N)} } { N }
+  ,
+\end{equation*}
+%
+can be written as a recurrence relation regarding
+the addition of the last data point.
+%
+\begin{align}
+  {\bar X}^{(N)}
+  &=
+  {\bar X}^{(N-1)} + \frac{ X^{(N)} - {\bar X}^{(N-1)} } { N }
+  .
+  \label{eq:av_recur}
+\end{align}
+%
+If we interpret $X^{(N)} - {\bar X}^{(N-1)}$
+as the independent correction to the previous average,
+${\bar X}^{(N-1)}$, proposed by the latest data point, $X^{(N)}$,
+then this correction is absorbed into the average with
+a diminishing weight $1/N$ as the sample size, $N$, increases.
+
+
+Let us now consider a long equilibrium FDS simulation
+that consists of blocks of sub-simulations
+of $L$ steps.
+%
+If $X^{(N)}$ is
+the bias potential, $V_i^{(N)}$, computed
+from the $N$th sub-simulation,
+then ${\bar X}^{(N)}$ stands for the average bias potential,
+${\bar V}_i^{(N)}$,
+from the first $N$ sub-simulations,
+which is the best estimate at the end of
+the first $N$ sub-simulations.
+%
+If we wish to always use this best estimate, ${\bar V}_i^{(N-1)}$,
+from the previous $N-1$ sub-simulations
+as the bias potential for the $N$th sub-simulations,
+then this estimate can be updated according to Eq. \eqref{eq:av_recur}.
+%
+Assuming that the normalized histogram, $H_i^{(N)}$,
+from the $N$th sub-simulations is sufficiently precise,
+Eq. \eqref{eq:vcorr_equil} shows that the independent
+correction from the $N$th sub-simulation is
+%
+\begin{equation*}
+  \ln \frac{ H_i^{(N)} } { p_i }
+  \approx
+  \frac{ H_i^{(N)} } { p_i } - 1
+  ,
+\end{equation*}
+%
+where, the $-1$ on the right-hand side
+can be ignored as a uniform shift
+does not affect the distribution.
+%
+Thus, we may rewrite Eq. \eqref{eq:av_recur} as
+\begin{align}
+  {\bar V}_i^{(N)}
+  &=
+  {\bar V}_i^{(N-1)}
+  +
+  \frac{1}{N} \frac{ H_i^{(N)} }{ p_i }
+  \notag
+  \\
+  &=
+  {\bar V}_i^{(N-1)}
+  +
+  \sum_{l=1}^L \frac{1}{N \, L} \frac{ h_i^{(N)}(l) }{ p_i }
+  ,
+  \label{eq:vbar_update}
+\end{align}
+%
+where $h_i^{(N)}(l)$ stands for the instantaneous histogram
+at step $l$ of sub-simulation $N$,
+and it is related to the average $H_i^{(N)}$ as
+$H_i^{(N)} \equiv \frac{1}{L} \sum_{l=1}^L h_i^{(N)}(l)$.
+%
+Thus, Eq. \eqref{eq:vbar_update} shows that the best estimate
+or the runtime average of the bias potential can be computed
+through a step-by-step incremental updating scheme that is equivalent to
+the WL algorithm, Eq. \eqref{eq:wl_update},
+with the magnitude being
+%
+\begin{equation}
+  \alpha(t) = 1/(NL)
+  .
+  \label{eq:alpha_block}
+\end{equation}
+%
+In the long time limit,
+we may approximate the simulation time
+by the product of the number of sub-simulations
+and the number of steps in each sub-simulation, or $NL$,
+%
+and Eq. \eqref{eq:alpha_block} recovers Eq. \eqref{eq:alpha_invt}.
+
+
+
+The above demonstration has several practical implications.
+%
+First,
+since the bias potential is often sufficiently precise
+in late stages of a WL simulation,
+some practitioners would then fix
+the bias potential and switch
+to the equilibrium FDS method
+to prevent possible future efficiency loss
+due to the adaptive updates.
+%
+However, the above demonstration shows that
+this practice becomes unnecessary
+with the inverse-time schedule.
+%
+That is,
+the WL algorithm with the inverse-time schedule
+produces a bias potential that is similar in precision to that from 
+the ideal equilibrium simulation for long times.
+
+Second,
+an alternative way of improving the precision of the bias potential
+from a simulation using the WL algorithm or metadynamics
+with a fixed magnitude
+is to time average the bias potential\cite{zhou2005}.
+%
+This practice becomes redundant with the inverse-time schedule
+because the averaging of the bias potential
+has been implicitly performed by the schedule.
+%
+The inverse-time schedule approach is preferred, however,
+because with a decreasing updating magnitude,
+it minimizes the systematic error caused by
+the on-the-fly updating scheme\cite{zhou2005},
+which is ignored in this analysis.
+
+Third,
+it is possible to reformulate the WL algorithm
+with the inverse-time schedule
+such that the bias potential is computed as
+a weighted adaptive average of the histogram\cite{marsili2006, barducci2008},
+which is analogous to the adaptive bias force method\cite{darve2001, *darve2008}.
+
+
+
+
 
 
 \section{\label{sec:wltoinvt}
@@ -4577,16 +4764,7 @@ the schedule given by Eq. \eqref{eq:alphas_t}
 is identical to that from Eq. \eqref{eq:alpha_invt1}.
 
 
-\section{\label{sec:adaptinvt}
-Inverse-time schedule as a result of increasing sample size
-in adaptive averaging
-}
 
-Result of the increase of the sample size.
-
-Final bias potential is already the average,
-No further trajectory averaging is needed.
-Fixed magnitude, improvable by trajectory averaging.
 
 
 \section{\label{sec:Gamma}
@@ -4733,6 +4911,13 @@ Eqs. \eqref{eq:ortho1},
 and
 \eqref{eq:zz_perfect}.
 %
+Thus, Eq. \eqref{eq:kappa_delta} is exact,
+with
+$
+\Gamma_k
+=
+\sum_{ i = 1}^n \phi_{ki}^2 / p_i.
+$
 \note{Proof.%Eq. \eqref{eq:kappa_perfect},
   $$
   \begin{aligned}
@@ -4774,18 +4959,8 @@ and
   only the first term in the parentheses survives.
 }
 In particular, if $p_i = \rho_i$, then, by
-Eq. \eqref{eq:eig_orthonormal_rows}
-$$
-\kappa_k(t - t') = 1.
-$$
-Thus, Eq. \eqref{eq:kappa_delta} is exact,
-with
-$$
-\Gamma_k
-=
-\sum_{ i = 1}^n \frac{ \phi_{ki}^2 } { p_i },
-$$
-or if $\mathbf p = \pmb \rho$,
+Eq. \eqref{eq:eig_orthonormal_rows}, we have
+$\kappa_k(t - t') = \delta_{t, t'}$, or
 \begin{equation}
   \Gamma_k = 1
   .
@@ -4895,9 +5070,8 @@ $\alpha(t) = a_0$.
 However,
 we often do not know a priori the intrinsic distribution, $p^*_i$,
 and hence
-cannot compute the shifted bias potential, $v_i$,
-from the original one, $V_i$
-(cf. Sec. \ref{sec:FDS}).
+cannot compute the deviation
+of the bias potential, $V_i$.
 %
 To circumvent the problem, we
 modify Eq. \eqref{eq:y2_eql} as
@@ -4927,7 +5101,7 @@ with
 $
 \bar V
 \equiv
-\sum_{ j = 1 }^n p_j \, V_j.
+\sum_{ j = 1 }^n \rho_j \, V_j.
 $
 
 To show Eq. \eqref{eq:varY},
@@ -4946,7 +5120,7 @@ $
   \ln \frac{ p_i } { p^*_i }
   -
   \sum_{ j = 1 }^n
-    p_j \, \ln \frac{ p_j } { p^*_j }.
+    \rho_j \, \ln \frac{ p_j } { p^*_j }.
 $
 Thus, by Eqs. \eqref{eq:y_def} and \eqref{eq:Y_def},
 we have
@@ -5456,275 +5630,6 @@ where $\lambda_{ k^* } \approx 1/q(T)$.
 
 
 
-\section{\label{sec:equilerr}
-Error of the ideal equilibrium FDS simulation}
-
-
-
-%As discussed in Sec. \ref{sec:FDS},
-%the asymptotic limit of an adaptive FDS method
-%is the corresponding equilibrium FDS method
-%with the bias potential fixed to the exact value.
-%%
-%Such a simulation delivers the maximal efficiency.
-
-In late stages of an adaptive FDS simulation,
-the bias potential is often sufficiently precise.
-Some practitioners would then fix
-the bias potential and switch
-to the equilibrium method
-to prevent possible future efficiency loss
-due to the adaptive updates.
-%
-Below, we will show that this practice is unnecessary
-if the simulation uses the single-bin or a bandpass updating scheme
-with the optimal schedule, Eq. \eqref{eq:alpha_invt1}.
-%
-That is, the bias potential obtained from
-an optimal single-bin scheme adaptive simulation
-will be similar in precision to that from
-the ideal equilibrium simulation
-for long times.
-%
-%Thus, our demonstration below serves as an alternative proof
-%of the optimality of the single-bin scheme.
-
-The error of the equilibrium FDS simulation
-depends on the precision of the histogram.
-%
-If all $v_i$'s are exact,
-the error is minimized, and can be computed
-from the second term
-on the right-hand side of Eq. \eqref{eq:vcorr_equil} as
-%
-\begin{align}
-  E
-  &=
-  \left\langle
-    \sum_{ i = 1 }^ n
-      \rho_i \,
-      \left(
-        \ln \frac { H_i }
-                  { p_i }
-        -
-        \sum_{r = 1}^n \rho_r
-        \ln \frac { H_r }
-                  { p_r }
-      \right)^2
-  \right\rangle
-  \notag
-  \\
-  &
-  \approx
-  \sum_{ i = 1 }^ n
-    \rho_i \,
-    \left\langle
-      \left(
-        \frac { H_i }
-              { p_i }
-        -
-        \sum_{r = 1}^n \rho_r
-            \frac { H_r }
-                  { p_r }
-      \right)^2
-    \right\rangle,
-\notag
-\end{align}
-where
-we have defined a time-averaged histogram
-$H_i = \frac{1}{T} \sum_{t = 1}^T h_i(t)$
-with the instantaneous histogram
-$h_i(t)$ defined by Eq. \eqref{eq:h_def}.
-
-We can rewrite the error as
-a sum of the eigenmodes as
-%
-\begin{align}
-  E
-  =
-  \sum_{ k = 2 }^n
-    \left\langle
-      \Theta_k^2
-    \right\rangle
-  ,
-\notag
-%\label{eq:error_sbin_equil}
-\end{align}
-%
-where
-%
-$
-  \Theta_k
-  =
-  \frac{ 1 } { T }
-  \sum_{ t = 1 } ^ T
-    \theta_k( t )
-  ,
-$
-%
-with $\theta_k(t)$ defined by Eq. \eqref{eq:theta_def}.
-%and $\phi_{k i}$ by Eq. \eqref{eq:eig_orthonormal_cols}.
-%\begin{align}
-%\theta_k( t )
-%=
-%\sum_{ i = 1 }^ n
-%\phi_{k i} \left[
-%             \frac{ h_i(t) }
-%                  { p_i    }
-%             - 1
-%           \right],
-%\end{align}
-%and
-%\begin{align}
-%\sum_{ k = 1 }^n
-%  \phi_{k i} \, \phi_{k j}
-%  = p_i \, \delta_{i j}.
-%\end{align}
-%
-\note{Because
-%
-\begin{align*}
-  \sum_{ k = 1 }^n
-    \Theta_k^2
-  &=
-  \frac{ 1 } { T^2 }
-  \sum_{ t, t' = 1 }^T
-    \sum_{ k = 1 }^n
-      \theta_k( t ) \, \theta_k( t' )
-  \\
-  &=
-  \frac{ 1 } { T^2 }
-  \sum_{ t, t' = 1 }^T
-    \sum_{ i, j = 1 }^n
-      \xi_i(t) \, \xi_j(t')
-      %\left[
-      %  \frac{ h_i(t) }
-      %       { p_i    }
-      %  - 1
-      %\right]
-      %\left[
-      %  \frac{ h_j(t') }
-      %       { p_j     }
-      %  - 1
-      %\right]
-      \sum_{ k = 1 }^n
-        \phi_{k \, i} \, \phi_{k \, j}
-  \\
-  &=
-  \frac{ 1 } { T^2 }
-  \sum_{ t, t' = 1 }^T
-    \sum_{ i, j = 1 }^n
-      \xi_i(t) \, \xi_j(t') \,
-      \rho_i \, \delta_{i, j}
-  \\
-  &=
-  \sum_{ i = 1 }^n
-  \rho_i \,
-  \frac{ 1 } { T }
-  \sum_{ t = 1 }^T \xi_i(t)
-  \;
-  \frac{ 1 } { T }
-  \sum_{ t' = 1 }^T \xi_i(t')
-  \\
-  &=
-  \sum_{ i = 1 }^n
-    \rho_i \,
-      \left(
-        \frac{ H_i }
-             { p_i }
-        -
-        \sum_{r = 1}^n \rho_r
-        \frac{ H_r }
-             { p_r }
-      \right)^2
-  ,
-\end{align*}
-where we have used
-$$
-  \frac{1}{T}
-  \sum_{t = 1}^T \xi_i(t)
-  =
-  \frac{ H_i }
-       { p_i }
-  -
-  \sum_{r = 1}^n \rho_r
-  \frac{ H_r }
-       { p_r }
-  .
-$$
-}%
-The sum starts from $k = 2$, for
-by Eq. \eqref{eq:eigenmode1}, % we have
-$$
-\theta_1(t)
-=
-\sum_{ i = 1 }^n
-  \phi_{1i} \, \left(
-    \frac{ h_i(t) } { p_i }
-    -
-    \sum_{r = 1}^n
-    \rho_r
-    \frac{ h_r(t) } { p_r }
-  \right)
-= 0.
-$$
-
-In the long-time limit,
-\begin{align*}
-  \left\langle
-    \Theta_k^2
-  \right\rangle
-  &=
-  \frac{1}{T^2}
-  \sum_{ t, t' = 1 }^T
-  \langle \theta_k(t) \, \theta_k(t') \rangle
-  %\\
-  %&\approx
-  %\frac{1}{T}
-  %\sum_{ \tau = -\infty }^{ \infty }
-  %\langle \theta_k(t) \, \theta_k(t + \tau) \rangle
-  %\\
-  %&=
-  =
-  \frac{1}{T}
-  \sum_{\tau = -\infty}^\infty
-    \kappa_k(\tau)
-  =
-  \frac{ \Gamma_k }{ T }
-.
-\end{align*}
-%
-Thus,
-\begin{equation}
-  E
-  =
-  \frac{ 1 } { T }
-  \sum_{ k = 2 }^n \Gamma_k
-  .
-\label{eq:error_equil}
-\end{equation}
-
-Now comparing this with the error of
-the optimal adaptive simulation,
-Eq. \eqref{eq:error_sinc} (with $K = n$),
-we find the difference to be negligible
-in the long time limit.
-
-The above argument can be extended
-to the bandpass updating schemes.
-%
-If the intrinsic PMF is sufficiently smooth,
-we can explicitly filter out some error modes
-in the histogram,
-say those with $k >  K$,
-and truncate the sum in
-Eq. \eqref{eq:error_equil} at $k = K$.
-
-
-
-
-
-
 \section{\label{sec:invt_schedule}
 Modified inverse-time schedules}
 
@@ -6053,8 +5958,8 @@ $\min \lambda_k = 1 - 4 \, \mu_1$.
     $\phi_{ki}$     &   Eigenvectors of the updating matrix. \\
     $g$             &   Degeneracy factor, $2$ for a periodic variable, or for $1$ a non-periodic one. \\
     $\Gamma_k$      &   Integral of the autocorrelation function of mode $k$. \\
-    $h_i(t)$        &   Histogram.  \\
-    $H_i$           &   Average histogram.  \\
+    $h_i(t)$        &   Instantaneous histogram.  \\
+    $H_i$           &   Average normalized histogram.  \\
     $i, j$          &   Bin indices. \\
     $\lambda_k$     &   The $k$th eigenvalue of the updating matrix. \\
     $k, l$          &   Mode indices. \\
@@ -6083,7 +5988,7 @@ $\min \lambda_k = 1 - 4 \, \mu_1$.
     $\mathbf w$     &   Updating matrix. \\
     $x_i(t)$        &   Average-deducted bias potential, Eq. \eqref{eq:x_def}. \\
     $\xi_i(t)$      &   The noise, Eq. \eqref{eq:xi_def}. \\
-    $\chi_i$        &   $\chi_i \equiv \ln \frac{ p_i } { p^*_i } - \sum_{ j = 1 }^n p_j \, \ln \frac{ p_j } { p^*_j }$. \\
+    $\chi_i$        &   $\chi_i \equiv \ln \frac{ p_i } { p^*_i } - \sum_{ j = 1 }^n \rho_j \, \ln \frac{ p_j } { p^*_j }$. \\
     $y_k(t)$        &   Mode of the shifted bias potential, Eq. \eqref{eq:y_def}. \\
     $Y_k$           &   Mode of the original bias potential, Eq. \eqref{eq:Y_def}. \\
     $z$             &   Reaction coordinate. \\

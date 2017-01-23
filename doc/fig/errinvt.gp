@@ -37,6 +37,8 @@ set key left Left reverse spacing 1.2
 # instead of
 #   "u 1:2 w p"
 
+set arrow 1 from 1, 5e-7 to 1, 5e-4 lt 2 lc rgb "#808080" nohead back
+
 plot [:][:] \
     "../../data/invt/wl_g_err.dat" u (1/$1):2         w p  pt 7  ps 2.0  notitle, \
     "../../data/invt/wl_g_prd.dat" u (1/$1):($2**2)   w l  lt 1  lw 2    t "Single{/*0.7 -}bin, global", \

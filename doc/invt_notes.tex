@@ -40,6 +40,277 @@
 \title{Additional notes: Optimal updating factor in Wang-Landau and metadynamics simulations}
 
 
+\section{\label{sec:equilerr}
+Error of the ideal equilibrium FDS simulation}
+
+
+\note{Original Appendix F.}
+
+%As discussed in Sec. \ref{sec:FDS},
+%the asymptotic limit of an adaptive FDS method
+%is the corresponding equilibrium FDS method
+%with the bias potential fixed to the exact value.
+%%
+%Such a simulation delivers the maximal efficiency.
+
+In late stages of an adaptive FDS simulation,
+the bias potential is often sufficiently precise.
+Some practitioners would then fix
+the bias potential and switch
+to the equilibrium method
+to prevent possible future efficiency loss
+due to the adaptive updates.
+%
+Below, we will show that this practice is unnecessary
+if the simulation uses the single-bin or a bandpass updating scheme
+with the optimal schedule, Eq. \eqref{eq:alpha_invt1}.
+%
+That is, the bias potential obtained from
+an optimal single-bin scheme adaptive simulation
+will be similar in precision to that from
+the ideal equilibrium simulation
+for long times.
+%
+%Thus, our demonstration below serves as an alternative proof
+%of the optimality of the single-bin scheme.
+
+The error of the equilibrium FDS simulation
+depends on the precision of the histogram.
+%
+If all $v_i$'s are exact,
+the error is minimized, and can be computed
+from the second term
+on the right-hand side of Eq. \eqref{eq:vcorr_equil} as
+%
+\begin{align}
+  E
+  &=
+  \left\langle
+    \sum_{ i = 1 }^ n
+      \rho_i \,
+      \left(
+        \ln \frac { H_i }
+                  { p_i }
+        -
+        \sum_{r = 1}^n \rho_r
+        \ln \frac { H_r }
+                  { p_r }
+      \right)^2
+  \right\rangle
+  \notag
+  \\
+  &
+  \approx
+  \sum_{ i = 1 }^ n
+    \rho_i \,
+    \left\langle
+      \left(
+        \frac { H_i }
+              { p_i }
+        -
+        \sum_{r = 1}^n \rho_r
+            \frac { H_r }
+                  { p_r }
+      \right)^2
+    \right\rangle,
+\notag
+\end{align}
+where
+we have defined a time-averaged histogram
+$H_i = \frac{1}{T} \sum_{t = 1}^T h_i(t)$
+with the instantaneous histogram
+$h_i(t)$ defined by Eq. \eqref{eq:h_def}.
+
+We can rewrite the error as
+a sum of the eigenmodes as
+%
+\begin{align}
+  E
+  =
+  \sum_{ k = 2 }^n
+    \left\langle
+      \Theta_k^2
+    \right\rangle
+  ,
+\notag
+%\label{eq:error_sbin_equil}
+\end{align}
+%
+where
+%
+$
+  \Theta_k
+  =
+  \frac{ 1 } { T }
+  \sum_{ t = 1 } ^ T
+    \theta_k( t )
+  ,
+$
+%
+with $\theta_k(t)$ defined by Eq. \eqref{eq:theta_def}.
+%and $\phi_{k i}$ by Eq. \eqref{eq:eig_orthonormal_cols}.
+%\begin{align}
+%\theta_k( t )
+%=
+%\sum_{ i = 1 }^ n
+%\phi_{k i} \left[
+%             \frac{ h_i(t) }
+%                  { p_i    }
+%             - 1
+%           \right],
+%\end{align}
+%and
+%\begin{align}
+%\sum_{ k = 1 }^n
+%  \phi_{k i} \, \phi_{k j}
+%  = p_i \, \delta_{i j}.
+%\end{align}
+%
+\note{Because
+%
+\begin{align*}
+  \sum_{ k = 1 }^n
+    \Theta_k^2
+  &=
+  \frac{ 1 } { T^2 }
+  \sum_{ t, t' = 1 }^T
+    \sum_{ k = 1 }^n
+      \theta_k( t ) \, \theta_k( t' )
+  \\
+  &=
+  \frac{ 1 } { T^2 }
+  \sum_{ t, t' = 1 }^T
+    \sum_{ i, j = 1 }^n
+      \xi_i(t) \, \xi_j(t')
+      %\left[
+      %  \frac{ h_i(t) }
+      %       { p_i    }
+      %  - 1
+      %\right]
+      %\left[
+      %  \frac{ h_j(t') }
+      %       { p_j     }
+      %  - 1
+      %\right]
+      \sum_{ k = 1 }^n
+        \phi_{k \, i} \, \phi_{k \, j}
+  \\
+  &=
+  \frac{ 1 } { T^2 }
+  \sum_{ t, t' = 1 }^T
+    \sum_{ i, j = 1 }^n
+      \xi_i(t) \, \xi_j(t') \,
+      \rho_i \, \delta_{i, j}
+  \\
+  &=
+  \sum_{ i = 1 }^n
+  \rho_i \,
+  \frac{ 1 } { T }
+  \sum_{ t = 1 }^T \xi_i(t)
+  \;
+  \frac{ 1 } { T }
+  \sum_{ t' = 1 }^T \xi_i(t')
+  \\
+  &=
+  \sum_{ i = 1 }^n
+    \rho_i \,
+      \left(
+        \frac{ H_i }
+             { p_i }
+        -
+        \sum_{r = 1}^n \rho_r
+        \frac{ H_r }
+             { p_r }
+      \right)^2
+  ,
+\end{align*}
+where we have used
+$$
+  \frac{1}{T}
+  \sum_{t = 1}^T \xi_i(t)
+  =
+  \frac{ H_i }
+       { p_i }
+  -
+  \sum_{r = 1}^n \rho_r
+  \frac{ H_r }
+       { p_r }
+  .
+$$
+}%
+The sum starts from $k = 2$, for
+by Eq. \eqref{eq:eigenmode1}, % we have
+$$
+\theta_1(t)
+=
+\sum_{ i = 1 }^n
+  \phi_{1i} \, \left(
+    \frac{ h_i(t) } { p_i }
+    -
+    \sum_{r = 1}^n
+    \rho_r
+    \frac{ h_r(t) } { p_r }
+  \right)
+= 0.
+$$
+
+In the long-time limit,
+\begin{align*}
+  \left\langle
+    \Theta_k^2
+  \right\rangle
+  &=
+  \frac{1}{T^2}
+  \sum_{ t, t' = 1 }^T
+  \langle \theta_k(t) \, \theta_k(t') \rangle
+  %\\
+  %&\approx
+  %\frac{1}{T}
+  %\sum_{ \tau = -\infty }^{ \infty }
+  %\langle \theta_k(t) \, \theta_k(t + \tau) \rangle
+  %\\
+  %&=
+  =
+  \frac{1}{T}
+  \sum_{\tau = -\infty}^\infty
+    \kappa_k(\tau)
+  =
+  \frac{ \Gamma_k }{ T }
+.
+\end{align*}
+%
+Thus,
+\begin{equation}
+  E
+  =
+  \frac{ 1 } { T }
+  \sum_{ k = 2 }^n \Gamma_k
+  .
+\label{eq:error_equil}
+\end{equation}
+
+Now comparing this with the error of
+the optimal adaptive simulation,
+Eq. \eqref{eq:error_sinc} (with $K = n$),
+we find the difference to be negligible
+in the long time limit.
+
+The above argument can be extended
+to the bandpass updating schemes.
+%
+If the intrinsic PMF is sufficiently smooth,
+we can explicitly filter out some error modes
+in the histogram,
+say those with $k >  K$,
+and truncate the sum in
+Eq. \eqref{eq:error_equil} at $k = K$.
+
+
+
+
+
+
+
 
 \section{Multiple-bin scheme: Error}
 
