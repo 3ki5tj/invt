@@ -1,6 +1,6 @@
 prj=invt
 
-ver=4.0
+ver=4.1
 
 figgps=$(wildcard fig/*.gp)
 pdffigs=$(patsubst %.gp,%.pdf, $(figgps))
@@ -66,7 +66,8 @@ refver=3.4
 diff::
 	mkdir -p old/V$(ver)
 	#module load perl
-	cd old/V$(ver) && latexdiff --math-markup=0 \
+	# consider the flag --math-markup=0 if there is trouble for formulae
+	cd old/V$(ver) && latexdiff \
 	  --config="PICTUREENV=(?:picture|DIFnomarkup|align|equation|table)[\w\d*@]*" \
 	  ../V$(refver)/invt_annotatedV$(refver).tex invt_annotatedV$(ver).tex > invt_diffV$(ver).tex
 	make -C old/V$(ver) invt_diffV$(ver).pdf

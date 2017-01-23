@@ -1,4 +1,4 @@
-\documentclass[reprint, superscriptaddress, floatfix]{revtex4-1}
+\documentclass[preprint, superscriptaddress, floatfix]{revtex4-1}
 \usepackage{amsmath}
 \usepackage{mathtools}
 \usepackage{upgreek}
@@ -132,7 +132,7 @@ to capture the global shape of the free energy surface
 an effective strategy is to introduce a bias potential that
 cancels the PMF, resulting sampling of a flat distribution
 along $z$\cite{mezei1987, berg1992, lee1993,
-wang2001, wang2001pre, laio2002, laio2008, barducci2011, sutto2012}.
+wang2001, *wang2001pre, laio2002, laio2008, barducci2011, sutto2012}.
 %The negative logarithm,
 %$-\ln p^*(z)$,
 %defines a free energy,
@@ -159,7 +159,7 @@ wang2001, wang2001pre, laio2002, laio2008, barducci2011, sutto2012}.
 %
 %A better solution is to artificially flatten
 %the target distribution along $z$\cite{mezei1987, berg1992, lee1993,
-%wang2001, wang2001pre, laio2002, laio2008, barducci2011, sutto2012}.
+%wang2001, *wang2001pre, laio2002, laio2008, barducci2011, sutto2012}.
 %%
 %This alleviates the above problem of local trapping
 %by forcing the system to travel more
@@ -173,7 +173,7 @@ wang2001, wang2001pre, laio2002, laio2008, barducci2011, sutto2012}.
 
 
 
-The Wang-Landau (WL) algorithm\cite{wang2001, wang2001pre}
+The Wang-Landau (WL) algorithm\cite{wang2001, *wang2001pre}
 and metadynamics\cite{huber1994, laio2002,
 laio2008, barducci2011, sutto2012}
 are two widely-used and closely-related\cite{micheletti2004}
@@ -223,16 +223,16 @@ the updating magnitude,
 therefore, critically affects
 the precision of the final bias potential,
 hence that of the PMF\cite{liang2007,
-belardinelli2007, belardinelli2007jcp, belardinelli2008,
+belardinelli2007, *belardinelli2007jcp, *belardinelli2016, belardinelli2008,
 morozov2007, zhou2008, morozov2009,
-komura2012, caparica2012, caparica2014,
+komura2012, caparica2012, *caparica2014,
 barducci2008, dickson2011, dama2014}.
 %
 For the WL algorithm, it is known
 that the optimal schedule
 is a function of the
 inverse time\cite{liang2007,
-belardinelli2007, belardinelli2007jcp, belardinelli2008,
+belardinelli2007, *belardinelli2007jcp, *belardinelli2016, belardinelli2008,
 morozov2007, zhou2008}
 or
 the inverse number of simulation steps.
@@ -558,7 +558,7 @@ reduce the updating magnitude
 over the course of simulation\cite{
 marsili2006,
 liang2007,
-belardinelli2007, belardinelli2007jcp, belardinelli2008,
+belardinelli2007, *belardinelli2007jcp, *belardinelli2016, belardinelli2008,
 barducci2008}.
 %
 %Thus, in late stages of a long simulation,
@@ -574,9 +574,9 @@ barducci2008}.
 For example, one can show that
 if the magnitude decreases according to
 the optimal inverse-time prescription\cite{
-belardinelli2007, belardinelli2007jcp, belardinelli2008,
+belardinelli2007, *belardinelli2007jcp, *belardinelli2016, belardinelli2008,
 morozov2007, zhou2008, morozov2009,
-komura2012, caparica2012, caparica2014},
+komura2012, caparica2012, *caparica2014},
 the WL algorithm is equivalent to the ideal equilibrium counterpart
 in improving the precision of the bias potential,
 delivering the maximal efficiency
@@ -592,7 +592,7 @@ delivering the maximal efficiency
 
 We will mainly focus on the adaptive methods below.
 %
-In the WL algorithm\cite{wang2001, wang2001pre},
+In the WL algorithm\cite{wang2001, *wang2001pre},
 the bias potential, $V_i(t)$, is updated
 at each sampling step $t$ as
 %
@@ -678,7 +678,7 @@ $p^*_i$. %via Eq. \eqref{eq:v_def}.
 
 
 In the original WL papers\cite{
-wang2001, wang2001pre},
+wang2001, *wang2001pre},
 the updating magnitude $\alpha$
 (or $\ln f$ there)
 is controlled in stages.
@@ -691,13 +691,14 @@ is collected and monitored.
 Once the histogram is sufficiently flat,
 we switch to a new stage
 with $\alpha$ reduced by a factor of $1/2$\cite{
-wang2001, wang2001pre}.
+wang2001, *wang2001pre}.
 %
 While this scheme works well for early stages,
 %
 it tends to reduce $\alpha$
 too quickly in late stages, making the asymptotic error
-saturate\cite{belardinelli2007, belardinelli2007jcp, belardinelli2008}.
+saturate\cite{
+belardinelli2007, *belardinelli2007jcp, *belardinelli2016, belardinelli2008}.
 
 
 %For the single-bin scheme
@@ -720,9 +721,10 @@ is the number of steps
 from the beginning of the simulation.
 %
 This simple yet effective formula has attracted
-several studies\cite{belardinelli2007, belardinelli2007jcp, belardinelli2008,
+several studies\cite{
+belardinelli2007, *belardinelli2007jcp, *belardinelli2016, belardinelli2008,
 morozov2007, zhou2008, morozov2009,
-komura2012, caparica2012, caparica2014}.
+komura2012, caparica2012, *caparica2014}.
 %
 Here we will re-derive this formula
 and suggest a slight modification
@@ -857,9 +859,7 @@ the error of the bias potential as
 \begin{equation}
   \Err
   =
-  \sum_{i = 1}^n \rho_i \, \langle x_i^2 \rangle
-  =
-  \sum_{i = 1}^n \rho_i \, \left\langle (v_i - \bar v)^2 \right\rangle
+  \sum_{i = 1}^n \rho_i \, \left\langle x_i^2(t) \right\rangle
   .
 \label{eq:error_sum}
 \end{equation}
@@ -962,9 +962,9 @@ for the deterministic part
   \\
   &\approx
   p_i \,
-  \left(
-    1 - x_i + \sum_{r=1}^n p_r \, x_r
-  \right)
+  \left[
+    1 - x_i(t) + \sum_{r=1}^n p_r \, x_r(t)
+  \right]
   ,
   \label{eq:h_ave}
 \end{align}
@@ -2291,7 +2291,7 @@ happens to coincide with the
 recommended reduction factor of updating magnitude
 at stage transitions
 in the original WL algorithm\cite{
-wang2001, wang2001pre}.
+wang2001, *wang2001pre}.
 
 
 Let us now consider
@@ -2715,7 +2715,7 @@ and be even functions about the axis $i = 1/2$:
 %
 The eigenvalues can be borrowed from
 Eq. \eqref{eq:wband_eigenvalue_pbc},
-with the periodic $n$ doubled:
+with the period $n$ doubled:
 %
 \begin{align}
   \lambda_k
@@ -3276,19 +3276,20 @@ for any set of nonnegative numbers, $c_k$'s,
 \label{eq:CSineq}
 \end{align}
 %
-\note{This inequality follows from the non-negativity of
-the following quadratic polynomial of $Y$,
+%\note{
+This inequality follows from the non-negativity of
+the following quadratic polynomial of $\chi$,
 $$
 \int_0^T
   dt \sum_{k = 2}^n \Gamma_k \,
-    \left( \dot u_k \, Y - c_k \right)^2
+    \left( \dot u_k \, \chi - c_k \right)^2
   \equiv
-  A \, Y^2 + B \, Y + C
+  A_2 \, \chi^2 + A_1 \, \chi + A_0
   ,
 $$
 which implies a non-positive discriminant,
-$B^2 - 4 \, A \, C$.
-}%
+$A_1^2 - 4 \, A_0 \, A_2$.
+%}%
 %
 Note that the last expression of Eq. \eqref{eq:CSineq}
 depends on the curve, $q(t)$ ($0 < t < T$),
@@ -3379,7 +3380,7 @@ Eq. \eqref{eq:alpha_invtk}
 recovers Eq. \eqref{eq:alpha_invt1}.
 %
 
-Since the first eigenmode corresponds to
+Since the first eigenmode represents
 a uniform shift of the bias potential,
 we can freely set $\lambda_1$ to be the same as $\lambda_2$
 without changing the nature of the updating scheme.
@@ -3739,6 +3740,8 @@ and
 \label{eq:error_sinc}
 \end{equation}
 %
+This error decreases inversely with increasing simulation length,
+as one would expect from an equilibrium FDS simulation.
 %In Appendix \ref{sec:equilerr},
 %we show that the above error tends
 %to the error of the ideal equilibrium FDS simulation
@@ -4389,7 +4392,7 @@ of glassy systems.
 
 \section{Acknowledgments}
 
-We thank Dr. J. Ma, Dr. Y. Mei, J. Wang,
+We thank Dr. Y. Mei, J. Wang,
 O. Nassar, Dr. C. Lai, Dr. S. Ou, D. Stuhlsatz,
 Dr. C. Myers, and Dr. O. Samoylova
 for helpful discussions.  We gratefully acknowledge the Robert A. Welch Foundation (H-0037), the National Science Foundation (CHE-1152876) and the National Institutes of Health (GM-037657) for partial support of this work.  This research used computing resources of the National Science Foundation XSEDE grid.
@@ -4534,7 +4537,7 @@ with the inverse-time schedule.
 %
 That is,
 the WL algorithm with the inverse-time schedule
-produces a bias potential that is similar in precision to that from 
+produces a bias potential that is similar in precision to that from
 the ideal equilibrium simulation for long times.
 
 Second,
@@ -4556,8 +4559,8 @@ which is ignored in this analysis.
 Third,
 it is possible to reformulate the WL algorithm
 with the inverse-time schedule
-such that the bias potential is computed as
-a weighted adaptive average of the histogram\cite{marsili2006, barducci2008},
+such that the bias potential is computed from
+a weighted runtime average of the histogram\cite{marsili2006, barducci2008},
 which is analogous to the adaptive bias force method\cite{darve2001, *darve2008}.
 
 
@@ -4803,7 +4806,7 @@ at each time step $t$.
 Further, in the asymptotic limit,
 $\langle h_i(t) \rangle = p_i$,
 we find from Eqs. \eqref{eq:h_split} and \eqref{eq:xi_def} that
-$$
+\begin{equation*}
   \xi_i(t)
   =
   \frac{ h_i(t) } { p_i }
@@ -4811,7 +4814,7 @@ $$
   \sum_{ r = 1 }^n
     \rho_r \frac{ h_r(t) } { p_r }
   ,
-$$
+\end{equation*}
 %
 and
 %
@@ -4913,11 +4916,7 @@ and
 %
 Thus, Eq. \eqref{eq:kappa_delta} is exact,
 with
-$
-\Gamma_k
-=
-\sum_{ i = 1}^n \phi_{ki}^2 / p_i.
-$
+$\Gamma_k = \sum_{ i = 1}^n \phi_{ki}^2 / p_i$.
 \note{Proof.%Eq. \eqref{eq:kappa_perfect},
   $$
   \begin{aligned}
@@ -5089,13 +5088,13 @@ where
 means the variance from the sampling (time) average,
 and
 %
-\begin{align}
+\begin{align*}
 Y_k
 &=
 \sum_{ i = 1 }^n
   \phi_{k i} \, (V_i - \bar V),
-\label{eq:Y_def}
-\end{align}
+%\label{eq:Y_def}
+\end{align*}
 %
 with
 $
@@ -5105,30 +5104,20 @@ $
 $
 
 To show Eq. \eqref{eq:varY},
-we first use Eq. \eqref{eq:v_def}
-to rewrite Eq. \eqref{eq:x_def}
-as
-$
-  x_i
-  =
-  (V_i - \bar V) + \chi_i,
-$
-where
-$
-  \chi_i
-  \equiv
-  \ln \frac{ p_i } { p^*_i }
-  -
-  \sum_{ j = 1 }^n
-    \rho_j \, \ln \frac{ p_j } { p^*_j }.
-$
-Thus, by Eqs. \eqref{eq:y_def} and \eqref{eq:Y_def},
-we have
-$$
-y_k = Y_k + \sum_{i = 1}^n \phi_{k i} \, \chi_i.
-$$
-Since the second term on the right-hand side
-is a constant, and the average of $y_k$ is zero,
+we first note that
+the difference, $V_i - {\bar V}$,
+differs from the actual deviation $x_i$ of bin $i$,
+as defined in Eq. \eqref{eq:x_def},
+only by a constant shift,
+$\ln( p^*_i / p_i ) - \sum_{ j = 1 }^n \rho_j \, \ln( p^*_j / p_j )$.
+%
+This means that the two would share the same variance
+under time averaging.
+%
+It follows that the corresponding linear combinations,
+$Y_k$ and $y_k$, would also share the same variance.
+%
+But since the average of $y_k$ is zero,
 we have
 $$
 \operatorname{var} Y_k
@@ -5828,7 +5817,8 @@ the asymptotic error is implicitly given by the integral
 
 
 
-For perfect sampling, with $\mathbf p = \pmb \rho$,
+For perfect sampling, if $\mathbf p = \pmb \rho$,
+we have
 $\Gamma(p) = 1$ from Eq. \eqref{eq:Gamma_perfect},
 and
 $$
@@ -5988,7 +5978,6 @@ $\min \lambda_k = 1 - 4 \, \mu_1$.
     $\mathbf w$     &   Updating matrix. \\
     $x_i(t)$        &   Average-deducted bias potential, Eq. \eqref{eq:x_def}. \\
     $\xi_i(t)$      &   The noise, Eq. \eqref{eq:xi_def}. \\
-    $\chi_i$        &   $\chi_i \equiv \ln \frac{ p_i } { p^*_i } - \sum_{ j = 1 }^n \rho_j \, \ln \frac{ p_j } { p^*_j }$. \\
     $y_k(t)$        &   Mode of the shifted bias potential, Eq. \eqref{eq:y_def}. \\
     $Y_k$           &   Mode of the original bias potential, Eq. \eqref{eq:Y_def}. \\
     $z$             &   Reaction coordinate. \\
