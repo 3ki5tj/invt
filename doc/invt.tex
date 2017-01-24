@@ -774,8 +774,7 @@ and then minimize it by variation.
 
 First, we need to define the error in the bias potential.
 %
-This is done by subtracting from the bias potential
-two contributions.
+This is done by removing two contributions from the bias potential.
 %
 The first contribution comes from the target value,
 Eq. \eqref{eq:Vi_target}.
@@ -797,7 +796,7 @@ we introduce a shifted bias potential
 which should tend to a constant of $i$
 upon convergence.
 Note that the updates to $v_i$'s are
-the same as the updates to $V_i$'s,
+equivalent to the updates to $V_i$'s,
 since the shift
 remains a constant during the course of simulation,
 %%
@@ -849,9 +848,9 @@ for some distribution,
 $\pmb \rho = (\rho_1, \dots, \rho_n)$.
 %
 In this way,
-the variables, $x_i(t)$'s,
-represent the error of the bias potential,
-and are expected to vanish on convergence.
+the variable, $x_i(t)$,
+represents the error of the bias potential,
+and is expected to vanish on convergence.
 %
 We, therefore, define
 the error of the bias potential as
@@ -921,7 +920,10 @@ being the instantaneous histogram,
 which is equal to $1.0$
 for the bin $i(t)$ at time $t$
 or zero otherwise.
-
+%
+The shifted bias potential, $v_i(t)$,
+follows the same differential equation
+as the shift is a constant.
 
 
 Next, we split $h_i(t)$ into a deterministic averaged part
@@ -933,7 +935,7 @@ and a stochastic part, $\zeta_i(t)$,
 \end{equation}
 %
 The deterministic part can be related
-to the ``ensemble average'' of $h_i$,
+to the ``ensemble average'',
 where the ensemble consists of many similar simulation copies
 sharing the same schedule $\alpha(t)$
 the same bias potential at time $t$.
@@ -1026,22 +1028,25 @@ $
 
 
 
-The average growth rate of $v(t)$ is given by
-\begin{equation}
-  \frac{ d \bar v (t) }
-       { d t }
-  =
-  \alpha(t)
-  \sum_{ r = 1 }^n \rho_r \, \frac{ h_r(t) } { p_r }
-  .
-\label{eq:dvbardt}
-\end{equation}
+%The average growth rate of $v(t)$ is given by
+%\begin{equation}
+%  \frac{ d \bar v (t) }
+%       { d t }
+%  =
+%  \alpha(t)
+%  \sum_{ r = 1 }^n \rho_r \, \frac{ h_r(t) } { p_r }
+%  .
+%\label{eq:dvbardt}
+%\end{equation}
 %
 
 
 From Eqs.
-\eqref{eq:x_def},
-\eqref{eq:rhox_sum}-\eqref{eq:dvbardt},
+\eqref{eq:v_def}-\eqref{eq:vbar_def},
+\eqref{eq:rhox_sum}-\eqref{eq:h_ave},
+%\eqref{eq:v_def},
+%\eqref{eq:x_def},
+%\eqref{eq:vbar_def},
 %\eqref{eq:rhox_sum},
 %\eqref{eq:vt_diffeq},
 %\eqref{eq:h_split}
@@ -1077,7 +1082,7 @@ $$
   &\stackrel{\mathrm{Eq.\; \eqref{eq:x_def}}}
             {=\joinrel=\joinrel=\joinrel=\joinrel=}
   \dot v_i - \dot{ \bar v }
-  \stackrel{\mathrm{Eqs.\; \eqref{eq:vt_diffeq}\; and\; \eqref{eq:dvbardt}}}
+  \stackrel{\mathrm{Eqs.\; \eqref{eq:vt_diffeq}\; and\; \eqref{eq:vbar_def}}}
             {=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=}
   \alpha(t) \left(
     \frac{ h_i } { p_i }
@@ -1086,7 +1091,7 @@ $$
       \rho_r \frac{ h_r } { p_r }
   \right)
   \\
-  &\stackrel{\mathrm{Eq.\; \eqref{eq:h_split}}}
+  &\stackrel{\mathrm{Eqs.\; \eqref{eq:h_split} and \; \eqref{eq:h_ave}}}
             {=\joinrel=\joinrel=\joinrel=\joinrel=}
   \alpha(t) \left(
     \frac{ \langle h_i \rangle } { p_i }
@@ -1115,7 +1120,8 @@ at the end of the simulation period $T$.
 %
 It suffices to consider
 a one-variable problem that
-minimizes each individual $\left\langle x_i^2 \right\rangle$.
+minimizes each individual
+$\left\langle x_i^2(T) \right\rangle$.
 
 
 
@@ -1654,7 +1660,7 @@ from $k = 2$,
   =
   \sum_{k = 2}^n
     \left\langle
-      y_k^2
+    y_k^2(T)
     \right\rangle
   .
 \label{eq:y2_sum}
@@ -4337,8 +4343,9 @@ in the long time limit
 without a priori assumptions
 about the smoothness of the PMF.
 %
-More generally, with perfect filtering
-of certain eigenmodes, we can construct a
+However, if certain eigenmodes for local noises
+are expected to vanish in the PMF,
+we can construct a
 class of bandpass updating schemes
 that are also optimal for asymptotic convergence.
 %
@@ -5106,12 +5113,12 @@ $
 To show Eq. \eqref{eq:varY},
 we first note that
 the difference, $V_i - {\bar V}$,
-differs from the actual deviation $x_i$ of bin $i$,
-as defined in Eq. \eqref{eq:x_def},
+differs from the actual deviation, $x_i$,
+defined in Eq. \eqref{eq:x_def},
 only by a constant shift,
 $\ln( p^*_i / p_i ) - \sum_{ j = 1 }^n \rho_j \, \ln( p^*_j / p_j )$.
 %
-This means that the two would share the same variance
+Thus, the two share the same variance
 under time averaging.
 %
 It follows that the corresponding linear combinations,
@@ -5471,99 +5478,104 @@ $$
 
 
 
-Next, we show that this bound represents
+Next, we will show that this bound represents
 updating schemes with a set of very different eigenvalues.
 %
-First, observe that the summand of Eq. \eqref{eq:mass_func},
-$\Gamma_k \, \left( \lambda_k e^{-\lambda_k \, Q} \right)^2$
-is a function that peaks at $\lambda_k = 1/Q$,
-so that the sum is dominated by the term at $k = k(Q)$ with
+%First, observe that the summand of Eq. \eqref{eq:mass_func},
+%$\Gamma_k \, \left( \lambda_k e^{-\lambda_k \, Q} \right)^2$
+%is a function that peaks at $\lambda_k = 1/Q$,
+%so that the sum is dominated by the term at $k = k(Q)$ with
+%%
+%\begin{equation}
+%  \lambda_{k(Q)}
+%  \approx
+%  \frac 1 Q
+%  .
+%  \label{eq:kQ_def}
+%\end{equation}
 %
-\begin{equation}
-  \lambda_{k(Q)}
-  \approx
-  \frac 1 Q
-  .
-  \label{eq:kQ_def}
-\end{equation}
+%Thus,
+First, we have for any mode $k^*$ $(k^* \ge 2)$,
 %
-Thus,
 \begin{align}
   M(Q)
   &
-  \gtrsim
+  \ge
   %\approx
-  \sqrt{ \Gamma_{ k(Q) } } \,
-  \lambda_{ k(Q) } \,
-  e^{ -\lambda_{ k(Q) } \, Q }
-\label{eq:MQ_lbound1}
-  \\
-  &
-  \approx
-  \frac{ \sqrt{ \Gamma_{ k(Q) } } }
-       { Q }
-  e^{ -\lambda_{ k(Q) } \, Q }
-  .
-\label{eq:MQ_lbound}
-\end{align}
-
-
-Now consider the $k$th error component, % of the asymptotic error,
-\begin{equation}
-  \left\langle
-    y_k^2
-  \right\rangle_A
-  =
-  \frac C T \,
-  \Gamma_k \, \lambda_k^2
-  \int_0^\infty
-    \frac{ e^{-2 \, \lambda_k \, Q} }
-         { M(Q) }
-    \, dQ
-  .
-\notag
-\end{equation}
-%
-Using Eq. \eqref{eq:MQ_lbound}, we have
-$$
-\begin{aligned}
-  \left\langle
-    y_k^2
-  \right\rangle_A
-  &
-  \lesssim
-  \frac C T \, \Gamma_k \, \lambda_k^2
-  \int_0^\infty
-    \frac{ Q } { \sqrt{ \Gamma_{ k(Q) } } }
-    e^{-\left[ 2\,\lambda_k - \lambda_k(Q) \right] Q }
-    \, dQ
-  \\
-  &
-  \approx
-  \frac C T \,
-  \frac{ \Gamma_k } { \sqrt{ \Gamma_{ k(Q^*) } } }
-  \left[
-    \frac{ \lambda_k } { 2 \, \lambda_k - \lambda_{ k(Q^*) } }
-  \right]^2
+  \sqrt{ \Gamma_{ k^* } } \,
+  \lambda_{ k^* } \,
+  e^{ -\lambda_{ k^* } \, Q }
   ,
-\end{aligned}
-$$
-where we have approximated $k(Q)$
-by its value around the peak of the integrand
-$$
-  Q^*
-  =
-  \frac{ 1 } { 2 \, \lambda_k - \lambda_{ k(Q^*) } }
-  .
-$$
+\label{eq:MQ_lbound1}
+\end{align}
 %
-Comparing this to Eq. \eqref{eq:kQ_def},
-we identify $k(Q^*) \approx k$, so
+which would approach an equality if the $k^*$ mode
+dominates the mass function, $M(Q)$,
+defined in Eq. \eqref{eq:mass_func}.
+%
+Then, for the $k$th component of the asymptotic error,
+we have from Eq. \eqref{eq:error_asym_Lagrangian}
+%
+\begin{align}
+  \left\langle
+  y_k^2(T)
+  \right\rangle_A
+  &=
+  \int_0^T
+  \Gamma_k \, \lambda_k^2 \, e^{2 \, \lambda_k \, [q(t) - q(T)] }
+  \, {\dot q}^2(t) \, dt
+  \notag
+  \\
+  &=
+  \frac{ C } { T }
+  \, \Gamma_k \, \lambda_k^2
+  \int_0^{q(T)}
+  \frac{ e^{-2 \, \lambda_k \, Q } } { M(Q) }
+  \,  \, dQ
+  \notag
+  \\
+  &\le
+  \frac C T \,
+  \frac{ \Gamma_k \, \lambda_k^2 } { \sqrt{ \Gamma_{k^*} } \, \lambda_{k^*} }
+  \int_0^{q(T)}
+    e^{-(2 \, \lambda_k - \lambda_{k^*} ) \, Q}
+    \, dQ
+  \notag
+  \\
+  &\le
+  \frac C T \,
+  \cdot
+  \frac{ \Gamma_k }
+  { \sqrt{ \Gamma_{k^*} } }
+  \cdot
+  \frac{ \lambda_k^2 }
+  { \lambda_{k^*} \, (2 \, \lambda_k -\lambda_{k^*}) }
+  ,
+  \label{eq:y2_ubound_k}
+\end{align}
+%
+where we have
+used Eqs. \eqref{eq:Lagrangian_const} and \eqref{eq:MQ_lbound1}
+on the second and third lines, respectively,
+and extended the upper limit to infinity on the last line.
+%
+For a set of well-separated eigenvalues,
+$\lambda_k$ depends on the mode index $k$
+much more critically than $\Gamma_k$.
+%
+Thus, the tightest upper bound
+can be approximately obtained from minimizing the last factor
+on the right-hand side of Eq. \eqref{eq:y2_ubound_k},
+and the minimal is reached at $k^* = k$,
+when $\lambda_{k^*} = \lambda_k$.
+%
+So
+%
 \begin{equation}
   \left\langle
-    y_k^2
+  y_k^2(T)
   \right\rangle_A
-  \lesssim
+  \le
   %\approx
   \frac C T
   \sqrt{ \Gamma_k }
@@ -5571,6 +5583,10 @@ we identify $k(Q^*) \approx k$, so
   \label{eq:y2_ubound}
 \end{equation}
 %
+By summing over $k$
+and using Eq. \eqref{eq:mint_ubound},
+we recover Eq. \eqref{eq:error_asym_ubound}.
+
 This result shows that with a set of well-separated eigenvalues,
 the asymptotic error profile would be
 independent of $\lambda_k$'s and
@@ -5579,42 +5595,38 @@ Eq. \eqref{eq:y2_eql}
 (cf. Fig. \ref{fig:xerr}
 for a Gaussian example).
 %
-Note that we can turn Eq, \eqref{eq:y2_ubound}
-to an inequality by choosing $k(Q) \to k$
-for Eq. \eqref{eq:MQ_lbound1}.
+Note, however, that to approach this upper bound
+the simulation has to be long enough
+such that the upper limit of the integral
+can be extended from $q(T)$ to infinity
+in the last step of Eq. \eqref{eq:y2_ubound_k}.
 %
-Then by summing over $k$
-and using Eq. \eqref{eq:mint_ubound},
-we recover Eq. \eqref{eq:error_asym_ubound}.
-
-
-For a finite-length simulation,
-the integrals $\int_0^{q(T)} dQ$
-can be extended to infinity
-only if $q(T) \gg Q^*$.
-%
-In other words,
-the above asymptotic limit fails around
-$Q^* \approx q(T)$, or equivalently
-around mode $k^* = k\bigl( q(T) \bigr)$,
-where $\lambda_{ k^* } \approx 1/q(T)$.
-%
-\note{This case also exemplifies
-  the sensitivity to the simulation length.
-  %
-  In this limit,
-  $M(Q) \propto 1/Q$ by Eq. \eqref{eq:MQ_lbound},
-  and $C \propto \ln\bigl[ q(T) / q_0 \bigr]$
-  for some $q_0$,
-  and we expect that with fixed $a_0$,
-  $q(T)$ to increase almost linearly with $T$
-  by Eq. \eqref{eq:opt_qT}.
-  %
-  So the normalized asymptotic error,
-  $E_A \cdot T \propto \bigl( \ln[ q(T)/q_0 ] \bigr)^2 \sim (\ln T)^2$,
-  is sensitive to the simulation length,
-  and worse than the ideal case of a constant.
-}
+As a result,
+the flatter profile from Eq. \eqref{eq:y2_ubound}
+would stop at mode $k$,
+at which $\lambda_k \approx 1/q(T)$.
+%In other words,
+%the above asymptotic limit fails around
+%$Q^* \approx q(T)$, or equivalently
+%around mode $k^* = k\bigl( q(T) \bigr)$,
+%where $\lambda_{ k^* } \approx 1/q(T)$.
+%%
+%\note{This case also exemplifies
+%  the sensitivity to the simulation length.
+%  %
+%  In this limit,
+%  $M(Q) \propto 1/Q$ by Eq. \eqref{eq:MQ_lbound},
+%  and $C \propto \ln\bigl[ q(T) / q_0 \bigr]$
+%  for some $q_0$,
+%  and we expect that with fixed $a_0$,
+%  $q(T)$ to increase almost linearly with $T$
+%  by Eq. \eqref{eq:opt_qT}.
+%  %
+%  So the normalized asymptotic error,
+%  $E_A \cdot T \propto \bigl( \ln[ q(T)/q_0 ] \bigr)^2 \sim (\ln T)^2$,
+%  is sensitive to the simulation length,
+%  and worse than the ideal case of a constant.
+%}
 
 
 
