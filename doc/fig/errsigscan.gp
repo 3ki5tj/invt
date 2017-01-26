@@ -32,7 +32,7 @@ set format y "10^{/*0.8 %T}"
 #set ytics 1e3
 #set format y "%.0t{/Symbol \264}10^{/*0.8 %T}"
 #set mytics 2
-set ylabel "Normalized error, ({/Times-Italic T} + {/Times-Italic t}_{0}) {/Times-Italic E}"
+set ylabel "Normalized error, ({/Times-Italic T} + {/Times-Italic t}_{0}) {/Times-Italic E}({/Times-Italic T})"
 
 a0 = 0.0001
 fac = 2*100/sqrt(2*pi)
