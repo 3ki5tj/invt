@@ -117,7 +117,8 @@ in computational physics and chemistry.
 Given a system,
 often the task is to compute
 a distribution, $p^*(z)$,
-along a collective variable $z$ by sampling via either Monte Carlo\cite{frenkel, newman, landau_binder} (MC)
+along a collective variable $z$ by sampling via either Monte Carlo\cite{
+  frenkel, newman, landau_binder} (MC)
 or molecular dynamics\cite{frenkel, karplus2002} (MD) simulations.
 %
 The logarithm, $\ln p^*(z)$,
@@ -131,8 +132,10 @@ Thus,
 to capture the global shape of the free energy surface
 an effective strategy is to introduce a bias potential that
 cancels the PMF, resulting sampling of a flat distribution
-along $z$\cite{mezei1987, berg1992, lee1993,
-wang2001, *wang2001pre, laio2002, laio2008, barducci2011, sutto2012}.
+along $z$\cite{mezei1987, berg1992, *lee1993,
+wang2001, *wang2001pre,
+huber1994,
+*laio2002, *laio2008, *barducci2011, *sutto2012}.
 %The negative logarithm,
 %$-\ln p^*(z)$,
 %defines a free energy,
@@ -145,7 +148,7 @@ wang2001, *wang2001pre, laio2002, laio2008, barducci2011, sutto2012}.
 %of the PMF,
 %one has to run multiple independent simulations
 %under different umbrella or bias potentials
-%along $z$\cite{mezei1987, berg1992, lee1993},
+%along $z$\cite{mezei1987, berg1992, *lee1993},
 %and then piece together the entire curve.
 %%
 %This solution can be laborious % clumsy in practice
@@ -158,8 +161,10 @@ wang2001, *wang2001pre, laio2002, laio2008, barducci2011, sutto2012}.
 %
 %
 %A better solution is to artificially flatten
-%the target distribution along $z$\cite{mezei1987, berg1992, lee1993,
-%wang2001, *wang2001pre, laio2002, laio2008, barducci2011, sutto2012}.
+%the target distribution along $z$\cite{mezei1987, berg1992, *lee1993,
+%wang2001, *wang2001pre,
+%huber1994,
+%*laio2002, *laio2008, *barducci2011, *sutto2012}.
 %%
 %This alleviates the above problem of local trapping
 %by forcing the system to travel more
@@ -174,8 +179,8 @@ wang2001, *wang2001pre, laio2002, laio2008, barducci2011, sutto2012}.
 
 
 The Wang-Landau (WL) algorithm\cite{wang2001, *wang2001pre}
-and metadynamics\cite{huber1994, laio2002,
-laio2008, barducci2011, sutto2012}
+and metadynamics\cite{huber1994,
+*laio2002, *laio2008, *barducci2011, *sutto2012}
 are two widely-used and closely-related\cite{micheletti2004}
 flat-distribution-sampling (FDS) techniques
 that build the bias potential adaptively or on the fly.
@@ -187,7 +192,7 @@ by incrementally elevating the bias potential there.
 The difference lies
 in the updating window function,
 which takes the form of a discrete
-$\delta$-function (or a boxcar function one histogram bin wide)
+$\delta$-function (a boxcar function one histogram bin wide)
 in the WL case,
 or that of a Gaussian
 in the metadynamics.
@@ -211,7 +216,7 @@ regular updates to the bias potential
 %is updated frequently (usually every few MC or MD steps),
 %and the fluctuation
 disrupts the underlying equilibrium
-sampling\cite{laio2002},
+sampling\cite{zhou2005, zhou2008},
 and for convergence
 one  has to gradually decrease
 the updating magnitude.
@@ -222,20 +227,30 @@ The schedule of reducing
 the updating magnitude,
 therefore, critically affects
 the precision of the final bias potential,
-hence that of the PMF\cite{liang2007,
-belardinelli2007, *belardinelli2007jcp, *belardinelli2016, belardinelli2008,
-morozov2007, zhou2008, morozov2009,
-komura2012, caparica2012, *caparica2014,
+hence that of the PMF\cite{
+belardinelli2007, *belardinelli2007jcp, *belardinelli2008, *belardinelli2016,
+liang2007,
+morozov2007, zhou2008,
+komura2012, *caparica2012, *caparica2014,
 barducci2008, dickson2011, dama2014}.
 %
 For the WL algorithm, it is known
 that the optimal schedule
 is a function of the
-inverse time\cite{liang2007,
-belardinelli2007, *belardinelli2007jcp, *belardinelli2016, belardinelli2008,
+inverse time\cite{
+belardinelli2007, *belardinelli2007jcp, *belardinelli2008, *belardinelli2016,
+liang2007,
 morozov2007, zhou2008}
 or
 the inverse number of simulation steps.
+\note{
+  About the origin of the inverse-time formula.
+  Besides the Belardinelli paper,
+  we can also find it in Eq. (6) of reference \cite{liang2007},
+  if I am not too mistaken.
+  But I find the paper is a bit hard to read.
+  There, however, the formula is $t_0/t$ instead of $1/t$.
+}
 %
 The optimal schedule for the metadynamics case,
 however, is less studied.
@@ -268,7 +283,7 @@ and the width of the Gaussian window.
 %
 In either case, however,
 the initial updating magnitude
-should be set to
+can be optimally set to
 half of the previous equilibrium value,
 which amounts to a shift of the origin of time in the WL case.
 %
@@ -357,7 +372,7 @@ for a given system.
 For example, $i$ can be the energy, $E$,
 in a lattice spin model or the temperature index
 in a simulated tempering simulation\cite{
-marinari1992, lyubartsev1992}.
+marinari1992, *lyubartsev1992}.
 %
 For a continuous quantity, $z$,
 which is often the case in a (classical) molecular system,
@@ -425,7 +440,7 @@ to be the same as the intended distribution, $p_i$,
 which is usually flat,
 i.e., $p_i$ constant for all $i$'s,
 or nearly flat\cite{
-dayal2004, trebst2004, zhang2007, barducci2008, singh2011}.
+dayal2004, *trebst2004, *zhang2007, barducci2008, singh2011}.
 %
 We will generally call such a biased simulation
 a flat-distribution-sampling (FDS) simulation.
@@ -451,7 +466,7 @@ Once this aim is achieved,
 the PMF, $-\ln p^*_i$, can be naturally
 deduced from the bias potential. % $V_i$.
 \note{
-  For example, in the context of simulated tempering\cite{zhang2007},
+  For example, in the context of simulated tempering (Zhang and Ma, 2007),
   $p^*_i$ is replaced by $\ln Z_i$,
   $p_i$ is the weight $\zeta_i$,
   and the bias potential $V_i$ is $\ln (\tilde Z_i / \zeta_i)$.
@@ -471,9 +486,9 @@ during simulation.
 %
 Examples include the original
 entropic or multicanonical sampling\cite{
-berg1992, lee1993}
+berg1992, *lee1993}
 and simulated tempering\cite{
-marinari1992, lyubartsev1992}
+marinari1992, *lyubartsev1992}
 with $i$ being the index of energy
 and that of temperature, respectively.
 %
@@ -557,8 +572,8 @@ many adaptive methods adopt a schedule to
 reduce the updating magnitude
 over the course of simulation\cite{
 marsili2006,
+belardinelli2007, *belardinelli2007jcp, *belardinelli2008, *belardinelli2016,
 liang2007,
-belardinelli2007, *belardinelli2007jcp, *belardinelli2016, belardinelli2008,
 barducci2008}.
 %
 %Thus, in late stages of a long simulation,
@@ -572,11 +587,12 @@ barducci2008}.
 %the optimal asymptotic limit of the adaptive counterpart,
 %
 For example, one can show that
-if the magnitude decreases according to
+if the magnitude falls according to
 the optimal inverse-time prescription\cite{
-belardinelli2007, *belardinelli2007jcp, *belardinelli2016, belardinelli2008,
-morozov2007, zhou2008, morozov2009,
-komura2012, caparica2012, *caparica2014},
+belardinelli2007, *belardinelli2007jcp, *belardinelli2008, *belardinelli2016,
+liang2007,
+morozov2007, zhou2008,
+komura2012, *caparica2012, *caparica2014},
 the WL algorithm is equivalent to the ideal equilibrium counterpart
 in improving the precision of the bias potential,
 delivering the maximal efficiency
@@ -649,9 +665,10 @@ Eq. \eqref{eq:pi_p_V} no longer holds
 at all times,
 and the error in $V_i(t)$
 depends on the updating magnitude\cite{
-  zhou2005, liang2005, laio2005, bussi2006, poulain2006, liang2007,
-  morozov2007, zhou2008, morozov2009, crespo2010,
-  atchade2011, fort2015}.
+  belardinelli2007, *belardinelli2007jcp, *belardinelli2008, *belardinelli2016,
+  zhou2005, zhou2008, morozov2007,
+  laio2005, bussi2006, poulain2006, liang2007,
+  crespo2010, *atchade2011, *fort2015}.
 %%
 %The source of the deviation is two-fold.
 %%
@@ -698,7 +715,7 @@ While this scheme works well for early stages,
 it tends to reduce $\alpha$
 too quickly in late stages, making the asymptotic error
 saturate\cite{
-belardinelli2007, *belardinelli2007jcp, *belardinelli2016, belardinelli2008}.
+belardinelli2007, *belardinelli2007jcp, *belardinelli2008, *belardinelli2016}.
 
 
 %For the single-bin scheme
@@ -722,9 +739,20 @@ from the beginning of the simulation.
 %
 This simple yet effective formula has attracted
 several studies\cite{
-belardinelli2007, *belardinelli2007jcp, *belardinelli2016, belardinelli2008,
+belardinelli2007, *belardinelli2007jcp, *belardinelli2008, *belardinelli2016,
 morozov2007, zhou2008, morozov2009,
-komura2012, caparica2012, *caparica2014}.
+komura2012, *caparica2012, *caparica2014}.
+%
+An interesting explanation\cite{
+  marsili2006, barducci2008}
+comes from the interpretation where
+the bias potential under the WL updating scheme,
+Eq. \eqref{eq:wl_update}
+as a runtime average from all data collected before time, $t$,
+so that the addition of a new data point only
+affects the average by a weight of $1/t$,
+which is the inverse of the sample size, $t$
+(cf. Appendix \ref{sec:equilerr}).
 %
 Here we will re-derive this formula
 and suggest a slight modification
@@ -849,14 +877,11 @@ $\pmb \rho = (\rho_1, \dots, \rho_n)$.
 %
 In this way,
 the variable, $x_i(t)$,
-represents the error of the bias potential,
-and is expected to vanish on convergence.
-%
-We, therefore, define
-the error of the bias potential as
+represents the actual deviation of the bias potential, $V_i(t)$,
+and the total error is given by
 %
 \begin{equation}
-  \Err
+  \Err(t)
   =
   \sum_{i = 1}^n \rho_i \, \left\langle x_i^2(t) \right\rangle
   .
@@ -938,7 +963,7 @@ The deterministic part can be related
 to the ``ensemble average'',
 where the ensemble consists of many similar simulation copies
 sharing the same schedule $\alpha(t)$
-the same bias potential at time $t$.
+and the same bias potential at time $t$.
 %
 The initial states and the stochastic forces
 during the process may differ, however.
@@ -1025,7 +1050,21 @@ $
   T^{t - t'}_{ij} \pi_j - \pi_i \, \pi_j.
 $
 }%
-
+Below, we will assume the noise is white,
+such that
+$$
+\sigma_{ij}(t) = \Gamma_0 \, \delta(t)
+$$
+for some $\Gamma_0$,
+where $\delta(t)$ is the Dirac's delta function.
+%
+This approximation is valid if the simulation period, $T$,
+is much longer than the autocorrelation time of $\sigma_{ij}(t)$,
+%
+and for a non-white noise, 
+the equivalent value of $\Gamma_0$ can be obtained
+from the integral of the autocorrelation function
+$\int_{-\infty}^\infty \sigma_{ij}(t) \, dt$.
 
 
 %The average growth rate of $v(t)$ is given by
@@ -1110,13 +1149,14 @@ $$
 }
 
 
-The total error defined in Eq. \eqref{eq:error_sum}
+The total error
+at the end of the simulation, $t = T$,
+as defined in Eq. \eqref{eq:error_sum},
 now depends implicitly on the function $\alpha(t)$
 via $x_i(t)$.
 %
 Our aim is to find the $\alpha(t)$
-that minimizes the error
-at the end of the simulation period $T$.
+that minimizes this error.
 %
 It suffices to consider
 a one-variable problem that
@@ -1138,28 +1178,14 @@ of a single variable:
 \label{eq:dxdt_alpha}
 \end{equation}
 %
-where $\xi(t)$ is a generalized noise
-that is invariant under time translation:
+where $\xi(t)$ is a white noise, such that
 %
 $
   \left\langle \xi(t) \, \xi(t') \right\rangle
   =
-  \kappa(t - t')
+  \Gamma \, \delta(t - t')
   .
 $
-%
-Additionally,
-we assume that $\kappa(t)$ is an even function and
-\begin{equation}
-  \lim_{t \rightarrow \infty} \kappa(t)
-  = 0
-  .
-  \label{eq:kappa_limit}
-\end{equation}
-%
-For example, for a white noise,
-$\kappa(t)$ is proportional to a
-Dirac $\delta$-function, $\delta(t)$.
 %
 We wish to show that the $\alpha(t)$
 of minimizing $\langle x^2(t) \rangle$ at long times
@@ -1208,14 +1234,10 @@ At the end of period $T$, we have
 =
 \langle x^2(0) \,
 \rangle e^{-2 \, q(T)}
-\notag
-\\
-&\qquad
 +
-\int_0^T \int_0^T
-  \dot u\bigl( q(t) \bigr) \,
-  \dot u\bigl( q(t') \bigr) \,
-  \kappa(t - t') \, dt' \, dt.
+\Gamma \int_0^T
+  {\dot u}^2\bigl( q(t) \bigr) \,
+  \, dt.
 \label{eq:x2t_average}
 \end{align}
 
@@ -1233,7 +1255,9 @@ $u\bigl( q(T) \bigr) = 1$.
 %
 Note also that the first term on the right-hand side
 of Eq. \eqref{eq:x2t_average} is fixed during
-the process.
+the process,
+while the second term is the action of a free particle,
+which must move at a constant velocity, $c$:
 %
 %We will further demand that
 %%
@@ -1261,21 +1285,21 @@ the process.
 %\label{eq:x2t_average_asym}
 %\end{align}
 %
-By the Euler-Lagrange equation, we get
-$$
-\begin{aligned}
-0
-&=
-\frac{d}{dt} \int_0^T
-  \dot u\bigl( q(t') \bigr) \, \kappa(t' - t) \, dt'
-\\
-&= \int_0^T
-  \ddot u\bigl( q(t') \bigr) \, \kappa(t' - t) \, dt',
-\end{aligned}
-$$
-where we have dropped the boundary terms
-by assuming Eq. \eqref{eq:kappa_limit}
-and a large $T$.
+%By the Euler-Lagrange equation, we get
+%$$
+%\begin{aligned}
+%0
+%&=
+%\frac{d}{dt} \int_0^T
+%  \dot u\bigl( q(t') \bigr) \, \kappa(t' - t) \, dt'
+%\\
+%&= \int_0^T
+%  \ddot u\bigl( q(t') \bigr) \, \kappa(t' - t) \, dt',
+%\end{aligned}
+%$$
+%where we have dropped the boundary terms
+%by assuming Eq. \eqref{eq:kappa_limit}
+%and a large $T$.
 %
 %In fact, we can repeat the process $n$ times, and
 %$$
@@ -1283,24 +1307,21 @@ and a large $T$.
 %\qquad (n \ge 1)
 %$$
 %
-In order for this to hold for any $t$,
-we must have
-%
-$
-\ddot u\bigl( q(t') \bigr) = 0
-,
-$
-or
+%In order for this to hold for any $t$,
+%we must have
+%%
+%$
+%\ddot u\bigl( q(t') \bigr) = 0
+%,
+%$
+%or
 \begin{equation}
   \dot u\bigl( q(t') \bigr) = c
-  ,
+  .
 \label{eq:dudt_const}
 \end{equation}
 %
-where $c$ is a constant of $t'$.
-%
-Using Eq. \eqref{eq:u_def},
-we get
+Then by using Eq. \eqref{eq:u_def}, we have
 $$
 e^{ q(t') - q(T) }
 =
@@ -1328,7 +1349,7 @@ is of the form of Eq. \eqref{eq:dxdt_alpha}.
 Thus,
 the optimal schedule $\alpha(t)$ is given by
 Eq. \eqref{eq:alpha_invt1}
-for it optimizes each term $\langle x_i^2 \rangle$,
+for it optimizes each term $\langle x_i^2(T) \rangle$,
 and hence the sum;
 Eq. \eqref{eq:alpha_invt}
 is the special case of $t_0 = 0$.
@@ -1842,13 +1863,13 @@ is given by
 
 
 We will use this result to model the initial error
-before starting the schedule $\alpha(t)$ to be optimized.
+before starting the target schedule, $\alpha(t)$.
 %
-That is, we assume
-$\alpha(t) = a_0$
-for $t < 0$, and
-the system has entered the sampling equilibrium
-under a fixed $a_0$ at $t = 0$.
+That is, we assume that there is an equilibration phase
+for $t < 0$ during which the adaptive FDS sampling was performed
+under a constant updating magnitude
+$\alpha(t) = a_0$, and at the end of the equilibration, $t = 0$,
+the system has entered the equilibrium state of sampling.
 %
 We can then use Eq. \eqref{eq:y2_eql}
 for the $\langle y_k^2(0) \rangle$'s
@@ -2290,7 +2311,7 @@ we can rewrite the condition as
 \end{equation}
 %
 i.e., the optimal initial updating magnitude
-is always half of the equilibration value.
+is always half of the equilibrium value.
 %
 This factor $1/2$
 happens to coincide with the
@@ -3416,7 +3437,7 @@ Bandpass updating schemes}
 We can generalize
 the single-bin scheme to a class of
 perfect (brick-wall) \emph{bandpass} updating schemes
-that ignore short-wave eigenmodes,
+that ignore short-wavelength eigenmodes,
 which are typically local noises.
 %
 Mathematically, these updating schemes will have
@@ -3827,6 +3848,11 @@ and equilibrate the system for $10^7$ steps
 under a constant updating magnitude,
 $a_0 = 10^{-4}$.
 %
+This equilibration process models
+a stage of the WL algorithm or
+a regular metadynamics
+with a fixed updating magnitude.
+%
 Although the bias potential is correct initially,
 it would deviate from the correct value
 at the end of the equilibration.
@@ -3841,7 +3867,7 @@ and start the testing schedule
 for $T = 10^8$ steps.
 %
 We repeat the above process $1000$ times (unless specified otherwise)
-and average the results.
+and report the averaged results.
 %specified by either
 %Eq. \eqref{eq:q_opt}
 %or
@@ -3851,7 +3877,7 @@ and average the results.
 
 For the Gaussian updating scheme,
 the kernel was truncated at
-$b = \min\{10 \, \sigma, n - 1\}$
+$b = \min\{10 \, \sigma, n - 1\}$ bins
 and numerically stabilized
 using the technique
 in Appendix \ref{sec:stabilize_wband}.
@@ -3931,7 +3957,7 @@ and the triple-bin updating scheme with $\mu_1 = 0.24$.
 %
 As shown in Fig. \ref{fig:errinvt},
 the errors from the simulations
-agreed well those from the theory.
+agreed well with those from the theory.
 
 
 \begin{figure}[h]
@@ -3975,11 +4001,12 @@ Appendix \ref{sec:invt_singlebin}.
 For the triple-bin updating scheme,
 the optimal $\lambda$ was less than $1.0$
 for the global sampling process,
-although it remained around $1.0$
+although it stayed around $1.0$
 for the local sampling process,
-as discussed in Appendix \ref{sec:invt_nn}.
+also in agreement with the discussion
+in Appendix \ref{sec:invt_nn}.
 %
-Thus, the inverse-time formula,
+Thus, the inverse-time schedule,
 Eq. \eqref{eq:alpha_invt1},
 is optimal for the single-bin updating scheme,
 but not necessarily so for a general updating scheme.
@@ -3994,8 +4021,10 @@ Optimal schedule}
 
 
 To demonstrate the optimal schedule from Eq. \eqref{eq:q_opt},
-we used the Gaussian (with $\sigma = 10$) updating scheme
+we used the Gaussian (with $\sigma = 10$ bins) updating scheme
 as an example.
+%
+This updating scheme is typically used in metadynamics simulations.
 %
 In Table \ref{tab:error_Gaussian},
 we showed that the optimal schedule
@@ -4011,21 +4040,23 @@ as shown in Fig. \ref{fig:optacmp}.
 The impeded decay of the optimal schedule
 was necessary in order to
 damp out the short-wavelength eigenmodes
-(i.e., local noises),
-as shown in Fig. \ref{fig:xerr}.
+(i.e., local noises).
 %
-If, however, we could ignore these local eigenmodes
-(by explicitly filtering
-them from the biased potential),
-then we can modify the optimal schedule
-from Eq. \eqref{eq:q_opt}
-and limit the sum
+As shown in Fig. \ref{fig:xerr},
+the inverse-time schedule was effective in error reduction
+only for the first few eigenmodes,
+whose eigenvalues were around $1.0$.
+%
+We can, however, ignore these local eigenmodes
+by explicitly filtering them out from the final bias potential,
+and truncating the error sum in Eq. \eqref{eq:error_sum}
 to the first few eigenmodes.
 %
-The resulting schedule
-would become similar to the inverse-time schedule,
+Then, the corresponding optimal schedule
+from Eq. \eqref{eq:q_opt} with the truncated error definition
+became similar to the inverse-time schedule,
 Eq. \eqref{eq:alpha_invt1},
-as shown in Fig. \ref{fig:optacmp}.
+as exemplified in Fig. \ref{fig:optacmp}.
 %
 \note{A more thorough approach is
 to use the bandpass updating scheme
@@ -4095,7 +4126,9 @@ to be discussed later.
     %
     The mode-limited schedules were produced by
     limiting the sum in Eq. \eqref{eq:q_opt}
-    to the first four terms.
+    to the first four terms,
+    or the four longest wavelength modes.
+    %
     They became similar to the inverse-time schedule,
     Eq. \eqref{eq:alpha_invt1}.
     %
@@ -4128,7 +4161,7 @@ to be discussed later.
     %
     For longer simulations,
     the error components from the optimal schedule
-    would roughly maintain the relatively flat profile,
+    would roughly maintain a relatively flat profile,
     but meet the initial error curve
     at a lower level (not shown),
     where $\lambda_k \approx 1/q(T)$
@@ -4142,15 +4175,28 @@ to be discussed later.
 \end{figure}
 
 
-To verify Eq. \eqref{eq:half_alpha0},
+An interesting prediction from the theory is Eq. \eqref{eq:half_alpha0},
+which states that the optimal schedule should always start from
+half of the magnitude from the previous equilibration run.
+%
+To verify this,
 we computed the optimal schedules
-for different values of $q(T)$,
+for different values of $q(T)$
+for the Gaussian updating scheme,
 and plotted the final error
 against the initial updating magnitude, $\alpha(0)$.
 %
 As shown in Fig. \ref{fig:erriascan},
-The minimal error was reached at
-$\alpha(0) = a_0/2 = 5 \times 10^{-5}$.
+The minimal error was indeed reached at
+$\alpha(0) = a_0/2 = 5 \times 10^{-5}$,
+although the dependence on $\alpha(0)$
+is generally weak.
+%
+This dependence becomes even weaker
+in the single-bin updating scheme,
+as it only amounts to a shift of the origin of
+simulation time in the inverse-time schedule,
+Eq. \eqref{eq:alpha_invt1}.
 
 
 \begin{figure}[h]
@@ -4202,6 +4248,13 @@ and other parameters.
 As an example,
 we compare Gaussian updating schemes
 with different widths, $\sigma$.
+%
+In Fig. \ref{fig:errsigscan},
+we show the errors, $\Err$,
+normalized by the shifted simulation length, $T+t_0$,
+so that the normalized errors
+would stay constant in the single-bin updating scheme
+(corresponding to the limit of $\sigma \to 0$).
 %
 As shown in Fig. \ref{fig:errsigscan}(a)
 that the minimal error was achieved
@@ -4343,8 +4396,9 @@ in the long time limit
 without a priori assumptions
 about the smoothness of the PMF.
 %
-However, if certain eigenmodes for local noises
-are expected to vanish in the PMF,
+However, if some eigenmodes
+correspond to local noises
+that are expected to be absent from the PMF,
 we can construct a
 class of bandpass updating schemes
 that are also optimal for asymptotic convergence.
@@ -4375,18 +4429,25 @@ would be close to that of the bandpass scheme.
 
 
 
-In this analysis, we have ignored the \emph{systematic} error\cite{zhou2005}
+The analysis in this study has two limitations.
+%
+First, we have ignored the \emph{systematic}
+error\cite{zhou2005, zhou2008}
 caused by the updates in adaptive FDS methods.
 %
-This is a valid assumption in the asymptotic regime,
-where the random error is much greater than the systematic one.
+This is valid in the asymptotic regime,
+where the updating magnitude is small
+and the sampling is a quasi-equilibrium one\cite{barducci2008, dama2014}.
+%
+Then the random error is much greater than the systematic one,
+because the former is proportional to the square root of the updating magnitude
+whereas the latter is proportional to the magnitude itself.
 %
 %Our method of analysis is most useful for long simulations
 %to achieve relatively precise results.
 %
-This allows us to assume the sampling process
-to be a quasi-equilibrium one\cite{barducci2008, dama2014},
-and to represent the autocorrelation function
+Second, by using the white noise approximation,
+we have represented the autocorrelation function
 of each eigenmode by a single number, $\Gamma_k$.
 %
 Although this assumption appeared to work well
@@ -4418,7 +4479,8 @@ in a runtime average
 
 We can understand the optimality of the inverse-time schedule
 as a result of the stabilization of a runtime average
-with respect to the increase of sample size\cite{marsili2006, barducci2008}.
+with respect to the increase of sample size\cite{
+  marsili2006, barducci2008}.
 %
 Consider a sample, $\{X^{(1)}, \dots, X^{(N)}\}$,
 with a dynamically growing size.
@@ -4551,7 +4613,8 @@ Second,
 an alternative way of improving the precision of the bias potential
 from a simulation using the WL algorithm or metadynamics
 with a fixed magnitude
-is to time average the bias potential\cite{zhou2005}.
+is to time average the bias potential\cite{
+  zhou2005, zhou2008}.
 %
 This practice becomes redundant with the inverse-time schedule
 because the averaging of the bias potential
@@ -4560,15 +4623,18 @@ has been implicitly performed by the schedule.
 The inverse-time schedule approach is preferred, however,
 because with a decreasing updating magnitude,
 it minimizes the systematic error caused by
-the on-the-fly updating scheme\cite{zhou2005},
+the on-the-fly updating scheme\cite{
+  zhou2005, zhou2008},
 which is ignored in this analysis.
 
 Third,
 it is possible to reformulate the WL algorithm
 with the inverse-time schedule
 such that the bias potential is computed from
-a weighted runtime average of the histogram\cite{marsili2006, barducci2008},
-which is analogous to the adaptive bias force method\cite{darve2001, *darve2008}.
+a weighted runtime average of the histogram\cite{
+  marsili2006, barducci2008},
+which is analogous to the adaptive bias force method\cite{
+  darve2001, *darve2008}.
 
 
 
