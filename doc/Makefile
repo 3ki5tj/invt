@@ -1,6 +1,6 @@
 prj=invt
 
-ver=5.0
+ver=5.3
 
 figgps=$(wildcard fig/*.gp)
 pdffigs=$(patsubst %.gp,%.pdf, $(figgps))
@@ -61,7 +61,7 @@ $(prj)doc.zip: $(prj).tex $(prj).pdf \
 	       Makefile README.md
 	zip -r $@ $^
 
-refver=5
+refver=5.2
 
 diff::
 	mkdir -p old/V$(ver)
@@ -72,6 +72,14 @@ diff::
 	  ../V$(refver)/invt_annotatedV$(refver).tex invt_annotatedV$(ver).tex > invt_diffV$(ver).tex
 	make -C old/V$(ver) invt_diffV$(ver).pdf
 
+refver2=4.1_jd
+
+diff2::
+	mkdir -p old/V$(ver)
+	cd old/V$(ver) && latexdiff \
+	  --config="PICTUREENV=(?:picture|DIFnomarkup|align|equation|tikzpicture|table)[\w\d*@]*" \
+	  ../V$(refver2)/invtV$(refver2).tex invt_annotatedV$(ver).tex > invt_diffV$(ver)_$(refver2).tex
+	make -C old/V$(ver) invt_diffV$(ver)_$(refver2).pdf
 
 Bossman: zip
 	cp $(prj)docV$(ver).zip /Bossman/cz1/invt/doc/
