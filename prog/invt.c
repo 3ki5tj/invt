@@ -1,4 +1,5 @@
-/* main driver */
+/* main driver
+ * One-dimensional model system */
 
 
 
