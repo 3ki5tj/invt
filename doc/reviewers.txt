@@ -54,18 +54,55 @@ Some additional questions:
 this mean that the optimal schedule of the update magnitude suggested by Eq.(22) or (49)
 is only for a subgroup simulations which have the same q(T)? Please clarify this issue or
 add the corresponding discussion to the manuscript.
+
+Response.  This is correct. The optimizations are done for a subgroup of simulations with the same value of q(T), and the value of q(T) has to be further determined to complete the problem.
+For the single-bin case, the latter step is equivalent to the best choice of t_0, i.e., Eq. (24).  For the multiple-bin case, the optimal value of q(T) is solved from Eq. (55).
+We have added a few comments after Eqs. (22) and (49) to clarify the procedure.  We thank the referee to point out these ambiguities.
+
+
 2.How to determine the time of the preliminary adaptive FDS simulations with a constant
 updating magnitude?
+
+
+
 3.The study of the updating matrix borrows techniques used in studying transition matrices.
 Does this require all the elements in the updating matrix w_{ij}" to be nonnegative? If it is
 true, please mention this requirement after Eq.(28).
+
+Response: The elements in the updating matrix can be negative.
+The balance property, as well as a few ensuing properties,
+are unaffected by the allowance of the negative numbers.
+For example, the balance property follows directly from
+the detailed balance condition as demonstrated in Eq. (28).
+The existence of a set of orthonormal eigenvector follows from
+the symmetry of the scaled version of w:
+sqrt(rho_i) w_{ij} / sqrt(rho_j).
+We have added a comment to clarify this point.  Thank you.
+
+
 4. For Eq.(5): perhaps Change p_i to p_{i(t)}.
+
+Response: Corrected.  Thank you.
+
 5. Eq. 11 expresses the total error in the cumulative bias potential as a weighted average
 over the errors in each bin, weighted by the density rho, which is the equilibrium
 eigenvector of the updating matrix w. Why is the equilibrium eigenvector of the
 updating matrix, the correct way to weight the errors in the cumulative bias in the bins?
 Can the authors provide a physical explanation of why this is the case, as well as a
 mathematical justification.
+
+Response:
+The restraint between the matrix w and distribution rho is mainly imposed for mathematical convenience.
+One way to see it is the following. 
+The vector rho is given by the user (hence the correct way to weight the errors),
+and the updating matrix w must adjust itself such that it satisfies detailed balance
+with respect to this vector rho.
+In practice, the vector rho is almost always the uniform vector 1/n,
+which is a fair way of weighting the errors,
+which means that the matrix w is almost always symmetric.
+We have added several sentences after Eq. (28) to clarity this subtle relation.
+Thank you.
+
 
 
 Reviewer #2 Evaluations:
@@ -80,7 +117,11 @@ The authors present a method of computing the optimal schedule of the updating m
 a) The authors agree both methods are "closely related", referring to [9]. In fact, it has been shown that both methods can be made identical by applying the same schedule of the updating magnitude, see C Junghans, D Perez, T Vogel, Journal of Chemical Theory and Computation (JCTC) 10 (5), 1843 (2014). At that point, the authors should also recognize the existence of Statistical Temperature Molecular Dynamics, see J. Kim, J. E. Straub, and T. Keyes, Phys. Rev. Lett. 97, 050601 (2006); and J. Chem. Phys. 126, 135101 (2007).
 b) It is not true that "the difference" [between WL and metadynamics] "lies in the updating window function". While a discrete delta-function is often used in practice, WL was introduced saying that any kernel function can be used for updates, and a Gaussian one was explicitly mentioned in the original WL papers.
 c) It is true that it is commonly accepted that the 1/t method is "optimal" for WL, so it should be for metadynamics. Given the equivalence of WL and metadynamics, it is not obvious that "the resulting optimal schedule is different in the WL and metadynamics cases." Rephrasing this, for example, into "depends on the updating window function applied in either method" could help to clarify this point.
+
+
+
 d) Given the vast number of publications in the metadynamics community, I would also not agree that "the optimal schedule for metadynamics is less studied."
+
 
 2) The length of the paper, also pointed out by the editor.
 a) I recommend to drastically shorten section IIA, this is too detailed given that it is just a review and

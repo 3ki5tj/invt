@@ -165,32 +165,44 @@ be observed with traditional simulations.
 
 
 
-The Wang-Landau (WL) algorithm\cite{wang2001, *wang2001pre}
+Many efficient flat-distribution-sampling (FDS) techniques
+based on adaptive construction of the bias potential
+have been introduced,
+including the Wang-Landau (WL) algorithm\cite{
+  wang2001, *wang2001pre}
 and metadynamics\cite{huber1994,
-*laio2002, *laio2008, *barducci2011, *sutto2012}
-are two widely-used and closely-related\cite{micheletti2004}
-flat-distribution-sampling (FDS) techniques
-that build the bias potential adaptively or on the fly.
+*laio2002, *laio2008, *barducci2011, *sutto2012},
+more commonly used for MC and MD simulations, respectively\cite{junghans2014}.
 %
-Both techniques regularly update the bias potential
+%flat-distribution-sampling (FDS) techniques
+%that build the bias potential adaptively or on the fly.
+%
+These techniques regularly update the bias potential
 to discourage future visits to previously sampled configurations
-by incrementally elevating the bias potential.
+by incrementally elevating the bias potential,
+%and they are closely-related\cite{junghans2014, micheletti2004}.
 %
 %The bias potential is associated with discrete values of $z$.
 %
-The difference lies
+A key difference lies
 in the updating window function,
 which specifies
 a neighborhood around the current value of $z$ on the free energy surface
 where the updating should occur
 as well as the relative updating magnitude.
 %
-The window function
+Usually, the window function
 takes the form of a discrete
 $\delta$-function (a boxcar function one histogram bin wide)
 in WL,
 or that of a Gaussian
 in metadynamics.
+%
+Although the assignment of the window functions to the two methods
+is not absolute\cite{micheletti2004, kim2006, *kim2007, junghans2014},
+below we will use the terms WL and metadynamics
+to represent FDS simulations using the
+$\delta$- and Gaussian window functions, respectively.
 %
 %is that in the WL case,
 %each updating step is limited to the bin
@@ -246,15 +258,17 @@ the inverse number of simulation steps.
   There, however, the formula is $t_0/t$ instead of $1/t$.
 }
 %
-The optimal schedule for metadynamics,
-however, is less studied.
+%The optimal schedule for metadynamics,
+%however, is less studied.
 
 
 In this study,
 we present a method of computing
 the optimal schedule
-for a general adaptive FDS method,
-including the WL algorithm and metadynamics.
+for an adaptive FDS method
+with a general window function,
+including the $\delta$- and Gaussian one
+used in the WL algorithm and metadynamics.
 %
 Our method maps the optimization problem to a mechanical one,
 in which the schedule plays the role of the velocity of
@@ -1342,6 +1356,17 @@ Taking the logarithm,
 and differentiating both sides
 with respect to $t'$,
 we get Eq. \eqref{eq:alpha_invt1}.
+%
+From the boundary condition at $t' = T$,
+we get $c = 1/(T + t_0)$,
+and from the case of $t' = 0$,
+we get $q(T) = \ln(1 + T/t_0)$.
+%
+Since the above optimization is performed
+under a fixed $q(T)$, below
+one will choose a proper value of $q(T)$,
+or, equivalently, of $t_0$, to complete the optimization.
+
 
 
 
@@ -1446,8 +1471,11 @@ Then, Eq. \eqref{eq:vt_diffeq} is generalized to
 
 The optimization procedure is similar to the single-bin case.
 %
-However, we will assume some restrictions and approximations
-to simplify the discussion.
+The key simplification comes from the
+projection of the bias potential to the $n$ eigenmodes
+of the updating matrix, $\mathbf w$.
+%However, we will assume some restrictions and approximations
+%to simplify the discussion.
 
 
 
@@ -1456,7 +1484,7 @@ Updating matrix}
 
 
 
-The matrix, $\mathbf w$, is not arbitrary.
+The matrix, $\mathbf w$, is subject to three conditions.
 %
 First, to sample
 the desired distribution,
@@ -1484,15 +1512,19 @@ with eigenvalue $1$.
 %
 Thus, the transpose $\mathbf w^T$
 resembles a transition matrix,
-except that some elements can be negative.
+except that some elements can be negative
+in our cases.
 %
 Below we will take advantage of the analogy
 and borrow techniques used
 in studying transition matrices\cite{vankampen}.
+%
+The quoted results were unaffected by the allowance
+of negative elements into the matrix, $\mathbf w$.
 
 
-To simplify the ensuing discussion,
-we  limit ourselves to matrices % $\mathbf w$'s
+%To simplify the ensuing discussion,
+Second, we limit ourselves to matrices % $\mathbf w$'s
 that satisfy
 the detailed balance condition,
 %
@@ -1516,8 +1548,18 @@ It follows that
   \label{eq:w_balance}
 \end{equation}
 %
-i.e. $\mathbf \rho$ is a left eigenvector of
+i.e. $\pmb \rho$ is a left eigenvector of
 $\mathbf w$ with eigenvalue $1$.
+%
+In the way,
+the error weighting distribution, $\pmb \rho$,
+restrains the form of the updating matrix, $\mathbf w$.
+%
+The condition, albeit somewhat artificial,
+is readily met in many updating schemes used in practice:
+most commonly, $\pmb \rho$ is a uniform distribution,
+and this condition requires the updating matrix, $\pmb w$, to be symmetric.
+
 
 
 
@@ -1862,7 +1904,8 @@ Optimal schedule for multiple-bin updating schemes}
 
 
 \subsubsection{\label{sec:eqlerr}
-Equilibrium error under a constant updating magnitude
+Modeling initial error from a simulation
+under a constant updating magnitude
 }
 
 
