@@ -6,7 +6,7 @@
 #include "invt.h"
 #include "cosmodes.h"
 #include "intq.h"
-#include "invtsamp.h"
+#include "invtsamp.h" /* MD and MC sampling of the 1D test system */
 #include "corr.h"
 
 
@@ -261,9 +261,11 @@ static double invt_run(invtpar_t *m)
    * lambda[i] are positive-definite */
   lambda = trimwindow(m->n, &m->winn, m->win, m->pbc, 0, m->verbose);
   if ( m->fnwin[0] != '\0' ) {
+    /* save the window kernel */
     savewin(m->winn, m->win, m->fnwin);
   }
   if ( m->fnwinmat[0] != '\0' ) {
+    /* save the n x n updating matrix */
     savewinmat(m->winn, m->win, m->n, m->pbc, m->fnwinmat);
   }
 

@@ -209,9 +209,6 @@ typedef struct {
   double thermdt;
   double expndt, sqrtdt;
   int pbc;
-#if 0
-  double dwa, dwb; /* potential parameters sin(x) (dwa - dwb * sin(x)) */
-#endif
   double *vb; /* point to the bias potential */
 } invtmd_t;
 
@@ -229,10 +226,6 @@ static void invtmd_init(invtmd_t *md, int n,
   md->expndt = exp( -0.25 * thermdt );
   md->sqrtdt = sqrt( 2 * tp * thermdt * 0.5 );
 
-#if 0
-  md->dwa = dwa;
-  md->dwb = dwb;
-#endif
   md->vb = vb;
   md->x = 2 * M_PI * rand01();
   md->v = randgaus();
@@ -245,19 +238,6 @@ static void invtmd_init(invtmd_t *md, int n,
   md->pbc = pbc;
 }
 
-
-
-#if 0
-/* compute the normal force */
-static void invtmd_force(invtmd_t *md)
-{
-  double s = sin(md->x), c = cos(md->x);
-  double a = md->dwa, b = md->dwb;
-
-  md->ep = s * (a - b * s);
-  md->f = c * (-a + 2 * b * s);
-}
-#endif
 
 
 /* add the bias force */

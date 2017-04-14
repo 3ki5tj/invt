@@ -3,7 +3,7 @@
 
 
 
-/* module to compute autocorrelation function */
+/* module to compute the autocorrelation function */
 
 
 

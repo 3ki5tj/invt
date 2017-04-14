@@ -62,10 +62,6 @@ typedef struct {
   double mddt; /* MD time step */
   double tp; /* temperature */
   double thermdt; /* thermostat time step */
-#if 0
-  double dwa; /* parameter a in sin(x) * (a - b * sin(x)) */
-  double dwb; /* parameter b in sin(x) * (a - b * sin(x)) */
-#endif
 
   int docorr; /* compute correlation functions */
   int nstcorr; /* time interval of computing the autocorrelation functions */
@@ -183,10 +179,6 @@ static void invtpar_init(invtpar_t *m)
   m->mddt = 0.005;
   m->tp = 1.0;
   m->thermdt = 0.1;
-#if 0
-  m->dwa = 1.0;
-  m->dwb = 2.0;
-#endif
 
   m->docorr = 0; /* don't compute correlation functions */
   m->nstcorr = 0; /* do correlation functions */
@@ -816,16 +808,6 @@ static int invtpar_keymatch(invtpar_t *m,
   {
     m->thermdt = invtpar_getdouble(m, key, val);
   }
-#if 0
-  else if ( strcmpfuzzy(key, "dwa") == 0 )
-  {
-    m->dwa = invtpar_getdouble(m, key, val);
-  }
-  else if ( strcmpfuzzy(key, "dwb") == 0 )
-  {
-    m->dwb = invtpar_getdouble(m, key, val);
-  }
-#endif
   else if ( strcmpfuzzy(key, "corr") == 0
          || strcmpfuzzy(key, "docorr") == 0 )
   {

@@ -102,15 +102,16 @@ the next nearest neighbors with a relative weight of 0.05 each, type
 ```
 ./invt --nb=0.1,0.05
 ```
-This means an updating window
+This represents a symmetric updating window
 
   i - 2 | i - 1 |   i   | i + 1 | i + 2
-  ------+-------+-------+-------+-------
+  ------|-------|-------|-------|-------
   0.05  |  0.1  |  0.7  |  0.1  |  0.05
 
 The value at bin i is automatically filled such that
 the total is equal to 1.0.
-The boundary values are wrapped around, for example,
+In the case of reflective boundary condition,
+the out-of-boundary values are wrapped around, for example,
 for i = 0 (first bin), i - 1 means 0, i - 2 means 1, etc.
 
 Note that the window function has to be stable.

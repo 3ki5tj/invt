@@ -1,4 +1,4 @@
-\documentclass[preprint, superscriptaddress, floatfix]{revtex4-1}
+\documentclass[reprint, superscriptaddress, floatfix]{revtex4-1}
 \usepackage{amsmath}
 \usepackage{mathtools}
 \usepackage{upgreek}
@@ -611,7 +611,7 @@ at each sampling step $t$ as
   V_i(t)
   +
   \delta_{i, \, i(t)}
-  \frac{ \alpha(t) } { p_i }
+  \frac{ \alpha(t) } { p_{i(t)} }
   ,
 \label{eq:wl_update}
 \end{equation}
@@ -2452,29 +2452,6 @@ or translationally invariant.
 An example is the Gaussian updating scheme
 used in metadynamics.
 
-By the translational invariance,
-homogeneous updating schemes
-satisfy detailed balance,
-Eq. \eqref{eq:w_detailedbalance},
-for the flat distribution, $\rho_i = 1/n$,
-i.e. the updating matrix, $\mathbf w$,
-is symmetric.
-%
-The updating matrices
-share the same set of eigenvectors
-(which here are sines and cosines of different frequencies),
-and thus are completely determined
-by the eigenvalues.
-%
-Further, the multiplication of $\mathbf w$
-can be reduced to a convolution with the window function,
-or the updating kernel.
-%
-Thus,
-there is a one-to-one correspondence between
-the eigenvalues of $\mathbf w$
-and the updating kernel.
-
 
 
 \subsubsection{\label{sec:bandkernel}
@@ -2495,10 +2472,9 @@ Updating kernel and eigenvalues}
 
 
 
-It is natural to first introduce homogeneous updating schemes
-for a periodic variable\cite{dama2014}.
-%
-The updating matrix, $\mathbf w$,
+%It is natural to first introduce homogeneous updating schemes
+For a periodic variable\cite{dama2014},
+the updating matrix, $\mathbf w$,
 assumes the following form
 %
 \begin{equation}
@@ -2901,7 +2877,7 @@ In both cases,
 the eigenvalues, $\lambda_k$'s,
 are the cosine transform of
 the updating kernel.
-%
+
 For the updating scheme to be stable,
 the cosine transform of the kernel
 must be nonnegative.
@@ -5551,10 +5527,42 @@ Eqs. \eqref{eq:error_split},
 
 
 
+\subsection{\label{sec:more_wband}
+Homogeneous updating schemes
+}
 
 
-\section{\label{sec:stabilize_wband}
-Stabilization of homogeneous updating schemes}
+Here, we present some detailed derivations
+on the homogeneous updating schemes.
+%
+By the translational invariance,
+homogeneous updating schemes
+satisfy detailed balance,
+Eq. \eqref{eq:w_detailedbalance},
+for the flat distribution, $\rho_i = 1/n$,
+i.e. the updating matrix, $\mathbf w$,
+is symmetric.
+%
+The updating matrices
+share the same set of eigenvectors
+(which here are sines and cosines of different frequencies),
+and thus are completely determined
+by the eigenvalues.
+%
+Further, the multiplication of $\mathbf w$
+can be reduced to a convolution with the window function,
+or the updating kernel.
+%
+Thus,
+there is a one-to-one correspondence between
+the eigenvalues of $\mathbf w$
+and the updating kernel.
+
+
+
+
+\subsection{\label{sec:stabilize_wband}
+Stabilization}
 
 
 
