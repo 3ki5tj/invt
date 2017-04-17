@@ -333,8 +333,6 @@ In Sec. \ref{sec:background},
 we first review the basics of FDS
 and some known aspects of the optimal schedule.
 %
-%This also helps fixing the notations.
-%
 Then, in Sec. \ref{sec:single-bin},
 we illustrate the method of
 computing the optimal schedule
@@ -343,6 +341,9 @@ single-bin updating scheme
 used by the WL algorithm,
 by proving the optimality
 of the known inverse-time formula.
+%
+The above two introductory sections help fix our notations,
+and an expert reader can readily skip them.
 %
 Next, we extend the method to the general case
 of a multiple-bin updating scheme
@@ -394,42 +395,45 @@ $\sum_{i = 1}^n p^*_i = 1$.
 
 
 
-For a large system at temperatures of interest,
-the distribution, $p^*_i$, often tends to
-be localized,
+%For a large system at temperatures of interest,
+%the distribution, $p^*_i$, often tends to
+%be localized,
+%%
+%and to explore the global shape
+%of the PMF, $-\ln p^*_i$,
+%it is often advantageous to perform
+%biased sampling that targets
+%a wider and smoother distribution, $p_i$.
+%%
+%%Here, we refer to simulations that target
+%%a flat or nearly flat distribution
+%%as entropic or multicanonical sampling.
 %
-and to explore the global shape
-of the PMF, $-\ln p^*_i$,
+%To do so, we introduce a bias potential, $V_i$,
+If the distribution, $p^*_i$, is multimodal,
 it is often advantageous to perform
 biased sampling that targets
-a wider and smoother distribution, $p_i$.
-%
-%Here, we refer to simulations that target
-%a flat or nearly flat distribution
-%as entropic or multicanonical sampling.
-
-
-
-To do so, we introduce a bias potential, $V_i$,
-which changes the equilibrium distribution to
-%
-\begin{equation}
-  \pi_i \propto p^*_i \, e^{-V_i}.
-  \label{eq:pi_p_V1}
-\end{equation}
-%
-Upon normalization,
-$\sum_{i = 1}^n \pi_i = 1$,
-we get
+a smoother distribution, $p_i$,
+by introducing a bias potential, $V_i$,
+such that the biased equilibrium distribution is
 %
 \begin{equation}
   \pi_i
+  %=
+  %C_i \, p^*_i \, e^{-V_i}
   =
   \frac{                p^*_i \, e^{-V_i} }
        { \sum_{j = 1}^n p^*_j \, e^{-V_j} }
+  \propto
+  p^*_i \, e^{-V_i}
   .
   \label{eq:pi_p_V}
 \end{equation}
+%
+%where the proportionality constant, $C_i$,
+%is found from the normalization condition,
+%$\sum_{i = 1}^n \pi_i = 1$,
+%in the second step.
 %
 %In particular,
 %to make $\pi_i$ flat,
@@ -441,37 +445,43 @@ we get
 %and thus $\pi_i$ need not
 %coincide with the intended distribution $p_i$.
 
-
-We wish the biased equilibrium distribution, $\pi_i$,
-to converge to the target distribution, $p_i$,
-which is usually chosen to be flat,
-i.e. $p_i$ is constant for all $i$'s,
+We will broadly call a biased simulation
+targeting a flat (i.e. $p_i \equiv 1/n$)
 or nearly flat\cite{
-dayal2004, *trebst2004, *zhang2007, barducci2008, singh2011}.
-%
-We will broadly call such a biased simulation
+dayal2004, *trebst2004, *zhang2007, barducci2008, singh2011}
+$p_i$
 a flat-distribution-sampling (FDS) simulation.
 %
-To achieve this distribution, the bias potential must satisfy
+For the biased distribution, $\pi_i$,
+to converge to $p_i$,
+the bias potential must satisfy
 %
 \begin{equation}
   V_i \to \ln p^*_i - \ln p_i + \mathrm{const.}
-  ,
+  .
   \label{eq:Vi_target}
 \end{equation}
 %
-according to Eq. \eqref{eq:pi_p_V1}.
+%according to Eq. \eqref{eq:pi_p_V}.
 %which allows us to deduce the PMF, $-\ln p^*_i$,
 %directly from the bias potential.
 %
-This relation thus sets a practical aim for the convergence of FDS
-methods---the bias potential must be adjusted to make the
+In practice,
+the bias potential is adjusted to make the
 observed distribution, or the normalized histogram,
-match the intended one.
-%
-Once this aim is achieved,
+match the intended one,
+and once this is done,
 the PMF, $-\ln p^*_i$, can be naturally
 deduced from the bias potential. % $V_i$.
+%
+%This relation thus sets a practical aim for the convergence of FDS
+%methods---the bias potential must be adjusted to make the
+%observed distribution, or the normalized histogram,
+%match the intended one.
+%%
+%Once this aim is achieved,
+%the PMF, $-\ln p^*_i$, can be naturally
+%deduced from the bias potential. % $V_i$.
 \note{
   For example, in the context of simulated tempering (Zhang and Ma, 2007),
   $p^*_i$ is replaced by $\ln Z_i$,
@@ -495,9 +505,9 @@ Examples include the original
 entropic or multicanonical sampling\cite{
 berg1992, *lee1993}
 and simulated tempering\cite{
-marinari1992, *lyubartsev1992}
-with $i$ being the index of energy
-and that of temperature, respectively.
+marinari1992, *lyubartsev1992}.
+%with $i$ being the index of energy
+%and that of temperature, respectively.
 %
 The estimated bias potentials at bin $i$, $V_i$,
 are often improved
@@ -505,7 +515,7 @@ with the normalized histogram of the sampling, $H_i$, accumulated
 during simulation.
 %
 Using $H_i$ as an estimate of $\pi_i$ in
-Eq. \eqref{eq:pi_p_V1}
+Eq. \eqref{eq:pi_p_V}
 allows us to correct $V_i$ as
 %
 \begin{equation}
@@ -529,91 +539,92 @@ allows us to correct $V_i$ as
   \end{aligned}
   $$
 }
-However, for an unknown system,
-it is often difficult
-to guess a sufficiently accurate
-$V_i$ with which to start.
-%
-Thus,
-it can take many iterative rounds of simulations
-to achieve the desired flat distribution.
-%
-%Another difficulty of this approach is that
-The effectiveness of this approach
-depends on the precision of the histogram, $H_i$,
-which in turn depends on the simulation length
-that must be decided in advance.
-%
-Thus, the rigidity of this framework disallows
-continuous, rapid improvement of the bias potential,
-and subsequently the PMF,
+%However, for an unknown system,
+%it is often difficult
+%to guess a sufficiently accurate
+%$V_i$ with which to start.
+%%
+%Thus,
+%it can take many iterative rounds of simulations
+%to achieve the desired flat distribution.
+%%
+%%Another difficulty of this approach is that
+%The effectiveness of this approach
+%depends on the precision of the histogram, $H_i$,
+%which in turn depends on the simulation length
+%that must be decided in advance.
+However, this formula often requires a long
+simulation period to accumulate a precise histogram, $H_i$,
+and thus it disallows
+continuous improvement of the bias potential
+(hence that of the PMF)
 as simulation lengthens.
 
 The second type of methods,
-which we will refer to as the adaptive FDS methods,
+including the WL algorithm and metadynamics,
 address the above shortcomings
 by continuously and incrementally updating the bias potential.
 %For this reason, the second type of methods,
 %referred to as the adaptive FDS methods,
 %were invented.
 %
-Examples include
-the WL algorithm and metadynamics.
-%
-%These methods incrementally update the bias potential
-%and can approximately sample the target distribution.
-%
-However,
-the on-the-fly updates break the microscopic reversibility
-of the underlying sampling mechanism.
-Further, failure to properly reduce the magnitude of
-the histogram-based increments
-would lead to roughness or errors in the final estimate of the PMF.
-%
-%Thus, for a conservative practitioner,
-%the E-FDS methods appear more appealing
-%once a sufficiently accurate bias potential is available.
-%
-To minimize this effect,
-many adaptive methods adopt a schedule to
-reduce the updating magnitude
-over the course of simulation\cite{
-marsili2006,
-belardinelli2007, *belardinelli2007jcp, *belardinelli2008, *belardinelli2016,
-liang2007,
-barducci2008}.
-%
-%Thus, in late stages of a long simulation,
-%the updating becomes negligible and
-%the adaptive simulation tends to
-%the corresponding equilibrium one.
-%
-%if the bias potential were converged to the exact value,
-%this adaptive FDS tends to the ideal equilibrium counterpart,
-%particular equilibrium simulation can be thought as
-%the optimal asymptotic limit of the adaptive counterpart,
-%
-For example, one can show that
-if the magnitude is controlled by
-the optimal inverse-time prescription\cite{
-belardinelli2007, *belardinelli2007jcp, *belardinelli2008, *belardinelli2016,
-liang2007,
-morozov2007, zhou2008,
-komura2012, *caparica2012, *caparica2014},
-the WL algorithm is equivalent to the ideal equilibrium counterpart
-in improving the precision of the bias potential,
-thus allowing for maximum efficiency
-(cf. Appendix \ref{sec:equilerr}).
-%the bias potential in the WL algorithm
-%will evolve similar to Eq. \eqref{eq:vcorr_equil}
-%with the precision of the histogram as simulation lengthens.
+These methods, refered to as the adaptive FDS methods,
+will be discussed below.
+%%
+%%These methods incrementally update the bias potential
+%%and can approximately sample the target distribution.
+%%
+%However,
+%the on-the-fly updates break the microscopic reversibility
+%of the underlying sampling mechanism.
+%Further, failure to properly reduce the magnitude of
+%the histogram-based increments
+%would lead to roughness or errors in the final estimate of the PMF.
+%%
+%%Thus, for a conservative practitioner,
+%%the E-FDS methods appear more appealing
+%%once a sufficiently accurate bias potential is available.
+%%
+%To minimize this effect,
+%many adaptive methods adopt a schedule to
+%reduce the updating magnitude
+%over the course of simulation\cite{
+%marsili2006,
+%belardinelli2007, *belardinelli2007jcp, *belardinelli2008, *belardinelli2016,
+%liang2007,
+%barducci2008}.
+%%
+%%Thus, in late stages of a long simulation,
+%%the updating becomes negligible and
+%%the adaptive simulation tends to
+%%the corresponding equilibrium one.
+%%
+%%if the bias potential were converged to the exact value,
+%%this adaptive FDS tends to the ideal equilibrium counterpart,
+%%particular equilibrium simulation can be thought as
+%%the optimal asymptotic limit of the adaptive counterpart,
+%%
+%For example, one can show that
+%if the magnitude is controlled by
+%the optimal inverse-time prescription\cite{
+%belardinelli2007, *belardinelli2007jcp, *belardinelli2008, *belardinelli2016,
+%liang2007,
+%morozov2007, zhou2008,
+%komura2012, *caparica2012, *caparica2014},
+%the WL algorithm is equivalent to the ideal equilibrium counterpart
+%in improving the precision of the bias potential,
+%thus allowing for maximum efficiency
+%(cf. Appendix \ref{sec:equilerr}).
+%%the bias potential in the WL algorithm
+%%will evolve similar to Eq. \eqref{eq:vcorr_equil}
+%%with the precision of the histogram as simulation lengthens.
 
 
 \subsubsection{Updating schemes}
 
 
 
-We will mainly focus on the adaptive methods below.
+%We will mainly focus on the adaptive methods below.
 %
 In the WL algorithm\cite{wang2001, *wang2001pre},
 the bias potential, $V_i(t)$, is updated
@@ -760,7 +771,7 @@ comes from the interpretation of
 the bias potential %under the WL updating scheme, Eq. \eqref{eq:wl_update},
 as a runtime average computed from all data points collected so far,
 so that the addition of a new data point only
-affects the average by a weight of $1/t$,
+affects the average by its due weight, $1/t$,
 which is the inverse of the current sample size, $t$
 (cf. Appendix \ref{sec:equilerr}).
 %
@@ -774,14 +785,14 @@ from optimally planning the simulation lengths in the stages
 and the reduction factor, as shown in Appendix \ref{sec:wltoinvt}.
 
 
-As Eq. \eqref{eq:alpha_invt} was being developed for the WL algorithm,
-several similar ways of
-reducing the updating magnitude
-were developed for umbrella sampling and metadynamics,
-particularly, the self-healing umbrella sampling
-and well-tempered metadynamics\cite{
-  marsili2006, barducci2008, dickson2011, dama2014}.
-%
+%As Eq. \eqref{eq:alpha_invt} was being developed for the WL algorithm,
+%several similar ways of
+%reducing the updating magnitude
+%were developed for umbrella sampling and metadynamics,
+%particularly, the self-healing umbrella sampling
+%and well-tempered metadynamics\cite{
+%  marsili2006, barducci2008, dickson2011, dama2014}.
+%%
 Our aim here is to find the optimal schedule, $\alpha(t)$,
 for a general updating scheme.
 
@@ -851,7 +862,7 @@ remains a constant during the course of simulation,
 %  \label{eq:pi_p_v}
 %\end{equation}
 %%
-%According to Eq. \eqref{eq:pi_p_V1},
+%According to Eq. \eqref{eq:pi_p_V},
 
 
 Second, the bias potential following Eq. \eqref{eq:wl_update}
@@ -1348,24 +1359,30 @@ Then, by using Eq. \eqref{eq:u_def}, we have
 $$
 e^{ q(t') - q(T) }
 =
-c \, (t' + t_0),
+c \, (t' + t_0)
+=
+\frac{ t' + t_0 }
+     { T  + t_0 }
+,
 $$
-where $t_0$ is a constant.
+where $t_0$ is a constant,
+and in the second step,
+the constant $c$ is determined
+from the boundary condition at $t' = T$.
 %
 Taking the logarithm,
 and differentiating both sides
 with respect to $t'$,
 we get Eq. \eqref{eq:alpha_invt1}.
 %
-From the boundary condition at $t' = T$,
-we get $c = 1/(T + t_0)$,
-and from the case of $t' = 0$,
-we get $q(T) = \ln(1 + T/t_0)$.
+Further, from the case of $t' = 0$,
+we get $q(T) = \ln\bigl[1 + (T/t_0)\bigr]$.
 %
 Since the above optimization is performed
-under a fixed $q(T)$, below
-one will choose a proper value of $q(T)$,
-or, equivalently, of $t_0$, to complete the optimization.
+under a fixed $q(T)$,
+we will complete the optimization
+by choosing a proper value of $q(T)$,
+or, equivalently, of $t_0$.
 
 
 

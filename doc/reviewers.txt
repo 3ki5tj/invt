@@ -93,7 +93,7 @@ mathematical justification.
 
 Response:
 The restraint between the matrix w and distribution rho is mainly imposed for mathematical convenience.
-One way to see it is the following. 
+One way to see it is the following.
 The vector rho is given by the user (hence the correct way to weight the errors),
 and the updating matrix w must adjust itself such that it satisfies detailed balance
 with respect to this vector rho.
@@ -122,15 +122,57 @@ c) It is true that it is commonly accepted that the 1/t method is "optimal" for 
 
 d) Given the vast number of publications in the metadynamics community, I would also not agree that "the optimal schedule for metadynamics is less studied."
 
+Point 1.
+We apologize for the inaccurate wording in framing WL and metadynamics.  The more correct terms should be, as the referee kindly pointed out, the single-bin updating scheme and the Gaussian updating scheme.
+
+Point 1.a) We apologize for ignoring the references.
+We have added the references to the paper.
+C Junghans, D Perez, T Vogel, Journal of Chemical Theory and Computation (JCTC) 10 (5), 1843 (2014).
+J. Kim, J. E. Straub, and T. Keyes, Phys. Rev. Lett. 97, 050601 (2006); and J. Chem. Phys. 126, 135101 (2007).
+
+Point 1.b)  "the difference" --> "a major difference between FDS methods"
+Add a note that the use of Gaussian kernel was explicitly mentioned in the original WL paper.
+
+Point 1.c) We have rephrased the sentence.
+
+Point 1.d) We have deleted the sentence. "the optimal schedule for metadynamics is less studied."
+
 
 2) The length of the paper, also pointed out by the editor.
 a) I recommend to drastically shorten section IIA, this is too detailed given that it is just a review and
 b) shorten section IIB, since the content is also largely known to the community.
 The authors should focus on sections IID-F, which contains the new developments.
 
+Response.  We agree and we apologize for the length of the manuscript We have shorten section IIA and keeping only what is necessary for introducing the notations and key equations useful for later development.
+The purpose of section IIB is mainly to fix the notations and definitions.
+We have added a note in the introduction of section II to explain the introductory nature of the sections so that an expert reader can readily skip it.
+We have slightly expanded section IID-F to explain several ambiguities, and we have included a section on the practical procedure that was originally in the Appendices, as suggested by the reviewer.
+
+
+
 3) The choice of an artificial, "trivial" test system to demonstrate the advantage of the proposed method.
 a) The model system is artificial in the sense that "intrinsic distributions are assumed to be flat". So, where is the challenge? I understand that the theory section of the paper is very general and "generic", but numerical checks should be performed using known, well-studied, and challenging systems. The presented numerical checks are not very convincing this way.
 b) "the errors from the simulations agreed well with those from theory". In particular this is not a surprise for a system with intrinsically flat distributions.
 c) In general, all the focus is on minimizing the statistical errors. While that is "neat", it is most often not the main issue in a "real world" study and neither critical. WL is correctly applied to determine the weights for multicanonical simulations. Multicanonical sampling is statistically correct and unacceptably large errors in the weight function, both statistical and systematic, become evident immediately. So, minimizing the statistical errors is mostly not a major concern. Being able to move through the whole phase space is. The real question should rather be: Can this new method and insight help to study systems that were formerly inaccessible to FDS methods? This question is not answered. To the contrary, the authors themselves admit that their assumptions "may break down for relatively short simulations of glassy systems". Did the authors try a glassy system?
 
-Overall, while points 1) and 2) should be straightforward to revise, point 3) makes me believe that this paper, even though doubtlessly very interesting, will have a limited impact on the community in practice. 
+Response.
+
+Point 3.a) Add an example.
+
+Point 3.b) This is a subtle and important point on correctly modeling the initial error.
+The challenge lies in the recovery from the error introduced during the equilibration phase.
+Even though the error is zero at the beginning, the equilibration phase with a constant updating magnitude will introduce some error that would become challenging to remove in the production run.
+The single-bin updating scheme does not differentiate the source of error, either systematic or random.
+However, for the multiple-bin updating scheme, like the Gaussian one, the random error built from the equilibration phase will be sufficiently smooth with very little minimal short-wave (local) error, because these local modes are coupled to very small eigenvalues of the updating matrix.  Even in such case, Gaussian updating scheme will have trouble in removing these short-wave or not-so-short-wave error modes in the long run, because the small eigenvalues coupled to local modes also represent how quickly the errors in these modes (if any) would be removed.  Thus, if the intrinsic PMF is not smooth enough (or equivalently if the Gaussian window is chosen too wide), the real error would be must larger than those reported in our trivial test system.
+
+Point 3.c)
+We agree with the reviewer that the failure of multicanonical sampling lies in its lack of responsiveness of the updating scheme to the bias potential.
+The stages of the WL algorithm suffers from a similar problem of losing responsiveness, where, the updating magnitude is reduced too quickly, making the iterative updating scheme ineffective.
+Our belief is that these issues, even for hard problems, can be addressed in the present framework.
+A practically difficulty may lie in the attainment of the correlation integrals, Gamma_k's, which reflect the difficulty of phase-space sampling.
+Similarly, the Gaussian updating scheme can be inefficient in removing local errors, if any, in the long run without a proper scheduling.
+The method we advance here aims at improve the situation in improve long-term convergence of the Gaussian updating scheme. However, we do not imagine a dramatic improvement on previous methods for these very challenging problems, which are associated with very long correlation times and likely hard to simulate even with the perfect bias potential.  Thus, to best simulate these system, new simulation methods.
+We have added some discussion in the section IIA to address this issue.
+
+
+Overall, while points 1) and 2) should be straightforward to revise, point 3) makes me believe that this paper, even though doubtlessly very interesting, will have a limited impact on the community in practice.
