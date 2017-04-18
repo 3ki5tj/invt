@@ -34,6 +34,16 @@ how eq. 49 is numerically integrated is also needed. A clearer discussion of wha
 functions are being calculated, and how they are used in the variational optimization is also
 needed.
 
+Response.
+In our implementation, q(T) is solved from the bisection method.
+For the optimal schedule,
+Eqs. (48) and (49) are integrated on an even grid of q',
+using the standard trapezoidal rule.
+We have added some details in the new section IIF.
+Thank you.
+
+
+
 My biggest concern with the paper relates to the numerical example. It seems that the single test
 system studied in detail is a completely flat “potential”. While it is interesting to note that
 different FDS schemes will exhibit different efficiencies on this “trivial” example, it doesn’t give
@@ -76,8 +86,8 @@ For example, the balance property follows directly from
 the detailed balance condition as demonstrated in Eq. (28).
 The existence of a set of orthonormal eigenvector follows from
 the symmetry of the scaled version of w:
-sqrt(rho_i) w_{ij} / sqrt(rho_j).
-We have added a comment to clarify this point.  Thank you.
+sqrt(rho_i/rho_j) w_{ij}.
+We have added several comments in section IIC.1 to clarify this point.  Thank you.
 
 
 4. For Eq.(5): perhaps Change p_i to p_{i(t)}.
@@ -143,8 +153,13 @@ a) I recommend to drastically shorten section IIA, this is too detailed given th
 b) shorten section IIB, since the content is also largely known to the community.
 The authors should focus on sections IID-F, which contains the new developments.
 
-Response.  We agree and we apologize for the length of the manuscript We have shorten section IIA and keeping only what is necessary for introducing the notations and key equations useful for later development.
+Response.  We agree and we apologize for the length of the manuscript.
+
+2.a) We have shorten section IIA and keeping only what is necessary for introducing the notations and key equations useful for later development.
+
+2.b) Similarly, section IIB was indeed too verbose with many unnecessary repetitions. We have now shortened it, and the original sections IIB.3 and IIB.4 are merged.
 The purpose of section IIB is mainly to fix the notations and definitions.
+
 We have added a note in the introduction of section II to explain the introductory nature of the sections so that an expert reader can readily skip it.
 We have slightly expanded section IID-F to explain several ambiguities, and we have included a section on the practical procedure that was originally in the Appendices, as suggested by the reviewer.
 
