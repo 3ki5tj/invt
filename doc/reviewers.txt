@@ -1,3 +1,9 @@
+The definition of g has changed.
+Mapping g --> 2/g.
+
+Deepens our understanding.
+
+
 Reviewer #1 Evaluations:
 Recommendation: Major revision
 New Potential Energy Surface: No
@@ -35,9 +41,12 @@ functions are being calculated, and how they are used in the variational optimiz
 needed.
 
 Response.
-In our implementation, q(T) is solved from the bisection method.
+We are grateful to the reviewer for the time and effort in reviewing the manuscript and we apologize for the lack of polishing and structure in the manuscript.
+We have move the old Appendix D to the main text (current section II.F)
+and added some technical details.
+In particular, q(T) is solved from the bisection method.
 For the optimal schedule,
-Eqs. (48) and (49) are integrated on an even grid of q',
+Eqs. (48) and (49) are integrated on an even grid of q,
 using the standard trapezoidal rule.
 We have added some details in the new section IIF.
 Thank you.
@@ -66,8 +75,10 @@ is only for a subgroup simulations which have the same q(T)? Please clarify this
 add the corresponding discussion to the manuscript.
 
 Response.  This is correct. The optimizations are done for a subgroup of simulations with the same value of q(T), and the value of q(T) has to be further determined to complete the problem.
-For the single-bin case, the latter step is equivalent to the best choice of t_0, i.e., Eq. (24).  For the multiple-bin case, the optimal value of q(T) is solved from Eq. (55).
-We have added a few comments after Eqs. (22) and (49) to clarify the procedure.  We thank the referee to point out these ambiguities.
+For the single-bin case, the latter step is equivalent to the best choice of t_0, the new Eq. (23).
+For the multiple-bin case, the optimal value of q(T) is solved from Eq. (55).
+We have added a few comments in the two respective sections to clarify the procedure.
+We thank the referee to point out these ambiguities.
 
 
 2.How to determine the time of the preliminary adaptive FDS simulations with a constant
@@ -80,14 +91,14 @@ Does this require all the elements in the updating matrix w_{ij}" to be nonnegat
 true, please mention this requirement after Eq.(28).
 
 Response: The elements in the updating matrix can be negative.
-The balance property, as well as a few ensuing properties,
-are unaffected by the allowance of the negative numbers.
+Fortunately, the balance property, as well as a few ensuing properties, are unaffected by the allowance of the negative numbers.
 For example, the balance property follows directly from
 the detailed balance condition as demonstrated in Eq. (28).
 The existence of a set of orthonormal eigenvector follows from
 the symmetry of the scaled version of w:
 sqrt(rho_i/rho_j) w_{ij}.
-We have added several comments in section IIC.1 to clarify this point.  Thank you.
+We have added a note to clarify this, as well as several one-line derivations in section IIC.1 to show that the quoted results are unaffected by the negative matrix elements.
+Thank you for pointing out this subtle issue.
 
 
 4. For Eq.(5): perhaps Change p_i to p_{i(t)}.
@@ -102,15 +113,21 @@ Can the authors provide a physical explanation of why this is the case, as well 
 mathematical justification.
 
 Response:
-The restraint between the matrix w and distribution rho is mainly imposed for mathematical convenience.
-One way to see it is the following.
-The vector rho is given by the user (hence the correct way to weight the errors),
-and the updating matrix w must adjust itself such that it satisfies detailed balance
-with respect to this vector rho.
+This is an astute observation, and we also find this setup somewhat awkward.
+While the equilibrium eigenvector rho of matrix w may not be the most straightforward way of weighting errors, it sometimes serves as _a_ mathematically convenient way of doing so.
+By adopting a looser weighting function of the error, we can analyze a larger class of updating matrices with somewhat simpler formulas using properties of transition matrices.
+
+For example, the matrix
+     0.6  0.4  0
+w =  0.2  0.6  0.2
+     0    0.4  0.6
+is not symmetric, yet it satisfies detailed balance for the left equilibrium vector (0.25, 0.5, 0.25).
+
+Another way to think about this is the following.
+Instead of thinking of the equilibrium eigenvector of the updating matrix has to be correct way of weighting the errors, we may think of the updating matrix must adjust its elements such that the correct weighting vector is its eigenvector.
 In practice, the vector rho is almost always the uniform vector 1/n,
-which is a fair way of weighting the errors,
-which means that the matrix w is almost always symmetric.
-We have added several sentences after Eq. (28) to clarity this subtle relation.
+which is a fair way of weighting the matrix.
+We have added several comments in sections II.B.1 and II.C.1 to clarify this point.
 Thank you.
 
 
@@ -127,25 +144,17 @@ The authors present a method of computing the optimal schedule of the updating m
 a) The authors agree both methods are "closely related", referring to [9]. In fact, it has been shown that both methods can be made identical by applying the same schedule of the updating magnitude, see C Junghans, D Perez, T Vogel, Journal of Chemical Theory and Computation (JCTC) 10 (5), 1843 (2014). At that point, the authors should also recognize the existence of Statistical Temperature Molecular Dynamics, see J. Kim, J. E. Straub, and T. Keyes, Phys. Rev. Lett. 97, 050601 (2006); and J. Chem. Phys. 126, 135101 (2007).
 b) It is not true that "the difference" [between WL and metadynamics] "lies in the updating window function". While a discrete delta-function is often used in practice, WL was introduced saying that any kernel function can be used for updates, and a Gaussian one was explicitly mentioned in the original WL papers.
 c) It is true that it is commonly accepted that the 1/t method is "optimal" for WL, so it should be for metadynamics. Given the equivalence of WL and metadynamics, it is not obvious that "the resulting optimal schedule is different in the WL and metadynamics cases." Rephrasing this, for example, into "depends on the updating window function applied in either method" could help to clarify this point.
-
-
-
 d) Given the vast number of publications in the metadynamics community, I would also not agree that "the optimal schedule for metadynamics is less studied."
 
-Point 1.
-We apologize for the inaccurate wording in framing WL and metadynamics.  The more correct terms should be, as the referee kindly pointed out, the single-bin updating scheme and the Gaussian updating scheme.
-
-Point 1.a) We apologize for ignoring the references.
-We have added the references to the paper.
-C Junghans, D Perez, T Vogel, Journal of Chemical Theory and Computation (JCTC) 10 (5), 1843 (2014).
-J. Kim, J. E. Straub, and T. Keyes, Phys. Rev. Lett. 97, 050601 (2006); and J. Chem. Phys. 126, 135101 (2007).
-
-Point 1.b)  "the difference" --> "a major difference between FDS methods"
-Add a note that the use of Gaussian kernel was explicitly mentioned in the original WL paper.
-
-Point 1.c) We have rephrased the sentence.
-
-Point 1.d) We have deleted the sentence. "the optimal schedule for metadynamics is less studied."
+Response.
+We apologize for the inaccurate wording in framing WL and metadynamics.
+The more precise and technical terms of differentiating the updating schemes, as the referee kindly pointed out, should be the single-bin updating scheme and the Gaussian updating scheme.
+We have corrected the terms in the abstract,
+and added an explicit note in the introduction that the terms "WL" and "metadynamics" are used as pseudonyms in this study in the loose sense to refer the two updating schemes.
+For 1.a), we apologize for ignoring the references
+and we have added the suggested references to the paper.
+For 1.b), we have changed the phrase "the difference" to "a key difference."
+For 1.d), we have deleted the sentence. "the optimal schedule for metadynamics is less studied."
 
 
 2) The length of the paper, also pointed out by the editor.
@@ -154,10 +163,8 @@ b) shorten section IIB, since the content is also largely known to the community
 The authors should focus on sections IID-F, which contains the new developments.
 
 Response.  We agree and we apologize for the length of the manuscript.
-
-2.a) We have shorten section IIA and keeping only what is necessary for introducing the notations and key equations useful for later development.
-
-2.b) Similarly, section IIB was indeed too verbose with many unnecessary repetitions. We have now shortened it, and the original sections IIB.3 and IIB.4 are merged.
+For 2.a), we have shorten section IIA and keeping only what is necessary for introducing the notations and key equations useful for later development.
+For 2.b), similarly, section IIB was indeed too verbose with many unnecessary repetitions. We have now shortened it, and the original sections IIB.3 and IIB.4 are merged.
 The purpose of section IIB is mainly to fix the notations and definitions.
 
 We have added a note in the introduction of section II to explain the introductory nature of the sections so that an expert reader can readily skip it.
@@ -181,12 +188,16 @@ The single-bin updating scheme does not differentiate the source of error, eithe
 However, for the multiple-bin updating scheme, like the Gaussian one, the random error built from the equilibration phase will be sufficiently smooth with very little minimal short-wave (local) error, because these local modes are coupled to very small eigenvalues of the updating matrix.  Even in such case, Gaussian updating scheme will have trouble in removing these short-wave or not-so-short-wave error modes in the long run, because the small eigenvalues coupled to local modes also represent how quickly the errors in these modes (if any) would be removed.  Thus, if the intrinsic PMF is not smooth enough (or equivalently if the Gaussian window is chosen too wide), the real error would be must larger than those reported in our trivial test system.
 
 Point 3.c)
+We believe that even for hard and glassy problems, the long-time correlation might have already been taken into account, at least partially, by the integrals of the autocorrelation functions defined here.
+Thus, even if the integrals, Gamma_k's may take very large values and difficult to estimate accurately, we can still hopefully use this framework to analyze these challenging problem, at least for long simulations.
+The removal of the systematic error can often by addressed with the usual WL and metadynamics techniques.
 We agree with the reviewer that the failure of multicanonical sampling lies in its lack of responsiveness of the updating scheme to the bias potential.
-The stages of the WL algorithm suffers from a similar problem of losing responsiveness, where, the updating magnitude is reduced too quickly, making the iterative updating scheme ineffective.
+The final stages of the WL algorithm suffers from a similar problem of losing responsiveness, where, the updating magnitude is reduced too quickly, making the iterative updating scheme ineffective.
 Our belief is that these issues, even for hard problems, can be addressed in the present framework.
 A practically difficulty may lie in the attainment of the correlation integrals, Gamma_k's, which reflect the difficulty of phase-space sampling.
 Similarly, the Gaussian updating scheme can be inefficient in removing local errors, if any, in the long run without a proper scheduling.
-The method we advance here aims at improve the situation in improve long-term convergence of the Gaussian updating scheme. However, we do not imagine a dramatic improvement on previous methods for these very challenging problems, which are associated with very long correlation times and likely hard to simulate even with the perfect bias potential.  Thus, to best simulate these system, new simulation methods.
+The method we present here aims at improve the situation in improve long-term convergence of the Gaussian updating scheme. However, we do not imagine a dramatic improvement on previous methods for these very challenging problems, which are associated with very long correlation times and likely hard to simulate even with the perfect bias potential.  Thus, to best simulate these system, new simulation methods.
+
 We have added some discussion in the section IIA to address this issue.
 
 
