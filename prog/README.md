@@ -41,7 +41,7 @@ invtpar.h | handling input parameters
 invt.h    | utility routines
 invtsamp.h| sampling routines
 intq.h    | optimal schedule by integrating the equation of motion
-cosmodes.h| eigenmode decomposition
+cosmodes.h| eigenmode decomposition for translationally invariant updating schemes
 corr.h    | correlation of eigenmodes
 invt.cfg  | sample configuration file
 

@@ -4,7 +4,7 @@
 
 
 #include "invt.h"
-#include "cosmodes.h"
+#include "cosmodes.h" /* eigenmode decomposition */
 #include "intq.h"
 #include "invtsamp.h" /* MD and MC sampling of the 1D test system */
 #include "corr.h"
@@ -69,10 +69,10 @@ __inline static void premeta(const invtpar_t *m, double *gamma)
   double ucnt = 0, *uave, *uvar;
 
   /* data for sampling */
-  invtsamp_t *is;
+  invtsamp_t *its;
 
   /* open an object for sampling */
-  is = invtsamp_open(m);
+  its = invtsamp_open(m);
 
   xnew(gamma0, n);
   xnew(uave, n);
@@ -89,29 +89,29 @@ __inline static void premeta(const invtpar_t *m, double *gamma)
   for ( t = 0; t < m->gam_nsteps; t++ ) {
     /* sampling */
     if ( m->tcorr <= 0 || rand01() * m->tcorr < 1 ) {
-      invtsamp_step(is, &i);
+      invtsamp_step(its, &i);
     }
 
     /* compute the updating magnitude */
     a = m->alpha0 / m->p[i];
 
     /* update the bias potential (WL) way */
-    is->v[i] += a;
+    its->v[i] += a;
 
     /* accumulate data for variance */
     if ( (t + 1) % m->gam_nstave == 0 ) {
-      shift(is->v, n);
+      shift(its->v, n);
       /* Fourier transform to get the modes `u` */
-      getcosmodes(is->v, n, is->u, is->costab);
+      getcosmodes(its->v, n, its->u, its->costab);
       /* accumulate data for average and variance */
       for ( j = 0; j < n; j++ ) {
         double y = 0, du;
         if ( ucnt > 0 ) {
           y = uave[j] / ucnt;
         }
-        uave[j] += is->u[j]; /* update the average */
+        uave[j] += its->u[j]; /* update the average */
         if ( ucnt > 0 ) { /* update the variance */
-          du = is->u[j] - y;
+          du = its->u[j] - y;
           uvar[j] += du * du * ucnt / (ucnt + 1);
         }
       }
@@ -132,7 +132,7 @@ __inline static void premeta(const invtpar_t *m, double *gamma)
     savegamma(n, gamma, m->fngamma);
   }
 
-  invtsamp_close(is);
+  invtsamp_close(its);
 }
 
 
@@ -147,7 +147,7 @@ static double simulmeta(const invtpar_t *m, intq_t *intq,
   long t;
 
   /* data for sampling */
-  invtsamp_t *is;
+  invtsamp_t *its;
 
   /* data for computing correlation functions */
   corr_t *corr = NULL;
@@ -155,7 +155,7 @@ static double simulmeta(const invtpar_t *m, intq_t *intq,
 
 
   /* open an object for sampling */
-  is = invtsamp_open(m);
+  its = invtsamp_open(m);
 
   /* open an object for correlation functions */
   if ( m->docorr ) {
@@ -167,14 +167,14 @@ static double simulmeta(const invtpar_t *m, intq_t *intq,
   for ( t = 0; t < m->nsteps + m->nequil; t++ ) {
     /* sampling */
     if ( m->tcorr <= 0 || rand01() * m->tcorr < 1 ) {
-      invtsamp_step(is, &i);
+      invtsamp_step(its, &i);
     }
 
     /* try to turn on production after equilibration */
     if ( !prod && t >= m->nequil ) {
       prod = 1;
       /* compute the initial error */
-      *err0 = geterror(is->v, n, m->p);
+      *err0 = geterror(its->v, n, m->p);
       if ( m->verbose >= 1 ) {
         fprintf(stderr, "starting production at step %ld, t0 %g, err %g\n",
             t, m->t0, *err0);
@@ -190,27 +190,27 @@ static double simulmeta(const invtpar_t *m, intq_t *intq,
     a /= m->p[i];
 
     /* update the bias potential  */
-    mbin_update(is->v, n, i, a, m->win, m->winn, m->pbc);
+    mbin_update(its->v, n, i, a, m->win, m->winn, m->pbc);
 
     /* accumulate data for correlation functions */
     if ( prod && corr != NULL && (t + 1) % m->nstcorr == 0 ) {
-      shift(is->v, n);
+      shift(its->v, n);
       /* Fourier transform to get the modes `u` */
-      getcosmodes(is->v, n, is->u, is->costab);
-      /* the first mode is always zero,
+      getcosmodes(its->v, n, its->u, its->costab);
+      /* the first mode its always zero,
        * so we start from the second mode, u + 1 */
-      corr_add(corr, is->u + 1);
+      corr_add(corr, its->u + 1);
     }
   }
 
   /* compute the error */
-  err = geterror(is->v, n, m->p);
+  err = geterror(its->v, n, m->p);
 
   /* print out the error of the modes */
   if ( m->verbose >= 2 ) {
-    getcosmodes(is->v, n, is->u, is->costab);
+    getcosmodes(its->v, n, its->u, its->costab);
     for ( i = 0; i < n; i++ ) {
-      printf("  %+11.8f", is->u[i]);
+      printf("  %+11.8f", its->u[i]);
     }
     printf("\n");
   }
@@ -225,7 +225,7 @@ static double simulmeta(const invtpar_t *m, intq_t *intq,
         m->corrtol, 0, m->fncorr);
   }
 
-  invtsamp_close(is);
+  invtsamp_close(its);
 
   if ( corr != NULL ) {
     corr_close(corr);
@@ -251,7 +251,7 @@ static double invt_run(invtpar_t *m)
   long ntr = m->ntrials;
   long i;
 
-  /* clock() is probably better than time(NULL) */
+  /* clock() its probably better than time(NULL) */
   mtscramble( clock() );
 
   /* estimate the eigenvalues of the w matrix,
@@ -307,7 +307,7 @@ static double invt_run(invtpar_t *m)
 
       /* don't be smart about t0, we want a constant t0 as
        * a part of the normalization factor
-       * even if the schedule is inverse-time, don't multiply c */
+       * even if the schedule its inverse-time, don't multiply c */
       m->t0 = 2 / m->alpha0;
 
       if ( m->opta ) {

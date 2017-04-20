@@ -2,12 +2,14 @@
 #define COSMODES_H__
 
 
-/* decomposition of updating scheme to cosine modes */
+
+/* decomposition of histogram fluctuation into eigenmodes
+ * for translationally-invariant (homogeneous) updating schemes */
 
 
 
-/* compute the cosine table
-   costab = phi * n */
+/* compute the eigenvectors,
+   costab = n * phi */
 static double *mkcostab(int n, int pbc)
 {
   int i, k;
@@ -15,13 +17,22 @@ static double *mkcostab(int n, int pbc)
 
   xnew(costab, n * n);
 
-  /* first row, uniform distribution */
+  /* first row, uniform distribution
+   * costab(0, i) = n phi(0, i) = 1 */
   for ( i = 0; i < n; i++ ) {
     costab[i] = norm;
   }
 
   norm *= sqrt(2);
   if ( pbc ) {
+    /* periodic case, for k = 1, ..., n - 1
+     * in the paper, we use the exponential form
+     *   n phi(k, i) = exp(I i k 2 Pi / n)
+     * here, we use the equivalent cosine and sine form
+     *   n phi(k, i) = sqrt(2) cos(i k 2 Pi / n)
+     * for k <= n/2, or
+     *   n phi(k, i) = sqrt(2) sin(i k 2 Pi / n)
+     * for k > n/2 */
     for ( k = 1; k < n; k++ ) {
       ang = k * 2 * M_PI / n;
       for ( i = 0; i < n; i++ ) {
@@ -34,7 +45,8 @@ static double *mkcostab(int n, int pbc)
       }
     }
   } else {
-    /* cosine modes */
+    /* non-periodic case, for k = 1, ..., n - 1
+     * n phi(k, i) = sqrt(2) cos[k (i+1/2) Pi / n] */
     for ( k = 1; k < n; k++ ) {
       ang = k * M_PI / n;
       for ( i = 0; i < n; i++ ) {
@@ -48,8 +60,8 @@ static double *mkcostab(int n, int pbc)
 
 
 
-/* compute the magnitude of the eigenmodes of the histogram
- * save them to `u` */
+/* decompose the histogram fluctuation, `v`, into eigenmodes, `u`
+ * the coefficients are pre-computed in costab */
 static void getcosmodes(double *v, int n, double *u,
     double *costab)
 {
@@ -86,21 +98,6 @@ static void fromcosmodes(double *v, int n, double *u,
   }
 }
 
-
-
-#if 0
-/* compute the adjusted instantaneous histogram from the bin index i
-   z_i = h_i / p_i - 1 */
-__inline static void mkinsthist(double *ih, int n, int i)
-{
-  int j;
-
-  for ( j = 0; j < n; j++ ) {
-    ih[j] = -1;
-  }
-  ih[i] += n;
-}
-#endif
 
 
 #endif /* COSMODES_H__ */

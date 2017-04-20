@@ -3,7 +3,8 @@
 
 
 
-/* module to compute the autocorrelation function */
+/* module to compute the autocorrelation function
+ * of the eigenmodes */
 
 
 
