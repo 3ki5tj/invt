@@ -1787,7 +1787,7 @@ as a sum of two contributions,
   \Err(T)
   =
   \Err_R(T) + \Err_A(T),
-  \label{eq:error_split}
+  \label{eq:error_tot}
 \end{equation}
 %
 where the residual error
@@ -1816,16 +1816,26 @@ is given by
 \label{eq:error_asym}
 \end{align}
 %
-where we have approximated $\theta_k(t)$
-as white noise:
+where
 %
 \begin{equation}
-  \kappa_k(t)
-  \equiv \langle \theta_k(0) \, \theta_k(t) \rangle
-  \approx \Gamma_k \, \delta(t)
+  u_k(q') \equiv e^{\lambda_k \, [q' - q(T)]}
+  ,
+  \label{eq:uk_def}
+\end{equation}
+%
+and $\Gamma_k$ is computed from
+the autocorrelation function
+of the histogram fluctuation,
+$\kappa_k(t) \equiv \langle \theta_k(0) \, \theta_k(t) \rangle$,
+as:
+%
+\begin{equation}
+  \Gamma_k
+  = \sum_{t = -\infty}^\infty \kappa_k(t)
+  = \sum_{t = -\infty}^\infty \left\langle \theta_k(0) \, \theta_k(t) \right\rangle
   .
-  \notag
-  %\label{eq:kappa_delta}
+  \label{eq:Gamma_sum}
 \end{equation}
 %
 %\begin{equation}
@@ -1833,28 +1843,22 @@ as white noise:
 %  \notag
 %\label{eq:Gamma_integral}
 %\end{equation}
-
-For the theory to be applicable to
-a general sampling process,
-we can map the histogram fluctuation
-to the equivalent white noise, with
-\begin{equation}
-  \Gamma_k
-  = \sum_{t = -\infty}^\infty \kappa_k(t)
-  %= \sum_{t = -\infty}^\infty \left\langle \theta_k(0) \, \theta_k(t) \right\rangle
-  .
-  \label{eq:Gamma_sum}
-\end{equation}
+%
+Equation \eqref{eq:Gamma_sum}
+essentially maps the histogram fluctuation, $\theta_k(t)$,
+to the equivalent white noise
+so that the theory can be applicable to
+a general sampling process.
 %
 In this way,
 the underlying sampling process
 affects the error only through the
-few $\Gamma_k$'s.
+few numbers, $\Gamma_k$'s.
 %
 For example, we expect large values of $\Gamma_k$
-from eigenmodes corresponding to long-range fluctation
-in a local sampling process,
-especially for complex or glassy systems.
+from eigenmodes corresponding to
+persistent long-range motion
+in sampling complex or glassy systems.
 %
 In Appendix \ref{sec:Gamma},
 we evaluate $\Gamma_k$'s in two special cases,
@@ -1875,7 +1879,6 @@ from an adaptive FDS simulation.
 %\end{equation}
 %%
 %with
-%$u_k(q') \equiv e^{\lambda_k \, [q' - q(T)]}$,
 %and
 %$\kappa_k(t - t') \equiv \left\langle \theta_k(t) \, \theta_k(t') \right\rangle$.
 %
@@ -2011,12 +2014,14 @@ Optimal schedule}
 
 
 
-We will minimize the error under a fixed value of $q(T)$.
+As in the single-bin case,
+by varying the schedule, $\alpha(t)$, under a fixed value of
+$q(T) = \int_0^T \alpha(t) \, dt$,
+we can focus on the asymptotic error,
+$\Err_A(T)$.
 %
-This allows us to focus on the asymptotic part
-for the residual error
-depends on $\alpha(t)$ only through
-the integral, $q(T) = \int_0^T \alpha(t) \, dt$.
+The value of $q(T)$ will be adjusted later
+to minimize the total error in Sec. \ref{sec:optinitalpha}).
 %
 We can rewrite Eq. \eqref{eq:error_asym} much like an action
 of a particle whose position is given by $q(t)$:
@@ -2043,26 +2048,42 @@ where the Lagrangian is
   %\\
   %&=
   =
-  \sum_{ k = 2 }^n
-    \Gamma_k \, \lambda_k^2 \, u_k^2 \bigl[ q(t) \bigr]
+  %\sum_{ k = 2 }^n
+  %  \Gamma_k \, \lambda_k^2 \, u_k^2 \bigl[ q(t) \bigr]
+  %\; \dot q^2( t )
+  %\notag
+  %\\
+  %&=
+  M^2\bigl(q(T) - q(t) \bigr)
   \; \dot q^2( t )
   .
 \notag
 \end{align}
 %
+where we have
+used Eq. \eqref{eq:uk_def} and
+defined the (square-root) mass function as
+%
+\begin{equation}
+  M(Q)
+  \equiv
+  \sqrt{
+    \textstyle\sum_{ k = 2 }^n \Gamma_k \, \lambda_k^2 \, e^{-2 \, \lambda_k \, Q}
+  }
+  .
+\label{eq:mass_func}
+\end{equation}
+%
 In this mechanical analogy,
 the schedule, $\dot q(t) = \alpha(t)$,
-corresponds to the velocity of the particle.
+corresponds to the velocity of the particle,
 %
-So the above Lagrangian contains only the kinetic energy,
-and, therefore, describes a free particle
-carrying a position-dependent mass.
+and the above Lagrangian, containing only the kinetic energy,
+describes a free particle
+with a position-dependent mass.
 %
-Since the Lagrangian
-does not explicitly depend on time, $t$,
-the Hamiltonian is conserved.
-%
-But in this case the Hamiltonian
+Besides, the Hamiltonian
+coincides with the Lagrangian:
 %
 \begin{equation}
   \mathcal H
@@ -2076,68 +2097,60 @@ But in this case the Hamiltonian
   2 \, \mathcal L
   - \mathcal L
   =
-  \mathcal L,
+  \mathcal L
+  .
   %=
   %\mathrm{const.}
   \notag
   %\label{eq:error_asym_Hamiltonian}
 \end{equation}
 %
-coincides with the Lagrangian.
-%
-So we may set
+Since the Lagrangian
+does not explicitly depend on time, $t$,
+the Hamiltonian is conserved,
+and we may set
 %
 \begin{equation}
-  \mathcal L
+  \sqrt{ \mathcal H }
   =
-    \sum_{ k = 2 }^n
-      \Gamma_k \, \lambda_k^2
-      \, u_k^2 \bigl[ q(t) \bigr]
+  \sqrt{ \mathcal L }
+  =
+  M\bigl( q(T) - q(t) \bigr)
   \;
-  \dot q^2(t)
+  \dot q(t)
   =
-  \left(
-    \frac{C}{T}
-  \right)^2
+  \frac{C}{T}
   ,
   \label{eq:Lagrangian_const}
 \end{equation}
 %
-for some positive constant, $C$.
+for some positive $C$
 %
 This serves
 as a generalization of Eq. \eqref{eq:dudt_const}.
 %
-By integrating the square root, we get
+By integrating this equation of motion, we get
 %
 \begin{equation}
-  \int_{ 0 }^{ q(t) }
-    \sqrt{
-      \textstyle\sum_{ k = 2 }^n
-        \Gamma_k \, \lambda_k^2
-        \, u_k^2( q' )
-    }
+  \int_{ q(T) - q(t) }^{ q(T) }
+    M(Q)
     \;
-    d q'
+    d Q
   =
   C \, \frac t T
   ,
   \label{eq:q_opt}
 \end{equation}
 %
-where $C$ is determined by
-the boundary condition at $t = T$ as
+and $C$ can be determined from
+the $t = T$ case as
 %
 \begin{equation}
   C =
   \int_{ 0 }^{ q(T) }
-    \sqrt{
-      \textstyle\sum_{ k = 2 }^n
-        \Gamma_k \, \lambda_k^2
-        \, u_k^2( q' )
-    }
+    M( Q )
     \;
-    d q'
+    d Q
   .
   \label{eq:mint}
 \end{equation}
@@ -2145,12 +2158,6 @@ the boundary condition at $t = T$ as
 Thus, we have an implicit equation for $q(t)$,
 and hence the optimal schedule,
 $\alpha(t) = \dot q(t)$.
-%
-Since we only optimized the asymptotic error, $\Err_A(T)$,
-in the above,
-the value of $q(T)$ can be further adjusted
-to minimize the total error, $\Err(T) = \Err_R(T) + \Err_A(T)$
-(cf. Sec. \ref{sec:optinitalpha}).
 
 
 
@@ -2163,19 +2170,8 @@ Characterization of optimal schedules}
 We can characterize the optimal schedule
 geometrically as follows.
 %
-First, we define a mass function as
-%
-\begin{equation}
-  M(Q)
-  =
-  \sqrt{
-    \textstyle\sum_{ k = 2 }^n \Gamma_k \, \lambda_k^2 \, e^{-2 \, \lambda_k \, Q}
-  }
-  .
-\label{eq:mass_func}
-\end{equation}
-%
-and a normalized mass distribution as
+First, we define
+a normalized mass distribution as
 %
 \begin{equation}
   m(Q)
@@ -2221,7 +2217,7 @@ $\int_0^{q(T)} m(Q) \, dQ = 1$.
       plot({\x}, {1.5*exp(-0.5*\x*\x)});
 
     % label for the shaded area
-    \node[] at (1.1, 0.5) {$\dfrac{t}{T}$};
+    \node[] at (1.1, 0.40) {$\dfrac{t}{T}$};
 
     \draw[<->] (0.6, 0)  --
                node[left, inner sep=1mm]
@@ -2363,21 +2359,18 @@ and
 
 
 The above characterization allows us to determine
-the optimal initial updating magnitude.
+the optimal initial updating magnitude,
+or, equivalently, the optimal value of $q(T)$
+that minimizes the total error defined in Eq. \eqref{eq:error_tot}.
 %
-Let us now consider simulations in which
+We will consider simulations in which
 the system is initially equilibrated at the same
 constant updating magnitude, $a_0$.
-%
-For these simulations,
-we can adjust $q(T)$
-to minimize the total error.
 %
 From Eqs. \eqref{eq:error_res1}
 and \eqref{eq:error_asym2},
 we find that
-the $q(T)$ that minimizes
-the total error satisfies
+the optimal $q(T)$ satisfies
 \begin{equation}
   m\bigl( q(T) \bigr)
   =
@@ -2485,15 +2478,16 @@ Homogeneous updating schemes}
 
 
 
-Many commonly-used updating schemes
+Many commonly-used updating schemes,
+such as the Gaussian updating scheme
+used in metadynamics,
 can be characterized by a rigid window
 centered on the current bin.
 %
-We call these schemes homogeneous,
-or translationally invariant.
+For these translationally invariant or homogeneous
+schemes, the eigenvalues can be readily found
+from the shape of the window function.
 %
-An example is the Gaussian updating scheme
-used in metadynamics.
 
 
 
@@ -2533,9 +2527,13 @@ assumes the following form
 %\label{eq:w_band_pbc}
 \end{equation}
 %
-where
-$\mu_{-b}, \dots, \mu_b$ ($b \le n/2$)
-are a set of numbers satisfying
+where the numbers,
+$\mu_{-b}, \dots, \mu_b$, ($b \le n/2$)
+characterizing the rigid window
+will be referred to as an \emph{updating kernel}\cite{bussi2006}.
+%
+To satisfy Eq. \eqref{eq:w_sumj},
+we impose the normalization condition
 %
 \begin{equation}
   \mu_{-b} + \cdots + \mu_b = 1
@@ -2543,21 +2541,19 @@ are a set of numbers satisfying
 \label{eq:mu_normalization}
 \end{equation}
 %
-and $\mu_l = 0$ for $|l| > b$.
+with $\mu_l = 0$ for $|l| > b$.
 %
-We will further impose the symmetry
+If $b = n/2$, then $\mu_{-b}$ is removed
+from the sum in Eq. \eqref{eq:mu_normalization}
+to avoid double counting.
+%
+For simplicity, we also impose the symmetry
 %
 \begin{equation}
   \mu_i = \mu_{-i}
   .
 \label{eq:mu_symm}
 \end{equation}
-%
-If $b = n/2$, then $\mu_{-b}$ is removed
-from the sum in Eq. \eqref{eq:mu_normalization}
-to avoid double counting.
-%
-These numbers constitute an \emph{updating kernel}\cite{bussi2006}.
 %
 As shown in Appendix \ref{sec:wband_eig},
 the multiplication of $\mathbf w$
@@ -2620,23 +2616,7 @@ Note that the two reflective mirrors effectively
 define a periodic variable of period $2 \, n$.
 Thus, the eigenvalues can be borrowed from
 Eq. \eqref{eq:wband_eigenvalue_pbc},
-with the period, $n$, doubled:
-%
-\begin{align}
-  \lambda_k
-  &=
-  \mu_0
-  +
-  2
-  \sum_{l = 1}^b
-    \mu_l
-    \cos \frac{(k - 1)  \, l \, 2 \, \pi}{ 2 \, n }
-  .
-\label{eq:wband_eigenvalue_refl}
-\end{align}
-%
-We may unify Eqs. \eqref{eq:wband_eigenvalue_refl}
-and \eqref{eq:wband_eigenvalue_pbc} as
+with a doubled period:
 %
 \begin{equation}
   \lambda_k
@@ -2652,13 +2632,8 @@ and \eqref{eq:wband_eigenvalue_pbc} as
   \label{eq:wband_eigenvalue}
 \end{equation}
 %
-where the $g = 1$ for the periodic case,
-or $2$ otherwise.
-%
-In both cases,
-the eigenvalues, $\lambda_k$'s,
-are the cosine transform of
-the updating kernel.
+where $g = 1$ or $2$
+in the periodic or non-periodic case, respectively.
 
 %\subsubsection{\label{sec:invert_wband}
 %Inversion}
@@ -2882,8 +2857,8 @@ can be used for linear interpolation
 to get the updating magnitude, $\alpha(t)$, at any simulation time, $t$.
 
 \item
-  Compute the error $\Err(T)$ from
-Eqs. \eqref{eq:error_split},
+  Compute the total error $\Err(T)$ from
+Eqs. \eqref{eq:error_tot},
   \eqref{eq:error_res1},
   and
   \eqref{eq:error_asym2}.
@@ -3379,7 +3354,7 @@ For the single-bin updating scheme,
 it recovers Eq. \eqref{eq:t0_singlebin}
 under the assumption of Eq. \eqref{eq:y2_eql}.
 %
-From Eqs. \eqref{eq:error_split},
+From Eqs. \eqref{eq:error_tot},
 \eqref{eq:error_res1},
 \eqref{eq:tk0},
 and
@@ -5232,7 +5207,8 @@ and are even functions about the axis, $i = 1/2$:
 \end{equation}
 %
 and the eigenvalues are given by
-  Eq. \eqref{eq:wband_eigenvalue_refl}.
+  Eq. \eqref{eq:wband_eigenvalue}
+  with $g = 2$.
 
 \note{Derivation.
   First consider the unnormalized eigenvectors,
@@ -5265,7 +5241,8 @@ and the eigenvalues are given by
   &= \Phi^{(k)}_j \, \lambda_k,
   \end{aligned}
   $$
-  with $\lambda_k$ given by Eq. \eqref{eq:wband_eigenvalue_refl}.
+  with $\lambda_k$ given by Eq. \eqref{eq:wband_eigenvalue}
+  with $g = 2$.
 }%
 %
 
@@ -5285,7 +5262,8 @@ Eq. \eqref{eq:lambdan}
   for
   $l = 1, \dots, n - 1$,
   %
-  then Eq. \eqref{eq:wband_eigenvalue_refl} can be rewritten as
+  then Eq. \eqref{eq:wband_eigenvalue} ($g = 2$)
+  can be rewritten as
   %
   \begin{align}
     \lambda_{k+1}
@@ -5457,13 +5435,14 @@ in the continuous limit.
 
 
 For $n \gg 1$,
-we define
-$x = l \, \Delta x$,
+we define an equivalent angular variable, $\varphi$,
+over $[0, 2 \, \pi/g]$,
+with bin size
+$\Delta \varphi = 2 \, \pi/(g \, n)$.
+The variable is related to discrete index as
+$\varphi = l \, \Delta \varphi$,
 and
-$\mu_l = \mu(x) \, \Delta x$,
-where
-$\Delta x = 2 \, \pi/(g \, n)$
-is the bin size.
+$\mu_l = \mu(\varphi) \, \Delta \varphi$.
 %
 By assuming the largest cutoff, $b \approx g \, n/2$,
 we can approximate Eq. \eqref{eq:wband_eigenvalue}
@@ -5473,7 +5452,7 @@ as an integral:
   \lambda_k
   =
   2 \int_0^\pi
-    \mu(x) \, \cos \bigl[ (k-1) \, x \bigr] \, dx,
+    \mu(\varphi) \, \cos \bigl[ (k-1) \, \varphi \bigr] \, d\varphi,
 \notag
 %\label{eq:lambda_int}
 \end{equation}
@@ -5481,39 +5460,40 @@ as an integral:
 with the normalization
 %
 $
-  1 = 2 \int_0^\pi \mu(x) \, dx.
+  1 = 2 \int_0^\pi \mu(\varphi) \, d\varphi.
 $
 \note{
 \begin{align*}
   \lambda_k
   &\approx
-  \int_0^b \mu_l \, \cos[(k-1) \, x] \, dl
+  \int_0^b \mu_l \, \cos[(k-1) \, \varphi] \, dl
   \\
   &=
-  \int_0^b \mu(x) \, \cos[(k-1) \, x] \, \Delta x \, dl
+  \int_0^b \mu(\varphi) \, \cos[(k-1) \, \varphi] \, \Delta \varphi \, dl
   \\
   &=
-  \int_0^{b \, \Delta x} \mu(x) \, \cos[(k-1) \, x] \, dx
+  \int_0^{b \, \Delta \varphi} \mu(\varphi) \, \cos[(k-1) \, \varphi] \, d\varphi
 \end{align*}
 The upper limit,
-$b \, \Delta x \approx (g\,n/2) \, [2\,\pi/(g\,n)] = \pi$.
+$b \, \Delta \varphi \approx (g\,n/2) \, [2\,\pi/(g\,n)] = \pi$.
 }
 
 For the Gaussian updating kernel,
-if the width, $\sigma$, satisfies $\Delta x \ll \sigma \ll 1$,
+if the width of the angular variable, $\sigma_\varphi$,
+satisfies $\Delta \varphi \ll \sigma_\varphi \ll \pi$,
 we can extend
 the upper limit of the integrals
 to infinity, and
 %
 \begin{equation}
-  \mu(x)
+  \mu(\varphi)
   =
   \frac{            1            }
-       { \sqrt{ 2 \pi \sigma^2 } }
+       { \sqrt{ 2 \pi \sigma_\varphi^2 } }
   %
   \exp\left(
-        -\frac{       x^2     }
-              { 2 \, \sigma^2 }
+        -\frac{   \varphi^2   }
+              { 2 \, \sigma_\varphi^2 }
       \right)
   .
 \notag
@@ -5526,7 +5506,7 @@ If follows that all eigenvalues are positive\cite{bussi2006}:
   \lambda_k
   &=
   \exp\left[
-        -\frac{ (k - 1)^2 \, \sigma^2 }
+        -\frac{ (k - 1)^2 \, \sigma_\varphi^2 }
               {           2           }
       \right]
   %\notag
@@ -5539,8 +5519,8 @@ If follows that all eigenvalues are positive\cite{bussi2006}:
   %             {   n   }
   %      \right)^2
   %      \left(
-  %        \frac{  \sigma }
-  %             { \Delta x }
+  %        \frac{  \sigma_\varphi }
+  %             { \Delta \varphi }
   %      \right)^2
   %    \right]
   .
@@ -5551,21 +5531,21 @@ If follows that all eigenvalues are positive\cite{bussi2006}:
 
 
 %However,
-%as $\sigma/\Delta x \gg 1$,
+%as $\sigma_\varphi/\Delta \varphi \gg 1$,
 %the smallest eigenvalue
 %%
 %$$
 %\lambda_n
 %\approx
 %\exp\left(
-%      -\frac{ n^2 \, \sigma^2 }
+%      -\frac{ n^2 \, \sigma_\varphi^2 }
 %            {        2        }
 %    \right)
 %=
 %\exp\left[
 %      -\frac{ \pi^2 }{ 2 }
 %      \left(
-%        \frac{  \sigma }
+%        \frac{  \sigma_\varphi }
 %             { \Delta x }
 %      \right)^2
 %    \right]
@@ -5597,19 +5577,19 @@ If follows that all eigenvalues are positive\cite{bussi2006}:
 %at some $k_{\max}$,
 %which corresponds to a minimal length scale
 %$l_{\min} = \Delta x \, (n /k_{\max}) = \pi/k_{\max}$
-%greater than $\sigma$.
+%greater than $\sigma_\varphi$.
 %%
 %Then,
 %$$
 %\lambda_{ k_{\max} }
 %\approx
 %\exp\left(
-%      -\frac{ k_{\max}^2 \, \sigma^2 }
+%      -\frac{ k_{\max}^2 \, \sigma_\varphi^2 }
 %            {           2            }
 %    \right)
 %=
 %\exp\left(
-%      -\frac{  \pi^2 \, \sigma^2    }
+%      -\frac{  \pi^2 \, \sigma_\varphi^2    }
 %            {    2 \, l_{\min}^2  }
 %    \right).
 %$$
@@ -5705,6 +5685,9 @@ with a set of well-separated eigenvalues,
 in parallel to the lower bound reached by
 the single-bin scheme with a set of identical eigenvalues
 (cf. Sec. \ref{sec:optWL}).
+%
+For example, the smaller eigenvalues of the Gaussian updating scheme
+are well separated because of the rapid exponential decay.
 
 
 Starting from the definition Eq. \eqref{eq:mass_func}, we have
@@ -6218,8 +6201,8 @@ $\min \lambda_k = 1 - 4 \, \mu_1$.
   \centering
   \rowcolors{1}{white}{LightGray}
   \setlength{\tabcolsep}{4pt} % column separation
-  %
-  \caption{\label{tab:symbols}Table of symbols.}
+  \caption{\label{tab:symbols}
+    Table of symbols.}
   \begin{tabular}{l | p{12cm} }
     Symbol          &   Description \\
     \hline
@@ -6232,7 +6215,8 @@ $\min \lambda_k = 1 - 4 \, \mu_1$.
     $\Err, \Err_R, \Err_A$          &   Error, residual error, asymptotic error. \\
     $\ln f$         &   Updating factor in the WL algorithm.  \\
     $\phi_{ki}$     &   Eigenvectors of the updating matrix. \\
-    $g$             &   Degeneracy factor, $2$ for a periodic variable, or for $1$ a non-periodic one. \\
+    $g$             &   $1$ for a periodic variable, or for $2$ a non-periodic one. \\
+    $G_i$           &   Integral of the autocorrelation function of histogram fluctuation at bin $i$. \\
     $\Gamma_k$      &   Integral of the autocorrelation function of mode $k$. \\
     $h_i(t)$        &   Instantaneous histogram.  \\
     $H_i$           &   Average normalized histogram.  \\
@@ -6255,7 +6239,7 @@ $\min \lambda_k = 1 - 4 \, \mu_1$.
     $\rho_i$        &   Distribution used to define the error. \\
     $s, S$          &   Stage index and the total number of stages in the Wang-Landau algorithm. \\
     $\sigma_{ij}(t)$   &   Autocorrelation function of $\zeta_i(t)$. \\
-    $\sigma$        &   Width of the Gaussian updating scheme. \\
+    $\sigma_\varphi$   &   Width of the Gaussian updating scheme in radians. \\
     $t, \tau$       &   Time. \\
     $T$             &   Simulation length. \\
     $u_i(q')$       &   $u_i(q') \equiv e^{\lambda \, [q - q(T)]}$. \\

@@ -68,7 +68,7 @@ diff::
 	#module load perl
 	# consider the flag --math-markup=0 if there is trouble for formulae
 	cd old/V$(ver) && latexdiff \
-	  --config="PICTUREENV=(?:picture|DIFnomarkup|align|equation|tikzpicture|table)[\w\d*@]*" \
+	  --config="PICTUREENV=(?:picture|DIFnomarkup|align|equation|tikzpicture|table|tabular)[\w\d*@]*" \
 	  ../V$(refver)/invt_annotatedV$(refver).tex invt_annotatedV$(ver).tex > invt_diffV$(ver).tex
 	make -C old/V$(ver) invt_diffV$(ver).pdf
 
