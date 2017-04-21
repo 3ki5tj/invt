@@ -351,9 +351,8 @@ and an expert reader may wish to skip them.
 %
 Next, we extend the method to the general case
 of a multiple-bin updating scheme
-that encompasses metadynamics
-in Secs. \ref{sec:multiple-bin}
-to \ref{sec:band-matrix},
+that encompasses the Gaussian scheme used in metadynamics
+in Sec. \ref{sec:multiple-bin},
 and present a general procedure of computing the optimal schedule
 in Sec. \ref{sec:procedure}.
 %
@@ -509,11 +508,12 @@ marinari1992, *lyubartsev1992}.
 %
 After a sufficiently long run, the bias potential, $V_i$,
 can often be improved
-with the normalized histogram, $H_i$, from the simulation.
+with the normalized histogram, $H_i$,
+accumulated from the simulation as
 %
-Using $H_i$ as an estimate of $\pi_i$ in
-Eq. \eqref{eq:pi_p_V}
-allows us to correct $V_i$ as
+%Using $H_i$ as an estimate of $\pi_i$ in
+%Eq. \eqref{eq:pi_p_V}
+%allows us to correct $V_i$ as
 %
 \begin{equation}
   V^\mathrm{corr}_i
@@ -551,7 +551,7 @@ allows us to correct $V_i$ as
 %which in turn depends on the simulation length
 %that must be decided in advance.
 However, this formula often requires a long
-simulation period to accumulate a precise histogram,
+accumulation period for a precise histogram,
 and thus disallows
 continuous improvement of the bias potential
 %(hence that of the PMF)
@@ -909,7 +909,7 @@ and the total error is given by
   =
   \sum_{i = 1}^n \rho_i \, \left\langle x_i^2(t) \right\rangle
   .
-\label{eq:error_sum}
+\label{eq:error_def}
 \end{equation}
 
 
@@ -1135,11 +1135,11 @@ we get a set of decoupled equations
 \label{eq:dxdt_WL}
 \end{equation}
 %
-where the modified histogram fluctuation
+where the shifted histogram fluctuation
 %
 \begin{equation}
   \xi_i(t)
-  =
+  \equiv
   \frac{ \zeta_i(t) }
        { p_i }
   -
@@ -1153,9 +1153,12 @@ where the modified histogram fluctuation
 %
 is also governed by white noise as is $\zeta_i(t)$,
 i.e. we may write
-$$
-  \langle \xi_i(t) \, \xi_i(t') \rangle = G_i \, \delta(t - t'),
-$$
+\begin{equation}
+  \langle \xi_i(t) \, \xi_i(t') \rangle
+  = G_i \, \delta(t - t')
+  ,
+  \label{eq:G_def}
+\end{equation}
 for some $G_i$.
 %
 \note{The derivation:
@@ -1195,7 +1198,7 @@ $$
 
 The total error
 at the end of the simulation, $t = T$,
-as defined in Eq. \eqref{eq:error_sum},
+as defined in Eq. \eqref{eq:error_def},
 now depends implicitly on the function $\alpha(t)$
 via $x_i(T)$.
 %
@@ -1248,7 +1251,7 @@ e^{q' - q(T)}.
 \end{align}
 %
 At the end of period $T$,
-the total error defined in Eq. \eqref{eq:error_sum}
+the total error defined in Eq. \eqref{eq:error_def}
 is given by
 %
 %\begin{align}
@@ -1275,7 +1278,10 @@ is given by
   \label{eq:ET_average}
 \end{align}
 where
-$\Gamma \equiv \sum_{i=1}^n \rho_i \, G_i$.
+\begin{equation}
+  \Gamma \equiv \sum_{i=1}^n \rho_i \, G_i.
+  \label{eq:Gamma_def}
+\end{equation}
 
 
 
@@ -1401,15 +1407,8 @@ from the $t = 0$ case of Eq. \eqref{eq:expqt}\big].
 %
 By using the optimal schedule in Eq. \eqref{eq:ET_average},
 we find the final total error to be
-\begin{equation}
-  E(T)
-  =
-  \frac{ E(0) \, t_0^2 + \Gamma \, T}
-       { (t_0 + T)^2 }
-  ,
-  \notag
-  %\label{eq:error_singlebin}
-\end{equation}
+%
+$E(T) = [ E(0) \, t_0^2 + \Gamma \, T ]/(t_0 + T)^2$,
 %
 which is minimized if
 %
@@ -1420,7 +1419,7 @@ t_0 = \frac{ \Gamma }
   \label{eq:t0_singlebin}
 \end{equation}
 %
-and at this point
+and at this point, the error is given by
 %
 \begin{equation}
   E(T)
@@ -1429,6 +1428,10 @@ and at this point
   .
   \label{eq:Emin_singlebin}
 \end{equation}
+%
+This error is roughly equal to the overall histogram flatness
+and thus it can be conveniently estimated\cite{zhou2005, zhou2008}
+(see also Appendix \ref{sec:flatness}).
 
 
 
@@ -1706,7 +1709,8 @@ yields a set of decoupled equations
   \dot y_k(t)
   =
   -\alpha(t) \, \lambda_k \, [y_k(t) - \theta_k(t)],
-\label{eq:yt_diffeq}
+  \notag
+  %\label{eq:yt_diffeq}
 \end{equation}
 %
 where
@@ -1716,7 +1720,7 @@ where
   \sum_{j=1}^n
     \phi_{kj} \, x_j(t)
   ,
-  \label{eq:y_def}
+  %\label{eq:y_def}
 \end{align}
 and
 \begin{align}
@@ -1737,7 +1741,7 @@ of mode $k$, respectively.
 
 
 
-The error function defined in Eq. \eqref{eq:error_sum}
+The error function defined in Eq. \eqref{eq:error_def}
 can be rewritten in terms of the eigenmodes of $\mathbf w$,
 %
 \begin{align}
@@ -1906,8 +1910,8 @@ from an adaptive FDS simulation.
 
 
 
-\subsection{\label{sec:mbin_opta}
-Optimal schedule for multiple-bin updating schemes}
+%\subsection{\label{sec:mbin_opta}
+%Optimal schedule for multiple-bin updating schemes}
 
 
 
@@ -2124,7 +2128,7 @@ and we may set
   \label{eq:Lagrangian_const}
 \end{equation}
 %
-for some positive $C$
+for some positive $C$.
 %
 This serves
 as a generalization of Eq. \eqref{eq:dudt_const}.
@@ -2473,7 +2477,7 @@ wang2001, *wang2001pre}.
 
 
 
-\subsection{\label{sec:band-matrix}
+\subsubsection{\label{sec:band-matrix}
 Homogeneous updating schemes}
 
 
@@ -2689,7 +2693,7 @@ in Appendix \ref{sec:stabilize_wband}.
 
 
 
-\subsection{\label{sec:procedure}
+\subsubsection{\label{sec:procedure}
 Procedure for computing the optimal schedule and error
 }
 
@@ -3372,11 +3376,20 @@ we get
 \label{eq:error_sinc}
 \end{equation}
 %
-which serves as a generalization of
-the result from the single-bin scheme,
-Eq. \eqref{eq:Emin_singlebin}
-[one can show that $\sum_{k=2}^n \Gamma_k = \sum_{i=1}^n \rho_i \, G_i = \Gamma$,
-following the steps similar to those leading to Eq. \eqref{eq:y2_sum}].
+In particular, for $K = n$, we have
+\begin{equation}
+  \sum_{k=2}^n \Gamma_k
+  = \sum_{i=1}^n \rho_i \, G_i = \Gamma
+  ,
+  \notag
+  %\label{eq:Gamma_sum}
+\end{equation}
+which can be shown by following the steps
+similar to those leading to Eq. \eqref{eq:y2_sum},
+and the above error recovers the single-bin result,
+Eq. \eqref{eq:Emin_singlebin}.
+%
+%
 %
 \note{The derivation.
 From Eq. \eqref{eq:eig_orthonormal_cols}, we have
@@ -3456,7 +3469,7 @@ Both the target and intrinsic distributions
 are assumed to be flat:
 $p^*_i = p_i = 1/n$,
 along with the distribution, $\rho_i$, in Eqs.
-\eqref{eq:vbar_def} and \eqref{eq:error_sum}.
+\eqref{eq:vbar_def} and \eqref{eq:error_def}.
 %
 %We wish to see how
 %the schedule, $\alpha(t)$,
@@ -3673,7 +3686,7 @@ whose eigenvalues were around $1.0$.
 %
 We can, however, ignore these local eigenmodes
 by explicitly filtering them out from the final bias potential,
-and truncating the error sum in Eq. \eqref{eq:error_sum}
+and truncating the error sum in Eq. \eqref{eq:error_def}
 to the first few eigenmodes.
 %
 Then, the corresponding optimal schedule
@@ -4216,7 +4229,7 @@ Thus, we may rewrite Eq. \eqref{eq:av_recur} as
   &=
   {\bar V}_i^{(N-1)}
   +
-  \sum_{l=1}^L \frac{1}{N \, L} \frac{ h_i^{(N)}(l) }{ p_i }
+  \sum_{l=1}^L \frac{1}{N L} \frac{ h_i^{(N)}(l) }{ p_i }
   ,
   \label{eq:vbar_update}
 \end{align}
@@ -4233,7 +4246,7 @@ the WL algorithm, Eq. \eqref{eq:wl_update},
 with the updating magnitude being
 %
 \begin{equation}
-  \alpha(t) = \frac{1}{N \, L}
+  \alpha(t) = \frac{1}{N L}
   .
   \label{eq:alpha_block}
 \end{equation}
@@ -4241,7 +4254,7 @@ with the updating magnitude being
 In the long time limit,
 we may approximate the simulation time
 by the product of the number of sub-simulations
-and the number of steps in each sub-simulation, or $N \, L$,
+and the number of steps in each sub-simulation, or $N L$,
 %
 and Eq. \eqref{eq:alpha_block} recovers Eq. \eqref{eq:alpha_invt}.
 
@@ -4294,9 +4307,6 @@ a weighted runtime average of the histogram\cite{
   marsili2006, barducci2008},
 which is analogous to the adaptive bias force method\cite{
   darve2001, *darve2008}.
-
-
-
 
 
 
@@ -4512,6 +4522,108 @@ and the schedule given by Eq. \eqref{eq:alphas_t}
 is identical to that from Eq. \eqref{eq:alpha_invt1}.
 
 
+
+
+\section{\label{sec:flatness}
+Histogram flatness}
+
+
+Here we wish to show that for an optimal WL simulation
+(also for an FDS simulation with a perfect bias potential),
+the overall histogram flatness
+is roughly equal to the final error.
+%
+First, in the long time limit, the fluctuation of
+the instantaneous histogram is dominated by the random part,
+$h_i(t) \approx \zeta_i(t)$,
+and $\xi_i(t)$ defined in Eq. \eqref{eq:xi_def}
+will dominate the shifted instantaneous histogram
+%
+\begin{equation}
+\xi_i(t) \approx
+\frac{ h_i(t) } { p_i }
+- \sum_{r = 1}^n \rho_r \frac{ h_r(t) } { p_r }
+.
+\label{eq:xi_h}
+\end{equation}
+%
+If we define the overall or time-averaged histogram as
+\begin{equation}
+  H_i \equiv \frac{1}{T} \sum_{t=1}^T h_i(t)
+  ,
+  \label{eq:H_def}
+\end{equation}
+then the time average of the right-hand side of Eq. \eqref{eq:xi_h}
+represents the fractional deviation of the shifted histogram.
+%
+We way thus define the histogram flatness as
+%
+\begin{equation}
+  F
+  \equiv
+  \left\langle
+  \sum_{i = 1}^n \rho_i
+  \left(
+  \frac{ H_i } { p_i }
+  - \sum_{r = 1}^n \rho_r \frac{ H_r } { p_r }
+  \right)^2
+  \right\rangle
+  .
+  \label{eq:F_def}
+\end{equation}
+%
+By using Eqs. \eqref{eq:H_def}, \eqref{eq:xi_h},
+\eqref{eq:G_def}, and \eqref{eq:Gamma_def}, we have
+%
+\begin{align*}
+  F
+  %&\approx
+  %\sum_{i = 1}^n \rho_i
+  %\left\langle
+  %\left(
+  %\frac{1}{T}
+  %\sum_{t = 1}^T \xi_i(t)
+  %\right)^2
+  %\right\rangle
+  %\\
+  &\approx
+  \frac{1}{T^2}
+  \sum_{i = 1}^n \rho_i
+  \sum_{t, t' = 1}^T
+  \left\langle
+  \xi_i(t) \, \xi_i(t')
+  \right\rangle
+  \approx
+  \frac{1}{T}
+  \sum_{i = 1}^n \rho_i \, G_i
+  =
+  \frac{ \Gamma } { T }
+  .
+\end{align*}
+%
+Compare the last expression to Eq. \eqref{eq:Emin_singlebin},
+we conclude
+\begin{equation}
+  F \approx E(T)
+  .
+  \notag
+  %\label{eq:flatness}
+\end{equation}
+%and the histogram flatness
+%serves as a good estimate of the final error.
+Note that in some previous studies\cite{zhou2005, zhou2008},
+the histogram flatness, Eq. \eqref{eq:F_def},
+was previously used to define the error,
+and the above demonstration shows the definition
+is compatible with ours, Eq. \eqref{eq:error_def}, in the long-time limit.
+%
+\note{
+An interesting application\cite{zhou2008},
+of the above result is
+to set the updating magnitude by $F/\Gamma$
+for some empirical value [$\Gamma \approx 10$ there, see Eq. (8)]
+as a substitute of the inverse-time schedule.
+}
 
 
 
@@ -4980,11 +5092,11 @@ To find the eigenvectors for a periodic variable, $\phi_i$,
 we define the out-of-boundary values by
 %
 \begin{equation}
-  \phi_i = \phi_{i \pm n},
+  \phi_j = \phi_{j \pm n},
 \label{eq:phi_pbc}
 \end{equation}
 %
-such that $i \pm n$ lies in between $1$ and $n$.
+such that $j \pm n$ lies in between $1$ and $n$.
 %
 Then, the multiplication of the matrix, $\mathbf w$,
 is equivalent to a convolution with the kernel:
@@ -5087,6 +5199,27 @@ compatible with the periodicity, Eq. \eqref{eq:phi_pbc},
 %
 where $\ii^2 = -1$.
 %
+Alternatively, to avoid complex numbers, we can use
+%
+\begin{equation}
+  \phi^{(k)}_j
+  =
+  \phi_{kj}
+  =
+  \frac{ \sqrt{ 2 - \delta_{k,0} } } { n }
+  %\overset{ \cos } { \sin }
+  {\cos \atop \sin}
+  \left[
+    \frac{ (k - 1) \, j \, 2 \, \pi }
+         {            n             }
+  \right]
+  ,
+  \notag
+\end{equation}
+%
+where the function takes the cosine form for $k \le n/2 + 1$,
+or the sine form otherwise.
+%
 Then one can readily verify that the eigenvalues are given by
   Eq. \eqref{eq:wband_eigenvalue_pbc}.
 %
@@ -5137,14 +5270,14 @@ Then one can readily verify that the eigenvalues are given by
 
 For a non-periodic variable,
 we define the out-of-boundary values
-of $\phi_i$ as
+of $\phi_j$ as
 %
 \begin{equation}
-  \phi_i
+  \phi_j
   =
   \begin{dcases}
-    \phi_{ 1 - i }           & \mathrm{for \;} i \le 0, \\
-    \phi_{ 2 \, n + 1 - i }  & \mathrm{for \;} i > n,
+    \phi_{ 1 - j }           & \mathrm{for \;} j \le 0, \\
+    \phi_{ 2 \, n + 1 - j }  & \mathrm{for \;} j > n,
   \end{dcases}
 \label{eq:phi_refl}
 \end{equation}
@@ -5183,24 +5316,26 @@ a convolution as Eq. \eqref{eq:wmul_to_convol}.
   \end{aligned}
   $$
 }%
-We note that Eq. \eqref{eq:phi_refl}
-defines a periodic variable of period $2 \, n$
-with a reflective symmetry around $i = 1/2$.
 %
-Accordingly, the eigenvectors,
+Since Eq. \eqref{eq:phi_refl}
+defines a periodic variable of period $2 \, n$
+with a reflective symmetry around $j = 1/2$,
+the eigenvectors,
 $\pmb\phi^{(1)}, \dots, \pmb\phi^{(n)}$,
-share the same periodicity,
-and are even functions about the axis, $i = 1/2$:
+should share the same periodicity,
+and be even functions about the same axis:
 %
 \begin{equation}
-  \phi^{(k)}_i
+  \phi^{(k)}_j
   =
-  \phi_{k i}
+  \phi_{k j}
   =
   \frac{ \sqrt{ 2 - \delta_{k, 1} } }
        {             n              }
-  \cos \frac{ ( k - 1) \, \left( i - \frac 1 2 \right) \, 2 \, \pi}
+  \cos \left[
+       \frac{ ( k - 1) \, \left( j - \frac 1 2 \right) \, 2 \, \pi}
             {                    2 \, n                           }
+       \right]
   ,
 \notag
 %\label{eq:wband_eigenvector_refl}
@@ -5213,9 +5348,9 @@ and the eigenvalues are given by
 \note{Derivation.
   First consider the unnormalized eigenvectors,
   $$
-  \Phi^{(k)}_i
+  \Phi^{(k)}_j
   =
-  \cos \frac{ \left( i - \frac 1 2 \right) (k - 1) \, \pi}{n},
+  \cos \frac{ (k - 1) \, \left( j - \frac 1 2 \right) \, \pi }{n},
   $$
   which satisfies Eq. \eqref{eq:phi_refl}.
   %
@@ -5937,13 +6072,14 @@ the asymptotic error
         \right)^{ 2 \, \nu_k - 1 }
   \right]
   ,
-\label{eq:error_asym_invt}
+  \notag
+  %\label{eq:error_asym_invt}
 \end{align}
 %
 where $\nu_k \equiv \lambda_k / \lambda$.
 %
 From Eq. \eqref{eq:error_res1},
-we get the residual error
+we get % the residual error
 %
 \begin{equation}
   \Err_R(T)
@@ -6024,26 +6160,20 @@ For the single-bin scheme, we have
 $\lambda_2 = \cdots = \lambda_n = 1$,
 and
 $\Gamma_k$'s affect the error
-only via the sum, $\sum_{k = 2}^n \Gamma_k$,
-as a multiplicative constant.
-
-In the asymptotic limit,
-we can focus on the asymptotic error
-and drop the second term in the square brackets
-of Eq. \eqref{eq:error_asym_invt}
-by assuming $\lambda < 2$.
+only via the sum, $\Gamma = \sum_{k = 2}^n \Gamma_k$,
+as a multiple.
 %
-Then,
+In the long time limit,
+we have for $\lambda < 2$,
 $$
   \Err_A(T)
   =
   \frac { 1 } { T + t_0 }
-  \frac {             1            }
+  \frac {         \Gamma           }
         { \lambda \, (2 - \lambda) }
-  \sum_{ k = 2 }^n \Gamma_k
   ,
 $$
-is minimal at $\lambda = 1$.
+which is minimal at $\lambda = 1$.
 %
 \note{A higher-order correction:
   $
@@ -6248,8 +6378,8 @@ $\min \lambda_k = 1 - 4 \, \mu_1$.
     $\mathbf w$     &   Updating matrix. \\
     $x_i(t)$        &   Average-deducted bias potential, Eq. \eqref{eq:x_def}. \\
     $\xi_i(t)$      &   The noise, Eq. \eqref{eq:xi_def}. \\
-    $y_k(t)$        &   Mode of the shifted bias potential, Eq. \eqref{eq:y_def}. \\
-    $Y_k$           &   Mode of the original bias potential, Eq. \eqref{eq:Y_def}. \\
+    $y_k(t)$        &   Mode of the shifted bias potential. \\
+    $Y_k$           &   Mode of the original bias potential. \\
     $z$             &   Reaction coordinate. \\
     $\zeta_i(t)$    &   The noise part of the instantaneous histogram, $h_i(t)$.
   \end{tabular}

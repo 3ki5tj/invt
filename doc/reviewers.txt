@@ -1,5 +1,8 @@
-The definition of g has changed.
-Mapping g --> 2/g.
+The definition of g has changed: g --> 2/g.
+
+We have added a note that for the single-bin updating scheme
+the histogram flatness is roughly equal to the error,
+as well as a proof for this in the new appendix C.
 
 Deepens our understanding.
 

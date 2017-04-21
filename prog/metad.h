@@ -54,7 +54,8 @@ __inline static int metad_getindex(metad_t *metad, int x)
 
 
 
-/* decide if a transition from xold to xnew is to be accepted */
+/* decide if a transition from xold (index iold)
+ * to xnew (index iold) is to be accepted */
 static int metad_acc(metad_t *metad, int iold, int xnew,
     int *inew)
 {
@@ -69,6 +70,45 @@ static int metad_acc(metad_t *metad, int iold, int xnew,
   if ( dv <= 0 ) return 1;
   r = rand01();
   return r < exp(-dv);
+}
+
+
+
+/* compute the histogram flatness */
+__inline static double metad_hflatness(metad_t *metad)
+{
+  int i;
+  double hmin, hmax, hi;
+
+  hmin = hmax = metad->h[0];
+  for ( i = 1; i < metad->n; i++ ) {
+    hi = metad->h[i];
+    if ( hi < hmin ) {
+      hmin = hi;
+    } else if ( hi > hmax ) {
+      hmax = hi;
+    }
+  }
+
+  return 2 * (hmax - hmin) / (hmax + hmin + DBL_EPSILON);
+}
+
+
+
+/* check if histogram is flat enough to switch to
+ * a smaller updating magnitude */
+static int metad_wlcheck(metad_t *metad)
+{
+  double hflatness;
+  int i;
+
+  /* compute the histogram flatness */
+  hflatness = metad_hflatness(metad);
+  /* return if the histogram not flatness enough */
+  if ( hflatness > 0.2 ) return 0;
+
+  metad->a *= 0.5;
+  for ( i = 0; i < metad->n; i++ ) metad->h[i] = 0;
 }
 
 
@@ -101,8 +141,8 @@ static int metad_save(metad_t *metad, const char *fn)
     return -1;
   }
   metad_trimv(metad);
-  fprintf(fp, "# %d %d %d %d\n",
-      metad->n, metad->xmin, metad->xmax, metad->xdel);
+  fprintf(fp, "# %d %d %d %d %g\n",
+      metad->n, metad->xmin, metad->xmax, metad->xdel, metad->a);
   for ( i = 0; i < metad->n; i++ ) {
     fprintf(fp, "%d %g %g\n",
         metad->xmin + i * metad->xdel, metad->v[i], metad->h[i]);

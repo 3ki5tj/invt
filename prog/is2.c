@@ -10,7 +10,7 @@ static int invt_is2_run(invtpar_t *m)
   is2_t *is;
   int id, h;
   long t;
-  int enew, iold, inew, acc;
+  int enew, icur, inew, acc;
   metad_t *metad;
 
   mtscramble( clock() );
@@ -28,16 +28,19 @@ static int invt_is2_run(invtpar_t *m)
 
   /* production run */
   metad = metad_open(-IS2_N*2+8, 0, 4);
-  iold = metad_getindex(metad, is->E);
+  icur = metad_getindex(metad, is->E);
   for ( t = 1; t <= m->nsteps; t++ ) {
     IS2_PICK(is, id, h);
     enew = is->E + h * 2;
-    acc = metad_acc(metad, iold, enew, &inew);
+    acc = metad_acc(metad, icur, enew, &inew);
     if ( acc ) {
-      iold = inew;
+      icur = inew;
       IS2_FLIP(is, id, h);
     }
-    metad_updatev(metad, iold);
+    metad_updatev(metad, icur);
+    if ( t % 100 == 0 ) {
+      metad_wlcheck(metad);
+    }
   }
 
   metad_save(metad, "vbias.dat");
