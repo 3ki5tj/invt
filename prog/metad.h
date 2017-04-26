@@ -13,15 +13,50 @@ typedef struct {
   double *h; /* histogram */
   double a; /* updating magnitude */
   int pbc; /* periodic boundary condition */
+  int winn;
+  double *win;
+  double *lambda;
   double *costab; /* cosine transform coefficients */
   double *u;
+  double hflatness;
   double *tmat; /* n x n transition matrix */
   corr_t *corr;
 } metad_t;
 
 
 
-static metad_t *metad_open(int xmin, int xmax, int xdel, int pbc)
+/* prepare the window function */
+static double *metad_prepwin(metad_t *metad,
+    int *winn, double **lambda,
+    double gaussig, int okmax, const double *win0, int winn0)
+{
+  int i, n = metad->n, pbc = metad->pbc;
+  double *win;
+
+  xnew(win, n);
+  if ( gaussig > 0 ) {
+    mkgauswin(gaussig, n, pbc, win, winn);
+  } else if ( okmax >= 0 ) {
+    mksincwin(okmax, n, pbc, win, winn);
+  } else {
+    /* copy the user window */
+    *winn = winn0;
+    for ( i = 0; i < *winn; i++ )
+      win[i] = win0[i];
+  }
+
+  /* modify the window function such that all eigenvalues
+   * lambda[i] are positive-definite */
+  *lambda = stablizewin(n, winn, win, pbc, 0, 1);
+  //  /* save the window kernel */
+  //  savewin(*winn, win, m->fnwin);
+  //  /* save the n x n updating matrix */
+  //  savewinmat(*winn, win, n, pbc, m->fnwinmat);
+  return win;
+}
+
+static metad_t *metad_open(int xmin, int xmax, int xdel,
+    int pbc, double gaussig, int okmax, const double *win, int winn)
 {
   metad_t *metad;
   int i;
@@ -40,6 +75,9 @@ static metad_t *metad_open(int xmin, int xmax, int xdel, int pbc)
   }
   metad->a = 1.0 / metad->n;
   metad->pbc = pbc;
+  /* prepare the window */
+  metad->win = metad_prepwin(metad, &metad->winn, &metad->lambda,
+      gaussig, okmax, win, winn);
   metad->costab = mkcostab(metad->n, metad->pbc);
   xnew(metad->tmat, metad->n * metad->n);
   xnew(metad->u, metad->n);
@@ -115,13 +153,12 @@ __inline static double metad_hflatness(metad_t *metad)
  * a smaller updating magnitude */
 static int metad_wlcheck(metad_t *metad)
 {
-  double hflatness;
   int i;
 
   /* compute the histogram flatness */
-  hflatness = metad_hflatness(metad);
+  metad->hflatness = metad_hflatness(metad);
   /* return if the histogram not flatness enough */
-  if ( hflatness > 0.2 ) return 0;
+  if ( metad->hflatness > 0.2 ) return 0;
 
   /* reduce the updating magnitude and clear the histogram */
   metad->a *= 0.5;
@@ -132,13 +169,35 @@ static int metad_wlcheck(metad_t *metad)
 
 
 
-static void metad_updatev(metad_t *metad, int i)
+static void metad_updatev_wl(metad_t *metad, int i)
 {
   double amp = metad->n * metad->a;
   metad->v[i] += amp;
   metad->h[i] += 1;
 }
 
+
+/* multiple-bin update */
+__inline static void metad_updatev(metad_t *metad, int i)
+{
+  int j, k, n = metad->n;
+
+  metad->v[i] += metad->a * metad->win[0];
+  /* update the bias potential at the neighbors */
+  for ( j = 1; j < metad->winn; j++ ) {
+    /* left neighbor */
+    k = i - j;
+    if ( k < 0 ) k = metad->pbc ? k + n : - k - 1;
+    metad->v[k] += metad->a * metad->win[j];
+    if ( j * 2 == n && metad->pbc ) continue;
+
+    /* right neighbor */
+    k = i + j;
+    if ( k >= n ) k = metad->pbc ? k - n : 2 * n - 1 - k;
+    metad->v[k] += metad->a * metad->win[j];
+  }
+  metad->h[i] += 1;
+}
 
 
 static void metad_trimv(metad_t *metad)
@@ -172,14 +231,6 @@ static int metad_save(metad_t *metad, const char *fn)
   return 0;
 }
 
-__inline static void metad_getcosmodes(metad_t *metad, int id)
-{
-  int k, n = metad->n;
-
-  for ( k = 1; k < n; k++ ) {
-    metad->u[k] = metad->costab[k*n + id];
-  }
-}
 
 
 /* compute the normalized transition matrix */
@@ -239,6 +290,7 @@ __inline static double *metad_normalize_tmat(metad_t *metad)
   return mat;
 }
 
+/* compute the gamma values from the transition matrix */
 static void metad_getgamma_tmat(metad_t *metad, double *gam, double dt)
 {
   int i, j, k, n = metad->n;
@@ -255,7 +307,6 @@ static void metad_getgamma_tmat(metad_t *metad, double *gam, double dt)
     x = pow(x, 1.0/dt);
     if ( x > 0.999999 ) x = 0.999999;
     g[i] = (1 + x)/(1 - x);
-    //printf("%2d: %g %g %g\n", i, val[i], g[i], x);
   }
   for ( k = 1; k < n; k++ ) {
     /* k: mode of updating matrix */
@@ -266,11 +317,9 @@ static void metad_getgamma_tmat(metad_t *metad, double *gam, double dt)
       for ( x = 0, i = 0; i < n; i++ ) {
         x += metad->costab[k*n + i] * vec[i*n + j];
       }
-      //printf("k %d, j %d, x %g, g[j] %g, gam %g\n", k, j, x, g[j], gam[k]);
       gam[k] += g[j] * x * x;
     }
     gam[k] /= n;
-    //printf("k %3d, gam %10.6f\n", k, gam[k]);
   }
 
   free(mat);

@@ -14,7 +14,7 @@
 
 /* maximal number of neighbors
  * in the multiple-bin updating scheme */
-#define NBMAX 16384
+#define NBMAX 128
 
 
 
@@ -221,88 +221,6 @@ static void invtpar_init(invtpar_t *m)
 
 
 
-/* construct a Gaussian window */
-static void invtpar_mkgauswin(invtpar_t *m)
-{
-  int i;
-  double x, s, sig = m->gaussig;
-
-  m->winn = NBMAX;
-
-  if ( m->winn > m->n ) {
-    m->winn = m->n;
-  }
-
-  /* truncate the Gaussian at 10 * sigma */
-  if ( m->winn >= sig * 10 ) {
-    m->winn = (int) (sig * 10 + 0.5);
-    if ( m->winn < 1 ) {
-      m->winn = 1;
-    }
-  }
-
-  /* further limit the window width
-   * if an explicit value is given */
-  if ( m->winmax > 0 && m->winn > m->winmax ) {
-    m->winn = m->winmax;
-  }
-
-  m->win[0] = 1;
-  s = m->win[0];
-  for ( i = 1; i < m->winn; i++ ) {
-    x = i / sig;
-    m->win[i] = exp(-0.5 * x * x);
-    s += m->win[i] * 2;
-  }
-
-  /* normalize the window function, such that
-   * win[0] + 2 * (win[1] + ... + win[n - 1]) = 1 */
-  for ( i = 0; i < m->winn; i++ ) {
-    m->win[i] /= s;
-  }
-}
-
-
-
-/* construct the window for an optimal updating scheme */
-static void invtpar_mksinrwin(invtpar_t *m)
-{
-  int i, km = m->okmax, n = m->n;
-  double k2p1 = km * 2 + 1, ang, y;
-
-  m->winn = m->pbc ? (n/2 + 1) : n;
-
-  if ( n > NBMAX ) {
-    fprintf(stderr, "window %d > %d too large!\n",
-        n, NBMAX);
-  }
-
-  if ( m->pbc )
-  {
-    /* win[i] = sin((2*km+1)*i*Pi/n)/sin(i*Pi/n)/n; */
-    m->win[0] = 1.0 * k2p1 / n;
-    for ( i = 1; i < m->winn; i++ ) {
-      ang = i * M_PI / n;
-      y = sin(k2p1 * ang);
-      m->win[i] = y / sin(ang) / n;
-    }
-  }
-  else
-  {
-    /* win[i] = {(-1)^(n+km+i-1)+
-     *         sin[(2*km+1)*i*Pi/2/n]/sin(i*Pi/2/n)}/(2*n); */
-    m->win[0] = ((((n + km) % 2) ? 1 : -1) + k2p1)/ (2.0 * n);
-    for ( i = 1; i < n; i++ ) {
-      ang = i * M_PI / (2 * n);
-      y = sin(k2p1 * ang);
-      m->win[i] = ( ((n + km + i) % 2 ? 1 : -1)
-                + y / sin(ang) ) / (2 * n);
-    }
-  }
-}
-
-
-
 /* compute dependent parameters
  * call this function only once
  * the second call will miss supposedly default parameters */
@@ -356,26 +274,13 @@ static void invtpar_compute(invtpar_t *m)
   }
 
   /* initialize the window function */
-  if ( m->gaussig > 0 ) {
-
-    /* construct the Gaussian window */
-    invtpar_mkgauswin(m);
-
-  } else if ( m->okmax >= 0 ) {
-
-    /* construct the sinc-like window
-     * for the optimal updating scheme */
-    invtpar_mksinrwin(m);
-
-  } else {
-
+  if ( m->winn > 1 ) {
     /* normalize the window function
      * such that it sums to 1.0 */
     for ( x = 0, i = 1; i < m->winn; i++ ) {
       x += m->win[i];
     }
     m->win[0] = 1 - 2 * x;
-
   }
 
   /* initialize the target distribution */
@@ -1099,16 +1004,18 @@ static void invtpar_dump(const invtpar_t *m)
       m->gam_nsteps, m->gam_nstave);
   }
 
-  fprintf(stderr, "update window function (%d bins): ", m->winn);
-  for ( i = 0; i < m->winn; i++ ) {
-    x = m->win[i];
-    if ( i > 0 && !(m->pbc && i * 2 == m->n) ) {
-      x *= 2;
+  if ( m->winn > 1 ) {
+    fprintf(stderr, "update window function (%d bins): ", m->winn);
+    for ( i = 0; i < m->winn; i++ ) {
+      x = m->win[i];
+      if ( i > 0 && !(m->pbc && i * 2 == m->n) ) {
+        x *= 2;
+      }
+      sum += x;
+      fprintf(stderr, "%g ", m->win[i]);
     }
-    sum += x;
-    fprintf(stderr, "%g ", m->win[i]);
+    fprintf(stderr, "| sum %g\n", sum);
   }
-  fprintf(stderr, "| sum %g\n", sum);
 
 #ifdef SCAN
   if ( m->cscan ) {

@@ -4,20 +4,19 @@
 #include "metad.h"
 
 const double IS2_TC = 2.3;
-const int IS2_EMIN = -2*IS2_N + 8;
+const int IS2_EMIN = -2*IS2_N + 116;
 const int IS2_EMAX = 0;
 
-typedef invtpar_t par_t;
-
-/* constant updating magnitude run */
-static int invt_is2_prerun(par_t *m, metad_t *metad, is2_t *is)
+/* constant updating magnitude run
+ * computes the gamma values */
+static int invt_is2_prerun(invtpar_t *m, metad_t *metad, is2_t *is)
 {
   long t;
   int id, h, acc;
   int icur, inew, enew, iold;
   cmvar_t *cm;
 
-  cm = cmvar_open(metad->n, 0);
+  cm = cmvar_open(metad->n, metad->pbc);
   metad->a = m->alpha0;
   m->gam_nstave = 100;
   //strcpy(m->fncorr, "corr.dat");
@@ -33,7 +32,7 @@ static int invt_is2_prerun(par_t *m, metad_t *metad, is2_t *is)
       icur = inew;
       IS2_FLIP(is, id, h);
     }
-    metad_updatev(metad, icur);
+    metad_updatev_wl(metad, icur);
     if ( t % m->gam_nstave == 0 ) {
       metad->tmat[icur*metad->n + iold] += 1;
       iold = icur;
@@ -48,14 +47,18 @@ static int invt_is2_prerun(par_t *m, metad_t *metad, is2_t *is)
   /* compute gamma */
   {
     int i;
-    double *tgamma;
+    double *tgamma, *gamma;
     xnew(tgamma, cm->n);
+    xnew(gamma, cm->n);
     metad_getgamma_tmat(metad, tgamma, m->gam_nstave);
     cmvar_get(cm);
     for ( i = 1; i < metad->n; i++ ) {
+      gamma[i] = cm->uvar[i]*2/m->alpha0;
       printf("%4d: %g %g\n", i, tgamma[i], cm->uvar[i]*2/m->alpha0);
     }
+    savegamma(metad->n, gamma, "gamma.dat");
     free(tgamma);
+    free(gamma);
   }
   //if ( metad->corr != NULL ) {
   //  /* print out the thermodynamic fluctuations */
@@ -70,7 +73,32 @@ static int invt_is2_prerun(par_t *m, metad_t *metad, is2_t *is)
   return 0;
 }
 
-static int invt_is2_run(par_t *m)
+/* production run */
+static int invt_is2_simul(invtpar_t *m, metad_t *metad, is2_t *is, double *gamma)
+{
+  long t;
+  int id, h, acc;
+  int icur, inew, enew;
+
+  metad->a = m->alpha0;
+  icur = metad_getindex(metad, is->E);
+
+  fprintf(stderr, "starting production metadynamics run of %ld steps...\n", m->gam_nsteps);
+  for ( t = 1; t <= m->nsteps; t++ ) {
+    IS2_PICK(is, id, h);
+    enew = is->E + h * 2;
+    acc = metad_acc(metad, icur, enew, &inew);
+    if ( acc ) {
+      icur = inew;
+      IS2_FLIP(is, id, h);
+    }
+    metad_updatev(metad, icur);
+  }
+
+  return 0;
+}
+
+static int invt_is2_run(invtpar_t *m)
 {
   is2_t *is;
   int id, h;
@@ -84,15 +112,17 @@ static int invt_is2_run(par_t *m)
 
   /* equilibration at the critical temperature */
   is2_setuproba(1.0/IS2_TC, is->uproba);
-  for ( t = 1; t <= m->nequil; t++ ) {
+  for ( t = 1; ; t++ ) {
     IS2_PICK(is, id, h);
     if ( h <= 0 || mtrand() <= is->uproba[h] ) {
       IS2_FLIP(is, id, h);
     }
+    if ( is->E >= IS2_EMIN && is->E < IS2_EMAX ) break;
   }
 
   /* typical WL run */
-  metad = metad_open(IS2_EMIN, IS2_EMAX, 4, 0);
+  metad = metad_open(IS2_EMIN, IS2_EMAX, 4,
+      m->pbc, m->gaussig, m->okmax, m->win, m->winn);
   icur = metad_getindex(metad, is->E);
   for ( t = 1; ; t++ ) {
     IS2_PICK(is, id, h);
@@ -108,12 +138,15 @@ static int invt_is2_run(par_t *m)
       if ( sacc && metad->a < m->alpha0 )
         break;
     }
+    if ( t % 100000 == 0 ) {
+      printf("t %ld, fl %g\n", t, metad->hflatness);
+      metad_save(metad, "vbias.dat");
+    }
   }
 
   /* constant magnitude run */
   invt_is2_prerun(m, metad, is);
 
-  metad_save(metad, "vbias.dat");
   is2_close(is);
   metad_close(metad);
 
@@ -122,12 +155,15 @@ static int invt_is2_run(par_t *m)
 
 int main(int argc, char **argv)
 {
-  par_t m[1];
+  invtpar_t m[1];
 
   invtpar_init(m);
   m->nequil = 10000;
   m->nsteps = 100000000;
   m->alpha0 = 1e-6;
+  m->gam_nsteps = 10000000;
+  m->gam_nstave = 1000;
+  m->pbc = 0;
   invtpar_doargs(m, argc, argv);
   invtpar_dump(m);
   invt_is2_run(m);

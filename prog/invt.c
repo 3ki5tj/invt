@@ -8,6 +8,7 @@
 #include "intq.h"
 #include "invtsamp.h" /* MD and MC sampling of the 1D test system */
 #include "corr.h"
+#include "ave.h"
 
 
 
@@ -54,7 +55,7 @@ __inline static void mbin_update(double *v, int n, int i,
       k = pbc ? k - n : 2 * n - 1 - k;
     }
 
-    v[k] += a * win[ abs(j) ];
+    v[k] += a * win[j];
   }
 }
 
@@ -124,6 +125,7 @@ __inline static void premeta(const invtpar_t *m, double *gamma)
 /* simulate a metadynamics process
  * return the root-mean-squared error of the inverse time scheme */
 static double simulmeta(const invtpar_t *m, intq_t *intq,
+    const double *win, int winn,
     double *err0, const double *xerr0)
 {
   double a, err;
@@ -174,7 +176,7 @@ static double simulmeta(const invtpar_t *m, intq_t *intq,
     a /= m->p[i];
 
     /* update the bias potential  */
-    mbin_update(its->v, n, i, a, m->win, m->winn, m->pbc);
+    mbin_update(its->v, n, i, a, win, winn, m->pbc);
 
     /* accumulate data for correlation functions */
     if ( prod && corr != NULL && (t + 1) % m->nstcorr == 0 ) {
@@ -221,6 +223,41 @@ static double simulmeta(const invtpar_t *m, intq_t *intq,
 
 
 
+/* prepare the window function */
+static double *invt_prepwin(invtpar_t *m,
+    int *winn, double **lambda)
+{
+  int i, n = m->n, pbc = m->pbc;
+  double *win;
+
+  xnew(win, n);
+  if ( m->gaussig > 0 ) {
+    mkgauswin(m->gaussig, n, pbc, win, winn);
+  } else if ( m->okmax >= 0 ) {
+    mksincwin(m->okmax, n, pbc, win, winn);
+  } else {
+    /* copy the user window */
+    *winn = m->winn;
+    for ( i = 0; i < m->winn; i++ )
+      win[i] = m->win[i];
+  }
+
+  /* modify the window function such that all eigenvalues
+   * lambda[i] are positive-definite */
+  *lambda = stablizewin(n, winn, win, pbc, 0, m->verbose);
+  if ( m->fnwin[0] != '\0' ) {
+    /* save the window kernel */
+    savewin(*winn, win, m->fnwin);
+  }
+  if ( m->fnwinmat[0] != '\0' ) {
+    /* save the n x n updating matrix */
+    savewinmat(*winn, win, n, pbc, m->fnwinmat);
+  }
+  return win;
+}
+
+
+
 static double invt_run(invtpar_t *m)
 {
   double err = 0,  e,  se = 0,  see = 0,  ave,  averr,  stde;  /* final */
@@ -230,6 +267,8 @@ static double invt_run(invtpar_t *m)
   double optc, errmin = 0; /* optimal c, predicted minimal error */
   double T;
   double alphaf; /* final updating magnitude */
+  int winn;
+  double *win;
   double *lambda = NULL, *gamma = NULL;
   double *xerr0 = NULL, *xerr = NULL;
   intq_t *intq = NULL;
@@ -239,20 +278,8 @@ static double invt_run(invtpar_t *m)
   /* clock() its probably better than time(NULL) */
   mtscramble( clock() );
 
-  /* estimate the eigenvalues of the w matrix,
-   * for the updating scheme */
-  //lambda = geteigvals(m->n, m->winn, m->win, m->pbc, 0, NULL, 1);
-  /* modify the window function such that all eigenvalues
-   * lambda[i] are positive-definite */
-  lambda = trimwindow(m->n, &m->winn, m->win, m->pbc, 0, m->verbose);
-  if ( m->fnwin[0] != '\0' ) {
-    /* save the window kernel */
-    savewin(m->winn, m->win, m->fnwin);
-  }
-  if ( m->fnwinmat[0] != '\0' ) {
-    /* save the n x n updating matrix */
-    savewinmat(m->winn, m->win, m->n, m->pbc, m->fnwinmat);
-  }
+  /* prepare the window function */
+  win = invt_prepwin(m, &winn, &lambda);
 
   /* estimate the integrals of the autocorrelation functions
    * of the eigenmodes for the updating scheme */
@@ -271,7 +298,7 @@ static double invt_run(invtpar_t *m)
 
   if ( m->docorr ) {
     /* compute the correlation functions for a single run */
-    err = simulmeta(m, NULL, &err0, xerr0);
+    err = simulmeta(m, NULL, win, winn, &err0, xerr0);
   } else {
     /* do multiple runs to compute the average error */
     T = (double) m->nsteps;
@@ -341,7 +368,7 @@ static double invt_run(invtpar_t *m)
     /* repeat `ntr` independent simulations */
     for ( i = 0; i < ntr; i++ ) {
       /* run simulation */
-      err = simulmeta(m, intq, &err0, xerr0);
+      err = simulmeta(m, intq, win, winn, &err0, xerr0);
 
       /* accumulators for the final error */
       e = err * err;

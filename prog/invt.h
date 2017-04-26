@@ -89,6 +89,69 @@ __inline static double normalize(double *v, int n, double sig,
 
 
 
+/* construct a Gaussian window
+ * which may not be stable */
+static void mkgauswin(double sig, int n, int pbc, double *win, int *winn)
+{
+  int i, winmax;
+  double x, s;
+
+  /* truncate the Gaussian at 10 * sigma */
+  *winn = (int) (sig * 10 + 0.5);
+  if ( *winn < 1 ) *winn = 1;
+
+  /* limit the maximal bin width */
+  winmax = pbc ? (n/2 + 1) : n;
+  if ( *winn > winmax ) *winn = winmax;
+
+  win[0] = 1;
+  s = win[0];
+  for ( i = 1; i < *winn; i++ ) {
+    x = i / sig;
+    win[i] = exp(-0.5 * x * x);
+    s += win[i] * 2;
+  }
+
+  /* normalize the window function, such that
+   * win[0] + 2 * (win[1] + ... + win[n - 1]) = 1 */
+  for ( i = 0; i < *winn; i++ ) {
+    win[i] /= s;
+  }
+}
+
+
+
+/* construct the window for an optimal updating scheme */
+static void mksincwin(int km, int n, int pbc, double *win, int *winn)
+{
+  int i;
+  double k2p1 = km * 2 + 1, ang, y;
+
+  *winn = pbc ? (n/2 + 1) : n;
+
+  if ( pbc ) {
+    /* win[i] = sin((2*km+1)*i*Pi/n)/sin(i*Pi/n)/n; */
+    win[0] = 1.0 * k2p1 / n;
+    for ( i = 1; i < *winn; i++ ) {
+      ang = i * M_PI / n;
+      y = sin(k2p1 * ang);
+      win[i] = y / sin(ang) / n;
+    }
+  } else {
+    /* win[i] = {(-1)^(n+km+i-1)+
+     *         sin[(2*km+1)*i*Pi/2/n]/sin(i*Pi/2/n)}/(2*n); */
+    win[0] = ((((n + km) % 2) ? 1 : -1) + k2p1)/ (2.0 * n);
+    for ( i = 1; i < n; i++ ) {
+      ang = i * M_PI / (2 * n);
+      y = sin(k2p1 * ang);
+      win[i] = ( ((n + km + i) % 2 ? 1 : -1)
+             + y / sin(ang) ) / (2 * n);
+    }
+  }
+}
+
+
+
 /* estimate the eigenvalues of the updating scheme
  * for a given window `win` */
 static double *geteigvals(int n,
@@ -107,15 +170,14 @@ static double *geteigvals(int n,
   /* loop over eigenvalues */
   for ( i = 0; i < n; i++ ) {
     lambda[i] = 1;
-    /* loop over windows */
+    /* loop over kernel indices
+     * lambda_i = 1 - 4 Sum_{j=1}^b mu_j sin^2(i*j*PI/(gn))
+     * where g == 1 for periodic or g == 2 for non-periodic variable */
     for ( j = 1; j < winn; j++ ) {
       x = i * j * M_PI / n;
-      if ( !pbc ) {
-        x *= 0.5;
-      }
+      if ( !pbc ) x *= 0.5;
       x = sin(x);
-      fac = 4;
-      if ( pbc && j * 2 == n ) fac = 2;
+      fac = ( pbc && j * 2 == n ) ? 2 : 4;
       lambda[i] -= fac * win[j] * x * x;
     }
     if ( lambda[i] < -tol ) {
@@ -207,36 +269,32 @@ __inline static int savewinmat(int winn, double *win,
 
 /* modify the window function
  * such that no eigenvalue is negative */
-__inline static double *trimwindow(int n,
+__inline static double *stablizewin(int n,
     int *winn, double *win,
     int pbc, double tol, int verbose)
 {
   const int itmax = 10000;
   int i, j, err, it;
   double lam, lamn, lammax, *lambda = NULL;
-  double nwin[NBMAX + 1];
+  double *nwin;
+
+  xnew(nwin, n + 1);
 
   /* A1. copy window function */
-  for ( i = 0; i < *winn; i++ ) {
+  for ( i = 0; i < *winn; i++ )
     nwin[i] = win[i];
-  }
-  for ( i = *winn; i < NBMAX; i++ ) {
+  for ( i = *winn; i < n; i++ )
     nwin[i] = 0;
-  }
-
-  if ( n > NBMAX ) {
-    fprintf(stderr, "cannot use this function with %d > %d\n",
-      n, NBMAX);
-    exit(1);
-  }
 
   for ( it = 0; it < itmax; it++ ) {
     /* B1. compute the eigenvalues from the window */
     lambda = geteigvals(n, *winn, nwin, pbc,
         tol, &err, it == itmax - 1);
+    //for ( i = 0; i < n; i++ ) printf("i %4d: lambda %8.5f, win %8.5f\n", i, lambda[i], win[i]);
+    //getchar();
 
     /* B2. change negative eigenvalues to zeros */
-    lammax = 0;
+    lammax = 0; /* magnitude of the most negative eigenvalue */
     err = 0;
     for ( i = 0; i < n; i++ ) {
       if ( lambda[i] < 0 ) {
@@ -273,8 +331,10 @@ __inline static double *trimwindow(int n,
     if ( err == 0 || it == itmax - 1 ) {
       fprintf(stderr, "it %d: lambda %g, %g, ..., %g lamn %g\n",
           it, lambda[0], lambda[1], lambda[n - 1], lamn);
+      if ( err == 0 ) break;
     }
 
+    /* construct a new window */
     for ( j = 0; j < *winn; j++ ) {
       if ( pbc ) {
         /* periodic boundary condition */
@@ -333,6 +393,7 @@ __inline static double *trimwindow(int n,
     win[j] = nwin[j];
   }
 
+  free(nwin);
   return lambda;
 }
 
