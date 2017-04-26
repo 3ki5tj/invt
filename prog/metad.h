@@ -11,6 +11,7 @@ typedef struct {
   int n;
   double *v; /* bias potential */
   double *h; /* histogram */
+  double *vref; /* reference bias potential */
   double a; /* updating magnitude */
   int pbc; /* periodic boundary condition */
   int winn;
@@ -69,9 +70,11 @@ static metad_t *metad_open(int xmin, int xmax, int xdel,
   metad->xmax = metad->xmin + metad->n * metad->xdel;
   xnew(metad->v, metad->n);
   xnew(metad->h, metad->n);
+  xnew(metad->vref, metad->n);
   for ( i = 0; i < metad->n; i++ ) {
     metad->v[i] = 0;
     metad->h[i] = 0;
+    metad->vref[i] = 0;
   }
   metad->a = 1.0 / metad->n;
   metad->pbc = pbc;
@@ -158,7 +161,7 @@ static int metad_wlcheck(metad_t *metad)
   /* compute the histogram flatness */
   metad->hflatness = metad_hflatness(metad);
   /* return if the histogram not flatness enough */
-  if ( metad->hflatness > 0.2 ) return 0;
+  if ( metad->hflatness > 0.4 ) return 0;
 
   /* reduce the updating magnitude and clear the histogram */
   metad->a *= 0.5;
@@ -224,8 +227,9 @@ static int metad_save(metad_t *metad, const char *fn)
   fprintf(fp, "# %d %d %d %d %g\n",
       metad->n, metad->xmin, metad->xmax, metad->xdel, metad->a);
   for ( i = 0; i < metad->n; i++ ) {
-    fprintf(fp, "%d %g %g\n",
-        metad->xmin + i * metad->xdel, metad->v[i], metad->h[i]);
+    fprintf(fp, "%d %g %g %g\n",
+        metad->xmin + i * metad->xdel,
+        metad->v[i], metad->h[i], metad->vref[i]);
   }
   fclose(fp);
   return 0;

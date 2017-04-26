@@ -4,7 +4,7 @@
 #include "metad.h"
 
 const double IS2_TC = 2.3;
-const int IS2_EMIN = -2*IS2_N + 112;
+const int IS2_EMIN = -2*IS2_N + 116;
 const int IS2_EMAX = 0;
 
 /* constant updating magnitude run
@@ -98,6 +98,37 @@ static int invt_is2_simul(invtpar_t *m, metad_t *metad, is2_t *is, double *gamma
   return 0;
 }
 
+static int invt_is2_addexact(metad_t *metad, int l)
+{
+  char fn[128], s[128];
+  FILE *fp;
+  double *lndos, v0;
+  int i, id, n;
+
+  sprintf(fn, "islogdos%dx%d.txt", l, l);
+  if ((fp = fopen(fn, "r")) == NULL) {
+    fprintf(stderr, "cannot read %s\n", fn);
+    return -1;
+  }
+  n = l*l;
+  xnew(lndos, n + 1);
+  for ( i = 0; i <= n; i++ ) {
+    fgets(s, sizeof s, fp);
+    sscanf(s, "%lf", &lndos[i]);
+  }
+  fclose(fp);
+
+  /* map the exact dos to the grid */
+  for ( i = 0; i < metad->n; i++ ) {
+    id = (IS2_EMIN + 2*n)/4 + i;
+    if ( i == 0 ) v0 = lndos[id];
+    metad->vref[i] = lndos[id] - v0;
+  }
+  free(lndos);
+
+  return 0;
+}
+
 static int invt_is2_run(invtpar_t *m)
 {
   is2_t *is;
@@ -123,6 +154,7 @@ static int invt_is2_run(invtpar_t *m)
   /* typical WL run */
   metad = metad_open(IS2_EMIN, IS2_EMAX, 4,
       m->pbc, m->gaussig, m->okmax, m->win, m->winn);
+  invt_is2_addexact(metad, IS2_L);
   icur = metad_getindex(metad, is->E);
   for ( t = 1; ; t++ ) {
     IS2_PICK(is, id, h);
@@ -161,7 +193,7 @@ int main(int argc, char **argv)
   m->nequil = 10000;
   m->nsteps = 100000000;
   m->alpha0 = 1e-6;
-  m->gam_nsteps = 10000000;
+  m->gam_nsteps = 100000000;
   m->gam_nstave = 1000;
   m->pbc = 0;
   invtpar_doargs(m, argc, argv);

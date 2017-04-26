@@ -17,7 +17,7 @@ $(bins): % : %.c $(deps)
 
 clean:
 	rm -rf $(bins) \
-	  a.out *~ .*.un~ */*~ */.*.un~ *.dat *.pos *.log
+	  a.out *~ .*.un~ */*~ */.*.un~ *.dat *.pos *.log vgcore*
 	rstrip.py -Rlv
 
 Bossman: clean
