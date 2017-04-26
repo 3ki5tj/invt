@@ -260,8 +260,9 @@ static double *invt_prepwin(invtpar_t *m,
 
 static double invt_run(invtpar_t *m)
 {
-  double err = 0,  e,  se = 0,  see = 0,  ave,  averr,  stde;  /* final */
-  double err0, e0, se0 = 0, see0 = 0, ave0, averr0, stde0; /* initial */
+  double err = 0, averr, stde;  /* final */
+  double err0, averr0, stde0; /* initial */
+  ave_t ei[1], ef[1];
   /* reference values */
   double errref = 0, err0ref, err1ref = 0; /* final, initial, final saturated */
   double optc, errmin = 0; /* optimal c, predicted minimal error */
@@ -287,6 +288,8 @@ static double invt_run(invtpar_t *m)
 
   xnew(xerr0, m->n);
   xnew(xerr, m->n);
+  ave_clear(ei);
+  ave_clear(ef);
 
   /* theoretical estimate of the initial saturated error */
   err0ref = esterror_eql(m->alpha0, m->n, xerr0, lambda, gamma);
@@ -370,48 +373,30 @@ static double invt_run(invtpar_t *m)
       /* run simulation */
       err = simulmeta(m, intq, win, winn, &err0, xerr0);
 
-      /* accumulators for the final error */
-      e = err * err;
-      se += e;
-      see += e * e;
-      ave = se / (i + 1);
-      averr = sqrt( ave );
-
-      /* accumulators for the initial error */
-      e0 = err0 * err0;
-      se0 += e0;
-      see0 += e0 * e0;
-      ave0 = se0 / (i + 1);
-      averr0 = sqrt( ave0 );
+      /* accumulators for the initial and final errors */
+      ave_add(ei, err * err); averr0 = sqrt( ei->ave );
+      ave_add(ef, err * err); averr  = sqrt( ef->ave );
 
       printf("%4ld: err %10.8f -> %10.8f, "
                    "ave %10.8f -> %10.8f, "
                    "sqr %e -> %e\n",
-          i, err0, err,
-          averr0, averr,
-          ave0, ave);
+          i, err0, err, averr0, averr, ei->ave, ef->ave);
     }
 
     /* statistics for the final square error */
-    ave = se / ntr;
-    averr = sqrt( ave );
-    stde = sqrt( see / ntr - ave * ave );
-    if ( ntr > 1 ) {
-      stde /= sqrt(ntr - 1.0) ;
-    }
+    averr = sqrt( ef->ave );
+    stde = sqrt( ef->var );
+    if ( ntr > 1 ) stde /= sqrt(ntr - 1.0) ;
 
     /* statistics for the initial square error */
-    ave0 = se0 / ntr;
-    averr0 = sqrt( ave0 );
-    stde0 = sqrt( see0 / ntr - ave0 * ave0 );
-    if ( ntr > 1 ) {
-      stde0 /= sqrt(ntr - 1.0);
-    }
+    averr0 = sqrt( ei->ave );
+    stde0 = sqrt( ei->var );
+    if ( ntr > 1 ) stde0 /= sqrt(ntr - 1.0);
 
     printf("average error: %10.8f -> %10.8f, sqr %e -> %e, "
         "norm. sqr %e, stdsqr %e -> %e\n",
-        averr0, averr, ave0, ave,
-        ave * (T + m->t0), stde0, stde);
+        averr0, averr, ei->ave, ef->ave,
+        ef->ave * (T + m->t0), stde0, stde);
     printf("predicted val: %10.8f -> %10.8f, sqr %e -> %e, "
         "norm. sqr %e\n",
         err0ref, errref, err0ref * err0ref, errref * errref,

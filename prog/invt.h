@@ -290,7 +290,7 @@ __inline static double *stablizewin(int n,
     /* B1. compute the eigenvalues from the window */
     lambda = geteigvals(n, *winn, nwin, pbc,
         tol, &err, it == itmax - 1);
-    //for ( i = 0; i < n; i++ ) printf("i %4d: lambda %8.5f, win %8.5f\n", i, lambda[i], win[i]);
+    //for ( i = 0; i < n; i++ ) printf("i %4d: lambda %18.15f, win %18.15f\n", i, lambda[i], win[i]);
     //getchar();
 
     /* B2. change negative eigenvalues to zeros */

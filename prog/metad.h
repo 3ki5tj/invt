@@ -47,7 +47,7 @@ static double *metad_prepwin(metad_t *metad,
 
   /* modify the window function such that all eigenvalues
    * lambda[i] are positive-definite */
-  *lambda = stablizewin(n, winn, win, pbc, 0, 1);
+  *lambda = stablizewin(n, winn, win, pbc, 0.0, 1);
   //  /* save the window kernel */
   //  savewin(*winn, win, m->fnwin);
   //  /* save the n x n updating matrix */

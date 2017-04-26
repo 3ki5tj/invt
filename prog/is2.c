@@ -4,7 +4,7 @@
 #include "metad.h"
 
 const double IS2_TC = 2.3;
-const int IS2_EMIN = -2*IS2_N + 116;
+const int IS2_EMIN = -2*IS2_N + 112;
 const int IS2_EMAX = 0;
 
 /* constant updating magnitude run
@@ -138,7 +138,7 @@ static int invt_is2_run(invtpar_t *m)
       if ( sacc && metad->a < m->alpha0 )
         break;
     }
-    if ( t % 100000 == 0 ) {
+    if ( t % 1000000 == 0 ) {
       printf("t %ld, fl %g\n", t, metad->hflatness);
       metad_save(metad, "vbias.dat");
     }
