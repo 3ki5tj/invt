@@ -1,4 +1,8 @@
 #include "util.h"
+#include "corr.h"
+#include "cosmodes.h"
+#include "eig.h"
+
 
 
 /* metadynamics for integer */
@@ -8,11 +12,16 @@ typedef struct {
   double *v; /* bias potential */
   double *h; /* histogram */
   double a; /* updating magnitude */
+  int pbc; /* periodic boundary condition */
+  double *costab; /* cosine transform coefficients */
+  double *u;
+  double *tmat; /* n x n transition matrix */
+  corr_t *corr;
 } metad_t;
 
 
 
-static metad_t *metad_open(int xmin, int xmax, int xdel)
+static metad_t *metad_open(int xmin, int xmax, int xdel, int pbc)
 {
   metad_t *metad;
   int i;
@@ -29,7 +38,11 @@ static metad_t *metad_open(int xmin, int xmax, int xdel)
     metad->v[i] = 0;
     metad->h[i] = 0;
   }
-  metad->a = 1;
+  metad->a = 1.0 / metad->n;
+  metad->pbc = pbc;
+  metad->costab = mkcostab(metad->n, metad->pbc);
+  xnew(metad->tmat, metad->n * metad->n);
+  xnew(metad->u, metad->n);
   return metad;
 }
 
@@ -39,6 +52,9 @@ static void metad_close(metad_t *metad)
 {
   free(metad->v);
   free(metad->h);
+  free(metad->costab);
+  free(metad->tmat);
+  free(metad->u);
   free(metad);
 }
 
@@ -107,15 +123,19 @@ static int metad_wlcheck(metad_t *metad)
   /* return if the histogram not flatness enough */
   if ( hflatness > 0.2 ) return 0;
 
+  /* reduce the updating magnitude and clear the histogram */
   metad->a *= 0.5;
   for ( i = 0; i < metad->n; i++ ) metad->h[i] = 0;
+  fprintf(stderr, "changing the updating magnitude to %g\n", metad->a);
+  return 1;
 }
 
 
 
 static void metad_updatev(metad_t *metad, int i)
 {
-  metad->v[i] += metad->a;
+  double amp = metad->n * metad->a;
+  metad->v[i] += amp;
   metad->h[i] += 1;
 }
 
@@ -129,6 +149,7 @@ static void metad_trimv(metad_t *metad)
   for ( i = 0; i < metad->n; i++ )
     metad->v[i] -= v0;
 }
+
 
 
 static int metad_save(metad_t *metad, const char *fn)
@@ -149,4 +170,111 @@ static int metad_save(metad_t *metad, const char *fn)
   }
   fclose(fp);
   return 0;
+}
+
+__inline static void metad_getcosmodes(metad_t *metad, int id)
+{
+  int k, n = metad->n;
+
+  for ( k = 1; k < n; k++ ) {
+    metad->u[k] = metad->costab[k*n + id];
+  }
+}
+
+
+/* compute the normalized transition matrix */
+__inline static double *metad_normalize_tmat(metad_t *metad)
+{
+  int i, j, n = metad->n;
+  double *mat, *col, x, y, z, dx;
+
+  xnew(mat, n * n);
+  xnew(col, n);
+  for ( j = 0; j < n; j++ ) {
+    for ( col[j] = 0, i = 0; i < n; i++ )
+      col[j] += metad->tmat[i*n + j];
+    if ( col[j] > 0 ) {
+      for ( i = 0; i < n; i++ )
+        mat[i*n + j] = metad->tmat[i*n + j] / col[j];
+    } else {
+      for ( i = 0; i < n; i++ )
+        mat[i*n + j] = ( i == j );
+    }
+  }
+
+  /* make the transition matrix symmetric
+   * to satisfy detailed balance */
+  for ( i = 0; i < n; i++ ) {
+    for ( j = i + 1; j < n; j++ ) {
+      x = mat[i*n + j];
+      y = mat[j*n + i];
+      z = (x + y)/2;
+      dx = z - x;
+      /* make sure the diagonal elements can afford the adjustment */
+      if ( dx > 0 ) {
+        if ( mat[j*n+j] < dx )
+          dx = mat[j*n+j];
+      } else {
+        if ( mat[i*n+i] < -dx )
+          dx = -mat[i*n+i];
+      }
+      mat[j*n + i] = mat[i*n + j] = x + dx;
+    }
+  }
+
+  {
+    // Gnuplot command:
+    //   plot "tmat.dat" matrix with image
+    // cf. http://www.gnuplotting.org/tag/matrix/
+    FILE *fp = fopen("tmat.dat", "w");
+    for ( i = 0; i < n; i++ ) {
+      for ( j = 0; j < n; j++ )
+        fprintf(fp, "%5.3f ", mat[i*n+j]);
+      fprintf(fp, "\n");
+    }
+    fclose(fp);
+  }
+
+  free(col);
+  return mat;
+}
+
+static void metad_getgamma_tmat(metad_t *metad, double *gam, double dt)
+{
+  int i, j, k, n = metad->n;
+  double *mat, *val, *vec, *g, x;
+
+  mat = metad_normalize_tmat(metad);
+  xnew(val, n);
+  xnew(vec, n*n);
+  xnew(g, n);
+  eigsym(mat, val, vec, n);
+  for ( i = 0; i < n; i++ ) {
+    x = val[i];
+    if ( x < 0 ) x = 0;
+    x = pow(x, 1.0/dt);
+    if ( x > 0.999999 ) x = 0.999999;
+    g[i] = (1 + x)/(1 - x);
+    //printf("%2d: %g %g %g\n", i, val[i], g[i], x);
+  }
+  for ( k = 1; k < n; k++ ) {
+    /* k: mode of updating matrix */
+    gam[k] = 0;
+    for ( j = 1; j < n; j++ ) {
+      /* j: mode of transition matrix */
+      /* matrix multiplication of phi and vec */
+      for ( x = 0, i = 0; i < n; i++ ) {
+        x += metad->costab[k*n + i] * vec[i*n + j];
+      }
+      //printf("k %d, j %d, x %g, g[j] %g, gam %g\n", k, j, x, g[j], gam[k]);
+      gam[k] += g[j] * x * x;
+    }
+    gam[k] /= n;
+    //printf("k %3d, gam %10.6f\n", k, gam[k]);
+  }
+
+  free(mat);
+  free(val);
+  free(vec);
+  free(g);
 }

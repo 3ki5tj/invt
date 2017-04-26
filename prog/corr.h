@@ -25,8 +25,8 @@ typedef struct {
 
 
 
-/* open an correction function object */
-static corr_t *corr_open(int n, int cap)
+/* open an correlation function object */
+__inline static corr_t *corr_open(int n, int cap)
 {
   corr_t *c;
 
@@ -44,8 +44,8 @@ static corr_t *corr_open(int n, int cap)
 
 
 
-/* close the correction function object */
-static void corr_close(corr_t *c)
+/* close the correlation function object */
+__inline static void corr_close(corr_t *c)
 {
   free(c->arr);
   free(c);
@@ -54,7 +54,7 @@ static void corr_close(corr_t *c)
 
 
 /* add a frame */
-static void corr_add(corr_t *c, double *u)
+__inline static void corr_add(corr_t *c, double *u)
 {
   int i, n = c->n;
 
@@ -73,7 +73,7 @@ static void corr_add(corr_t *c, double *u)
 
 
 
-static void corr_getave(corr_t *c, double *uave)
+__inline static void corr_getave(corr_t *c, double *uave)
 {
   int i, k, n = c->n;
 
@@ -96,7 +96,7 @@ static void corr_getave(corr_t *c, double *uave)
 
 /* compute autocorrelation functions
  * for a separation of j frames */
-static int corr_compute(corr_t *c, double *uu, int j,
+__inline static int corr_compute(corr_t *c, double *uu, int j,
     const double *uave)
 {
   int i, k, k2, n = c->n, tmax = c->cnt;
@@ -140,13 +140,13 @@ static int corr_compute(corr_t *c, double *uu, int j,
  * if `subave` is true, the time-average value is subtracted
  * from c->arr[] before computing the correlation function
  * otherwise, zero is assumed as the average */
-static int corr_save(corr_t *c, int dt,
+__inline static int corr_save(corr_t *c, int dt,
     double tmax, double tol,
     int subave, const char *fn)
 {
   int i, j, jmax, n = c->n, err;
   int *stopped = NULL;
-  double *uu0, *uu, *uave = NULL;
+  double *uu0, *uu, *uave = NULL, *gam;
   FILE *fp;
 
   if ( (fp = fopen(fn, "w")) == NULL ) {
@@ -157,6 +157,7 @@ static int corr_save(corr_t *c, int dt,
   xnew(uu0, n);
   xnew(uu, n);
   xnew(stopped, n);
+  xnew(gam, n);
 
   for ( i = 0; i < n; i++ ) {
     stopped[i] = 0;
@@ -192,6 +193,7 @@ static int corr_save(corr_t *c, int dt,
       /* save the static fluctuation as a reference point */
       for ( i = 0; i < n; i++ ) {
         uu0[i] = uu[i];
+        gam[i] = uu[i] * dt;
       }
     } else {
       /* decide if to stop the calculation */
@@ -200,6 +202,7 @@ static int corr_save(corr_t *c, int dt,
         if ( uu[i] <= uu0[i] * tol ) {
           stopped[i] = 1;
         }
+        gam[i] += 2 * uu[i] * dt;
         if ( stopped[i] ) {
           err += 1;
           break;
@@ -215,6 +218,11 @@ static int corr_save(corr_t *c, int dt,
     }
     fprintf(fp, "\n");
   }
+  fprintf(fp, "#gamma");
+  for ( i = 0; i < n; i++ ) {
+    fprintf(fp, "\t%g", gam[i]);
+  }
+  fprintf(fp, "\n");
 
   fprintf(stderr, "autocorrelation functions saved in %s, %d frames\n",
       fn, j);
@@ -224,6 +232,7 @@ static int corr_save(corr_t *c, int dt,
   free(uu0);
   free(uu);
   free(stopped);
+  free(gam);
 
   return 0;
 }
@@ -277,7 +286,7 @@ __inline static int corr_getgamma(corr_t *c, double *gam,
 
 
 /* print the thermodynamic averages of the modes */
-static int corr_printfluc(corr_t *c, int subave,
+__inline static int corr_printfluc(corr_t *c, int subave,
     const double *xerr)
 {
   int i, n = c->n;

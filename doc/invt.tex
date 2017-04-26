@@ -100,7 +100,7 @@ Galveston, Texas 77555-0304, USA}
   belongs to a class of bandpass updating schemes
   that are optimal for asymptotic convergence,
   and the optimal schedule of these schemes
-  is the inverse number of sampling steps with a proper shift,
+  is the inverse number of updating steps with a proper shift,
   as given by the $1/t$ prescription.
   %
 \end{abstract}
@@ -204,9 +204,9 @@ in metadynamics.
 Although the two window functions
 are not always associated with
 the two methods\cite{micheletti2004, kim2006, *kim2007, junghans2014},
-we will loosely use the terms WL and metadynamics
+we will colloquially use the terms WL and metadynamics
 to represent FDS simulations using the
-$\delta$- and Gaussian window functions, respectively.
+single-bin and Gaussian window functions, respectively.
 %
 %is that in the WL case,
 %each updating step is limited to the bin
@@ -245,14 +245,14 @@ morozov2007, zhou2008,
 komura2012, *caparica2012, *caparica2014,
 barducci2008, dickson2011, dama2014}.
 %
-For the WL algorithm, the optimal updating schedule
+For the single-bin (WL) case, the optimal updating schedule
 is a function of the
 inverse time\cite{
 belardinelli2007, *belardinelli2007jcp, *belardinelli2008, *belardinelli2016,
 liang2007,
 morozov2007, zhou2008}
 or
-the inverse number of simulation steps.
+the inverse number of updating steps.
 \note{
   About the origin of the inverse-time formula.
   Besides the Belardinelli paper,
@@ -271,7 +271,7 @@ we present a method of computing
 the optimal schedule
 for an adaptive FDS method
 with a general window function,
-including the $\delta$- and Gaussian one
+including the single-bin and Gaussian one
 used in the WL algorithm and metadynamics.
 %
 Our method maps the optimization problem to a mechanical one,
@@ -283,13 +283,13 @@ In this way, the optimal schedule
 can be deduced from the equation of motion
 of the particle that minimizes the action.
 %
-As the mass is defined from the updating window function,
-the resulting optimal schedule
-is different in the WL and metadynamics cases.
+The resulting optimal schedule
+depends on the updating window function
+through the mass function.
 %
-While the optimal schedule in the WL case
+While the optimal schedule in the single-bin case
 is given by the known inverse-time formula,
-the optimal schedule for metadynamics is more complex
+that for Gaussian case is more complex
 and sensitive to the simulation length
 and the width of the Gaussian window.
 %
@@ -297,10 +297,11 @@ In either case, however,
 the initial updating magnitude
 can be optimally set to
 half of the previous equilibrium value,
-which amounts to a shift of the origin of time in the WL case.
+which amounts to a shift of the origin of time
+in the single-bin case.
 %
 Further, we can generalize
-the WL updating scheme
+the single-bin updating scheme
 to a class of bandpass updating schemes
 that are optimal for long simulations,
 and the above origin-shifted inverse-time schedule
@@ -647,7 +648,9 @@ We refer to this scheme as the \emph{single-bin scheme},
 for it applies only to the bias potential
 at the current bin, $i(t)$.
 %
-In a more general \emph{multiple-bin scheme}, however,
+In a more general \emph{multiple-bin scheme},
+including the Gaussian updating scheme
+used in metadynamics,
 several neighboring bins are updated:
 %
 \begin{equation}
@@ -665,12 +668,26 @@ where the elements, $w_{ij}$'s, are a set of coefficients satisfying
 the restrictions to be discussed
 in Sec. \ref{sec:updating-matrix}.
 %
-The Gaussian updating scheme
-used in metadynamics
-is a multiple-bin scheme.
+Note that if the updating occurs
+only every few sampling steps,
+then $t$ means the number of updating steps.
 
 
 
+\subsubsection{Updating magnitude and the inverse-time formula}
+
+
+
+While adaptive FDS simulations
+can often sample the desired distribution,
+frequent updates to the bias potential
+disrupt the underlying equilibrium sampling
+and introduce artificial errors that need to be
+removed by gradually decreasing the updating magnitude\cite{
+  belardinelli2007, *belardinelli2007jcp, *belardinelli2008, *belardinelli2016,
+  zhou2005, morozov2007, zhou2008,
+  laio2005, bussi2006, poulain2006, liang2007,
+  crespo2010, *atchade2011, *fort2015}.
 %One can show that with a constant magnitude,
 %$\alpha(t) = \alpha > 0$,
 %the distribution collected from
@@ -682,18 +699,6 @@ is a multiple-bin scheme.
 %the equilibrium distribution,
 %Eq. \eqref{eq:pi_p_V}, no longer holds
 %at all times,
-While adaptive FDS simulations
-can often sample the desired distribution, $p_i$,
-even with a constant magnitude,
-$\alpha(t) = \alpha$,
-frequent updates to the bias potential
-disrupt the underlying equilibrium sampling
-and introduce artificial errors that need to be
-removed by gradually decreasing the updating magnitude\cite{
-  belardinelli2007, *belardinelli2007jcp, *belardinelli2008, *belardinelli2016,
-  zhou2005, morozov2007, zhou2008,
-  laio2005, bussi2006, poulain2006, liang2007,
-  crespo2010, *atchade2011, *fort2015}.
 %%
 %The source of the deviation is two-fold.
 %%
@@ -711,29 +716,24 @@ removed by gradually decreasing the updating magnitude\cite{
 
 
 
-\subsubsection{Updating magnitude and the inverse-time formula}
-
-
-
 In the original WL papers\cite{
 wang2001, *wang2001pre},
-the updating magnitude, $\alpha$,
+the updating magnitude, $\alpha(t)$,
 (or $\ln f$ therein)
 is controlled in stages.
 %
-In each stage, $\alpha$
+In each stage, $\alpha(t)$
 is kept constant,
 and the histogram along $i$
 is collected and monitored.
 %
 Once the histogram is sufficiently flat,
 we switch to a new stage
-with $\alpha$ reduced by a factor of $1/2$\cite{
+with $\alpha(t)$ reduced by a factor of $1/2$\cite{
 wang2001, *wang2001pre}.
 %
 While this scheme works well for early stages,
-%
-it tends to reduce $\alpha$
+it tends to reduce the magnitude
 too quickly in late stages, making the asymptotic error
 saturate\cite{
 belardinelli2007, *belardinelli2007jcp, *belardinelli2008, *belardinelli2016}.
@@ -753,13 +753,13 @@ is to follow the formula
 %
 where $t$,
 referred to as the ``time'' below,
-is the number of steps
+is the number of updating steps
 from the beginning of the simulation\cite{
 belardinelli2007, *belardinelli2007jcp, *belardinelli2008, *belardinelli2016,
 morozov2007, zhou2008,
 komura2012, *caparica2012, *caparica2014}.
 %
-An interesting explanation of this result\cite{
+An intuitive explanation of this result\cite{
   marsili2006, barducci2008}
 comes from the interpretation of
 the bias potential %under the WL updating scheme, Eq. \eqref{eq:wl_update},
@@ -1080,10 +1080,10 @@ is much longer than the autocorrelation time of noise.
 %
 For non-white noise,
 the equivalent value of $G^{(0)}_i$ can be approximately obtained
-from the integral,
-$\int_{-\infty}^\infty \sigma_{ij}(t) \, dt$,
-or in the discrete time case,
-$\sum_{-\infty}^\infty \sigma_{ij}(t)$.
+%from the integral,
+%$\int_{-\infty}^\infty \sigma_{ij}(t) \, dt$,
+%or in the discrete time case,
+$\sum_{t = -\infty}^\infty \sigma_{ij}(t)$.
 %
 \note{More explicitly,
 if the transition matrix of a period, $\tau$,
@@ -1125,14 +1125,14 @@ From Eqs.
 %\eqref{eq:h_split}
 %\eqref{eq:h_ave},
 %\eqref{eq:dvbardt},
-we get a set of decoupled equations
+we get % a set of decoupled equations
 %
 \begin{equation}
   \dot x_i(t)
   =
   -\alpha(t) \, \left[ x_i(t) - \xi_i(t) \right]
   ,
-\label{eq:dxdt_WL}
+\label{eq:dxdt_singlebin}
 \end{equation}
 %
 where the shifted histogram fluctuation
@@ -1151,8 +1151,8 @@ where the shifted histogram fluctuation
 \label{eq:xi_def}
 \end{equation}
 %
-is also governed by white noise as is $\zeta_i(t)$,
-i.e. we may write
+is also governed by white noise as is $\zeta_i(t)$:
+%i.e. we may write
 \begin{equation}
   \langle \xi_i(t) \, \xi_i(t') \rangle
   = G_i \, \delta(t - t')
@@ -1222,7 +1222,7 @@ that minimizes this error.
 
 
 We recall that
-the formal solution of Eq. \eqref{eq:dxdt_WL} is
+the formal solution of Eq. \eqref{eq:dxdt_singlebin} is
 %
 \begin{equation}
 x_i(T)
@@ -1396,16 +1396,14 @@ and Eq. \eqref{eq:alpha_invt}
 is the special case of $t_0 = 0$.
 %
 
-Since the above optimization is performed
-under a fixed $q(T)$,
-it can be improved
-by choosing a proper value of $q(T)$.
+We now determine the optimal value of $q(T)$,
+which is fixed in the above process.
 %
 This is equivalent to choosing a value of $t_0$
 \big[because $q(T) = \ln\bigl[1 + (T/t_0)\bigr]$,
 from the $t = 0$ case of Eq. \eqref{eq:expqt}\big].
 %
-By using the optimal schedule in Eq. \eqref{eq:ET_average},
+By using Eq. \eqref{eq:alpha_invt} in Eq. \eqref{eq:ET_average},
 we find the final total error to be
 %
 $E(T) = [ E(0) \, t_0^2 + \Gamma \, T ]/(t_0 + T)^2$,
@@ -1429,8 +1427,9 @@ and at this point, the error is given by
   \label{eq:Emin_singlebin}
 \end{equation}
 %
-This error is roughly equal to the overall histogram flatness
-and thus it can be conveniently estimated\cite{zhou2005, zhou2008}
+This error is roughly equal to
+the overall histogram flatness\cite{zhou2005, zhou2008}
+and thus it can be conveniently estimated
 (see also Appendix \ref{sec:flatness}).
 
 
@@ -1458,7 +1457,7 @@ Then, Eq. \eqref{eq:vt_diffeq} is generalized to
 
 The optimization procedure is similar to the single-bin case.
 %
-The key simplification comes from the
+The key step comes from the
 projection of the bias potential to the $n$ eigenmodes
 of the updating matrix, $\mathbf w$,
 formed by the relative magnitudes, $w_{ij}$'s.
@@ -1482,12 +1481,13 @@ $\mathbf p = (p_1, \dots, p_n)$,
 ${\dot V}_i(t)$
 in Eq. \eqref{eq:vt_diffeq_mbin}
 should be a constant of $i$
-if $h_j(t)$ were the same as $p_j$.
-%
-This allows the bias potential to grow uniformly
+if $h_j(t)$ were the same as $p_j$,
+i.e.
+$\sum_{j=1}^n w_{ij}$ should be a constant
+to allow the bias potential to grow uniformly
 in the asymptotic regime.
 %
-Thus, by a proper scaling of $\alpha(t)$,
+By a proper overall scaling of $\mathbf w$,
 we may write this condition as
 %
 \begin{equation}
@@ -1526,15 +1526,14 @@ the detailed balance condition,
 for the error weighting distribution, $\pmb \rho$,
 introduced in Eq. \eqref{eq:vbar_def}.
 %
-This artificial condition
-restrains the form of the updating matrix, $\mathbf w$,
-and it requires, for the commonly-used uniform distribution, $\pmb\rho$,
-a symmetric updating matrix, $\pmb w$.
-%
-More generally, only
+This requires the updating matrix, $\mathbf w$
+to be symmetric
+for a uniform $\pmb\rho$,
+or more generally,
 the scaled matrix, $\sqrt{ \rho_i/\rho_j } \, w_{ij}$,
-needs to be symmetric,
-and the symmetry allows the diagonalization
+to be symmetric.
+%
+This symmetry allows the diagonalization
 of $\mathbf w$ with a set of
 eigenvectors, $\phi_{ki}$,
 %
@@ -1613,7 +1612,7 @@ Finally, there is a stability condition.
 %
 In a \emph{stable} updating scheme,
 no eigenmode grows indefinitely,
-which means that no eigenvalue, $\lambda_k$,
+which means that, as we will show, no eigenvalue, $\lambda_k$,
 can be negative.
 
 
@@ -1737,11 +1736,11 @@ of mode $k$, respectively.
 
 
 
-\subsubsection{Error functional}
+\subsubsection{Error}
 
 
 
-The error function defined in Eq. \eqref{eq:error_def}
+The error defined in Eq. \eqref{eq:error_def}
 can be rewritten in terms of the eigenmodes of $\mathbf w$,
 %
 \begin{align}
@@ -1915,90 +1914,80 @@ from an adaptive FDS simulation.
 
 
 
-\subsubsection{\label{sec:eqlerr}
-Modeling initial error from a simulation
-under a constant updating magnitude
-}
+%\subsubsection{\label{sec:eqlerr}
+%Initial error
+%%from a simulation under a constant updating magnitude
+%}
 
 
 
-Before addressing the optimal schedule
-for a multiple-bin scheme,
-we will first compute the equilibrium error
-under a constant schedule,
-$\alpha(t) = a_0$.
-%
-After a long period, $T'$,
-the residual error becomes negligible, and
-the $k$th component of the asymptotic error
-is given by
-%
+%Before addressing the optimal schedule
+%for a multiple-bin scheme,
+%we will first compute the equilibrium error
+%under a constant schedule,
+%$\alpha(t) = a_0$.
+%%
+%%In terms of the components, we have
+%%
 %\begin{align}
-%  \Err
+%  \left\langle
+%    y_k^2
+%  \right\rangle
 %  &=
-%  \Err_A
-%  =
 %  \int_0^{T'}
-%    \sum_{k = 2}^n
-%      \Gamma_k \, (\lambda_k \, a_0)^2 \,
+%    \Gamma_k \, (\lambda_k \, a_0)^2 \,
 %      e^{ 2 \, \lambda_k \, a_0 \, (t - T') }
 %    \, dt
 %  \notag
 %  \\
-%  &
-%  =
-%  %\stackrel{ T' \to \infty }
-%  %{ =\joinrel=\joinrel=\joinrel= }
-%  %
-%  \sum_{ k = 2 }^n
-%    \frac 1 2 \, \Gamma_k \, \lambda_k \, a_0
+%  &=
+%  \frac 1 2 \, \Gamma_k \, \lambda_k \, a_0
 %  ,
 %  \qquad
 %  ( T' \to \infty )
 %  .
-%\notag
-%%\label{eq:error_eql}
+%\label{eq:y2_eql}
 %\end{align}
+%%
+
+
+To model the initial error for Eq. \eqref{eq:error_res},
+we will assume that
+the adaptive FDS sampling
+was performed under a constant updating magnitude
+for sufficiently long.
 %
-%In terms of the components, we have
+Then, one can show that
+\begin{equation}
+  \left\langle y_k^2(0) \right\rangle = \frac 1 2 \, \Gamma_k \, \lambda_k \, a_0
+  ,
+  \label{eq:y2_eql}
+\end{equation}
 %
-\begin{align}
-  \left\langle
-    y_k^2
-  \right\rangle
-  &=
+\note{
+Consider a long period, $T'$, under a fixed schedule,
+$\alpha(t) = a_0$,
+the residual error becomes negligible, and
+the $k$th component of the asymptotic error
+is given by
+%
+\begin{align*}
+  \left\langle y_k^2(T') \right\rangle
+  =
   \int_0^{T'}
     \Gamma_k \, (\lambda_k \, a_0)^2 \,
       e^{ 2 \, \lambda_k \, a_0 \, (t - T') }
     \, dt
-  \notag
-  \\
-  &=
+  \stackrel{ T' \to \infty }
+  { =\joinrel=\joinrel=\joinrel= }
   \frac 1 2 \, \Gamma_k \, \lambda_k \, a_0
-  ,
-  \qquad
-  ( T' \to \infty )
   .
-\label{eq:y2_eql}
-\end{align}
+\notag
+%\label{eq:error_eql}
+\end{align*}
+}
 %
-
-
-We will use this result to model the initial error
-before starting the target schedule, $\alpha(t)$.
-%
-That is, we assume that there is an equilibration phase
-for $t < 0$ during which the adaptive FDS sampling was performed
-under a constant updating magnitude,
-$\alpha(t) = a_0$, and at the end of the equilibration, $t = 0$,
-the system has entered the equilibrium state of sampling,
-in which the error of mode $k$ obeys Eq. \eqref{eq:y2_eql}.
-%
-Using this result
-for the $\langle y_k^2(0) \rangle$'s
-in Eq. \eqref{eq:error_res},
-the residual error at the end of period $T$
-is given by
+and
 %
 \begin{equation}
   \Err_R(T)
@@ -2010,6 +1999,8 @@ is given by
   \label{eq:error_res1}
 \end{equation}
 %
+This expression excludes systematic bias
+and thus serves as a lower bound for a realistic simulation.
 
 
 
@@ -2208,17 +2199,17 @@ $\int_0^{q(T)} m(Q) \, dQ = 1$.
   \begin{tikzpicture}[very thick, scale=2.5, every node/.style={scale=1.5}]
     % distribution
     \draw[domain=0:2.5, variable=\x, dashed, gray, ultra thick]
-      plot({\x}, {1.5*exp(-0.5*\x*\x)});
+      plot({\x}, {sqrt(2*exp(-2*\x)+exp(-\x))});
 
     % shade
     \fill [gray!30!white, domain=0.7:2.2, variable=\x]
       (0.7, 0) --
-      plot ({\x}, {1.5*exp(-0.5*\x*\x)})
+      plot ({\x}, {sqrt(2*exp(-2*\x)+exp(-\x))})
       -- (2.2, 0) -- cycle;
 
     % thick curve
     \draw[domain=0:2.2, variable=\x, ultra thick]
-      plot({\x}, {1.5*exp(-0.5*\x*\x)});
+      plot({\x}, {sqrt(2*exp(-2*\x)+exp(-\x))});
 
     % label for the shaded area
     \node[] at (1.1, 0.40) {$\dfrac{t}{T}$};
@@ -2226,13 +2217,13 @@ $\int_0^{q(T)} m(Q) \, dQ = 1$.
     \draw[<->] (0.6, 0)  --
                node[left, inner sep=1mm]
                {$\dfrac{1}{T \, \alpha}$}
-               (0.6, 1.174);
+               (0.6, 0.99488);
     % label for the ordinate
     %\node[fill=white] at (0.4, 0.7) {$\dfrac{1}{Ta}$};
 
-    \draw[] (0.5, 1.174) -- (0.7, 1.1740);
+    \draw[] (0.5, 0.99488) -- (0.7, 0.99488);
     \draw[->] (0, 0) -- node[below, inner sep=5mm] {$Q$} (2.8, 0);
-    \draw[->] (0, 0) -- node[above, rotate=90] {$m(Q)$} (0, 1.8);
+    \draw[->] (0, 0) -- node[above, rotate=90] {$m(Q)$} (0, 1.9);
 
     % xtics
     \draw[] (0.0, 0.1) -- (0.0, 0.0) node[below] {$0$};
@@ -2423,14 +2414,13 @@ we can rewrite the condition as
 \end{equation}
 %
 i.e. the optimal initial updating magnitude
-is always half of the equilibrium value.
-%
-This factor, $1/2$,
+is always half of the equilibrium value.\footnote{This factor, $1/2$,
 happens to coincide with the
 recommended reduction factor of the updating magnitude
 at stage transitions
 in the original WL algorithm\cite{
 wang2001, *wang2001pre}.
+}
 
 
 %For simulations with the same $a_0$,
@@ -2537,7 +2527,7 @@ characterizing the rigid window
 will be referred to as an \emph{updating kernel}\cite{bussi2006}.
 %
 To satisfy Eq. \eqref{eq:w_sumj},
-we impose the normalization condition
+we impose the normalization
 %
 \begin{equation}
   \mu_{-b} + \cdots + \mu_b = 1
@@ -2547,7 +2537,7 @@ we impose the normalization condition
 %
 with $\mu_l = 0$ for $|l| > b$.
 %
-If $b = n/2$, then $\mu_{-b}$ is removed
+If $b = n/2$, $\mu_{-b}$ is removed
 from the sum in Eq. \eqref{eq:mu_normalization}
 to avoid double counting.
 %
@@ -2560,8 +2550,8 @@ For simplicity, we also impose the symmetry
 \end{equation}
 %
 As shown in Appendix \ref{sec:wband_eig},
-the multiplication of $\mathbf w$
-is equivalent to a convolution with the kernel, and
+%the multiplication of $\mathbf w$
+%is equivalent to a convolution with the kernel, and
 the eigenvalues of $\mathbf w$ are
 the Fourier or cosine transform of the updating kernel:
 %
@@ -2575,13 +2565,12 @@ the Fourier or cosine transform of the updating kernel:
   \mu_l
   \cos
   \frac{ (k - 1) \, l \, 2 \, \pi }
-       {            n             }
+       {            g \, n        }
   ,
-  \label{eq:wband_eigenvalue_pbc}
+  \label{eq:wband_eigenvalue}
 \end{equation}
 %
-with a two-fold degeneracy,
-$\lambda_{n - k + 2} = \lambda_k$.
+where $g = 1$ here for the periodic variable.
 
 
 
@@ -2619,88 +2608,23 @@ the cutoff $b$ only needs to be less than $n$.
 Note that the two reflective mirrors effectively
 define a periodic variable of period $2 \, n$.
 Thus, the eigenvalues can be borrowed from
-Eq. \eqref{eq:wband_eigenvalue_pbc},
-with a doubled period:
-%
-\begin{equation}
-  \lambda_k
-  =
-  \mu_0
-  +
-  2
-  \sum_{ l = 1 }^b
-    \mu_l \,
-    \cos \frac{ (k - 1) \, l \, 2 \, \pi }
-              {            g \, n        }
-  ,
-  \label{eq:wband_eigenvalue}
-\end{equation}
-%
-where $g = 1$ or $2$
-in the periodic or non-periodic case, respectively.
+Eq. \eqref{eq:wband_eigenvalue},
+with a doubled period,
+i.e. $g$ is changed to $2$ in the non-periodic case.
 
 %\subsubsection{\label{sec:invert_wband}
 %Inversion}
 
 
 
-Since the eigenvalues are related to the updating kernel
-by a cosine transform,
-we can invert the relation as
-%
-\begin{equation}
-  \mu_l
-  =
-  \frac { 1 } { g \, n }
-  \sum_{ k = 1 }^{ g \, n }
-  \lambda_k
-  \cos \frac{ (k - 1) \, l \, 2 \, \pi }
-            {            g \, n        }
-  .
-\label{eq:mu_from_lambda}
-\end{equation}
-%
-In the non-periodic case,
-we have defined
-$\lambda_k \equiv \lambda_{2 \, n + 2 - k}$
-for $k = n + 2, \dots, 2 \, n$,
-as well as
-%
-\begin{align}
-  \lambda_{ n + 1 }
-  =
-  (-1)^{ n - 1 }
-  \lambda_1
-  +
-  2 \, \sum_{ k = 2 }^{ n }
-      (-1)^{n - k} \, \lambda_k
-  ,
-\label{eq:lambdan}
-\end{align}
-to satisfy the constraint, $\mu_n = 0$.
-%
-
-For the updating scheme to be stable,
-the cosine transform of the kernel
-must be nonnegative.
-%
-If this is not so,
-we can modify the kernel
-using the technique described
-in Appendix \ref{sec:stabilize_wband}.
-
-
-
-
-
 \subsubsection{\label{sec:procedure}
-Procedure for computing the optimal schedule and error
+Procedure of computing the optimal schedule and error
 }
 
 
-Here we give a procedure for computing
+Here we give a procedure of computing
 the optimal schedule and the error
-of a given adaptive FDS simulation.
+for a given adaptive FDS simulation.
 %
 Basically, we need to extract
 $\lambda_i$'s and $\Gamma_i$'s
@@ -2793,38 +2717,35 @@ We have the following procedure.
 
 \begin{enumerate}
 
-\item \label{item:lambda}
+\item
 Compute the eigenvalues, $\lambda_k$'s
 from the updating matrix, $\mathbf w$,
 or from Eq. \eqref{eq:wband_eigenvalue}
 for a homogeneous updating scheme.
 %
-Note also that
-the updating scheme should be stabilized
-using the procedure in Appendix \ref{sec:stabilize_wband}
-to ensure all eigenvalues are nonnegative.
+Note that
+the updating scheme should be stable
+with no negative eigenvalue
+(cf. the stabilization procedure in Appendix \ref{sec:stabilize_wband}).
 
 \item
 Run a preliminary adaptive FDS simulation
 %using the updating scheme
 with a constant updating magnitude, $a_0$.
 
-\item \label{item:Gamma}
+\item
 Compute $\Gamma_k$'s from Eq. \eqref{eq:varY}
     (cf. Appendix \ref{sec:Gamma_measure}).
 
-\item \label{item:qT}
-Compute the optimal $q(T)$ by solving Eq. \eqref{eq:opt_qT}.
+\item
+Compute the optimal $q(T)$ by solving Eq. \eqref{eq:opt_qT}
+using e.g. the bisection method.
 %
 Since $m(Q)$ is a decreasing function of $Q$,
-the equation can be solved
-for a sufficiently small $a_0$
-by the bisection method.
-%
-We start from an interval $[Q_L, Q_R]$
+we can start from an interval $[Q_L, Q_R]$
 that satisfies $m(Q_L) > 2/(T\,a_0) > m(Q_R)$
 (e.g. we can choose $Q_L = 0$,
-  and repeatedly increase $Q_R$ until
+  and repeatedly double $Q_R$ until
   the latter inequality is satisfied).
 %
 We can then iteratively refine the interval
@@ -2832,11 +2753,11 @@ by substituting $Q_M = (Q_L + Q_R)/2$
 for either $Q_L$ and $Q_R$,
 depending on the sign of $m(Q_M) - 2/(T \, a_0)$,
 until the width of the interval is less than
-the desired precision.
+the desired precision,
 %
-Then, $q(T)$ is given by $Q_M$.
+and set $q(T)$ to $Q_M$.
 
-\item \label{item:qopt}
+\item
 Compute the optimal schedule by
 numerically integrating Eqs. \eqref{eq:q_opt} and \eqref{eq:mint}.
 %
@@ -2857,7 +2778,7 @@ $t_{[ -1]} \equiv t_{[0]} = 0$, and
 $t_{[N+1]} \equiv t_{[N]} = T$.
 %
 The resulting values of $(t_{[i]}, \alpha_{[i]})$
-can be used for linear interpolation
+can be linear interpolated
 to get the updating magnitude, $\alpha(t)$, at any simulation time, $t$.
 
 \item
@@ -2896,7 +2817,20 @@ but with different positive eigenvalues,
 $\lambda_k$'s.
 %
 Using the Cauchy-Schwarz inequality, we have,
-for any set of nonnegative numbers, $c_k$'s,
+for any set of nonnegative numbers, $c_k$'s\footnote{This
+inequality follows from the nonnegativity of
+the quadratic polynomial,
+$$
+\int_0^T
+  dt \sum_{k = 2}^n \Gamma_k \,
+    \left( \dot u_k \, \chi - c_k \right)^2
+  \equiv
+  A_2 \, \chi^2 + A_1 \, \chi + A_0
+  ,
+$$
+which must carry a non-positive discriminant:
+$A_1^2 - 4 \, A_0 \, A_2 \le 0$.},
+%
 %
 \begin{align}
 &
@@ -2936,22 +2870,7 @@ for any set of nonnegative numbers, $c_k$'s,
 \label{eq:CSineq}
 \end{align}
 %
-%\note{
-This inequality follows from the non-negativity of
-the quadratic polynomial,
-$$
-\int_0^T
-  dt \sum_{k = 2}^n \Gamma_k \,
-    \left( \dot u_k \, \chi - c_k \right)^2
-  \equiv
-  A_2 \, \chi^2 + A_1 \, \chi + A_0
-  ,
-$$
-which must carry a non-positive discriminant:
-$A_1^2 - 4 \, A_0 \, A_2 \le 0$.
-%}%
-%
-Note that the last expression of Eq. \eqref{eq:CSineq}
+Note that the last expression %of Eq. \eqref{eq:CSineq}
 depends on the curve, $q(t)$ ($0 < t < T$),
 only through the endpoint value, $q(T)$,
 which is fixed in the variational process.
@@ -3006,12 +2925,12 @@ with
 }
 %
 Such a solution is possible only if
-all nontrivial eigenvalues are equal
+all nontrivial eigenvalues are equal,
 %
-\begin{equation}
-  \lambda_2 = \dots = \lambda_n.
-  \notag
-\end{equation}
+%\begin{equation}
+$\lambda_2 = \dots = \lambda_n$.
+%  \notag
+%\end{equation}
 %
 Then, by Eq. \eqref{eq:tk0},
 all $t_{k0}$'s also share the same value,
@@ -3046,11 +2965,10 @@ a uniform shift of the bias potential,
 we can freely set $\lambda_1$ to be the same as $\lambda_2$
 without changing the nature of the updating scheme.
 %
-Note, an updating matrix
+Since an updating matrix
 with identical eigenvalues
-is a multiple of the identity matrix.
+is a multiple of the identity matrix,
 %
-Thus,
 the corresponding updating scheme,
 the single-bin scheme, is most efficient
 in asymptotic convergence.
@@ -3074,10 +2992,9 @@ perfect (brick-wall) \emph{bandpass} updating schemes
 that ignore short-wavelength eigenmodes,
 which are typically local noise.
 %
-Mathematically, these updating schemes will have
-zero eigenvalues for the ignored modes,
-and they are useful if we can assume that
-the ignored modes are absent from the PMF.
+Mathematically, these updating schemes
+allow us to assign zero eigenvalues
+to modes that are likely absent from the PMF.
 %
 For example,
 %if we can assume
@@ -3124,15 +3041,16 @@ For a periodic variable, we demand
 %
 $$
 \begin{aligned}
-&
-\lambda_1 = \cdots = \lambda_{K+1}
-= \lambda_{n-K+1} = \cdots = \lambda_n = 1,
-\\
-&
+%&
+%\lambda_1 = \cdots = \lambda_{K+1}
+%= \lambda_{n-K+1} = \cdots = \lambda_n = 1,
+%\\
+%&
 \lambda_{K+2} = \cdots = \lambda_{n-K} = 0,
 \end{aligned}
 $$
-for $K \ge 1$.
+for $K \ge 1$,
+with the rest of the eigenvalues being $1$.
 %
 Then by using
 Eq. \eqref{eq:mu_from_lambda},
@@ -3358,6 +3276,9 @@ For the single-bin updating scheme,
 it recovers Eq. \eqref{eq:t0_singlebin}
 under the assumption of Eq. \eqref{eq:y2_eql}.
 %
+\note{From Eq. \eqref{eq:y2_eql}, we have
+$$E(0) = \frac{1}{2} a_0 \sum_{k=2}^n \Gamma_k = \frac{1}{2} \, a_0 \, \Gamma.$$
+}
 From Eqs. \eqref{eq:error_tot},
 \eqref{eq:error_res1},
 \eqref{eq:tk0},
@@ -3382,7 +3303,7 @@ In particular, for $K = n$, we have
   = \sum_{i=1}^n \rho_i \, G_i = \Gamma
   ,
   \notag
-  %\label{eq:Gamma_sum}
+  %\label{eq:Gamma_G_sum}
 \end{equation}
 which can be shown by following the steps
 similar to those leading to Eq. \eqref{eq:y2_sum},
@@ -3632,8 +3553,7 @@ The sampling process affected the error function
 only by a multiplicative constant,
 %The error functions of the two sampling processes
 %differed only by a multiplicative constant,
-in agreement with the discussion in
-Appendix \ref{sec:invt_singlebin}.
+(cf. Appendix \ref{sec:invt_singlebin}).
 %
 For the triple-bin updating scheme,
 the optimal $\lambda$ was less than $1.0$
@@ -4353,8 +4273,8 @@ the optimal number of stages and $r$.
 
 
 If we denote the error at the end of stage $s$ as $E_s$,
-then $q(t) = \alpha_s \, t$,
-where $t$ denotes the number of steps in stage $s$,
+then $q\left( \tau^{(s)} \right) = \alpha_s \, \tau^{(s)}$,
+where $\tau^{(s)}$ denotes the number of steps in stage $s$,
 and from Eq. \eqref{eq:ET_average}, we have
 %
 \begin{align}
@@ -4364,8 +4284,8 @@ and from Eq. \eqref{eq:ET_average}, we have
   +
   \Gamma \, \int_0^{T_s}
   \alpha_s^2 \,
-  e^{ -2 \, \alpha_s \, (T_s - t) }
-  \, dt
+  e^{ -2 \, \alpha_s \, \left(T_s - \tau^{(s)}\right) }
+  \, d \tau^{(s)}
   \notag
   \\
   &=
@@ -4451,11 +4371,11 @@ in Eq. \eqref{eq:errorstage}, we get
 %
 
 To compute the optimal schedule,
-we map the overall simulation time, $t^{(s)}$,
+we map the overall simulation time, $t$,
 to the stage number, $s$, as
 %
 \begin{align*}
-  t^{(s)}
+  t
   = \sum_{s' = 1}^s T_{s'}
   = \frac{ 1 - r^s } { 1 - r } \, T_s
   = \frac{ 1 } { \gamma } \,
@@ -4475,7 +4395,7 @@ Thus,
 \begin{equation}
   \alpha_s =
   \frac{ 1 }
-  { \gamma \, t^{(s)} + \alpha_0^{-1} }
+  { \gamma \, t + \alpha_0^{-1} }
   ,
   \label{eq:alphas_t}
 \end{equation}
@@ -4515,7 +4435,7 @@ for a large $T$
 }
 %
 If we identify the parameter, $\alpha_0$,
-as the initial updating magnitude, $\alpha(t^{(s)} = 0)$,
+as the initial updating magnitude, $\alpha(t = 0)$,
 then this result agrees with Eq. \eqref{eq:t0_sinc},
 with $t_0 = \alpha_0^{-1}$,
 and the schedule given by Eq. \eqref{eq:alphas_t}
@@ -4611,9 +4531,8 @@ we conclude
 \end{equation}
 %and the histogram flatness
 %serves as a good estimate of the final error.
-Note that in some previous studies\cite{zhou2005, zhou2008},
-the histogram flatness, Eq. \eqref{eq:F_def},
-was previously used to define the error,
+Note that the expected histogram flatness
+was previously used to define the error\cite{zhou2005, zhou2008},
 and the above demonstration shows the definition
 is compatible with ours, Eq. \eqref{eq:error_def}, in the long-time limit.
 %
@@ -5060,7 +4979,7 @@ Here, we give some details
 on the homogeneous updating schemes.
 %
 By the translational invariance,
-homogeneous updating schemes
+these schemes
 satisfy detailed balance,
 Eq. \eqref{eq:w_detailedbalance},
 for the flat distribution, $\rho_i = 1/n$,
@@ -5221,8 +5140,9 @@ where the function takes the cosine form for $k \le n/2 + 1$,
 or the sine form otherwise.
 %
 Then one can readily verify that the eigenvalues are given by
-  Eq. \eqref{eq:wband_eigenvalue_pbc}.
-%
+  Eq. \eqref{eq:wband_eigenvalue},
+  and there is a two-fold degeneracy,
+  $\lambda_{n - k + 2} = \lambda_k$.
 \note{Consider the unnormalized version
   $$
   \Phi^{(k)}_j =
@@ -5263,7 +5183,7 @@ Then one can readily verify that the eigenvalues are given by
   \end{aligned}
   $$
   The term in the square brackets is the eigenvalue given by
-  Eq. \eqref{eq:wband_eigenvalue_pbc}.
+  Eq. \eqref{eq:wband_eigenvalue}.
 }
 %
 
@@ -5468,7 +5388,11 @@ Eq. \eqref{eq:lambdan}
   for $l = n$,
   yielding Eq. \eqref{eq:lambdan}.
 }
+
+
 \subsection{Examples}
+
+
 
 \subsubsection{\label{sec:nnscheme}
 Triple-bin updating scheme}
@@ -5571,15 +5495,15 @@ in the continuous limit.
 
 For $n \gg 1$,
 we define an equivalent angular variable, $\varphi$,
-over $[0, 2 \, \pi/g]$,
+over $[0, 2 \, \pi/g]$
 with bin size
 $\Delta \varphi = 2 \, \pi/(g \, n)$.
-The variable is related to discrete index as
+The variable is related to the bin index, $l$, as
 $\varphi = l \, \Delta \varphi$,
 and
 $\mu_l = \mu(\varphi) \, \Delta \varphi$.
 %
-By assuming the largest cutoff, $b \approx g \, n/2$,
+By assuming the largest bin cutoff, $b \approx g \, n/2$,
 we can approximate Eq. \eqref{eq:wband_eigenvalue}
 as an integral:
 %
@@ -5728,6 +5652,47 @@ If follows that all eigenvalues are positive\cite{bussi2006}:
 %            {    2 \, l_{\min}^2  }
 %    \right).
 %$$
+
+
+\subsection{\label{sec:invert_wband}
+Inversion}
+
+Since the eigenvalues are related to the updating kernel
+by a cosine transform,
+we can invert the relation as
+%
+\begin{equation}
+  \mu_l
+  =
+  \frac { 1 } { g \, n }
+  \sum_{ k = 1 }^{ g \, n }
+  \lambda_k
+  \cos \frac{ (k - 1) \, l \, 2 \, \pi }
+            {            g \, n        }
+  .
+\label{eq:mu_from_lambda}
+\end{equation}
+%
+In the non-periodic case,
+we have defined
+$\lambda_k \equiv \lambda_{2 \, n + 2 - k}$
+for $k = n + 2, \dots, 2 \, n$,
+as well as
+%
+\begin{align}
+  \lambda_{ n + 1 }
+  =
+  (-1)^{ n - 1 }
+  \lambda_1
+  +
+  2 \, \sum_{ k = 2 }^{ n }
+      (-1)^{n - k} \, \lambda_k
+  ,
+\label{eq:lambdan}
+\end{align}
+to satisfy the constraint, $\mu_n = 0$.
+%
+
 
 
 
@@ -6054,8 +6019,9 @@ General results on error
 
 
 Using Eq. \eqref{eq:alpha_invtlambda}
-in Eq. \eqref{eq:error_asym} yields
-the asymptotic error
+in Eqs. \eqref{eq:error_asym}
+and \eqref{eq:error_res1}
+yields
 %
 \begin{align}
   \Err_A(T)
@@ -6074,16 +6040,9 @@ the asymptotic error
   ,
   \notag
   %\label{eq:error_asym_invt}
-\end{align}
-%
-where $\nu_k \equiv \lambda_k / \lambda$.
-%
-From Eq. \eqref{eq:error_res1},
-we get % the residual error
-%
-\begin{equation}
+  \\
   \Err_R(T)
-  =
+  &=
   \frac { a_0 } { 2 }
   \sum_{k = 2}^n
   \Gamma_k \, \lambda_k \,
@@ -6091,12 +6050,13 @@ we get % the residual error
       \frac{   t_0   }
            { T + t_0 }
   \right)^{ 2 \, \nu_k }
-  .
-\notag
-%\label{eq:error_res_invt}
-\end{equation}
+  ,
+  \notag
+  %\label{eq:error_res_invt}
+\end{align}
 %
-The total error is the sum of the two.
+where $\nu_k \equiv \lambda_k / \lambda$.
+%
 %with
 %$
 %  q(T)
@@ -6197,13 +6157,9 @@ Triple-bin updating scheme}
 
 For the triple-bin updating scheme,
 %introduced in Sec. \ref{sec:nnscheme},
-we can find an analytical expression
-of the optimal value of $\lambda$
-in the large-$n$ and asymptotic limit.
+we will consider the large-$n$ limit.
 %
-In this case,
-if $2 \, \nu_k > 1$ for every $k$,
-the asymptotic error is implicitly given by the integral
+If $2 \, \nu_k > 1$ for every $k$, we have
 %$\sum_i \to \frac{2 \, n}{\pi} \int_0^{\pi/2} dp$, and
 %
 \begin{align}
@@ -6219,12 +6175,9 @@ the asymptotic error is implicitly given by the integral
 \notag
 %\label{eq:error_nn_asym_int}
 \end{align}
-
-
-
-For perfect sampling, if $\mathbf p = \pmb \rho$,
-we have
-$\Gamma(p) = 1$ from Eq. \eqref{eq:Gamma_perfect},
+%
+For perfect sampling with $\mathbf p = \pmb \rho$,
+we have Eq. \eqref{eq:Gamma_perfect},
 and
 $$
 \begin{aligned}
@@ -6237,11 +6190,11 @@ $$
     \frac{ \lambda }
     { \sqrt{ (2 - \lambda) (2 - 8 \, \mu_1 - \lambda) } }
   \right)
-.
+,
 \end{aligned}
 $$
 %
-Minimizing the function yields
+which is minimal at
 %
 \begin{equation}
   \lambda
@@ -6253,11 +6206,7 @@ Minimizing the function yields
 \label{eq:lambda_nn_perfect}
 \end{equation}
 %
-which shows that the original inverse-time formula,
-Eq. \eqref{eq:alpha_invt1},
-is not optimal in this case.
-%
-The asymptotic error is given by
+and at this point,
 %
 \begin{equation}
   \Err_A(T)
@@ -6266,18 +6215,16 @@ The asymptotic error is given by
   \left(
     1+ \frac{2 \, \mu_1^2}{1-4 \, \mu_1}
   \right)
-  ,
-\notag
-%\label{eq:error_nn_perfect}
+  .
+  \label{eq:error_nn_perfect}
 \end{equation}
 %
-%From Eq. \eqref{eq:error_nn}, it is clear that
-which
-is minimal at $\mu_1 = 0$, the single-bin case.
-%increases with the magnitude of $\mu_1$
-%no matter its sign,
-%and the minimal value, obtained at $\mu_1 = 0$,
-%corresponds to the single-bin scheme.
+This shows that the original inverse-time formula,
+Eq. \eqref{eq:alpha_invt1},
+is not optimal unless $\mu_1 = 0$,
+the single-bin case,
+and the latter minimizes the asymptotic error,
+Eq. \eqref{eq:error_nn_perfect}.
 %
 Note that the value given by
 Eq. \eqref{eq:lambda_nn_perfect}

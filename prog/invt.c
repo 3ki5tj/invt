@@ -63,26 +63,26 @@ __inline static void mbin_update(double *v, int n, int i,
 /* preparation metadynamics run to compute the gamma values */
 __inline static void premeta(const invtpar_t *m, double *gamma)
 {
-  int i, j, n = m->n;
+  int i, n = m->n;
   long t;
   double a, *gamma0;
-  double ucnt = 0, *uave, *uvar;
 
   /* data for sampling */
   invtsamp_t *its;
 
+  /* accumulator for computing the variance of the bias potential */
+  cmvar_t *cm;
+
   /* open an object for sampling */
   its = invtsamp_open(m);
 
+  cm = cmvar_open(n, m->pbc);
+
   xnew(gamma0, n);
-  xnew(uave, n);
-  xnew(uvar, n);
 
   for ( i = 0; i < n; i++ ) {
     gamma0[i] = gamma[i];
     gamma[i] = 0;
-    uave[i] = 0;
-    uvar[i] = 0;
   }
 
   i = 0;
@@ -100,31 +100,15 @@ __inline static void premeta(const invtpar_t *m, double *gamma)
 
     /* accumulate data for variance */
     if ( (t + 1) % m->gam_nstave == 0 ) {
-      shift(its->v, n);
-      /* Fourier transform to get the modes `u` */
-      getcosmodes(its->v, n, its->u, its->costab);
-      /* accumulate data for average and variance */
-      for ( j = 0; j < n; j++ ) {
-        double y = 0, du;
-        if ( ucnt > 0 ) {
-          y = uave[j] / ucnt;
-        }
-        uave[j] += its->u[j]; /* update the average */
-        if ( ucnt > 0 ) { /* update the variance */
-          du = its->u[j] - y;
-          uvar[j] += du * du * ucnt / (ucnt + 1);
-        }
-      }
-      ucnt += 1;
+      cmvar_add(cm, its->v);
     }
   }
 
   /* compute the integrals of the autocorrelation functions */
+  cmvar_get(cm);
   fprintf(stderr, "mode    old-gamma    new-gamma\n");
   for ( i = 1; i < n; i++ ) {
-    uave[i] /= ucnt;
-    uvar[i] /= ucnt;
-    gamma[i] = 2 * uvar[i] / m->alpha0;
+    gamma[i] = 2 * cm->uvar[i] / m->alpha0;
     fprintf(stderr, "%4d %12.6f %12.6f\n", i, gamma0[i], gamma[i]);
   }
 
@@ -197,7 +181,8 @@ static double simulmeta(const invtpar_t *m, intq_t *intq,
       shift(its->v, n);
       /* Fourier transform to get the modes `u` */
       getcosmodes(its->v, n, its->u, its->costab);
-      /* the first mode its always zero,
+      //getcosmodesh(i, n, its->u, its->costab);
+      /* the first mode should always be zero,
        * so we start from the second mode, u + 1 */
       corr_add(corr, its->u + 1);
     }

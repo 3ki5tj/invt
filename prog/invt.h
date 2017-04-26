@@ -138,7 +138,7 @@ static double *geteigvals(int n,
 
 
 /* save the updating window function */
-static int savewin(int winn, double *win,
+__inline static int savewin(int winn, double *win,
     const char *fn)
 {
   FILE *fp;
@@ -161,7 +161,7 @@ static int savewin(int winn, double *win,
 
 /* save the updating window function
  * in matrix form */
-static int savewinmat(int winn, double *win,
+__inline static int savewinmat(int winn, double *win,
     int n, int pbc, const char *fn)
 {
   FILE *fp;
