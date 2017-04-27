@@ -18,10 +18,11 @@ typedef struct {
   double *win;
   double *lambda;
   double *costab; /* cosine transform coefficients */
-  double *u;
   double hflatness;
   double *tmat; /* n x n transition matrix */
   corr_t *corr;
+  double *vtmp;
+  double *hmod;
 } metad_t;
 
 
@@ -83,7 +84,8 @@ static metad_t *metad_open(int xmin, int xmax, int xdel,
       gaussig, okmax, win, winn);
   metad->costab = mkcostab(metad->n, metad->pbc);
   xnew(metad->tmat, metad->n * metad->n);
-  xnew(metad->u, metad->n);
+  xnew(metad->vtmp, metad->n);
+  xnew(metad->hmod, metad->n);
   return metad;
 }
 
@@ -93,9 +95,11 @@ static void metad_close(metad_t *metad)
 {
   free(metad->v);
   free(metad->h);
+  free(metad->win);
   free(metad->costab);
   free(metad->tmat);
-  free(metad->u);
+  free(metad->vtmp);
+  free(metad->hmod);
   free(metad);
 }
 
@@ -130,9 +134,8 @@ static int metad_acc(metad_t *metad, int iold, int xnew,
 }
 
 
-
-/* compute the histogram flatness */
-__inline static double metad_hflatness(metad_t *metad)
+/* compute the histogram flatness (Wang-Landau version) */
+__inline static double metad_hflatness_wl(metad_t *metad)
 {
   int i;
   double hmin, hmax, hi;
@@ -152,19 +155,42 @@ __inline static double metad_hflatness(metad_t *metad)
 
 
 
+/* compute the histogram flatness */
+__inline static double metad_hflatness(metad_t *metad)
+{
+  int i, k, n = metad->n;
+  double x, fl = 0, tot = 0, sqr = 0;
+  const double lamcut = 0.1;
+
+  for ( i = 0; i < n; i++ ) tot += metad->h[i];
+  getcosmodes(metad->h, n, metad->vtmp, metad->costab);
+  /* truncate modes with lambda */
+  for ( k = 1; k < n; k++ ) {
+    if ( metad->lambda[k] < lamcut ) break;
+    x = n * metad->vtmp[k] / tot;
+    fl += x * x;
+  }
+  /* compute the flitered histogram */
+  for ( ; k < n; k++ ) metad->vtmp[k] = 0;
+  fromcosmodes(metad->hmod, n, metad->vtmp, metad->costab);
+  return sqrt( fl );
+}
+
 /* check if histogram is flat enough to switch to
  * a smaller updating magnitude */
-static int metad_wlcheck(metad_t *metad)
+static int metad_wlcheck(metad_t *metad, double fl, double magred)
 {
   int i;
 
   /* compute the histogram flatness */
   metad->hflatness = metad_hflatness(metad);
+  //printf("flatness %g, %g\n", metad->hflatness, metad_hflatness_wl(metad));
+  //getchar();
   /* return if the histogram not flatness enough */
-  if ( metad->hflatness > 0.4 ) return 0;
+  if ( metad->hflatness > fl ) return 0;
 
   /* reduce the updating magnitude and clear the histogram */
-  metad->a *= 0.5;
+  metad->a *= magred;
   for ( i = 0; i < metad->n; i++ ) metad->h[i] = 0;
   fprintf(stderr, "changing the updating magnitude to %g\n", metad->a);
   return 1;
@@ -227,9 +253,9 @@ static int metad_save(metad_t *metad, const char *fn)
   fprintf(fp, "# %d %d %d %d %g\n",
       metad->n, metad->xmin, metad->xmax, metad->xdel, metad->a);
   for ( i = 0; i < metad->n; i++ ) {
-    fprintf(fp, "%d %g %g %g\n",
+    fprintf(fp, "%d %g %g %g %g\n",
         metad->xmin + i * metad->xdel,
-        metad->v[i], metad->h[i], metad->vref[i]);
+        metad->v[i], metad->h[i], metad->vref[i], metad->hmod[i]);
   }
   fclose(fp);
   return 0;

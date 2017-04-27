@@ -1,11 +1,7 @@
 #include "invt.h"
-#define IS2_LB 4
+#define IS2_LB 6
 #include "is2.h"
 #include "metad.h"
-
-const double IS2_TC = 2.3;
-const int IS2_EMIN = -2*IS2_N + 116;
-const int IS2_EMAX = 0;
 
 /* constant updating magnitude run
  * computes the gamma values */
@@ -105,7 +101,7 @@ static int invt_is2_addexact(metad_t *metad, int l)
   double *lndos, v0;
   int i, id, n;
 
-  sprintf(fn, "islogdos%dx%d.txt", l, l);
+  sprintf(fn, "is2dos/is2lndos%dx%d.txt", l, l);
   if ((fp = fopen(fn, "r")) == NULL) {
     fprintf(stderr, "cannot read %s\n", fn);
     return -1;
@@ -114,13 +110,13 @@ static int invt_is2_addexact(metad_t *metad, int l)
   xnew(lndos, n + 1);
   for ( i = 0; i <= n; i++ ) {
     fgets(s, sizeof s, fp);
-    sscanf(s, "%lf", &lndos[i]);
+    sscanf(s, "%d%lf", &id, &lndos[i]);
   }
   fclose(fp);
 
   /* map the exact dos to the grid */
   for ( i = 0; i < metad->n; i++ ) {
-    id = (IS2_EMIN + 2*n)/4 + i;
+    id = (metad->xmin + 2*n)/4 + i;
     if ( i == 0 ) v0 = lndos[id];
     metad->vref[i] = lndos[id] - v0;
   }
@@ -137,22 +133,22 @@ static int invt_is2_run(invtpar_t *m)
   int enew, icur, inew, acc;
   metad_t *metad;
 
+  int emax = 0; // -IS2_N;
+  int emin = emax - (m->n - 1) * 4;
+
   mtscramble( clock() );
 
   is = is2_open(IS2_L);
 
-  /* equilibration at the critical temperature */
-  is2_setuproba(1.0/IS2_TC, is->uproba);
+  /* equilibration at the infinite temperature */
   for ( t = 1; ; t++ ) {
     IS2_PICK(is, id, h);
-    if ( h <= 0 || mtrand() <= is->uproba[h] ) {
-      IS2_FLIP(is, id, h);
-    }
-    if ( is->E >= IS2_EMIN && is->E < IS2_EMAX ) break;
+    IS2_FLIP(is, id, h);
+    if ( is->E >= emin && is->E < emax ) break;
   }
 
   /* typical WL run */
-  metad = metad_open(IS2_EMIN, IS2_EMAX, 4,
+  metad = metad_open(emin, emax, 4,
       m->pbc, m->gaussig, m->okmax, m->win, m->winn);
   invt_is2_addexact(metad, IS2_L);
   icur = metad_getindex(metad, is->E);
@@ -166,7 +162,7 @@ static int invt_is2_run(invtpar_t *m)
     }
     metad_updatev(metad, icur);
     if ( t % 1000 == 0 ) {
-      int sacc = metad_wlcheck(metad);
+      int sacc = metad_wlcheck(metad, m->flatness, m->magred);
       if ( sacc && metad->a < m->alpha0 )
         break;
     }

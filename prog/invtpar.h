@@ -58,6 +58,9 @@ typedef struct {
   int gam_nstave; /* interval of accumulating averages */
   char fngamma[FILENAME_MAX]; /* file name for the gamma values */
 
+  double flatness; /* threshold for histogram flatness */
+  double magred; /* reduction factor for updating magnitude */
+
   /* molecular dynamics parameters */
   double mddt; /* MD time step */
   double tp; /* temperature */
@@ -174,6 +177,9 @@ static void invtpar_init(invtpar_t *m)
   m->gam_nsteps = 100000000L;
   m->gam_nstave = 0;
   m->fngamma[0] = '\0';
+
+  m->flatness = 0.05;
+  m->magred = 0.5;
 
   /* molecular dynamics parameters */
   m->mddt = 0.005;
@@ -349,6 +355,8 @@ static void invtpar_help(const invtpar_t *m)
   fprintf(stderr, "  --gamnsteps=:  set the number of steps in the preliminary simulation, default %ld\n", m->gam_nsteps);
   fprintf(stderr, "  --gamnstave=:  set the interval of accumulating data in the preliminary simulation, default %d\n", m->gam_nstave);
   fprintf(stderr, "  --fngamma=:    set the file for the gamma values, default %s\n", m->fngamma);
+  fprintf(stderr, "  --fl=:         set the threshold for the histogram flatness (WL), default %g\n", m->flatness);
+  fprintf(stderr, "  --magred=:     set the reduction factor for the updating magnitude (WL), default %g\n", m->magred);
   fprintf(stderr, "  --corr:        compute correlation functions, default %d\n", m->docorr);
   fprintf(stderr, "  --nstcorr=:    set the number of steps of setting the correlation function, default %d\n", m->nstcorr);
   fprintf(stderr, "  --corrtol=:    set the tolerance level to truncate the autocorrelation function, default %g\n", m->corrtol);
@@ -694,6 +702,16 @@ static int invtpar_keymatch(invtpar_t *m,
          || strcmpfuzzy(key, "fngam") == 0 )
   {
     strcpy(m->fngamma, val);
+  }
+  else if ( strcmpfuzzy(key, "flatness") == 0
+         || strcmpfuzzy(key, "fl") == 0 )
+  {
+    m->flatness = atof(val);
+  }
+  else if ( strcmpfuzzy(key, "red") == 0
+         || strcmpfuzzy(key, "magred") == 0 )
+  {
+    m->magred = atof(val);
   }
   else if ( strcmpfuzzy(key, "tcorr") == 0
          || strcmpfuzzy(key, "corr-time") == 0 )
