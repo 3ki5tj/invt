@@ -1,7 +1,8 @@
 #include "util.h"
-#include "corr.h"
+//#include "corr.h"
 #include "cosmodes.h"
 #include "eig.h"
+#include "intq.h"
 
 
 
@@ -16,76 +17,80 @@ typedef struct {
   int pbc; /* periodic boundary condition */
   int winn;
   double *win;
-  double *lambda;
+  double *lambda; /* eigenvalues of the updating marix */
+  double *gamma; /* correlation integrals */
+  double *gamma_tmat; /* correlation integrals from the transition matrix */
   double *costab; /* cosine transform coefficients */
   double hflatness;
   double *tmat; /* n x n transition matrix */
-  corr_t *corr;
+  //corr_t *corr;
   double *vtmp;
   double *hmod;
+  intq_t *intq;
+  double errref;
 } metad_t;
 
 
 
 /* prepare the window function */
-static double *metad_prepwin(metad_t *metad,
-    int *winn, double **lambda,
+static void metad_prepwin(metad_t *metad,
     double gaussig, int okmax, const double *win0, int winn0)
 {
   int i, n = metad->n, pbc = metad->pbc;
-  double *win;
 
-  xnew(win, n);
+  xnew(metad->win, n);
   if ( gaussig > 0 ) {
-    mkgauswin(gaussig, n, pbc, win, winn);
+    mkgauswin(gaussig, n, pbc, metad->win, &metad->winn);
   } else if ( okmax >= 0 ) {
-    mksincwin(okmax, n, pbc, win, winn);
+    mksincwin(okmax, n, pbc, metad->win, &metad->winn);
   } else {
     /* copy the user window */
-    *winn = winn0;
-    for ( i = 0; i < *winn; i++ )
-      win[i] = win0[i];
+    metad->winn = winn0;
+    for ( i = 0; i < metad->winn; i++ )
+      metad->win[i] = win0[i];
   }
 
   /* modify the window function such that all eigenvalues
    * lambda[i] are positive-definite */
-  *lambda = stablizewin(n, winn, win, pbc, 0.0, 1);
+  metad->lambda = stablizewin(n, metad->win, &metad->winn, pbc, 0.0, 1);
   //  /* save the window kernel */
-  //  savewin(*winn, win, m->fnwin);
+  //  savewin(metad->win, metad->winn, m->fnwin);
   //  /* save the n x n updating matrix */
-  //  savewinmat(*winn, win, n, pbc, m->fnwinmat);
-  return win;
+  //  savewinmat(metad->win, metad->winn, n, pbc, m->fnwinmat);
 }
 
 static metad_t *metad_open(int xmin, int xmax, int xdel,
     int pbc, double gaussig, int okmax, const double *win, int winn)
 {
   metad_t *metad;
-  int i;
+  int i, n;
 
   xnew(metad, 1);
   metad->xmin = xmin;
   metad->xmax = xmax;
   metad->xdel = xdel;
-  metad->n = (xmax - xmin) / xdel + 1;
-  metad->xmax = metad->xmin + metad->n * metad->xdel;
-  xnew(metad->v, metad->n);
-  xnew(metad->h, metad->n);
-  xnew(metad->vref, metad->n);
-  for ( i = 0; i < metad->n; i++ ) {
+  metad->n = n = (xmax - xmin) / xdel + 1;
+  metad->xmax = metad->xmin + n * metad->xdel;
+  xnew(metad->v, n);
+  xnew(metad->h, n);
+  xnew(metad->vref, n);
+  for ( i = 0; i < n; i++ ) {
     metad->v[i] = 0;
     metad->h[i] = 0;
     metad->vref[i] = 0;
   }
-  metad->a = 1.0 / metad->n;
+  metad->a = 1.0 / n;
   metad->pbc = pbc;
   /* prepare the window */
-  metad->win = metad_prepwin(metad, &metad->winn, &metad->lambda,
-      gaussig, okmax, win, winn);
-  metad->costab = mkcostab(metad->n, metad->pbc);
-  xnew(metad->tmat, metad->n * metad->n);
-  xnew(metad->vtmp, metad->n);
-  xnew(metad->hmod, metad->n);
+  metad_prepwin(metad, gaussig, okmax, win, winn);
+  xnew(metad->gamma, n);
+  xnew(metad->gamma_tmat, n);
+  metad->costab = mkcostab(n, metad->pbc);
+  xnew(metad->tmat, n * n);
+  xnew(metad->vtmp, n);
+  xnew(metad->hmod, n);
+  metad->intq = NULL;
+  metad->errref = 0;
   return metad;
 }
 
@@ -96,10 +101,16 @@ static void metad_close(metad_t *metad)
   free(metad->v);
   free(metad->h);
   free(metad->win);
+  free(metad->lambda);
+  free(metad->gamma);
+  free(metad->gamma_tmat);
   free(metad->costab);
   free(metad->tmat);
   free(metad->vtmp);
   free(metad->hmod);
+  if ( metad->intq != NULL ) {
+    intq_close( metad->intq );
+  }
   free(metad);
 }
 
@@ -159,7 +170,7 @@ __inline static double metad_hflatness_wl(metad_t *metad)
 __inline static double metad_hflatness(metad_t *metad)
 {
   int i, k, n = metad->n;
-  double x, fl = 0, tot = 0, sqr = 0;
+  double x, fl = 0, tot = 0;
   const double lamcut = 0.1;
 
   for ( i = 0; i < n; i++ ) tot += metad->h[i];
@@ -210,32 +221,34 @@ static void metad_updatev_wl(metad_t *metad, int i)
 __inline static void metad_updatev(metad_t *metad, int i)
 {
   int j, k, n = metad->n;
+  double amp = metad->n * metad->a;
 
-  metad->v[i] += metad->a * metad->win[0];
+  metad->v[i] += amp * metad->win[0];
   /* update the bias potential at the neighbors */
   for ( j = 1; j < metad->winn; j++ ) {
     /* left neighbor */
     k = i - j;
     if ( k < 0 ) k = metad->pbc ? k + n : - k - 1;
-    metad->v[k] += metad->a * metad->win[j];
+    metad->v[k] += amp * metad->win[j];
     if ( j * 2 == n && metad->pbc ) continue;
 
     /* right neighbor */
     k = i + j;
     if ( k >= n ) k = metad->pbc ? k - n : 2 * n - 1 - k;
-    metad->v[k] += metad->a * metad->win[j];
+    metad->v[k] += amp * metad->win[j];
   }
   metad->h[i] += 1;
 }
 
 
-static void metad_trimv(metad_t *metad)
+static void metad_trimv(metad_t *metad, double *v)
 {
-  int i;
-  double v0 = metad->v[0];
+  int i, n = metad->n;
+  double v0;
 
-  for ( i = 0; i < metad->n; i++ )
-    metad->v[i] -= v0;
+  for ( i = 0; i < n; i++ ) v0 += v[i];
+  v0 /= n;
+  for ( i = 0; i < n; i++ ) v[i] -= v0;
 }
 
 
@@ -249,7 +262,7 @@ static int metad_save(metad_t *metad, const char *fn)
     fprintf(stderr, "cannot open %s\n", fn);
     return -1;
   }
-  metad_trimv(metad);
+  metad_trimv(metad, metad->v);
   fprintf(fp, "# %d %d %d %d %g\n",
       metad->n, metad->xmin, metad->xmax, metad->xdel, metad->a);
   for ( i = 0; i < metad->n; i++ ) {
@@ -357,3 +370,35 @@ static void metad_getgamma_tmat(metad_t *metad, double *gam, double dt)
   free(vec);
   free(g);
 }
+
+
+static void metad_getalpha(metad_t *metad, invtpar_t *m, double T)
+{
+  m->t0 = 2 / m->alpha0;
+  metad->errref = esterror_opt(T, m->alpha0, 0, &m->qT, m->qprec,
+      m->alpha_nint, &metad->intq, m->n, m->kcutoff, m->pbc,
+      metad->lambda, metad->gamma, m->verbose);
+  /* save the optimal schedule to file */
+  intq_save(metad->intq, 1.0, m->t0,
+      m->alpha_resample, m->fnalpha);
+}
+
+/* compute the root-mean-squared error of `v`
+ * note: the baseline of `v` will be shifted  */
+static double metad_geterror(metad_t *metad)
+{
+  double err = 0, x;
+  int i, n = metad->n;
+
+  metad_trimv(metad, metad->v);
+  for ( i = 0; i < n; i++ ) {
+    x = metad->v[i] - metad->vref[i];
+    err += x * x;
+  }
+  err /= n;
+  return err;
+}
+
+
+
+

@@ -58,7 +58,7 @@ static void invt_geterr(invtpar_t *m,
   lambda = geteigvals(m->n, m->winn, m->win, m->pbc,
       0, &err, 1);
   if ( err ) {
-    lambda = trimwindow(m->n, &m->winn, m->win, m->pbc, 0, 1);
+    lambda = stablizewin(m->n, m->win, &m->winn, m->pbc, 0.0, 1);
   }
 
   /* models of well-separated eigenvalues */
@@ -66,11 +66,11 @@ static void invt_geterr(invtpar_t *m,
 
   /* save updating kernel or window function */
   if ( m->fnwin[0] != '\0' ) {
-    savewin(m->winn, m->win, m->fnwin);
+    savewin(m->win, m->winn, m->fnwin);
   }
   /* save the updating matrix */
   if ( m->fnwinmat[0] != '\0' ) {
-    savewinmat(m->winn, m->win, m->n, m->pbc, m->fnwinmat);
+    savewinmat(m->win, m->winn, m->n, m->pbc, m->fnwinmat);
   }
 
   /* initial errors */
@@ -276,14 +276,14 @@ static void invt_scan(invtpar_t *m,
     {
       /* make the Gaussian window */
       m->gaussig = sig;
-      invtpar_mkgauswin(m);
-      lambda = trimwindow(m->n, &m->winn, m->win, m->pbc, 0, m->verbose);
+      mkgauswin(sig, m->n, m->pbc, m->win, &m->winn);
+      lambda = stablizewin(m->n, m->win, &m->winn, m->pbc, 0.0, m->verbose);
     }
     else if ( scantype == SCAN_OK )
     {
       /* make the bandpass sinc window */
       m->okmax = ok;
-      invtpar_mksinrwin(m);
+      mksincwin(ok, m->n, m->pbc, m->win, &m->winn);
       lambda = geteigvals(m->n, m->winn, m->win, m->pbc,
           0, &eigerr, 1);
     }

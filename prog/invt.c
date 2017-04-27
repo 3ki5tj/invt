@@ -16,10 +16,9 @@
 static double getalpha(const invtpar_t *m, double t, intq_t *intq)
 {
   double a = 0;
-  static int id = 0;
 
   if ( intq != NULL ) {
-    a = intq_interpa(intq, t, &id);
+    a = intq_interpa(intq, t);
     //printf("a %g (a_invt: %g), id %d, t %g, %g\n", a, m->c/(t+m->t0), id, t, intq->tarr[id]);
   } else {
     a = m->c / (t + m->t0);
@@ -255,14 +254,14 @@ static void invt_prepwin(invtdata_t *invt, invtpar_t *m)
 
   /* modify the window function such that all eigenvalues
    * lambda[i] are positive-definite */
-  invt->lambda = stablizewin(n, &invt->winn, invt->win, pbc, 0, m->verbose);
+  invt->lambda = stablizewin(n, invt->win, &invt->winn, pbc, 0, m->verbose);
   if ( m->fnwin[0] != '\0' ) {
     /* save the window kernel */
-    savewin(invt->winn, invt->win, m->fnwin);
+    savewin(invt->win, invt->winn, m->fnwin);
   }
   if ( m->fnwinmat[0] != '\0' ) {
     /* save the n x n updating matrix */
-    savewinmat(invt->winn, invt->win, n, pbc, m->fnwinmat);
+    savewinmat(invt->win, invt->winn, n, pbc, m->fnwinmat);
   }
 }
 
@@ -289,7 +288,7 @@ static invtdata_t *invt_open(invtpar_t *m)
   xnew(invt->xerr, invt->n);
   invt->errref = 0;
   invt->err1ref = 0;
-  
+
   /* theoretical estimate of the initial saturated error */
   invt->err0ref = esterror_eql(m->alpha0, m->n, invt->xerr0, invt->lambda, invt->gamma);
 
@@ -310,7 +309,7 @@ static void invt_close(invtdata_t *invt)
 }
 
 /* prepare the schedule */
-static void invt_mkalpha(invtdata_t *invt, invtpar_t *m)
+static void invt_getalpha(invtdata_t *invt, invtpar_t *m)
 {
   double optc;
   double alphaf; /* final updating magnitude */
@@ -410,7 +409,7 @@ static double invt_run(invtpar_t *m)
         invt->err0ref, invt->err0ref * invt->err0ref);
 
     /* prepare the schedule */
-    invt_mkalpha(invt, m);
+    invt_getalpha(invt, m);
 
     /* repeat `ntr` independent simulations */
     for ( i = 0; i < ntr; i++ ) {

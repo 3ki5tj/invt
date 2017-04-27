@@ -21,6 +21,7 @@ typedef struct {
   const double *gamma; /* autocorrelation integrals */
   double Ea, Er, E; /* square errors */
   double EKa, EKr, EK; /* mode-limited errors */
+  int curr_id; /* bin index for interpolation */
 } intq_t;
 
 
@@ -45,6 +46,7 @@ static intq_t *intq_open(double T, int m,
   intq->gamma = gamma;
   intq->Ea = intq->Er = intq->E = 0;
   intq->EKa = intq->EKr = intq->EK = 0;
+  intq->curr_id = 0;
   return intq;
 }
 
@@ -231,7 +233,7 @@ static double intq_reserr(intq_t *intq, double a0, double qT)
 
 
 /* compute the error components */
-static double intq_errcomp(intq_t *intq, double a0,
+__inline static double intq_errcomp(intq_t *intq, double a0,
     double qT, double *xerr, double *xerr_r, double *xerr_a)
 {
   int i, j, m = intq->m, n = intq->n;
@@ -598,6 +600,8 @@ __inline static double intq_interp(double t, int *id,
 
   /* find the proper bin */
   i = *id;
+  if ( i < 0 ) i = 0;
+  if ( i >= m ) i = m - 1;
   /* seek backward */
   if ( i < m ) {
     for ( ; i > 0; i-- ) {
@@ -635,9 +639,9 @@ __inline static double intq_interp(double t, int *id,
 /* compute the updating magnitude alpha at a given t
  * by interpolation
  * assuming intq_geta() has been called */
-__inline static double intq_interpa(intq_t *intq, double t, int *id)
+__inline static double intq_interpa(intq_t *intq, double t)
 {
-  return intq_interp(t, id, intq->m, intq->tarr, intq->aarr);
+  return intq_interp(t, &intq->curr_id, intq->m, intq->tarr, intq->aarr);
 }
 
 
@@ -699,7 +703,7 @@ __inline static int intq_save(intq_t *intq,
 
 
 
-/* return the square-root error from the optimal schedule  */
+/* return the square-root error from the optimal schedule */
 static double esterror_opt(double T, double a0,
     double initalpha, double *qT, double qprec,
     int m, intq_t **intq_ptr,

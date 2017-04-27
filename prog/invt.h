@@ -200,7 +200,7 @@ static double *geteigvals(int n,
 
 
 /* save the updating window function */
-__inline static int savewin(int winn, double *win,
+__inline static int savewin(double *win, int winn,
     const char *fn)
 {
   FILE *fp;
@@ -223,7 +223,7 @@ __inline static int savewin(int winn, double *win,
 
 /* save the updating window function
  * in matrix form */
-__inline static int savewinmat(int winn, double *win,
+__inline static int savewinmat(double *win, int winn,
     int n, int pbc, const char *fn)
 {
   FILE *fp;
@@ -270,7 +270,7 @@ __inline static int savewinmat(int winn, double *win,
 /* modify the window function
  * such that no eigenvalue is negative */
 __inline static double *stablizewin(int n,
-    int *winn, double *win,
+    double *win, int *winn,
     int pbc, double tol, int verbose)
 {
   const int itmax = 10000;
@@ -408,7 +408,7 @@ __inline static double *stablizewin(int n,
  * as those of the Monte Carlo transition matrix
  * This is true only for perfect sampling and
  * local Monte Carlo sampling */
-static double *estgamma(int n, int sampmethod,
+__inline static double *estgamma(int n, int sampmethod,
     int pbc, double localg)
 {
   int i;
@@ -486,7 +486,7 @@ __inline static void dumperror(int n, const double *lambda,
 /* estimate the square-root error
  * under a constant updating magnitude alpha
  * according to the analytical prediction */
-static double esterror_eql(double alpha, int n, double *xerr,
+__inline static double esterror_eql(double alpha, int n, double *xerr,
     const double *lambda, const double *gamma)
 {
   int i;
@@ -599,7 +599,7 @@ static double esterror_invt_x(double T, double c, double a0,
  * according to the analytical prediction
  * assuming a single local minimum
  * */
-static double estbestc_invt(double T, double a0, double t0,
+__inline static double estbestc_invt(double T, double a0, double t0,
    int n, const double *lambda, const double *gamma,
    double prec, double *err, int verbose)
 {
