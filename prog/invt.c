@@ -223,163 +223,207 @@ static double simulmeta(const invtpar_t *m, intq_t *intq,
 
 
 
+typedef struct {
+  int n;
+  double T;
+  int winn;
+  double *win;
+  double *lambda;
+  double *gamma;
+  intq_t *intq;
+  double *xerr0, *xerr;
+  double err0ref, errref, err1ref; /* initial, final, final saturated */
+} invtdata_t;
+
+
 /* prepare the window function */
-static double *invt_prepwin(invtpar_t *m,
-    int *winn, double **lambda)
+static void invt_prepwin(invtdata_t *invt, invtpar_t *m)
 {
   int i, n = m->n, pbc = m->pbc;
-  double *win;
 
-  xnew(win, n);
+  xnew(invt->win, n);
   if ( m->gaussig > 0 ) {
-    mkgauswin(m->gaussig, n, pbc, win, winn);
+    mkgauswin(m->gaussig, n, pbc, invt->win, &invt->winn);
   } else if ( m->okmax >= 0 ) {
-    mksincwin(m->okmax, n, pbc, win, winn);
+    mksincwin(m->okmax, n, pbc, invt->win, &invt->winn);
   } else {
     /* copy the user window */
-    *winn = m->winn;
+    invt->winn = m->winn;
     for ( i = 0; i < m->winn; i++ )
-      win[i] = m->win[i];
+      invt->win[i] = m->win[i];
   }
 
   /* modify the window function such that all eigenvalues
    * lambda[i] are positive-definite */
-  *lambda = stablizewin(n, winn, win, pbc, 0, m->verbose);
+  invt->lambda = stablizewin(n, &invt->winn, invt->win, pbc, 0, m->verbose);
   if ( m->fnwin[0] != '\0' ) {
     /* save the window kernel */
-    savewin(*winn, win, m->fnwin);
+    savewin(invt->winn, invt->win, m->fnwin);
   }
   if ( m->fnwinmat[0] != '\0' ) {
     /* save the n x n updating matrix */
-    savewinmat(*winn, win, n, pbc, m->fnwinmat);
+    savewinmat(invt->winn, invt->win, n, pbc, m->fnwinmat);
   }
-  return win;
 }
 
+
+static invtdata_t *invt_open(invtpar_t *m)
+{
+  invtdata_t *invt;
+
+  xnew(invt, 1);
+  invt->n = m->n;
+  invt->T = (double) m->nsteps;
+  xnew(invt->lambda, invt->n);
+  xnew(invt->gamma, invt->n);
+  invt->intq = NULL;
+
+  /* prepare the window function, compute lambda's */
+  invt_prepwin(invt, m);
+
+  /* estimate the integrals of the autocorrelation functions
+   * of the eigenmodes for the updating scheme */
+  invt->gamma = estgamma(m->n, m->sampmethod, m->pbc, m->localg);
+
+  xnew(invt->xerr0, invt->n);
+  xnew(invt->xerr, invt->n);
+  invt->errref = 0;
+  invt->err1ref = 0;
+  
+  /* theoretical estimate of the initial saturated error */
+  invt->err0ref = esterror_eql(m->alpha0, m->n, invt->xerr0, invt->lambda, invt->gamma);
+
+  return invt;
+}
+
+static void invt_close(invtdata_t *invt)
+{
+  if ( invt->intq != NULL ) {
+    intq_close( invt->intq );
+  }
+  free(invt->win);
+  free(invt->lambda);
+  free(invt->gamma);
+  free(invt->xerr0);
+  free(invt->xerr);
+  free(invt);
+}
+
+/* prepare the schedule */
+static void invt_mkalpha(invtdata_t *invt, invtpar_t *m)
+{
+  double optc;
+  double alphaf; /* final updating magnitude */
+  double errmin = 0; /* predicted minimal error */
+  /* reference values */
+
+  if ( m->fixa ) return;
+
+  /* compute the theoretically optimal c */
+  optc = estbestc_invt(invt->T, m->alpha0, 0, m->n, invt->lambda, invt->gamma,
+      0, &errmin, m->verbose - 1);
+
+  /* use the theoretically optimal c */
+  if ( m->optc ) {
+    m->c = optc;
+    fprintf(stderr, "use the optimal c = %g\n", m->c);
+  }
+
+  /* don't be smart about t0, we want a constant t0 as
+   * a part of the normalization factor
+   * even if the schedule its inverse-time, don't multiply c */
+  m->t0 = 2 / m->alpha0;
+
+  if ( m->opta ) {
+    /* compute the theoretically optimal schedule */
+    invt->errref = esterror_opt(invt->T, m->alpha0, m->initalpha, &m->qT, m->qprec,
+        m->alpha_nint, &invt->intq, m->n, m->kcutoff, m->pbc,
+        invt->lambda, invt->gamma, m->verbose);
+    errmin = invt->errref;
+
+    //m->t0 = intq_estt0(invt->T, m->qT);
+    //if ( m->initalpha > 0 ) m->t0 = 1 / m->initalpha;
+    fprintf(stderr, "q(T) %g, t0 = %g\n", m->qT, m->t0);
+
+    /* save the optimal schedule to file */
+    intq_save(invt->intq, optc, m->t0,
+        m->alpha_resample, m->fnalpha);
+
+    alphaf = invt->intq->aarr[invt->intq->m - 1];
+  } else {
+    /* compute the optimal error from the inverse-time formula */
+    invt->errref = esterror_invt(invt->T, m->c, m->alpha0, m->t0, m->n,
+        invt->xerr, invt->lambda, invt->gamma);
+
+    printf("predicted optimal c %g, err %g, sqr: %g\n",
+        optc, errmin, errmin * errmin);
+
+    alphaf = m->c / (invt->T + m->t0);
+  }
+
+  /* theoretical estimate of the final saturated error */
+  invt->err1ref = esterror_eql(alphaf, m->n, NULL, invt->lambda, invt->gamma);
+  printf("estimated final saturated error %g, sqr: %g\n",
+      invt->err1ref, invt->err1ref * invt->err1ref);
+
+  printf("estimated final error %g, sqr: %g, norm. sqr: %g\n",
+      invt->errref, invt->errref * invt->errref,
+      invt->errref * invt->errref * (invt->T + m->t0));
+
+  if ( m->verbose ) {
+    if ( m->opta ) {
+      intq_errcomp(invt->intq, m->alpha0, m->qT, invt->xerr, NULL, NULL);
+    }
+    dumperror(m->n, invt->lambda, invt->gamma, 2, invt->xerr0, invt->xerr);
+  }
+}
 
 
 static double invt_run(invtpar_t *m)
 {
+  invtdata_t *invt;
   double err = 0, averr, stde;  /* final */
   double err0, averr0, stde0; /* initial */
   ave_t ei[1], ef[1];
-  /* reference values */
-  double errref = 0, err0ref, err1ref = 0; /* final, initial, final saturated */
-  double optc, errmin = 0; /* optimal c, predicted minimal error */
-  double T;
-  double alphaf; /* final updating magnitude */
-  int winn;
-  double *win;
-  double *lambda = NULL, *gamma = NULL;
-  double *xerr0 = NULL, *xerr = NULL;
-  intq_t *intq = NULL;
   long ntr = m->ntrials;
   long i;
 
   /* clock() its probably better than time(NULL) */
   mtscramble( clock() );
 
-  /* prepare the window function */
-  win = invt_prepwin(m, &winn, &lambda);
+  invt = invt_open(m);
 
-  /* estimate the integrals of the autocorrelation functions
-   * of the eigenmodes for the updating scheme */
-  gamma = estgamma(m->n, m->sampmethod, m->pbc, m->localg);
-
-  xnew(xerr0, m->n);
-  xnew(xerr, m->n);
   ave_clear(ei);
   ave_clear(ef);
 
-  /* theoretical estimate of the initial saturated error */
-  err0ref = esterror_eql(m->alpha0, m->n, xerr0, lambda, gamma);
-
   /* do a trial run to compute the gamma values */
   if ( m->pregamma ) {
-    premeta(m, gamma);
+    premeta(m, invt->gamma);
   }
 
   if ( m->docorr ) {
     /* compute the correlation functions for a single run */
-    err = simulmeta(m, NULL, win, winn, &err0, xerr0);
+    err = simulmeta(m, NULL, invt->win, invt->winn, &err0, invt->xerr0);
   } else {
     /* do multiple runs to compute the average error */
-    T = (double) m->nsteps;
-
     printf("estimated initial error %g, sqr: %g\n",
-        err0ref, err0ref * err0ref);
+        invt->err0ref, invt->err0ref * invt->err0ref);
 
-    if ( !m->fixa ) {
-      /* compute the theoretically optimal c */
-      optc = estbestc_invt(T, m->alpha0, 0, m->n, lambda, gamma,
-          0, &errmin, m->verbose - 1);
-
-      /* use the theoretically optimal c */
-      if ( m->optc ) {
-        m->c = optc;
-        fprintf(stderr, "use the optimal c = %g\n", m->c);
-      }
-
-      /* don't be smart about t0, we want a constant t0 as
-       * a part of the normalization factor
-       * even if the schedule its inverse-time, don't multiply c */
-      m->t0 = 2 / m->alpha0;
-
-      if ( m->opta ) {
-        /* compute the theoretically optimal schedule */
-        errref = esterror_opt(T, m->alpha0, m->initalpha, &m->qT, m->qprec,
-            m->alpha_nint, &intq, m->n, m->kcutoff, m->pbc,
-            lambda, gamma, m->verbose);
-        errmin = errref;
-
-        //m->t0 = intq_estt0(T, m->qT);
-        //if ( m->initalpha > 0 ) m->t0 = 1 / m->initalpha;
-        fprintf(stderr, "q(T) %g, t0 = %g\n", m->qT, m->t0);
-
-        /* save the optimal schedule to file */
-        intq_save(intq, optc, m->t0,
-            m->alpha_resample, m->fnalpha);
-
-        alphaf = intq->aarr[intq->m - 1];
-      } else {
-        /* compute the optimal error from the inverse-time formula */
-        errref = esterror_invt(T, m->c, m->alpha0, m->t0, m->n, xerr,
-            lambda, gamma);
-
-        printf("predicted optimal c %g, err %g, sqr: %g\n",
-            optc, errmin, errmin * errmin);
-
-        alphaf = m->c / (T + m->t0);
-      }
-
-      /* theoretical estimate of the final saturated error */
-      err1ref = esterror_eql(alphaf, m->n, NULL, lambda, gamma);
-      printf("estimated final saturated error %g, sqr: %g\n",
-          err1ref, err1ref * err1ref);
-
-      printf("estimated final error %g, sqr: %g, norm. sqr: %g\n",
-          errref, errref * errref, errref * errref * (T + m->t0));
-
-      if ( m->verbose ) {
-        if ( m->opta ) {
-          intq_errcomp(intq, m->alpha0, m->qT, xerr, NULL, NULL);
-        }
-        dumperror(m->n, lambda, gamma, 2, xerr0, xerr);
-      }
-    }
+    /* prepare the schedule */
+    invt_mkalpha(invt, m);
 
     /* repeat `ntr` independent simulations */
     for ( i = 0; i < ntr; i++ ) {
       /* run simulation */
-      err = simulmeta(m, intq, win, winn, &err0, xerr0);
+      err = simulmeta(m, invt->intq, invt->win, invt->winn, &err0, invt->xerr0);
 
       /* accumulators for the initial and final errors */
-      ave_add(ei, err * err); averr0 = sqrt( ei->ave );
-      ave_add(ef, err * err); averr  = sqrt( ef->ave );
+      ave_add(ei, err0 * err0);
+      averr0 = sqrt( ei->ave );
+      ave_add(ef, err * err);
+      averr  = sqrt( ef->ave );
 
-      printf("%4ld: err %10.8f -> %10.8f, "
-                   "ave %10.8f -> %10.8f, "
-                   "sqr %e -> %e\n",
+      printf("%4ld: err %10.8f -> %10.8f, ave %10.8f -> %10.8f, sqr %e -> %e\n",
           i, err0, err, averr0, averr, ei->ave, ef->ave);
     }
 
@@ -396,23 +440,16 @@ static double invt_run(invtpar_t *m)
     printf("average error: %10.8f -> %10.8f, sqr %e -> %e, "
         "norm. sqr %e, stdsqr %e -> %e\n",
         averr0, averr, ei->ave, ef->ave,
-        ef->ave * (T + m->t0), stde0, stde);
+        ef->ave * (invt->T + m->t0), stde0, stde);
     printf("predicted val: %10.8f -> %10.8f, sqr %e -> %e, "
         "norm. sqr %e\n",
-        err0ref, errref, err0ref * err0ref, errref * errref,
-        errref * errref * (T + m->t0));
+        invt->err0ref, invt->errref, invt->err0ref * invt->err0ref, invt->errref * invt->errref,
+        invt->errref * invt->errref * (invt->T + m->t0));
     printf("saturated val: %10.8f -> %10.8f, sqr %e -> %e\n",
-        err0ref, err1ref, err0ref * err0ref, err1ref * err1ref);
+        invt->err0ref, invt->err1ref, invt->err0ref * invt->err0ref, invt->err1ref * invt->err1ref);
   }
 
-  if ( intq != NULL ) {
-    intq_close( intq );
-  }
-  free(lambda);
-  free(gamma);
-  free(xerr0);
-  free(xerr);
-
+  invt_close(invt);
   return err;
 }
 
