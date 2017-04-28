@@ -200,6 +200,7 @@ __inline static int savewin(double *win, int winn,
 {
   FILE *fp;
   int i;
+  double ymin = 0, ymax = 0;
 
   if ( (fp = fopen(fn, "w")) == NULL ) {
     fprintf(stderr, "cannot open %s\n", fn);
@@ -207,10 +208,14 @@ __inline static int savewin(double *win, int winn,
   }
   fprintf(fp, "# %d\n", winn);
   for ( i = 0; i < winn; i++ ) {
+    if ( win[i] < ymin ) ymin = win[i];
+    if ( win[i] > ymax ) ymax = win[i];
     fprintf(fp, "%d %g\n", i, win[i]);
   }
   fprintf(fp, "%d 0\n", winn);
   fclose(fp);
+  fprintf(stderr, "saved window function to %s, min %g, max %g\n",
+      fn, ymin, ymax);
   return 0;
 }
 
@@ -223,6 +228,7 @@ __inline static int savewinmat(double *win, int winn,
 {
   FILE *fp;
   int i, j, ks[3], k, l;
+  double y, ymin = 0, ymax = 0;
 
   if ( (fp = fopen(fn, "w")) == NULL ) {
     fprintf(stderr, "cannot open %s\n", fn);
@@ -231,8 +237,7 @@ __inline static int savewinmat(double *win, int winn,
   fprintf(fp, "# %d %d\n", winn, n);
   for ( i = 1; i <= n; i++ ) {
     for ( j = 1; j <= n; j++ ) {
-      double y = 0;
-
+      y = 0;
       if ( pbc ) {
         ks[0] = i - j;
         ks[1] = i - j - n;
@@ -252,11 +257,15 @@ __inline static int savewinmat(double *win, int winn,
           }
         }
       }
-      fprintf(fp, "%d %d %g\n", i, j, y);
+      if ( y > ymax ) ymax = y;
+      if ( y < ymin ) ymin = y;
+      fprintf(fp, "%9.6f ", y);
     }
     fprintf(fp, "\n");
   }
   fclose(fp);
+  fprintf(stderr, "saved updating matrix to %s, min %g, max %g\n",
+      fn, ymin, ymax);
   return 0;
 }
 

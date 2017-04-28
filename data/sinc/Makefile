@@ -7,7 +7,7 @@ compile::
 
 # for Figure sinc.gp
 sincsingle: compile
-	$(prog) --opta --samp=l --okmax=8       --fnwin=sinc_nonpbc_win.dat --fnwinmat=sinc_nonpbc_winmat.dat
-	$(prog) --opta --samp=l --okmax=4 --pbc --fnwin=sinc_pbc_win.dat
+	$(prog) --okmax=10       --fnwin=sinc_nonpbc_win.dat --fnwinmat=sinc_nonpbc_winmat.dat
+	$(prog) --okmax=5  --pbc --fnwin=sinc_pbc_win.dat
 
 
