@@ -127,7 +127,7 @@ static int invt_is2_addexact(metad_t *metad, int l)
     if ( i == 0 ) v0 = lndos[id];
     metad->vref[i] = lndos[id] - v0;
   }
-  metad_trimv(metad, vref);
+  metad_trimv(metad, metad->vref);
   free(lndos);
 
   return 0;

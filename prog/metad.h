@@ -52,7 +52,7 @@ static void metad_prepwin(metad_t *metad,
 
   /* modify the window function such that all eigenvalues
    * lambda[i] are positive-definite */
-  metad->lambda = stablizewin(n, metad->win, &metad->winn, pbc, 0.0, 1);
+  stablizewin(metad->lambda, n, metad->win, &metad->winn, pbc, 0.0, 1);
   //  /* save the window kernel */
   //  savewin(metad->win, metad->winn, m->fnwin);
   //  /* save the n x n updating matrix */
@@ -244,7 +244,7 @@ __inline static void metad_updatev(metad_t *metad, int i)
 static void metad_trimv(metad_t *metad, double *v)
 {
   int i, n = metad->n;
-  double v0;
+  double v0 = 0;
 
   for ( i = 0; i < n; i++ ) v0 += v[i];
   v0 /= n;

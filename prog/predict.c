@@ -41,9 +41,9 @@ static int save_xerr(invtpar_t *m, const char *fn,
 static void invt_geterr(invtpar_t *m,
     const double *gamma)
 {
-  int n = m->n, err;
+  int n = m->n, winn;
   double T, c0, c1, t0, qT, inita, err0, err1, err2;
-  double *lambda;
+  double *win, *lambda;
   double *xerri, *xerrf, *xerrf_r, *xerrf_a;
   intq_t *intq;
 
@@ -54,24 +54,13 @@ static void invt_geterr(invtpar_t *m,
 
   T = (double) m->nsteps;
 
-  /* compute the eigenvalues of the updating matrix */
-  lambda = geteigvals(m->n, m->winn, m->win, m->pbc,
-      0, &err, 1);
-  if ( err ) {
-    lambda = stablizewin(m->n, m->win, &m->winn, m->pbc, 0.0, 1);
-  }
-
-  /* models of well-separated eigenvalues */
-  //{ int i; for ( i = 1; i < n; i++ ) lambda[i] = pow(0.1, i); // pow(0.3, i*i*0.5); }
-
-  /* save updating kernel or window function */
-  if ( m->fnwin[0] != '\0' ) {
-    savewin(m->win, m->winn, m->fnwin);
-  }
-  /* save the updating matrix */
-  if ( m->fnwinmat[0] != '\0' ) {
-    savewinmat(m->win, m->winn, m->n, m->pbc, m->fnwinmat);
-  }
+  xnew(win, n);
+  xnew(lambda, n);
+  /* prepare the window function and
+   * compute the eigenvalues of the updating matrix */
+  prepwin(lambda, m->n, m->win, m->winn, win, &winn,
+      m->pbc, m->gaussig, m->okmax,
+      m->fnwin, m->fnwinmat, m->verbose);
 
   /* initial errors */
   esterror_eql(m->alpha0, m->n, xerri, lambda, gamma);
@@ -121,6 +110,7 @@ static void invt_geterr(invtpar_t *m,
   }
 
   intq_close(intq);
+  free(win);
   free(lambda);
   free(xerri);
   free(xerrf);
@@ -140,7 +130,8 @@ static void invt_scanc(invtpar_t *m,
   T = (double) m->nsteps;
 
   /* compute the eigenvalues of the updating matrix */
-  lambda = geteigvals(m->n, m->winn, m->win, m->pbc,
+  xnew(lambda, m->n);
+  geteigvals(lambda, m->n, m->win, m->winn, m->pbc,
       0, NULL, 1);
 
   /* initial equilibrium error */
@@ -188,7 +179,8 @@ static void invt_scania(invtpar_t *m,
   T = (double) m->nsteps;
 
   /* compute the eigenvalues of the updating matrix */
-  lambda = geteigvals(m->n, m->winn, m->win, m->pbc,
+  xnew(lambda, m->n);
+  geteigvals(lambda, m->n, m->win, m->winn, m->pbc,
       0, NULL, 1);
 
   /* initial equilibrium error */
@@ -232,9 +224,10 @@ static void invt_scan(invtpar_t *m,
   double nb, sig;
   int ok, okmax = m->okmax, eigerr = 0;
   double T, t0, c, qT, err1, err1norm, err2, err2norm;
-  double *lambda = NULL;
+  double *lambda;
 
   T = (double) m->nsteps;
+  xnew(lambda, m->n);
 
   /* initialize the scanning variable */
   if ( scantype == SCAN_NB )
@@ -269,7 +262,7 @@ static void invt_scan(invtpar_t *m,
       m->winn = 2;
       m->win[1] = nb;
       m->win[0] = 1 - nb;
-      lambda = geteigvals(m->n, m->winn, m->win, m->pbc,
+      geteigvals(lambda, m->n, m->win, m->winn, m->pbc,
           0, &eigerr, 1);
     }
     else if ( scantype == SCAN_SIG )
@@ -277,14 +270,14 @@ static void invt_scan(invtpar_t *m,
       /* make the Gaussian window */
       m->gaussig = sig;
       mkgauswin(sig, m->n, m->pbc, m->win, &m->winn);
-      lambda = stablizewin(m->n, m->win, &m->winn, m->pbc, 0.0, m->verbose);
+      stablizewin(lambda, m->n, m->win, &m->winn, m->pbc, 0.0, m->verbose);
     }
     else if ( scantype == SCAN_OK )
     {
       /* make the bandpass sinc window */
       m->okmax = ok;
       mksincwin(ok, m->n, m->pbc, m->win, &m->winn);
-      lambda = geteigvals(m->n, m->winn, m->win, m->pbc,
+      geteigvals(lambda, m->n, m->win, m->winn, m->pbc,
           0, &eigerr, 1);
     }
 
@@ -359,14 +352,15 @@ static void invt_scan(invtpar_t *m,
 int main(int argc, char **argv)
 {
   invtpar_t m[1];
-  double *gamma = NULL;
+  double *gamma;
 
   invtpar_init(m);
   invtpar_doargs(m, argc, argv);
   invtpar_dump(m);
 
   /* estimate or load the gamma values */
-  gamma = estgamma(m->n, m->sampmethod, m->pbc, m->localg);
+  xnew(gamma, m->n);
+  estgamma(gamma, m->n, m->sampmethod, m->pbc, m->localg);
   if ( m->fngamma[0] != '\0' ) {
     if ( m->sampmethod == SAMPMETHOD_MD ) {
       loadgamma(m->n, gamma, m->fngamma);

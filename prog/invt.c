@@ -235,37 +235,6 @@ typedef struct {
 } invtdata_t;
 
 
-/* prepare the window function */
-static void invt_prepwin(invtdata_t *invt, invtpar_t *m)
-{
-  int i, n = m->n, pbc = m->pbc;
-
-  xnew(invt->win, n);
-  if ( m->gaussig > 0 ) {
-    mkgauswin(m->gaussig, n, pbc, invt->win, &invt->winn);
-  } else if ( m->okmax >= 0 ) {
-    mksincwin(m->okmax, n, pbc, invt->win, &invt->winn);
-  } else {
-    /* copy the user window */
-    invt->winn = m->winn;
-    for ( i = 0; i < m->winn; i++ )
-      invt->win[i] = m->win[i];
-  }
-
-  /* modify the window function such that all eigenvalues
-   * lambda[i] are positive-definite */
-  invt->lambda = stablizewin(n, invt->win, &invt->winn, pbc, 0, m->verbose);
-  if ( m->fnwin[0] != '\0' ) {
-    /* save the window kernel */
-    savewin(invt->win, invt->winn, m->fnwin);
-  }
-  if ( m->fnwinmat[0] != '\0' ) {
-    /* save the n x n updating matrix */
-    savewinmat(invt->win, invt->winn, n, pbc, m->fnwinmat);
-  }
-}
-
-
 static invtdata_t *invt_open(invtpar_t *m)
 {
   invtdata_t *invt;
@@ -273,16 +242,19 @@ static invtdata_t *invt_open(invtpar_t *m)
   xnew(invt, 1);
   invt->n = m->n;
   invt->T = (double) m->nsteps;
+  xnew(invt->win, invt->n);
   xnew(invt->lambda, invt->n);
   xnew(invt->gamma, invt->n);
   invt->intq = NULL;
 
   /* prepare the window function, compute lambda's */
-  invt_prepwin(invt, m);
+  prepwin(invt->lambda, invt->n, m->win, m->winn,
+      invt->win, &invt->winn, m->pbc, m->gaussig, m->okmax,
+      m->fnwin, m->fnwinmat, m->verbose);
 
   /* estimate the integrals of the autocorrelation functions
    * of the eigenmodes for the updating scheme */
-  invt->gamma = estgamma(m->n, m->sampmethod, m->pbc, m->localg);
+  estgamma(invt->gamma, m->n, m->sampmethod, m->pbc, m->localg);
 
   xnew(invt->xerr0, invt->n);
   xnew(invt->xerr, invt->n);

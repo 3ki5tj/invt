@@ -153,19 +153,18 @@ static void mksincwin(int km, int n, int pbc, double *win, int *winn)
 
 
 /* estimate the eigenvalues of the updating scheme
- * for a given window `win` */
-static double *geteigvals(int n,
-    int winn, const double *win, int pbc,
+ * for a given window `win`
+ * `tol`: tolerance of negative eigenvalues
+ * `err`: number of negative eigenvalues */
+static void geteigvals(double *lambda, int n,
+    const double *win, int winn, int pbc,
     double tol, int *err, int verbose)
 {
   int i, j, nerr = 0;
-  double *lambda, x, fac;
+  double x, fac;
 
-  if ( tol <= 0 ) { /* use the default value */
-    tol = 100 * DBL_EPSILON;
-  }
-
-  xnew(lambda, n);
+  /* use the default tolerance of negative eigenvalues */
+  if ( tol <= 0 ) tol = 100 * DBL_EPSILON;
 
   /* loop over eigenvalues */
   for ( i = 0; i < n; i++ ) {
@@ -190,11 +189,7 @@ static double *geteigvals(int n,
     }
   }
 
-  if ( err != NULL ) {
-    *err = nerr;
-  }
-
-  return lambda;
+  if ( err != NULL ) *err = nerr;
 }
 
 
@@ -268,14 +263,14 @@ __inline static int savewinmat(double *win, int winn,
 
 
 /* modify the window function
- * such that no eigenvalue is negative */
-__inline static double *stablizewin(int n,
+ * such that no eigenvalue in `lambda` is negative */
+__inline static void stablizewin(double *lambda, int n,
     double *win, int *winn,
     int pbc, double tol, int verbose)
 {
   const int itmax = 10000;
   int i, j, err, it;
-  double lam, lamn, lammax, *lambda = NULL;
+  double lam, lamn, lammax;
   double *nwin;
 
   xnew(nwin, n + 1);
@@ -288,7 +283,7 @@ __inline static double *stablizewin(int n,
 
   for ( it = 0; it < itmax; it++ ) {
     /* B1. compute the eigenvalues from the window */
-    lambda = geteigvals(n, *winn, nwin, pbc,
+    geteigvals(lambda, n, nwin, *winn, pbc,
         tol, &err, it == itmax - 1);
     //for ( i = 0; i < n; i++ ) printf("i %4d: lambda %18.15f, win %18.15f\n", i, lambda[i], win[i]);
     //getchar();
@@ -379,8 +374,6 @@ __inline static double *stablizewin(int n,
           "most negative value %g, modifying the window function\n",
           it, err, n, -lammax);
     }
-
-    free(lambda);
   }
 
   /* change the window width if the iteration fails */
@@ -394,7 +387,41 @@ __inline static double *stablizewin(int n,
   }
 
   free(nwin);
-  return lambda;
+}
+
+
+
+/* prepare the window function */
+__inline static double *prepwin(double *lambda, int n,
+    const double *win0, int winn0, double *win, int *winn,
+    int pbc, double gaussig, int okmax,
+    const char *fnwin, const char *fnwinmat, int verbose)
+{
+  int i;
+
+  if ( gaussig > 0 ) {
+    mkgauswin(gaussig, n, pbc, win, winn);
+  } else if ( okmax >= 0 ) {
+    mksincwin(okmax, n, pbc, win, winn);
+  } else {
+    /* copy the user window */
+    *winn = winn0;
+    for ( i = 0; i < winn0; i++ )
+      win[i] = win0[i];
+  }
+
+  /* modify the window function such that all eigenvalues
+   * lambda[i] are positive-definite */
+  stablizewin(lambda, n, win, winn, pbc, 0, verbose);
+  if ( fnwin[0] != '\0' ) {
+    /* save the window kernel */
+    savewin(win, *winn, fnwin);
+  }
+  if ( fnwinmat[0] != '\0' ) {
+    /* save the n x n updating matrix */
+    savewinmat(win, *winn, n, pbc, fnwinmat);
+  }
+  return win;
 }
 
 
@@ -408,14 +435,12 @@ __inline static double *stablizewin(int n,
  * as those of the Monte Carlo transition matrix
  * This is true only for perfect sampling and
  * local Monte Carlo sampling */
-__inline static double *estgamma(int n, int sampmethod,
-    int pbc, double localg)
+__inline static void estgamma(double *gamma, int n,
+    int sampmethod, int pbc, double localg)
 {
   int i;
-  double *gamma, x;
+  double x;
   static int once;
-
-  xnew(gamma, n);
 
   gamma[0] = 0;
   for ( i = 1; i < n; i++ ) {
@@ -447,8 +472,6 @@ __inline static double *estgamma(int n, int sampmethod,
       gamma[i] = 1.0;
     }
   }
-
-  return gamma;
 }
 
 
