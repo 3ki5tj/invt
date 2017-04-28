@@ -2,7 +2,8 @@
  * that is the pair of functions
  * getcosmodes() and fromcosmodes()
  * */
-#include "invt.h"
+#include "../invt.h"
+#include "../cosmodes.h"
 
 
 
@@ -61,7 +62,7 @@ int main(int argc, char **argv)
   xnew(v, n);
   xnew(v1, n);
   xnew(v2, n);
-  costab = makecostab(n);
+  costab = mkcostab(n, 0);
 
   /* random noise */
   for ( i = 0; i < n; i++ ) {
