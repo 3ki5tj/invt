@@ -1,5 +1,5 @@
 #define IS2_LB 5
-#define L (1 << IS2_LB)
+#define L IS2_L
 #include "is2.h"
 #include "util.h"
 
@@ -17,7 +17,7 @@ static void savehist(double *h, int n,
     tot += h[i];
   for ( i = 0; i < n; i++ ) {
     if ( h[i] <= 0 ) continue;
-    fprintf(fp, "%d %g %g\n", emin+i*de, h[i]/tot/de, h[i]);
+    fprintf(fp, "%g %g %g\n", emin+i*de, h[i]/tot/de, h[i]);
   }
   fclose(fp);
 }
@@ -111,8 +111,8 @@ static void is2_aus(is2_t *is, double Eave, double Esig,
     y2 = (y1 * y1 - 1);
     c2 += y2 / (Esig * Esig) / t;
     if ( t % 10000 == 0 )
-    printf("c1 %g, c2 %g, E %d, Eave %g, y %g, %g, acc %g%%\n",
-        c1, c2, is->E, Eave, y1, y2, 100.*nacc/t);
+      printf("c1 %g, c2 %g, E %d, Eave %g, y %g, %g, acc %g%%\n",
+          c1, c2, is->E, Eave, y1, y2, 100.*nacc/t);
     his[(is->E + 2 * is->n)/4] += 1;
   }
   savehist(his, is->n + 1, -2*IS2_N, 4, "is2aus.his");

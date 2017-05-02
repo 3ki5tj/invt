@@ -1,9 +1,37 @@
 #ifndef AVE_H__
 #define AVE_H__
 
+/* simple version */
 typedef struct {
-  long cnt;
-  double sum, sqr, ave, var;
+  double cnt, sum, sqr;
+} av_t;
+
+__inline static void av_clear(av_t *a)
+{
+  a->cnt = 0;
+  a->sum = 0;
+  a->sqr = 0;
+}
+
+__inline static void av_add(av_t *a, double x)
+{
+  a->cnt += 1;
+  a->sum += x;
+  a->sqr += x * x;
+}
+
+__inline static double av_getave(av_t *a, double *var)
+{
+  double ave = (a->cnt > 0) ? a->sum / a->cnt : 0;
+  if ( var != NULL )
+    *var = (a->cnt > 0) ? a->sqr / a->cnt - ave * ave : 0;
+  return ave;
+}
+
+
+/* more careful version */
+typedef struct {
+  double cnt, sum, sqr, ave, var;
 } ave_t;
 
 __inline static void ave_clear(ave_t *a)
@@ -29,4 +57,4 @@ __inline static void ave_add(ave_t *a, double x)
 }
 
 
-#endif
+#endif /* AVE_H__ */

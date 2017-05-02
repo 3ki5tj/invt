@@ -100,7 +100,7 @@ Galveston, Texas 77555-0304, USA}
   that are optimal for asymptotic convergence,
   and the optimal schedule of these schemes
   is the inverse number of updating steps with a proper shift,
-  as given by the $1/t$ prescription.
+  as given by the inverse-time prescription.
   %
 \end{abstract}
 
@@ -746,11 +746,11 @@ in late stages
 is to follow the formula
 %
 \begin{equation}
-  \alpha(t) = \frac{1}{t},
+  \alpha(t) = \frac{1}{t + 1},
   \label{eq:alpha_invt}
 \end{equation}
 %
-where $t$,
+where $t + 1$,
 referred to as the ``time'' below,
 is the number of updating steps
 from the beginning of the simulation\cite{
@@ -764,8 +764,8 @@ comes from the interpretation of
 the bias potential %under the WL updating scheme, Eq. \eqref{eq:wl_update},
 as a runtime average computed from all data points collected so far,
 so that the addition of a new data point only
-affects the average by its due weight, $1/t$,
-which is the inverse of the current sample size, $t$
+affects the average by its due weight,
+which is the inverse of the current sample size, $t + 1$
 (cf. Appendix \ref{sec:equilerr}).
 %
 Alternatively, we may derive it
@@ -1392,7 +1392,7 @@ we get the inverse-time schedule
 \end{equation}
 %
 and Eq. \eqref{eq:alpha_invt}
-is the special case of $t_0 = 0$.
+is the special case of $t_0 = 1$.
 %
 
 We now determine the optimal value of $q(T)$,
