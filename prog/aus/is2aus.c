@@ -111,8 +111,8 @@ static void is2_aus(is2_t *is, double Eave, double Esig,
     y2 = (y1 * y1 - 1);
     c2 += y2 / (Esig * Esig) / t;
     if ( t % 10000 == 0 )
-      printf("c1 %g, c2 %g, E %d, Eave %g, y %g, %g, acc %g%%\n",
-          c1, c2, is->E, Eave, y1, y2, 100.*nacc/t);
+      printf("t %ld, c1 %g, c2 %g, E %d, Eave %g, y %g, %g, acc %g%%\n",
+          t, c1, c2, is->E, Eave, y1, y2, 100.*nacc/t);
     his[(is->E + 2 * is->n)/4] += 1;
   }
   savehist(his, is->n + 1, -2*IS2_N, 4, "is2aus.his");
@@ -126,12 +126,14 @@ int main(int argc, char **argv)
   is2_t *is;
   int method = 0;
   double Eave = -1468, Edev = 50;
-  long nsteps = 100000000L;
+  long nsteps = 0;
 
   if ( argc > 1 ) method = atoi( argv[1] );
   if ( argc > 2 ) Eave   = atof( argv[2] );
   if ( argc > 3 ) Edev   = atof( argv[3] );
   if ( argc > 4 ) nsteps = atol( argv[4] );
+  if ( nsteps <= 0 )
+    nsteps = (method == 0) ? 100000000L : 500000L;
 
   is = is2_open(L);
   is2_aus(is, Eave, Edev, method, nsteps);
