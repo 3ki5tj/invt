@@ -2,25 +2,8 @@
 #define L POTTS2_L
 #include "potts2.h"
 #include "util.h"
+#include "gaus.h"
 
-
-
-static void savehist(double *h, int n,
-    double emin, double de, const char *fn)
-{
-  FILE *fp;
-  int i;
-  double tot = 0;
-
-  fp = fopen(fn, "w");
-  for ( i = 0; i < n; i++ )
-    tot += h[i];
-  for ( i = 0; i < n; i++ ) {
-    if ( h[i] <= 0 ) continue;
-    fprintf(fp, "%g %g %g\n", emin+i*de, h[i]/tot/de, h[i]);
-  }
-  fclose(fp);
-}
 
 
 
@@ -91,48 +74,63 @@ __inline static int potts2_wolff_mod(potts2_t *pt,
 }
 
 
-static void potts2_aus(potts2_t *pt, double Eave, double Esig,
-    int wolff, long nsteps)
+/* equilibrate the system to raise the energy above ene */
+static void potts2_equil(potts2_t *pt, double ene)
 {
   int id, h, sn;
-  long t, nacc = 0, nstrep;
-  double c1 = 0, c2 = 0, y1, y2, amp;
-  double *his;
+  long t;
 
-  mtscramble(clock());
-  xnew(his, pt->n * 2 + 1);
-
-  /* equilibrate the system to raise the energy */
   for ( t = 1; ; t++ ) {
     POTTS2_PICK(pt, id, h, sn);
     POTTS2_FLIP(pt, id, h, sn);
-    if ( pt->E > Eave ) break;
+    if ( pt->E > ene ) break;
   }
-  c1 = 1.4245;
+}
 
-  nstrep = wolff ? 50000 : 1000000;
-  amp = 1e-4;
+
+static void potts2_gaus(potts2_t *pt,
+    int wolff, long nsteps)
+{
+  long t;
+  int m, id, acc;
+  double ecmin, ecmax, esig;
+  const double tp = 1.4;
+  gaus_t *gaus;
+
+  mtscramble(clock());
+
+  ecmin = -1.8 * pt->n;
+  ecmax = -0.8 * pt->n;
+  //ecmin = -1.3 * pt->n;
+  //ecmax = -1.25 * pt->n;
+  //ecmin = -0.5 * pt->n;
+  //ecmax = -0.45 * pt->n;
+  esig = pt->l;
+  m = (int) ((ecmax - ecmin) / esig) + 1;
+  potts2_equil(pt, ecmin);
+  gaus = gaus_open(ecmin, ecmax, m, esig, tp,
+      -2*pt->n, 0, 1);
+
+  id = 0;
   for ( t = 1; t <= nsteps; t++ ) {
-    if ( wolff ) {
-      /* cluster algorithm */
-      nacc += potts2_wolff_mod(pt, c1, c2, Eave);
-    } else {
-      /* Metropolis way */
-      nacc += potts2_metro_mod(pt, c1, c2, Eave);
+    if ( wolff ) { /* cluster algorithm */
+      acc = potts2_wolff_mod(pt, gaus->beta1[id], gaus->beta2[id], gaus->ave[id]);
+    } else { /* Metropolis algorithm */
+      acc = potts2_metro_mod(pt, gaus->beta1[id], gaus->beta2[id], gaus->ave[id]);
     }
-    y1 = (pt->E - Eave) / Esig;
-    c1 += y1 / Esig * amp;
-    y2 = y1 * y1 - 1;
-    c2 += y2 / (Esig * Esig) * amp;
-    his[pt->E + 2 * pt->n] += 1;
-    if ( t % nstrep == 0 ) {
-      printf("t %ld, c1 %g, c2 %g, E %d, Eave %g, y %g, %g, acc %g%%\n",
-          t, c1, c2, pt->E, Eave, y1, y2, 100.*nacc/t);
-      savehist(his, pt->n * 2 + 1, -2*POTTS2_N, 1, "pt2aus.his");
-      //getchar();
+    gaus_update(gaus, id, pt->E, (double) t);
+    gaus_add(gaus, id, pt->E, acc);
+    gaus_bmove(gaus, pt->E, &id);
+    if ( t % 100 == 0 ) {
+      gaus_wlcheck(gaus, 0.1, 0.5, (double) t);
+    }
+    if ( t % 100000 == 0 ) {
+      printf("t %ld, flatness %g, alpha %g, invt %d\n",
+          t, gaus->hflatness, gaus->alpha, gaus->invt);
+      gaus_savehist(gaus, "pt2gaus.his");
     }
   }
-  free(his);
+  gaus_close(gaus);
 }
 
 
@@ -141,18 +139,16 @@ int main(int argc, char **argv)
 {
   potts2_t *pt;
   int method = 0, q = 10;
-  double Eave = -1280, Edev = 32;
   long nsteps = 0;
 
   if ( argc > 1 ) method = atoi( argv[1] );
-  if ( argc > 2 ) Eave   = atof( argv[2] );
-  if ( argc > 3 ) Edev   = atof( argv[3] );
-  if ( argc > 4 ) nsteps = atol( argv[4] );
+  if ( argc > 2 ) q      = atoi( argv[2] );
+  if ( argc > 3 ) nsteps = atol( argv[3] );
   if ( nsteps <= 0 )
-    nsteps = (method == 0) ? 100000000L : 50000000L;
+    nsteps = (method == 0) ? 100000000L : 5000000L;
 
   pt = potts2_open(L, q);
-  potts2_aus(pt, Eave, Edev, method, nsteps);
+  potts2_gaus(pt, method, nsteps);
   potts2_close(pt);
   return 0;
 }

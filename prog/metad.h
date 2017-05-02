@@ -181,7 +181,7 @@ __inline static double metad_hflatness(metad_t *metad)
     x = n * metad->vtmp[k] / tot;
     fl += x * x;
   }
-  /* compute the flitered histogram */
+  /* compute the filtered histogram */
   for ( ; k < n; k++ ) metad->vtmp[k] = 0;
   fromcosmodes(metad->hmod, n, metad->vtmp, metad->costab);
   return sqrt( fl );
