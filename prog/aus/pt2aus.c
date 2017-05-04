@@ -1,7 +1,7 @@
 #define POTTS2_LB 5
-#define L POTTS2_L
 #include "potts2.h"
 #include "util.h"
+#include "mmwl.h"
 
 
 
@@ -94,10 +94,14 @@ __inline static int potts2_wolff_mod(potts2_t *pt,
 static void potts2_aus(potts2_t *pt, double Eave, double Esig,
     int wolff, long nsteps)
 {
-  int id, h, sn;
+  int id, h, sn, dovar = 1;
   long t, nacc = 0, nstrep;
   double c1 = 0, c2 = 0, y1, y2, amp;
   double *his;
+  mmwl_t mmwl[1];
+
+  dovar = ( Esig > 0 );
+  Esig = fabs(Esig);
 
   mtscramble(clock());
   xnew(his, pt->n * 2 + 1);
@@ -109,25 +113,32 @@ static void potts2_aus(potts2_t *pt, double Eave, double Esig,
     if ( pt->E > Eave ) break;
   }
   c1 = 1.4245;
+  mmwl_init(mmwl, 1e-3);
 
-  nstrep = wolff ? 50000 : 1000000;
-  amp = 1e-4;
+  nstrep = wolff ? 50000 : 10000000;
   for ( t = 1; t <= nsteps; t++ ) {
-    if ( wolff ) {
-      /* cluster algorithm */
+    if ( wolff ) { /* cluster algorithm */
       nacc += potts2_wolff_mod(pt, c1, c2, Eave);
-    } else {
-      /* Metropolis way */
+    } else { /* Metropolis algorithm */
       nacc += potts2_metro_mod(pt, c1, c2, Eave);
     }
+    amp = mmwl_getalpha(mmwl);
     y1 = (pt->E - Eave) / Esig;
     c1 += y1 / Esig * amp;
     y2 = y1 * y1 - 1;
-    c2 += y2 / (Esig * Esig) * amp;
+    if ( dovar ) {
+      c2 += y2 / (Esig * Esig) * amp;
+    }
     his[pt->E + 2 * pt->n] += 1;
+    mmwl_add(mmwl, y1, y2);
+    /* control the updating magnitude */
+    if ( t % 100 == 0 && mmwl_check(mmwl, dovar, 0.05, 0.5) ) {
+      printf("t %ld, new updating magnitude %g, fl %g, %g, c %g, %g, invt %d\n",
+          t, mmwl->alpha, mmwl->fl[1], mmwl->fl[2], c1, c2, mmwl->invt);
+    }
     if ( t % nstrep == 0 ) {
-      printf("t %ld, c1 %g, c2 %g, E %d, Eave %g, y %g, %g, acc %g%%\n",
-          t, c1, c2, pt->E, Eave, y1, y2, 100.*nacc/t);
+      printf("t %ld, c1 %g, c2 %g, E %d, Eave %g, y %g(%+g), %g(%+g), amp %g, acc %g%%, invt %d\n",
+          t, c1, c2, pt->E, Eave, y1, mmwl->fl[1], y2, mmwl->fl[2], amp, 100.*nacc/t, mmwl->invt);
       savehist(his, pt->n * 2 + 1, -2*POTTS2_N, 1, "pt2aus.his");
       //getchar();
     }
@@ -141,18 +152,18 @@ int main(int argc, char **argv)
 {
   potts2_t *pt;
   int method = 0, q = 10;
-  double Eave = -1280, Edev = 32;
+  double eave = -1.3, edev = 1.0;
   long nsteps = 0;
 
   if ( argc > 1 ) method = atoi( argv[1] );
-  if ( argc > 2 ) Eave   = atof( argv[2] );
-  if ( argc > 3 ) Edev   = atof( argv[3] );
+  if ( argc > 2 ) eave   = atof( argv[2] );
+  if ( argc > 3 ) edev   = atof( argv[3] );
   if ( argc > 4 ) nsteps = atol( argv[4] );
   if ( nsteps <= 0 )
-    nsteps = (method == 0) ? 100000000L : 50000000L;
+    nsteps = (method == 0) ? 1000000000L : 500000000L;
 
-  pt = potts2_open(L, q);
-  potts2_aus(pt, Eave, Edev, method, nsteps);
+  pt = potts2_open(POTTS2_L, q);
+  potts2_aus(pt, pt->n * eave, pt->l * edev, method, nsteps);
   potts2_close(pt);
   return 0;
 }

@@ -1,5 +1,4 @@
 #define POTTS2_LB 5
-#define L POTTS2_L
 #include "potts2.h"
 #include "util.h"
 #include "gaus.h"
@@ -97,10 +96,10 @@ static void potts2_gaus(potts2_t *pt,
   const double tp = 1.4;
   gaus_t *gaus;
 
-  mtscramble(clock());
+  //mtscramble(clock());
 
-  ecmin = -1.8 * pt->n;
-  ecmax = -0.8 * pt->n;
+  ecmin = -1.7 * pt->n;
+  ecmax = -0.9 * pt->n;
   //ecmin = -1.3 * pt->n;
   //ecmax = -1.25 * pt->n;
   //ecmin = -0.5 * pt->n;
@@ -125,8 +124,8 @@ static void potts2_gaus(potts2_t *pt,
       gaus_wlcheck(gaus, 0.1, 0.5, (double) t);
     }
     if ( t % 100000 == 0 ) {
-      printf("t %ld, flatness %g, alpha %g, invt %d\n",
-          t, gaus->hflatness, gaus->alpha, gaus->invt);
+      printf("t %ld, flatness %g, alpha %g, id %d, invt %d\n",
+          t, gaus->hflatness, gaus->alpha, id, gaus->invt);
       gaus_savehist(gaus, "pt2gaus.his");
     }
   }
@@ -147,7 +146,7 @@ int main(int argc, char **argv)
   if ( nsteps <= 0 )
     nsteps = (method == 0) ? 100000000L : 5000000L;
 
-  pt = potts2_open(L, q);
+  pt = potts2_open(POTTS2_L, q);
   potts2_gaus(pt, method, nsteps);
   potts2_close(pt);
   return 0;

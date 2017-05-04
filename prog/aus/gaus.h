@@ -6,6 +6,7 @@
  * */
 
 
+#include "mmwl.h"
 
 typedef struct {
   int n;
@@ -16,8 +17,10 @@ typedef struct {
   double *lnz; /* partition function */
   double alpha; /* updating magnitude */
   double hflatness;
+  double t, t0;
   int invt; /* using 1/t schedule */
-  double *cnt, *tcnt;
+  mmwl_t *mmwl;
+  double *cnt;
   double *acc;
   int xmin, xmax, dx;
   int xn;
@@ -41,8 +44,8 @@ __inline static gaus_t *gaus_open(double xcmin, double xcmax,
   xnew(gaus->beta1, n);
   xnew(gaus->beta2, n);
   xnew(gaus->lnz, n);
+  xnew(gaus->mmwl, n);
   xnew(gaus->cnt, n);
-  xnew(gaus->tcnt, n);
   xnew(gaus->acc, n);
   delx = (xcmax - xcmin) / (n - 1);
   for ( i = 0; i < n; i++ ) {
@@ -51,8 +54,8 @@ __inline static gaus_t *gaus_open(double xcmin, double xcmax,
     gaus->beta1[i] = beta;
     gaus->beta2[i] = 0;
     gaus->lnz[i] = 0;
+    mmwl_init(gaus->mmwl + i, 1e-3);
     gaus->cnt[i] = 0;
-    gaus->tcnt[i] = 0;
     gaus->acc[i] = 0;
   }
   gaus->xmin = xmin;
@@ -68,6 +71,8 @@ __inline static gaus_t *gaus_open(double xcmin, double xcmax,
     gaus->htot[i] = 0;
   }
   gaus->alpha = 1;
+  gaus->t = 0;
+  gaus->t0 = 1;
   gaus->invt = 0;
   fprintf(stderr, "%d states Ec %g ... %g\n",
       n, gaus->ave[0], gaus->ave[n-1]);
@@ -84,8 +89,8 @@ __inline static void gaus_close(gaus_t *gaus)
   free(gaus->beta1);
   free(gaus->beta2);
   free(gaus->lnz);
+  free(gaus->mmwl);
   free(gaus->cnt);
-  free(gaus->tcnt);
   free(gaus->acc);
   free(gaus->hist);
   free(gaus->htot);
@@ -146,9 +151,9 @@ __inline static int gaus_savehist(gaus_t *gaus, const char *fn)
   for ( j = 0; j < xn; j++ )
     gaus->htot[j] = 0;
   for ( i = 0; i < n; i++ ) {
-    fprintf(fp, "# %g %g %g %g %g %g %g\n", gaus->ave[i], gaus->sig[i],
-        gaus->beta1[i], gaus->beta2[i], gaus->lnz[i],
-        gaus->cnt[i], gaus->tcnt[i]);
+    fprintf(fp, "# %g %g %g %g %g %g %d %g %g %g\n", gaus->ave[i], gaus->sig[i],
+        gaus->beta1[i], gaus->beta2[i], gaus->lnz[i], gaus->cnt[i],
+        gaus->mmwl[i].invt, mmwl_getalpha(gaus->mmwl+i), gaus->mmwl[i].fl[1], gaus->mmwl[i].fl[2]);
     savehistlow(i, gaus->hist + i * xn,
         xn, xmin, dx, gaus->ave[i], gaus->sig[i], fp);
     for ( j = 0; j < xn; j++ )
@@ -164,18 +169,27 @@ __inline static int gaus_savehist(gaus_t *gaus, const char *fn)
 /* update the parameters of the bias potential */
 __inline static void gaus_update(gaus_t *gaus, int i, double x, double t)
 {
-  double ave = gaus->ave[i], sig = gaus->sig[i], y1, y2;
-  double alpha = gaus->invt ? gaus->n / t : gaus->alpha, ti, amp;
+  double ave = gaus->ave[i], sig = gaus->sig[i], y1, y2, amp;
 
-  ti = (gaus->tcnt[i] += 1);
   y1 = (x - ave) / sig;
-  gaus->beta1[i] += y1 / sig / ti;
   y2 = y1 * y1 - 1;
-  //amp = (ti > 10000) ? 1./t : 0.0001;
-  amp = 1e-4;
+  amp = mmwl_getalpha(gaus->mmwl + i);
+  gaus->beta1[i] += y1 / sig * amp;
   gaus->beta2[i] += y2 / (sig * sig) * amp;
-  gaus->lnz[i] += alpha;
+  mmwl_add(gaus->mmwl + i, y1, y2);
+  if ( fmod(t, 100) < 0.1 && mmwl_check(gaus->mmwl + i, 1, 0.05, 0.5)) {
+    printf("t %g, id %d, new updating magnitude %g, fl %g, %g, c %g, %g, invt %d\n",
+      t, i, gaus->mmwl[i].alpha, gaus->mmwl[i].fl[1], gaus->mmwl[i].fl[2], gaus->beta1[i], gaus->beta2[i], gaus->mmwl[i].invt);
+  }
+  /* disable update during update stage */
+  if ( gaus->mmwl[i].invt ) {
+    double alpha = gaus->invt ? gaus->n / (gaus->t + gaus->t0) : gaus->alpha;
+    gaus->t += 1;
+    gaus->cnt[i] += 1;
+    gaus->lnz[i] += alpha;
+  }
 }
+
 
 
 /* update the histogram */
@@ -183,7 +197,6 @@ __inline static void gaus_add(gaus_t *gaus, int i, int x, int acc)
 {
   int j;
   gaus->acc[i] += acc;
-  gaus->cnt[i] += 1;
   j = (x - gaus->xmin) / gaus->dx;
   gaus->hist[i * gaus->xn + j] += 1;
 }
@@ -206,6 +219,7 @@ __inline static double gaus_hflatness_wl(gaus_t *gaus)
     }
   }
 
+  if ( hmax <= 0 ) return 100.0;
   return 2 * (hmax - hmin) / (hmax + hmin + 1e-16);
 }
 
@@ -216,6 +230,7 @@ __inline static double gaus_hflatness(gaus_t *gaus)
   double tot = 0, h, dx, s = 0;
 
   for ( i = 0; i < n; i++ ) tot += gaus->cnt[i];
+  if ( tot <= 0 ) return 100.0;
   for ( i = 0; i < n; i++ ) {
     h = gaus->cnt[i] / tot;
     dx = h * n - 1;
@@ -234,10 +249,13 @@ __inline static int gaus_wlcheck(gaus_t *gaus,
     return 0;
   }
   gaus->alpha *= magred;
-  if ( gaus->alpha < gaus->n/t ) {
+  if ( gaus->alpha < gaus->n/(gaus->t + gaus->t0) ) {
     gaus->invt = 1;
+    gaus->t0 = gaus->t;
   }
-  fprintf(stderr, "alpha %g, %g, invt %d\n", gaus->alpha, gaus->n/t, gaus->invt);
+  fprintf(stderr, "alpha %g, %g, flatness %g, invt %d\n",
+      gaus->alpha, gaus->n/gaus->t, gaus->hflatness, gaus->invt);
+  gaus->t = 0;
   for ( i = 0; i < n; i++ ) {
     gaus->cnt[i] = 0;
   }
@@ -255,6 +273,8 @@ __inline static int gaus_bmove(gaus_t *gaus, double x, int *id)
   double xi, xj, vi, vj, dv;
 
   if ( jd < 0 || jd >= gaus->n ) return 0;
+  /* disable transition during WL stage */
+  if ( !gaus->mmwl[*id].invt ) return 0;
   /* compute the acceptance probability */
   xi = x - gaus->ave[*id];
   xj = x - gaus->ave[jd];
