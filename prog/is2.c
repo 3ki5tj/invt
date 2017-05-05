@@ -2,7 +2,10 @@
 #define IS2_LB 6
 #include "is2.h"
 #include "metad.h"
+#include "cmvar.h"
 #include "ave.h"
+
+
 
 /* constant updating magnitude run
  * computes the gamma values */

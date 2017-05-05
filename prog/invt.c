@@ -4,7 +4,7 @@
 
 
 #include "invt.h"
-#include "cosmodes.h" /* eigenmode decomposition */
+#include "cmvar.h" /* eigenmode decomposition */
 #include "intq.h"
 #include "invtsamp.h" /* MD and MC sampling of the 1D test system */
 #include "corr.h"

@@ -5,6 +5,9 @@
 
 
 
+enum { SAMP_METROPOLIS, SAMP_WOLFF };
+
+
 
 /* modified Metropolis algorithm */
 __inline static int potts2_metro_mod(potts2_t *pt,
@@ -88,45 +91,46 @@ static void potts2_equil(potts2_t *pt, double ene)
 
 
 static void potts2_gaus(potts2_t *pt,
-    int wolff, long nsteps)
+    int sampmethod, int lnzmethod, long nsteps)
 {
-  long t;
+  long t, nstsave;
   int m, id, acc;
-  double ecmin, ecmax, esig;
-  const double tp = 1.4;
+  double ecmin, ecmax, esig, beta1, beta2;
+  const double beta_c = 1.4;
   gaus_t *gaus;
 
   //mtscramble(clock());
 
   ecmin = -1.7 * pt->n;
   ecmax = -0.9 * pt->n;
-  //ecmin = -1.3 * pt->n;
-  //ecmax = -1.25 * pt->n;
-  //ecmin = -0.5 * pt->n;
-  //ecmax = -0.45 * pt->n;
   esig = pt->l;
   m = (int) ((ecmax - ecmin) / esig) + 1;
   potts2_equil(pt, ecmin);
-  gaus = gaus_open(ecmin, ecmax, m, esig, tp,
-      -2*pt->n, 0, 1);
+  gaus = gaus_open(ecmin, ecmax, m, esig, lnzmethod,
+      beta_c * esig, 0.01, -2*pt->n, 0, 1, 0);
 
   id = 0;
+  nstsave = (sampmethod == SAMP_WOLFF) ? 100*pt->n : 10000*pt->n;
   for ( t = 1; t <= nsteps; t++ ) {
-    if ( wolff ) { /* cluster algorithm */
-      acc = potts2_wolff_mod(pt, gaus->beta1[id], gaus->beta2[id], gaus->ave[id]);
+    beta1 = gaus->c1[id] / esig;
+    beta2 = gaus->c2[id] / (esig * esig);
+    if ( sampmethod == SAMP_WOLFF ) { /* cluster algorithm */
+      acc = potts2_wolff_mod(pt, beta1, beta2, gaus->ave[id]);
     } else { /* Metropolis algorithm */
-      acc = potts2_metro_mod(pt, gaus->beta1[id], gaus->beta2[id], gaus->ave[id]);
+      acc = potts2_metro_mod(pt, beta1, beta2, gaus->ave[id]);
     }
-    gaus_update(gaus, id, pt->E, (double) t);
     gaus_add(gaus, id, pt->E, acc);
     gaus_bmove(gaus, pt->E, &id);
     if ( t % 100 == 0 ) {
-      gaus_wlcheck(gaus, 0.1, 0.5, (double) t);
+      gaus_wlcheckx(gaus, 0.2, 0.5);
     }
-    if ( t % 100000 == 0 ) {
-      printf("t %ld, flatness %g, alpha %g, id %d, invt %d\n",
-          t, gaus->hflatness, gaus->alpha, id, gaus->invt);
+    if ( t % nstsave == 0 ) {
+      double alpha, alphamm;
+      alpha = gaus_getalpha(gaus, &alphamm);
+      gaus_save(gaus, "pt2gaus.dat");
       gaus_savehist(gaus, "pt2gaus.his");
+      printf("t %ld/%g, flatness %g, alpha %g/%g, id %d, invt %d\n",
+          t, gaus->t, gaus->hflatness, alpha, alphamm, id, gaus->invt);
     }
   }
   gaus_close(gaus);
@@ -137,17 +141,19 @@ static void potts2_gaus(potts2_t *pt,
 int main(int argc, char **argv)
 {
   potts2_t *pt;
-  int method = 0, q = 10;
+  int sampmethod = SAMP_METROPOLIS, lnzmethod = LNZ_WL, q = 10;
   long nsteps = 0;
 
-  if ( argc > 1 ) method = atoi( argv[1] );
-  if ( argc > 2 ) q      = atoi( argv[2] );
-  if ( argc > 3 ) nsteps = atol( argv[3] );
+  if ( argc > 1 ) sampmethod = atoi( argv[1] );
+  if ( argc > 2 ) lnzmethod  = atoi( argv[2] );
+  if ( argc > 3 ) q          = atoi( argv[3] );
+  if ( argc > 4 ) nsteps     = atol( argv[4] );
   if ( nsteps <= 0 )
-    nsteps = (method == 0) ? 100000000L : 5000000L;
+    nsteps = (sampmethod == 0) ? 1000000L : 50000L;
 
   pt = potts2_open(POTTS2_L, q);
-  potts2_gaus(pt, method, nsteps);
+  nsteps *= pt->n;
+  potts2_gaus(pt, sampmethod, lnzmethod, nsteps);
   potts2_close(pt);
   return 0;
 }

@@ -96,7 +96,7 @@ static void potts2_aus(potts2_t *pt, double Eave, double Esig,
 {
   int id, h, sn, dovar = 1;
   long t, nacc = 0, nstrep;
-  double c1 = 0, c2 = 0, y1, y2, amp;
+  double c1 = 0, c2 = 0, y1, y2, amp, beta1, beta2;
   double *his;
   mmwl_t mmwl[1];
 
@@ -112,29 +112,29 @@ static void potts2_aus(potts2_t *pt, double Eave, double Esig,
     POTTS2_FLIP(pt, id, h, sn);
     if ( pt->E > Eave ) break;
   }
-  c1 = 1.4245;
+  c1 = 1.4245 * Esig;
   mmwl_init(mmwl, 1e-3);
 
   nstrep = wolff ? 50000 : 10000000;
   for ( t = 1; t <= nsteps; t++ ) {
+    beta1 = c1 / Esig;
+    beta2 = c2 / (Esig * Esig);
     if ( wolff ) { /* cluster algorithm */
-      nacc += potts2_wolff_mod(pt, c1, c2, Eave);
+      nacc += potts2_wolff_mod(pt, beta1, beta2, Eave);
     } else { /* Metropolis algorithm */
-      nacc += potts2_metro_mod(pt, c1, c2, Eave);
+      nacc += potts2_metro_mod(pt, beta1, beta2, Eave);
     }
     amp = mmwl_getalpha(mmwl);
     y1 = (pt->E - Eave) / Esig;
-    c1 += y1 / Esig * amp;
+    c1 += y1 * amp;
     y2 = y1 * y1 - 1;
-    if ( dovar ) {
-      c2 += y2 / (Esig * Esig) * amp;
-    }
+    if ( dovar ) c2 += y2 * amp;
     his[pt->E + 2 * pt->n] += 1;
     mmwl_add(mmwl, y1, y2);
     /* control the updating magnitude */
     if ( t % 100 == 0 && mmwl_check(mmwl, dovar, 0.05, 0.5) ) {
       printf("t %ld, new updating magnitude %g, fl %g, %g, c %g, %g, invt %d\n",
-          t, mmwl->alpha, mmwl->fl[1], mmwl->fl[2], c1, c2, mmwl->invt);
+          t, mmwl_getalpha(mmwl), mmwl->fl[1], mmwl->fl[2], c1, c2, mmwl->invt);
     }
     if ( t % nstrep == 0 ) {
       printf("t %ld, c1 %g, c2 %g, E %d, Eave %g, y %g(%+g), %g(%+g), amp %g, acc %g%%, invt %d\n",
