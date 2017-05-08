@@ -95,7 +95,7 @@ static void potts2_gaus(potts2_t *pt,
 {
   long t, nstsave;
   int m, id, acc;
-  double ecmin, ecmax, esig, beta1, beta2;
+  double ecmin, ecmax, esig, beta1, beta2, fl, alpha0;
   const double beta_c = 1.4;
   gaus_t *gaus;
 
@@ -106,8 +106,15 @@ static void potts2_gaus(potts2_t *pt,
   esig = pt->l;
   m = (int) ((ecmax - ecmin) / esig) + 1;
   potts2_equil(pt, ecmin);
+  if (lnzmethod == LNZ_WL) {
+    fl = 0.2;
+    alpha0 = 0.01;
+  } else {
+    fl = 0.05;
+    alpha0 = 0.001;
+  }
   gaus = gaus_open(ecmin, ecmax, m, esig, lnzmethod,
-      beta_c * esig, 0.01, -2*pt->n, 0, 1, 0);
+      beta_c * esig, alpha0, -2*pt->n, 0, 1, 0);
 
   id = 0;
   nstsave = (sampmethod == SAMP_WOLFF) ? 100*pt->n : 10000*pt->n;
@@ -120,13 +127,13 @@ static void potts2_gaus(potts2_t *pt,
       acc = potts2_metro_mod(pt, beta1, beta2, gaus->ave[id]);
     }
     gaus_add(gaus, id, pt->E, acc);
-    gaus_bmove(gaus, pt->E, &id);
+    gaus_move(gaus, pt->E, &id);
     if ( t % 100 == 0 ) {
-      gaus_wlcheckx(gaus, 0.2, 0.5);
+      gaus_wlcheckx(gaus, fl, 0.5);
     }
     if ( t % nstsave == 0 ) {
       double alpha, alphamm;
-      alpha = gaus_getalpha(gaus, &alphamm);
+      alpha = gaus_getalpha(gaus, id, &alphamm);
       gaus_save(gaus, "pt2gaus.dat");
       gaus_savehist(gaus, "pt2gaus.his");
       printf("t %ld/%g, flatness %g, alpha %g/%g, id %d, invt %d\n",

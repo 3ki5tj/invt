@@ -67,7 +67,7 @@ __inline static gaus_t *gaus_open(double xcmin, double xcmax,
     gaus->sig[i] = sig;
     gaus->c1[i] = c1;
     gaus->c2[i] = 0;
-    gaus->lnz[i] = 0;
+    gaus->lnz[i] = (i - (n - 1)*0.5) * c1 / sig * delx;
     mmwl_init(gaus->mmwl + i, gaus->alphamm0);
     gaus->cnt[i] = 0;
     gaus->acc[i] = 0;
@@ -116,22 +116,87 @@ __inline static void gaus_close(gaus_t *gaus)
 
 
 
+static void gaus_trimv(gaus_t *gaus, double *v)
+{
+  int i, n = gaus->n;
+  double v0 = 0;
+
+  for ( i = 0; i < n; i++ ) v0 += v[i];
+  v0 /= n;
+  for ( i = 0; i < n; i++ ) v[i] -= v0;
+}
+
+
+
+/* compute difference of the partition function from the average method
+ * lnz[j] - lnz[i] */
+__inline static double gaus_getlnzaveij(gaus_t *gaus, int j, int i, int corr)
+{
+  double sigi = gaus->sig[i], sigj = gaus->sig[j];
+  double dx = gaus->ave[j] - gaus->ave[i], dv;
+
+  dv = 0.5 * (gaus->c1[j]/sigj + gaus->c1[i]/sigi) * dx;
+  if ( corr )
+    dv += 0.125 * (gaus->c2[i]/(sigi*sigi) - gaus->c2[j]/(sigj*sigj)) * dx * dx;
+  return dv;
+}
+
+
+
+/* compute the partition function from the average method */
+static void gaus_getlnzave(gaus_t *gaus)
+{
+  int i, n = gaus->n;
+
+  gaus->lnz[0] = 0;
+  for ( i = 1; i < n; i++ )
+    gaus->lnz[i] = gaus->lnz[i-1] + gaus_getlnzaveij(gaus, i, i-1, 1);
+  gaus_trimv(gaus, gaus->lnz);
+}
+
+
+
+/* retrieve the updating magnitude */
+__inline static double gaus_getalpha(const gaus_t *gaus, int i, double *alphamm)
+{
+  double alpha = gaus->invt ? gaus->n / (gaus->t + gaus->t0) : gaus->alphawl;
+
+  if ( gaus->lnzmethod == LNZ_WL ) {
+    *alphamm = alpha;
+  } else {
+    *alphamm = mmwl_getalpha(gaus->mmwl + i);
+  }
+  if ( *alphamm > gaus->alphamm0 ) {
+    *alphamm = gaus->alphamm0;
+  }
+  return alpha;
+}
+
+
+
 /* save temperature dependent data */
 __inline static void gaus_save(gaus_t *gaus, const char *fn)
 {
   int i, n = gaus->n;
   FILE *fp;
   mmwl_t *mm;
+  double alpha, alphamm;
 
   if ( (fp = fopen(fn, "w")) == NULL ) {
     fp = stderr;
   }
-  fprintf(fp, "# %d %d %d %g %g\n", n, gaus->lnzmethod, gaus->invt, gaus->t, gaus->t0);
+  if ( gaus->lnzmethod == LNZ_AVE )
+    gaus_getlnzave(gaus);
+  alpha = gaus_getalpha(gaus, 0, &alphamm);
+  fprintf(fp, "# %d %d %d %g %g %g %g\n", n, gaus->lnzmethod,
+      gaus->invt, gaus->t, gaus->t0, alpha, alphamm);
   for ( i = 0; i < n; i++ ) {
     mm = gaus->mmwl + i;
-    fprintf(fp, "%4d %12.5f %12.5f %12.5f %12.5f %12.5f ", i,
-        gaus->ave[i], gaus->sig[i], gaus->c1[i], gaus->c2[i], gaus->lnz[i]);
-    fprintf(fp, "%10.0f %10.7f %10.7f %d\n", mm->mm[0], mm->fl[1], mm->fl[2], mm->invt);
+    fprintf(fp, "%4d %12.5f %12.5f %12.5f %12.5f %12.5f %10.0f ", i,
+        gaus->ave[i], gaus->sig[i], gaus->c1[i], gaus->c2[i],
+        gaus->lnz[i], gaus->cnt[i]);
+    fprintf(fp, "%10.0f %10.7f %10.7f %.10f %d\n",
+        mm->mm[0], mm->fl[1], mm->fl[2], mmwl_getalpha(mm), mm->invt);
   }
   if ( fp != stderr ) fclose(fp);
 }
@@ -165,24 +230,13 @@ static void savehistlow(int id, double *h, int n,
 }
 
 
-static void gaus_trimv(gaus_t *gaus, double *v)
-{
-  int i, n = gaus->n;
-  double v0 = 0;
-
-  for ( i = 0; i < n; i++ ) v0 += v[i];
-  v0 /= n;
-  for ( i = 0; i < n; i++ ) v[i] -= v0;
-}
-
-
-
 /* save histogram file */
 __inline static int gaus_savehist(gaus_t *gaus, const char *fn)
 {
   FILE *fp;
   int i, j, n = gaus->n, xn = gaus->xn;
   double xmin = gaus->xmin, dx = gaus->dx;
+  mmwl_t *mm;
 
   if ( (fp = fopen(fn, "w")) == NULL ) {
     fprintf(stderr, "cannot open %s\n", fn);
@@ -192,9 +246,10 @@ __inline static int gaus_savehist(gaus_t *gaus, const char *fn)
   for ( j = 0; j < xn; j++ )
     gaus->htot[j] = 0;
   for ( i = 0; i < n; i++ ) {
+    mm = gaus->mmwl + i;
     fprintf(fp, "# %g %g %g %g %g %g %d %g %g %g\n", gaus->ave[i], gaus->sig[i],
         gaus->c1[i], gaus->c2[i], gaus->lnz[i], gaus->cnt[i],
-        gaus->mmwl[i].invt, mmwl_getalpha(gaus->mmwl+i), gaus->mmwl[i].fl[1], gaus->mmwl[i].fl[2]);
+        mm->invt, mmwl_getalpha(mm), mm->fl[1], mm->fl[2]);
     savehistlow(i, gaus->hist + i * xn,
         xn, xmin, dx, gaus->ave[i], gaus->sig[i], fp);
     for ( j = 0; j < xn; j++ )
@@ -207,75 +262,30 @@ __inline static int gaus_savehist(gaus_t *gaus, const char *fn)
 
 
 
-/* retrieve the updating magnitude */
-__inline static double gaus_getalpha(const gaus_t *gaus, double *alphamm)
-{
-  double alpha = gaus->invt ? gaus->n / (gaus->t + gaus->t0) : gaus->alphawl;
-  *alphamm = alpha;
-  if ( *alphamm > gaus->alphamm0 ) *alphamm = gaus->alphamm0;
-  return alpha;
-}
-
-
-
 /* update the parameters of the bias potential */
 __inline static void gaus_add(gaus_t *gaus, int i, int x, int acc)
 {
   double ave = gaus->ave[i], sig = gaus->sig[i], y1, y2, alphamm, alpha;
   int j;
+  mmwl_t *mm = gaus->mmwl + i;
 
-  alpha = gaus_getalpha(gaus, &alphamm);
+  alpha = gaus_getalpha(gaus, i, &alphamm);
 
   y1 = (x - ave) / sig;
   y2 = y1 * y1 - 1;
   gaus->c1[i] += y1 * alphamm;
   gaus->c2[i] += y2 * alphamm;
-  mmwl_add(gaus->mmwl + i, y1, y2);
+  mmwl_add(mm, y1, y2);
 
   gaus->t += 1;
   gaus->cnt[i] += 1;
-  gaus->lnz[i] += alpha;
   gaus->acc[i] += acc;
+  if ( gaus->lnzmethod == LNZ_WL )
+    gaus->lnz[i] += alpha;
   j = (x - gaus->xmin) / gaus->dx;
   gaus->hist[i * gaus->xn + j] += 1;
 }
 
-
-
-/* compute the histogram flatness (Wang-Landau version) */
-__inline static double gaus_hflatness_wl(gaus_t *gaus)
-{
-  int i, n = gaus->n;
-  double hmin = 1e30, hmax = 0, hi;
-
-  for ( i = 0; i < n; i++ ) {
-    hi = gaus->mmwl[i].mm[i];
-    if ( hi < hmin ) {
-      hmin = hi;
-    } else if ( hi > hmax ) {
-      hmax = hi;
-    }
-  }
-
-  if ( hmax <= 0 ) return 99.0;
-  return 2 * (hmax - hmin) / (hmax + hmin + 1e-16);
-}
-
-
-__inline static double gaus_hflatness(gaus_t *gaus)
-{
-  int i, n = gaus->n;
-  double tot = 0, h, dx, s = 0;
-
-  for ( i = 0; i < n; i++ ) tot += gaus->mmwl[i].mm[0];
-  if ( tot <= 0 ) return 100.0;
-  for ( i = 0; i < n; i++ ) {
-    h = gaus->mmwl[i].mm[0] / tot;
-    dx = h * n - 1;
-    s += dx * dx;
-  }
-  return s / n;
-}
 
 
 /* calculate fluctuation of histogram modes */
@@ -315,7 +325,6 @@ __inline static void gaus_switch(gaus_t *gaus, double magred, int extended)
       gaus->alphawl, gaus->n/gaus->t, gaus->hflatness, gaus->invt);
   gaus->t = 0;
   for ( i = 0; i < n; i++ ) {
-    //gaus->cnt[i] = 0;
     if ( extended ) {
       mmwl_init(gaus->mmwl + i, gaus->alphawl);
       gaus->mmwl[i].invt = gaus->invt;
@@ -346,45 +355,58 @@ __inline static int gaus_wlcheck(gaus_t *gaus,
 __inline static int gaus_wlcheckx(gaus_t *gaus,
     double fl, double magred)
 {
-  int i, n = gaus->n;
+  int i, j, n = gaus->n, xn = gaus->xn;
   double f, f2;
+  mmwl_t *mm;
 
   f = gaus_calcfl(gaus);
   for ( i = 0; i < n; i++ ) {
-    f2 = mmwl_calcfl(gaus->mmwl + i, 1);
+    mm = gaus->mmwl + i;
+    f2 = mmwl_calcfl(mm, 1);
+    if ( gaus->lnzmethod == LNZ_AVE ) {
+      if ( !mm->invt && f2 < fl ) {
+        fprintf(stderr, "%4d: switching %g, cnt %g, fl %g, %g | %g %g\n",
+            i, mm->alphawl, mm->mm[0], mm->fl[1], mm->fl[2], mm->mm[1], mm->mm[2]);
+        mmwl_switch(mm, magred);
+        for ( j = 0; j < xn; j++ )
+          gaus->hist[i*xn + j] = 0;
+      }
+    }
     if ( f2 > f ) f = f2;
   }
   gaus->hflatness = f;
-  if ( !gaus->invt && f < fl ) {
+  if ( gaus->lnzmethod == LNZ_WL && !gaus->invt && f < fl ) {
     gaus_switch(gaus, magred, 1);
     return 1;
-  } else {
-    return 0;
   }
+  return 0;
 }
 
 
 
 
-__inline static int gaus_bmove(gaus_t *gaus, double x, int *id)
+__inline static int gaus_move(gaus_t *gaus, double x, int *id)
 {
   int acc = 0;
   int jd = (rand01() < 0.5) ? *id - 1 : *id + 1;
-  double xi, xj, vi, vj, dv;
+  double xi, xj, vi, vj, dv, sigi, sigj;
+  mmwl_t *mm;
 
   if ( jd < 0 || jd >= gaus->n ) return 0;
+  sigi = gaus->sig[*id];
+  sigj = gaus->sig[ jd];
   if ( gaus->lnzmethod == LNZ_AVE ) {
     /* disable transition during WL stage */
-    if ( !gaus->mmwl[*id].invt ) return 0;
+    mm = gaus->mmwl + (*id);
+    if ( mmwl_getalpha(mm) < 1e-7 || !mm->invt ) return 0;
     /* approximate change of lnz */
-    dv = 0.5 * (gaus->c1[*id] + gaus->c1[jd])
-             * (gaus->ave[jd] - gaus->ave[*id]);
+    dv = gaus_getlnzaveij(gaus, jd, *id, 1);
   } else {
     dv = gaus->lnz[jd] - gaus->lnz[*id];
   }
   /* compute the acceptance probability */
-  xi = (x - gaus->ave[*id]) / gaus->sig[*id];
-  xj = (x - gaus->ave[ jd]) / gaus->sig[ jd];
+  xi = (x - gaus->ave[*id]) / sigi;
+  xj = (x - gaus->ave[ jd]) / sigj;
   vi = gaus->c1[*id] * xi + gaus->c2[*id] * 0.5 * xi * xi;
   vj = gaus->c1[ jd] * xj + gaus->c2[ jd] * 0.5 * xj * xj;
   dv += vj - vi;
