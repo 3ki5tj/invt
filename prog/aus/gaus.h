@@ -180,7 +180,7 @@ __inline static void gaus_save(gaus_t *gaus, const char *fn)
   int i, n = gaus->n;
   FILE *fp;
   mmwl_t *mm;
-  double alpha, alphamm;
+  double alpha, alphamm, tot = 0, acc = 0;
 
   if ( (fp = fopen(fn, "w")) == NULL ) {
     fp = stderr;
@@ -188,15 +188,22 @@ __inline static void gaus_save(gaus_t *gaus, const char *fn)
   if ( gaus->lnzmethod == LNZ_AVE )
     gaus_getlnzave(gaus);
   alpha = gaus_getalpha(gaus, 0, &alphamm);
-  fprintf(fp, "# %d %d %d %g %g %g %g\n", n, gaus->lnzmethod,
-      gaus->invt, gaus->t, gaus->t0, alpha, alphamm);
+  /* compute the overall acceptance ratio */
+  for ( i = 0; i < n; i++ ) {
+    acc += gaus->acc[i];
+    tot += gaus->cnt[i];
+  }
+  fprintf(fp, "# %d %d %d %g %g %14.7e %14.7e %.4f\n", n, gaus->lnzmethod,
+      gaus->invt, gaus->t, gaus->t0, alpha, alphamm, 1.0*acc/tot);
   for ( i = 0; i < n; i++ ) {
     mm = gaus->mmwl + i;
+    gaus_getalpha(gaus, i, &alphamm);
     fprintf(fp, "%4d %12.5f %12.5f %12.5f %12.5f %12.5f %10.0f ", i,
         gaus->ave[i], gaus->sig[i], gaus->c1[i], gaus->c2[i],
         gaus->lnz[i], gaus->cnt[i]);
-    fprintf(fp, "%10.0f %10.7f %10.7f %.10f %d\n",
-        mm->mm[0], mm->fl[1], mm->fl[2], mmwl_getalpha(mm), mm->invt);
+    fprintf(fp, "%10.0f %10.7f %10.7f %14.7e %d %.4f\n",
+        mm->mm[0], mm->fl[1], mm->fl[2], alphamm,
+        mm->invt, gaus->acc[i]/(gaus->cnt[i]+1e-12));
   }
   if ( fp != stderr ) fclose(fp);
 }
@@ -365,8 +372,8 @@ __inline static int gaus_wlcheckx(gaus_t *gaus,
     f2 = mmwl_calcfl(mm, 1);
     if ( gaus->lnzmethod == LNZ_AVE ) {
       if ( !mm->invt && f2 < fl ) {
-        fprintf(stderr, "%4d: switching %g, cnt %g, fl %g, %g | %g %g\n",
-            i, mm->alphawl, mm->mm[0], mm->fl[1], mm->fl[2], mm->mm[1], mm->mm[2]);
+        fprintf(stderr, "%4d: switching %g, cnt %g, fl %g, %g\n",
+            i, mm->alphawl, mm->mm[0], mm->fl[1], mm->fl[2]);
         mmwl_switch(mm, magred);
         for ( j = 0; j < xn; j++ )
           gaus->hist[i*xn + j] = 0;

@@ -5,6 +5,11 @@
 
 
 
+const char *fnhis = "pt2gaus.his";
+const char *fndat = "pt2gaus.dat";
+
+
+
 enum { SAMP_METROPOLIS, SAMP_WOLFF };
 
 
@@ -90,6 +95,7 @@ static void potts2_equil(potts2_t *pt, double ene)
 }
 
 
+
 static void potts2_gaus(potts2_t *pt,
     int sampmethod, int lnzmethod, long nsteps)
 {
@@ -117,7 +123,12 @@ static void potts2_gaus(potts2_t *pt,
       beta_c * esig, alpha0, -2*pt->n, 0, 1, 0);
 
   id = 0;
-  nstsave = (sampmethod == SAMP_WOLFF) ? 100*pt->n : 10000*pt->n;
+  if (sampmethod == SAMP_WOLFF) {
+    nstsave = 100000;
+  } else {
+    nstsave = 10000000;
+  }
+
   for ( t = 1; t <= nsteps; t++ ) {
     beta1 = gaus->c1[id] / esig;
     beta2 = gaus->c2[id] / (esig * esig);
@@ -134,8 +145,8 @@ static void potts2_gaus(potts2_t *pt,
     if ( t % nstsave == 0 ) {
       double alpha, alphamm;
       alpha = gaus_getalpha(gaus, id, &alphamm);
-      gaus_save(gaus, "pt2gaus.dat");
-      gaus_savehist(gaus, "pt2gaus.his");
+      gaus_save(gaus, fndat);
+      gaus_savehist(gaus, fnhis);
       printf("t %ld/%g, flatness %g, alpha %g/%g, id %d, invt %d\n",
           t, gaus->t, gaus->hflatness, alpha, alphamm, id, gaus->invt);
     }
@@ -156,7 +167,7 @@ int main(int argc, char **argv)
   if ( argc > 3 ) q          = atoi( argv[3] );
   if ( argc > 4 ) nsteps     = atol( argv[4] );
   if ( nsteps <= 0 )
-    nsteps = (sampmethod == 0) ? 1000000L : 50000L;
+    nsteps = (sampmethod == 0) ? 100000000L : 100000L;
 
   pt = potts2_open(POTTS2_L, q);
   nsteps *= pt->n;
