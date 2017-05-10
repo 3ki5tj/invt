@@ -1605,6 +1605,17 @@ while the orthogonality for $k \ge 2$ demands
   .
 \label{eq:ortho1}
 \end{equation}
+%
+We may write the updating matrix in terms of $\phi_{ki}$'s as
+%
+\begin{equation}
+  w_{ij}
+  =
+  \frac{1}{\rho_i} \sum_{k=1}^n \lambda_k \, \phi_{ki} \, \phi_{kj}
+  .
+  \notag
+\end{equation}
+
 
 %It is worth pointing out
 Finally, there is a stability condition.
@@ -2999,28 +3010,27 @@ For example,
 %if we can assume
 by assuming
 that the PMF is sufficiently smooth
-such that the eigenmodes can be limited to $k \le K$,
+such that the eigenmodes can be limited to $k \le K + 1$,
 %
 we can construct an updating scheme with
 $$
-\lambda_1 = \cdots = \lambda_K = 1,
+\lambda_1 = \cdots = \lambda_{K+1} = 1,
 \mathrm{\; and \;}
-\lambda_{K+1} = \cdots = \lambda_n = 0.
+\lambda_{K+2} = \cdots = \lambda_n = 0.
 $$
 %
-Then,
-we can change the upper limit of the sum in
-Eq. \eqref{eq:error_asym_singlebin} to $K$:
+Then, the updating matrix is given by
 %
-%Then,
-%Eq. \eqref{eq:error_singlebin} is changed to
+$$w_{ij} = \sum_{k=1}^{K+1} \phi_{ki} \, \phi_{kj},$$
+%
+and Eq. \eqref{eq:error_asym_singlebin} is modified as
 %
 \begin{equation}
   \Err_A(T)
   =
   \frac {       T     }
         { (T + t_0)^2 }
-  \sum_{ k = 2 }^K
+  \sum_{ k = 2 }^{K+1}
     \Gamma_k.
 %\notag
 \label{eq:error_asym_sinc}
@@ -3028,236 +3038,9 @@ Eq. \eqref{eq:error_asym_singlebin} to $K$:
 %
 The optimal schedule of these schemes
 remains to be the inverse-time schedule
-given by Eq. \eqref{eq:alpha_invt1}.
+given by Eq. \eqref{eq:alpha_invt1},
 %
-Below, we construct these schemes for
-the homogeneous case.
-%
-The definition of the cutoff, $K$, will be modified
-for mathematical convenience.
-
-For a periodic variable, we demand
-%
-$$
-\begin{aligned}
-%&
-%\lambda_1 = \cdots = \lambda_{K+1}
-%= \lambda_{n-K+1} = \cdots = \lambda_n = 1,
-%\\
-%&
-\lambda_{K+2} = \cdots = \lambda_{n-K} = 0,
-\end{aligned}
-$$
-for $K \ge 1$,
-with the rest of the eigenvalues being $1$.
-%
-Then by using
-Eq. \eqref{eq:mu_from_lambda},
-we get
-\begin{equation}
-  \mu_l
-  =
-  \frac{
-    \sin
-    \dfrac{ (2 K + 1) \, l \, \pi }
-         {              n        }
-  }
-  {
-    n \, \sin \dfrac{ l \, \pi } { n }
-  }
-  .
-\notag
-%\label{eq:mu_sinc_pbc}
-\end{equation}
-\note{Derivation.
-$$
-\begin{aligned}
-\mu_l
-&=
-\frac 1 n \sum_{k = 0}^{n-1} \lambda_{k+1} \cos \frac{ k \, l \, 2 \, \pi } { n }
-\\
-&=
-\frac{1}{n}
-\left(
-  1 +
-  \sum_{k=1}^K
-  \cos \frac { k \, l \, 2 \, \pi } { n }
-  +
-  \sum_{k=n-K}^{n-1}
-  \cos \frac { k \, l \, 2 \, \pi } { n }
-\right)
-\\
-&=
-\frac 1 n
-\sum_{k=-K}^K
-\cos \frac { k \, l \, 2 \, \pi } { n }
-=
-  \frac{
-    \sin
-    \dfrac{ (2 K + 1) \, l \, \pi }
-         {              n        }
-  }
-  {
-    n \, \sin \dfrac{ l \, \pi } { n }
-  }
-.
-\end{aligned}
-$$
-}
-
-For a non-periodic variable, we demand
-$$
-\lambda_1 = \cdots = \lambda_{K+1} = 1,
-\qquad
-\lambda_{K+2} = \cdots = \lambda_n = 0.
-$$
-Then Eq. \eqref{eq:lambdan} gives
-$\lambda_{n+1} = (-1)^{n+K-1}$,
-and from Eq. \eqref{eq:mu_from_lambda},
-we have
-\begin{equation}
-  \mu_l
-  =
-  \frac{1}{2 \, n}
-  \left[
-    (-1)^{n+K+l-1}
-    +
-    \frac{
-      \sin
-      \dfrac{ (2 K + 1) \, l \, \pi }
-           {         2 \, n        }
-    }
-    {
-      \sin \dfrac{ l \, \pi } { 2 \, n }
-    }
-  \right]
-  .
-\label{eq:mu_sinc_refl}
-\end{equation}
-\note{Derivation.
-$$
-\begin{aligned}
-  \lambda_{n+1}
-  &=
-  (-1)^{n-1}
-  \left[
-    \lambda_1
-    - 2 \, \lambda_2
-    + 2 \, \lambda_3 - \cdots
-    + (-1)^{K} 2 \, \lambda_{K+1})
-  \right]
-  \\
-  &=
-  \begin{dcases}
-    (-1)^{n-1} & K \mathrm{\; even,} \\
-    (-1)^n     & K \mathrm{\; odd.}
-  \end{dcases}
-\end{aligned}
-$$
-So
-$$
-\begin{aligned}
-  \mu_l
-  &=
-  \frac{1}{2\,n}
-  \left[
-    1 +
-    2 \sum_{k=2}^{K+1}
-    \cos \frac { (k - 1) \, l \pi } { n }
-    +
-    (-1)^{n+K-1} (-1)^l
-  \right]
-  \\
-  &=
-  \frac{1}{2\,n}
-  \left[
-    (-1)^{n+K+l-1}
-    +
-    \sum_{k=-K}^{K}
-    \cos \frac { k \, l \pi } { n }
-  \right]
-  .
-\end{aligned}
-$$
-}%
-
-
-\begin{figure}[h]
-\begin{center}
-  \makebox[\linewidth][c]{
-    \includegraphics[angle=0, width=0.95\linewidth]{fig/sinc.pdf}
-  }
-  \caption{
-    \label{fig:sinc}
-    Updating kernels of the bandpass updating schemes
-    compared to a Gaussian with a similar width.
-    %
-    The lines are a guide to the eyes.
-    Inset. Updating matrix in the non-periodic case.
-    %
-    \note{This figure was produced by \texttt{doc/fig/sinc.gp}.
-      The data were computed by the program \texttt{prog/predict},
-      see particularly the function \texttt{intq\_save()}
-      in \texttt{prog/intq.h} for panel (a),
-      and the functions \texttt{savewin()}
-      and \texttt{savewinmat()}
-      in \texttt{prog/invt.h} for panel (b),
-      The data were saved under the directory \texttt{data/sinc}.
-      See the \texttt{make} object \texttt{sincsingle}
-      in the \texttt{Makefile} there.
-    }%
-  }
-\end{center}
-\end{figure}
-
-
-In Fig. \ref{fig:sinc},
-we give examples of the updating kernels
-of the bandpass updating schemes,
-compared to a Gaussian
-with a similar width, $\sigma$,
-%
-\begin{equation}
-  \sigma
-  \approx
-  \frac
-  {
-    g \, n
-  }
-  {
-    \sqrt{ 2 \, \pi } \, 2 \, K
-  }
-  .
-\label{eq:sigma_equiv}
-\end{equation}
-%
-%where $g = 1$ for the periodic case
-%or $g = 2$ otherwise.
-%
-The kernel in the non-periodic case is a sawtooth
-because of the term, $(-1)^{n+K+l-1}$,
-in Eq. \eqref{eq:mu_sinc_refl}.
-%
-However, as shown in the inset, % of Fig. \ref{fig:sinc}(b),
-the ruggedness disappears
-in the updating matrix by Eq. \eqref{eq:w_band_refl},
-as the above oscillatory term for $l = i - j$
-is canceled by the term for either $l = i + j - 1$
-or $l = i + j - 2 \, n - 1$
-with the opposite sign.
-
-
-
-\subsubsection{\label{sec:finlencorr}
-Finite-length correction}
-
-
-
-By including the residual error,
-we determine the optimal $t_0$
-that minimizes the total error.
-%
-According to Eq. \eqref{eq:half_alpha0}, we have
+with
 %
 \begin{equation}
   t_0
@@ -3267,17 +3050,22 @@ According to Eq. \eqref{eq:half_alpha0}, we have
   =
   \frac{  2  }
        { a_0 }
-  .
+  ,
 \label{eq:t0_sinc}
 \end{equation}
 %
+where we have used Eq. \eqref{eq:half_alpha0}
+in the second step.
+%
+\note{
 For the single-bin updating scheme,
 it recovers Eq. \eqref{eq:t0_singlebin}
 under the assumption of Eq. \eqref{eq:y2_eql}.
 %
-\note{From Eq. \eqref{eq:y2_eql}, we have
+From Eq. \eqref{eq:y2_eql}, we have
 $$E(0) = \frac{1}{2} a_0 \sum_{k=2}^n \Gamma_k = \frac{1}{2} \, a_0 \, \Gamma.$$
 }
+%
 From Eqs. \eqref{eq:error_tot},
 \eqref{eq:error_res1},
 \eqref{eq:tk0},
@@ -3290,13 +3078,16 @@ we get
   =
   \frac{   1     }
        { T + t_0 }
-  \sum_{ k = 2 }^K
+  \sum_{ k = 2 }^{ K + 1 }
     \Gamma_k
   .
 \label{eq:error_sinc}
 \end{equation}
 %
-In particular, for $K = n$, we have
+This result recovers Eq. \eqref{eq:Emin_singlebin}
+for the single-bin updating scheme:
+if we set $K + 1 = n$,
+%
 \begin{equation}
   \sum_{k=2}^n \Gamma_k
   = \sum_{i=1}^n \rho_i \, G_i = \Gamma
@@ -3305,9 +3096,7 @@ In particular, for $K = n$, we have
   %\label{eq:Gamma_G_sum}
 \end{equation}
 which can be shown by following the steps
-similar to those leading to Eq. \eqref{eq:y2_sum},
-and the above error recovers the single-bin result,
-Eq. \eqref{eq:Emin_singlebin}.
+similar to those leading to Eq. \eqref{eq:y2_sum}.
 %
 %
 %
@@ -5389,6 +5178,127 @@ Eq. \eqref{eq:lambdan}
 }
 
 
+\subsection{\label{sec:invert_wband}
+Inversion}
+
+Since the eigenvalues are related to the updating kernel
+by a cosine transform,
+we can invert the relation as
+%
+\begin{equation}
+  \mu_l
+  =
+  \frac { 1 } { g \, n }
+  \sum_{ k = 1 }^{ g \, n }
+  \lambda_k
+  \cos \frac{ (k - 1) \, l \, 2 \, \pi }
+            {            g \, n        }
+  .
+\label{eq:mu_from_lambda}
+\end{equation}
+%
+In the non-periodic case,
+we have defined
+$\lambda_k \equiv \lambda_{2 \, n + 2 - k}$
+for $k = n + 2, \dots, 2 \, n$,
+as well as
+%
+\begin{align}
+  \lambda_{ n + 1 }
+  =
+  (-1)^{ n - 1 }
+  \lambda_1
+  +
+  2 \, \sum_{ k = 2 }^{ n }
+      (-1)^{n - k} \, \lambda_k
+  ,
+\label{eq:lambdan}
+\end{align}
+to satisfy the constraint, $\mu_n = 0$.
+%
+
+
+
+
+
+\subsection{\label{sec:stabilize_wband}
+Stabilization}
+
+
+
+%A practical problem of using homogeneous updating scheme
+%is the following.
+%
+A homogeneous updating scheme
+specified by an arbitrary kernel
+is not necessarily stable,
+i.e. some eigenvalues can be negative.
+%
+%
+%\note{
+  %For example,
+  %the triple-bin updating scheme
+  %is unstable if Eq. \eqref{eq:nn_stable} is violated.
+  %
+%}%
+Even
+the Gaussian updating scheme, which is stable in the continuous limit,
+can be unstable
+when the updating kernel is truncated during discretization.
+%
+Here we show how to minimally modify
+the updating kernel
+to stabilize it.
+%
+\note{The relative code is \texttt{trimwindow()} in \texttt{invt.h}.
+}
+
+
+Given an updating kernel,
+we can compute the eigenvalues from
+Eq. \eqref{eq:wband_eigenvalue}.
+%
+By replacing negative eigenvalues with zeros and
+using the inversion formula,
+Eq. \eqref{eq:mu_from_lambda},
+we get a new updating kernel,
+which is stable by construction.
+%
+However, the new kernel is widened
+as $\mu_l$ may be nonzero for $l > b$.
+%
+If we truncate the new kernel at $\mu_b$,
+the stability problem remains,
+although the negative eigenvalues
+tend to be smaller in magnitude.
+%
+Thus, to stabilize the updating kernel
+without increasing the width,
+we need to iterate the above process many times,
+resulting the following algorithm.
+
+
+%
+\begin{enumerate}
+  \item
+    Given an updating kernel, $\mu_0, \dots, \mu_b$,
+    compute the eigenvalues,
+    $\lambda_1, \dots, \lambda_n$,
+    from Eq. \eqref{eq:wband_eigenvalue}.
+  \item
+    If all eigenvalues are nonnegative within the numerical error,
+    we are done. % and exit the loop.
+  \item
+    Otherwise, replace negative eigenvalues by zeros,
+    and compute the new kernel,
+    $\mu_0, \dots, \mu_b$, from
+    Eq. \eqref{eq:mu_from_lambda},
+    with $\mu_l = 0$ for $l > b$.
+    Go to step 1.
+\end{enumerate}
+
+
+
 \subsection{Examples}
 
 
@@ -5653,124 +5563,232 @@ If follows that all eigenvalues are positive\cite{bussi2006}:
 %$$
 
 
-\subsection{\label{sec:invert_wband}
-Inversion}
+\subsubsection{\label{sec:homo_bandpass}
+Bandpass updating schemes}
 
-Since the eigenvalues are related to the updating kernel
-by a cosine transform,
-we can invert the relation as
+
+
+For the bandpass updating schemes,
+the eigenvalues are known and
+we can use the inversion formula, Eq. \eqref{eq:mu_from_lambda}
+to find the updating kernel.
 %
+Below we will slightly modify the definition of
+the mode cutoff, $K$,
+for mathematical convenience.
+
+For a periodic variable, we demand
+%
+$$
+\begin{aligned}
+%&
+%\lambda_1 = \cdots = \lambda_{K+1}
+%= \lambda_{n-K+1} = \cdots = \lambda_n = 1,
+%\\
+%&
+\lambda_{K+2} = \cdots = \lambda_{n-K} = 0,
+\end{aligned}
+$$
+for $K \ge 1$,
+with the rest of the eigenvalues being $1$.
+%
+Then by using
+Eq. \eqref{eq:mu_from_lambda},
+we get
 \begin{equation}
   \mu_l
   =
-  \frac { 1 } { g \, n }
-  \sum_{ k = 1 }^{ g \, n }
-  \lambda_k
-  \cos \frac{ (k - 1) \, l \, 2 \, \pi }
-            {            g \, n        }
+  \frac{
+    \sin
+    \dfrac{ (2 K + 1) \, l \, \pi }
+         {              n        }
+  }
+  {
+    n \, \sin \dfrac{ l \, \pi } { n }
+  }
   .
-\label{eq:mu_from_lambda}
+\notag
+%\label{eq:mu_sinc_pbc}
 \end{equation}
-%
-In the non-periodic case,
-we have defined
-$\lambda_k \equiv \lambda_{2 \, n + 2 - k}$
-for $k = n + 2, \dots, 2 \, n$,
-as well as
-%
-\begin{align}
-  \lambda_{ n + 1 }
-  =
-  (-1)^{ n - 1 }
-  \lambda_1
+\note{Derivation.
+$$
+\begin{aligned}
+\mu_l
+&=
+\frac 1 n \sum_{k = 0}^{n-1} \lambda_{k+1} \cos \frac{ k \, l \, 2 \, \pi } { n }
+\\
+&=
+\frac{1}{n}
+\left(
+  1 +
+  \sum_{k=1}^K
+  \cos \frac { k \, l \, 2 \, \pi } { n }
   +
-  2 \, \sum_{ k = 2 }^{ n }
-      (-1)^{n - k} \, \lambda_k
-  ,
-\label{eq:lambdan}
-\end{align}
-to satisfy the constraint, $\mu_n = 0$.
-%
-
-
-
-
-
-\subsection{\label{sec:stabilize_wband}
-Stabilization}
-
-
-
-%A practical problem of using homogeneous updating scheme
-%is the following.
-%
-A homogeneous updating scheme
-specified by an arbitrary kernel
-is not necessarily stable,
-i.e. some eigenvalues can be negative.
-%
-%
-%\note{
-  %For example,
-  %the triple-bin updating scheme
-  %is unstable if Eq. \eqref{eq:nn_stable} is violated.
-  %
-%}%
-Even
-the Gaussian updating scheme, which is stable in the continuous limit,
-can be unstable
-when the updating kernel is truncated during discretization.
-%
-Here we show how to minimally modify
-the updating kernel
-to stabilize it.
-%
-\note{The relative code is \texttt{trimwindow()} in \texttt{invt.h}.
+  \sum_{k=n-K}^{n-1}
+  \cos \frac { k \, l \, 2 \, \pi } { n }
+\right)
+\\
+&=
+\frac 1 n
+\sum_{k=-K}^K
+\cos \frac { k \, l \, 2 \, \pi } { n }
+=
+  \frac{
+    \sin
+    \dfrac{ (2 K + 1) \, l \, \pi }
+         {              n        }
+  }
+  {
+    n \, \sin \dfrac{ l \, \pi } { n }
+  }
+.
+\end{aligned}
+$$
 }
 
+For a non-periodic variable, we demand
+$$
+\lambda_1 = \cdots = \lambda_{K+1} = 1,
+\qquad
+\lambda_{K+2} = \cdots = \lambda_n = 0.
+$$
+Then Eq. \eqref{eq:lambdan} gives
+$\lambda_{n+1} = (-1)^{n+K-1}$,
+and from Eq. \eqref{eq:mu_from_lambda},
+we have
+\begin{equation}
+  \mu_l
+  =
+  \frac{1}{2 \, n}
+  \left[
+    (-1)^{n+K+l-1}
+    +
+    \frac{
+      \sin
+      \dfrac{ (2 K + 1) \, l \, \pi }
+           {         2 \, n        }
+    }
+    {
+      \sin \dfrac{ l \, \pi } { 2 \, n }
+    }
+  \right]
+  .
+\label{eq:mu_sinc_refl}
+\end{equation}
+\note{Derivation.
+$$
+\begin{aligned}
+  \lambda_{n+1}
+  &=
+  (-1)^{n-1}
+  \left[
+    \lambda_1
+    - 2 \, \lambda_2
+    + 2 \, \lambda_3 - \cdots
+    + (-1)^{K} 2 \, \lambda_{K+1})
+  \right]
+  \\
+  &=
+  \begin{dcases}
+    (-1)^{n-1} & K \mathrm{\; even,} \\
+    (-1)^n     & K \mathrm{\; odd.}
+  \end{dcases}
+\end{aligned}
+$$
+So
+$$
+\begin{aligned}
+  \mu_l
+  &=
+  \frac{1}{2\,n}
+  \left[
+    1 +
+    2 \sum_{k=2}^{K+1}
+    \cos \frac { (k - 1) \, l \pi } { n }
+    +
+    (-1)^{n+K-1} (-1)^l
+  \right]
+  \\
+  &=
+  \frac{1}{2\,n}
+  \left[
+    (-1)^{n+K+l-1}
+    +
+    \sum_{k=-K}^{K}
+    \cos \frac { k \, l \pi } { n }
+  \right]
+  .
+\end{aligned}
+$$
+}%
 
-Given an updating kernel,
-we can compute the eigenvalues from
-Eq. \eqref{eq:wband_eigenvalue}.
-%
-By replacing negative eigenvalues with zeros and
-using the inversion formula,
-Eq. \eqref{eq:mu_from_lambda},
-we get a new updating kernel,
-which is stable by construction.
-%
-However, the new kernel is widened
-as $\mu_l$ may be nonzero for $l > b$.
-%
-If we truncate the new kernel at $\mu_b$,
-the stability problem remains,
-although the negative eigenvalues
-tend to be smaller in magnitude.
-%
-Thus, to stabilize the updating kernel
-without increasing the width,
-we need to iterate the above process many times,
-resulting the following algorithm.
+
+\begin{figure}[h]
+\begin{center}
+  \makebox[\linewidth][c]{
+    \includegraphics[angle=0, width=0.95\linewidth]{fig/sinc.pdf}
+  }
+  \caption{
+    \label{fig:sinc}
+    Updating kernels of the bandpass updating schemes
+    compared to a Gaussian with a similar width.
+    %
+    The lines are a guide to the eyes.
+    Inset. Updating matrix in the non-periodic case.
+    %
+    \note{This figure was produced by \texttt{doc/fig/sinc.gp}.
+      The data were computed by the program \texttt{prog/predict},
+      see particularly the function \texttt{intq\_save()}
+      in \texttt{prog/intq.h} for panel (a),
+      and the functions \texttt{savewin()}
+      and \texttt{savewinmat()}
+      in \texttt{prog/invt.h} for panel (b),
+      The data were saved under the directory \texttt{data/sinc}.
+      See the \texttt{make} object \texttt{sincsingle}
+      in the \texttt{Makefile} there.
+    }%
+  }
+\end{center}
+\end{figure}
 
 
+In Fig. \ref{fig:sinc},
+we give examples of the updating kernels
+of the bandpass updating schemes,
+compared to a Gaussian
+with a similar width, $\sigma$,
 %
-\begin{enumerate}
-  \item
-    Given an updating kernel, $\mu_0, \dots, \mu_b$,
-    compute the eigenvalues,
-    $\lambda_1, \dots, \lambda_n$,
-    from Eq. \eqref{eq:wband_eigenvalue}.
-  \item
-    If all eigenvalues are nonnegative within the numerical error,
-    we are done. % and exit the loop.
-  \item
-    Otherwise, replace negative eigenvalues by zeros,
-    and compute the new kernel,
-    $\mu_0, \dots, \mu_b$, from
-    Eq. \eqref{eq:mu_from_lambda},
-    with $\mu_l = 0$ for $l > b$.
-    Go to step 1.
-\end{enumerate}
+\begin{equation}
+  \sigma
+  \approx
+  \frac
+  {
+    g \, n
+  }
+  {
+    \sqrt{ 2 \, \pi } \, 2 \, K
+  }
+  .
+\label{eq:sigma_equiv}
+\end{equation}
+%
+%where $g = 1$ for the periodic case
+%or $g = 2$ otherwise.
+%
+The kernel in the non-periodic case is a sawtooth
+because of the term, $(-1)^{n+K+l-1}$,
+in Eq. \eqref{eq:mu_sinc_refl}.
+%
+However, as shown in the inset, % of Fig. \ref{fig:sinc}(b),
+the ruggedness disappears
+in the updating matrix by Eq. \eqref{eq:w_band_refl},
+as the above oscillatory term for $l = i - j$
+is canceled by the term for either $l = i + j - 1$
+or $l = i + j - 2 \, n - 1$
+with the opposite sign.
+
+
+
 
 
 \section{\label{sec:upperbound}
