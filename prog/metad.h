@@ -161,7 +161,7 @@ __inline static double metad_hflatness_wl(metad_t *metad)
     }
   }
 
-  return 2 * (hmax - hmin) / (hmax + hmin + DBL_EPSILON);
+  return (hmax - hmin) / (hmax + hmin + DBL_EPSILON);
 }
 
 
