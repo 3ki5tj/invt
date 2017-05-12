@@ -1548,19 +1548,22 @@ satisfying the orthonormal conditions\cite{vankampen}:
 %
 \begin{align}
   \sum_{k = 1}^n
-    \phi_{ki} \, \phi_{kj}
+    \phi_{ki} \, \phi_{kj}^*
   &=
   \delta_{ij} \, \rho_i,
   \label{eq:eig_orthonormal_cols}
   \\
   \sum_{i = 1}^n
-    \frac{ \phi_{ki} \, \phi_{li} }
+    \frac{ \phi_{ki} \, \phi_{li}^* }
          { \rho_i }
   &=
   \delta_{kl}
-  .
+  ,
   \label{eq:eig_orthonormal_rows}
 \end{align}
+%
+where the superscript $^*$
+denotes the complex conjugate.
 
 The above symmetry implies the existence of
 a left eigenvector, $\pmb \rho$,
@@ -1598,7 +1601,7 @@ while the orthogonality for $k \ge 2$ demands
   \sum_{ i = 1 }^n \phi_{ki}
   =
   \sum_{ i = 1 }^n
-    \frac{ \phi_{ki} \, \phi_{1i} }
+    \frac{ \phi_{ki} \, \phi_{1i}^* }
          { \rho_i }
   =
   0
@@ -1611,7 +1614,8 @@ We may write the updating matrix in terms of $\phi_{ki}$'s as
 \begin{equation}
   w_{ij}
   =
-  \frac{1}{\rho_i} \sum_{k=1}^n \lambda_k \, \phi_{ki} \, \phi_{kj}
+  \frac{1}{\rho_i} \sum_{k=1}^n
+  \lambda_k \, \phi_{ki}^* \, \phi_{kj}
   .
   \notag
 \end{equation}
@@ -1759,12 +1763,12 @@ can be rewritten in terms of the eigenmodes of $\mathbf w$,
   \sum_{i = 1}^n \rho_i \,
     \left\langle x_i^2 \right\rangle
   =
-  \sum_{i, j, k=1}^n \phi_{ki} \, \phi_{kj} \,
+  \sum_{i, j, k=1}^n \phi_{ki} \, \phi_{kj}^* \,
     \left\langle x_i \, x_j \right\rangle
   =
   \sum_{k = 1}^n
     \left\langle
-      y_k^2
+      \left| y_k \right|^2
     \right\rangle
   ,
 \notag
@@ -1785,7 +1789,7 @@ from $k = 2$,
   =
   \sum_{k = 2}^n
     \left\langle
-    y_k^2(T)
+      \left| y_k(T) \right|^2
     \right\rangle
   .
 \label{eq:y2_sum}
@@ -1840,13 +1844,14 @@ where
 and $\Gamma_k$ is computed from
 the autocorrelation function
 of the histogram fluctuation,
-$\kappa_k(t) \equiv \langle \theta_k(0) \, \theta_k(t) \rangle$,
+$\kappa_k(t) \equiv \langle \theta_k^*(0) \, \theta_k(t) \rangle$,
 as:
 %
 \begin{equation}
   \Gamma_k
   = \sum_{t = -\infty}^\infty \kappa_k(t)
-  = \sum_{t = -\infty}^\infty \left\langle \theta_k(0) \, \theta_k(t) \right\rangle
+  = \sum_{t = -\infty}^\infty
+  \left\langle \theta_k^*(0) \, \theta_k(t) \right\rangle
   .
   \label{eq:Gamma_sum}
 \end{equation}
@@ -1969,7 +1974,10 @@ for sufficiently long.
 %
 Then, one can show that
 \begin{equation}
-  \left\langle y_k^2(0) \right\rangle = \frac 1 2 \, \Gamma_k \, \lambda_k \, a_0
+  \left\langle
+    \left| y_k(0) \right|^2
+  \right\rangle
+  = \frac 1 2 \, \Gamma_k \, \lambda_k \, a_0
   ,
   \label{eq:y2_eql}
 \end{equation}
@@ -2490,80 +2498,8 @@ centered on the current bin.
 %
 For these translationally invariant or homogeneous
 schemes, the eigenvalues can be readily found
-from the shape of the window function.
-%
-
-
-
-%\subsubsection{\label{sec:bandkernel}
-%Updating kernel and eigenvalues}
-
-
-
-%While translationally-invariant
-%updating schemes
-%naturally suit periodic variables\cite{
-%dama2014},
-%they can also be extended to non-periodic variables
-%by imposing the reflective boundary condition\cite{
-%bussi2006}.
-%%
-%For simplicity, we will assume that the target
-%distribution is flat, or $p_i = 1/n$, below.
-
-
-
-%It is natural to first introduce homogeneous updating schemes
-For a periodic variable\cite{dama2014},
-the updating matrix, $\mathbf w$,
-assumes the following form
-%
-\begin{equation}
-  w_{ij}
-  =
-  \mu_{i-j}
-  +
-  \mu_{i-j+n}
-  +
-  \mu_{i-j-n}
-  ,
-\notag
-%\label{eq:w_band_pbc}
-\end{equation}
-%
-where the numbers,
-$\mu_{-b}, \dots, \mu_b$, ($b \le n/2$)
-characterizing the rigid window
-will be referred to as an \emph{updating kernel}\cite{bussi2006}.
-%
-To satisfy Eq. \eqref{eq:w_sumj},
-we impose the normalization
-%
-\begin{equation}
-  \mu_{-b} + \cdots + \mu_b = 1
-  ,
-\label{eq:mu_normalization}
-\end{equation}
-%
-with $\mu_l = 0$ for $|l| > b$.
-%
-If $b = n/2$, $\mu_{-b}$ is removed
-from the sum in Eq. \eqref{eq:mu_normalization}
-to avoid double counting.
-%
-For simplicity, we also impose the symmetry
-%
-\begin{equation}
-  \mu_i = \mu_{-i}
-  .
-\label{eq:mu_symm}
-\end{equation}
-%
-As shown in Appendix \ref{sec:wband_eig},
-%the multiplication of $\mathbf w$
-%is equivalent to a convolution with the kernel, and
-the eigenvalues of $\mathbf w$ are
-the Fourier or cosine transform of the updating kernel:
+from the window function ($\mu_0, \mu_1, \dots, \mu_b$)
+as a cosine transform,
 %
 \begin{equation}
   \lambda_k
@@ -2580,50 +2516,9 @@ the Fourier or cosine transform of the updating kernel:
   \label{eq:wband_eigenvalue}
 \end{equation}
 %
-where $g = 1$ here for the periodic variable.
-
-
-
-For a non-periodic variable,
-we use the reflective boundary condition\cite{bussi2006},
-and change the form of the updating matrix to
-%
-%
-\begin{equation}
-  w_{ij}
-  =
-  \mu_{ i - j }
-  +
-  \mu_{ i + j - 1 }
-  +
-  \mu_{ i + j - 2 n - 1 }
-  ,
-  \label{eq:w_band_refl}
-\end{equation}
-%
-where the last two terms on the right hand side,
-representing two reflective mirrors at
-$j = 1/2$ and $j = n + 1/2$,
-are added to avoid unintended distortion\cite{dickson2011, mcgovern2013}
-to the equilibrium distribution\cite{bussi2006}.
-%such that Eqs. \eqref{eq:w_sumj}-\eqref{eq:w_balance}
-%are satisfied.
-%
-Again, the updating kernel should satisfy
-Eqs. \eqref{eq:mu_normalization}
-and \eqref{eq:mu_symm},
-but
-the cutoff $b$ only needs to be less than $n$.
-
-Note that the two reflective mirrors effectively
-define a periodic variable of period $2 \, n$.
-Thus, the eigenvalues can be borrowed from
-Eq. \eqref{eq:wband_eigenvalue},
-with a doubled period,
-i.e. $g$ is changed to $2$ in the non-periodic case.
-
-%\subsubsection{\label{sec:invert_wband}
-%Inversion}
+where $g = 1$ here for the periodic variable,
+or $2$ for a non-periodic one
+[cf. Appendix \ref{sec:more_wband}].
 
 
 
@@ -3021,7 +2916,7 @@ $$
 %
 Then, the updating matrix is given by
 %
-$$w_{ij} = \sum_{k=1}^{K+1} \phi_{ki} \, \phi_{kj},$$
+$$w_{ij} = n \sum_{k=1}^{K+1} \phi_{ki}^* \, \phi_{kj},$$
 %
 and Eq. \eqref{eq:error_asym_singlebin} is modified as
 %
@@ -3119,6 +3014,7 @@ as one would expect from an equilibrium FDS simulation.
 %we show that the above error tends
 %to the error of the ideal equilibrium FDS simulation
 %in the asymptotic limit.
+
 
 
 
@@ -4462,7 +4358,7 @@ for $k \ge 2$, we get
   =
   \sum_{i,j = 1}^n
   \phi_{ki} \phi_{kj}
-  \langle \xi_i(t) \, \xi_j(t') \rangle
+  \langle \xi_i^*(t) \, \xi_j(t') \rangle
   %
   =
   \sum_{i = 1}^n \frac{ \phi_{ki}^2 } { p_i }
@@ -4794,9 +4690,74 @@ and the updating kernel.
 \subsection{\label{sec:wband_eig}
 Eigenvalues and eigenvectors}
 
+%\subsubsection{\label{sec:bandkernel}
+%Updating kernel and eigenvalues}
 
-To find the eigenvectors for a periodic variable, $\phi_i$,
-we define the out-of-boundary values by
+
+
+%While translationally-invariant
+%updating schemes
+%naturally suit periodic variables\cite{
+%dama2014},
+%they can also be extended to non-periodic variables
+%by imposing the reflective boundary condition\cite{
+%bussi2006}.
+%%
+%For simplicity, we will assume that the target
+%distribution is flat, or $p_i = 1/n$, below.
+
+
+
+It is natural to first introduce homogeneous updating schemes
+for a periodic variable\cite{dama2014},
+the updating matrix, $\mathbf w$,
+assumes the following form
+%
+\begin{equation}
+  w_{ij}
+  =
+  \mu_{i-j}
+  +
+  \mu_{i-j+n}
+  +
+  \mu_{i-j-n}
+  ,
+\notag
+%\label{eq:w_band_pbc}
+\end{equation}
+%
+where the numbers,
+$\mu_{-b}, \dots, \mu_b$, ($b \le n/2$)
+characterizing the rigid window
+will be referred to as an \emph{updating kernel}\cite{bussi2006}.
+%
+To satisfy Eq. \eqref{eq:w_sumj},
+we impose the normalization
+%
+\begin{equation}
+  \mu_{-b} + \cdots + \mu_b = 1
+  ,
+\label{eq:mu_normalization}
+\end{equation}
+%
+with $\mu_l = 0$ for $|l| > b$.
+%
+If $b = n/2$, $\mu_{-b}$ is removed
+from the sum in Eq. \eqref{eq:mu_normalization}
+to avoid double counting.
+%
+For simplicity, we also impose the symmetry
+%
+\begin{equation}
+  \mu_i = \mu_{-i}
+  .
+\label{eq:mu_symm}
+\end{equation}
+
+
+To find the eigenvectors,
+we define for a periodic variable, $\phi_i$,
+the out-of-boundary values by
 %
 \begin{equation}
   \phi_j = \phi_{j \pm n},
@@ -4915,6 +4876,7 @@ Alternatively, to avoid complex numbers, we can use
   =
   \frac{ \sqrt{ 2 - \delta_{k,0} } } { n }
   %\overset{ \cos } { \sin }
+  \,
   {\cos \atop \sin}
   \left[
     \frac{ (k - 1) \, j \, 2 \, \pi }
@@ -4977,7 +4939,51 @@ Then one can readily verify that the eigenvalues are given by
 
 
 For a non-periodic variable,
-we define the out-of-boundary values
+we use the reflective boundary condition\cite{bussi2006},
+and change the form of the updating matrix to
+%
+%
+\begin{equation}
+  w_{ij}
+  =
+  \mu_{ i - j }
+  +
+  \mu_{ i + j - 1 }
+  +
+  \mu_{ i + j - 2 n - 1 }
+  ,
+  \label{eq:w_band_refl}
+\end{equation}
+%
+where the last two terms on the right hand side,
+representing two reflective mirrors at
+$j = 1/2$ and $j = n + 1/2$,
+are added to avoid unintended distortion\cite{dickson2011, mcgovern2013}
+to the equilibrium distribution\cite{bussi2006}.
+%such that Eqs. \eqref{eq:w_sumj}-\eqref{eq:w_balance}
+%are satisfied.
+%
+Again, the updating kernel should satisfy
+Eqs. \eqref{eq:mu_normalization}
+and \eqref{eq:mu_symm},
+but
+the cutoff $b$ only needs to be less than $n$.
+
+Note that the two reflective mirrors effectively
+define a periodic variable of period $2 \, n$.
+Thus, the eigenvalues can be borrowed from
+Eq. \eqref{eq:wband_eigenvalue},
+with a doubled period,
+i.e. $g$ is changed to $2$ in the non-periodic case.
+
+%\subsubsection{\label{sec:invert_wband}
+%Inversion}
+
+
+
+
+%For a non-periodic variable,
+We define the out-of-boundary values
 of $\phi_j$ as
 %
 \begin{equation}
@@ -5569,8 +5575,8 @@ Bandpass updating schemes}
 
 
 For the bandpass updating schemes,
-the eigenvalues are known and
-we can use the inversion formula, Eq. \eqref{eq:mu_from_lambda}
+the eigenvalues are known ($0$ or $1$) and
+we can use Eq. \eqref{eq:mu_from_lambda}
 to find the updating kernel.
 %
 Below we will slightly modify the definition of
@@ -5600,16 +5606,18 @@ we get
   =
   \frac{
     \sin
-    \dfrac{ (2 K + 1) \, l \, \pi }
+    \frac{ (2 K + 1) \, l \, \pi }
          {              n        }
   }
   {
-    n \, \sin \dfrac{ l \, \pi } { n }
+    n \, \sin \frac{ l \, \pi } { n }
   }
-  .
+  ,
 \notag
 %\label{eq:mu_sinc_pbc}
 \end{equation}
+and $w_{ij} = \mu_{i-j}$.
+%
 \note{Derivation.
 $$
 \begin{aligned}
@@ -5635,11 +5643,11 @@ $$
 =
   \frac{
     \sin
-    \dfrac{ (2 K + 1) \, l \, \pi }
+    \frac{ (2 K + 1) \, l \, \pi }
          {              n        }
   }
   {
-    n \, \sin \dfrac{ l \, \pi } { n }
+    n \, \sin \frac{ l \, \pi } { n }
   }
 .
 \end{aligned}
@@ -5659,22 +5667,55 @@ we have
 \begin{equation}
   \mu_l
   =
-  \frac{1}{2 \, n}
-  \left[
-    (-1)^{n+K+l-1}
+  \frac{ (-1)^{n+K+l-1} } { 2 \, n }
     +
-    \frac{
-      \sin
-      \dfrac{ (2 K + 1) \, l \, \pi }
-           {         2 \, n        }
-    }
-    {
-      \sin \dfrac{ l \, \pi } { 2 \, n }
-    }
-  \right]
+  \frac{
+    \sin
+    \frac{ (2 K + 1) \, l \, \pi }
+         {         2 \, n        }
+  }
+  {
+    2 \, n \, \sin \frac{ l \, \pi } { 2 \, n }
+  }
   .
 \label{eq:mu_sinc_refl}
 \end{equation}
+%
+The updating matrix is given by
+%
+\begin{equation}
+  w_{ij}
+  =
+    \frac{
+      \sin
+      \frac{ (2 K + 1) \, (i-j) \, \pi }
+           {         2 \, n        }
+    }
+    {
+      2 \, n \, \sin \frac{ (i-j) \, \pi } { 2 \, n }
+    }
+    +
+    \frac{
+      \sin
+      \frac{ (2 K + 1) \, (i+j-1) \, \pi }
+           {         2 \, n        }
+    }
+    {
+      2 \, n \, \sin \frac{ (i+j-1) \, \pi } { 2 \, n }
+    }
+  .
+  \notag
+\end{equation}
+%
+Although the kernel is a sawtooth
+because of the term, $(-1)^{n+K+l-1}$,
+the ruggedness disappears
+in the updating matrix
+as the above oscillatory term for $l = i - j$
+is canceled by the term for either $l = i + j - 1$
+or $l = i + j - 2 \, n - 1$
+with the opposite sign.
+%
 \note{Derivation.
 $$
 \begin{aligned}
@@ -5723,69 +5764,58 @@ $$
 }%
 
 
-\begin{figure}[h]
-\begin{center}
-  \makebox[\linewidth][c]{
-    \includegraphics[angle=0, width=0.95\linewidth]{fig/sinc.pdf}
-  }
-  \caption{
-    \label{fig:sinc}
-    Updating kernels of the bandpass updating schemes
-    compared to a Gaussian with a similar width.
-    %
-    The lines are a guide to the eyes.
-    Inset. Updating matrix in the non-periodic case.
-    %
-    \note{This figure was produced by \texttt{doc/fig/sinc.gp}.
-      The data were computed by the program \texttt{prog/predict},
-      see particularly the function \texttt{intq\_save()}
-      in \texttt{prog/intq.h} for panel (a),
-      and the functions \texttt{savewin()}
-      and \texttt{savewinmat()}
-      in \texttt{prog/invt.h} for panel (b),
-      The data were saved under the directory \texttt{data/sinc}.
-      See the \texttt{make} object \texttt{sincsingle}
-      in the \texttt{Makefile} there.
-    }%
-  }
-\end{center}
-\end{figure}
+%\begin{figure}[h]
+%\begin{center}
+%  \makebox[\linewidth][c]{
+%    \includegraphics[angle=0, width=0.95\linewidth]{fig/sinc.pdf}
+%  }
+%  \caption{
+%    \label{fig:sinc}
+%    Updating kernels of the bandpass updating schemes
+%    compared to a Gaussian with a similar width.
+%    %
+%    The lines are a guide to the eyes.
+%    Inset. Updating matrix in the non-periodic case.
+%    %
+%    \note{This figure was produced by \texttt{doc/fig/sinc.gp}.
+%      The data were computed by the program \texttt{prog/predict},
+%      see particularly the function \texttt{intq\_save()}
+%      in \texttt{prog/intq.h} for panel (a),
+%      and the functions \texttt{savewin()}
+%      and \texttt{savewinmat()}
+%      in \texttt{prog/invt.h} for panel (b),
+%      The data were saved under the directory \texttt{data/sinc}.
+%      See the \texttt{make} object \texttt{sincsingle}
+%      in the \texttt{Makefile} there.
+%    }%
+%  }
+%\end{center}
+%\end{figure}
 
 
-In Fig. \ref{fig:sinc},
-we give examples of the updating kernels
-of the bandpass updating schemes,
-compared to a Gaussian
-with a similar width, $\sigma$,
-%
-\begin{equation}
-  \sigma
-  \approx
-  \frac
-  {
-    g \, n
-  }
-  {
-    \sqrt{ 2 \, \pi } \, 2 \, K
-  }
-  .
-\label{eq:sigma_equiv}
-\end{equation}
-%
-%where $g = 1$ for the periodic case
-%or $g = 2$ otherwise.
-%
-The kernel in the non-periodic case is a sawtooth
-because of the term, $(-1)^{n+K+l-1}$,
-in Eq. \eqref{eq:mu_sinc_refl}.
-%
-However, as shown in the inset, % of Fig. \ref{fig:sinc}(b),
-the ruggedness disappears
-in the updating matrix by Eq. \eqref{eq:w_band_refl},
-as the above oscillatory term for $l = i - j$
-is canceled by the term for either $l = i + j - 1$
-or $l = i + j - 2 \, n - 1$
-with the opposite sign.
+%In Fig. \ref{fig:sinc},
+%we give examples of the updating kernels
+%of the bandpass updating schemes,
+%compared to a Gaussian
+%with a similar width, $\sigma$,
+%%
+%\begin{equation}
+%  \sigma
+%  \approx
+%  \frac
+%  {
+%    g \, n
+%  }
+%  {
+%    \sqrt{ 2 \, \pi } \, 2 \, K
+%  }
+%  .
+%\label{eq:sigma_equiv}
+%\end{equation}
+%%
+%%where $g = 1$ for the periodic case
+%%or $g = 2$ otherwise.
+%%
 
 
 
