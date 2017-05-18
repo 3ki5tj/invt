@@ -1,14 +1,20 @@
+#ifndef METAD_H__
+#define METAD_H__
+
+
 #include "util.h"
-//#include "corr.h"
 #include "cosmodes.h"
 #include "eig.h"
 #include "intq.h"
+#include "invt.h"
+#include "cmvar.h" /* for autocorrelation integrals (gamma) */
 
 
 
 /* metadynamics for integer */
 typedef struct {
-  int xmin, xmax, xdel;
+  int imin, imax, idel;
+  double xmin, xmax, xdel;
   int n;
   double *v; /* bias potential */
   double *h; /* histogram */
@@ -18,12 +24,12 @@ typedef struct {
   int winn;
   double *win;
   double *lambda; /* eigenvalues of the updating marix */
+  cmvar_t *cm;
   double *gamma; /* correlation integrals */
-  double *gamma_tmat; /* correlation integrals from the transition matrix */
+  double *tmat; /* n x n transition matrix */
+  double *tgamma; /* correlation integrals from the transition matrix */
   double *costab; /* cosine transform coefficients */
   double hflatness;
-  double *tmat; /* n x n transition matrix */
-  //corr_t *corr;
   double *vtmp;
   double *hmod;
   intq_t *intq;
@@ -59,18 +65,21 @@ static void metad_prepwin(metad_t *metad,
   //  savewinmat(metad->win, metad->winn, n, pbc, m->fnwinmat);
 }
 
-static metad_t *metad_open(int xmin, int xmax, int xdel,
+static metad_t *metad_open(int imin, int imax, int idel,
     int pbc, double gaussig, int okmax, const double *win, int winn)
 {
   metad_t *metad;
   int i, n;
 
   xnew(metad, 1);
-  metad->xmin = xmin;
-  metad->xmax = xmax;
-  metad->xdel = xdel;
-  metad->n = n = (xmax - xmin) / xdel + 1;
-  metad->xmax = metad->xmin + n * metad->xdel;
+  metad->imin = imin;
+  metad->imax = imax;
+  metad->idel = idel;
+  metad->n = n = (imax - imin) / idel + 1;
+  metad->imax = metad->imin + n * metad->idel;
+  metad->xmin = 0;
+  metad->xmax = 0;
+  metad->xdel = 0;
   xnew(metad->v, n);
   xnew(metad->h, n);
   xnew(metad->vref, n);
@@ -82,15 +91,32 @@ static metad_t *metad_open(int xmin, int xmax, int xdel,
   metad->a = 1.0 / n;
   metad->pbc = pbc;
   /* prepare the window */
+  xnew(metad->lambda, n);
   metad_prepwin(metad, gaussig, okmax, win, winn);
+  metad->cm = cmvar_open(metad->n, metad->pbc);
   xnew(metad->gamma, n);
-  xnew(metad->gamma_tmat, n);
-  metad->costab = mkcostab(n, metad->pbc);
   xnew(metad->tmat, n * n);
+  xnew(metad->tgamma, n);
+  metad->costab = mkcostab(n, metad->pbc);
   xnew(metad->vtmp, n);
   xnew(metad->hmod, n);
   metad->intq = NULL;
   metad->errref = 0;
+  return metad;
+}
+
+
+
+__inline static metad_t *metad_openf(double xmin, double xmax, double xdel,
+    int pbc, double gaussig, int okmax, const double *win, int winn)
+{
+  metad_t *metad;
+  int n = (int)((xmax - xmin) / xdel);
+  gaussig /= xdel;
+  metad = metad_open(0, n, 1, pbc, gaussig, okmax, win, winn);
+  metad->xmin = xmin;
+  metad->xdel = xdel;
+  metad->xmax = xmin + metad->n * xdel;
   return metad;
 }
 
@@ -102,10 +128,11 @@ static void metad_close(metad_t *metad)
   free(metad->h);
   free(metad->win);
   free(metad->lambda);
+  cmvar_close(metad->cm);
   free(metad->gamma);
-  free(metad->gamma_tmat);
-  free(metad->costab);
   free(metad->tmat);
+  free(metad->tgamma);
+  free(metad->costab);
   free(metad->vtmp);
   free(metad->hmod);
   if ( metad->intq != NULL ) {
@@ -119,9 +146,16 @@ static void metad_close(metad_t *metad)
 /* return the bin index of value x */
 __inline static int metad_getindex(metad_t *metad, int x)
 {
+  if ( x < metad->imin || x >= metad->imax )
+    return -1;
+  return (x - metad->imin) / metad->idel;
+}
+
+__inline static int metad_getindexf(metad_t *metad, double x)
+{
   if ( x < metad->xmin || x >= metad->xmax )
     return -1;
-  return (x - metad->xmin) / metad->xdel;
+  return (int) ((x - metad->xmin) / metad->xdel);
 }
 
 
@@ -164,8 +198,6 @@ __inline static double metad_hflatness_wl(metad_t *metad)
   return (hmax - hmin) / (hmax + hmin + DBL_EPSILON);
 }
 
-
-
 /* compute the histogram flatness */
 __inline static double metad_hflatness(metad_t *metad)
 {
@@ -186,6 +218,8 @@ __inline static double metad_hflatness(metad_t *metad)
   fromcosmodes(metad->hmod, n, metad->vtmp, metad->costab);
   return sqrt( fl );
 }
+
+
 
 /* check if histogram is flat enough to switch to
  * a smaller updating magnitude */
@@ -215,7 +249,6 @@ static void metad_updatev_wl(metad_t *metad, int i)
   metad->v[i] += amp;
   metad->h[i] += 1;
 }
-
 
 /* multiple-bin update */
 __inline static void metad_updatev(metad_t *metad, int i)
@@ -256,18 +289,28 @@ static void metad_trimv(metad_t *metad, double *v)
 static int metad_save(metad_t *metad, const char *fn)
 {
   FILE *fp;
-  int i;
+  int i, isfloat = (fabs(metad->xmax - metad->xmin) > 0);
+  double x;
 
   if ( (fp = fopen(fn, "w")) == NULL ) {
     fprintf(stderr, "cannot open %s\n", fn);
     return -1;
   }
   metad_trimv(metad, metad->v);
-  fprintf(fp, "# %d %d %d %d %g\n",
-      metad->n, metad->xmin, metad->xmax, metad->xdel, metad->a);
+  if ( isfloat ) {
+    fprintf(fp, "# %d %g %g %g %g\n",
+        metad->n, metad->xmin, metad->xmax, metad->xdel, metad->a);
+  } else {
+    fprintf(fp, "# %d %d %d %d %g\n",
+        metad->n, metad->imin, metad->imax, metad->idel, metad->a);
+  }
   for ( i = 0; i < metad->n; i++ ) {
-    fprintf(fp, "%d %g %g %g %g\n",
-        metad->xmin + i * metad->xdel,
+    if ( isfloat ) {
+      x = metad->xmin + (i + 0.5) * metad->xdel;
+    } else {
+      x = metad->imin + i * metad->idel;
+    }
+    fprintf(fp, "%g %g %g %g %g\n", x,
         metad->v[i], metad->h[i], metad->vref[i], metad->hmod[i]);
   }
   fclose(fp);
@@ -275,6 +318,28 @@ static int metad_save(metad_t *metad, const char *fn)
 }
 
 
+
+/* update the accumulator for computing the gamma */
+__inline static void metad_add_varv(metad_t *metad)
+{
+  cmvar_add(metad->cm, metad->v);
+}
+
+/* compute the autocorrelation integrals (gamma)
+ * from the variance of the bias potential (cmvar) */
+__inline static void metad_getgamma_varv(metad_t *metad, double alpha0,
+    const char *fn)
+{
+  int i, n = metad->n;
+
+  cmvar_get(metad->cm);
+  for ( i = 1; i < n; i++ ) {
+    double lam = metad->lambda[i];
+    if ( lam < 0.1 ) lam = 0.1;
+    metad->gamma[i] = metad->cm->uvar[i]*2/alpha0/lam;
+  }
+  if ( fn != NULL ) savegamma(n, metad->gamma, fn);
+}
 
 /* compute the normalized transition matrix */
 __inline static double *metad_normalize_tmat(metad_t *metad)
@@ -316,30 +381,39 @@ __inline static double *metad_normalize_tmat(metad_t *metad)
     }
   }
 
-  {
-    // Gnuplot command:
-    //   plot "tmat.dat" matrix with image
-    // cf. http://www.gnuplotting.org/tag/matrix/
-    FILE *fp = fopen("tmat.dat", "w");
-    for ( i = 0; i < n; i++ ) {
-      for ( j = 0; j < n; j++ )
-        fprintf(fp, "%5.3f ", mat[i*n+j]);
-      fprintf(fp, "\n");
-    }
-    fclose(fp);
-  }
-
   free(col);
   return mat;
 }
 
-/* compute the gamma values from the transition matrix */
-static void metad_getgamma_tmat(metad_t *metad, double *gam, double dt)
+/* Gnuplot command:
+   plot "tmat.dat" matrix with image
+   cf. http://www.gnuplotting.org/tag/matrix/ */
+__inline static int metad_save_tmat(const double *mat, int n, const char *fn)
+{
+  int i, j;
+  FILE *fp;
+  if ( (fp = fopen(fn, "w")) == NULL ) {
+    fprintf(stderr, "cannot write %s\n", fn);
+    return -1;
+  }
+  for ( i = 0; i < n; i++ ) {
+    for ( j = 0; j < n; j++ )
+      fprintf(fp, "%5.3f ", mat[i*n+j]);
+    fprintf(fp, "\n");
+  }
+  fclose(fp);
+  return 0;
+}
+
+/* compute the autocorrelation integrals (gamma) from the transition matrix */
+__inline static void metad_getgamma_tmat(metad_t *metad, double dt,
+    const char *fn)
 {
   int i, j, k, n = metad->n;
-  double *mat, *val, *vec, *g, x;
+  double *mat, *val, *vec, *g, x, gam;
 
   mat = metad_normalize_tmat(metad);
+  /* metad_save_tmat(mat, n, "tmat.dat"); */
   xnew(val, n);
   xnew(vec, n*n);
   xnew(g, n);
@@ -353,35 +427,50 @@ static void metad_getgamma_tmat(metad_t *metad, double *gam, double dt)
   }
   for ( k = 1; k < n; k++ ) {
     /* k: mode of updating matrix */
-    gam[k] = 0;
+    gam = 0;
     for ( j = 1; j < n; j++ ) {
       /* j: mode of transition matrix */
       /* matrix multiplication of phi and vec */
       for ( x = 0, i = 0; i < n; i++ ) {
         x += metad->costab[k*n + i] * vec[i*n + j];
       }
-      gam[k] += g[j] * x * x;
+      gam += g[j] * x * x;
     }
-    gam[k] /= n;
+    metad->tgamma[k] = gam / n;
   }
 
   free(mat);
   free(val);
   free(vec);
   free(g);
+
+  if ( fn != NULL ) savegamma(n, metad->tgamma, fn);
 }
 
 
-static void metad_getalpha(metad_t *metad, invtpar_t *m, double T)
+/* compute the optimal schedule */
+static void metad_getalpha(metad_t *metad, double T, int gammethod,
+    double alpha0, double *qT, double qprec, int nint,
+    const char *fnalpha)
 {
-  m->t0 = 2 / m->alpha0;
-  metad->errref = esterror_opt(T, m->alpha0, 0, &m->qT, m->qprec,
-      m->alpha_nint, &metad->intq, m->n, m->kcutoff, m->pbc,
-      metad->lambda, metad->gamma, m->verbose);
+  double *gamma, t0 = 2/alpha0;
+
+  if ( gammethod == GAMMETHOD_VARV) {
+    gamma = metad->gamma;
+  } else if ( gammethod == GAMMETHOD_TMAT ) {
+    gamma = metad->tgamma;
+  } else {
+    estgamma(metad->gamma, metad->n, SAMPMETHOD_METROLOCAL, metad->pbc, 0.5);
+    gamma = metad->gamma;
+  }
+  metad->errref = esterror_opt(T, alpha0, 0, qT, qprec,
+      nint, &metad->intq, metad->n, 0, metad->pbc,
+      metad->lambda, gamma, 0);
   /* save the optimal schedule to file */
-  intq_save(metad->intq, 1.0, m->t0,
-      m->alpha_resample, m->fnalpha);
+  intq_save(metad->intq, 1.0, t0, 0, fnalpha);
 }
+
+
 
 /* compute the root-mean-squared error of `v`
  * note: the baseline of `v` will be shifted  */
@@ -401,4 +490,4 @@ static double metad_geterror(metad_t *metad)
 
 
 
-
+#endif /* METAD_H__ */

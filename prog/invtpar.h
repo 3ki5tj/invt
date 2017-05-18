@@ -56,6 +56,7 @@ typedef struct {
   int pregamma; /* use simulation to estimate the gamma values */
   long gam_nsteps; /* number of steps */
   int gam_nstave; /* interval of accumulating averages */
+  int gammethod; /* method of estimating gamma */
   char fngamma[FILENAME_MAX]; /* file name for the gamma values */
 
   double flatness; /* threshold for histogram flatness */
@@ -132,6 +133,22 @@ const char *sampmethod_names[][MAX_OPT_ALIASES] = {
 
 
 
+enum {
+  GAMMETHOD_NONE = 0,
+  GAMMETHOD_VARV,
+  GAMMETHOD_TMAT, /* transition matrix */
+  GAMMETHOD_COUNT
+};
+
+const char *gammethod_names[][MAX_OPT_ALIASES] = {
+  {"none", "n"},
+  {"varv", "variance", "var", "v"},
+  {"tmat", "transition-matrix", "t"},
+  {""}
+};
+
+
+
 /* initialize the default parameters */
 static void invtpar_init(invtpar_t *m)
 {
@@ -176,6 +193,7 @@ static void invtpar_init(invtpar_t *m)
   m->pregamma = 0;
   m->gam_nsteps = 100000000L;
   m->gam_nstave = 0;
+  m->gammethod = GAMMETHOD_TMAT;
   m->fngamma[0] = '\0';
 
   m->flatness = 0.05;
@@ -354,6 +372,7 @@ static void invtpar_help(const invtpar_t *m)
   fprintf(stderr, "  --gam:         use a preliminary simulation to estimate the integrals of autocorrelation functions of the eigenmodes, default %d\n", m->pregamma);
   fprintf(stderr, "  --gamnsteps=:  set the number of steps in the preliminary simulation, default %ld\n", m->gam_nsteps);
   fprintf(stderr, "  --gamnstave=:  set the interval of accumulating data in the preliminary simulation, default %d\n", m->gam_nstave);
+  fprintf(stderr, "  --gammethod=:  method of estimating gamma, default %s\n", gammethod_names[m->gammethod][0]);
   fprintf(stderr, "  --fngamma=:    set the file for the gamma values, default %s\n", m->fngamma);
   fprintf(stderr, "  --fl=:         set the threshold for the histogram flatness (WL), default %g\n", m->flatness);
   fprintf(stderr, "  --magred=:     set the reduction factor for the updating magnitude (WL), default %g\n", m->magred);
@@ -679,10 +698,16 @@ static int invtpar_keymatch(invtpar_t *m,
     /* the value 1 means to compute
      * the value 2 means to load */
     if ( val != NULL ) {
-      m->pregamma = invtpar_getint(m, key, val);
-    } else {
       m->pregamma = 1;
+    } else {
+      m->pregamma = atoi(val);
     }
+  }
+  else if ( strcmpfuzzy(key, "gamm") == 0
+         || strcmpfuzzy(key, "gammethod") == 0 )
+  {
+    m->gammethod = invtpar_selectoption(m, key, val,
+        gammethod_names, GAMMETHOD_COUNT);
   }
   else if ( strcmpfuzzy(key, "gamnsteps") == 0
          || strcmpfuzzy(key, "gamsteps") == 0
@@ -1018,8 +1043,8 @@ static void invtpar_dump(const invtpar_t *m)
       sampmethod_names[m->sampmethod][0], m->nsteps, m->nequil);
 
   if ( m->pregamma ) {
-    fprintf(stderr, "preliminary run: %ld steps, averaging every %d steps\n",
-      m->gam_nsteps, m->gam_nstave);
+    fprintf(stderr, "preliminary run: %ld steps, averaging every %d steps, method %s\n",
+      m->gam_nsteps, m->gam_nstave, gammethod_names[m->gammethod][0]);
   }
 
   if ( m->winn > 1 ) {

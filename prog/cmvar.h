@@ -2,7 +2,8 @@
 #define CMVAR_H__
 
 
-/* accumulator for computing the variance of the bias potential */
+/* accumulator for computing the correlation integrals
+ * of the eigenmodes from the variances of the bias potential */
 #include "cosmodes.h"
 
 
@@ -55,11 +56,6 @@ __inline static void cmvar_add(cmvar_t *cm, double *v)
   double uave, du;
   long cnt = cm->cnt;
   int i, n = cm->n;
-
-  /* shift the baseline of the bias potential */
-  for ( uave = 0, i = 0; i < n; i++ ) uave += v[i];
-  uave /= n;
-  for ( i = 0; i < n; i++ ) v[i] -= uave;
 
   /* cosine transform to the components of v */
   getcosmodes(v, n, cm->u, cm->costab);

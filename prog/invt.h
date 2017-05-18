@@ -451,6 +451,10 @@ __inline static void estgamma(double *gamma, int n,
   double x;
   static int once;
 
+  if ( sampmethod == SAMPMETHOD_MD ) {
+    sampmethod = SAMPMETHOD_METROLOCAL;
+    localg = 0.5;
+  }
   gamma[0] = 0;
   for ( i = 1; i < n; i++ ) {
     if ( sampmethod == SAMPMETHOD_METROGLOBAL ) {
@@ -464,14 +468,6 @@ __inline static void estgamma(double *gamma, int n,
       gamma[i] = 1.0 / (2 * localg * x * x) + 1 / (2 * localg) - 1;
     } else if ( sampmethod == SAMPMETHOD_HEATBATH ) {
       gamma[i] = 1.0;
-    } else if ( sampmethod == SAMPMETHOD_MD ) {
-      /* borrow the local sampling data */
-      x = i * M_PI / n;
-      if ( !pbc ) {
-        x *= 0.5;
-      }
-      x = tan(x);
-      gamma[i] = 1.0 / (x * x);
     } else {
       if ( !once ) { /* complain only once */
         fprintf(stderr, "Error: unknown sampling method, %d\n",
@@ -742,7 +738,7 @@ __inline static int savegamma(int n, const double *gamma,
   }
 
   fprintf(fp, "# %d\n", n);
-  for ( i = 0; i < n; i++ ) {
+  for ( i = 1; i < n; i++ ) {
     fprintf(fp, "%4d %14.6f\n", i, gamma[i]);
   }
 

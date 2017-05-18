@@ -3,7 +3,7 @@
 
 
 
-/* PMF along the distance between the two atoms
+/* for PMF along the distance between the two atoms
  * define the dimension D before including this file
  * Note: coordinates are not reduced */
 
@@ -13,6 +13,7 @@
 #include "vct.h"
 #include "mat.h"
 #include "mdutil.h"
+#include "metad.h"
 
 
 
@@ -51,7 +52,7 @@ typedef struct {
 
 
 /* initialize a fcc lattice */
-static void lj_initfcc(lj_t *lj)
+__inline static void lj_initfcc(lj_t *lj)
 {
   int i, j, id, n1, n = lj->n;
   double a, noise;
@@ -74,7 +75,7 @@ static void lj_initfcc(lj_t *lj)
 
 
 /* get the tail correction */
-static double lj_gettail(double rc, double rho, int n, double *ptail)
+__inline static double lj_gettail(double rc, double rho, int n, double *ptail)
 {
   double irc, irc3, irc6, utail;
 
@@ -94,7 +95,7 @@ static double lj_gettail(double rc, double rho, int n, double *ptail)
 
 
 /* initialize a fcc lattice */
-static void lj_initfcc(lj_t *lj)
+__inline static void lj_initfcc(lj_t *lj)
 {
   int i, j, k, id, n1, n = lj->n;
   double a, noise;
@@ -119,7 +120,7 @@ static void lj_initfcc(lj_t *lj)
 
 
 /* get the tail correction */
-static double lj_gettail(double rc, double rho, int n, double *ptail)
+__inline static double lj_gettail(double rc, double rho, int n, double *ptail)
 {
   double irc, irc3, irc6, utail;
 
@@ -139,7 +140,7 @@ static double lj_gettail(double rc, double rho, int n, double *ptail)
 
 
 /* set density and compute tail corrections */
-static void lj_setrho(lj_t *lj, double rho)
+__inline static void lj_setrho(lj_t *lj, double rho)
 {
   double irc;
 
@@ -161,7 +162,7 @@ static void lj_setrho(lj_t *lj, double rho)
 
 
 /* open an LJ system */
-static lj_t *lj_open(int n, double rho, double rcdef)
+__inline static lj_t *lj_open(int n, double rho, double rcdef)
 {
   lj_t *lj;
   int i, d;
@@ -195,7 +196,7 @@ static lj_t *lj_open(int n, double rho, double rcdef)
 
 
 /* close the lj object */
-static void lj_close(lj_t *lj)
+__inline static void lj_close(lj_t *lj)
 {
   free(lj->x);
   free(lj->v);
@@ -209,7 +210,7 @@ static void lj_close(lj_t *lj)
 
 
 
-static double *lj_vpbc(double *v, double l, double invl)
+__inline static double *lj_vpbc(double *v, double l, double invl)
 {
   int d;
   for ( d = 0; d < D; d++ )
@@ -219,7 +220,7 @@ static double *lj_vpbc(double *v, double l, double invl)
 
 
 
-static double lj_pbcdist2(double *dx, const double *a, const double *b,
+__inline static double lj_pbcdist2(double *dx, const double *a, const double *b,
     double l, double invl)
 {
   lj_vpbc(vdiff(dx, a, b), l, invl);
@@ -325,7 +326,7 @@ __inline static double lj_force_low(lj_t *lj, double (*x)[D], double (*f)[D],
 
 
 /* compute pressure */
-static double lj_calcp(lj_t *lj, double tp)
+__inline static double lj_calcp(lj_t *lj, double tp)
 {
   return (lj->dof * tp + lj->vir) / (D * lj->vol) + lj->p_tail;
 }
@@ -400,7 +401,7 @@ __inline static void lj_langp0(lj_t *lj, double dt,
 
 
 /* displace a random particle i, return i */
-static int lj_randmv(lj_t *lj, double *xi, double amp)
+__inline static int lj_randmv(lj_t *lj, double *xi, double amp)
 {
   int i, d;
 
@@ -435,7 +436,7 @@ __inline static int lj_pair(double dr2,
 
 /* return the energy change from displacing x[i] to xi */
 __inline static double lj_depot(lj_t *lj, int i, double *xi,
-    const double *vb, int xn, double xdel,
+    metad_t *metad,
     double *u6, double *u12, double *du01, double *vir)
 {
   int j, n = lj->n;
@@ -451,14 +452,15 @@ __inline static double lj_depot(lj_t *lj, int i, double *xi,
     r2n = lj_pbcdist2(dx, xi, lj->x[j], l, invl);
     if ( i + j == 1 ) {
       int io, in;
-      double xmax = xn * xdel;
-      ro = sqrt(r2o); io = (int)(ro/xdel);
-      rn = sqrt(r2n); in = (int)(rn/xdel);
-      if ( io < xn ) {
-        if ( rn >= xmax ) {
+      ro = sqrt(r2o);
+      rn = sqrt(r2n);
+      io = metad_getindexf(metad, ro);
+      in = metad_getindexf(metad, rn);
+      if ( ro < metad->xmax ) {
+        if ( rn >= metad->xmax ) {
           *du01 = 1e5;
         } else {
-          *du01 = (D-1)*log(rn/ro) + vb[in] - vb[io];
+          *du01 = (D-1)*log(rn/ro) + metad->v[in] - metad->v[io];
         }
       }
       continue;
@@ -483,7 +485,6 @@ __inline static double lj_depot(lj_t *lj, int i, double *xi,
 __inline static void lj_commit(lj_t *lj, int i, const double *xi,
     double du6, double du12, double dvir)
 {
-  int j, n = lj->n;
   double du = du12 - du6;
 
   vwrap( vcopy(lj->x[i], xi), lj->l );
@@ -498,14 +499,13 @@ __inline static void lj_commit(lj_t *lj, int i, const double *xi,
 
 /* Metropolis algorithm */
 __inline static int lj_metro(lj_t *lj, double amp, double bet,
-    const double *vb, int xn, double xdel)
+    metad_t *metad)
 {
   int i, acc = 0;
-  double xi[D], r, dux;
-  double du = 0, du6 = 0, du12 = 0, du01 = 0, dvir = 0;
+  double xi[D], r, dux, du, du6, du12, du01, dvir;
 
   i = lj_randmv(lj, xi, amp);
-  du = lj_depot(lj, i, xi, vb, xn, xdel, &du6, &du12, &du01, &dvir);
+  du = lj_depot(lj, i, xi, metad, &du6, &du12, &du01, &dvir);
   dux = bet * du + du01;
   if ( dux < 0 ) {
     acc = 1;

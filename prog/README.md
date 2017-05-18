@@ -36,15 +36,17 @@ invt
 
 File      | Description
 ----------|-------------------
-invt.c    | header
+invt.c    | driver for a 1D model
 invtpar.h | handling input parameters
 invt.h    | utility routines
 invtsamp.h| sampling routines
 intq.h    | optimal schedule by integrating the equation of motion
 cosmodes.h| eigenmode decomposition for translationally invariant updating schemes
+cmvar.h   | computing the autocorrelation integrals from the variance of the bias potential
 corr.h    | correlation of eigenmodes
 invt.cfg  | sample configuration file
-
+metad.h   | wrapper for using the invt.h, etc. in a realistic simulation
+is2.c     | driver for MC simulation
 
 
 Compilation
