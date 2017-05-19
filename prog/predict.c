@@ -360,7 +360,7 @@ int main(int argc, char **argv)
 
   /* estimate or load the gamma values */
   xnew(gamma, m->n);
-  estgamma(gamma, m->n, m->sampmethod, m->pbc, m->localg);
+  estgamma(gamma, m->n, m->sampmethod, m->pbc, m->mvsize);
   if ( m->fngamma[0] != '\0' ) {
     if ( m->sampmethod == SAMPMETHOD_MD ) {
       loadgamma(m->n, gamma, m->fngamma);

@@ -254,7 +254,7 @@ static invtdata_t *invt_open(invtpar_t *m)
 
   /* estimate the integrals of the autocorrelation functions
    * of the eigenmodes for the updating scheme */
-  estgamma(invt->gamma, m->n, m->sampmethod, m->pbc, m->localg);
+  estgamma(invt->gamma, m->n, m->sampmethod, m->pbc, m->mvsize);
 
   xnew(invt->xerr0, invt->n);
   xnew(invt->xerr, invt->n);

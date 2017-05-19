@@ -378,36 +378,12 @@ __inline static double lj_langevin(lj_t *lj, double tp, double dt)
 
 
 
-/* position Langevin barostat, with coordinates only
- * set cutoff to half of the box */
-__inline static void lj_langp0(lj_t *lj, double dt,
-    double tp, double pext, int ensx)
-{
-  double pint, amp, s, dlnv;
-  int i;
-
-  pint = lj_calcp(lj, tp);
-  amp = sqrt(2 * dt);
-  dlnv = ((pint - pext) * lj->vol / tp + 1 - ensx) * dt + amp * randgaus();
-  s = exp( dlnv / D );
-  lj->vol *= exp( dlnv );
-  lj_setrho(lj, lj->n / lj->vol);
-  for ( i = 0; i < lj->n; i++ ) {
-    vsmul(lj->x[i], s);
-  }
-  lj_force(lj);
-}
-
-
-
 /* displace a random particle i, return i */
 __inline static int lj_randmv(lj_t *lj, double *xi, double amp)
 {
   int i, d;
 
   i = (int) (rand01() * lj->n);
-  for ( d = 0; d < D; d++ )
-    xi[d] = lj->x[i][d] + (rand01() * 2 - 1) * amp;
   return i;
 }
 
@@ -498,13 +474,14 @@ __inline static void lj_commit(lj_t *lj, int i, const double *xi,
 
 
 /* Metropolis algorithm */
-__inline static int lj_metro(lj_t *lj, double amp, double bet,
-    metad_t *metad)
+__inline static int lj_metro(lj_t *lj, int i, double amp,
+    double bet, metad_t *metad)
 {
-  int i, acc = 0;
+  int d, acc = 0;
   double xi[D], r, dux, du, du6, du12, du01, dvir;
 
-  i = lj_randmv(lj, xi, amp);
+  for ( d = 0; d < D; d++ )
+    xi[d] = lj->x[i][d] + (rand01() * 2 - 1) * amp;
   du = lj_depot(lj, i, xi, metad, &du6, &du12, &du01, &dvir);
   dux = bet * du + du01;
   if ( dux < 0 ) {
@@ -518,63 +495,6 @@ __inline static int lj_metro(lj_t *lj, double amp, double bet,
     return 1;
   }
   return 0;
-}
-
-
-
-/* Monte Carlo volume move
- * the scaling is r = r*s, p = p/s;
- * set cutoff to half of the box
- * the ensemble distribution is
- *   distr. ~ V^(dof/D - ensx) exp(-beta * ep)
- * */
-__inline static int lj_mcvmov(lj_t *lj, double lnvamp, double tp, double pext,
-    int ensx)
-{
-  int acc = 0, i;
-  double lnlo, lnln, lo, ln, vo, vn, s, ss, is6, dex;
-  double epo, epn, ep6n, ep12n, eptailn, bet = 1/tp;
-
-  vo = lj->vol;
-  lo = lj->l;
-  lnlo = log(lo);
-  lnln = lnlo + lnvamp/D * (rand01() * 2 - 1);
-  ln = exp( lnln );
-  vn = exp( D * lnln );
-
-  epo = lj->epot;
-  s = ln / lo;
-  ss = s * s;
-  is6 = 1 / (ss * ss * ss);
-  ep6n = lj->ep6 * is6;
-  ep12n = lj->ep12 * is6 * is6;
-  /* note: assuming half-box cutoff here */
-  eptailn = lj_gettail(ln/2, lj->n / vn, lj->n, NULL);
-  epn = ep12n - ep6n + eptailn;
-  dex = bet * (epn - epo + pext * (vn - vo))
-      + lj->dof * (lnlo - lnln)
-      + D * (lnlo - lnln) * (1 - ensx);
-  //printf("l %g -> %g, vol %g -> %g, s %g\n", lo, ln, vo, vn, s);
-  //printf("ep %g, %g, %g -> %g, %g, %g\n", lj->ep6, lj->ep12, lj->epot, ep6n, ep12n, epn);
-
-  acc = 1;
-  if ( dex > 0 ) {
-    double r = rand01();
-    acc = ( r < exp(-dex) );
-  }
-  if ( acc ) { /* scale the velocities */
-    lj_setrho(lj, lj->n / vn);
-    lj->ep12 = ep12n;
-    lj->ep6 = ep6n;
-    lj->ep0 = ep12n - ep6n;
-    lj->vir = ep12n * 12 - ep6n * 6;
-    lj->epot = lj->ep0 + lj->epot_tail;
-    /* scale the coordinates */
-    for ( i = 0; i < lj->n; i++ ) {
-      vsmul(lj->x[i], s);
-    }
-  }
-  return acc;
 }
 
 

@@ -3,13 +3,11 @@
 #include "ave.h"
 #include <time.h>
 
-int n = 55;
+int n = 108;
 double rho = 0.8;
 double rcdef = 100.0;
-double tp = 0.81;
-
-int mcblk = 10;
-
+double tp = 1.5;
+int mcblk = 5;
 
 /* return the index for distance between the first two atoms */
 static int dist01(metad_t *metad, lj_t *lj, double *pdr)
@@ -21,14 +19,20 @@ static int dist01(metad_t *metad, lj_t *lj, double *pdr)
   return metad_getindexf(metad, dr);
 }
 
-/* a block of metropolis move */
-static void lj_metroblk(lj_t *lj, metad_t *metad)
+/* a block of Metropolis move */
+static double lj_metroblk(lj_t *lj, metad_t *metad)
 {
-  int it;
+  int it, i, sacc = 0;
   double amp = 0.1/rho;
 
-  for ( it = 0; it < mcblk; it++ )
-    lj_metro(lj, amp, 1/tp, metad);
+  /* move for non-special */
+  for ( it = 0; it < mcblk - 1; it++ ) {
+    i = 2 + (int) (rand01() * (lj->n - 2));
+    sacc += lj_metro(lj, i, amp, 1/tp, metad);
+  }
+  i = (int) (rand01() * 2);
+  sacc += lj_metro(lj, i, amp, 1/tp, metad);
+  return 1. * sacc / mcblk;
 }
 
 /* run with decreasing magnitude
@@ -63,7 +67,7 @@ static int cmagrun(invtpar_t *m, metad_t *metad, lj_t *lj)
 {
   long t;
   int ir0, ir;
-  double dr;
+  double dr, sacc = 0;
 
   metad->a = m->alpha0;
   ir0 = dist01(metad, lj, &dr);
@@ -71,12 +75,13 @@ static int cmagrun(invtpar_t *m, metad_t *metad, lj_t *lj)
   fprintf(stderr, "starting constant magnitude %g metadynamics run of %ld steps...\n",
       metad->a, m->gam_nsteps);
   for ( t = 1; t <= m->gam_nsteps; t++ ) {
-    lj_metroblk(lj, metad);
+    sacc += lj_metroblk(lj, metad);
     ir = dist01(metad, lj, &dr);
     metad_updatev(metad, ir);
     metad->tmat[ir*metad->n + ir0] += 1;
     ir0 = ir;
     metad_add_varv(metad);
+    if ( t % 1000 == 0 ) fprintf(stderr, "t %ld/%ld, acc %g%% \r", t, m->gam_nsteps, 100*sacc/t);
   }
 
   /* estimate gamma */

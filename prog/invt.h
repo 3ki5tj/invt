@@ -445,7 +445,7 @@ __inline static double *prepwin(double *lambda, int n,
  * This is true only for perfect sampling and
  * local Monte Carlo sampling */
 __inline static void estgamma(double *gamma, int n,
-    int sampmethod, int pbc, double localg)
+    int sampmethod, int pbc, double mvsize)
 {
   int i;
   double x;
@@ -453,7 +453,6 @@ __inline static void estgamma(double *gamma, int n,
 
   if ( sampmethod == SAMPMETHOD_MD ) {
     sampmethod = SAMPMETHOD_METROLOCAL;
-    localg = 0.5;
   }
   gamma[0] = 0;
   for ( i = 1; i < n; i++ ) {
@@ -461,11 +460,14 @@ __inline static void estgamma(double *gamma, int n,
       gamma[i] = 1.0; /* n / (n - 1.0); */
     } else if ( sampmethod == SAMPMETHOD_METROLOCAL ) {
       x = i * M_PI / n;
-      if ( !pbc ) {
-        x *= 0.5;
-      }
+      if ( !pbc ) x *= 0.5;
       x = tan(x);
-      gamma[i] = 1.0 / (2 * localg * x * x) + 1 / (2 * localg) - 1;
+      gamma[i] = 1.0 / (mvsize * x * x) + 1 / mvsize - 1;
+    } else if ( sampmethod == SAMPMETHOD_METROGAUSS ) {
+      x = 2 * i * M_PI / n;
+      if ( !pbc ) x *= 0.5;
+      x = exp(-x*x/2);
+      gamma[i] = (1 + x) / (1 - x);
     } else if ( sampmethod == SAMPMETHOD_HEATBATH ) {
       gamma[i] = 1.0;
     } else {

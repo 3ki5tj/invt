@@ -50,7 +50,7 @@ typedef struct {
   double initrand; /* magnitude of the initial Gaussian noise */
   int kcutoff; /* cutoff wave number of the initial noise */
   int sampmethod; /* sampling method */
-  double localg; /* hopping probability for the local sampling process */
+  double mvsize; /* average move size in number of bins */
   double tcorr; /* correlation time for the sampling method */
 
   int pregamma; /* use simulation to estimate the gamma values */
@@ -112,6 +112,7 @@ typedef struct {
 enum {
   SAMPMETHOD_METROGLOBAL = 0,
   SAMPMETHOD_METROLOCAL,
+  SAMPMETHOD_METROGAUSS,
   SAMPMETHOD_HEATBATH,
   SAMPMETHOD_OU, /* Ornstein-Uhlenbeck process */
   SAMPMETHOD_MD,
@@ -124,6 +125,7 @@ enum {
 const char *sampmethod_names[][MAX_OPT_ALIASES] = {
   {"global Metropolis", "global", "g"},
   {"local Metropolis", "local", "l"},
+  {"Gaussian Metropolis", "gauss", "s"},
   {"heat-bath", "h"},
   {"Ornstein-Uhlenbeck", "OU", "o",
    "Harmonic oscillator", "HO"},
@@ -187,7 +189,7 @@ static void invtpar_init(invtpar_t *m)
   m->initrand = 0;
   m->kcutoff = -1;
   m->sampmethod = 0;
-  m->localg = 0.5;
+  m->mvsize = 1.0;
   m->tcorr = 1.0; /* only used for the Ornstein-Uhlenbeck process */
 
   m->pregamma = 0;
@@ -318,11 +320,6 @@ static void invtpar_compute(invtpar_t *m)
   for ( i = 0; i < m->n; i++ ) {
     m->p[i] = 1.0 / m->n;
   }
-
-  if ( m->localg > 0.5 ) {
-    fprintf(stderr, "local hopping probability cannot exceed 0.5\n");
-    m->localg = 0.5;
-  }
 }
 
 
@@ -368,7 +365,7 @@ static void invtpar_help(const invtpar_t *m)
   fprintf(stderr, "  --initrand=:   magnitude of the initial random error, default %g\n", m->initrand);
   fprintf(stderr, "  --kcutoff=:    cutoff of wave number of the initial random error, default %d\n", m->kcutoff);
   fprintf(stderr, "  --samp=:       set the sampling scheme, g=global Metropolis, l=local Metropolis, h=heat-bath, d=molecular dynamics, o=Ornstein-Uhlenbeck, default %s\n", sampmethod_names[m->sampmethod][0]);
-  fprintf(stderr, "  --localg=:     set the hopping probability for the local sampling process, [0, 0.5], default %g\n", m->localg);
+  fprintf(stderr, "  --mvsize=:     set the hopping move size, default %g\n", m->mvsize);
   fprintf(stderr, "  --gam:         use a preliminary simulation to estimate the integrals of autocorrelation functions of the eigenmodes, default %d\n", m->pregamma);
   fprintf(stderr, "  --gamnsteps=:  set the number of steps in the preliminary simulation, default %ld\n", m->gam_nsteps);
   fprintf(stderr, "  --gamnstave=:  set the interval of accumulating data in the preliminary simulation, default %d\n", m->gam_nstave);
@@ -687,9 +684,9 @@ static int invtpar_keymatch(invtpar_t *m,
         sampmethod_names, SAMPMETHOD_COUNT);
   }
   else if ( strcmp(key, "g") == 0
-         || strcmpfuzzy(key, "localg") == 0 )
+         || strcmpfuzzy(key, "mvsize") == 0 )
   {
-    m->localg = invtpar_getdouble(m, key, val);
+    m->mvsize = invtpar_getdouble(m, key, val);
   }
   else if ( strcmpfuzzy(key, "gam") == 0
          || strcmpfuzzy(key, "pre") == 0

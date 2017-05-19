@@ -398,7 +398,7 @@ __inline static int metad_save_tmat(const double *mat, int n, const char *fn)
   }
   for ( i = 0; i < n; i++ ) {
     for ( j = 0; j < n; j++ )
-      fprintf(fp, "%5.3f ", mat[i*n+j]);
+      fprintf(fp, "%7.5f ", mat[i*n+j]);
     fprintf(fp, "\n");
   }
   fclose(fp);
@@ -413,7 +413,7 @@ __inline static void metad_getgamma_tmat(metad_t *metad, double dt,
   double *mat, *val, *vec, *g, x, gam;
 
   mat = metad_normalize_tmat(metad);
-  /* metad_save_tmat(mat, n, "tmat.dat"); */
+  metad_save_tmat(mat, n, "tmat.dat");
   xnew(val, n);
   xnew(vec, n*n);
   xnew(g, n);
