@@ -53,13 +53,13 @@ typedef struct {
   double mvsize; /* average move size in number of bins */
   double tcorr; /* correlation time for the sampling method */
 
-  int pregamma; /* use simulation to estimate the gamma values */
+  /* use simulation to estimate the gamma values */
   long gam_nsteps; /* number of steps */
   int gam_nstave; /* interval of accumulating averages */
   int gammethod; /* method of estimating gamma */
   char fngamma[FILENAME_MAX]; /* file name for the gamma values */
 
-  double flatness; /* threshold for histogram flatness */
+  double fluc; /* threshold for histogram fluctuation */
   double magred; /* reduction factor for updating magnitude */
 
   /* molecular dynamics parameters */
@@ -112,7 +112,7 @@ typedef struct {
 enum {
   SAMPMETHOD_METROGLOBAL = 0,
   SAMPMETHOD_METROLOCAL,
-  SAMPMETHOD_METROGAUSS,
+  SAMPMETHOD_GAUSS,
   SAMPMETHOD_HEATBATH,
   SAMPMETHOD_OU, /* Ornstein-Uhlenbeck process */
   SAMPMETHOD_MD,
@@ -125,7 +125,7 @@ enum {
 const char *sampmethod_names[][MAX_OPT_ALIASES] = {
   {"global Metropolis", "global", "g"},
   {"local Metropolis", "local", "l"},
-  {"Gaussian Metropolis", "gauss", "s"},
+  {"Gaussian Metropolis", "gauss", "gaus", "s"},
   {"heat-bath", "h"},
   {"Ornstein-Uhlenbeck", "OU", "o",
    "Harmonic oscillator", "HO"},
@@ -137,8 +137,9 @@ const char *sampmethod_names[][MAX_OPT_ALIASES] = {
 
 enum {
   GAMMETHOD_NONE = 0,
-  GAMMETHOD_VARV,
+  GAMMETHOD_VARV, /* variance of the bias potential */
   GAMMETHOD_TMAT, /* transition matrix */
+  GAMMETHOD_LOAD, /* load previous value */
   GAMMETHOD_COUNT
 };
 
@@ -146,6 +147,7 @@ const char *gammethod_names[][MAX_OPT_ALIASES] = {
   {"none", "n"},
   {"varv", "variance", "var", "v"},
   {"tmat", "transition-matrix", "t"},
+  {"load", "l"},
   {""}
 };
 
@@ -192,13 +194,12 @@ static void invtpar_init(invtpar_t *m)
   m->mvsize = 1.0;
   m->tcorr = 1.0; /* only used for the Ornstein-Uhlenbeck process */
 
-  m->pregamma = 0;
   m->gam_nsteps = 100000000L;
   m->gam_nstave = 0;
-  m->gammethod = GAMMETHOD_TMAT;
+  m->gammethod = GAMMETHOD_NONE;
   m->fngamma[0] = '\0';
 
-  m->flatness = 0.05;
+  m->fluc = 0.05;
   m->magred = 0.5;
 
   /* molecular dynamics parameters */
@@ -289,11 +290,11 @@ static void invtpar_compute(invtpar_t *m)
     m->ntrials = 1;
   }
 
-  if ( m->fngamma[0] != '\0' ) {
-    m->pregamma = 1;
+  if ( m->fngamma[0] != '\0' && m->gammethod == GAMMETHOD_NONE ) {
+    m->gammethod = GAMMETHOD_VARV;
   }
 
-  if ( m->pregamma ) {
+  if ( m->gammethod != GAMMETHOD_NONE ) {
     if ( m->gam_nstave <= 0 ) {
       m->gam_nstave = m->n;
     }
@@ -366,12 +367,11 @@ static void invtpar_help(const invtpar_t *m)
   fprintf(stderr, "  --kcutoff=:    cutoff of wave number of the initial random error, default %d\n", m->kcutoff);
   fprintf(stderr, "  --samp=:       set the sampling scheme, g=global Metropolis, l=local Metropolis, h=heat-bath, d=molecular dynamics, o=Ornstein-Uhlenbeck, default %s\n", sampmethod_names[m->sampmethod][0]);
   fprintf(stderr, "  --mvsize=:     set the hopping move size, default %g\n", m->mvsize);
-  fprintf(stderr, "  --gam:         use a preliminary simulation to estimate the integrals of autocorrelation functions of the eigenmodes, default %d\n", m->pregamma);
   fprintf(stderr, "  --gamnsteps=:  set the number of steps in the preliminary simulation, default %ld\n", m->gam_nsteps);
   fprintf(stderr, "  --gamnstave=:  set the interval of accumulating data in the preliminary simulation, default %d\n", m->gam_nstave);
-  fprintf(stderr, "  --gammethod=:  method of estimating gamma, default %s\n", gammethod_names[m->gammethod][0]);
+  fprintf(stderr, "  --gam=:        method of estimating gamma, default %s\n", gammethod_names[m->gammethod][0]);
   fprintf(stderr, "  --fngamma=:    set the file for the gamma values, default %s\n", m->fngamma);
-  fprintf(stderr, "  --fl=:         set the threshold for the histogram flatness (WL), default %g\n", m->flatness);
+  fprintf(stderr, "  --fl=:         set the threshold for the histogram fluctuation (WL), default %g\n", m->fluc);
   fprintf(stderr, "  --magred=:     set the reduction factor for the updating magnitude (WL), default %g\n", m->magred);
   fprintf(stderr, "  --corr:        compute correlation functions, default %d\n", m->docorr);
   fprintf(stderr, "  --nstcorr=:    set the number of steps of setting the correlation function, default %d\n", m->nstcorr);
@@ -689,18 +689,8 @@ static int invtpar_keymatch(invtpar_t *m,
     m->mvsize = invtpar_getdouble(m, key, val);
   }
   else if ( strcmpfuzzy(key, "gam") == 0
-         || strcmpfuzzy(key, "pre") == 0
-         || strcmpfuzzy(key, "gamma") == 0 )
-  {
-    /* the value 1 means to compute
-     * the value 2 means to load */
-    if ( val != NULL ) {
-      m->pregamma = 1;
-    } else {
-      m->pregamma = atoi(val);
-    }
-  }
-  else if ( strcmpfuzzy(key, "gamm") == 0
+         || strcmpfuzzy(key, "gamm") == 0
+         || strcmpfuzzy(key, "gamma") == 0
          || strcmpfuzzy(key, "gammethod") == 0 )
   {
     m->gammethod = invtpar_selectoption(m, key, val,
@@ -725,10 +715,10 @@ static int invtpar_keymatch(invtpar_t *m,
   {
     strcpy(m->fngamma, val);
   }
-  else if ( strcmpfuzzy(key, "flatness") == 0
+  else if ( strcmpfuzzy(key, "fluc") == 0
          || strcmpfuzzy(key, "fl") == 0 )
   {
-    m->flatness = atof(val);
+    m->fluc = atof(val);
   }
   else if ( strcmpfuzzy(key, "red") == 0
          || strcmpfuzzy(key, "magred") == 0 )
@@ -1039,9 +1029,12 @@ static void invtpar_dump(const invtpar_t *m)
       m->ntrials, m->n, m->c, m->t0, m->alpha0, m->qT, m->pbc,
       sampmethod_names[m->sampmethod][0], m->nsteps, m->nequil);
 
-  if ( m->pregamma ) {
+  if ( m->gammethod != GAMMETHOD_NONE ) {
     fprintf(stderr, "preliminary run: %ld steps, averaging every %d steps, method %s\n",
       m->gam_nsteps, m->gam_nstave, gammethod_names[m->gammethod][0]);
+  } else {
+    fprintf(stderr, "estimated sampling method %s\n",
+        sampmethod_names[m->sampmethod][0]);
   }
 
   if ( m->winn > 1 ) {

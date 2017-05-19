@@ -20,13 +20,9 @@ static void shift(double *v, int n)
   double s = 0;
   int i;
 
-  for ( i = 0; i < n; i++ ) {
-    s += v[i];
-  }
+  for ( i = 0; i < n; i++ ) s += v[i];
   s /= n;
-  for ( i = 0; i < n; i++ ) {
-    v[i] -= s;
-  }
+  for ( i = 0; i < n; i++ ) v[i] -= s;
 }
 
 
@@ -463,8 +459,8 @@ __inline static void estgamma(double *gamma, int n,
       if ( !pbc ) x *= 0.5;
       x = tan(x);
       gamma[i] = 1.0 / (mvsize * x * x) + 1 / mvsize - 1;
-    } else if ( sampmethod == SAMPMETHOD_METROGAUSS ) {
-      x = 2 * i * M_PI / n;
+    } else if ( sampmethod == SAMPMETHOD_GAUSS ) {
+      x = 2 * mvsize * i * M_PI / n;
       if ( !pbc ) x *= 0.5;
       x = exp(-x*x/2);
       gamma[i] = (1 + x) / (1 - x);
@@ -772,7 +768,8 @@ __inline static int loadgamma(int n, double *gamma,
     return -1;
   }
 
-  for ( i = 0; i < n; i++ ) {
+  gamma[0] = 0;
+  for ( i = 1; i < n; i++ ) {
     if ( fgets(buf, sizeof buf, fp) == NULL ) {
       break;
     }
@@ -780,12 +777,13 @@ __inline static int loadgamma(int n, double *gamma,
     if ( i != id ) {
       fprintf(stderr, "index mismatch %d != %d (%s)\n",
           i, id, fn);
-      break;
+      return -1;
     }
-    fprintf(stderr, "gamma(%d) = %g -> %g\n", i, gamma[i], x);
+    //fprintf(stderr, "gamma(%d) = %g -> %g\n", i, gamma[i], x);
     gamma[i] = x;
   }
-
+  fprintf(stderr, "loaded %d gamma values %g,...%g, from %s\n",
+      i-1, gamma[1], gamma[i-1], fn);
   fclose(fp);
 
   return 0;

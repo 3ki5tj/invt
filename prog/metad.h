@@ -29,7 +29,7 @@ typedef struct {
   double *tmat; /* n x n transition matrix */
   double *tgamma; /* correlation integrals from the transition matrix */
   double *costab; /* cosine transform coefficients */
-  double hflatness;
+  double hfl;
   double *vtmp;
   double *hmod;
   intq_t *intq;
@@ -59,10 +59,10 @@ static void metad_prepwin(metad_t *metad,
   /* modify the window function such that all eigenvalues
    * lambda[i] are positive-definite */
   stablizewin(metad->lambda, n, metad->win, &metad->winn, pbc, 0.0, 1);
-  //  /* save the window kernel */
-  //  savewin(metad->win, metad->winn, m->fnwin);
-  //  /* save the n x n updating matrix */
-  //  savewinmat(metad->win, metad->winn, n, pbc, m->fnwinmat);
+  /* save the window kernel */
+  savewin(metad->win, metad->winn, "ker.dat");
+  /* save the n x n updating matrix */
+  savewinmat(metad->win, metad->winn, n, pbc, "win.dat");
 }
 
 static metad_t *metad_open(int imin, int imax, int idel,
@@ -113,7 +113,7 @@ __inline static metad_t *metad_openf(double xmin, double xmax, double xdel,
   metad_t *metad;
   int n = (int)((xmax - xmin) / xdel);
   gaussig /= xdel;
-  metad = metad_open(0, n, 1, pbc, gaussig, okmax, win, winn);
+  metad = metad_open(0, n - 1, 1, pbc, gaussig, okmax, win, winn);
   metad->xmin = xmin;
   metad->xdel = xdel;
   metad->xmax = xmin + metad->n * xdel;
@@ -162,8 +162,8 @@ __inline static int metad_getindexf(metad_t *metad, double x)
 
 /* decide if a transition from xold (index iold)
  * to xnew (index iold) is to be accepted */
-static int metad_acc(metad_t *metad, int iold, int xnew,
-    int *inew)
+__inline static int metad_acc(metad_t *metad,
+    int iold, int xnew, int *inew)
 {
   double dv, r;
 
@@ -179,8 +179,8 @@ static int metad_acc(metad_t *metad, int iold, int xnew,
 }
 
 
-/* compute the histogram flatness (Wang-Landau version) */
-__inline static double metad_hflatness_wl(metad_t *metad)
+/* compute the histogram fluctuation (Wang-Landau version) */
+__inline static double metad_hfl_wl(metad_t *metad)
 {
   int i;
   double hmin, hmax, hi;
@@ -198,8 +198,8 @@ __inline static double metad_hflatness_wl(metad_t *metad)
   return (hmax - hmin) / (hmax + hmin + DBL_EPSILON);
 }
 
-/* compute the histogram flatness */
-__inline static double metad_hflatness(metad_t *metad)
+/* compute the histogram fluctuation */
+__inline static double metad_hfl(metad_t *metad)
 {
   int i, k, n = metad->n;
   double x, fl = 0, tot = 0;
@@ -227,12 +227,12 @@ static int metad_wlcheck(metad_t *metad, double fl, double magred)
 {
   int i;
 
-  /* compute the histogram flatness */
-  metad->hflatness = metad_hflatness(metad);
-  //printf("flatness %g, %g\n", metad->hflatness, metad_hflatness_wl(metad));
+  /* compute the histogram fluctuation */
+  metad->hfl = metad_hfl(metad);
+  //printf("fl %g, %g\n", metad->hfl, metad_hfl_wl(metad));
   //getchar();
-  /* return if the histogram not flatness enough */
-  if ( metad->hflatness > fl ) return 0;
+  /* return if the histogram not flat enough */
+  if ( metad->hfl > fl ) return 0;
 
   /* reduce the updating magnitude and clear the histogram */
   metad->a *= magred;
@@ -243,7 +243,7 @@ static int metad_wlcheck(metad_t *metad, double fl, double magred)
 
 
 
-static void metad_updatev_wl(metad_t *metad, int i)
+__inline static void metad_updatev_wl(metad_t *metad, int i)
 {
   double amp = metad->n * metad->a;
   metad->v[i] += amp;
@@ -285,7 +285,7 @@ static void metad_trimv(metad_t *metad, double *v)
 }
 
 
-
+/* save the bias potential to file */
 static int metad_save(metad_t *metad, const char *fn)
 {
   FILE *fp;
@@ -315,6 +315,55 @@ static int metad_save(metad_t *metad, const char *fn)
   }
   fclose(fp);
   return 0;
+}
+
+
+
+/* load the bias potential from file */
+__inline static int metad_load(metad_t *metad, double *v, const char *fn)
+{
+  FILE *fp;
+  int i, isfloat = (fabs(metad->xmax - metad->xmin) > 0), err = -1;
+  int n, imin, imax, idel;
+  double x, xmin, xmax, xdel;
+  static char buf[256];
+
+  if ( (fp = fopen(fn, "r")) == NULL ) {
+    fprintf(stderr, "cannot open %s\n", fn);
+    return -1;
+  }
+  fgets(buf, sizeof buf, fp);
+  if ( isfloat ) {
+    sscanf(buf, "# %d%lf%lf%lf", &n, &xmin, &xmax, &xdel);
+    if ( n != metad->n
+      || fabs(xmin - metad->xmin) > 1e-6
+      || fabs(xmax - metad->xmax) > 1e-6
+      || fabs(xdel - metad->xdel) > 1e-6 ) {
+      fprintf(stderr, "%s data mismatch\n", fn);
+      goto ERR;
+    }
+  } else {
+    sscanf(buf, "# %d%d%d%d", &n, &imin, &imax, &idel);
+    if ( n != metad->n
+      || imin != metad->imin
+      || imax != metad->imax
+      || idel != metad->idel ) {
+      fprintf(stderr, "%s data mismatch\n", fn);
+      goto ERR;
+    }
+  }
+  for ( i = 0; i < metad->n; i++ ) {
+    fgets(buf, sizeof buf, fp);
+    if ( 2 != sscanf(buf, "%lf%lf", &x, &v[i]) ) {
+      fprintf(stderr, "%s corrupted at line %d\n", fn, i);
+      goto ERR;
+    }
+  }
+  metad_trimv(metad, v);
+  err = 0;
+ERR:
+  fclose(fp);
+  return err;
 }
 
 
@@ -450,22 +499,23 @@ __inline static void metad_getgamma_tmat(metad_t *metad, double dt,
 
 /* compute the optimal schedule */
 static void metad_getalpha(metad_t *metad, double T, int gammethod,
-    double alpha0, double *qT, double qprec, int nint,
-    const char *fnalpha)
+    const char *fngamma, int sampmethod, double alpha0, double *qT,
+    double qprec, int nint, const char *fnalpha)
 {
-  double *gamma, t0 = 2/alpha0;
+  double *gamma = metad->gamma, t0 = 2/alpha0, y;
 
-  if ( gammethod == GAMMETHOD_VARV) {
-    gamma = metad->gamma;
+  if ( gammethod == GAMMETHOD_LOAD ) {
+    if ( loadgamma(metad->n, gamma, fngamma) != 0 )
+      exit(1);
   } else if ( gammethod == GAMMETHOD_TMAT ) {
     gamma = metad->tgamma;
-  } else {
-    estgamma(metad->gamma, metad->n, SAMPMETHOD_METROLOCAL, metad->pbc, 0.5);
-    gamma = metad->gamma;
+  } else if ( gammethod == GAMMETHOD_NONE ) {
+    estgamma(gamma, metad->n, sampmethod, metad->pbc, 1.0);
   }
-  metad->errref = esterror_opt(T, alpha0, 0, qT, qprec,
-      nint, &metad->intq, metad->n, 0, metad->pbc,
+  y = esterror_opt(T, alpha0, 0, qT, qprec,
+      nint, &metad->intq, metad->n, -1, metad->pbc,
       metad->lambda, gamma, 0);
+  metad->errref = y * y;
   /* save the optimal schedule to file */
   intq_save(metad->intq, 1.0, t0, 0, fnalpha);
 }
@@ -482,8 +532,10 @@ static double metad_geterror(metad_t *metad)
   metad_trimv(metad, metad->v);
   for ( i = 0; i < n; i++ ) {
     x = metad->v[i] - metad->vref[i];
+    //printf("i %d, dif %g = %g, %g\n", i, x, metad->v[i], metad->vref[i]);
     err += x * x;
   }
+  //getchar();
   err /= n;
   return err;
 }

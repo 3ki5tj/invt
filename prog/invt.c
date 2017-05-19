@@ -112,9 +112,8 @@ __inline static void premeta(const invtpar_t *m, double *gamma)
     fprintf(stderr, "%4d %12.6f %12.6f\n", i, gamma0[i], gamma[i]);
   }
 
-  if ( m->pregamma == 1 && m->fngamma[0] != '\0' ) {
+  if ( m->fngamma[0] != '\0' )
     savegamma(n, gamma, m->fngamma);
-  }
 
   invtsamp_close(its);
 }
@@ -368,7 +367,9 @@ static double invt_run(invtpar_t *m)
   ave_clear(ef);
 
   /* do a trial run to compute the gamma values */
-  if ( m->pregamma ) {
+  if ( m->gammethod == GAMMETHOD_LOAD ) {
+    loadgamma(invt->n, invt->gamma, m->fngamma);
+  } else if ( m->gammethod != GAMMETHOD_NONE ) {
     premeta(m, invt->gamma);
   }
 

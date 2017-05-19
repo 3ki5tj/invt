@@ -378,17 +378,6 @@ __inline static double lj_langevin(lj_t *lj, double tp, double dt)
 
 
 
-/* displace a random particle i, return i */
-__inline static int lj_randmv(lj_t *lj, double *xi, double amp)
-{
-  int i, d;
-
-  i = (int) (rand01() * lj->n);
-  return i;
-}
-
-
-
 /* compute pair energy */
 __inline static int lj_pair(double dr2,
     double rc2, double *u6, double *u12, double *vir)

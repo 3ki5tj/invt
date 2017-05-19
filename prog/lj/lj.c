@@ -3,11 +3,14 @@
 #include "ave.h"
 #include <time.h>
 
-int n = 108;
+int n = 100;
 double rho = 0.8;
 double rcdef = 100.0;
-double tp = 1.5;
+double tp = 3.0;
 int mcblk = 5;
+double delr = 0.005; /* spacing */
+const char *fnvbias = "vbias.dat";
+const char *fnvref = "vref.dat";
 
 /* return the index for distance between the first two atoms */
 static int dist01(metad_t *metad, lj_t *lj, double *pdr)
@@ -39,9 +42,9 @@ static double lj_metroblk(lj_t *lj, metad_t *metad)
  * until it falls under m->alpha0 */
 static void decmagrun(invtpar_t *m, metad_t *metad, lj_t *lj)
 {
-  int ir, it;
+  int ir;
   long t;
-  double dx[D], l = lj->l, invl = 1/l, dr, amp = 0.1/rho;
+  double dr;
 
   ir = dist01(metad, lj, &dr);
   for ( t = 1; ; t++ ) {
@@ -49,13 +52,13 @@ static void decmagrun(invtpar_t *m, metad_t *metad, lj_t *lj)
     ir = dist01(metad, lj, &dr);
     metad_updatev(metad, ir);
     if ( t % 1000 == 0 ) {
-      int sacc = metad_wlcheck(metad, m->flatness, m->magred);
+      int sacc = metad_wlcheck(metad, m->fluc, m->magred);
       if ( sacc && metad->a < m->alpha0 )
         break;
     }
     if ( t % 1000000 == 0 ) {
-      printf("t %ld, fl %g\n", t, metad->hflatness);
-      metad_save(metad, "vbias.dat");
+      printf("t %ld, fl %g\n", t, metad->hfl);
+      metad_save(metad, fnvbias);
     }
   }
 }
@@ -63,7 +66,7 @@ static void decmagrun(invtpar_t *m, metad_t *metad, lj_t *lj)
 
 /* constant updating magnitude run
  * to compute the gamma values */
-static int cmagrun(invtpar_t *m, metad_t *metad, lj_t *lj)
+static int gammrun(invtpar_t *m, metad_t *metad, lj_t *lj)
 {
   long t;
   int ir0, ir;
@@ -81,8 +84,9 @@ static int cmagrun(invtpar_t *m, metad_t *metad, lj_t *lj)
     metad->tmat[ir*metad->n + ir0] += 1;
     ir0 = ir;
     metad_add_varv(metad);
-    if ( t % 1000 == 0 ) fprintf(stderr, "t %ld/%ld, acc %g%% \r", t, m->gam_nsteps, 100*sacc/t);
+    if ( t % 10000 == 0 ) fprintf(stderr, "t %ld/%ld = %5.2f%%, acc %.2f%% \r", t, m->gam_nsteps, 100.*t/m->gam_nsteps, 100*sacc/t);
   }
+  metad_save(metad, fnvbias);
 
   /* estimate gamma */
   metad_getgamma_varv(metad, m->alpha0, "gamma.dat");
@@ -92,7 +96,8 @@ static int cmagrun(invtpar_t *m, metad_t *metad, lj_t *lj)
 
 
 /* production run */
-static double prodrun(invtpar_t *m, metad_t *metad, lj_t *lj)
+static double prodrun(invtpar_t *m, metad_t *metad, lj_t *lj,
+    int prod, long nsteps)
 {
   int ir;
   long t;
@@ -100,37 +105,42 @@ static double prodrun(invtpar_t *m, metad_t *metad, lj_t *lj)
 
   metad->a = m->alpha0;
   t0 = 2/metad->a;
-  for ( t = 1; t <= m->nsteps; t++ ) {
+  for ( t = 1; t <= nsteps; t++ ) {
     lj_metroblk(lj, metad);
     ir = dist01(metad, lj, &dr);
-    if ( m->opta ) {
-      metad->a = intq_interpa(metad->intq, (double) t);
-    } else {
-      metad->a = 1.0/(t + t0);
+    if ( prod ) {
+      if ( m->opta ) {
+        metad->a = intq_interpa(metad->intq, (double) t);
+      } else {
+        metad->a = 1.0/(t + t0);
+      }
+    }
+    //if ( prod ) {
+    //  printf("t %ld, a %g\n", t, metad->a); getchar();
+    //}
+    if ( t % 10000 == 0 ) {
+      fprintf(stderr, "%s t %8ld/%8ld = %5.2f%%, a %.3e, err %g %20s\r",
+          (prod ? "prod." : "prep."), t, nsteps, 100.*t/nsteps,
+          metad->a, metad_geterror(metad), " ");
     }
     metad_updatev(metad, ir);
   }
   return metad_geterror(metad);
 }
 
-
 static int work(invtpar_t *m)
 {
   lj_t *lj;
-  long t;
-  int it, ir, acc;
-  double dx[D], dr, l, invl, amp;
-  double sacc = 0, xdel = 0.02;
+  int ir;
+  double dr;
   metad_t *metad;
 
   mtscramble(clock());
 
   lj = lj_open(n, rho, rcdef);
   lj_energy(lj);
-  invl = 1/(l = lj->l);
-  amp = 0.1/rho;
 
-  metad = metad_openf(0, lj->l*0.5, xdel,
+  metad = metad_openf(0, lj->l*0.5, delr,
       m->pbc, m->gaussig, m->okmax, m->win, m->winn);
   ir = dist01(metad, lj, &dr);
   fprintf(stderr, "n %d, rmax %g, r %d/%g\n", metad->n, metad->xmax, ir, dr);
@@ -139,32 +149,37 @@ static int work(invtpar_t *m)
   decmagrun(m, metad, lj);
 
   /* constant magnitude run */
-  if ( m->gammethod != GAMMETHOD_NONE )
-    cmagrun(m, metad, lj);
+  if ( m->gammethod != GAMMETHOD_NONE
+    && m->gammethod != GAMMETHOD_LOAD )
+    gammrun(m, metad, lj);
 
   /* compute the optimal schedule */
   if ( m->opta )
     metad_getalpha(metad, (double) m->nsteps, m->gammethod,
-        m->alpha0, &m->qT, m->qprec, m->alpha_nint, m->fnalpha);
+        m->fngamma, m->sampmethod, m->alpha0, &m->qT,
+        m->qprec, m->alpha_nint, m->fnalpha);
 
   /* multiple production runs */
   {
-    int i, itr, n = metad->n;
-    ave_t ef[1];
+    int i, itr;
+    ave_t ei[1], ef[1];
     double erri, errf, *v0;
 
-    xnew(v0, n);
-    for ( i = 0; i < n; i++ ) v0[i] = metad->v[i];
+    metad_load(metad, metad->vref, fnvref);
+    xnew(v0, metad->n);
+    for ( i = 0; i < metad->n; i++ ) v0[i] = metad->v[i];
+    ave_clear(ei);
     ave_clear(ef);
-    erri = metad_geterror(metad);
-    metad_save(metad, "vi.dat");
-    fprintf(stderr, "starting production metadynamics run of %ld steps..., a %g\n", m->gam_nsteps, metad->a);
+    fprintf(stderr, "starting production metadynamics run of %ld/%ld steps..., a %g, err %g\n", m->nequil, m->nsteps, metad->a, metad->errref);
     for ( itr = 0; itr < m->ntrials; itr++ ) {
-      for ( i = 0; i < n; i++ ) metad->v[i] = v0[i];
-      errf = prodrun(m, metad, lj);
-      metad_save(metad, "vf.dat");
+      for ( i = 0; i < metad->n; i++ ) metad->v[i] = v0[i];
+      erri = prodrun(m, metad, lj, 0, m->nequil);
+      ave_add(ei, erri);
+      metad_save(metad, "vi.dat");
+      errf = prodrun(m, metad, lj, 1, m->nsteps);
       ave_add(ef, errf);
-      printf("%4ld: %14g %14g %14g\n", itr, errf, ef->ave, erri);
+      metad_save(metad, "vf.dat");
+      printf("%4d: %14g %14g %14g %14g %20s\n", itr, errf, ef->ave, erri, ei->ave, " ");
     }
     free(v0);
   }
@@ -181,10 +196,13 @@ int main(int argc, char **argv)
   invtpar_init(m);
   m->n = 0;
   m->gam_nsteps = 10000000L;
-  m->nsteps = 100000000L;
-  m->alpha0 = 1e-5;
+  m->nequil = 100000L;
+  m->nsteps = 10000000L;
+  m->alpha0 = 1e-4;
   m->pbc = 0;
-  m->pregamma = 1;
+  m->gammethod = GAMMETHOD_NONE;
+  m->sampmethod = SAMPMETHOD_GAUSS;
+  strcpy(m->fnalpha, "alpha.dat");
   invtpar_doargs(m, argc, argv);
   invtpar_dump(m);
   work(m);

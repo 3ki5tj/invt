@@ -408,17 +408,17 @@ static double intq_optqTfunc(intq_t *intq,
   f = mint - mass * intq->T * initalpha;
 
   for ( y = 0, k = 0; k < n; k++ ) {
-      if ( K >= 0 && k > K && (!pbc || k < n - K) )
-        continue;
-      gamma = intq->gamma[k];
-      lambda = intq->lambda[k];
-      xp = exp(-2 * lambda * q);
-      y += gamma * lambda * lambda * lambda * xp;
+    if ( K >= 0 && k > K && (!pbc || k < n - K) )
+      continue;
+    gamma = intq->gamma[k];
+    lambda = intq->lambda[k];
+    xp = exp(-2 * lambda * q);
+    y += gamma * lambda * lambda * lambda * xp;
+    //printf("k %d, gamma %g, lambda %g, xp %g\n", k, gamma, lambda, xp);
   }
 
   *df = mass + y / mass * intq->T * initalpha;
-
-  //printf("qT %g, f %g, mass %g, df %g, y %g\n", qT, f, mass, *df, y);
+  //printf("qT %g, f %g, mass %g, df %g, y %g, K %d\n", qT, f, mass, *df, y, K);
   return f;
 }
 
@@ -725,6 +725,7 @@ static double esterror_opt(double T, double a0,
       initalpha = a0 / 2;
     }
     *qT = intq_optqT(intq, initalpha, qprec, verbose);
+    //printf("qT %g\n", *qT); getchar();
   }
   err = intq_geterr(intq, a0, *qT);
 

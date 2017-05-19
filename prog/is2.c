@@ -26,12 +26,12 @@ static void decmagrun(invtpar_t *m, metad_t *metad, is2_t *is)
     }
     metad_updatev(metad, icur);
     if ( t % 1000 == 0 ) {
-      int sacc = metad_wlcheck(metad, m->flatness, m->magred);
+      int sacc = metad_wlcheck(metad, m->fluc, m->magred);
       if ( sacc && metad->a < m->alpha0 )
         break;
     }
     if ( t % 1000000 == 0 ) {
-      printf("t %ld, fl %g\n", t, metad->hflatness);
+      printf("t %ld, fl %g\n", t, metad->hfl);
       metad_save(metad, "vbias.dat");
     }
   }
@@ -39,7 +39,7 @@ static void decmagrun(invtpar_t *m, metad_t *metad, is2_t *is)
 
 /* constant updating magnitude run
  * computes the gamma values */
-static int cmagrun(invtpar_t *m, metad_t *metad, is2_t *is)
+static int gammrun(invtpar_t *m, metad_t *metad, is2_t *is)
 {
   long t;
   int id, h, acc;
@@ -73,7 +73,7 @@ static int cmagrun(invtpar_t *m, metad_t *metad, is2_t *is)
 }
 
 /* production run */
-static double prodrun(invtpar_t *m, metad_t *metad, is2_t *is)
+static double prodrun(invtpar_t *m, metad_t *metad, is2_t *is, int prod, long nsteps)
 {
   long t;
   int id, h, acc;
@@ -83,7 +83,7 @@ static double prodrun(invtpar_t *m, metad_t *metad, is2_t *is)
   metad->a = m->alpha0;
   t0 = 2/metad->a;
   icur = metad_getindex(metad, is->E);
-  for ( t = 1; t <= m->nsteps; t++ ) {
+  for ( t = 1; t <= nsteps; t++ ) {
     IS2_PICK(is, id, h);
     enew = is->E + h * 2;
     acc = metad_acc(metad, icur, enew, &inew);
@@ -91,10 +91,12 @@ static double prodrun(invtpar_t *m, metad_t *metad, is2_t *is)
       icur = inew;
       IS2_FLIP(is, id, h);
     }
-    if ( m->opta ) {
-      metad->a = intq_interpa(metad->intq, (double) t);
-    } else {
-      metad->a = 1.0/(t + t0);
+    if ( prod ) {
+      if ( m->opta ) {
+        metad->a = intq_interpa(metad->intq, (double) t);
+      } else {
+        metad->a = 1.0/(t + t0);
+      }
     }
     metad_updatev_wl(metad, icur);
   }
@@ -102,7 +104,7 @@ static double prodrun(invtpar_t *m, metad_t *metad, is2_t *is)
 }
 
 /* compute or load the exact density of states */
-static int invt_is2_addexact(metad_t *metad, int l)
+static int addvref(metad_t *metad, int l)
 {
   char fn[128], s[128];
   FILE *fp;
@@ -160,38 +162,42 @@ static int invt_is2_run(invtpar_t *m)
 
   metad = metad_open(emin, emax, 4,
       m->pbc, m->gaussig, m->okmax, m->win, m->winn);
-  invt_is2_addexact(metad, IS2_L);
+  addvref(metad, IS2_L);
 
   /* gradually reduce the updating magnitude */
   decmagrun(m, metad, is);
 
   /* run with constant updating magnitude */
-  if ( m->gammethod != GAMMETHOD_NONE )
-    cmagrun(m, metad, is);
+  if ( m->gammethod != GAMMETHOD_NONE
+    && m->gammethod != GAMMETHOD_LOAD )
+    gammrun(m, metad, is);
 
   /* compute the optimal schedule */
   if ( m->opta )
     metad_getalpha(metad, (double) m->nsteps, m->gammethod,
-        m->alpha0, &m->qT, m->qprec, m->alpha_nint, m->fnalpha);
+        m->fngamma, m->sampmethod, m->alpha0, &m->qT,
+        m->qprec, m->alpha_nint, m->fnalpha);
 
   /* multiple production runs */
   {
-    int i, n = metad->n;
-    ave_t ef[1];
+    int i;
+    ave_t ei[1], ef[1];
     double erri, errf, *v0;
 
-    xnew(v0, n);
-    for ( i = 0; i < n; i++ ) v0[i] = metad->v[i];
+    xnew(v0, metad->n);
+    for ( i = 0; i < metad->n; i++ ) v0[i] = metad->v[i];
+    ave_clear(ei);
     ave_clear(ef);
-    erri = metad_geterror(metad);
-    metad_save(metad, "vi.dat");
-    fprintf(stderr, "starting production metadynamics run of %ld steps..., a %g\n", m->gam_nsteps, metad->a);
+    fprintf(stderr, "starting production metadynamics run of %ld/%ld steps..., a %g\n", m->nequil, m->nsteps, metad->a);
     for ( itr = 0; itr < m->ntrials; itr++ ) {
-      for ( i = 0; i < n; i++ ) metad->v[i] = v0[i];
-      errf = prodrun(m, metad, is);
-      metad_save(metad, "vf.dat");
+      for ( i = 0; i < metad->n; i++ ) metad->v[i] = v0[i];
+      erri = prodrun(m, metad, is, 0, m->nequil);
+      ave_add(ei, erri);
+      metad_save(metad, "vi.dat");
+      errf = prodrun(m, metad, is, 1, m->nsteps);
       ave_add(ef, errf);
-      printf("%4ld: %14g %14g %14g\n", itr, errf, ef->ave, erri);
+      metad_save(metad, "vf.dat");
+      printf("%4ld: %14g %14g %14g %14g %10s\n", itr, errf, ef->ave, erri, ei->ave, " ");
     }
     free(v0);
   }
@@ -212,7 +218,7 @@ int main(int argc, char **argv)
   m->alpha0 = 1e-6;
   m->gam_nsteps = 100000000;
   m->gam_nstave = 100;
-  m->pregamma = 1;
+  m->gammethod = GAMMETHOD_TMAT;
   m->pbc = 0;
   invtpar_doargs(m, argc, argv);
   invtpar_dump(m);
