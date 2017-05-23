@@ -1,16 +1,48 @@
-#include "metad.h"
 #include "lj.h"
-#include "ave.h"
+#include "../ave.h"
 #include <time.h>
 
-int n = 100;
+int np = 100;
 double rho = 0.8;
 double rcdef = 100.0;
 double tp = 3.0;
 int mcblk = 5;
-double delr = 0.005; /* spacing */
+double delr = 0.01; /* spacing */
 const char *fnvbias = "vbias.dat";
 const char *fnvref = "vref.dat";
+const char *fnlog = "verr.log";
+
+static void ljpar_help(void)
+{
+  fprintf(stderr, "  --np=:      number of Lennard Jones particles, default %d\n", np);
+  fprintf(stderr, "  --rho=:     density of Lennard Jones particles, default %g\n", rho);
+  fprintf(stderr, "  --rc=:      distance cutoff, default %g\n", rcdef);
+  fprintf(stderr, "  --tp=:      temperature, default %g\n", tp);
+  fprintf(stderr, "  --dr=:      bin width, default %g\n", delr);
+  fprintf(stderr, "  --blk=:     number of steps in a Monte Carlo, default %d\n", mcblk);
+}
+
+static int ljpar_keymatch(invtpar_t *m, const char *key, const char *val)
+{
+  if ( strcmpfuzzy(key, "np") == 0 ) {
+    np = invtpar_getint(m, key, val);
+  } else if ( strcmpfuzzy(key, "rho") == 0 ) {
+    rho = invtpar_getdouble(m, key, val);
+  } else if ( strcmpfuzzy(key, "rc") == 0
+           || strcmpfuzzy(key, "rcutoff") == 0 ) {
+    rcdef = invtpar_getdouble(m, key, val);
+  } else if ( strcmpfuzzy(key, "tp") == 0
+           || strcmpfuzzy(key, "temp") == 0 ) {
+    tp = invtpar_getdouble(m, key, val);
+  } else if ( strcmpfuzzy(key, "dr") == 0
+           || strcmpfuzzy(key, "delr") == 0 ) {
+    delr = invtpar_getdouble(m, key, val);
+  } else if ( strcmpfuzzy(key, "blk") == 0
+           || strcmpfuzzy(key, "mcblk") == 0 ) {
+    mcblk = invtpar_getint(m, key, val);
+  }
+  return 0;
+}
 
 /* return the index for distance between the first two atoms */
 static int dist01(metad_t *metad, lj_t *lj, double *pdr)
@@ -61,6 +93,7 @@ static void decmagrun(invtpar_t *m, metad_t *metad, lj_t *lj)
       metad_save(metad, fnvbias);
     }
   }
+  metad_save(metad, fnvbias);
 }
 
 
@@ -83,8 +116,13 @@ static int gammrun(invtpar_t *m, metad_t *metad, lj_t *lj)
     metad_updatev(metad, ir);
     metad->tmat[ir*metad->n + ir0] += 1;
     ir0 = ir;
-    metad_add_varv(metad);
+    if ( t % 10 == 0 )
+      metad_add_varv(metad);
     if ( t % 10000 == 0 ) fprintf(stderr, "t %ld/%ld = %5.2f%%, acc %.2f%% \r", t, m->gam_nsteps, 100.*t/m->gam_nsteps, 100*sacc/t);
+    if ( t % 1000000 == 0 ) {
+      metad_getgamma_varv(metad, m->alpha0, "gamma.dat");
+      metad_getgamma_tmat(metad, 1, "tgamma.dat");
+    }
   }
   metad_save(metad, fnvbias);
 
@@ -97,7 +135,7 @@ static int gammrun(invtpar_t *m, metad_t *metad, lj_t *lj)
 
 /* production run */
 static double prodrun(invtpar_t *m, metad_t *metad, lj_t *lj,
-    int prod, long nsteps)
+    int prod, long nsteps, const char *fn)
 {
   int ir;
   long t;
@@ -123,27 +161,32 @@ static double prodrun(invtpar_t *m, metad_t *metad, lj_t *lj,
           (prod ? "prod." : "prep."), t, nsteps, 100.*t/nsteps,
           metad->a, metad_geterror(metad), " ");
     }
+    if ( t % 1000000 == 0 ) metad_save(metad, fn);
     metad_updatev(metad, ir);
   }
+  metad_save(metad, fn);
   return metad_geterror(metad);
 }
 
 static int work(invtpar_t *m)
 {
   lj_t *lj;
-  int ir;
-  double dr;
+  int ir, kcerr;
+  double dr, errtrunc;
   metad_t *metad;
 
   mtscramble(clock());
 
-  lj = lj_open(n, rho, rcdef);
+  lj = lj_open(np, rho, rcdef);
   lj_energy(lj);
 
   metad = metad_openf(0, lj->l*0.5, delr,
       m->pbc, m->gaussig, m->kc, m->win, m->winn);
+  /* load the reference bias potential */
+  metad_load(metad, metad->vref, fnvref);
+  errtrunc = metad_errtrunc(metad, metad->vref, &kcerr, "vtrunc.dat");
   ir = dist01(metad, lj, &dr);
-  fprintf(stderr, "n %d, rmax %g, r %d/%g\n", metad->n, metad->xmax, ir, dr);
+  fprintf(stderr, "n %d, rmax %g, r %d/%g, err trunc %g, mode %d\n", metad->n, metad->xmax, ir, dr, errtrunc, kcerr);
 
   /* reduce the updating magnitude until it falls below m->alpha0 */
   decmagrun(m, metad, lj);
@@ -164,22 +207,26 @@ static int work(invtpar_t *m)
     int i, itr;
     ave_t ei[1], ef[1];
     double erri, errf, *v0;
+    FILE *fplog;
 
-    metad_load(metad, metad->vref, fnvref);
     xnew(v0, metad->n);
     for ( i = 0; i < metad->n; i++ ) v0[i] = metad->v[i];
     ave_clear(ei);
     ave_clear(ef);
     fprintf(stderr, "starting production metadynamics run of %ld/%ld steps..., a %g, err %g\n", m->nequil, m->nsteps, metad->a, metad->errref);
+    fplog = fopen(fnlog, "a");
+    metad_saveheader(metad, fplog);
+    fclose(fplog);
     for ( itr = 0; itr < m->ntrials; itr++ ) {
       for ( i = 0; i < metad->n; i++ ) metad->v[i] = v0[i];
-      erri = prodrun(m, metad, lj, 0, m->nequil);
+      erri = prodrun(m, metad, lj, 0, m->nequil, "vi.dat");
       ave_add(ei, erri);
-      metad_save(metad, "vi.dat");
-      errf = prodrun(m, metad, lj, 1, m->nsteps);
+      errf = prodrun(m, metad, lj, 1, m->nsteps, "vf.dat");
       ave_add(ef, errf);
-      metad_save(metad, "vf.dat");
-      printf("%4d: %14g %14g %14g %14g %20s\n", itr, errf, ef->ave, erri, ei->ave, " ");
+      printf("%4d: %14.10f %14.10f %14.10f %14.10f %20s\n", itr, errf, ef->ave, erri, ei->ave, " ");
+      fplog = fopen(fnlog, "a");
+      fprintf(fplog, "%d %g %g\n", itr, errf, erri);
+      fclose(fplog);
     }
     free(v0);
   }
@@ -198,11 +245,14 @@ int main(int argc, char **argv)
   m->gam_nsteps = 10000000L;
   m->nequil = 100000L;
   m->nsteps = 10000000L;
+  m->ntrials = 1000;
   m->alpha0 = 1e-4;
   m->pbc = 0;
   m->gammethod = GAMMETHOD_NONE;
   m->sampmethod = SAMPMETHOD_GAUSS;
   strcpy(m->fnalpha, "alpha.dat");
+  m->userhelp = ljpar_help;
+  m->usermatch = ljpar_keymatch;
   invtpar_doargs(m, argc, argv);
   invtpar_dump(m);
   work(m);

@@ -8,7 +8,7 @@ LMd = -lm
 
 srcs = $(wildcard *.c)
 bins = $(patsubst %.c,%, $(srcs))
-deps = $(wildcard *.h) Makefile
+deps = $(wildcard *.h ../*.h) Makefile
 
 all: $(bins)
 

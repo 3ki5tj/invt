@@ -11,6 +11,8 @@
 
 
 
+const double metad_lamcut = 0.1;
+
 /* metadynamics for integer */
 typedef struct {
   int imin, imax, idel;
@@ -33,7 +35,7 @@ typedef struct {
   double *vtmp;
   double *hmod;
   intq_t *intq;
-  double errref;
+  double errref; /* estimated error */
 } metad_t;
 
 
@@ -203,13 +205,12 @@ __inline static double metad_hfl(metad_t *metad)
 {
   int i, k, n = metad->n;
   double x, fl = 0, tot = 0;
-  const double lamcut = 0.1;
 
   for ( i = 0; i < n; i++ ) tot += metad->h[i];
   getcosmodes(metad->h, n, metad->vtmp, metad->costab);
   /* truncate modes with lambda */
   for ( k = 1; k < n; k++ ) {
-    if ( metad->lambda[k] < lamcut ) break;
+    if ( metad->lambda[k] < metad_lamcut ) break;
     x = n * metad->vtmp[k] / tot;
     fl += x * x;
   }
@@ -285,11 +286,63 @@ static void metad_trimv(metad_t *metad, double *v)
 }
 
 
+__inline static void metad_saveheader(metad_t *metad, FILE *fp)
+{
+  if ( fabs(metad->xmax - metad->xmin) > 0 ) {
+    fprintf(fp, "# %d %g %g %g",
+        metad->n, metad->xmin, metad->xmax, metad->xdel);
+  } else {
+    fprintf(fp, "# %d %d %d %d",
+        metad->n, metad->imin, metad->imax, metad->idel);
+  }
+  fprintf(fp, " %g %d\n", metad->a, metad->pbc);
+}
+
+__inline static double metad_getx(metad_t *metad, int i)
+{
+  if (fabs(metad->xmax - metad->xmin) > 0) { /* float */
+    return metad->xmin + (i + 0.5) * metad->xdel;
+  } else {
+    return metad->imin + i * metad->idel;
+  }
+}
+
+/* compute the mode-trunction error */
+__inline static double metad_errtrunc(metad_t *metad,
+    double *v, int *kc, const char *fntrunc)
+{
+  int k, i, n = metad->n;
+  double x, vi, err = 0;
+  FILE *fp;
+
+  getcosmodes(v, n, metad->vtmp, metad->costab);
+  *kc = -1;
+  for ( k = 1; k < n; k++ ) {
+    if ( metad->lambda[k] > 0.5 ) continue;
+    if ( *kc < 0 ) *kc = k;
+    err += metad->vtmp[k] * metad->vtmp[k];
+  }
+
+  /* save mode-truncated profile */
+  if ( fntrunc != NULL && (fp=fopen(fntrunc, "w")) != NULL ) {
+    metad_saveheader(metad, fp);
+    for ( i = 0; i < n; i++ ) {
+      for ( vi = 0, k = 0; k < *kc; k++ )
+        vi += metad->costab[k*n + i] * metad->vtmp[k];
+      x = metad_getx(metad, i);
+      fprintf(fp, "%g %g %g\n", x, vi, v[i]);
+    }
+    fclose(fp);
+  }
+
+  return err;
+}
+
 /* save the bias potential to file */
 static int metad_save(metad_t *metad, const char *fn)
 {
   FILE *fp;
-  int i, isfloat = (fabs(metad->xmax - metad->xmin) > 0);
+  int i;
   double x;
 
   if ( (fp = fopen(fn, "w")) == NULL ) {
@@ -297,19 +350,9 @@ static int metad_save(metad_t *metad, const char *fn)
     return -1;
   }
   metad_trimv(metad, metad->v);
-  if ( isfloat ) {
-    fprintf(fp, "# %d %g %g %g %g\n",
-        metad->n, metad->xmin, metad->xmax, metad->xdel, metad->a);
-  } else {
-    fprintf(fp, "# %d %d %d %d %g\n",
-        metad->n, metad->imin, metad->imax, metad->idel, metad->a);
-  }
+  metad_saveheader(metad, fp);
   for ( i = 0; i < metad->n; i++ ) {
-    if ( isfloat ) {
-      x = metad->xmin + (i + 0.5) * metad->xdel;
-    } else {
-      x = metad->imin + i * metad->idel;
-    }
+    x = metad_getx(metad, i);
     fprintf(fp, "%g %g %g %g %g\n", x,
         metad->v[i], metad->h[i], metad->vref[i], metad->hmod[i]);
   }

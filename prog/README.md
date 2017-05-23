@@ -46,7 +46,7 @@ cmvar.h   | computing the autocorrelation integrals from the variance of the bia
 corr.h    | correlation of eigenmodes
 invt.cfg  | sample configuration file
 metad.h   | wrapper for using the invt.h, etc. in a realistic simulation
-is2.c     | driver for MC simulation
+is2.c     | driver for MC simulation on the 2D Ising model (using metad.h)
 
 
 Compilation

@@ -297,7 +297,7 @@ __inline static void stablizewin(double *lambda, int n,
     lammax = 0; /* magnitude of the most negative eigenvalue */
     err = 0;
     for ( i = 0; i < n; i++ ) {
-      if ( lambda[i] < 0 ) {
+      if ( lambda[i] < -1e3 * DBL_EPSILON ) {
         if ( -lambda[i] > lammax ) {
           lammax = -lambda[i];
         }
@@ -369,7 +369,6 @@ __inline static void stablizewin(double *lambda, int n,
       }
     }
 
-    //printf("it %d, err %d\n", it, err); getchar();
     if ( err == 0 ) {
       fprintf(stderr, "it %d: %d positive eigenvalues\n",
           it, n);

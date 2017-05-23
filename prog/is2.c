@@ -7,6 +7,22 @@
 #include "cmvar.h"
 #include "ave.h"
 
+int l = 0; /* explicit value */
+
+static void is2par_help(void)
+{
+  fprintf(stderr, "  --l=:          side length of Ising model, default %d\n", l);
+}
+
+static int is2par_keymatch(invtpar_t *m, const char *key, const char *val)
+{
+  if ( strcmp(key, "l") == 0 ) {
+    l = invtpar_getint(m, key, val);
+  } else {
+    return -1;
+  }
+  return 0;
+}
 
 /* run with decreasing magnitude */
 static void decmagrun(invtpar_t *m, metad_t *metad, is2_t *is)
@@ -17,12 +33,14 @@ static void decmagrun(invtpar_t *m, metad_t *metad, is2_t *is)
 
   icur = metad_getindex(metad, is->E);
   for ( t = 1; ; t++ ) {
-    IS2_PICK(is, id, h);
+    //IS2_PICK(is, id, h);
+    id = is2_pick(is, &h);
     enew = is->E + h * 2;
     acc = metad_acc(metad, icur, enew, &inew);
     if ( acc ) {
       icur = inew;
-      IS2_FLIP(is, id, h);
+      //IS2_FLIP(is, id, h);
+      is2_flip(is, id, h);
     }
     metad_updatev(metad, icur);
     if ( t % 1000 == 0 ) {
@@ -51,12 +69,14 @@ static int gammrun(invtpar_t *m, metad_t *metad, is2_t *is)
   fprintf(stderr, "starting constant magnitude %g metadynamics run of %ld steps...\n",
       metad->a, m->gam_nsteps);
   for ( t = 1; t <= m->gam_nsteps; t++ ) {
-    IS2_PICK(is, id, h);
+    //IS2_PICK(is, id, h);
+    id = is2_pick(is, &h);
     enew = is->E + h * 2;
     acc = metad_acc(metad, icur, enew, &inew);
     if ( acc ) {
       icur = inew;
-      IS2_FLIP(is, id, h);
+      //IS2_FLIP(is, id, h);
+      is2_flip(is, id, h);
     }
     metad_updatev(metad, icur);
     metad->tmat[icur*metad->n + iold] += 1;
@@ -84,12 +104,14 @@ static double prodrun(invtpar_t *m, metad_t *metad, is2_t *is, int prod, long ns
   t0 = 2/metad->a;
   icur = metad_getindex(metad, is->E);
   for ( t = 1; t <= nsteps; t++ ) {
-    IS2_PICK(is, id, h);
+    //IS2_PICK(is, id, h);
+    id = is2_pick(is, &h);
     enew = is->E + h * 2;
     acc = metad_acc(metad, icur, enew, &inew);
     if ( acc ) {
       icur = inew;
-      IS2_FLIP(is, id, h);
+      //IS2_FLIP(is, id, h);
+      is2_flip(is, id, h);
     }
     if ( prod ) {
       if ( m->opta ) {
@@ -104,7 +126,7 @@ static double prodrun(invtpar_t *m, metad_t *metad, is2_t *is, int prod, long ns
 }
 
 /* compute or load the exact density of states */
-static int addvref(metad_t *metad, int l)
+static int addvref(metad_t *metad)
 {
   char fn[128], s[128];
   FILE *fp;
@@ -151,18 +173,18 @@ static int invt_is2_run(invtpar_t *m)
 
   //mtscramble( clock() );
 
-  is = is2_open(IS2_L);
+  is = is2_open(l);
 
   /* equilibration at the infinite temperature */
   for ( t = 1; ; t++ ) {
-    IS2_PICK(is, id, h);
-    IS2_FLIP(is, id, h);
+    id = is2_pick(is, &h);
+    is2_flip(is, id, h);
     if ( is->E >= emin && is->E < emax ) break;
   }
 
   metad = metad_open(emin, emax, 4,
       m->pbc, m->gaussig, m->kc, m->win, m->winn);
-  addvref(metad, IS2_L);
+  addvref(metad);
 
   /* gradually reduce the updating magnitude */
   decmagrun(m, metad, is);
@@ -220,8 +242,12 @@ int main(int argc, char **argv)
   m->gam_nstave = 100;
   m->gammethod = GAMMETHOD_TMAT;
   m->pbc = 0;
+  m->userhelp = is2par_help;
+  m->usermatch = is2par_keymatch;
   invtpar_doargs(m, argc, argv);
+  if ( l <= 0 ) l = IS2_L;
   invtpar_dump(m);
+  printf("l %d\n", l);
   invt_is2_run(m);
   invtpar_finish(m);
   return 0;

@@ -75,7 +75,7 @@ __inline static void getcosmodesh(int id, int n, double *u,
 
 /* decompose a general fluctuation, `v`, into eigenmodes, `u`
  * the coefficients are pre-computed in costab */
-__inline static void getcosmodes(double *v, int n, double *u,
+__inline static void getcosmodes(const double *v, int n, double *u,
     double *costab)
 {
   int i, k;
@@ -95,7 +95,7 @@ __inline static void getcosmodes(double *v, int n, double *u,
 
 
 /* compute the vector from the mode coefficients */
-__inline static void fromcosmodes(double *v, int n, double *u,
+__inline static void fromcosmodes(double *v, int n, const double *u,
     double *costab)
 {
   int i, k;

@@ -13,7 +13,7 @@
 #include "vct.h"
 #include "mat.h"
 #include "mdutil.h"
-#include "metad.h"
+#include "../metad.h"
 
 
 
@@ -66,8 +66,8 @@ __inline static void lj_initfcc(lj_t *lj)
       /* add some noise to prevent two atoms happened to
        * be separated by precisely some special cutoff distance,
        * which might be half of the box */
-      lj->x[id][0] = (i + .5) * a + noise * (2*rand01() - 1);
-      lj->x[id][1] = (j + .5) * a + noise * (2*rand01() - 1);
+      lj->x[id][0] = (j + .5) * a + noise * (2*rand01() - 1);
+      lj->x[id][1] = (i + .5) * a + noise * (2*rand01() - 1);
       id++;
     }
 }
@@ -110,9 +110,14 @@ __inline static void lj_initfcc(lj_t *lj)
         /* add some noise to prevent two atoms happened to
          * be separated by precisely some special cutoff distance,
          * which might be half of the box */
-        lj->x[id][0] = (i + .5) * a + noise * (2*rand01() - 1);
-        lj->x[id][1] = (j + .5) * a + noise * (2*rand01() - 1);
-        lj->x[id][2] = (k + .5) * a + noise * (2*rand01() - 1);
+        lj->x[id][0] = (k + .5) * a;
+        lj->x[id][1] = (j + .5) * a;
+        lj->x[id][2] = (i + .5) * a;
+        if ( id >= 2 ) {
+          lj->x[id][0] += noise * (2*rand01() - 1);
+          lj->x[id][1] += noise * (2*rand01() - 1);
+          lj->x[id][2] += noise * (2*rand01() - 1);
+        }
         id++;
       }
 }
@@ -425,7 +430,8 @@ __inline static double lj_depot(lj_t *lj, int i, double *xi,
         if ( rn >= metad->xmax ) {
           *du01 = 1e5;
         } else {
-          *du01 = (D-1)*log(rn/ro) + metad->v[in] - metad->v[io];
+          *du01 = metad->v[in] - metad->v[io];
+          //*du01 = (D-1)*log(rn/ro) + metad->v[in] - metad->v[io];
         }
       }
       continue;
@@ -469,8 +475,13 @@ __inline static int lj_metro(lj_t *lj, int i, double amp,
   int d, acc = 0;
   double xi[D], r, dux, du, du6, du12, du01, dvir;
 
-  for ( d = 0; d < D; d++ )
-    xi[d] = lj->x[i][d] + (rand01() * 2 - 1) * amp;
+  if ( i < 2 ) {
+    vcopy(xi, lj->x[i]);
+    xi[0] += (rand01() * 2 - 1) * amp;
+  } else {
+    for ( d = 0; d < D; d++ )
+      xi[d] = lj->x[i][d] + (rand01() * 2 - 1) * amp;
+  }
   du = lj_depot(lj, i, xi, metad, &du6, &du12, &du01, &dvir);
   dux = bet * du + du01;
   if ( dux < 0 ) {

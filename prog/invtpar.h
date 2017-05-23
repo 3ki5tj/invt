@@ -3,7 +3,7 @@
 
 
 
-/* parameters for the invt.c */
+/* parameters for the invt.c and related programs */
 
 
 
@@ -337,8 +337,8 @@ static void invtpar_help(const invtpar_t *m)
   fprintf(stderr, "  --nsteps=:     set the number of simulation steps, default %ld\n", m->nsteps);
   fprintf(stderr, "  --equil=:      set the number of equilibration steps, default %ld\n", m->nequil);
   fprintf(stderr, "  --fnxerr=:     set the file name for the error components, default %s\n", m->fnxerr);
-  fprintf(stderr, "  -v:            be verbose, -vv to be more verbose, etc.\n");
   if ( m->userhelp != NULL ) (*m->userhelp)();
+  fprintf(stderr, "  -v:            be verbose, -vv to be more verbose, etc.\n");
   fprintf(stderr, "  -h, --help:    display this message\n");
   exit(1);
 }
@@ -727,7 +727,8 @@ static int invtpar_keymatch(invtpar_t *m,
   {
     strcpy(m->fnxerr, val);
   }
-  else
+  else if ( m->usermatch != NULL
+         && m->usermatch(m, key, val) != 0 )
   {
     return -1;
   }
@@ -781,8 +782,7 @@ static int invtpar_load(invtpar_t *m, const char *fn)
       val = NULL;
     }
 
-    if ( invtpar_keymatch(m, key, val) != 0
-      && m->usermatch != NULL && m->usermatch(m, key, val) != 0 ) {
+    if ( invtpar_keymatch(m, key, val) != 0 ) {
       fprintf(stderr, "Warning: unknown options %s = %s in %s\n",
           key, val, fn);
     }
