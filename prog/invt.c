@@ -248,7 +248,7 @@ static invtdata_t *invt_open(invtpar_t *m)
 
   /* prepare the window function, compute lambda's */
   prepwin(invt->lambda, invt->n, m->win, m->winn,
-      invt->win, &invt->winn, m->pbc, m->gaussig, m->okmax,
+      invt->win, &invt->winn, m->pbc, m->gaussig, m->kc,
       m->fnwin, m->fnwinmat, m->verbose);
 
   /* estimate the integrals of the autocorrelation functions
@@ -307,7 +307,7 @@ static void invt_getalpha(invtdata_t *invt, invtpar_t *m)
   if ( m->opta ) {
     /* compute the theoretically optimal schedule */
     invt->errref = esterror_opt(invt->T, m->alpha0, m->initalpha, &m->qT, m->qprec,
-        m->alpha_nint, &invt->intq, m->n, m->kcutoff, m->pbc,
+        m->alpha_nint, &invt->intq, m->n, m->errkc, m->pbc,
         invt->lambda, invt->gamma, m->verbose);
     errmin = invt->errref;
 

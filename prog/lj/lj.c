@@ -141,7 +141,7 @@ static int work(invtpar_t *m)
   lj_energy(lj);
 
   metad = metad_openf(0, lj->l*0.5, delr,
-      m->pbc, m->gaussig, m->okmax, m->win, m->winn);
+      m->pbc, m->gaussig, m->kc, m->win, m->winn);
   ir = dist01(metad, lj, &dr);
   fprintf(stderr, "n %d, rmax %g, r %d/%g\n", metad->n, metad->xmax, ir, dr);
 

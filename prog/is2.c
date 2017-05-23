@@ -161,7 +161,7 @@ static int invt_is2_run(invtpar_t *m)
   }
 
   metad = metad_open(emin, emax, 4,
-      m->pbc, m->gaussig, m->okmax, m->win, m->winn);
+      m->pbc, m->gaussig, m->kc, m->win, m->winn);
   addvref(metad, IS2_L);
 
   /* gradually reduce the updating magnitude */
