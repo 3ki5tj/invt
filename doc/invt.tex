@@ -66,7 +66,8 @@ Galveston, Texas 77555-0304, USA}
 \begin{abstract}
   We present a method of computing the optimal schedule
   of the updating magnitude
-  for a class of free energy calculation methods including
+  for a class of flat-distribution sampling methods
+  for free energy calculation including
   the Wang-Landau (WL) algorithm and metadynamics.
   %
   These methods rely on adaptive construction of
@@ -74,7 +75,7 @@ Galveston, Texas 77555-0304, USA}
   the potential of mean force by histogram-based adaptive updates.
   %
   The updating magnitude should decrease over time
-  to reduce the noise in the bias potential,
+  to reduce the error in the bias potential,
   and one may speed up the convergence by choosing an optimal schedule
   of the updating magnitude.
   %
@@ -89,18 +90,28 @@ Galveston, Texas 77555-0304, USA}
   %the equation of motion of the particle.
   %
   We will show that
-  the optimal schedule depends on the updating scheme
-  (such as the single-bin and Gaussian schemes commonly used in WL and metadynamics),
-  and the initial updating magnitude is ideally half of
-  the previous equilibrium value.
+  the optimal schedule depends on the updating scheme.
+  %
+  While the asymptotically optimal schedule for
+  the single-bin updating scheme (commonly used in WL)
+  is given by inverse-time formula,
+  that for the Gaussian updating scheme (commonly used in metadynamics)
+  is often more complex.
+  %and the initial updating magnitude is ideally half of
+  %the previous equilibrium value.
   %
   Further,
-  the single-bin updating scheme
+  we show that the single-bin updating scheme
   belongs to a class of bandpass updating schemes
-  that are optimal for asymptotic convergence,
-  and the optimal schedule of these schemes
-  is the inverse number of updating steps with a proper shift,
-  as given by the inverse-time prescription.
+  that are optimal for asymptotic convergence.
+  %
+  These bandpass updating schemes aim at
+  partially flattening a few selected histogram modes
+  and their optimal schedule
+  is also given by the inverse-time prescription.
+  %
+  Several previous flat-distribution-sampling algorithms
+  can be cast as special cases of the bandpass updating schemes. 
   %
 \end{abstract}
 
@@ -269,7 +280,7 @@ In this study,
 we present a method of computing
 the optimal schedule
 for an adaptive FDS method
-with a general window function,
+of a general updating scheme,
 including the single-bin and Gaussian one
 used in the WL algorithm and metadynamics.
 %
@@ -292,25 +303,39 @@ that for Gaussian case is more complex
 and sensitive to the simulation length
 and the width of the Gaussian window.
 %
-In either case, however,
-the initial updating magnitude
-can be optimally set to
+%In either case, however,
+Ideally,
+the optimal initial updating magnitude
+can be set to
 half of the previous equilibrium value,
 which amounts to a shift of the origin of time
 in the single-bin case.
 %
-Further, we can generalize
+Further, we will show that
 the single-bin updating scheme
-to a class of bandpass updating schemes
-that are optimal for long simulations,
-and the above origin-shifted inverse-time schedule
-turns out to be optimal for these schemes.
+is optimal for asymptotic convergence,
+and it can be generalized
+to a class of asymptotically optimal
+bandpass updating schemes.
 %
+The latter, however,
+allow one to selectively flatten only
+a few long-range histogram modes,
+and to avoid introducing local noise
+into the bias potential during the updating process.
+%
+The optimal schedule of bandpass updating schemes
+is also the above origin-shifted inverse-time schedule.
+%
+Interestingly, several previous FDS algorithms\cite{
+  langfeld2012, pellegrini2014,
+  neuhaus2006, *neuhaus2007}
+  
 %For finite-length simulations, however,
 %metadynamics may deliver better performance.
 %
-These results may help to better
-plan and optimize FDS simulations.
+%These results may help to better
+%plan and optimize FDS simulations.
 
 
 
@@ -3744,7 +3769,7 @@ in a runtime average
 We can understand the optimality of the inverse-time schedule
 as a natural consequence of the stabilization of a runtime average
 as the sample size increases\cite{
-  marsili2006, barducci2008}.
+  marsili2006, barducci2008, robbins1951, pellegrini2014}.
 %
 Consider a sample, $\{X^{(1)}, \dots, X^{(N)}\}$,
 with a dynamically growing size.

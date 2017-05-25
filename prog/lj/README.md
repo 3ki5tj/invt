@@ -22,7 +22,7 @@ Number of bins is n = 250 (rho = 0.8), n = 500 (rho = 0.1).
  0.8  |    | 0.05 | ~5e-7
  0.8  |    | 0.1  | ~1e-4
 
-### Truncate
+### Refine the bias potential
 
 The following simulations only need to run for 1-2 seconds and be stopped.
 
@@ -40,12 +40,14 @@ make lj && ./lj --rho=0.1 --kc=200
 cp vtrunc.dat dr0.01/rho0.1/vref.dat
 ```
 
-### Compute the gamma value,
+### Compute the gamma value
+
 ```
 ./lj --try=0 --gamnsteps=100000000 --gam=varv
 ```
 
 ### Compute the reference value, `vref.dat`
+
 ```
 ./lj --try=1 --nsteps=100000000
 cp vf.dat vref.dat
@@ -56,17 +58,17 @@ cp vf.dat vref.dat
 
 Wang-Landau:
 ```
-./lj --try=100 --nsteps=10000000
+./lj --nsteps=10000000
 ```
 Bandpass
 ```
-./lj --try=100 --nsteps=10000000 --kc=15
+./lj --nsteps=10000000 --kc=15
 ```
 Gaussian, inverse-time
 ```
-./lj --try=100 --nsteps=10000000 --sig=0.1
+./lj --nsteps=10000000 --sig=0.1
 ```
 Gaussian, optimal
 ```
-../lj --rho=0.1 --nsteps=10000000 --sig=0.1 --opta --fngamma=gamma.dat --gam=load
+./lj --nsteps=10000000 --sig=0.1 --opta --fngamma=gamma.dat --gam=load
 ```
