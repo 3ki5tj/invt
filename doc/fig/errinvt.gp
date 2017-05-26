@@ -43,11 +43,7 @@ plot [:][:] \
     "../../data/invt/wl_g_err.dat" u (1/$1):2         w p  pt 7  ps 2.0  notitle, \
     "../../data/invt/wl_g_prd.dat" u (1/$1):($2**2)   w l  lt 1  lw 2    t "Single{/*0.7 -}bin, global", \
     "../../data/invt/wl_l_err.dat" u (1/$1):2         w p  pt 6  ps 2.0  notitle, \
-    "../../data/invt/wl_l_prd.dat" u (1/$1):($2**2)   w l  lt 1  lw 1    t "Single{/*0.7 -}bin, local", \
-    "../../data/invt/nn_g_err.dat" u (1/$1):($2)      w p  pt 9  ps 2.0  lc rgb "#808080"    notitle, \
-    "../../data/invt/nn_g_prd.dat" u (1/$1):($2**2)   w l  lt 2  lw 2    lc rgb "#808080"    t "Triple{/*0.7 -}bin, global", \
-    "../../data/invt/nn_l_err.dat" u (1/$1):($2)      w p  pt 8  ps 2.0                      notitle, \
-    "../../data/invt/nn_l_prd.dat" u (1/$1):($2**2)   w l  lt 2  lw 1                        t "Triple{/*0.7 -}bin, local", \
+    "../../data/invt/wl_l_prd.dat" u (1/$1):($2**2)   w l  lt 1  lw 1    t "Single{/*0.7 -}bin, local"
 
 
 # phantom plot for the legend
@@ -55,8 +51,6 @@ set key at 0.035, 0.083 Left reverse
 plot [:][:] \
   -1 w p pt 7 ps 2.0 t " ", \
   -1 w p pt 6 ps 2.0 t " ", \
-  -1 w p pt 9 ps 2.0 lc rgb "#808080" t " ", \
-  -1 w p pt 8 ps 2.0 t " ", \
   -1 notitle
 
 unset multiplot

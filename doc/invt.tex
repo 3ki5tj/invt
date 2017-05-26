@@ -271,6 +271,8 @@ the inverse number of updating steps.
   But I find the paper is a bit hard to read.
   There, however, the formula is $t_0/t$ instead of $1/t$.
 }
+The same schedule also applies to a variant of
+the WL algorithm\cite{langfeld2012, pellegrini2014}.
 %
 %The optimal schedule for metadynamics,
 %however, is less studied.
@@ -330,6 +332,7 @@ is also the above origin-shifted inverse-time schedule.
 Interestingly, several previous FDS algorithms\cite{
   langfeld2012, pellegrini2014,
   neuhaus2006, *neuhaus2007}
+can be cast as special cases of bandpass updating schemes.
   
 %For finite-length simulations, however,
 %metadynamics may deliver better performance.
@@ -405,23 +408,20 @@ the distribution, $p^*_i$,
 along a discrete quantity, $i$,
 for a given system.
 %
-%The discreteness of $i$ is natural
-%in discrete models.
-%
-For example, $i$ can be the energy, $E$,
-in a lattice spin model or the temperature index
-in a simulated tempering simulation\cite{
-marinari1992, *lyubartsev1992}.
+%For example, $i$ can be the energy, $E$,
+%in a lattice spin model or the temperature index
+%in a simulated tempering simulation\cite{
+%marinari1992, *lyubartsev1992}.
 %
 For a continuous quantity, $z$,
-which is often the case in a (classical) molecular system,
-we can discretize $z$
+%which is often the case in a (classical) molecular system,
+we can discretize it
 such that the integer $i$ represents
 the index of a small interval, or a bin,
 $(z, z + \Delta z)$.
 %
-The distribution is normalized as
-$\sum_{i = 1}^n p^*_i = 1$.
+%The distribution is normalized as
+%$\sum_{i = 1}^n p^*_i = 1$.
 
 
 
@@ -440,25 +440,10 @@ $\sum_{i = 1}^n p^*_i = 1$.
 %%as entropic or multicanonical sampling.
 %
 %To do so, we introduce a bias potential, $V_i$,
-If the distribution, $p^*_i$, is multimodal,
-it is often advantageous to perform
-biased sampling that targets
-a smoother distribution, $p_i$,
-by introducing a bias potential, $V_i$,
-such that the biased equilibrium distribution is
+The challenge of sampling a multimodal distribution, $p^*_i$,
+with deep valley(s) can often be eased by
+biased sampling targeting a smoother distribution, $p_i$.
 %
-\begin{equation}
-  \pi_i
-  %=
-  %C_i \, p^*_i \, e^{-V_i}
-  =
-  \frac{                p^*_i \, e^{-V_i} }
-       { \sum_{j = 1}^n p^*_j \, e^{-V_j} }
-  \propto
-  p^*_i \, e^{-V_i}
-  .
-  \label{eq:pi_p_V}
-\end{equation}
 %
 %where the proportionality constant, $C_i$,
 %is found from the normalization condition,
@@ -474,21 +459,39 @@ such that the biased equilibrium distribution is
 %In practice, $V_i$ may be non-optimal or contain error,
 %and thus $\pi_i$ need not
 %coincide with the intended distribution $p_i$.
-
+%
 We will broadly define
 a flat-distribution-sampling (FDS) simulation
 as a biased simulation
 targeting a flat $p_i$ (i.e. $p_i \equiv 1/n$)
 or nearly flat one\cite{
-dayal2004, *trebst2004, *zhang2007, barducci2008, singh2011}.
+dayal2004, *trebst2004, barducci2008, singh2011}.
 %
-For the biased distribution, $\pi_i$,
-to converge to the desired $p_i$,
-the bias potential must satisfy
+By introducing a bias potential, $V_i$,
+the biased equilibrium distribution becomes
+%
+\begin{equation}
+  \pi_i
+  %=
+  %C_i \, p^*_i \, e^{-V_i}
+  =
+  \frac{                p^*_i \, e^{-V_i} }
+       { \sum_{j = 1}^n p^*_j \, e^{-V_j} }
+  \propto
+  p^*_i \, e^{-V_i}
+  ,
+  \label{eq:pi_p_V}
+\end{equation}
+%
+and our aim is to find a biased potential
+such that the resulting $\pi_i$ would coincide
+with the desired $p_i$.
+%
+Upon convergence, the bias potential would satisfy
 %
 \begin{equation}
   V_i \to \ln p^*_i - \ln p_i + \mathrm{const.}
-  .
+  ,
   \label{eq:Vi_target}
 \end{equation}
 %
@@ -496,12 +499,7 @@ the bias potential must satisfy
 %which allows us to deduce the PMF, $-\ln p^*_i$,
 %directly from the bias potential.
 %
-This relation thus sets a practical goal for the convergence of FDS
-methods---the bias potential must be adjusted to make the
-observed distribution match the intended one.
-%%
-Once this is done,
-the PMF, $-\ln p^*_i$, can be naturally
+and the PMF, $-\ln p^*_i$, can be readily 
 deduced from the bias potential. % $V_i$.
 \note{
   For example, in the context of simulated tempering (Zhang and Ma, 2007),
@@ -514,26 +512,19 @@ deduced from the bias potential. % $V_i$.
 
 
 
-In terms of how one adjusts the bias potential,
-there are roughly two types of FDS methods.
+Many methods\cite{mezei1987, berg1992, *lee1993,
+wang2001, *wang2001pre, huber1994,
+*laio2002, *laio2008, *barducci2011, *sutto2012}
+have been developed to find the proper bias potential.
 %
-The first type,
-referred to as the equilibrium FDS, % (E-FDS) methods hereinafter,
-uses a fixed bias potential, $V_i$,
-(estimated a priori)
-during simulation.
+In a class of equilibrium FDS methods\cite{
+  mezei1987, berg1992, *lee1993, marinari1992, *lyubartsev1992},
+the bias potential, $V_i$, is
+estimated a priori and fixed
+during simulation,
 %
-Examples include the original
-entropic or multicanonical sampling\cite{
-berg1992, *lee1993}
-and simulated tempering\cite{
-marinari1992, *lyubartsev1992}.
-%with $i$ being the index of energy
-%and that of temperature, respectively.
-%
-After a sufficiently long run, the bias potential, $V_i$,
-can often be improved
-with the normalized histogram, $H_i$,
+and a correction to the bias potential
+is derived from the normalized histogram, $H_i$,
 accumulated from the simulation as
 %
 %Using $H_i$ as an estimate of $\pi_i$ in
@@ -561,20 +552,6 @@ accumulated from the simulation as
   \end{aligned}
   $$
 }
-%However, for an unknown system,
-%it is often difficult
-%to guess a sufficiently accurate
-%$V_i$ with which to start.
-%%
-%Thus,
-%it can take many iterative rounds of simulations
-%to achieve the desired flat distribution.
-%%
-%%Another difficulty of this approach is that
-%The effectiveness of this approach
-%depends on the precision of the histogram, $H_i$,
-%which in turn depends on the simulation length
-%that must be decided in advance.
 However, this formula often requires a long
 accumulation period for a precise histogram,
 and thus disallows
@@ -582,16 +559,12 @@ continuous improvement of the bias potential
 %(hence that of the PMF)
 as simulation lengthens.
 
-The second type of methods,
-including the WL algorithm and metadynamics,
-addresses the above shortcomings
-by continuously and incrementally updating the bias potential.
-%For this reason, the second type of methods,
-%referred to as the adaptive FDS methods,
-%were invented.
-%
-These methods, referred to as the adaptive FDS methods,
-will be discussed below.
+An other class of adaptive FDS methods,
+including the WL algorithm\cite{wang2001, *wang2001pre}
+and metadynamics\cite{huber1994, laio2002, *laio2008, *barducci2011, *sutto2012},
+address the above shortcoming
+by continuously and incrementally updating the bias potential,
+and we will focus on these methods below.
 %%
 %%These methods incrementally update the bias potential
 %%and can approximately sample the target distribution.
@@ -648,7 +621,7 @@ will be discussed below.
 
 %We will mainly focus on the adaptive methods below.
 %
-In the WL algorithm\cite{wang2001, *wang2001pre},
+In the original WL algorithm\cite{wang2001, *wang2001pre},
 the bias potential, $V_i(t)$, is updated
 at each sampling step $t$ as
 %
@@ -684,13 +657,13 @@ several neighboring bins are updated:
   +
   w_{i, \, i(t)}
   \frac{ \alpha(t) }
-       { p_{i(t)} },
+       { p_{i(t)} }
+  .
   \label{eq:mbin_update}
 \end{equation}
 %
-where the elements, $w_{ij}$'s, are a set of coefficients satisfying
-the restrictions to be discussed
-in Sec. \ref{sec:updating-matrix}.
+The Gaussian updating scheme used in metadynamics
+is an example, with $w_{ij}$ being a Gaussian of $i-j$.
 %
 Note that if the updating occurs
 only every few sampling steps,
@@ -771,11 +744,11 @@ in late stages
 is to follow the formula
 %
 \begin{equation}
-  \alpha(t) = \frac{1}{t + 1},
+  \alpha(t) = \frac{1}{t},
   \label{eq:alpha_invt}
 \end{equation}
 %
-where $t + 1$,
+where $t$,
 referred to as the ``time'' below,
 is the number of updating steps
 from the beginning of the simulation\cite{
@@ -783,17 +756,19 @@ belardinelli2007, *belardinelli2007jcp, *belardinelli2008, *belardinelli2016,
 morozov2007, zhou2008,
 komura2012, *caparica2012, *caparica2014}.
 %
-An intuitive explanation of this result\cite{
+This can be derived from a general result\cite{
+  robbins1951, pellegrini2014}
+and an intuitive explanation\cite{
   marsili2006, barducci2008}
 comes from the interpretation of
 the bias potential %under the WL updating scheme, Eq. \eqref{eq:wl_update},
 as a runtime average computed from all data points collected so far,
 so that the addition of a new data point only
 affects the average by its due weight,
-which is the inverse of the current sample size, $t + 1$
+the inverse of the current sample size, $t$
 (cf. Appendix \ref{sec:equilerr}).
 %
-Alternatively, we may derive it
+We may also derive it
 from optimally planning the simulation lengths in the stages
 and the reduction factor in the WL setup (cf. Appendix \ref{sec:wltoinvt}).
 
@@ -832,9 +807,9 @@ Eq. \eqref{eq:wl_update},
 as a preparation
 for the more general multiple-bin scheme.
 %
-We will suggest a slight modification of Eq. \eqref{eq:alpha_invt}
-whereby the origin of $t$ is shifted by an amount
-determined from the initial error.
+%We will suggest a slight modification of Eq. \eqref{eq:alpha_invt}
+%whereby the origin of $t$ is shifted by an amount
+%determined from the initial error.
 %
 We will first express the error of
 the bias potential, $V_i(t)$,
@@ -844,17 +819,15 @@ and then minimize it by variation.
 
 
 
-\subsubsection{Error definition}
+\subsubsection{Error}
 
 
 
-First, we define the net error in the bias potential
+We define the net error in the bias potential
 by deducting two contributions.
 %
-The first contribution comes from the target value,
-Eq. \eqref{eq:Vi_target}.
-%
-For this purpose,
+First, to deduct the target value given by
+Eq. \eqref{eq:Vi_target},
 we introduce a shifted bias potential
 %
 \begin{equation}
@@ -870,8 +843,8 @@ we introduce a shifted bias potential
 %
 which should tend to a constant of $i$
 upon convergence.
-Note that the updates to $v_i$'s are
-equivalent to the updates to $V_i$'s,
+Note that the updates to $v_i(t)$ are
+equivalent to the updates to $V_i(t)$,
 since the shift
 remains a constant during the course of simulation,
 %%
@@ -898,9 +871,10 @@ Since a uniform increase of $V_i(t)$, or, equivalently, that of $v_i(t)$,
 does not affect the
 resulting distribution, $\pi_i(t)$,
 %
-the real deviation is more readily defined
-from the difference between $v_i(t)$ and a baseline value, $\bar v(t)$,
-that represents the average growth\cite{
+the real deviation, $x_i(t)$, of the bias potential
+depends only on the difference between $v_i(t)$
+and a baseline value, $\bar v(t)$,
+for average growth\cite{
 dama2014},
 %
 \begin{equation}
@@ -923,10 +897,7 @@ for some distribution,
 $\pmb \rho = (\rho_1, \dots, \rho_n)$
 (with $\rho_i \ge 0$ and $\sum_{i = 1}^n \rho_i = 1$).
 %
-In this way,
-the variable, $x_i(t)$,
-represents the actual deviation of the bias potential, $V_i(t)$,
-and the total error is given by
+The total error is given by
 %
 \begin{equation}
   \Err(t)
@@ -939,24 +910,25 @@ and the total error is given by
 
 
 
-Although the above error weighting distribution, $\pmb\rho$,
-is usually flat,
-i.e. $\rho_i \equiv 1/n$,
-in practice,
-a non-flat distribution
-is sometimes more convenient in analyzing
-some multiple-bin updating schemes later on.
+%Although the above error weighting distribution, $\pmb\rho$,
+%is usually flat,
+%i.e. $\rho_i \equiv 1/n$,
+%in practice,
+%a non-flat distribution
+%is sometimes more convenient in analyzing
+%some multiple-bin updating schemes later on.
 %
-We also note that $\pmb\rho$
-is independent of
+Note that the distribution, $\pmb\rho$, is arbitrary
+and independent of
 the target distribution,
-$\mathbf p = (p_1, \dots, p_n)$
-(e.g. in well-tempered metadynamics,
+$\mathbf p = (p_1, \dots, p_n)$,
+although it is usually flat.\footnote{In
+well-tempered metadynamics,
 $\mathbf p$ is an attenuated version of
 $\mathbf p^*$\cite{
   barducci2008, dama2014}:
 $\ln p_i = \ln {p^*_i}/(1+\Delta) + \mathrm{const.}$ for some positive $\Delta$,
-whereas $\pmb\rho$ is flat).
+whereas $\pmb\rho$ is flat.}
 %
 From Eqs. \eqref{eq:x_def} and \eqref{eq:vbar_def},
 we have
@@ -975,7 +947,8 @@ we have
 
 To proceed, we will
 approximate the finite difference Eq. \eqref{eq:wl_update}
-by a differential equation
+by a differential equation\footnote{This
+approximation requires us to shift the origin of time by $1$ in some cases.}
 %
 \begin{equation}
   \dot V_i(t)
@@ -1007,7 +980,7 @@ follows the same differential equation
 as the shift is a constant.
 
 
-Next, we split $h_i(t)$ into a deterministic averaged part
+We can split $h_i(t)$ into a deterministic averaged part
 and a random fluctuation part, $\zeta_i(t)$,
 %
 \begin{equation}
@@ -1103,11 +1076,8 @@ This approximation is valid if the simulation period, $T$,
 is much longer than the autocorrelation time of noise.
 %
 For non-white noise,
-the equivalent value of $G^{(0)}_i$ can be approximately obtained
-%from the integral,
-%$\int_{-\infty}^\infty \sigma_{ij}(t) \, dt$,
-%or in the discrete time case,
-$\sum_{t = -\infty}^\infty \sigma_{ij}(t)$.
+the equivalent value of $G^{(0)}_i$ can be approximately obtained as
+$\sum_{t = -\infty}^\infty \langle \zeta_i(t) \, \zeta_j(0) \rangle$.
 %
 \note{More explicitly,
 if the transition matrix of a period, $\tau$,
@@ -1219,34 +1189,7 @@ $$
 $$
 }
 
-
-The total error
-at the end of the simulation, $t = T$,
-as defined in Eq. \eqref{eq:error_def},
-now depends implicitly on the function $\alpha(t)$
-via $x_i(T)$.
-%
-Our aim is to find the $\alpha(t)$
-that minimizes this error.
-%%
-%It suffices to consider
-%a one-variable problem that
-%minimizes each individual
-%$\left\langle x_i^2(T) \right\rangle$.
-
-
-
-%\subsubsection{\label{sec:onevar}
-%Optimization of a one-variable problem}
-
-
-
-\subsubsection{Optimal schedule for the single-bin scheme}
-
-
-
-We recall that
-the formal solution of Eq. \eqref{eq:dxdt_singlebin} is
+The formal solution of Eq. \eqref{eq:dxdt_singlebin} is
 %
 \begin{equation}
 x_i(T)
@@ -1273,21 +1216,16 @@ u(q')
 e^{q' - q(T)}.
 \label{eq:u_def}
 \end{align}
-%
+
+
+
+\subsubsection{Optimal schedule}
+
+
+
 At the end of period $T$,
 the total error defined in Eq. \eqref{eq:error_def}
 is given by
-%
-%\begin{align}
-%  &\left\langle x_i^2(T) \right\rangle
-%  =
-%  \langle x_i^2(0) \rangle \, e^{-2 \, q(T)}
-%  +
-%  G_i \int_0^T
-%    {\dot u}^2\bigl( q(t) \bigr) \,
-%    \, dt.
-%  \label{eq:x2t_average}
-%\end{align}
 %
 \begin{align}
   E(T)
@@ -1307,9 +1245,11 @@ where
   \label{eq:Gamma_def}
 \end{equation}
 
-
-
-This is a functional of the curve $q(t)$.
+The error depends implicitly on the curve, $\alpha(t)$,
+or, equivalently, the curve, $q(t)$,
+via $x_i(T)$, and
+our aim is to find the $q(t)$
+that minimizes this error.
 %
 We now fix the endpoint value, $q(T)$,
 and vary the curve, $q(t)$ ($0 < t < T$).
@@ -1400,9 +1340,9 @@ Then, by using Eq. \eqref{eq:u_def}, we have
   ,
 \label{eq:expqt}
 \end{equation}
-where $t_0$ is a constant,
-and the constant $c$ is determined
-from the boundary condition at $t = T$
+where $t_0$ is some constant,
+and the other constant, $c$, has been determined
+from the $t = T$ case
 in the second step.
 %
 Taking the logarithm,
@@ -1417,7 +1357,7 @@ we get the inverse-time schedule
 \end{equation}
 %
 and Eq. \eqref{eq:alpha_invt}
-is the special case of $t_0 = 1$.
+is the special case of $t_0 = 0$.
 %
 
 We now determine the optimal value of $q(T)$,
@@ -2543,7 +2483,7 @@ as a cosine transform,
 %
 where $g = 1$ here for the periodic variable,
 or $2$ for a non-periodic one
-[cf. Appendix \ref{sec:more_wband}].
+(cf. Appendix \ref{sec:more_wband}).
 
 
 
@@ -2552,7 +2492,8 @@ Procedure of computing the optimal schedule and error
 }
 
 
-Here we give a procedure of computing
+Based on the above results,
+we give a procedure of computing
 the optimal schedule and the error
 for a given adaptive FDS simulation.
 %
@@ -2904,11 +2845,11 @@ the single-bin scheme, is most efficient
 in asymptotic convergence.
 %if no eigenvalue $\lambda_k$ is zero.
 %
-In Appendix \ref{sec:upperbound},
-we will show that the opposite limit of
-a set of well-separated eigenvalues
-will provide an upper bound for
-the asymptotic error, Eq. \eqref{eq:error_asym_ubound}.
+%In Appendix \ref{sec:upperbound},
+%we will show that the opposite limit of
+%a set of well-separated eigenvalues
+%will provide an upper bound for
+%the asymptotic error, Eq. \eqref{eq:error_asym_ubound}.
 
 
 
@@ -3191,12 +3132,12 @@ in the theoretical predictions.
 
 
 \subsection{\label{sec:results_invt}
-Modified inverse-time schedule}
+Scaled inverse-time schedule}
 
 
 Using the model system above, we
 tested our analysis of computing errors
-on the modified inverse-time schedule,
+on the scaled inverse-time schedule,
 %
 \begin{equation}
 \alpha(t) = \frac{1}{\lambda \, (t + t_0) },
@@ -3209,14 +3150,14 @@ and $t_0$ is given by Eq. \eqref{eq:t0_sinc}.
 %
 The error of this schedule
 can be computed analytically
-(cf. Appendix \ref{sec:invt_schedule}),
+(cf. Appendix \ref{sec:sinvt_schedule}),
 and tested against simulation.
 
 
 
 We performed adaptive FDS simulations
-using the single-bin updating scheme
-and the triple-bin updating scheme with $\mu_1 = 0.24$.
+using the single-bin updating scheme.
+%and the triple-bin updating scheme with $\mu_1 = 0.24$.
 %
 %For each value of $\lambda$,
 %we ran $1000$ independent simulations
@@ -3235,15 +3176,12 @@ agreed well with those from the theory.
   \caption{
     \label{fig:errinvt}
     Error, $\Err$, versus the parameter, $\lambda$,
-    for the modified inverse-time schedule,
+    for the single-bin updating scheme
+    using the scaled inverse-time schedule,
     Eq. \eqref{eq:alpha_invtlambda}.
     %
     The points are results from averaging over $1000$ independent runs;
     the curves are theoretical predictions.
-    %
-    For the single-bin (WL) updating scheme,
-    the minimal should occur at $\lambda = 1$,
-    while it is not necessarily the case for a general updating scheme.
     %
     \note{The figure was produced by \texttt{doc/fig/errinvt.gp}.
       The data were produced by the script \texttt{data/invtcscan.py},
@@ -3259,24 +3197,22 @@ the optimal $\lambda$ occurred around $1.0$
 for both global and local sampling processes.
 %
 The sampling process affected the error function
-only by a multiplicative constant,
-%The error functions of the two sampling processes
-%differed only by a multiplicative constant,
-(cf. Appendix \ref{sec:invt_singlebin}).
+only by a multiplicative constant, $\Gamma$
+(cf. Appendix \ref{sec:sinvt_schedule}).
 %
-For the triple-bin updating scheme,
-the optimal $\lambda$ was less than $1.0$
-for the global sampling process,
-although it stayed around $1.0$
-for the local sampling process,
-also in agreement with the discussion
-in Appendix \ref{sec:invt_nn}.
-%
-Thus, the inverse-time schedule,
-Eq. \eqref{eq:alpha_invt1},
-is optimal for the single-bin updating scheme,
-but not necessarily so for a general multiple-bin updating scheme.
-%
+%For the triple-bin updating scheme,
+%the optimal $\lambda$ was less than $1.0$
+%for the global sampling process,
+%although it stayed around $1.0$
+%for the local sampling process,
+%also in agreement with the discussion
+%in Appendix \ref{sec:invt_nn}.
+%%
+%Thus, the inverse-time schedule,
+%Eq. \eqref{eq:alpha_invt1},
+%is optimal for the single-bin updating scheme,
+%but not necessarily so for a general multiple-bin updating scheme.
+%%
 
 
 
@@ -3308,26 +3244,23 @@ was necessary in order to
 damp out the short-wavelength eigenmodes
 (i.e. local noise).
 %
-As shown in Fig. \ref{fig:xerr},
-the inverse-time schedule was effective in error reduction
-only for the first few eigenmodes,
-whose eigenvalues were around $1.0$.
-%
-We can, however, ignore these local eigenmodes
-by explicitly filtering them out from the final bias potential,
-and truncating the error sum in Eq. \eqref{eq:error_def}
-to the first few eigenmodes.
-%
-Then, the corresponding optimal schedule
-from Eq. \eqref{eq:q_opt} that minimizes the truncated error
-became similar to the inverse-time schedule,
-Eq. \eqref{eq:alpha_invt1},
-as exemplified in Fig. \ref{fig:optacmp}.
-%
-\note{A more thorough approach is
-to use the bandpass updating scheme
-to be discussed later.
-}
+%As shown in Fig. \ref{fig:xerr},
+%the inverse-time schedule was effective in error reduction
+%only for the first few eigenmodes,
+%whose eigenvalues were around $1.0$.
+%%
+%We can, however, ignore these local eigenmodes
+%by explicitly filtering them out from the final bias potential,
+%and truncating the error sum in Eq. \eqref{eq:error_def}
+%to the first few eigenmodes.
+%%
+%Then, the corresponding optimal schedule
+%from Eq. \eqref{eq:q_opt} that minimizes the truncated error
+%became similar to the inverse-time schedule,
+%Eq. \eqref{eq:alpha_invt1},
+%as exemplified in Fig. \ref{fig:optacmp}.
+%%
+
 
 
 \begin{table}[h]\footnotesize
@@ -3350,10 +3283,10 @@ to be discussed later.
     \hline
       Schedule
     &
-      Inverse-time, \newline
+      $1/t$, \newline
       Eq. \eqref{eq:alpha_invt1}
     &
-      Modified, \newline
+      Scaled $1/t$, \newline
       Eq.~\eqref{eq:alpha_invtlambda}
     &
       Optimal, \newline
@@ -3412,38 +3345,6 @@ to be discussed later.
 \end{figure}
 
 
-\begin{figure}[h]
-\begin{center}
-  \makebox[\linewidth][c]{
-    \includegraphics[angle=0, width=1.0\linewidth]{fig/xerr.pdf}
-  }
-  \caption{
-    \label{fig:xerr}
-    Predicted error components for the Gaussian updating scheme
-    with $\sigma = 10$
-    from the optimal schedule
-    and the inverse-time schedule, Eq. \eqref{eq:alpha_invt1}.
-    %
-    The latter schedule failed to damp out the errors
-    from the long-wavelength (local) eigenmodes
-    with $k \ge 5$.
-    %
-    For longer simulations,
-    the error components from the optimal schedule
-    would roughly maintain a relatively flat profile,
-    but meet the initial error curve
-    at a lower level (not shown),
-    where $\lambda_k \approx 1/q(T)$
-    (cf. Appendix \ref{sec:upperbound}).
-    %
-    \note{This figure was produced by \texttt{doc/fig/xerr.gp}.
-      The data were saved under the directory \texttt{data/xerr}.
-    }%
-  }
-\end{center}
-\end{figure}
-
-
 An interesting prediction from the theory is Eq. \eqref{eq:half_alpha0},
 which states that the optimal schedule should always start from
 half of the magnitude from the previous equilibration run.
@@ -3459,14 +3360,12 @@ As shown in Fig. \ref{fig:erriascan},
 the minimal error was indeed reached at
 $\alpha(0) = a_0/2 = 5 \times 10^{-5}$,
 although the dependence on $\alpha(0)$
-is generally weak.
-%
-The weak dependence is best illustrated in
+is generally weak.\footnote{The weak dependence is best illustrated in
 the case of single-bin updating scheme,
 as the initial updating magnitude only
 affects the schedule by a shift of the origin of
 simulation time in the inverse-time schedule,
-Eq. \eqref{eq:alpha_invt1}.
+Eq. \eqref{eq:alpha_invt1}.}
 
 
 \begin{figure}[h]
@@ -3766,126 +3665,89 @@ in a runtime average
 
 
 
-We can understand the optimality of the inverse-time schedule
+The optimality of the inverse-time schedule can be considered
 as a natural consequence of the stabilization of a runtime average
 as the sample size increases\cite{
-  marsili2006, barducci2008, robbins1951, pellegrini2014}.
+  marsili2006, barducci2008}.
 %
-Consider a sample, $\{X^{(1)}, \dots, X^{(N)}\}$,
-with a dynamically growing size.
-%
-The runtime average
+We first note that the normalized histogram, $H_i(t)$,
+is a runtime average of the instantaneous histogram, $h_i(t)$.
 %
 \begin{equation*}
-  {\bar X}^{(N)}
+  H_i(t)
   =
-  \frac{ X^{(1)} + \cdots + X^{(N)} } { N }
-  ,
+  \frac{ h_i(1) + \cdots + h_i(t) } { t }
+  .
 \end{equation*}
 %
-can be written as a recurrence relation regarding
+This formula can written as a recurrence relation regarding
 the addition of the last data point,
 %
 \begin{align}
-  {\bar X}^{(N)}
+  H_i(t)
   &=
-  {\bar X}^{(N-1)} + \frac{ X^{(N)} - {\bar X}^{(N-1)} } { N }
-  .
+  H_i(t-1) + \frac{ h_i(t) - H_i(t-1) } { t }
+  ,
   \label{eq:av_recur}
 \end{align}
 %
-If we interpret $X^{(N)} - {\bar X}^{(N-1)}$
-as the independent correction to the previous average,
-${\bar X}^{(N-1)}$, proposed by the latest data point, $X^{(N)}$,
-then this correction is absorbed into the average with
-a diminishing weight $1/N$ as the sample size, $N$, increases.
-
-
-The structural similarity between the recurrence relation,
-Eq. \eqref{eq:av_recur},
-and the WL updating scheme, Eq. \eqref{eq:wl_update},
-suggests that the bias potential may represent
-a runtime average in a particular case.
+%If we interpret $x(t) - X(t-1)$
+%as the independent correction to the previous average,
+%$X(t-1)$, proposed by the last data point, $x(t)$,
+%then this correction is absorbed into the average with
+%a diminishing weight $1/t$ as the sample size, $t$, increases.
 %
-To establish a mapping between the two,
-let us now consider a long equilibrium FDS simulation
-that consists of a sequence of sub-simulations
-of $L$ steps.
+which allows us to incrementally improve the estimated
+bias potential given by Eq. \eqref{eq:vcorr_equil}.
 %
-If $X^{(N)}$ is
-the bias potential, $V_i^{(N)}$, computed
-from the $N$th sub-simulation,
-then ${\bar X}^{(N)}$ means the average bias potential,
-${\bar V}_i^{(N)}$,
-from the first $N$ sub-simulations.
-%
-Since this average, ${\bar V}_i^{(N)}$,
-gives the best estimate at the end of
-the first $N$ sub-simulations,
-we should ideally use it as the bias potential
-for the next sub-simulation,
-until it is further updated by Eq. \eqref{eq:av_recur}
-at the end of the next sub-simulation.
-%
-Assuming that the normalized histogram, $H_i^{(N)}$,
-from the $N$th sub-simulation is sufficiently precise,
-Eq. \eqref{eq:vcorr_equil}
-\big[with
-$V_i^\mathrm{corr} \to V_i^{(N)}$, $V_i \to {\bar V}_i^{(N-1)}$\big]
-shows that the independent
-correction from the $N$th sub-simulation is
+With
+$V_i^\mathrm{corr} \to V_i(t+1)$, $V_i \to V_i(1)$,
+we have
 %
 \begin{equation*}
-  \ln \frac{ H_i^{(N)} } { p_i }
+  V_i(t+1) = V_i(1) +
+  \ln \frac{ H_i(t) } { p_i }
   \approx
-  \frac{ H_i^{(N)} } { p_i } - 1
+  V_i(1) +
+  \frac{ H_i(t) } { p_i } - 1
   ,
 \end{equation*}
+where we have assumed that
+the normalized histogram, $H_i(t)$,
+is sufficiently precise in the second step.
 %
-where the ``$-1$'' on the right-hand side
-can be ignored as a uniform shift
-that does not affect the distribution.
+%where the ``$-1$'' on the right-hand side
+%can be ignored as a uniform shift
+%that does not affect the distribution.
 %
-Thus, we may rewrite Eq. \eqref{eq:av_recur} as
+Thus,
+%Since $H_i(t)$ is the average of the instantaneous histogram, $h_i(t)$,
+%we may apply Eq. \eqref{eq:av_recur}, and
+%
 \begin{align}
-  {\bar V}_i^{(N)}
+  V_i(t+1)
   &=
-  {\bar V}_i^{(N-1)}
+  V_i(t)
   +
-  \frac{1}{N} \frac{ H_i^{(N)} }{ p_i }
+  \frac{ H_i(t) - H_i(t-1) }{ p_i }
   \notag
   \\
   &=
-  {\bar V}_i^{(N-1)}
+  V_i(t)
   +
-  \sum_{l=1}^L \frac{1}{N L} \frac{ h_i^{(N)}(l) }{ p_i }
-  ,
+  \frac{1}{t} \frac{ h_i(t) }{ p_i }
+  -\frac{1}{t} \frac{ H_i(t-1) }{ p_i }
+  .
   \label{eq:vbar_update}
 \end{align}
 %
-where $h_i^{(N)}(l)$ stands for the instantaneous histogram
-at step $l$ of sub-simulation $N$,
-and its average is
-$H_i^{(N)} \equiv \frac{1}{L} \sum_{l=1}^L h_i^{(N)}(l)$.
-%
-Now Eq. \eqref{eq:vbar_update} shows that the best estimate
-of the bias potential from the runtime average can be computed
-through a step-by-step incremental updating scheme that is equivalent to
-the WL algorithm, Eq. \eqref{eq:wl_update},
-with the updating magnitude being
-%
-\begin{equation}
-  \alpha(t) = \frac{1}{N L}
-  .
-  \label{eq:alpha_block}
-\end{equation}
-%
-In the long time limit,
-we may approximate the simulation time
-by the product of the number of sub-simulations
-and the number of steps in each sub-simulation, or $N L$,
-%
-and Eq. \eqref{eq:alpha_block} recovers Eq. \eqref{eq:alpha_invt}.
+Now if we drop the last term,
+which tends to a uniform shift of the bias potential
+in the asymptotic limit,
+Eq. \eqref{eq:vbar_update} recovers
+the single-bin updating scheme, Eq. \eqref{eq:wl_update},
+under
+the inverse-time schedule, Eq. \eqref{eq:alpha_invt}.
 
 
 
@@ -5334,89 +5196,6 @@ resulting the following algorithm.
 
 
 
-\subsubsection{\label{sec:nnscheme}
-Triple-bin updating scheme}
-
-
-
-If $\mu_2 = \dots = \mu_b = 0$,
-the matrix, $\mathbf w$, is tridiagonal,
-%%
-%\begin{equation}
-%\arraycolsep=3.6pt\def\arraystretch{1.4}
-%\mathbf w
-%=
-%\left(
-%  \begin{array}{cccccccc}
-%    1 - \mu_1   & \mu_1 & 0 & \dots & 0 \\
-%    \mu_1 & 1 - 2 \, \mu_1  & \mu_1 & \dots & 0 \\
-%    \vdots & &  & & \vdots \\
-%    0 & \dots & \mu_1 & 1 - 2 \, \mu_1  & \mu_1 \\
-%    0 & \dots & 0 & \mu_1 & 1 - \mu_1
-%  \end{array}
-%\right).
-%\label{eq:wnn}
-%\end{equation}
-%%
-%We have
-and the eigenvalues are
-\begin{equation}
-  \lambda_k
-  =
-  1 -
-  4 \, \mu_1 \sin^2
-  \frac{ (k - 1) \, \pi }
-       {       g \, n   }
-  .
-\notag
-%\label{eq:wnn_eigenvalue}
-\end{equation}
-%
-So this updating scheme is stable if
-$\min \lambda_k \ge 0$,
-or
-\begin{equation}
-  \mu_1 \le
-  \begin{dcases}
-    \frac 1 4
-    & \mathrm{periodic \; and \;} n \mathrm{ \; even,}
-    \\
-    \frac 1 4
-    \sec^2
-    \left( \frac{  \pi   }
-                { 2 \, n }
-    \right)
-    & \mathrm{otherwise}.
-  \end{dcases}
-\notag
-%\label{eq:nn_stable}
-\end{equation}
-
-\note{
-If the variable is periodic ($g = 1$) and $n$ is even,
-the minimum is achieved at $k = (n/2) + 1$.
-
-If the variable is periodic ($g = 1$) but $n$ is odd,
-the minimum is achieved at $k = (n+1)/2$.
-$$
-\sin^2\left(
-  \frac{n-1}{2 \, n} \pi
-\right)
-=
-\cos^2\left(
-  \frac{\pi}{2 \, n}
-\right)
-.
-$$
-
-If the variable is nonperiodic ($g = 2$)
-the minimum is achieved at $k = n$ (the maximal index).
-}
-
-
-
-
-
 \subsubsection{Gaussian updating scheme}
 
 
@@ -5846,254 +5625,15 @@ $$
 
 
 
-\section{\label{sec:upperbound}
-Asymptotic error for an updating scheme
-with a set of well-separated eigenvalues}
-
-
-We will derive here an upper bound of the asymptotic error
-that can be associated to updating schemes
-with a set of well-separated eigenvalues,
-in parallel to the lower bound reached by
-the single-bin scheme with a set of identical eigenvalues
-(cf. Sec. \ref{sec:optWL}).
-%
-For example, the smaller eigenvalues of the Gaussian updating scheme
-are well separated because of the rapid exponential decay.
-
-
-Starting from the definition Eq. \eqref{eq:mass_func}, we have
-$$
-  M(Q)
-  \le
-  \sum_{k = 2}^n
-  \sqrt{ \Gamma_k } \, \lambda_k \, e^{ -\lambda_k \, Q }
-  .
-$$
-Thus,
-it follows from Eq. \eqref{eq:mint} that, as $q(T) \to \infty$,
-%
-\begin{equation}
-  C
-  =
-  \int_0^\infty
-  M(q') \, dq'
-  \le
-  \sum_{k = 2}^n \sqrt{ \Gamma_k }
-  ,
-  \label{eq:mint_ubound}
-\end{equation}
-%
-and the asymptotic error from Eq. \eqref{eq:error_asym2}
-is bounded as
-\begin{equation}
-  \Err_A(T)
-  =
-  \frac{ C^2 } { T }
-  \le
-  \frac 1 T
-  \left(
-    \sum_{k=2}^n \sqrt{ \Gamma_k }
-  \right)^2
-  .
-  \label{eq:error_asym_ubound}
-\end{equation}
-%
-It is readily seen that this bound is always
-greater than the lower bound given by Eq. \eqref{eq:error_asym_singlebin},
-%
-$$
-\frac{T}{(T+t_0)^2} \, \sum_{k=2}^n \Gamma_k
-\le
-\frac{1}{T} \sum_{k=2}^n \Gamma_k
-\le
-\frac{1}{T} \left( \sum_{k=2}^n \sqrt{ \Gamma_k } \right)^2
-.
-$$
+\section{\label{sec:sinvt_schedule}
+Scaled inverse-time schedule}
 
 
 
-Next, we will show that this bound represents
-updating schemes with a set of very different eigenvalues.
-%
-%First, observe that the summand of Eq. \eqref{eq:mass_func},
-%$\Gamma_k \, \left( \lambda_k e^{-\lambda_k \, Q} \right)^2$
-%is a function that peaks at $\lambda_k = 1/Q$,
-%so that the sum is dominated by the term at $k = k(Q)$ with
-%%
-%\begin{equation}
-%  \lambda_{k(Q)}
-%  \approx
-%  \frac 1 Q
-%  .
-%  \label{eq:kQ_def}
-%\end{equation}
-%
-%Thus,
-First, we have for any mode $k^*$ $(k^* \ge 2)$,
-%
-\begin{align}
-  M(Q)
-  &
-  \ge
-  %\approx
-  \sqrt{ \Gamma_{ k^* } } \,
-  \lambda_{ k^* } \,
-  e^{ -\lambda_{ k^* } \, Q }
-  ,
-\label{eq:MQ_lbound1}
-\end{align}
-%
-which would approach an equality if the $k^*$ mode
-dominates the mass function, $M(Q)$,
-as defined in Eq. \eqref{eq:mass_func}.
-%
-Then, for the $k$th component of the asymptotic error,
-we have from Eq. \eqref{eq:error_asym_Lagrangian}
-%
-\begin{align}
-  \left\langle
-  y_k^2(T)
-  \right\rangle_A
-  &=
-  \int_0^T
-  \Gamma_k \, \lambda_k^2 \, e^{2 \, \lambda_k \, [q(t) - q(T)] }
-  \, {\dot q}^2(t) \, dt
-  \notag
-  \\
-  &=
-  \frac{ C } { T }
-  \, \Gamma_k \, \lambda_k^2
-  \int_0^{q(T)}
-  \frac{ e^{-2 \, \lambda_k \, Q } } { M(Q) }
-  \,  \, dQ
-  \notag
-  \\
-  &\le
-  \frac C T \,
-  \frac{ \Gamma_k \, \lambda_k^2 } { \sqrt{ \Gamma_{k^*} } \, \lambda_{k^*} }
-  \int_0^{q(T)}
-    e^{-(2 \, \lambda_k - \lambda_{k^*} ) \, Q}
-    \, dQ
-  \notag
-  \\
-  &\le
-  \frac C T \,
-  \cdot
-  \frac{ \Gamma_k }
-  { \sqrt{ \Gamma_{k^*} } }
-  \cdot
-  \frac{ \lambda_k^2 }
-  { \lambda_{k^*} \, (2 \, \lambda_k -\lambda_{k^*}) }
-  ,
-  \label{eq:y2_ubound_k}
-\end{align}
-%
-where we have
-used Eqs. \eqref{eq:Lagrangian_const} and \eqref{eq:MQ_lbound1}
-on the second and third lines, respectively,
-and extended the upper limit to infinity on the last line.
-%
-For a set of well-separated eigenvalues,
-$\lambda_k$ depends on the mode index, $k$,
-much more critically than $\Gamma_k$.
-%
-Thus, the tightest upper bound
-can be approximately obtained from minimizing the last factor
-on the right-hand side of Eq. \eqref{eq:y2_ubound_k},
-and the minimal is reached at $k^* = k$,
-when $\lambda_{k^*} = \lambda_k$.
-%
-So
-%
-\begin{equation}
-  \left\langle
-  y_k^2(T)
-  \right\rangle_A
-  \le
-  %\approx
-  \frac C T
-  \sqrt{ \Gamma_k }
-  .
-  \label{eq:y2_ubound}
-\end{equation}
-%
-By summing over $k$
-and using Eq. \eqref{eq:mint_ubound},
-we recover Eq. \eqref{eq:error_asym_ubound}.
-
-This result shows that with a set of well-separated eigenvalues,
-the asymptotic error profile would be
-independent of $\lambda_k$'s and
-be flatter than the initial one from
-Eq. \eqref{eq:y2_eql}
-(cf. Fig. \ref{fig:xerr}
-for a Gaussian example).
-%
-Note, however, that to approach this upper bound
-the simulation has to be long enough
-such that the upper limit of the integral
-can be extended from $q(T)$ to infinity
-in the last step of Eq. \eqref{eq:y2_ubound_k}.
-%
-As a result,
-the flatter profile from Eq. \eqref{eq:y2_ubound}
-would stop at mode $k$,
-at which $\lambda_k \approx 1/q(T)$.
-%In other words,
-%the above asymptotic limit fails around
-%$Q^* \approx q(T)$, or equivalently
-%around mode $k^* = k\bigl( q(T) \bigr)$,
-%where $\lambda_{ k^* } \approx 1/q(T)$.
-%%
-%\note{This case also exemplifies
-%  the sensitivity to the simulation length.
-%  %
-%  In this limit,
-%  $M(Q) \propto 1/Q$ by Eq. \eqref{eq:MQ_lbound},
-%  and $C \propto \ln\bigl[ q(T) / q_0 \bigr]$
-%  for some $q_0$,
-%  and we expect that with fixed $a_0$,
-%  $q(T)$ to increase almost linearly with $T$
-%  by Eq. \eqref{eq:opt_qT}.
-%  %
-%  So the normalized asymptotic error,
-%  $E_A \cdot T \propto \bigl( \ln[ q(T)/q_0 ] \bigr)^2 \sim (\ln T)^2$,
-%  is sensitive to the simulation length,
-%  and worse than the ideal case of a constant.
-%}
-
-
-
-
-\section{\label{sec:invt_schedule}
-Modified inverse-time schedules}
-
-
-
-Here we compute the error of the schedule given by
-the modified inverse-time formula,
-Eq. \eqref{eq:alpha_invtlambda}.
-%As an alternative to the
-%optimal schedule from Eq. \eqref{eq:q_opt},
-%here we consider the modified
-%inverse-time formula, Eq. \eqref{eq:alpha_invtlambda},
-%with a free parameter $\lambda$.
-%
-%whose error can be computed explicitly.
-
-
-
-\subsection{\label{sec:invt_error}
-General results on error
-}
-
-
-
-Using Eq. \eqref{eq:alpha_invtlambda}
-in Eqs. \eqref{eq:error_asym}
-and \eqref{eq:error_res1}
-yields
+The error of the scaled inverse-time schedule,
+Eq. \eqref{eq:alpha_invtlambda},
+can be found by using Eq. \eqref{eq:alpha_invtlambda}
+in Eqs. \eqref{eq:error_asym} and \eqref{eq:error_res1}:
 %
 \begin{align}
   \Err_A(T)
@@ -6181,14 +5721,8 @@ where $\nu_k \equiv \lambda_k / \lambda$.
 
 
 
-
-\subsection{\label{sec:invt_singlebin}
-  Single-bin updating scheme
-}
-
-
-
-For the single-bin scheme, we have
+In particular,
+for the single-bin scheme, we have
 $\lambda_2 = \cdots = \lambda_n = 1$,
 and
 $\Gamma_k$'s affect the error
@@ -6219,129 +5753,6 @@ which is minimal at $\lambda = 1$.
 }
 
 
-
-
-\subsection{\label{sec:invt_nn}
-Triple-bin updating scheme}
-
-
-
-
-For the triple-bin updating scheme,
-%introduced in Sec. \ref{sec:nnscheme},
-we will consider the large-$n$ limit.
-%
-If $2 \, \nu_k > 1$ for every $k$, we have
-%$\sum_i \to \frac{2 \, n}{\pi} \int_0^{\pi/2} dp$, and
-%
-\begin{align}
-  \Err_A(T)
-  =
-  \frac{ 2 \, n  }
-       { \pi \, T }
-  \int_0^{\pi/2}
-    \frac{ \Gamma(p) \, \left(1 - 4 \, \mu_1 \, \sin^2 p \right)^2    }
-         {   \lambda \, \left(2 - 8 \, \mu_1 \, \sin^2 p - \lambda \right) }
-  \, dp
-  .
-\notag
-%\label{eq:error_nn_asym_int}
-\end{align}
-%
-For perfect sampling with $\mathbf p = \pmb \rho$,
-we have Eq. \eqref{eq:Gamma_perfect},
-and
-$$
-\begin{aligned}
-  \Err_A(T)
-  &=
-  \frac{n}{4 \, T}
-  \left(
-    \frac{2 - 4 \, \mu_1 + \lambda}{ \lambda }
-    +
-    \frac{ \lambda }
-    { \sqrt{ (2 - \lambda) (2 - 8 \, \mu_1 - \lambda) } }
-  \right)
-,
-\end{aligned}
-$$
-%
-which is minimal at
-%
-\begin{equation}
-  \lambda
-  =
-  \frac{ 1 - 4 \, \mu_1 }
-       { 1 - 2 \, \mu_1 }
-  ,
-%\notag
-\label{eq:lambda_nn_perfect}
-\end{equation}
-%
-and at this point,
-%
-\begin{equation}
-  \Err_A(T)
-  =
-  \frac{n}{T}
-  \left(
-    1+ \frac{2 \, \mu_1^2}{1-4 \, \mu_1}
-  \right)
-  .
-  \label{eq:error_nn_perfect}
-\end{equation}
-%
-This shows that the original inverse-time formula,
-Eq. \eqref{eq:alpha_invt1},
-is not optimal unless $\mu_1 = 0$,
-the single-bin case,
-and the latter minimizes the asymptotic error,
-Eq. \eqref{eq:error_nn_perfect}.
-%
-Note that the value given by
-Eq. \eqref{eq:lambda_nn_perfect}
-was less than the observed optimal value
-from Fig. \ref{fig:errinvt},
-and the latter would decrease
-with the simulation length.
-%
-
-
-
-
-For the one-step sampling process,
-we find from Eq. \eqref{eq:Gamma_onestep}
-that $\Gamma(p) = \cot^2 p$
-peaks around $p \approx 0$,
-%
-Then
-$$
-  \Err_A(T)
-  \propto
-  \frac{   2 \, n }
-       { \pi \, T }
-  \frac{             1             }
-       {  \lambda \, (2 - \lambda) }
-  .
-$$
-%
-The optimal $\lambda$ is, therefore,
-$\lambda \approx 1$.
-%
-
-\note{
-However, the above result %Eq. \eqref{eq:lambda_nn_onestep}
-is only good
-for sufficiently short simulations,
-since we have taken the limit of $n \to \infty$
-for a fixed $T$.
-%
-For very long simulations,
-the optimal $\lambda$
-will ultimately drift to
-the smallest eigenvalue,
-$\min \lambda_k = 1 - 4 \, \mu_1$.
-}
 
 
 \note{The table of symbols is listed in Table \ref{tab:symbols}.
