@@ -42,7 +42,7 @@ typedef struct {
   double *vtmp;
   double *hmod;
   intq_t *intq;
-  double errref; /* estimated error */
+  double eiref, efref; /* estimated errors */
 } metad_t;
 
 
@@ -115,7 +115,7 @@ static metad_t *metad_open(int imin, int imax, int idel,
   xnew(metad->vtmp, n);
   xnew(metad->hmod, n);
   metad->intq = NULL;
-  metad->errref = 0;
+  metad->eiref = metad->efref = 0;
   return metad;
 }
 
@@ -253,8 +253,6 @@ __inline static int metad_wlcheck(metad_t *metad, double fl, double magred)
 
   /* compute the histogram fluctuation */
   metad->hfl = metad_hfl(metad, metad_lamcut);
-  //printf("fl %g, %g\n", metad->hfl, metad_hfl_wl(metad));
-  //getchar();
   /* return if the histogram not flat enough */
   if ( metad->hfl > fl ) return 0;
 
@@ -382,20 +380,21 @@ static int metad_save(metad_t *metad, const char *fn)
 {
   FILE *fp;
   int i, n = metad->n;
-  double x;
+  double x, dv;
 
   if ( (fp = fopen(fn, "w")) == NULL ) {
     fprintf(stderr, "cannot open %s\n", fn);
     return -1;
   }
-  metad_shiftv(metad, metad->v);
+  dv = metad_getave(metad, metad->vref);
+  dv -= metad_getave(metad, metad->v);
   getcosmodes(metad->v, n, metad->vft, metad->costab);
 
   metad_saveheader(metad, fp);
   for ( i = 0; i < n; i++ ) {
     x = metad_getx(metad, i);
     fprintf(fp, "%g %g %g %g %g\n", x,
-        metad->v[i], metad->h[i], metad->vref[i], metad->vft[i]);
+        metad->v[i] + dv, metad->h[i], metad->vref[i], metad->vft[i]);
   }
   fclose(fp);
   return 0;
@@ -451,6 +450,41 @@ ERR:
 }
 
 
+/* save the gamma values */
+__inline static int metad_savegamma(metad_t *metad,
+    const double *gamma, int docm, const char *fn)
+{
+  int i, n = metad->n;
+  FILE *fp;
+  double gamtot = 0;
+
+  if ( (fp = fopen(fn, "w")) == NULL ) {
+    fprintf(stderr, "cannot write [%s]\n", fn);
+    return -1;
+  }
+
+  /* compute the total gamma value */
+  for ( i = 1; i < n; i++ ) gamtot += gamma[i];
+
+  if ( docm ) {
+    getcosmodes(metad->vref, n, metad->vft, metad->costab);
+  }
+  fprintf(fp, "# %d %g\n", n, gamtot);
+  for ( i = 1; i < n; i++ ) {
+    fprintf(fp, "%4d %14.6f %g", i, gamma[i], metad->lambda[i]);
+    if ( docm ) {
+      fprintf(fp, " %g %g %g", sqrt(metad->cm->uvar[i]),
+          metad->cm->uave[i], metad->vft[i]);
+    }
+    fprintf(fp, "\n");
+  }
+
+  fclose(fp);
+
+  return 0;
+}
+
+
 
 /* update the accumulator for computing the gamma */
 __inline static void metad_add_varv(metad_t *metad)
@@ -471,7 +505,7 @@ __inline static void metad_getgamma_varv(metad_t *metad, double alpha0,
     if ( lam < 0.1 ) lam = 0.1;
     metad->gamma[i] = metad->cm->uvar[i]*2/alpha0/lam;
   }
-  if ( fn != NULL ) savegamma(n, metad->gamma, metad->lambda, fn);
+  if ( fn != NULL ) metad_savegamma(metad, metad->gamma, 1, fn);
 }
 
 /* compute the normalized transition matrix */
@@ -577,7 +611,7 @@ __inline static void metad_getgamma_tmat(metad_t *metad, double dt,
   free(vec);
   free(g);
 
-  if ( fn != NULL ) savegamma(n, metad->tgamma, metad->lambda, fn);
+  if ( fn != NULL ) metad_savegamma(metad, metad->tgamma, 0, fn);
 }
 
 
@@ -587,35 +621,40 @@ static void metad_getalphaerr(metad_t *metad, int opta, double T, int gammethod,
     double qprec, int nint, const char *fnalpha)
 {
   double *gamma = metad->gamma, t0 = 2/alpha0, y;
-  double *xerr;
-  int i, n = metad->n;
+  int n = metad->n;
+
+  if ( gammethod == GAMMETHOD_LOAD ) {
+    if ( loadgamma(n, gamma, fngamma) != 0 )
+      exit(1);
+  } else if ( gammethod == GAMMETHOD_TMAT ) {
+    gamma = metad->tgamma;
+  } else if ( gammethod == GAMMETHOD_NONE ) {
+    estgamma(gamma, n, sampmethod, metad->pbc, 1.0);
+  }
+
+  y = esterror_eql(alpha0, n, NULL, metad->lambda, gamma);
+  metad->eiref = y * y;
 
   if ( opta ) {
-    if ( gammethod == GAMMETHOD_LOAD ) {
-      if ( loadgamma(metad->n, gamma, fngamma) != 0 )
-        exit(1);
-    } else if ( gammethod == GAMMETHOD_TMAT ) {
-      gamma = metad->tgamma;
-    } else if ( gammethod == GAMMETHOD_NONE ) {
-      estgamma(gamma, metad->n, sampmethod, metad->pbc, 1.0);
-    }
-    xnew(xerr, n);
-    for ( i = 1; i < n; i++ ) {
-      // TODO: and exponential decay of equilibration
-      y = sqrt(8)/(M_PI*M_PI*i*i) * 0.34;
-      xerr[i] = y*y;
-    }
-    y = esterror_optx(T, alpha0, xerr, qT, qprec,
-        nint, &metad->intq, metad->n, -1, metad->pbc,
+    //double *xerr; int i;
+    //xnew(xerr, n);
+    //for ( i = 1; i < n; i++ ) {
+    //  // TODO: and exponential decay of equilibration
+    //  y = sqrt(8)/(M_PI*M_PI*i*i) * 0.34;
+    //  xerr[i] = y*y;
+    //}
+    //y = esterror_optx(T, alpha0, xerr, qT, qprec,
+    y = esterror_opt(T, alpha0, 0, qT, qprec,
+        nint, &metad->intq, n, -1, metad->pbc,
         metad->lambda, gamma, 0);
     /* save the optimal schedule to file */
     intq_save(metad->intq, 1.0, t0, 0, fnalpha);
-    free(xerr);
+    //free(xerr);
   } else {
-    y = esterror_invt(T, 1.0, alpha0, t0, metad->n, NULL,
+    y = esterror_invt(T, 1.0, alpha0, t0, n, NULL,
         metad->lambda, gamma);
   }
-  metad->errref = y * y;
+  metad->efref = y * y;
 }
 
 
@@ -631,10 +670,8 @@ static double metad_geterror(metad_t *metad)
   vref0 = metad_getave(metad, metad->vref);
   for ( i = 0; i < n; i++ ) {
     x = (metad->v[i] - v0) - (metad->vref[i] - vref0);
-    //printf("i %d, dif %g = %g, %g\n", i, x, metad->v[i], metad->vref[i]);
     err += x * x;
   }
-  //getchar();
   err /= n;
   return err;
 }

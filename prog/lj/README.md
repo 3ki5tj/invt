@@ -77,26 +77,26 @@ Gaussian, optimal
 
 arun1-8: rho = 0.8
 ```
-../lj
-../lj --kc=20
-../lj --sig=0.1
-../lj --sig=0.1 --opta --fngamma=gamma.dat --gam=load
-../lj --sig=0.2
-../lj --sig=0.2 --opta --fngamma=gamma.dat --gam=load
-../lj --sig=0.5
-../lj --sig=0.5 --opta --fngamma=gamma.dat --gam=load
+make -C .. && ../lj --gam=load --fngamma=gamma.dat
+make -C .. && ../lj --gam=load --fngamma=gamma.dat --kc=20
+make -C .. && ../lj --gam=load --fngamma=gamma.dat --sig=0.1
+make -C .. && ../lj --gam=load --fngamma=gamma.dat --sig=0.1 --opta
+make -C .. && ../lj --gam=load --fngamma=gamma.dat --sig=0.2
+make -C .. && ../lj --gam=load --fngamma=gamma.dat --sig=0.2 --opta
+make -C .. && ../lj --gam=load --fngamma=gamma.dat --sig=0.5
+make -C .. && ../lj --gam=load --fngamma=gamma.dat --sig=0.5 --opta
 ```
 
 brun1-8: rho = 0.1
 ```
-../lj --rho=0.1
-../lj --rho=0.1 --kc=20
-../lj --rho=0.1 --sig=0.1
-../lj --rho=0.1 --sig=0.1 --opta --fngamma=gamma.dat --gam=load
-../lj --rho=0.1 --sig=0.2
-../lj --rho=0.1 --sig=0.2 --opta --fngamma=gamma.dat --gam=load
-../lj --rho=0.1 --sig=0.5
-../lj --rho=0.1 --sig=0.5 --opta --fngamma=gamma.dat --gam=load
+make -C .. && ../lj --rho=0.1 --gam=load --fngamma=gamma.dat
+make -C .. && ../lj --rho=0.1 --gam=load --fngamma=gamma.dat --kc=20
+make -C .. && ../lj --rho=0.1 --gam=load --fngamma=gamma.dat --sig=0.1
+make -C .. && ../lj --rho=0.1 --gam=load --fngamma=gamma.dat --sig=0.1 --opta
+make -C .. && ../lj --rho=0.1 --gam=load --fngamma=gamma.dat --sig=0.2
+make -C .. && ../lj --rho=0.1 --gam=load --fngamma=gamma.dat --sig=0.2 --opta
+make -C .. && ../lj --rho=0.1 --gam=load --fngamma=gamma.dat --sig=0.5
+make -C .. && ../lj --rho=0.1 --gam=load --fngamma=gamma.dat --sig=0.5 --opta
 ```
 
 

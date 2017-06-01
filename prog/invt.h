@@ -714,7 +714,7 @@ __inline static double estbestc_invt(double T, double a0, double t0,
 
 /* save the gamma values */
 __inline static int savegamma(int n, const double *gamma,
-    const double *lambda, const char *fn)
+    const char *fn)
 {
   int i;
   FILE *fp;
@@ -730,12 +730,9 @@ __inline static int savegamma(int n, const double *gamma,
 
   fprintf(fp, "# %d %g\n", n, gamtot);
   for ( i = 1; i < n; i++ ) {
-    double lam = (lambda != NULL) ? lambda[i] : 1;
-    fprintf(fp, "%4d %14.6f %g\n", i, gamma[i], lam);
+    fprintf(fp, "%4d %14.6f\n", i, gamma[i]);
   }
-
   fclose(fp);
-
   return 0;
 }
 

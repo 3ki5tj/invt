@@ -70,35 +70,6 @@ static double lj_metroblk(lj_t *lj, metad_t *metad)
   return 1. * sacc / mcblk;
 }
 
-#if 0
-/* run with decreasing magnitude
- * until it falls under m->alpha0
- * cannot be used for Gaussian updating scheme */
-__inline static void decmagrun(invtpar_t *m, metad_t *metad, lj_t *lj)
-{
-  int ir;
-  long t;
-  double dr;
-
-  ir = dist01(metad, lj, &dr);
-  for ( t = 1; ; t++ ) {
-    lj_metroblk(lj, metad);
-    ir = dist01(metad, lj, &dr);
-    metad_updatev(metad, ir);
-    if ( t % 1000 == 0 ) {
-      int sacc = metad_wlcheck(metad, m->fluc, m->magred);
-      if ( sacc && metad->a < m->alpha0 )
-        break;
-    }
-    if ( t % 1000000 == 0 ) {
-      printf("t %ld, fl %g\n", t, metad->hfl);
-      metad_save(metad, fnvbias);
-    }
-  }
-  metad_save(metad, fnvbias);
-}
-#endif
-
 /* constant updating magnitude run
  * to compute the gamma values */
 static int gammrun(invtpar_t *m, metad_t *metad, lj_t *lj)
@@ -133,15 +104,16 @@ static int gammrun(invtpar_t *m, metad_t *metad, lj_t *lj)
 
 /* production run */
 static double prodrun(invtpar_t *m, metad_t *metad, lj_t *lj,
-    int prod, long nsteps, const char *fn, double *hfl)
+    int prod, long nsteps, const char *fn, double *hfl, int *ntrip)
 {
-  int ir;
+  int ir, n = metad->n, sgn = 0;
   long t;
   double t0, dr;
 
   metad->a = m->alpha0;
   t0 = 2/metad->a;
   metad_clearh(metad);
+  *ntrip = 0;
   for ( t = 1; t <= nsteps; t++ ) {
     lj_metroblk(lj, metad);
     ir = dist01(metad, lj, &dr);
@@ -152,14 +124,19 @@ static double prodrun(invtpar_t *m, metad_t *metad, lj_t *lj,
         metad->a = 1.0/(t + t0);
       }
     }
-    //if ( prod ) {
-    //  printf("t %ld, a %g\n", t, metad->a); getchar();
-    //}
+    /* update number of round trips */
+    if ( ir == 0 ) {
+      if ( sgn > 0 ) *ntrip += 1;
+      sgn = -1;
+    } else if ( ir == n - 1 ) {
+      if ( sgn < 0 ) *ntrip += 1;
+      sgn = 1;
+    }
     if ( t % 10000 == 0 ) {
       *hfl = metad_hfl(metad, -1);
-      fprintf(stderr, "%s t %8ld/%8ld = %5.2f%%, a %.3e, err %12.6e, hist. fl %12.6e/%5.3f%% %20s\r",
+      fprintf(stderr, "%s t %8ld/%8ld = %5.2f%%, a %.3e, err %12.6e, hist. fl %12.6e/%5.3f%% ntrip %d %20s\r",
           (prod ? "prod." : "prep."), t, nsteps, 100.*t/nsteps,
-          metad->a, metad_geterror(metad), (*hfl) * (*hfl), 100 * (*hfl), " ");
+          metad->a, metad_geterror(metad), (*hfl) * (*hfl), 100 * (*hfl), *ntrip, " ");
     }
     if ( t % 1000000 == 0 ) metad_save(metad, fn);
     metad_updatev(metad, ir);
@@ -172,31 +149,28 @@ static double prodrun(invtpar_t *m, metad_t *metad, lj_t *lj,
 static int work(invtpar_t *m)
 {
   lj_t *lj;
-  int ir, kcerr;
-  double dr, errtrunc;
+  int ir, kcerr, ntrip;
+  double dr, errtrunc, hfl;
   metad_t *metad;
 
-  mtscramble(clock());
+  //mtscramble(clock());
 
   lj = lj_open(np, rho, rcdef);
   lj_energy(lj);
 
   metad = metad_openf(0, lj->l*0.5, delr, m->pbc,
       METAD_SHIFT_TAIL, m->gaussig, m->kc, m->win, m->winn);
+  metad->a = m->alpha0;
   /* load the reference bias potential */
   metad_load(metad, metad->vref, fnvref);
   errtrunc = metad_errtrunc(metad, metad->vref, &kcerr, "vtrunc.dat");
   ir = dist01(metad, lj, &dr);
   fprintf(stderr, "n %d, rmax %g, r %d/%g, err trunc %g, mode %d\n", metad->n, metad->xmax, ir, dr, errtrunc, kcerr);
 
-  /* reduce the updating magnitude until it falls below m->alpha0 */
-  //decmagrun(m, metad, lj);
-
   /* constant magnitude run */
   if ( m->gammethod != GAMMETHOD_NONE
     && m->gammethod != GAMMETHOD_LOAD ) {
-    double hfl;
-    prodrun(m, metad, lj, 0, m->nequil, "vg.dat", &hfl); /* equilibration */
+    prodrun(m, metad, lj, 0, m->nequil, "vg.dat", &hfl, &ntrip); /* equilibration */
     gammrun(m, metad, lj);
   }
 
@@ -207,36 +181,36 @@ static int work(invtpar_t *m)
 
   /* multiple production runs */
   {
-    int i, itr;
+    int i, itr, ntrip0, ntrip1;
     ave_t ei[1], ef[1], fi[1], ff[1];
     double erri, errf, hfli, hflf; // , *v0;
     FILE *fplog;
 
-    //xnew(v0, metad->n);
-    //for ( i = 0; i < metad->n; i++ ) v0[i] = metad->v[i];
     ave_clear(ei);
     ave_clear(ef);
     ave_clear(fi);
     ave_clear(ff);
-    fprintf(stderr, "starting production metadynamics run of %ld/%ld steps..., a %g, err %g\n", m->nequil, m->nsteps, metad->a, metad->errref);
+    fprintf(stderr, "starting %ld metadynamics run of %ld/%ld steps..., a %g, err %g -> %g\n",
+        m->ntrials, m->nequil, m->nsteps, metad->a, metad->eiref, metad->efref);
     fplog = fopen(fnlog, "a");
     metad_saveheader(metad, fplog);
+    fprintf(fplog, "# %ld %ld %ld %g %g %g\n",
+        m->ntrials, m->nequil, m->nsteps, metad->a, metad->eiref, metad->efref);
     fclose(fplog);
     for ( itr = 0; itr < m->ntrials; itr++ ) {
       for ( i = 0; i < metad->n; i++ ) metad->v[i] = 0; // v0[i];
-      erri = prodrun(m, metad, lj, 0, m->nequil, "vi.dat", &hfli);
+      erri = prodrun(m, metad, lj, 0, m->nequil, "vi.dat", &hfli, &ntrip0);
       ave_add(ei, erri);
       ave_add(fi, hfli);
-      errf = prodrun(m, metad, lj, 1, m->nsteps, "vf.dat", &hflf);
+      errf = prodrun(m, metad, lj, 1, m->nsteps, "vf.dat", &hflf, &ntrip1);
       ave_add(ef, errf);
       ave_add(ff, hflf);
-      printf("%4d: %14.10f %14.10f %14.10f %14.10f | %14.10f %14.10f %14.10f %14.10f\n",
-          itr, errf, ef->ave, erri, ei->ave, hflf, ff->ave, hfli, fi->ave);
+      printf("%4d: %9.7f %9.7f(%9.7f) %9.7f %9.7f(%9.7f) | %9.7f %9.7f %9.7f %9.7f | %d %d\n",
+          itr, errf, ef->ave, metad->efref, erri, ei->ave, metad->eiref, hflf, ff->ave, hfli, fi->ave, ntrip1, ntrip0);
       fplog = fopen(fnlog, "a");
-      fprintf(fplog, "%d %12.6f %12.6f %12.6f %12.6f\n", itr, errf, erri, hfli, hflf);
+      fprintf(fplog, "%d %.8f %.8f %.8f %.8f %d %d\n", itr, errf, erri, hflf, hfli, ntrip1, ntrip0);
       fclose(fplog);
     }
-    //free(v0);
   }
 
   lj_close(lj);
@@ -252,8 +226,8 @@ int main(int argc, char **argv)
   m->n = 0;
   m->alpha0 = 1e-4; /* updating magnitude for equilibration and gamma run */
   m->gam_nsteps = 10000000L;
-  m->nequil = 1000000L;
-  m->nsteps = 10000000L;
+  m->nequil = 100000L;
+  m->nsteps = 1000000L;
   m->ntrials = 1000;
   m->pbc = 0;
   m->gammethod = GAMMETHOD_NONE;

@@ -302,7 +302,6 @@ static double intq_geterrx(intq_t *intq, double a0,
 
   intq->E = intq->Ea + intq->Er;
   intq->EK = intq->EKa + intq->EKr;
-  //fprintf(stderr, "a0 %g, qT %g, Er %g Ea %g, E %g\n", a0, qT, intq->Er, intq->Ea, intq->E); getchar();
 
   return sqrt( intq->E );
 }
@@ -337,7 +336,7 @@ __inline static double intq_getmint(intq_t *intq, double qT,
     q = i * dq;
     y = 0;
     mass_ub = 0;
-    for ( k = 0; k < n; k++ ) {
+    for ( k = 1; k < n; k++ ) {
       gamma = intq->gamma[k];
       lambda = intq->lambda[k];
       xp = exp(-2 * lambda * q);
@@ -391,7 +390,7 @@ static double intq_optqTfunc(intq_t *intq,
   for ( i = 0; i <= m; i++ ) {
     q = i * dq;
     y = 0;
-    for ( k = 0; k < n; k++ ) {
+    for ( k = 1; k < n; k++ ) {
       if ( K >= 0 && k > K && (!pbc || k < n - K) )
         continue;
       gamma = intq->gamma[k];
@@ -408,7 +407,7 @@ static double intq_optqTfunc(intq_t *intq,
   }
   f = mint - mass * intq->T * initalpha;
 
-  for ( y = 0, k = 0; k < n; k++ ) {
+  for ( y = 0, k = 1; k < n; k++ ) {
     if ( K >= 0 && k > K && (!pbc || k < n - K) )
       continue;
     gamma = intq->gamma[k];
@@ -510,7 +509,7 @@ static double intq_optqTfuncx(intq_t *intq, double a0,
   for ( i = 0; i <= m; i++ ) {
     q = i * dq;
     y = 0;
-    for ( k = 0; k < n; k++ ) {
+    for ( k = 1; k < n; k++ ) {
       if ( K >= 0 && k > K && (!pbc || k < n - K) )
         continue;
       gamma = intq->gamma[k];
@@ -527,7 +526,7 @@ static double intq_optqTfuncx(intq_t *intq, double a0,
   }
 
   y = z = w = 0;
-  for ( k = 0; k < n; k++ ) {
+  for ( k = 1; k < n; k++ ) {
     if ( K >= 0 && k > K && (!pbc || k < n - K) )
       continue;
     gamma = intq->gamma[k];
@@ -538,15 +537,12 @@ static double intq_optqTfuncx(intq_t *intq, double a0,
       z += xerr[k] * lambda * xp;
       w += xerr[k] * lambda * lambda * xp;
     }
-    printf("k %d, gamma %g, lambda %g, xp %g\n", k, gamma, lambda, xp);
   }
 
-  dmass = y/mass;
+  dmass = -y/mass;
   T = intq->T;
   f = mint - T*mass*a0/2 - T*z/mass;
   *df = mass - T*a0/2*dmass + 2*T*w/mass - dmass*T*z/(mass*mass);
-  printf("qT %g, f %g, mass %g, dmass %g, df %g, y %g, z %g, w %g, K %d\n", qT, f, mass, dmass, *df, y, z, w, K);
-  getchar();
   return f;
 }
 
@@ -589,7 +585,7 @@ static double intq_optqTx(intq_t *intq, double a0,
     if ( df < 0 ) df = 1.0;
 
     dq = -f/df;
-    printf("f %g, df %g, dq %g\n", f, df, dq); getchar();
+    //printf("f %g, %g, df %g, %g(%g), dq %g\n", f, f1, df, df1, (f1-f)/0.01, dq); getchar();
 
     /* limit the change */
     if ( dq > dqmax ) {
@@ -598,13 +594,12 @@ static double intq_optqTx(intq_t *intq, double a0,
       dq = -dqmax;
     }
 
-    if ( 1|| verbose ) {
+    if ( verbose ) {
       fprintf(stderr, "%d: qT %g -> %g (%g:%g, %g:%g), dq %g, f %g, df %g\n",
           i, qT, qT + dq, qTmin, fleft, qTmax, fright, dq, f, df);
-      getchar();
     }
     qT += dq;
-    printf("qT %g, qTmin %g\n", qT, qTmin); getchar();
+    //printf("qT %g, qTmin %g\n", qT, qTmin); getchar();
 
     /* limit qT within the bracket */
     if ( qT > qTmax ) {
@@ -612,8 +607,7 @@ static double intq_optqTx(intq_t *intq, double a0,
     } else if ( qT < qTmin ) {
       qT = qTmin;
     }
-    printf("qT %g, qTmin %g\n", qT, qTmin); getchar();
-
+    //printf("qT %g, qTmin %g\n", qT, qTmin); getchar();
   }
   return qT;
 }
@@ -858,9 +852,7 @@ static double esterror_opt(double T, double a0,
     /* by default, the initial updating magnitude
      * takes the optimal value, which is
      * half of the equilibration value */
-    if ( initalpha <= 0 ) {
-      initalpha = a0 / 2;
-    }
+    if ( initalpha <= 0 ) initalpha = a0 / 2;
     *qT = intq_optqT(intq, initalpha, qprec, verbose);
     //printf("qT %g\n", *qT); getchar();
   }
@@ -894,7 +886,7 @@ static double esterror_optx(double T, double a0,
   /* compute the optimal schedule and error */
   if ( *qT <= 0 ) {
     *qT = intq_optqTx(intq, a0, xerr, qprec, verbose);
-    printf("qT %g\n", *qT); getchar();
+    //printf("qT %g\n", *qT); getchar();
   }
   err = intq_geterrx(intq, a0, xerr, *qT);
 
