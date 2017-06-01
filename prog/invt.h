@@ -398,15 +398,15 @@ __inline static void stablizewin(double *lambda, int n,
 /* prepare the window function */
 __inline static double *prepwin(double *lambda, int n,
     const double *win0, int winn0, double *win, int *winn,
-    int pbc, double gaussig, int okmax,
+    int pbc, double gaussig, int kc,
     const char *fnwin, const char *fnwinmat, int verbose)
 {
   int i;
 
   if ( gaussig > 0 ) {
     mkgauswin(gaussig, n, pbc, win, winn);
-  } else if ( okmax >= 0 ) {
-    mksincwin(okmax, n, pbc, win, winn);
+  } else if ( kc >= 0 ) {
+    mksincwin(kc, n, pbc, win, winn);
   } else {
     /* copy the user window */
     *winn = winn0;
@@ -594,26 +594,16 @@ static double esterror_invt_x(double T, double c, double a0,
 
   for ( i = 1; i < n; i++ ) {
     x = esterror_invt1(T, c, a0, t0, &xr, &xa, lambda[i], gamma[i]);
-    if ( xerr != NULL ) {
-      xerr[i] = x;
-    }
-    if ( xerrr != NULL ) {
-      xerrr[i] = xr;
-    }
-    if ( xerra != NULL ) {
-      xerra[i] = xa;
-    }
+    if ( xerr  != NULL ) xerr[i] = x;
+    if ( xerrr != NULL ) xerrr[i] = xr;
+    if ( xerra != NULL ) xerra[i] = xa;
     E += x;
     Er += xr;
     Ea += xa;
   }
 
-  if ( errr != NULL ) {
-    *errr = sqrt( Er );
-  }
-  if ( erra != NULL ) {
-    *erra = sqrt( Ea );
-  }
+  if ( errr != NULL ) *errr = sqrt( Er );
+  if ( erra != NULL ) *erra = sqrt( Ea );
   return sqrt( E );
 }
 
@@ -724,19 +714,24 @@ __inline static double estbestc_invt(double T, double a0, double t0,
 
 /* save the gamma values */
 __inline static int savegamma(int n, const double *gamma,
-    const char *fn)
+    const double *lambda, const char *fn)
 {
   int i;
   FILE *fp;
+  double gamtot = 0;
 
   if ( (fp = fopen(fn, "w")) == NULL ) {
     fprintf(stderr, "cannot write [%s]\n", fn);
     return -1;
   }
 
-  fprintf(fp, "# %d\n", n);
+  /* compute the total gamma value */
+  for ( i = 1; i < n; i++ ) gamtot += gamma[i];
+
+  fprintf(fp, "# %d %g\n", n, gamtot);
   for ( i = 1; i < n; i++ ) {
-    fprintf(fp, "%4d %14.6f\n", i, gamma[i]);
+    double lam = (lambda != NULL) ? lambda[i] : 1;
+    fprintf(fp, "%4d %14.6f %g\n", i, gamma[i], lam);
   }
 
   fclose(fp);

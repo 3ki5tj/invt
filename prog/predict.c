@@ -327,7 +327,7 @@ static void invt_scania(invtpar_t *m,
   for ( inita = iamin; inita < iamax * iafac; inita *= iafac ) {
     /* compute the exact minimal error  */
     qT = intq_optqT(intq, inita, m->qprec, m->verbose);
-    err = intq_geterr(intq, m->alpha0, qT);
+    err = intq_geterrx(intq, m->alpha0, NULL, qT);
 
     printf("%14.6e\t%14.10f\t%14.10f\t%14.6e\n",
         inita, err, erri, qT);

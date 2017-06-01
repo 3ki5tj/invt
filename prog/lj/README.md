@@ -72,3 +72,31 @@ Gaussian, optimal
 ```
 ./lj --nsteps=10000000 --sig=0.1 --opta --fngamma=gamma.dat --gam=load
 ```
+
+
+
+arun1-8: rho = 0.8
+```
+../lj
+../lj --kc=20
+../lj --sig=0.1
+../lj --sig=0.1 --opta --fngamma=gamma.dat --gam=load
+../lj --sig=0.2
+../lj --sig=0.2 --opta --fngamma=gamma.dat --gam=load
+../lj --sig=0.5
+../lj --sig=0.5 --opta --fngamma=gamma.dat --gam=load
+```
+
+brun1-8: rho = 0.1
+```
+../lj --rho=0.1
+../lj --rho=0.1 --kc=20
+../lj --rho=0.1 --sig=0.1
+../lj --rho=0.1 --sig=0.1 --opta --fngamma=gamma.dat --gam=load
+../lj --rho=0.1 --sig=0.2
+../lj --rho=0.1 --sig=0.2 --opta --fngamma=gamma.dat --gam=load
+../lj --rho=0.1 --sig=0.5
+../lj --rho=0.1 --sig=0.5 --opta --fngamma=gamma.dat --gam=load
+```
+
+

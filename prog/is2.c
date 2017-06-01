@@ -155,7 +155,7 @@ static int addvref(metad_t *metad)
     if ( i == 0 ) v0 = lndos[id];
     metad->vref[i] = lndos[id] - v0;
   }
-  metad_trimv(metad, metad->vref);
+  metad_shiftv(metad, metad->vref);
   free(lndos);
 
   return 0;
@@ -170,6 +170,7 @@ static int invt_is2_run(invtpar_t *m)
 
   int emax = 0; // -IS2_N;
   int emin = emax - (m->n - 1) * 4;
+  int kcerr;
 
   //mtscramble( clock() );
 
@@ -183,8 +184,9 @@ static int invt_is2_run(invtpar_t *m)
   }
 
   metad = metad_open(emin, emax, 4,
-      m->pbc, m->gaussig, m->kc, m->win, m->winn);
+      m->pbc, METAD_SHIFT_TAIL, m->gaussig, m->kc, m->win, m->winn);
   addvref(metad);
+  metad_errtrunc(metad, metad->vref, &kcerr, "vtrunc.dat");
 
   /* gradually reduce the updating magnitude */
   decmagrun(m, metad, is);
@@ -195,10 +197,9 @@ static int invt_is2_run(invtpar_t *m)
     gammrun(m, metad, is);
 
   /* compute the optimal schedule */
-  if ( m->opta )
-    metad_getalpha(metad, (double) m->nsteps, m->gammethod,
-        m->fngamma, m->sampmethod, m->alpha0, &m->qT,
-        m->qprec, m->alpha_nint, m->fnalpha);
+  metad_getalphaerr(metad, m->opta, (double) m->nsteps, m->gammethod,
+      m->fngamma, m->sampmethod, m->alpha0, &m->qT,
+      m->qprec, m->alpha_nint, m->fnalpha);
 
   /* multiple production runs */
   {

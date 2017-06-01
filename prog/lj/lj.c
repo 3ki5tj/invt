@@ -70,9 +70,11 @@ static double lj_metroblk(lj_t *lj, metad_t *metad)
   return 1. * sacc / mcblk;
 }
 
+#if 0
 /* run with decreasing magnitude
- * until it falls under m->alpha0 */
-static void decmagrun(invtpar_t *m, metad_t *metad, lj_t *lj)
+ * until it falls under m->alpha0
+ * cannot be used for Gaussian updating scheme */
+__inline static void decmagrun(invtpar_t *m, metad_t *metad, lj_t *lj)
 {
   int ir;
   long t;
@@ -95,7 +97,7 @@ static void decmagrun(invtpar_t *m, metad_t *metad, lj_t *lj)
   }
   metad_save(metad, fnvbias);
 }
-
+#endif
 
 /* constant updating magnitude run
  * to compute the gamma values */
@@ -119,23 +121,19 @@ static int gammrun(invtpar_t *m, metad_t *metad, lj_t *lj)
     if ( t % 10 == 0 )
       metad_add_varv(metad);
     if ( t % 10000 == 0 ) fprintf(stderr, "t %ld/%ld = %5.2f%%, acc %.2f%% \r", t, m->gam_nsteps, 100.*t/m->gam_nsteps, 100*sacc/t);
-    if ( t % 1000000 == 0 ) {
+    if ( t % 1000000 == 0 || t == m->gam_nsteps ) {
       metad_getgamma_varv(metad, m->alpha0, "gamma.dat");
       metad_getgamma_tmat(metad, 1, "tgamma.dat");
     }
   }
   metad_save(metad, fnvbias);
-
-  /* estimate gamma */
-  metad_getgamma_varv(metad, m->alpha0, "gamma.dat");
-  metad_getgamma_tmat(metad, 1, "tgamma.dat");
   return 0;
 }
 
 
 /* production run */
 static double prodrun(invtpar_t *m, metad_t *metad, lj_t *lj,
-    int prod, long nsteps, const char *fn)
+    int prod, long nsteps, const char *fn, double *hfl)
 {
   int ir;
   long t;
@@ -143,6 +141,7 @@ static double prodrun(invtpar_t *m, metad_t *metad, lj_t *lj,
 
   metad->a = m->alpha0;
   t0 = 2/metad->a;
+  metad_clearh(metad);
   for ( t = 1; t <= nsteps; t++ ) {
     lj_metroblk(lj, metad);
     ir = dist01(metad, lj, &dr);
@@ -157,14 +156,16 @@ static double prodrun(invtpar_t *m, metad_t *metad, lj_t *lj,
     //  printf("t %ld, a %g\n", t, metad->a); getchar();
     //}
     if ( t % 10000 == 0 ) {
-      fprintf(stderr, "%s t %8ld/%8ld = %5.2f%%, a %.3e, err %g %20s\r",
+      *hfl = metad_hfl(metad, -1);
+      fprintf(stderr, "%s t %8ld/%8ld = %5.2f%%, a %.3e, err %12.6e, hist. fl %12.6e/%5.3f%% %20s\r",
           (prod ? "prod." : "prep."), t, nsteps, 100.*t/nsteps,
-          metad->a, metad_geterror(metad), " ");
+          metad->a, metad_geterror(metad), (*hfl) * (*hfl), 100 * (*hfl), " ");
     }
     if ( t % 1000000 == 0 ) metad_save(metad, fn);
     metad_updatev(metad, ir);
   }
   metad_save(metad, fn);
+  *hfl *= *hfl;
   return metad_geterror(metad);
 }
 
@@ -180,8 +181,8 @@ static int work(invtpar_t *m)
   lj = lj_open(np, rho, rcdef);
   lj_energy(lj);
 
-  metad = metad_openf(0, lj->l*0.5, delr,
-      m->pbc, m->gaussig, m->kc, m->win, m->winn);
+  metad = metad_openf(0, lj->l*0.5, delr, m->pbc,
+      METAD_SHIFT_TAIL, m->gaussig, m->kc, m->win, m->winn);
   /* load the reference bias potential */
   metad_load(metad, metad->vref, fnvref);
   errtrunc = metad_errtrunc(metad, metad->vref, &kcerr, "vtrunc.dat");
@@ -189,46 +190,53 @@ static int work(invtpar_t *m)
   fprintf(stderr, "n %d, rmax %g, r %d/%g, err trunc %g, mode %d\n", metad->n, metad->xmax, ir, dr, errtrunc, kcerr);
 
   /* reduce the updating magnitude until it falls below m->alpha0 */
-  decmagrun(m, metad, lj);
+  //decmagrun(m, metad, lj);
 
   /* constant magnitude run */
   if ( m->gammethod != GAMMETHOD_NONE
-    && m->gammethod != GAMMETHOD_LOAD )
+    && m->gammethod != GAMMETHOD_LOAD ) {
+    double hfl;
+    prodrun(m, metad, lj, 0, m->nequil, "vg.dat", &hfl); /* equilibration */
     gammrun(m, metad, lj);
+  }
 
-  /* compute the optimal schedule */
-  if ( m->opta )
-    metad_getalpha(metad, (double) m->nsteps, m->gammethod,
-        m->fngamma, m->sampmethod, m->alpha0, &m->qT,
-        m->qprec, m->alpha_nint, m->fnalpha);
+  /* compute the optimal schedule and the error */
+  metad_getalphaerr(metad, m->opta, (double) m->nsteps, m->gammethod,
+      m->fngamma, m->sampmethod, m->alpha0, &m->qT,
+      m->qprec, m->alpha_nint, m->fnalpha);
 
   /* multiple production runs */
   {
     int i, itr;
-    ave_t ei[1], ef[1];
-    double erri, errf, *v0;
+    ave_t ei[1], ef[1], fi[1], ff[1];
+    double erri, errf, hfli, hflf; // , *v0;
     FILE *fplog;
 
-    xnew(v0, metad->n);
-    for ( i = 0; i < metad->n; i++ ) v0[i] = metad->v[i];
+    //xnew(v0, metad->n);
+    //for ( i = 0; i < metad->n; i++ ) v0[i] = metad->v[i];
     ave_clear(ei);
     ave_clear(ef);
+    ave_clear(fi);
+    ave_clear(ff);
     fprintf(stderr, "starting production metadynamics run of %ld/%ld steps..., a %g, err %g\n", m->nequil, m->nsteps, metad->a, metad->errref);
     fplog = fopen(fnlog, "a");
     metad_saveheader(metad, fplog);
     fclose(fplog);
     for ( itr = 0; itr < m->ntrials; itr++ ) {
-      for ( i = 0; i < metad->n; i++ ) metad->v[i] = v0[i];
-      erri = prodrun(m, metad, lj, 0, m->nequil, "vi.dat");
+      for ( i = 0; i < metad->n; i++ ) metad->v[i] = 0; // v0[i];
+      erri = prodrun(m, metad, lj, 0, m->nequil, "vi.dat", &hfli);
       ave_add(ei, erri);
-      errf = prodrun(m, metad, lj, 1, m->nsteps, "vf.dat");
+      ave_add(fi, hfli);
+      errf = prodrun(m, metad, lj, 1, m->nsteps, "vf.dat", &hflf);
       ave_add(ef, errf);
-      printf("%4d: %14.10f %14.10f %14.10f %14.10f %20s\n", itr, errf, ef->ave, erri, ei->ave, " ");
+      ave_add(ff, hflf);
+      printf("%4d: %14.10f %14.10f %14.10f %14.10f | %14.10f %14.10f %14.10f %14.10f\n",
+          itr, errf, ef->ave, erri, ei->ave, hflf, ff->ave, hfli, fi->ave);
       fplog = fopen(fnlog, "a");
-      fprintf(fplog, "%d %g %g\n", itr, errf, erri);
+      fprintf(fplog, "%d %12.6f %12.6f %12.6f %12.6f\n", itr, errf, erri, hfli, hflf);
       fclose(fplog);
     }
-    free(v0);
+    //free(v0);
   }
 
   lj_close(lj);
@@ -242,11 +250,11 @@ int main(int argc, char **argv)
 
   invtpar_init(m);
   m->n = 0;
+  m->alpha0 = 1e-4; /* updating magnitude for equilibration and gamma run */
   m->gam_nsteps = 10000000L;
-  m->nequil = 100000L;
+  m->nequil = 1000000L;
   m->nsteps = 10000000L;
   m->ntrials = 1000;
-  m->alpha0 = 1e-4;
   m->pbc = 0;
   m->gammethod = GAMMETHOD_NONE;
   m->sampmethod = SAMPMETHOD_GAUSS;
