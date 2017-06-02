@@ -192,7 +192,7 @@ static int work(invtpar_t *m)
     ave_clear(ff);
     fprintf(stderr, "starting %ld metadynamics run of %ld/%ld steps..., a %g, err %g -> %g\n",
         m->ntrials, m->nequil, m->nsteps, metad->a, metad->eiref, metad->efref);
-    fplog = fopen(fnlog, "a");
+    fplog = fopen(fnlog, "w");
     metad_saveheader(metad, fplog);
     fprintf(fplog, "# %ld %ld %ld %g %g %g\n",
         m->ntrials, m->nequil, m->nsteps, metad->a, metad->eiref, metad->efref);
@@ -205,8 +205,8 @@ static int work(invtpar_t *m)
       errf = prodrun(m, metad, lj, 1, m->nsteps, "vf.dat", &hflf, &ntrip1);
       ave_add(ef, errf);
       ave_add(ff, hflf);
-      printf("%4d: %9.7f %9.7f(%9.7f) %9.7f %9.7f(%9.7f) | %9.7f %9.7f %9.7f %9.7f | %d %d\n",
-          itr, errf, ef->ave, metad->efref, erri, ei->ave, metad->eiref, hflf, ff->ave, hfli, fi->ave, ntrip1, ntrip0);
+      printf("%4d: %9.7f %9.7f(%5.2f) %9.7f %9.7f(%5.2f) | %9.7f %9.7f %9.7f %9.7f | %d %d\n",
+          itr, errf, ef->ave, ef->ave/metad->efref, erri, ei->ave, ei->ave/metad->eiref, hflf, ff->ave, hfli, fi->ave, ntrip1, ntrip0);
       fplog = fopen(fnlog, "a");
       fprintf(fplog, "%d %.8f %.8f %.8f %.8f %d %d\n", itr, errf, erri, hflf, hfli, ntrip1, ntrip0);
       fclose(fplog);
@@ -226,9 +226,10 @@ int main(int argc, char **argv)
   m->n = 0;
   m->alpha0 = 1e-4; /* updating magnitude for equilibration and gamma run */
   m->gam_nsteps = 10000000L;
-  m->nequil = 100000L;
-  m->nsteps = 1000000L;
+  m->nequil = 10000000L;
+  m->nsteps = 10000000L;
   m->ntrials = 1000;
+  //m->alpha_nint = 20000;
   m->pbc = 0;
   m->gammethod = GAMMETHOD_NONE;
   m->sampmethod = SAMPMETHOD_GAUSS;

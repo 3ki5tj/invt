@@ -355,7 +355,7 @@ __inline static double metad_errtrunc(metad_t *metad,
   getcosmodes(v, n, metad->vft, metad->costab);
   *kc = n;
   for ( k = 1; k < n; k++ ) {
-    if ( metad->lambda[k] > 0.5 ) continue;
+    if ( metad->lambda[k] > 0.01 ) continue;
     if ( *kc == n ) *kc = k;
     err += metad->vft[k] * metad->vft[k];
   }
@@ -615,6 +615,34 @@ __inline static void metad_getgamma_tmat(metad_t *metad, double dt,
 }
 
 
+/* estimate the components of the systematic bias error */
+__inline static double *metad_estxerr(metad_t *metad,
+    double alpha0, double nequil)
+{
+  int i, n = metad->n;
+  double v, vmin, vmax, *xerr;
+
+  /* estimate the minimum and maximum */
+  vmin = vmax = metad->vref[0];
+  for ( i = 1; i < n; i++ ) {
+    if ( (v = metad->vref[i]) > vmax ) {
+      vmax = v;
+    } else if ( v < vmin ) {
+      vmin = v;
+    }
+  }
+
+  xnew(xerr, n);
+  for ( i = 1; i < n; i++ ) {
+    v = sqrt(8)/(M_PI*M_PI*i*i) * (vmax - vmin);
+    v *= exp(-metad->lambda[i]*alpha0*nequil);
+    //if (i < 20) printf("i %d, lambda %g, y %g\n", i, metad->lambda[i], v);
+    xerr[i] = v * v;
+  }
+  return xerr;
+}
+
+
 /* compute the optimal schedule and its error */
 static void metad_getalphaerr(metad_t *metad, int opta, double T, int gammethod,
     const char *fngamma, int sampmethod, double alpha0, double *qT,
@@ -636,13 +664,6 @@ static void metad_getalphaerr(metad_t *metad, int opta, double T, int gammethod,
   metad->eiref = y * y;
 
   if ( opta ) {
-    //double *xerr; int i;
-    //xnew(xerr, n);
-    //for ( i = 1; i < n; i++ ) {
-    //  // TODO: and exponential decay of equilibration
-    //  y = sqrt(8)/(M_PI*M_PI*i*i) * 0.34;
-    //  xerr[i] = y*y;
-    //}
     //y = esterror_optx(T, alpha0, xerr, qT, qprec,
     y = esterror_opt(T, alpha0, 0, qT, qprec,
         nint, &metad->intq, n, -1, metad->pbc,

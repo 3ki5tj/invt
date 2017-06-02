@@ -74,17 +74,19 @@ Gaussian, optimal
 ```
 
 
+WARNING: check if `mtscramble(clock());` is commented out.
+
 
 arun1-8: rho = 0.8
 ```
-make -C .. && ../lj --gam=load --fngamma=gamma.dat
-make -C .. && ../lj --gam=load --fngamma=gamma.dat --kc=20
-make -C .. && ../lj --gam=load --fngamma=gamma.dat --sig=0.1
-make -C .. && ../lj --gam=load --fngamma=gamma.dat --sig=0.1 --opta
-make -C .. && ../lj --gam=load --fngamma=gamma.dat --sig=0.2
-make -C .. && ../lj --gam=load --fngamma=gamma.dat --sig=0.2 --opta
-make -C .. && ../lj --gam=load --fngamma=gamma.dat --sig=0.5
-make -C .. && ../lj --gam=load --fngamma=gamma.dat --sig=0.5 --opta
+make -C .. && ../lj --rho=0.8 --gam=load --fngamma=gamma.dat
+make -C .. && ../lj --rho=0.8 --gam=load --fngamma=gamma.dat --kc=20
+make -C .. && ../lj --rho=0.8 --gam=load --fngamma=gamma.dat --sig=0.1
+make -C .. && ../lj --rho=0.8 --gam=load --fngamma=gamma.dat --sig=0.1 --opta
+make -C .. && ../lj --rho=0.8 --gam=load --fngamma=gamma.dat --sig=0.2
+make -C .. && ../lj --rho=0.8 --gam=load --fngamma=gamma.dat --sig=0.2 --opta
+make -C .. && ../lj --rho=0.8 --gam=load --fngamma=gamma.dat --sig=0.5
+make -C .. && ../lj --rho=0.8 --gam=load --fngamma=gamma.dat --sig=0.5 --opta
 ```
 
 brun1-8: rho = 0.1

@@ -89,30 +89,48 @@ __inline static double normalize(double *v, int n, double sig,
  * which may not be stable */
 static void mkgauswin(double sig, int n, int pbc, double *win, int *winn)
 {
-  int i, winmax;
-  double x, s;
+  int i, j, winmax;
+  double x, *lambda, lamn;
+
+  xnew(lambda, n);
+  /* starting from the Fourier transform: the eigenvalues */
+  for ( i = 0; i < n; i++ ) {
+    x = i * (pbc ? 2 : 1) * M_PI * sig / n;
+    lambda[i] = exp(-0.5*x*x);
+  }
 
   /* truncate the Gaussian at 10 * sigma */
-  *winn = (int) (sig * 10 + 0.5);
-  if ( *winn < 1 ) *winn = 1;
+  //*winn = (int) (sig * 10 + 0.5);
+  //if ( *winn < 1 ) *winn = 1;
 
   /* limit the maximal bin width */
   winmax = pbc ? (n/2 + 1) : n;
-  if ( *winn > winmax ) *winn = winmax;
+  //if ( *winn > winmax ) *winn = winmax;
+  *winn = winmax;
 
-  win[0] = 1;
-  s = win[0];
-  for ( i = 1; i < *winn; i++ ) {
-    x = i / sig;
-    win[i] = exp(-0.5 * x * x);
-    s += win[i] * 2;
-  }
+  /* for reflective boundary condition, compute lambda_n such that win[n] == 0 */
+  for ( lamn = lambda[0], i = 1; i < n; i++ )
+    lamn += lambda[i] * (i % 2 ? -2 : 2);
+  if ( n % 2 == 0 ) lamn = -lamn;
 
-  /* normalize the window function, such that
-   * win[0] + 2 * (win[1] + ... + win[n - 1]) = 1 */
-  for ( i = 0; i < *winn; i++ ) {
-    win[i] /= s;
+  for ( j = 0; j < *winn; j++ ) {
+    if ( pbc ) {
+      /* periodic boundary condition */
+      /* win[j] = Sum { k = 0 to n - 1 } lambda_k cos( 2 k j Pi / n) ); */
+      for ( win[j] = 0, i = 0; i < n; i++ )
+        win[j] += lambda[i] * cos( j * i * 2 * M_PI / n );
+    } else {
+      /* reflective boundary condition */
+      /* win[j] = ( (lambda_0 + lambda_n) / 2
+       *        + Sum { k = 1 to n - 1 } lambda_k cos( k j Pi / n) ); */
+      win[j] = (lambda[0] + lamn * (j % 2 ? -1 : 1)) * 0.5;
+      for ( i = 1; i < n; i++ )
+        win[j] += lambda[i] * cos(j * i * M_PI / n);
+    }
+    win[j] /= n;
+    //x = j / sig; printf("win %4d: %g %g\n", j, win[j], win[j]/(exp(-0.5*x*x)/sig/sqrt(2*M_PI)));
   }
+  free(lambda);
 }
 
 
@@ -180,7 +198,7 @@ static void geteigvals(double *lambda, int n,
       if ( verbose ) {
         fprintf(stderr, "Warning: eigenvalue %d: %g is negative\n", i + 1, lambda[i]);
       }
-    } else if ( lambda[i] < tol ) {
+    } else if ( lambda[i] < tol ) { // necessary? for sinc only?
       lambda[i] = 0;
     }
   }
@@ -275,32 +293,26 @@ __inline static void stablizewin(double *lambda, int n,
 {
   const int itmax = 10000;
   int i, j, err, it;
-  double lam, lamn, lammax;
-  double *nwin;
+  double lamn = 0, lammax, *nwin;
 
   xnew(nwin, n + 1);
 
   /* A1. copy window function */
-  for ( i = 0; i < *winn; i++ )
-    nwin[i] = win[i];
-  for ( i = *winn; i < n; i++ )
-    nwin[i] = 0;
+  for ( i = 0; i < n; i++ )
+    nwin[i] = (i < *winn ? win[i] : 0);
 
   for ( it = 0; it < itmax; it++ ) {
     /* B1. compute the eigenvalues from the window */
     geteigvals(lambda, n, nwin, *winn, pbc,
         tol, &err, it == itmax - 1);
-    //for ( i = 0; i < n; i++ ) printf("i %4d: lambda %18.15f, win %18.15f\n", i, lambda[i], win[i]);
-    //getchar();
 
     /* B2. change negative eigenvalues to zeros */
     lammax = 0; /* magnitude of the most negative eigenvalue */
     err = 0;
     for ( i = 0; i < n; i++ ) {
       if ( lambda[i] < -1e3 * DBL_EPSILON ) {
-        if ( -lambda[i] > lammax ) {
+        if ( -lambda[i] > lammax )
           lammax = -lambda[i];
-        }
         lambda[i] = 0;
         err += 1;
       }
@@ -308,24 +320,11 @@ __inline static void stablizewin(double *lambda, int n,
 
     /* B3. inversely Fourier transform to get the window function */
 
-    if ( pbc ) {
-      /* periodic boundary condition, lambda_n = 0 */
-      lamn = 0;
-    } else {
-      /* reflective boundary condition */
+    if ( !pbc ) { /* reflective boundary condition */
       /* compute lambda_n such that win[n] == 0 */
-      lamn = lambda[0];
-      for ( i = 1; i < n; i++ ) {
-        lam = lambda[i];
-        if ( i % 2 == 0 ) {
-          lamn += 2 * lam;
-        } else {
-          lamn -= 2 * lam;
-        }
-      }
-      if ( n % 2 == 0 ) {
-        lamn = -lamn;
-      }
+      for ( lamn = lambda[0], i = 1; i < n; i++ )
+        lamn += lambda[i] * (i % 2 ? -2 : 2);
+      if ( n % 2 == 0 ) lamn = -lamn;
     }
 
     if ( err == 0 || it == itmax - 1 ) {
@@ -340,28 +339,17 @@ __inline static void stablizewin(double *lambda, int n,
         /* periodic boundary condition */
         /* win[j] = Sum { k = 0 to n - 1 } lambda_k cos( 2 k j Pi / n) ); */
         nwin[j] = 0;
-        for ( i = 0; i < n; i++ ) {
-          lam = lambda[i];
-          nwin[j] += lam * cos( j * i * 2 * M_PI / n );
-        }
-        nwin[j] /= n;
+        for ( i = 0; i < n; i++ )
+          nwin[j] += lambda[i] * cos( j * i * 2 * M_PI / n );
       } else {
         /* reflective boundary condition */
-        /* win[j] = ( (lambda_0 + lambda_n) / 2
+        /* win[j] = ( (lambda_0 + (-1)^j lambda_n) / 2
          *        + Sum { k = 1 to n - 1 } lambda_k cos( k j Pi / n) ); */
-        nwin[j] = lambda[0] * 0.5; /* lambda0[0] should be 1.0 */
-        if ( j % 2 == 0 ) {
-          nwin[j] += lamn * 0.5;
-        } else {
-          nwin[j] -= lamn * 0.5;
-        }
-
-        for ( i = 1; i < n; i++ ) {
-          lam = lambda[i];
-          nwin[j] += lam * cos( j * i * M_PI / n );
-        }
-        nwin[j] /= n;
+        nwin[j] = (lambda[0] + lamn * (j % 2 ? -1: 1)) * 0.5;
+        for ( i = 1; i < n; i++ )
+          nwin[j] += lambda[i] * cos(j * i * M_PI / n);
       }
+      nwin[j] /= n;
 
       if ( verbose > 0 && (err == 0 || it == itmax - 1) ) {
         fprintf(stderr, "it %d: win %4d: %22.10e -> %22.10e\n",
@@ -381,14 +369,11 @@ __inline static void stablizewin(double *lambda, int n,
   }
 
   /* change the window width if the iteration fails */
-  if ( it >= itmax ) {
-    *winn = n;
-  }
+  if ( it >= itmax ) *winn = n;
 
   /* copy the window function */
-  for ( j = 0; j < *winn; j++ ) {
+  for ( j = 0; j < *winn; j++ )
     win[j] = nwin[j];
-  }
 
   free(nwin);
 }
