@@ -32,7 +32,8 @@
 
 \newcommand{\Err}{E}
 \newcommand{\ii}{\mathrm{i}}
-
+%bin average
+\newcommand{\bav}[1]{#1_\mathrm{av}}
 
 
 \begin{document}
@@ -111,7 +112,7 @@ Galveston, Texas 77555-0304, USA}
   is also given by the inverse-time prescription.
   %
   Several previous flat-distribution-sampling algorithms
-  can be cast as special cases of the bandpass updating schemes. 
+  can be cast as special cases of the bandpass updating schemes.
   %
 \end{abstract}
 
@@ -333,7 +334,7 @@ Interestingly, several previous FDS algorithms\cite{
   langfeld2012, pellegrini2014,
   neuhaus2006, *neuhaus2007}
 can be cast as special cases of bandpass updating schemes.
-  
+
 %For finite-length simulations, however,
 %metadynamics may deliver better performance.
 %
@@ -439,7 +440,7 @@ $(z, z + \Delta z)$.
 %%a flat or nearly flat distribution
 %%as entropic or multicanonical sampling.
 %
-%To do so, we introduce a bias potential, $V_i$,
+%To do so, we introduce a bias potential, $u_i$,
 The challenge of sampling a multimodal distribution, $p^*_i$,
 with deep valley(s) can often be eased by
 biased sampling targeting a smoother distribution, $p_i$.
@@ -452,11 +453,11 @@ biased sampling targeting a smoother distribution, $p_i$.
 %
 %In particular,
 %to make $\pi_i$ flat,
-%the bias potential $V_i$
+%the bias potential $u_i$
 %must coincide with $\ln p^*_i$,
 %up to an additive constant.
 %%
-%In practice, $V_i$ may be non-optimal or contain error,
+%In practice, $u_i$ may be non-optimal or contain error,
 %and thus $\pi_i$ need not
 %coincide with the intended distribution $p_i$.
 %
@@ -467,18 +468,18 @@ targeting a flat $p_i$ (i.e. $p_i \equiv 1/n$)
 or nearly flat one\cite{
 dayal2004, *trebst2004, barducci2008, singh2011}.
 %
-By introducing a bias potential, $V_i$,
+By introducing a bias potential, $u_i$,
 the biased equilibrium distribution becomes
 %
 \begin{equation}
   \pi_i
   %=
-  %C_i \, p^*_i \, e^{-V_i}
+  %C_i \, p^*_i \, e^{-u_i}
   =
-  \frac{                p^*_i \, e^{-V_i} }
-       { \sum_{j = 1}^n p^*_j \, e^{-V_j} }
+  \frac{                p^*_i \, e^{-u_i} }
+       { \sum_{j = 1}^n p^*_j \, e^{-u_j} }
   \propto
-  p^*_i \, e^{-V_i}
+  p^*_i \, e^{-u_i}
   ,
   \label{eq:pi_p_V}
 \end{equation}
@@ -490,7 +491,7 @@ with the desired $p_i$.
 Upon convergence, the bias potential would satisfy
 %
 \begin{equation}
-  V_i \to \ln p^*_i - \ln p_i + \mathrm{const.}
+  u_i \to \ln p^*_i - \ln p_i + \mathrm{const.}
   ,
   \label{eq:Vi_target}
 \end{equation}
@@ -499,13 +500,13 @@ Upon convergence, the bias potential would satisfy
 %which allows us to deduce the PMF, $-\ln p^*_i$,
 %directly from the bias potential.
 %
-and the PMF, $-\ln p^*_i$, can be readily 
-deduced from the bias potential. % $V_i$.
+and the PMF, $-\ln p^*_i$, can be readily
+deduced from the bias potential. % $u_i$.
 \note{
   For example, in the context of simulated tempering (Zhang and Ma, 2007),
   $p^*_i$ is replaced by $\ln Z_i$,
   $p_i$ is the weight $\zeta_i$,
-  and the bias potential, $V_i$, is $\ln (\tilde Z_i / \zeta_i)$.
+  and the bias potential, $u_i$, is $\ln (\tilde Z_i / \zeta_i)$.
   Upon convergence, we have $\ln \tilde Z_i \to \ln Z_i$
   up to a constant shift.
 }
@@ -519,7 +520,7 @@ have been developed to find the proper bias potential.
 %
 In a class of equilibrium FDS methods\cite{
   mezei1987, berg1992, *lee1993, marinari1992, *lyubartsev1992},
-the bias potential, $V_i$, is
+the bias potential, $u_i$, is
 estimated a priori and fixed
 during simulation,
 %
@@ -529,12 +530,12 @@ accumulated from the simulation as
 %
 %Using $H_i$ as an estimate of $\pi_i$ in
 %Eq. \eqref{eq:pi_p_V}
-%allows us to correct $V_i$ as
+%allows us to correct $u_i$ as
 %
 \begin{equation}
-  V^\mathrm{corr}_i
+  u^\mathrm{corr}_i
   =
-  V_i
+  u_i
   +
   \ln \frac{ H_i }
            { p_i }.
@@ -545,10 +546,10 @@ accumulated from the simulation as
   $$
   \begin{aligned}
     H_i \approx \pi_i
-    &\propto p^*_i \, e^{-V_i},
+    &\propto p^*_i \, e^{-u_i},
     \\
     p_i
-    &\propto p^*_i \, e^{-V^\mathrm{corr}_i}.
+    &\propto p^*_i \, e^{-v^{0, \mathrm{corr}}_i}.
   \end{aligned}
   $$
 }
@@ -622,13 +623,13 @@ and we will focus on these methods below.
 %We will mainly focus on the adaptive methods below.
 %
 In the original WL algorithm\cite{wang2001, *wang2001pre},
-the bias potential, $V_i(t)$, is updated
+the bias potential, $u_i(t)$, is updated
 at each sampling step $t$ as
 %
 \begin{equation}
-  V_i(t+1)
+  u_i(t+1)
   =
-  V_i(t)
+  u_i(t)
   +
   \delta_{i, \, i(t)}
   \frac{ \alpha(t) } { p_{i(t)} }
@@ -651,9 +652,9 @@ used in metadynamics,
 several neighboring bins are updated:
 %
 \begin{equation}
-  V_i(t+1)
+  u_i(t+1)
   =
-  V_i(t)
+  u_i(t)
   +
   w_{i, \, i(t)}
   \frac{ \alpha(t) }
@@ -692,14 +693,14 @@ removed by gradually decreasing the updating magnitude\cite{
 %is identical to $p_i$ in the long time or asymptotic limit.
 %
 %However, as the above updates
-%change $V_i(t)$ continuously,
+%change $u_i(t)$ continuously,
 %the equilibrium distribution,
 %Eq. \eqref{eq:pi_p_V}, no longer holds
 %at all times,
 %%
 %The source of the deviation is two-fold.
 %%
-%First, since $V_i(t)$ is updated continuously,
+%First, since $u_i(t)$ is updated continuously,
 %there is a random noise that is proportional
 %to $\sqrt \alpha$.
 %%
@@ -812,7 +813,7 @@ for the more general multiple-bin scheme.
 %determined from the initial error.
 %
 We will first express the error of
-the bias potential, $V_i(t)$,
+the bias potential, $u_i(t)$,
 as a functional of $\alpha(t)$,
 and then minimize it by variation.
 %
@@ -833,7 +834,7 @@ we introduce a shifted bias potential
 \begin{equation}
   v_i(t)
   \equiv
-  V_i(t)
+  u_i(t)
   -
   \ln \frac { p^*_i }
             { p_i }
@@ -844,7 +845,7 @@ we introduce a shifted bias potential
 which should tend to a constant of $i$
 upon convergence.
 Note that the updates to $v_i(t)$ are
-equivalent to the updates to $V_i(t)$,
+equivalent to the updates to $u_i(t)$,
 since the shift
 remains a constant during the course of simulation,
 %%
@@ -867,18 +868,18 @@ remains a constant during the course of simulation,
 Second, the bias potential following Eq. \eqref{eq:wl_update}
 generally grows over time.
 %
-Since a uniform increase of $V_i(t)$, or, equivalently, that of $v_i(t)$,
+Since a uniform increase of $u_i(t)$, or, equivalently, that of $v_i(t)$,
 does not affect the
 resulting distribution, $\pi_i(t)$,
 %
 the real deviation, $x_i(t)$, of the bias potential
 depends only on the difference between $v_i(t)$
-and a baseline value, $\bar v(t)$,
+and a baseline value, $\bav{v}(t)$,
 for average growth\cite{
 dama2014},
 %
 \begin{equation}
-  x_i(t) \equiv v_i(t) - \bar v(t)
+  x_i(t) \equiv v_i(t) - \bav{v}(t)
   %=
   %v_i - \sum_{j = 1}^n \rho_j \, v_j
   ,
@@ -888,7 +889,7 @@ dama2014},
 where
 %
 \begin{equation}
-  \bar v(t)
+  \bav{v}(t)
   = \sum_{i = 1}^n \rho_i \, v_i(t)
   ,
 \label{eq:vbar_def}
@@ -951,9 +952,9 @@ by a differential equation\footnote{This
 approximation requires us to shift the origin of time by $1$ in some cases.}
 %
 \begin{equation}
-  \dot V_i(t)
+  \dot u_i(t)
   \equiv
-  \frac{ dV_i(t) } { dt }
+  \frac{ d u_i(t) } { dt }
   =
   \alpha(t) \, \frac{ h_i(t) } { p_i },
   \label{eq:vt_diffeq}
@@ -1097,7 +1098,7 @@ $
 
 %The average growth rate of $v(t)$ is given by
 %\begin{equation}
-%  \frac{ d \bar v (t) }
+%  \frac{ d \bav{v} (t) }
 %       { d t }
 %  =
 %  \alpha(t)
@@ -1161,7 +1162,7 @@ $$
   \dot x_i
   &\stackrel{\mathrm{Eq.\; \eqref{eq:x_def}}}
             {=\joinrel=\joinrel=\joinrel=\joinrel=}
-  \dot v_i - \dot{ \bar v }
+  \dot v_i - \bav{\dot v}
   \stackrel{\mathrm{Eqs.\; \eqref{eq:vt_diffeq}\; and\; \eqref{eq:vbar_def}}}
             {=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=}
   \alpha(t) \left(
@@ -1197,7 +1198,7 @@ x_i(T)
 x_i(0) \, e^{-q(T)}
 +
 \int_0^T
-  \dot u\bigl( q(t) \bigr) \, \xi_i(t) \, dt,
+  \dot y\bigl( q(t) \bigr) \, \xi_i(t) \, dt,
 \notag
 %\label{eq:xt_solution}
 \end{equation}
@@ -1211,10 +1212,10 @@ $
 and
 %
 \begin{align}
-u(q')
+y(q')
 &\equiv
 e^{q' - q(T)}.
-\label{eq:u_def}
+\label{eq:y_def}
 \end{align}
 
 
@@ -1234,7 +1235,7 @@ is given by
   +
   \Gamma \,
   \int_0^T
-    {\dot u}^2\bigl( q(t) \bigr) \,
+    {\dot y}^2\bigl( q(t) \bigr) \,
     \, dt
   ,
   \label{eq:ET_average}
@@ -1254,17 +1255,17 @@ that minimizes this error.
 We now fix the endpoint value, $q(T)$,
 and vary the curve, $q(t)$ ($0 < t < T$).
 %
-This is equivalent to varying the curve $u(q(t))$
+This is equivalent to varying the curve $y(q(t))$
 with fixed endpoints,
-$u\bigl( q(0) \bigr)  = e^{- q(T)}$
+$y\bigl( q(0) \bigr)  = e^{- q(T)}$
 and
-$u\bigl( q(T) \bigr) = 1$.
+$y\bigl( q(T) \bigr) = 1$.
 %
 Note also that the first term on the right-hand side
 of Eq. \eqref{eq:ET_average} is fixed during
 the process,
 while the second term is the action of a free particle.
-Thus, the velocity of $u(q(t))$ should be a constant:
+Thus, the velocity of $y(q(t))$ should be a constant:
 %
 %We will further demand that
 %%
@@ -1280,14 +1281,14 @@ Thus, the velocity of $u(q(t))$ should be a constant:
 %\begin{align}
 %\left\langle x^2(t) \right\rangle
 %%&=
-%%\int_0^t \int_0^t \dot u(t') \, \dot u(t'')
+%%\int_0^t \int_0^t \dot y(t') \, \dot y(t'')
 %%    \left\langle \xi(t') \xi(t'') \right\rangle dt'' \, dt'
 %%\notag
 %%\\
 %&=
 %\int_0^t \int_0^t
-%  \dot u\bigl( q(t') \bigr) \,
-%  \dot u\bigl( q(t'') \bigr) \,
+%  \dot y\bigl( q(t') \bigr) \,
+%  \dot y\bigl( q(t'') \bigr) \,
 %  \kappa(t' - t'') \, dt'' \, dt'.
 %\label{eq:x2t_average_asym}
 %\end{align}
@@ -1298,10 +1299,10 @@ Thus, the velocity of $u(q(t))$ should be a constant:
 %0
 %&=
 %\frac{d}{dt} \int_0^T
-%  \dot u\bigl( q(t') \bigr) \, \kappa(t' - t) \, dt'
+%  \dot y\bigl( q(t') \bigr) \, \kappa(t' - t) \, dt'
 %\\
 %&= \int_0^T
-%  \ddot u\bigl( q(t') \bigr) \, \kappa(t' - t) \, dt',
+%  \ddot y\bigl( q(t') \bigr) \, \kappa(t' - t) \, dt',
 %\end{aligned}
 %$$
 %where we have dropped the boundary terms
@@ -1310,7 +1311,7 @@ Thus, the velocity of $u(q(t))$ should be a constant:
 %
 %In fact, we can repeat the process $n$ times, and
 %$$
-%\int_0^t u^{(n)}(t') \, \kappa(t' - \tau) \, dt' = 0,
+%\int_0^t y^{(n)}(t') \, \kappa(t' - \tau) \, dt' = 0,
 %\qquad (n \ge 1)
 %$$
 %
@@ -1318,17 +1319,17 @@ Thus, the velocity of $u(q(t))$ should be a constant:
 %we must have
 %%
 %$
-%\ddot u\bigl( q(t') \bigr) = 0
+%\ddot y\bigl( q(t') \bigr) = 0
 %,
 %$
 %or
 \begin{equation}
-  \dot u\bigl( q(t) \bigr) = c
+  \dot y\bigl( q(t) \bigr) = c
   .
-\label{eq:dudt_const}
+\label{eq:dydt_const}
 \end{equation}
 %
-Then, by using Eq. \eqref{eq:u_def}, we have
+Then, by using Eq. \eqref{eq:y_def}, we have
 %
 \begin{equation}
   e^{ q(t) - q(T) }
@@ -1409,16 +1410,6 @@ By definition, Eq. \eqref{eq:mbin_update},
 a visit to bin $j$ in this case results in updates of the bias potential
 not only at bin $j$, but also at a few neighboring bins $i$'s.
 %
-Then, Eq. \eqref{eq:vt_diffeq} is generalized to
-%
-\begin{equation}
-  \dot V_i(t)
-  =
-  \alpha(t) \sum_{j=1}^n \, w_{ij} \frac{ h_j(t) } { p_j }.
-  \label{eq:vt_diffeq_mbin}
-\end{equation}
-
-
 The optimization procedure is similar to the single-bin case.
 %
 The key step comes from the
@@ -1442,8 +1433,8 @@ First, we have a fixed-point condition\cite{bussi2006, dama2014}.
 %
 To sample the desired distribution,
 $\mathbf p = (p_1, \dots, p_n)$,
-${\dot V}_i(t)$
-in Eq. \eqref{eq:vt_diffeq_mbin}
+${\dot u}_i(t)$
+in Eq. \eqref{eq:ut_diffeq_mbin}
 should be a constant of $i$
 if $h_j(t)$ were the same as $p_j$,
 i.e.
@@ -1512,7 +1503,7 @@ eigenvectors, $\phi_{ki}$,
 satisfying the orthonormal conditions\cite{vankampen}:
 %
 \begin{align}
-  \sum_{k = 1}^n
+  \sum_{k = 0}^{n - 1}
     \phi_{ki} \, \phi_{kj}^*
   &=
   \delta_{ij} \, \rho_i,
@@ -1527,8 +1518,9 @@ satisfying the orthonormal conditions\cite{vankampen}:
   \label{eq:eig_orthonormal_rows}
 \end{align}
 %
-where the superscript $^*$
-denotes the complex conjugate.
+where the superscript $^*$ denotes the complex conjugate,
+and we have set the index of the first eigenmode to $0$
+instead of $1$ for later convenience.
 
 The above symmetry implies the existence of
 a left eigenvector, $\pmb \rho$,
@@ -1550,36 +1542,33 @@ We will label this eigenvector as the first one,
 and
 %
 \begin{equation}
-  \phi_{1i} = \rho_i,
-\label{eq:eigenmode1}
+  \phi_{0i} = \rho_i,
+\label{eq:eigenmode0}
 \end{equation}
 %
-with $\lambda_1 = 1$.
+with $\lambda_0 = 1$.
 %
-Clearly, Eq. \eqref{eq:eigenmode1}
+Clearly, Eq. \eqref{eq:eigenmode0}
 satisfies the normalization condition
 given by Eq. \eqref{eq:eig_orthonormal_rows}
-for $k = l = 1$,
-while the orthogonality for $k \ge 2$ demands
+for $k = l = 0$,
+while the orthogonality demands
 %
 \begin{equation}
   \sum_{ i = 1 }^n \phi_{ki}
   =
-  \sum_{ i = 1 }^n
-    \frac{ \phi_{ki} \, \phi_{1i}^* }
-         { \rho_i }
-  =
-  0
+  \delta_{k0}
   .
 \label{eq:ortho1}
 \end{equation}
 %
-We may write the updating matrix in terms of $\phi_{ki}$'s as
+We may write the updating matrix in $\phi_{ki}$'s
+as\cite{bussi2006}
 %
 \begin{equation}
   w_{ij}
   =
-  \frac{1}{\rho_i} \sum_{k=1}^n
+  \frac{1}{\rho_i} \sum_{k=0}^{n - 1}
   \lambda_k \, \phi_{ki}^* \, \phi_{kj}
   .
   \notag
@@ -1592,7 +1581,7 @@ Finally, there is a stability condition.
 In a \emph{stable} updating scheme,
 no eigenmode grows indefinitely,
 which means that, as we will show, no eigenvalue, $\lambda_k$,
-can be negative.
+can be negative for $k \ge 1$.
 
 
 
@@ -1601,15 +1590,57 @@ can be negative.
 
 
 
-We can now simplify Eq. \eqref{eq:vt_diffeq_mbin}.
+We can further define
+a generalized Fourier transform, $\mathcal{F}$,
+for variable, $A_i$,
 %
-By using Eqs.
-\eqref{eq:v_def}, \eqref{eq:vbar_def}, and
-\eqref{eq:vt_diffeq_mbin}-\eqref{eq:w_balance}
-we get
+\begin{equation}
+  {\tilde A}_k
+  \equiv \mathcal{F}[A_i]_k
+  \equiv \sum_{i = 1}^n \phi_{ki} \, A_i
+  ,
+  \label{eq:gft_def}
+\end{equation}
+and the inverse transform is
+%
+\begin{equation}
+  A_i =
+  \frac{1}{\rho_i} \sum_{k = 1}^n \phi^*_{ki} \, \tilde{A}_k
+  .
+  \label{eq:gft_inv}
+\end{equation}
+%
+The multiple-bin updating scheme, Eq. \eqref{eq:mbin_update},
+can be diagonalized as
+%
+$$
+{\tilde v}_k(t + 1) =
+{\tilde v}_k(t) + \alpha(t) \, \lambda_k \,
+\mathcal{F}\bigl[ h_i(t) / p_i \bigr]_k
+,
+$$
+or in the continuous-time form,
+%where
+%%
+%$$
+%\eta_i \equiv \frac{ h_i(t) } { p_i } - \sum_{j = 1}^n \rho_j \frac{ h_j(t) }{ p_j }.
+%$$
+%
+\begin{equation}
+  \dot{\tilde v}_k(t)
+  =
+  \alpha(t) \, \lambda_k \, \mathcal{F} \bigl[ h_j(t)/ p_i  \bigr]_k
+  .
+  \label{eq:ut_diffeq_mbin}
+\end{equation}
+
+
+In particular, for the first eigenmode,
+we have $\tilde{v}_0 \equiv v_\mathrm{av}$,
+and
 %
 \begin{align*}
-  \dot{ \bar v }(t)
+  \bav{\dot v}(t)
   =
   \alpha(t)
   \sum_{r = 1}^n \rho_r
@@ -1622,37 +1653,8 @@ we get
   ,
 \end{align*}
 %
-\note{Derivation.
-$$\begin{aligned}
-  \dot{ \bar v }
-  &
-  \stackrel{\mathrm{Eq.\; \eqref{eq:vbar_def}}}
-  {=\joinrel=\joinrel=\joinrel=\joinrel=}
-  \sum_{i = 1}^n \rho_i \, \dot v_i
-  %
-  \stackrel{\mathrm{Eq.\; \eqref{eq:vt_diffeq_mbin}}}
-  {=\joinrel=\joinrel=\joinrel=\joinrel=}
-  %
-  \alpha(t)
-  \sum_{j = 1}^n \frac{ h_j } { p_j }
-                 \sum_{ i = 1 }^{n} \rho_i \, w_{ij}
-  \\
-  &
-  \stackrel{\mathrm{Eq.\; \eqref{eq:w_balance}}}
-  {=\joinrel=\joinrel=\joinrel=\joinrel=}
-  \alpha(t)
-  \sum_{j = 1}^n \rho_j
-    \, \frac{ h_j } { p_j }
-  %
-  \stackrel{\mathrm{Eq.\; \eqref{eq:w_sumj}}}
-  {=\joinrel=\joinrel=\joinrel=\joinrel=}
-  \alpha(t)
-  \sum_{j = 1}^n w_{ij}
-  \sum_{r = 1}^n \rho_r
-    \, \frac{ h_r } { p_r }
-  .
-\end{aligned}$$
-}
+from Eq. \eqref{eq:eigenmode0},
+%
 %
 and by Eqs. \eqref{eq:x_def}, \eqref{eq:rhox_sum} and \eqref{eq:h_ave},
 %
@@ -1684,34 +1686,17 @@ using the eigenvectors defined in Eqs.
 yields a set of decoupled equations
 %
 \begin{equation}
-  \dot y_k(t)
+  \dot{\tilde x}_k(t)
   =
-  -\alpha(t) \, \lambda_k \, [y_k(t) - \theta_k(t)],
+  -\alpha(t) \, \lambda_k \,
+  \left[{\tilde x}_k(t) - {\tilde \xi}_k(t) \right]
+  .
   \notag
   %\label{eq:yt_diffeq}
 \end{equation}
 %
-where
-\begin{align}
-  y_k(t)
-  &\equiv
-  \sum_{j=1}^n
-    \phi_{kj} \, x_j(t)
-  ,
-  %\label{eq:y_def}
-\end{align}
-and
-\begin{align}
-  \theta_k(t)
-  &\equiv
-  \sum_{j=1}^n
-    \phi_{kj} \, \xi_j(t)
-  ,
-  \label{eq:theta_def}
-\end{align}
-%
-are the deviation and noise (histogram fluctuation)
-of mode $k$, respectively.
+%are the deviation and noise (histogram fluctuation)
+%of mode $k$, respectively.
 
 
 
@@ -1728,12 +1713,13 @@ can be rewritten in terms of the eigenmodes of $\mathbf w$,
   \sum_{i = 1}^n \rho_i \,
     \left\langle x_i^2 \right\rangle
   =
-  \sum_{i, j, k=1}^n \phi_{ki} \, \phi_{kj}^* \,
+  \sum_{i, j = 1}^n \sum_{k=0}^{n-1}
+   \phi_{ki} \, \phi_{kj}^* \,
     \left\langle x_i \, x_j \right\rangle
   =
-  \sum_{k = 1}^n
+  \sum_{k = 0}^{n - 1}
     \left\langle
-      \left| y_k \right|^2
+      \bigl| {\tilde x}_k^2 \bigr|
     \right\rangle
   ,
 \notag
@@ -1741,27 +1727,27 @@ can be rewritten in terms of the eigenmodes of $\mathbf w$,
 %
 where we have used Eq. \eqref{eq:eig_orthonormal_cols}.
 %
-From Eq. \eqref{eq:eigenmode1},
+From Eq. \eqref{eq:eigenmode0},
 the first eigenmode,
-$y_1 = \sum_{j=1}^n \rho_j \, x_j$,
+${\tilde x}_0 = \sum_{j=1}^n \rho_j \, x_j$,
 vanishes identically by Eq. \eqref{eq:rhox_sum}.
 %
-Thus, we can start the last sum %in Eq. \eqref{eq:y2_sum}
-from $k = 2$,
+Thus, we can start the last sum %in Eq. \eqref{eq:xt2_sum}
+from $k = 1$,
 %
 \begin{equation}
   \Err(T)
   =
-  \sum_{k = 2}^n
+  \sum_{k = 1}^{n - 1}
     \left\langle
-      \left| y_k(T) \right|^2
+      \bigl| {\tilde x}_k^2(T) \bigr|
     \right\rangle
   .
-\label{eq:y2_sum}
+\label{eq:xt2_sum}
 \end{equation}
 
 In analogy to Eq. \eqref{eq:ET_average},
-%using Eqs. \eqref{eq:yt_diffeq} and \eqref{eq:y2_sum},
+%using Eqs. \eqref{eq:yt_diffeq} and \eqref{eq:xt2_sum},
 we can write the error after a period, $T$,
 as a sum of two contributions,
 %
@@ -1779,8 +1765,10 @@ is given by
 \begin{equation}
   \Err_R(T)
   =
-  \sum_{k = 2}^n
-    \left\langle y_k^2(0) \right\rangle \,
+  \sum_{k = 1}^{n-1}
+    \left\langle
+      \left| {\tilde x}_k^2(0) \right|
+    \right\rangle \,
     e^{ - 2 \, \lambda_k  \, q(T) },
   \label{eq:error_res}
 \end{equation}
@@ -1792,8 +1780,8 @@ is given by
   \Err_A(T)
   &=
   \int_0^T
-  \sum_{k = 2}^n
-  \Gamma_k \, \dot u_k^2\bigl( q(t) \bigr) \, dt
+  \sum_{k = 1}^{n-1}
+  \Gamma_k \, \dot y_k^2\bigl( q(t) \bigr) \, dt
   ,
 \label{eq:error_asym}
 \end{align}
@@ -1801,7 +1789,7 @@ is given by
 where
 %
 \begin{equation}
-  u_k(q') \equiv e^{\lambda_k \, [q' - q(T)]}
+  y_k(q') \equiv e^{\lambda_k \, [q' - q(T)]}
   ,
   \label{eq:uk_def}
 \end{equation}
@@ -1809,14 +1797,14 @@ where
 and $\Gamma_k$ is computed from
 the autocorrelation function
 of the histogram fluctuation,
-$\kappa_k(t) \equiv \langle \theta_k^*(0) \, \theta_k(t) \rangle$,
+$\kappa_k(t) \equiv \langle {\tilde \xi}_k^*(0) \, {\tilde \xi}_k(t) \rangle$,
 as:
 %
 \begin{equation}
   \Gamma_k
   = \sum_{t = -\infty}^\infty \kappa_k(t)
   = \sum_{t = -\infty}^\infty
-  \left\langle \theta_k^*(0) \, \theta_k(t) \right\rangle
+  \left\langle {\tilde \xi}_k^*(0) \, {\tilde \xi}_k(t) \right\rangle
   .
   \label{eq:Gamma_sum}
 \end{equation}
@@ -1828,7 +1816,7 @@ as:
 %\end{equation}
 %
 Equation \eqref{eq:Gamma_sum}
-essentially maps the histogram fluctuation, $\theta_k(t)$,
+essentially maps the histogram fluctuation, ${\tilde \xi}_k(t)$,
 to the equivalent white noise
 so that the theory can be applicable to
 a general sampling process.
@@ -1852,9 +1840,9 @@ from an adaptive FDS simulation.
 %  \Err_A(T)
 %  =
 %  \int_0^T \int_0^T
-%  \sum_{k = 2}^n
-%    \dot u_k\bigl( q(t) \bigr) \,
-%    \dot u_k\bigl( q(t') \bigr) \,
+%  \sum_{k = 1}^{n-1}
+%    \dot y_k\bigl( q(t) \bigr) \,
+%    \dot y_k\bigl( q(t') \bigr) \,
 %    \kappa_k(t - t') \, dt \, dt'
 %  ,
 %  \notag
@@ -1866,7 +1854,7 @@ from an adaptive FDS simulation.
 %$\kappa_k(t - t') \equiv \left\langle \theta_k(t) \, \theta_k(t') \right\rangle$.
 %
 %\begin{align*}
-%  u_k(q')
+%  y_k(q')
 %  &\equiv
 %  e^{\lambda_k \, [q' - q(T)]},
 %  \\
@@ -1910,9 +1898,9 @@ from an adaptive FDS simulation.
 %%In terms of the components, we have
 %%
 %\begin{align}
-%  \left\langle
-%    y_k^2
-%  \right\rangle
+%  \left\langle \left|
+%    {\tilde x}_k^2
+%  \right| \right\rangle
 %  &=
 %  \int_0^{T'}
 %    \Gamma_k \, (\lambda_k \, a_0)^2 \,
@@ -1926,7 +1914,7 @@ from an adaptive FDS simulation.
 %  \qquad
 %  ( T' \to \infty )
 %  .
-%\label{eq:y2_eql}
+%\label{eq:xt2_eql}
 %\end{align}
 %%
 
@@ -1940,11 +1928,11 @@ for sufficiently long.
 Then, one can show that
 \begin{equation}
   \left\langle
-    \left| y_k(0) \right|^2
+    \bigl| {\tilde x}_k^2(0) \bigr|
   \right\rangle
   = \frac 1 2 \, \Gamma_k \, \lambda_k \, a_0
   ,
-  \label{eq:y2_eql}
+  \label{eq:xt2_eql}
 \end{equation}
 %
 \note{
@@ -1955,7 +1943,9 @@ the $k$th component of the asymptotic error
 is given by
 %
 \begin{align*}
-  \left\langle y_k^2(T') \right\rangle
+  \left\langle \bigl|
+    {\tilde x}_k^2(T')
+  \bigr| \right\rangle
   =
   \int_0^{T'}
     \Gamma_k \, (\lambda_k \, a_0)^2 \,
@@ -1975,7 +1965,7 @@ and
 \begin{equation}
   \Err_R(T)
   =
-  \sum_{k = 2}^n
+  \sum_{k = 1}^{n - 1}
       \frac 1 2 \, a_0 \, \Gamma_k \, \lambda_k \,
       e^{  - 2 \, \lambda_k \, q(T) }
   .
@@ -2020,14 +2010,14 @@ where the Lagrangian is
 \begin{align}
   {\mathcal L} \bigl[ q(t) \bigr]
   &=
-  \sum_{ k = 2 }^n
-    \Gamma_k \, \dot u_k^2\bigl[ q(t) \bigr]
+  \sum_{ k = 1 }^{n - 1}
+    \Gamma_k \, {\dot y}_k^2\bigl[ q(t) \bigr]
   %\notag
   %\\
   %&=
   =
-  %\sum_{ k = 2 }^n
-  %  \Gamma_k \, \lambda_k^2 \, u_k^2 \bigl[ q(t) \bigr]
+  %\sum_{ k = 1 }^{n - 1}
+  %  \Gamma_k \, \lambda_k^2 \, y_k^2 \bigl[ q(t) \bigr]
   %\; \dot q^2( t )
   %\notag
   %\\
@@ -2046,7 +2036,7 @@ defined the (square-root) mass function as
   M(Q)
   \equiv
   \sqrt{
-    \textstyle\sum_{ k = 2 }^n \Gamma_k \, \lambda_k^2 \, e^{-2 \, \lambda_k \, Q}
+    \textstyle\sum_{ k = 1 }^{n - 1}\Gamma_k \, \lambda_k^2 \, e^{-2 \, \lambda_k \, Q}
   }
   .
 \label{eq:mass_func}
@@ -2105,7 +2095,7 @@ and we may set
 for some positive $C$.
 %
 This serves
-as a generalization of Eq. \eqref{eq:dudt_const}.
+as a generalization of Eq. \eqref{eq:dydt_const}.
 %
 By integrating this equation of motion, we get
 %
@@ -2474,9 +2464,10 @@ as a cosine transform,
   2 \,
   \sum_{ l = 1 }^b
   \mu_l
-  \cos
-  \frac{ (k - 1) \, l \, 2 \, \pi }
-       {            g \, n        }
+  \cos\left(
+  \frac{ k \, l \, 2 \, \pi }
+       {      g \, n        }
+  \right)
   ,
   \label{eq:wband_eigenvalue}
 \end{equation}
@@ -2498,7 +2489,7 @@ the optimal schedule and the error
 for a given adaptive FDS simulation.
 %
 Basically, we need to extract
-$\lambda_i$'s and $\Gamma_i$'s
+$\lambda_k$'s and $\Gamma_k$'s
 from the given system and updating scheme (input),
 and then apply them to Eq. \eqref{eq:q_opt}
 for the schedule,
@@ -2525,10 +2516,10 @@ We have the following procedure.
     (sys) at (0, 1) {System\\and\\sampling\\process};
 
   \node[draw, text width={width("Eigenvalues,")}]
-    (lambda) at (2.2, 3) {Eigenvalues,\\$\lambda_2, \dots, \lambda_n$};
+    (lambda) at (2.2, 3) {Eigenvalues,\\$\lambda_1, \dots, \lambda_{n-1}$};
 
-  \node[draw, text width={width("Integrals, ")}]
-    (gamma) at (2.2, 1) {Integrals, \\$\Gamma_2, \dots, \Gamma_n$};
+  \node[draw, text width={width("Integrals, iii")}]
+    (gamma) at (2.1, 1) {Integrals, \\$\Gamma_1, \dots, \Gamma_{n-1}$};
 
   \node[draw, text width={width("Simulation")}]
     (T) at (2.2, -0.5) {Simulation\\time, $T$};
@@ -2605,43 +2596,46 @@ Run a preliminary adaptive FDS simulation
 with a constant updating magnitude, $a_0$.
 
 \item
-Compute $\Gamma_k$'s from Eq. \eqref{eq:varY}
+Compute $\Gamma_k$'s from Eq. \eqref{eq:varXt}
     (cf. Appendix \ref{sec:Gamma_measure}).
 
 \item
 Compute the optimal $q(T)$ by solving Eq. \eqref{eq:opt_qT}
-using e.g. the bisection method.
+    using e.g. the Newton-Raphson or bisection method\cite{press3rd}.
 %
-Since $m(Q)$ is a decreasing function of $Q$,
-we can start from an interval $[Q_L, Q_R]$
-that satisfies $m(Q_L) > 2/(T\,a_0) > m(Q_R)$
-(e.g. we can choose $Q_L = 0$,
-  and repeatedly double $Q_R$ until
-  the latter inequality is satisfied).
-%
-We can then iteratively refine the interval
-by substituting $Q_M = (Q_L + Q_R)/2$
-for either $Q_L$ and $Q_R$,
-depending on the sign of $m(Q_M) - 2/(T \, a_0)$,
-until the width of the interval is less than
-the desired precision,
-%
-and set $q(T)$ to $Q_M$.
+%Since $m(Q)$ is a decreasing function of $Q$,
+%we can start from an interval $[Q_L, Q_R]$
+%that satisfies $m(Q_L) > 2/(T\,a_0) > m(Q_R)$
+%(e.g. we can choose $Q_L = 0$,
+%  and repeatedly double $Q_R$ until
+%  the latter inequality is satisfied).
+%%
+%We can then iteratively refine the interval
+%by substituting $Q_M = (Q_L + Q_R)/2$
+%for either $Q_L$ and $Q_R$,
+%depending on the sign of $m(Q_M) - 2/(T \, a_0)$,
+%until the width of the interval is less than
+%the desired precision,
+%%
+%and set $q(T)$ to $Q_M$.
 
 \item
 Compute the optimal schedule by
 numerically integrating Eqs. \eqref{eq:q_opt} and \eqref{eq:mint}.
 %
-This can be done on an even grid of $N$ points
-at $q_{[i]} = \frac{i}{N} \, q(T)$
-($i = 0, 1, \dots, N$)
-using the standard trapezoidal rule\cite{press3rd}.
+%This can be done on an even grid of $N$ points
+%at $q_{[i]} = \frac{i}{N} \, q(T)$
+%($i = 0, 1, \dots, N$)
+We have used the standard trapezoidal rule\cite{press3rd},
+on $N+1$ grid points on $[0, q(T)]$ that are defined adaptively
+such that the resulting change of $t_{[i+1]}-t_{[i]}$
+is no less than $T/(2*N)$ and no greater than $2T/N$.
 %
 The curve $q(t)$ is then defined on the grid points,
 $(q_{[i]}, t_{[i]})$,
 %
 and the updating magnitude can be obtained from numerical differentiation:
-$\alpha_i = (q_{[i+1]} - q_{[i-1]}) / (t_{[i+1]} - t_{[i-1]})$,
+$\alpha_i = 1 - \exp[-(q_{[i+1]} - q_{[i-1]}) / (t_{[i+1]} - t_{[i-1]})]$,
 with
 $q_{[ -1]} \equiv q_{[0]} = 0$,
 $q_{[N+1]} \equiv q_{[N]} = q(T)$,
@@ -2693,8 +2687,8 @@ inequality follows from the nonnegativity of
 the quadratic polynomial,
 $$
 \int_0^T
-  dt \sum_{k = 2}^n \Gamma_k \,
-    \left( \dot u_k \, \chi - c_k \right)^2
+  dt \sum_{k = 1}^{n-1} \Gamma_k \,
+    \left( {\dot y}_k \, \chi - c_k \right)^2
   \equiv
   A_2 \, \chi^2 + A_1 \, \chi + A_0
   ,
@@ -2707,13 +2701,13 @@ $A_1^2 - 4 \, A_0 \, A_2 \le 0$.},
 &
 \left(
   \int_0^T dt
-    \sum_{k = 2}^n
-      \Gamma_k \, \dot u_k^2\bigl( q(t) \bigr)
+    \sum_{k = 1}^{n-1}
+      \Gamma_k \, {\dot y}_k^2\bigl( q(t) \bigr)
 \right)
 %
 \left(
   \int_0^T dt
-    \sum_{k = 2}^n
+    \sum_{k = 1}^{n-1}
       \Gamma_k \, c_k^2
 \right)
 %
@@ -2724,8 +2718,8 @@ $A_1^2 - 4 \, A_0 \, A_2 \le 0$.},
 \ge
 \left(
   \int_0^T dt
-    \sum_{k = 2}^n
-      \Gamma_k \, c_k \, \dot u_k \, \bigl( q(t) \bigr)
+    \sum_{k = 1}^{n-1}
+      \Gamma_k \, c_k \, {\dot y}_k \, \bigl( q(t) \bigr)
 \right)^2
 \notag
 \\
@@ -2733,7 +2727,7 @@ $A_1^2 - 4 \, A_0 \, A_2 \le 0$.},
 \qquad \qquad
 =
 \left(
-  \sum_{k = 2}^n \Gamma_k \, c_k
+  \sum_{k = 1}^{n-1} \Gamma_k \, c_k
     \left[
       1 - e^{ -\lambda_k \, q(T) }
     \right]
@@ -2751,8 +2745,8 @@ for the asymptotic error $\Err(T)$
 given in Eq. \eqref{eq:error_asym}.
 %
 The equality is achieved
-if $\dot u_k\left( q(t) \right) = c_k$
-for all $k = 2, \dots, n$ at any $t$,
+if $\dot y_k\left( q(t) \right) = c_k$
+for all $k > 0$ at any $t$,
 up to a multiplicative factor.
 %
 Solving these equations yields
@@ -2770,13 +2764,13 @@ with
 \end{equation}
 %
 \note{Derivation.
-  Integrating $\dot u_k = c_k$ yields
+  Integrating $\dot y_k = c_k$ yields
   \begin{equation}
-    u_k(t) = c_k \left(t + t_{k0} \right).
+    y_k(t) = c_k \left(t + t_{k0} \right).
   \tag{UK}
   \label{neq:ui_solution}
   \end{equation}
-  Given that $u_k(T) = 1$ and $u_k(0) = e^{-\lambda_k \, q(T)}$,
+  Given that $y_k(T) = 1$ and $y_k(0) = e^{-\lambda_k \, q(T)}$,
   we have
   $$
   c_k = \frac{ 1 }{ T + t_{k0} },
@@ -2799,7 +2793,7 @@ Such a solution is possible only if
 all nontrivial eigenvalues are equal,
 %
 %\begin{equation}
-$\lambda_2 = \dots = \lambda_n$.
+  $\lambda_1 = \dots = \lambda_{n-1}$.
 %  \notag
 %\end{equation}
 %
@@ -2807,10 +2801,10 @@ Then, by Eq. \eqref{eq:tk0},
 all $t_{k0}$'s also share the same value,
 $t_0$,
 such that
-$u_k = (t + t_0) / (T + t_0)$,
+$y_k = (t + t_0) / (T + t_0)$,
 and
 $c_k = 1/(T + t_0)$
-for $k \ge 2$.
+for $k > 0$.
 %
 The asymptotic error is then
 %
@@ -2819,13 +2813,13 @@ The asymptotic error is then
   =
   \frac{       T     }
        { (T + t_0)^2 }
-  \sum_{ k = 2 }^n
+  \sum_{ k = 1 }^{n-1}
     \Gamma_k
   .
 \label{eq:error_asym_singlebin}
 \end{align}
 %
-If we further assume $\lambda_2 = \cdots = \lambda_n = 1$,
+If we further assume $\lambda_1 = \cdots = \lambda_{n-1} = 1$,
 %the optimal schedule given by
 Eq. \eqref{eq:alpha_invtk}
 recovers Eq. \eqref{eq:alpha_invt1}.
@@ -2833,7 +2827,7 @@ recovers Eq. \eqref{eq:alpha_invt1}.
 
 Since the first eigenmode represents
 a uniform shift of the bias potential,
-we can freely set $\lambda_1$ to be the same as $\lambda_2$
+we can freely set $\lambda_0$ to be the same as $\lambda_1$
 without changing the nature of the updating scheme.
 %
 Since an updating matrix
@@ -2871,18 +2865,18 @@ For example,
 %if we can assume
 by assuming
 that the PMF is sufficiently smooth
-such that the eigenmodes can be limited to $k \le K + 1$,
+such that the eigenmodes can be limited to $k \le K$,
 %
 we can construct an updating scheme with
 $$
-\lambda_1 = \cdots = \lambda_{K+1} = 1,
+\lambda_0 = \cdots = \lambda_{K-1} = 1,
 \mathrm{\; and \;}
-\lambda_{K+2} = \cdots = \lambda_n = 0.
+\lambda_K = \cdots = \lambda_{n-1} = 0.
 $$
 %
 Then, the updating matrix is given by
 %
-$$w_{ij} = n \sum_{k=1}^{K+1} \phi_{ki}^* \, \phi_{kj},$$
+$$w_{ij} = n \sum_{k=0}^{K-1} \phi_{ki}^* \, \phi_{kj},$$
 %
 and Eq. \eqref{eq:error_asym_singlebin} is modified as
 %
@@ -2891,7 +2885,7 @@ and Eq. \eqref{eq:error_asym_singlebin} is modified as
   =
   \frac {       T     }
         { (T + t_0)^2 }
-  \sum_{ k = 2 }^{K+1}
+  \sum_{ k = 1 }^{K-1}
     \Gamma_k.
 %\notag
 \label{eq:error_asym_sinc}
@@ -2921,10 +2915,11 @@ in the second step.
 \note{
 For the single-bin updating scheme,
 it recovers Eq. \eqref{eq:t0_singlebin}
-under the assumption of Eq. \eqref{eq:y2_eql}.
+under the assumption of Eq. \eqref{eq:xt2_eql}.
 %
-From Eq. \eqref{eq:y2_eql}, we have
-$$E(0) = \frac{1}{2} a_0 \sum_{k=2}^n \Gamma_k = \frac{1}{2} \, a_0 \, \Gamma.$$
+From Eq. \eqref{eq:xt2_eql}, we have
+$$E(0) = \frac{1}{2} a_0 \sum_{k=1}^{n-1} \Gamma_k
+= \frac{1}{2} \, a_0 \, \Gamma.$$
 }
 %
 From Eqs. \eqref{eq:error_tot},
@@ -2939,7 +2934,7 @@ we get
   =
   \frac{   1     }
        { T + t_0 }
-  \sum_{ k = 2 }^{ K + 1 }
+  \sum_{ k = 1 }^{ K - 1 }
     \Gamma_k
   .
 \label{eq:error_sinc}
@@ -2950,27 +2945,27 @@ for the single-bin updating scheme:
 if we set $K + 1 = n$,
 %
 \begin{equation}
-  \sum_{k=2}^n \Gamma_k
+  \sum_{k=1}^{n-1} \Gamma_k
   = \sum_{i=1}^n \rho_i \, G_i = \Gamma
   ,
   \notag
   %\label{eq:Gamma_G_sum}
 \end{equation}
 which can be shown by following the steps
-similar to those leading to Eq. \eqref{eq:y2_sum}.
+similar to those leading to Eq. \eqref{eq:xt2_sum}.
 %
 %
 %
 \note{The derivation.
 From Eq. \eqref{eq:eig_orthonormal_cols}, we have
 $\sum_{i=1}^n \rho_i \langle x_i(t) \, x_i(0) \rangle
-=\sum_{k=2}^n \rho_i \langle y_k(t) \, y_k(0) \rangle$,
+=\sum_{k=1}^{n-1} \langle {\tilde x}_k(t) \, {\tilde x}_k^*(0) \rangle$,
 so
 \begin{align*}
 \sum_{i=1}^n \rho_i G_i
 &=\sum_{t=-\infty}^\infty\sum_{i=1}^n \rho_i \langle x_i(t) \, x_i(0) \rangle \\
-&=\sum_{t=-\infty}^\infty\sum_{k=2}^n \rho_i \langle y_k(t) \, y_k(0) \rangle
-=\sum_{k=2}^n \Gamma_k.
+  &=\sum_{t=-\infty}^\infty\sum_{k=1}^{n-1} \langle {\tilde x}_k(t) \, {\tilde x}_k^*(0) \rangle
+  =\sum_{k=1}^{n-1} \Gamma_k.
 \end{align*}
 }
 %
@@ -3050,7 +3045,7 @@ along with the distribution, $\rho_i$, in Eqs.
 %
 Initially,
 we set the bias potential to zero,
-$V_i \equiv 0$,
+$u_i \equiv 0$,
 and equilibrate the system for $10^7$ steps
 under a constant updating magnitude,
 $a_0 = 10^{-4}$.
@@ -3105,7 +3100,7 @@ in each step, a new bin index $j$ is proposed
 and then accepted with probability
 %
 $
-A(i \to j) = \min\{ 1, \exp(V_i - V_j) \}.
+A(i \to j) = \min\{ 1, \exp(u_i - u_j) \}.
 $
 However,
 in the first or global sampling process,
@@ -3742,14 +3737,14 @@ which allows us to incrementally improve the estimated
 bias potential given by Eq. \eqref{eq:vcorr_equil}.
 %
 With
-$V_i^\mathrm{corr} \to V_i(t+1)$, $V_i \to V_i(1)$,
+$u^\mathrm{corr}_i \to u_i(t+1)$, $u_i \to u_i(1)$,
 we have
 %
 \begin{equation*}
-  V_i(t+1) = V_i(1) +
+  u_i(t+1) = u_i(1) +
   \ln \frac{ H_i(t) } { p_i }
   \approx
-  V_i(1) +
+  u_i(1) +
   \frac{ H_i(t) } { p_i } - 1
   ,
 \end{equation*}
@@ -3766,15 +3761,15 @@ Thus,
 %we may apply Eq. \eqref{eq:av_recur}, and
 %
 \begin{align}
-  V_i(t+1)
+  u_i(t+1)
   &=
-  V_i(t)
+  u_i(t)
   +
   \frac{ H_i(t) - H_i(t-1) }{ p_i }
   \notag
   \\
   &=
-  V_i(t)
+  u_i(t)
   +
   \frac{1}{t} \frac{ h_i(t) }{ p_i }
   -\frac{1}{t} \frac{ H_i(t-1) }{ p_i }
@@ -4279,7 +4274,7 @@ and
 }
 %
 Thus,
-for $k \ge 2$, we get
+for $k > 0$, we get
 %
 \begin{equation}
   \kappa_k(t - t')
@@ -4297,8 +4292,6 @@ for $k \ge 2$, we get
 %
 where we have used
 Eqs. \eqref{eq:ortho1},
-\eqref{eq:theta_def},
-and
 \eqref{eq:zz_perfect}.
 %
 Thus, the white-noise approximation is exact,
@@ -4335,9 +4328,6 @@ $\Gamma_k = \sum_{ i = 1}^n \phi_{ki}^2 / p_i$.
   $$
   where,
   we have used
-  Eq. \eqref{eq:theta_def}
-  on the first line,
-  %
   Eq. \eqref{eq:zz_perfect}
   on the second line.
   %
@@ -4447,7 +4437,7 @@ Measurement via an adaptive FDS simulation
 %we need to know both $\lambda_k$'s and $\Gamma_k$'s.
 %
 For an unknown system,
-we can use Eq. \eqref{eq:y2_eql} to
+we can use Eq. \eqref{eq:xt2_eql} to
 measure $\Gamma_k$'s in
 an adaptive FDS simulation
 with a constant schedule,
@@ -4458,17 +4448,17 @@ However,
 we often do not know a priori the intrinsic distribution, $p^*_i$,
 and hence
 cannot compute the deviation
-of the bias potential, $V_i$.
+of the bias potential, $u_i$.
 %
 To circumvent the problem, we
-modify Eq. \eqref{eq:y2_eql} as
+modify Eq. \eqref{eq:xt2_eql} as
 %
 \begin{equation}
-  \operatorname{var} Y_k
+  \operatorname{var} {\tilde X}_k
   =
   \frac{1}{2} \,
   a_0 \, \Gamma_k \, \lambda_k,
-\label{eq:varY}
+\label{eq:varXt}
 \end{equation}
 %
 where
@@ -4477,23 +4467,23 @@ means the variance from the sampling (time) average,
 and
 %
 \begin{align*}
-Y_k
+{\tilde X}_k
 &=
 \sum_{ i = 1 }^n
-  \phi_{k i} \, (V_i - \bar V),
-%\label{eq:Y_def}
+  \phi_{k i} \, (u_i - \bav{u}),
+%\label{eq:Xt_def}
 \end{align*}
 %
 with
 $
-\bar V
+\bav{u}
 \equiv
-\sum_{ j = 1 }^n \rho_j \, V_j.
+\sum_{ j = 1 }^n \rho_j \, u_j.
 $
 
-To show Eq. \eqref{eq:varY},
+To show Eq. \eqref{eq:varXt},
 we first note that
-the difference, $V_i - {\bar V}$,
+the difference, $u_i - \bav{u}$,
 differs from the actual deviation, $x_i$,
 defined in Eq. \eqref{eq:x_def},
 only by a constant shift,
@@ -4503,21 +4493,21 @@ Thus, the two share the same variance
 under time averaging.
 %
 It follows that the corresponding linear combinations,
-$Y_k$ and $y_k$, would also share the same variance.
+${\tilde X}_k$ and ${\tilde x}_k$, would also share the same variance.
 %
-But since the average of $y_k$ is zero,
+But since the average of ${\tilde x}_k$ is zero,
 we have
 $$
-\operatorname{var} Y_k
+\operatorname{var} {\tilde X}_k
 =
-\operatorname{var} y_k
+\operatorname{var} {\tilde x}_k
 =
-\left\langle y_k^2 \right\rangle.
+\left\langle {\tilde x}_k^2 \right\rangle.
 $$
-Finally, by using Eq. \eqref{eq:y2_eql},
-we reach Eq. \eqref{eq:varY}.
+Finally, by using Eq. \eqref{eq:xt2_eql},
+we reach Eq. \eqref{eq:varXt}.
 
-\note{In practice, Eq. \eqref{eq:varY}
+\note{In practice, Eq. \eqref{eq:varXt}
 in inapplicable to zero eigenvalues, $\lambda_k$'s.
 %
 However, these eigenmodes can be ignored
@@ -4784,11 +4774,11 @@ compatible with the periodicity, Eq. \eqref{eq:phi_pbc},
   =
   \frac 1 n
   \exp
-  \left[
+  \left(
     \ii
-    \frac{ (k - 1) \, j \, 2 \, \pi }
-         {            n             }
-  \right]
+    \frac{ k \, j \, 2 \, \pi }
+         {      n             }
+  \right)
   ,
   \notag
 \end{equation}
@@ -4806,27 +4796,27 @@ Alternatively, to avoid complex numbers, we can use
   %\overset{ \cos } { \sin }
   \,
   {\cos \atop \sin}
-  \left[
-    \frac{ (k - 1) \, j \, 2 \, \pi }
-         {            n             }
-  \right]
+  \left(
+    \frac{ k \, j \, 2 \, \pi }
+         {      n             }
+  \right)
   ,
   \notag
 \end{equation}
 %
-where the function takes the cosine form for $k \le n/2 + 1$,
+where the function takes the cosine form for $k \le n/2$,
 or the sine form otherwise.
 %
 Then one can readily verify that the eigenvalues are given by
   Eq. \eqref{eq:wband_eigenvalue},
   and there is a two-fold degeneracy,
-  $\lambda_{n - k + 2} = \lambda_k$.
+  $\lambda_{n - k} = \lambda_k$.
 \note{Consider the unnormalized version
   $$
   \Phi^{(k)}_j =
   \exp\left[
-    \frac{ ( k - 1 ) \, j \, 2 \, \pi }
-         {              n             }
+    \frac{ k \, j \, 2 \, \pi }
+         {      n             }
     \ii
   \right]
   ,
@@ -4854,8 +4844,8 @@ Then one can readily verify that the eigenvalues are given by
     +
     2 \sum_{l = 1}^b
       \mu_l \, \cos
-      \frac{ (k - 1) \, l \, 2 \, \pi }
-           {            n             }
+      \frac{ k \, l \, 2 \, \pi }
+           {      n             }
   \right]
   .
   \end{aligned}
@@ -4972,11 +4962,11 @@ and be even functions about the same axis:
   =
   \phi_{k j}
   =
-  \frac{ \sqrt{ 2 - \delta_{k, 1} } }
+  \frac{ \sqrt{ 2 - \delta_{k, 0} } }
        {             n              }
   \cos \left[
-       \frac{ ( k - 1) \, \left( j - \frac 1 2 \right) \, 2 \, \pi}
-            {                    2 \, n                           }
+       \frac{ k \, \left( j - \frac 1 2 \right) \, 2 \, \pi}
+            {             2 \, n                           }
        \right]
   ,
 \notag
@@ -4992,7 +4982,7 @@ and the eigenvalues are given by
   $$
   \Phi^{(k)}_j
   =
-  \cos \frac{ (k - 1) \, \left( j - \frac 1 2 \right) \, \pi }{n},
+  \cos \frac{ k \, \left( j - \frac 1 2 \right) \, \pi }{n},
   $$
   which satisfies Eq. \eqref{eq:phi_refl}.
   %
@@ -5043,20 +5033,20 @@ Eq. \eqref{eq:lambdan}
   can be rewritten as
   %
   \begin{align}
-    \lambda_{k+1}
+    \lambda_k
     =
     \sum_{ l = 0 }^{ 2 \, n - 1 }
-    \mu_l \, \cos \frac{ k \, l \, \pi } { n }.
+    \mu_l \, \cos \left(\frac{ k \, l \, \pi } { n } \right).
   \notag
   %\label{eq:lambda_cosine_sum}
   \end{align}
   %
-  This formula for $\lambda_{k+1}$
-  can be readily extended to $k = 2 \, n - 1$,
+  This formula for $\lambda_k$
+  can be readily extended to $k = 1 \, n - 1$,
   and we have
   %
   $
-    \lambda_{ 2 \, n + 2 - k } = \lambda_k
+    \lambda_{ 2 \, n - k } = \lambda_k
     .
   $
   %
@@ -5065,7 +5055,7 @@ Eq. \eqref{eq:lambdan}
   $$
   \begin{aligned}
     \sum_{ k = 0 }^{ 2 \, n - 1 }
-      \lambda_{ k + 1 } \,
+      \lambda_k \,
       \cos \frac{ k \, p \, \pi }
                 {      n        }
     &=
@@ -5103,7 +5093,7 @@ Eq. \eqref{eq:lambdan}
   $$
   This entails Eq. \eqref{eq:mu_from_lambda}.
   %
-  The value of $\lambda_{n + 1}$
+  The value of $\lambda_n$
   can be deduced from
   imposing $\mu_n = 0$
   and solving Eq. \eqref{eq:mu_from_lambda}
@@ -5123,28 +5113,30 @@ we can invert the relation as
   \mu_l
   =
   \frac { 1 } { g \, n }
-  \sum_{ k = 1 }^{ g \, n }
+  \sum_{ k = 0 }^{ g \, n - 1 }
   \lambda_k
-  \cos \frac{ (k - 1) \, l \, 2 \, \pi }
-            {            g \, n        }
+  \cos \left(
+       \frac{ k \, l \, 2 \, \pi }
+            {      g \, n        }
+  \right)
   .
 \label{eq:mu_from_lambda}
 \end{equation}
 %
 In the non-periodic case,
 we have defined
-$\lambda_k \equiv \lambda_{2 \, n + 2 - k}$
-for $k = n + 2, \dots, 2 \, n$,
+$\lambda_k \equiv \lambda_{2 \, n - k}$
+for $k = n + 1, \dots, 2 \, n - 1$,
 as well as
 %
 \begin{align}
-  \lambda_{ n + 1 }
+  \lambda_n
   =
   (-1)^{ n - 1 }
-  \lambda_1
+  \lambda_0
   +
-  2 \, \sum_{ k = 2 }^{ n }
-      (-1)^{n - k} \, \lambda_k
+  2 \, \sum_{ k = 1 }^{ n - 1 }
+      (-1)^{n - k - 1} \, \lambda_k
   ,
 \label{eq:lambdan}
 \end{align}
@@ -5217,7 +5209,7 @@ resulting the following algorithm.
   \item
     Given an updating kernel, $\mu_0, \dots, \mu_b$,
     compute the eigenvalues,
-    $\lambda_1, \dots, \lambda_n$,
+    $\lambda_1, \dots, \lambda_{n-1}$,
     from Eq. \eqref{eq:wband_eigenvalue}.
   \item
     If all eigenvalues are nonnegative within the numerical error,
@@ -5271,7 +5263,7 @@ as an integral:
   \lambda_k
   =
   2 \int_0^\pi
-    \mu(\varphi) \, \cos \bigl[ (k-1) \, \varphi \bigr] \, d\varphi,
+    \mu(\varphi) \, \cos (k \, \varphi) \, d\varphi,
 \notag
 %\label{eq:lambda_int}
 \end{equation}
@@ -5285,13 +5277,13 @@ $
 \begin{align*}
   \lambda_k
   &\approx
-  \int_0^b \mu_l \, \cos[(k-1) \, \varphi] \, dl
+  \int_0^b \mu_l \, \cos(k \, \varphi) \, dl
   \\
   &=
-  \int_0^b \mu(\varphi) \, \cos[(k-1) \, \varphi] \, \Delta \varphi \, dl
+  \int_0^b \mu(\varphi) \, \cos(k \, \varphi) \, \Delta \varphi \, dl
   \\
   &=
-  \int_0^{b \, \Delta \varphi} \mu(\varphi) \, \cos[(k-1) \, \varphi] \, d\varphi
+  \int_0^{b \, \Delta \varphi} \mu(\varphi) \, \cos(k \, \varphi) \, d\varphi
 \end{align*}
 The upper limit,
 $b \, \Delta \varphi \approx (g\,n/2) \, [2\,\pi/(g\,n)] = \pi$.
@@ -5324,10 +5316,10 @@ If follows that all eigenvalues are positive\cite{bussi2006}:
 \begin{align}
   \lambda_k
   &=
-  \exp\left[
-        -\frac{ (k - 1)^2 \, \sigma_\varphi^2 }
-              {           2           }
-      \right]
+  \exp\left(
+        -\frac{ k^2 \, \sigma_\varphi^2 }
+              {           2             }
+      \right)
   %\notag
   %\\
   %&=
@@ -5433,14 +5425,14 @@ For a periodic variable, we demand
 $$
 \begin{aligned}
 %&
-%\lambda_1 = \cdots = \lambda_{K+1}
+%\lambda_0 = \cdots = \lambda_{K-1}
 %= \lambda_{n-K+1} = \cdots = \lambda_n = 1,
 %\\
 %&
-\lambda_{K+2} = \cdots = \lambda_{n-K} = 0,
+\lambda_{K} = \cdots = \lambda_{n-K} = 0,
 \end{aligned}
 $$
-for $K \ge 1$,
+for $K > 1$,
 with the rest of the eigenvalues being $1$.
 %
 Then by using
@@ -5451,7 +5443,7 @@ we get
   =
   \frac{
     \sin
-    \frac{ (2 K + 1) \, l \, \pi }
+    \frac{ (2 K - 1) \, l \, \pi }
          {              n        }
   }
   {
@@ -5468,27 +5460,27 @@ $$
 \begin{aligned}
 \mu_l
 &=
-\frac 1 n \sum_{k = 0}^{n-1} \lambda_{k+1} \cos \frac{ k \, l \, 2 \, \pi } { n }
+\frac 1 n \sum_{k = 0}^{n-1} \lambda_k \cos \frac{ k \, l \, 2 \, \pi } { n }
 \\
 &=
 \frac{1}{n}
 \left(
   1 +
-  \sum_{k=1}^K
+  \sum_{k=1}^{K-1}
   \cos \frac { k \, l \, 2 \, \pi } { n }
   +
-  \sum_{k=n-K}^{n-1}
+  \sum_{k=n-K+1}^{n-1}
   \cos \frac { k \, l \, 2 \, \pi } { n }
 \right)
 \\
 &=
 \frac 1 n
-\sum_{k=-K}^K
+\sum_{k=1-K}^{K-1}
 \cos \frac { k \, l \, 2 \, \pi } { n }
 =
   \frac{
     \sin
-    \frac{ (2 K + 1) \, l \, \pi }
+    \frac{ (2 K - 1) \, l \, \pi }
          {              n        }
   }
   {
@@ -5501,22 +5493,22 @@ $$
 
 For a non-periodic variable, we demand
 $$
-\lambda_1 = \cdots = \lambda_{K+1} = 1,
+\lambda_0 = \cdots = \lambda_{K-1} = 1,
 \qquad
-\lambda_{K+2} = \cdots = \lambda_n = 0.
+\lambda_K = \cdots = \lambda_{n-1} = 0.
 $$
 Then Eq. \eqref{eq:lambdan} gives
-$\lambda_{n+1} = (-1)^{n+K-1}$,
+$\lambda_n = (-1)^{n-K}$,
 and from Eq. \eqref{eq:mu_from_lambda},
 we have
 \begin{equation}
   \mu_l
   =
-  \frac{ (-1)^{n+K+l-1} } { 2 \, n }
+  \frac{ (-1)^{n-K+l} } { 2 \, n }
     +
   \frac{
     \sin
-    \frac{ (2 K + 1) \, l \, \pi }
+    \frac{ (2 K - 1) \, l \, \pi }
          {         2 \, n        }
   }
   {
@@ -5533,7 +5525,7 @@ The updating matrix is given by
   =
     \frac{
       \sin
-      \frac{ (2 K + 1) \, (i-j) \, \pi }
+      \frac{ (2 K - 1) \, (i-j) \, \pi }
            {         2 \, n        }
     }
     {
@@ -5542,7 +5534,7 @@ The updating matrix is given by
     +
     \frac{
       \sin
-      \frac{ (2 K + 1) \, (i+j-1) \, \pi }
+      \frac{ (2 K - 1) \, (i+j-1) \, \pi }
            {         2 \, n        }
     }
     {
@@ -5553,7 +5545,7 @@ The updating matrix is given by
 \end{equation}
 %
 Although the kernel is a sawtooth
-because of the term, $(-1)^{n+K+l-1}$,
+because of the term, $(-1)^{n-K+l}$,
 the ruggedness disappears
 in the updating matrix
 as the above oscillatory term for $l = i - j$
@@ -5564,20 +5556,20 @@ with the opposite sign.
 \note{Derivation.
 $$
 \begin{aligned}
-  \lambda_{n+1}
+  \lambda_{n}
   &=
   (-1)^{n-1}
   \left[
-    \lambda_1
-    - 2 \, \lambda_2
-    + 2 \, \lambda_3 - \cdots
-    + (-1)^{K} 2 \, \lambda_{K+1})
+    \lambda_0
+    - 2 \, \lambda_1
+    + 2 \, \lambda_2 - \cdots
+    + (-1)^{K-1} 2 \, \lambda_{K-1})
   \right]
   \\
   &=
   \begin{dcases}
-    (-1)^{n-1} & K \mathrm{\; even,} \\
-    (-1)^n     & K \mathrm{\; odd.}
+    (-1)^{n-1} & K \mathrm{\; odd,} \\
+    (-1)^n     & K \mathrm{\; even.}
   \end{dcases}
 \end{aligned}
 $$
@@ -5589,18 +5581,18 @@ $$
   \frac{1}{2\,n}
   \left[
     1 +
-    2 \sum_{k=2}^{K+1}
-    \cos \frac { (k - 1) \, l \pi } { n }
+    2 \sum_{k=1}^{K-1}
+    \cos \frac { k \, l \pi } { n }
     +
-    (-1)^{n+K-1} (-1)^l
+    (-1)^{n-K} (-1)^l
   \right]
   \\
   &=
   \frac{1}{2\,n}
   \left[
-    (-1)^{n+K+l-1}
+    (-1)^{n-K+l}
     +
-    \sum_{k=-K}^{K}
+    \sum_{k=1-K}^{K-1}
     \cos \frac { k \, l \pi } { n }
   \right]
   .
@@ -5681,7 +5673,7 @@ in Eqs. \eqref{eq:error_asym} and \eqref{eq:error_res1}:
   &=
   \frac{    1    }
        { T + t_0 }
-  \sum_{k = 2}^n
+  \sum_{k = 1}^{n-1}
     \frac{ \Gamma_k \, \nu_k^2 }
          {    2 \, \nu_k - 1   }
   \left[
@@ -5697,7 +5689,7 @@ in Eqs. \eqref{eq:error_asym} and \eqref{eq:error_res1}:
   \Err_R(T)
   &=
   \frac { a_0 } { 2 }
-  \sum_{k = 2}^n
+  \sum_{k = 1}^{n-1}
   \Gamma_k \, \lambda_k \,
   \left(
       \frac{   t_0   }
@@ -5726,8 +5718,8 @@ where $\nu_k \equiv \lambda_k / \lambda$.
 %the system was initially equilibrated
 %at a constant $a_0$,
 %such that the values of
-%$\left\langle y_k^2(0) \right\rangle$
-%can be computed from Eq. \eqref{eq:y2_eql},
+%$\left\langle {\tilde x}_k^2(0) \right\rangle$
+%can be computed from Eq. \eqref{eq:xt2_eql},
 %as well as Eq. \eqref{eq:t0_sinc}.
 %
 %The total error is
@@ -5739,7 +5731,7 @@ where $\nu_k \equiv \lambda_k / \lambda$.
 %\notag
 %\\
 %&=
-%\sum_{ k = 2 }^n
+%\sum_{ k = 1 }^{n-1}
 %  \frac
 %  {
 %    \Gamma_k \, \nu_k \,
@@ -5764,10 +5756,10 @@ where $\nu_k \equiv \lambda_k / \lambda$.
 
 In particular,
 for the single-bin scheme, we have
-$\lambda_2 = \cdots = \lambda_n = 1$,
+$\lambda_1 = \cdots = \lambda_{n-1} = 1$,
 and
 $\Gamma_k$'s affect the error
-only via the sum, $\Gamma = \sum_{k = 2}^n \Gamma_k$,
+only via the sum, $\Gamma = \sum_{k = 1}^{n-1} \Gamma_k$,
 as a multiple.
 %
 In the long time limit,
@@ -5836,21 +5828,20 @@ which is minimal at $\lambda = 1$.
     $\pi_i$         &   (Instantaneous) distribution, Eq. \eqref{eq:pi_p_V}. \\
     $q(t)$          &   $\int_0^t \alpha(t') \, dt'$.  \\
     $Q$             &   $q(T) - q(t)$.  \\
-    $\theta_k(t)$   &   Noise of mode $k$, Eq. \eqref{eq:theta_def}. \\
     $\rho_i$        &   Distribution used to define the error. \\
     $s, S$          &   Stage index and the total number of stages in the Wang-Landau algorithm. \\
     $\sigma_{ij}(t)$   &   Autocorrelation function of $\zeta_i(t)$. \\
     $\sigma_\varphi$   &   Width of the Gaussian updating scheme in radians. \\
     $t, \tau$       &   Time. \\
     $T$             &   Simulation length. \\
-    $u_i(q')$       &   $u_i(q') \equiv e^{\lambda \, [q - q(T)]}$. \\
-    $V_i(t)$        &   Original bias potential. \\
+    $y_k(q')$       &   $y_k(q') \equiv e^{\lambda_k \, [q - q(T)]}$. \\
+    $u_i(t)$        &   Original bias potential. \\
     $v_i(t)$        &   Shifted bias potential. \\
     $\mathbf w$     &   Updating matrix. \\
     $x_i(t)$        &   Average-deducted bias potential, Eq. \eqref{eq:x_def}. \\
     $\xi_i(t)$      &   The noise, Eq. \eqref{eq:xi_def}. \\
-    $y_k(t)$        &   Mode of the shifted bias potential. \\
-    $Y_k$           &   Mode of the original bias potential. \\
+    ${\tilde x}_k(t)$        &   Mode of the shifted bias potential. \\
+    ${\tilde X}_k$           &   Mode of the original bias potential. \\
     $z$             &   Reaction coordinate. \\
     $\zeta_i(t)$    &   The noise part of the instantaneous histogram, $h_i(t)$.
   \end{tabular}

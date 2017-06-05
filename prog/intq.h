@@ -183,7 +183,7 @@ static double intq_getq_adp(intq_t *intq, double qT)
 /* differentiate q(t) to get alpha(t) */
 static void intq_diffq(intq_t *intq)
 {
-  double y;
+  double y, lam = intq->lambda[1];
   int j, j1, j0, m = intq->m;
 
   /* differentiate q(t) */
@@ -192,7 +192,7 @@ static void intq_diffq(intq_t *intq)
     j0 = (j > 0 ? j - 1 : 0);
     y = ( intq->qarr[j1] - intq->qarr[j0] )
       / ( intq->tarr[j1] - intq->tarr[j0] );
-    intq->aarr[j] = 1 - exp(-y);
+    intq->aarr[j] = (1 - exp(-y*lam)) / lam;
   }
 }
 
@@ -819,10 +819,10 @@ __inline static double intq_interp(double t, int *id,
  * newer discretization */
 __inline static double intq_evala(intq_t *intq, double t)
 {
-  double t0 = (t >= 1 ? t - 1 : 0), q0, q1;
+  double t0 = (t >= 1 ? t - 1 : 0), q0, q1, lam = intq->lambda[1];
   q0 = intq_interp(t0, &intq->curr_id, intq->m, intq->tarr, intq->qarr);
   q1 = intq_interp(t,  &intq->curr_id, intq->m, intq->tarr, intq->qarr);
-  return 1 - exp(q0 - q1);
+  return (1 - exp(lam*(q0 - q1)))/lam;
 }
 
 
