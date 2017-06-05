@@ -92,10 +92,10 @@ static double intq_getmassx(intq_t *intq, double dq,
 /* compute the optimal schedule, in terms of q(t)
  * the results are saved to tarr[0..m], qarr[0..m]
  * */
-static void intq_getq(intq_t *intq, double qT)
+static double intq_getq(intq_t *intq, double qT)
 {
   int j, m = intq->m;
-  double c, dq, yK = 0;
+  double c, dq, yK = 0, dt;
 
   /* integrate over q over uniform grid */
   dq = qT / m;
@@ -103,10 +103,11 @@ static void intq_getq(intq_t *intq, double qT)
   intq->qarr[0] = 0;
   intq_getmassx(intq, intq->qarr[0] - qT, &yK);
   for ( j = 1; j <= m; j++ ) {
-    intq->qarr[j] = j * dq;
-    intq->tarr[j] = intq->tarr[j - 1] + yK * 0.5 * dq;
+    intq->qarr[j] = intq->qarr[j-1] + dq;
+    dt = yK * 0.5 * dq;
     intq_getmassx(intq, intq->qarr[j] - qT, &yK);
-    intq->tarr[j] += yK * 0.5 * dq;
+    dt += yK * 0.5 * dq;
+    intq->tarr[j] = intq->tarr[j-1] + dt;
   }
 
   /* normalize the time array */
@@ -114,7 +115,68 @@ static void intq_getq(intq_t *intq, double qT)
   for ( j = 1; j <= m; j++ ) {
     intq->tarr[j] *= c;
   }
+  return c;
 }
+
+
+
+/* compute the optimal schedule, in terms of q(t)
+ * the results are saved to tarr[0..m], qarr[0..m]
+ * */
+static double intq_getq_adp(intq_t *intq, double qT)
+{
+  int i, j, round, m = intq->m;
+  double c0, c, dq, yK = 0, yK1 = 0, dt, del, T = intq->T;
+
+  /* get the normalization constant */
+  c0 = intq_getq(intq, qT);
+  //printf("c %g\n", c0);
+  intq->tarr[0] = 0;
+  intq->qarr[0] = 0;
+
+  /* use several rounds to for improved estimate of c0
+   * usually one or two rounds would suffice */
+  for ( round = 0; round < 10; round++ ) {
+    intq_getmassx(intq, intq->qarr[0] - qT, &yK);
+    for ( j = 1; j <= m; j++ ) {
+      del = 1.0 / (m + 1 - j);
+      dq = (qT - intq->qarr[j-1]) / (m + 1 - j);
+      /* adjust the integration step size */
+      for ( i = 0; i < 100; i++ ) {
+        intq_getmassx(intq, intq->qarr[j-1] + dq - qT, &yK1);
+        dt = c0 * (yK + yK1) * 0.5 * dq;
+        //printf("point j %d, i %d, dq %g, dt %g, del %g, slope dq/dt %g | q %g, t %g\n", j, i, dq/(qT-q0), dt/T, del, dq/dt, q0/qT, intq->tarr[j-1]/T);
+        /* skip the adjustment for the last point
+         * or if the step is already too small */
+        if ( j == m || dq < 1e-3 * qT/m ) {
+          break;
+        } else if ( dt < del * T * 0.5 ) {
+          dq *= 2;
+        } else if ( dt > del * T * 2 ) {
+          dq *= 0.5;
+        } else {
+          break;
+        }
+      }
+      //getchar();
+      intq->qarr[j] = intq->qarr[j-1] + dq;
+      intq->tarr[j] = intq->tarr[j-1] + dt;
+      yK = yK1;
+    }
+
+    /* normalize the time array */
+    c = intq->T / intq->tarr[m];
+    c0 *= c;
+    for ( j = 1; j <= m; j++ )
+      intq->tarr[j] *= c;
+    //printf("round %d, c %g, c0 %g\n", round, c, c0); getchar();
+
+    /* stop if the estimated normalization is good */
+    if ( fabs(c - 1) < 0.1 ) break;
+  }
+  return c;
+}
+
 
 
 
@@ -122,20 +184,16 @@ static void intq_getq(intq_t *intq, double qT)
 static void intq_diffq(intq_t *intq)
 {
   double y;
-  int j, m = intq->m;
+  int j, j1, j0, m = intq->m;
 
   /* differentiate q(t) */
-  y = ( intq->qarr[1] - intq->qarr[0] )
-    / ( intq->tarr[1] - intq->tarr[0] );
-  intq->aarr[0] = y;
-  for ( j = 1; j < m; j++ ) {
-    y = ( intq->qarr[j + 1] - intq->qarr[j - 1] )
-      / ( intq->tarr[j + 1] - intq->tarr[j - 1] );
-    intq->aarr[j] = y;
+  for ( j = 0; j <= m; j++ ) {
+    j1 = (j < m ? j + 1 : m);
+    j0 = (j > 0 ? j - 1 : 0);
+    y = ( intq->qarr[j1] - intq->qarr[j0] )
+      / ( intq->tarr[j1] - intq->tarr[j0] );
+    intq->aarr[j] = 1 - exp(-y);
   }
-  y = ( intq->qarr[m] - intq->qarr[m - 1] )
-    / ( intq->tarr[m] - intq->tarr[m - 1] );
-  intq->aarr[m] = y;
 }
 
 
@@ -144,19 +202,15 @@ static void intq_diffq(intq_t *intq)
 static void intq_diffinva(intq_t *intq)
 {
   double y;
-  int j, m = intq->m;
+  int j, j0, j1, m = intq->m;
 
-  y = ( 1.0 / intq->aarr[1] - 1.0 / intq->aarr[0] )
-    / (       intq->tarr[1] -       intq->tarr[0] );
-  intq->dinva[0] = y;
-  for ( j = 1; j < m; j++ ) {
-    y = ( 1.0 / intq->aarr[j + 1] - 1.0 / intq->aarr[j - 1] )
-      / (       intq->tarr[j + 1] -       intq->tarr[j - 1] );
+  for ( j = 0; j <= m; j++ ) {
+    j1 = (j < m ? j + 1 : m);
+    j0 = (j > 0 ? j - 1 : 0);
+    y = ( 1.0 / intq->aarr[j1] - 1.0 / intq->aarr[j0] )
+      / (       intq->tarr[j1] -       intq->tarr[j0] );
     intq->dinva[j] = y;
   }
-  y = ( 1.0 / intq->aarr[m] - 1.0 / intq->aarr[m - 1] )
-    / (       intq->tarr[m] -       intq->tarr[m - 1] );
-  intq->dinva[m] = y;
 }
 
 
@@ -168,7 +222,8 @@ static void intq_diffinva(intq_t *intq)
  * */
 static void intq_geta(intq_t *intq, double qT)
 {
-  intq_getq(intq, qT);
+  intq_getq_adp(intq, qT);
+  //intq_getq(intq, qT);
 
   /* differentiate q(t) to get alpha(t) */
   intq_diffq(intq);
@@ -267,18 +322,11 @@ __inline static double intq_errcomp(intq_t *intq, double a0,
       err_a += y * dt;
     }
 
+    if ( xerr_r != NULL ) xerr_r[i] = err_r;
+    if ( xerr_a != NULL ) xerr_a[i] = err_a;
+
     err = err_r + err_a;
-
-    if ( xerr_r != NULL ) {
-      xerr_r[i] = err_r;
-    }
-
-    if ( xerr_a != NULL ) {
-      xerr_a[i] = err_a;
-    }
-
     xerr[i] = err;
-
     errtot += err;
   }
 
@@ -768,6 +816,18 @@ __inline static double intq_interp(double t, int *id,
 
 
 /* compute the updating magnitude alpha at a given t
+ * newer discretization */
+__inline static double intq_evala(intq_t *intq, double t)
+{
+  double t0 = (t >= 1 ? t - 1 : 0), q0, q1;
+  q0 = intq_interp(t0, &intq->curr_id, intq->m, intq->tarr, intq->qarr);
+  q1 = intq_interp(t,  &intq->curr_id, intq->m, intq->tarr, intq->qarr);
+  return 1 - exp(q0 - q1);
+}
+
+
+
+/* compute the updating magnitude alpha at a given t
  * by interpolation
  * assuming intq_geta() has been called */
 __inline static double intq_interpa(intq_t *intq, double t)
@@ -809,8 +869,8 @@ __inline static int intq_save(intq_t *intq,
     if ( resample ) {
       t = T * i / m;
       id = i;
-      a = intq_interp(t, &id, m, intq->tarr, intq->aarr);
       q = intq_interp(t, &id, m, intq->tarr, intq->qarr);
+      a = intq_interp(t, &id, m, intq->tarr, intq->aarr);
       dinva = intq_interp(t, &id, m, intq->tarr, intq->dinva);
     } else {
       t = intq->tarr[i];

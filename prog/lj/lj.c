@@ -119,7 +119,9 @@ static double prodrun(invtpar_t *m, metad_t *metad, lj_t *lj,
     ir = dist01(metad, lj, &dr);
     if ( prod ) {
       if ( m->opta ) {
-        metad->a = intq_interpa(metad->intq, (double) t);
+        //double a0 = intq_interpa(metad->intq, (double) t);
+        metad->a = intq_evala(metad->intq, (double) t);
+        //printf("t %ld, %g %g\n", t, a0, metad->a); if (t %10000 == 0) getchar();
       } else {
         metad->a = 1.0/(t + t0);
       }
@@ -176,7 +178,7 @@ static int work(invtpar_t *m)
 
   /* compute the optimal schedule and the error */
   metad_getalphaerr(metad, m->opta, (double) m->nsteps, m->gammethod,
-      m->fngamma, m->sampmethod, m->alpha0, &m->qT,
+      m->fngamma, m->sampmethod, m->alpha0, (double) m->nequil, &m->qT,
       m->qprec, m->alpha_nint, m->fnalpha);
 
   /* multiple production runs */

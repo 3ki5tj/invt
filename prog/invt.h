@@ -527,7 +527,7 @@ __inline static double esterror_eql(double alpha, int n, double *xerr,
  * and the default t0 = 2 / alpha0.
  * */
 static double esterror_invt1(double T, double c, double a0,
-    double t0, double *ea, double *er,
+    double t0, double er0, double *ea, double *er,
     double lambda, double gamma)
 {
   const double tol = 1e-7;
@@ -546,7 +546,7 @@ static double esterror_invt1(double T, double c, double a0,
   y = pow(f, r * 2 - 1);
   errsat = gamma * r / (T + t0);
 
-  *er = 0.5 * a0 * gamma * lambda * f * y;
+  *er = (0.5 * a0 * gamma * lambda + er0) * f * y;
   *ea = errsat * r / (r * 2 - 1) * (1 - y);
   //fprintf(stderr, "error %g vs %g\n", er + ea, errsat * (r + (r - 1) * pow(t0 / (T + t0), 2 * r - 1) ) / (r * 2 - 1)); getchar();
   //fprintf(stderr, "r %g, 2*r-1 %g, errsat %g\n", r, 2*r - 1, errsat);
@@ -565,20 +565,21 @@ static double esterror_invt1(double T, double c, double a0,
  * */
 #define esterror_invt(T, c, a0, t0, n, xerr, lambda, gamma) \
     esterror_invt_x(T, c, a0, t0, n, NULL, NULL, \
-        xerr, NULL, NULL, lambda, gamma)
+        NULL, xerr, NULL, NULL, lambda, gamma)
 
 static double esterror_invt_x(double T, double c, double a0,
     double t0, int n, double *errr, double *erra,
-    double *xerr, double *xerrr, double *xerra,
+    double *xerr0, double *xerr, double *xerrr, double *xerra,
     const double *lambda, const double *gamma)
 {
   int i;
-  double x, xr, xa, E = 0, Er = 0, Ea = 0;
+  double x, xr0, xr, xa, E = 0, Er = 0, Ea = 0;
 
   if ( t0 <= 0 ) t0 = 2 / a0;
 
   for ( i = 1; i < n; i++ ) {
-    x = esterror_invt1(T, c, a0, t0, &xr, &xa, lambda[i], gamma[i]);
+    xr0 = ( xerr0 != NULL ? xerr0[i] : 0 );
+    x = esterror_invt1(T, c, a0, t0, xr0, &xr, &xa, lambda[i], gamma[i]);
     if ( xerr  != NULL ) xerr[i] = x;
     if ( xerrr != NULL ) xerrr[i] = xr;
     if ( xerra != NULL ) xerra[i] = xa;
