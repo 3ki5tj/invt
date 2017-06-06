@@ -869,30 +869,28 @@ Second, the bias potential following Eq. \eqref{eq:wl_update}
 generally grows over time.
 %
 Since a uniform increase of $u_i(t)$, or, equivalently, that of $v_i(t)$,
-does not affect the
-resulting distribution, $\pi_i(t)$,
-%
-the real deviation, $x_i(t)$, of the bias potential
+does not affect the resulting distribution, $\pi_i(t)$,
+the real deviation of the bias potential
 depends only on the difference between $v_i(t)$
 and a baseline value, $\bav{v}(t)$,
 for average growth\cite{
-dama2014},
+dama2014}.
+%
+We define a bin-average-deducted bias potential as
 %
 \begin{equation}
-  x_i(t) \equiv v_i(t) - \bav{v}(t)
-  %=
-  %v_i - \sum_{j = 1}^n \rho_j \, v_j
+  v_{*i}(t) \equiv v_i(t) - \bav{v}(t)
   ,
 \label{eq:x_def}
 \end{equation}
 %
-where
+where the bin average, $\bav{v}(t)$, is defined as
 %
 \begin{equation}
   \bav{v}(t)
-  = \sum_{i = 1}^n \rho_i \, v_i(t)
+  \equiv \sum_{i = 1}^n \rho_i \, v_i(t)
   ,
-\label{eq:vbar_def}
+\label{eq:vav_def}
 \end{equation}
 for some distribution,
 $\pmb \rho = (\rho_1, \dots, \rho_n)$
@@ -931,7 +929,7 @@ $\mathbf p^*$\cite{
 $\ln p_i = \ln {p^*_i}/(1+\Delta) + \mathrm{const.}$ for some positive $\Delta$,
 whereas $\pmb\rho$ is flat.}
 %
-From Eqs. \eqref{eq:x_def} and \eqref{eq:vbar_def},
+From Eqs. \eqref{eq:x_def} and \eqref{eq:vav_def},
 we have
 %
 \begin{equation}
@@ -942,7 +940,8 @@ we have
 %
 
 
-\subsubsection{Differential equation}
+\subsubsection{\label{sec:sbin_diffeq}
+Differential equation}
 
 
 
@@ -956,7 +955,10 @@ approximation requires us to shift the origin of time by $1$ in some cases.}
   \equiv
   \frac{ d u_i(t) } { dt }
   =
-  \alpha(t) \, \frac{ h_i(t) } { p_i },
+  \alpha(t) \, \frac{ h_i(t) } { p_i }
+  \equiv
+  \alpha(t) \, \eta_i(t)
+  ,
   \label{eq:vt_diffeq}
 \end{equation}
 %
@@ -974,18 +976,21 @@ $
 being the instantaneous histogram,
 which is equal to $1.0$
 for the bin $i(t)$ at time $t$
-or zero otherwise.
+or zero otherwise,
+and we have defined a relative histogram
+$\eta_i(t) \equiv h_i(t) /p_i$
+in the last step.
 %
 The shifted bias potential, $v_i(t)$,
 follows the same differential equation
 as the shift is a constant.
 
 
-We can split $h_i(t)$ into a deterministic averaged part
+We now try to split the histogram into a deterministic averaged part
 and a random fluctuation part, $\zeta_i(t)$,
 %
 \begin{equation}
-  h_i(t) = \langle h_i(t) \rangle + \zeta_i(t).
+  \eta_i(t) = \langle \eta_i(t) \rangle + \zeta_i(t).
   \label{eq:h_split}
 \end{equation}
 %
@@ -1009,21 +1014,21 @@ and we may assume Eq. \eqref{eq:pi_p_V}
 for the deterministic part
 %
 \begin{align}
-  \langle h_i(t) \rangle
+  \langle \eta_i(t) \rangle
+  %&=
+  %\frac{ \langle h_i(t) } { p_i } \rangle
   &\approx
-  \pi_i(t)
+  \frac{ \pi_i(t) } { p_i }
   =
-  \frac{                p_i \, e^{-x_i(t)} }
+  \frac{                       e^{-x_i(t)} }
        { \sum_{j = 1}^n p_j \, e^{-x_j(t)} }
   \notag
   \\
   &\approx
-  p_i \,
-  \left[
-    1 - x_i(t) + \sum_{j = 1}^n p_j \, x_j(t)
-  \right]
+  1 - x_i(t) + \sum_{j = 1}^n p_j \, x_j(t)
   ,
-  \label{eq:h_ave}
+  \notag
+  %\label{eq:h_ave}
 \end{align}
 %
 where we have assumed the smallness
@@ -1045,47 +1050,87 @@ $$
 .
 $$
 }%
+%
+Deducting the bin average [similar to Eq. \eqref{eq:vav_def}],
+we have
+%
+\begin{align}
+  \langle \eta_i(t)  - \eta_\mathrm{av}(t) \rangle
+  \equiv
+  \langle \eta_i(t) \rangle -
+  \sum_{j=1}^n \rho_j \langle \eta_j(t) \rangle
+  &\approx
+  - x_i(t)
+  .
+  \label{eq:sh_ave}
+\end{align}
 
 %
 For the histogram fluctuation part,
 the average is zero by definition,
 $\langle \zeta_i(t) \rangle = 0$,
 %
-and we will approximate it as white noise, i.e.
-%The noise is not necessarily white,
-%and the autocorrelation function
-%depend only on the time difference
-%
-\begin{equation}
-  \left\langle
-    \zeta_i(t) \, \zeta_j(t')
-  \right\rangle
-  =
-  %\sigma_{ij}(t - t')
-  G^{(0)}_{ij} \, \delta(t - t')
-  ,
-  \notag
-  %\label{eq:zeta_zeta_correlation}
-\end{equation}
-%
-for some value of $G^{(0)}_{ij}$,
-and $\delta(t)$ is the Dirac's delta function.
+and we will approximate it as white noise.
+%i.e.
+%%The noise is not necessarily white,
+%%and the autocorrelation function
+%%depend only on the time difference
+%%
+%\begin{equation}
+%  \left\langle
+%    \zeta_i(t) \, \zeta_j(t')
+%  \right\rangle
+%  =
+%  %\sigma_{ij}(t - t')
+%  G^{(0)}_{ij} \, \delta(t - t')
+%  ,
+%  \notag
+%  %\label{eq:zeta_zeta_correlation}
+%\end{equation}
+%%
+%for some value of $G^{(0)}_{ij}$,
 %where $\sigma_{ij}(t)$ is an even function
 %that vanishes at large $t$.
 %
 This approximation is valid if the simulation period, $T$,
 is much longer than the autocorrelation time of noise.
 %
+The bin-average-deducted fluctuation
+%
+\begin{equation}
+  \xi_i(t)
+  \equiv
+  \zeta_i(t) - \zeta_\mathrm{av}(t)
+  \equiv
+  \zeta_i(t)
+  -
+  \sum_{ j = 1 }^n
+    \rho_j \, \zeta_j(t)
+  ,
+\label{eq:xi_def}
+\end{equation}
+%
+would also be governed by white noise as is $\zeta_i(t)$:
+%i.e. we may write
+\begin{equation}
+  \langle \xi_i(t) \, \xi_i(t') \rangle
+  = G_i \, \delta(t - t')
+  ,
+  \label{eq:G_def}
+\end{equation}
+for some $G_i$,
+and $\delta(t)$ is the Dirac's delta function.
+%
 For non-white noise,
-the equivalent value of $G^{(0)}_i$ can be approximately obtained as
-$\sum_{t = -\infty}^\infty \langle \zeta_i(t) \, \zeta_j(0) \rangle$.
+the equivalent value of $G_i$ can be approximately obtained as
+$\sum_{t = -\infty}^\infty \langle \xi_i(t) \, \xi_i(0) \rangle$.
 %
 \note{More explicitly,
 if the transition matrix of a period, $\tau$,
 is $T^\tau_{ij}$,
 then
 $
-  \langle \zeta_i(t) \, \zeta_j(t') \rangle
+  p_i p_j \langle \zeta_i(t) \, \zeta_j(t') \rangle
   =
   \langle h_i(t) \, h_j(t') \rangle
   -
@@ -1096,25 +1141,11 @@ $
 }%
 
 
-%The average growth rate of $v(t)$ is given by
-%\begin{equation}
-%  \frac{ d \bav{v} (t) }
-%       { d t }
-%  =
-%  \alpha(t)
-%  \sum_{ r = 1 }^n \rho_r \, \frac{ h_r(t) } { p_r }
-%  .
-%\label{eq:dvbardt}
-%\end{equation}
-%
-
-
 From Eqs.
-\eqref{eq:v_def}-\eqref{eq:vbar_def},
-\eqref{eq:rhox_sum}-\eqref{eq:h_ave},
+\eqref{eq:x_def}, \eqref{eq:vt_diffeq}-\eqref{eq:xi_def},
 %\eqref{eq:v_def},
 %\eqref{eq:x_def},
-%\eqref{eq:vbar_def},
+%\eqref{eq:vav_def},
 %\eqref{eq:rhox_sum},
 %\eqref{eq:vt_diffeq},
 %\eqref{eq:h_split}
@@ -1125,72 +1156,15 @@ we get % a set of decoupled equations
 \begin{equation}
   \dot x_i(t)
   =
+  \alpha(t) \, \left[ \eta_i(t) - \eta_\mathrm{av} \right]
+  \approx
   -\alpha(t) \, \left[ x_i(t) - \xi_i(t) \right]
   ,
-\label{eq:dxdt_singlebin}
+  \notag
+  %\label{eq:dxdt_singlebin}
 \end{equation}
 %
-where the shifted histogram fluctuation
-%
-\begin{equation}
-  \xi_i(t)
-  \equiv
-  \frac{ \zeta_i(t) }
-       { p_i }
-  -
-  \sum_{ j = 1 }^n
-    \rho_j
-    \frac{ \zeta_j(t) }
-         {     p_j    }
-  ,
-\label{eq:xi_def}
-\end{equation}
-%
-is also governed by white noise as is $\zeta_i(t)$:
-%i.e. we may write
-\begin{equation}
-  \langle \xi_i(t) \, \xi_i(t') \rangle
-  = G_i \, \delta(t - t')
-  ,
-  \label{eq:G_def}
-\end{equation}
-for some $G_i$.
-%
-\note{The derivation:
-$$
-\begin{aligned}
-  \dot x_i
-  &\stackrel{\mathrm{Eq.\; \eqref{eq:x_def}}}
-            {=\joinrel=\joinrel=\joinrel=\joinrel=}
-  \dot v_i - \bav{\dot v}
-  \stackrel{\mathrm{Eqs.\; \eqref{eq:vt_diffeq}\; and\; \eqref{eq:vbar_def}}}
-            {=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=}
-  \alpha(t) \left(
-    \frac{ h_i } { p_i }
-    -
-    \sum_{ j = 1 }^n
-      \rho_j \frac{ h_j } { p_j }
-  \right)
-  \\
-  &\stackrel{\mathrm{Eqs.\; \eqref{eq:h_split} \; and \; \eqref{eq:xi_def}}}
-            {=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=}
-  \alpha(t) \left(
-    \frac{ \langle h_i \rangle } { p_i }
-    -
-    \sum_{ j = 1 }^n
-      \rho_j \frac{ \langle h_j \rangle } { p_j }
-    +
-    \xi_i(t)
-  \right)
-  \\
-  &\stackrel{\mathrm{Eqs.\; \eqref{eq:h_ave} \;and\; \eqref{eq:rhox_sum}}}
-            {=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=\joinrel=}
-  \alpha(t) \left[ -x_i(t) + \xi_i(t) \right].
-\end{aligned}
-$$
-}
-
-The formal solution of Eq. \eqref{eq:dxdt_singlebin} is
+and the formal solution is % of Eq. \eqref{eq:dxdt_singlebin} is
 %
 \begin{equation}
 x_i(T)
@@ -1479,7 +1453,7 @@ the detailed balance condition,
 \end{equation}
 %
 for the error weighting distribution, $\pmb \rho$,
-introduced in Eq. \eqref{eq:vbar_def}.
+introduced in Eq. \eqref{eq:vav_def}.
 %
 This requires the updating matrix, $\mathbf w$
 to be symmetric
@@ -1504,13 +1478,13 @@ satisfying the orthonormal conditions\cite{vankampen}:
 %
 \begin{align}
   \sum_{k = 0}^{n - 1}
-    \phi_{ki} \, \phi_{kj}^*
+    \phi_{ki} \, \phi_{kj}
   &=
   \delta_{ij} \, \rho_i,
   \label{eq:eig_orthonormal_cols}
   \\
   \sum_{i = 1}^n
-    \frac{ \phi_{ki} \, \phi_{li}^* }
+    \frac{ \phi_{ki} \, \phi_{li} }
          { \rho_i }
   &=
   \delta_{kl}
@@ -1518,8 +1492,7 @@ satisfying the orthonormal conditions\cite{vankampen}:
   \label{eq:eig_orthonormal_rows}
 \end{align}
 %
-where the superscript $^*$ denotes the complex conjugate,
-and we have set the index of the first eigenmode to $0$
+where we have set the index of the first eigenmode to $0$
 instead of $1$ for later convenience.
 
 The above symmetry implies the existence of
@@ -1569,7 +1542,7 @@ as\cite{bussi2006}
   w_{ij}
   =
   \frac{1}{\rho_i} \sum_{k=0}^{n - 1}
-  \lambda_k \, \phi_{ki}^* \, \phi_{kj}
+  \lambda_k \, \phi_{ki} \, \phi_{kj}
   .
   \notag
 \end{equation}
@@ -1601,102 +1574,72 @@ for variable, $A_i$,
   ,
   \label{eq:gft_def}
 \end{equation}
+%
 and the inverse transform is
 %
 \begin{equation}
   A_i =
-  \frac{1}{\rho_i} \sum_{k = 1}^n \phi^*_{ki} \, \tilde{A}_k
+  \frac{1}{\rho_i} \sum_{k = 1}^n \phi_{ki} \, \tilde{A}_k
   .
   \label{eq:gft_inv}
 \end{equation}
 %
-The multiple-bin updating scheme, Eq. \eqref{eq:mbin_update},
-can be diagonalized as
+Using this definition,
+we can rewrite Eq. \eqref{eq:ortho1} as
+%
+\begin{equation}
+  \mathcal F[1]_k = \delta_{k0}
+  ,
+  \label{eq:ortho0}
+\end{equation}
+%
+and the bin average, Eq. \eqref{eq:vav_def} can be written as
+\begin{equation}
+  v_\mathrm{av} = \mathcal F[v_i]_0 = \tilde v_0
+  .
+  \label{eq:vav_vt0}
+\end{equation}
+
+We can now diagonalize
+the multiple-bin updating scheme, Eq. \eqref{eq:mbin_update},
+as
 %
 $$
 {\tilde v}_k(t + 1) =
 {\tilde v}_k(t) + \alpha(t) \, \lambda_k \,
-\mathcal{F}\bigl[ h_i(t) / p_i \bigr]_k
+{\tilde \eta}_k(t)
 ,
 $$
 or in the continuous-time form,
-%where
-%%
-%$$
-%\eta_i \equiv \frac{ h_i(t) } { p_i } - \sum_{j = 1}^n \rho_j \frac{ h_j(t) }{ p_j }.
-%$$
 %
 \begin{equation}
   \dot{\tilde v}_k(t)
   =
-  \alpha(t) \, \lambda_k \, \mathcal{F} \bigl[ h_j(t)/ p_i  \bigr]_k
+  \alpha(t) \, \lambda_k \, {\tilde \eta}_k(t)
   .
   \label{eq:ut_diffeq_mbin}
 \end{equation}
-
-
-In particular, for the first eigenmode,
-we have $\tilde{v}_0 \equiv v_\mathrm{av}$,
-and
 %
-\begin{align*}
-  \bav{\dot v}(t)
-  =
-  \alpha(t)
-  \sum_{r = 1}^n \rho_r
-    \, \frac{ h_r(t) } { p_r }
-  =
-  \alpha(t)
-  \sum_{j = 1}^n w_{ij}
-  \sum_{r = 1}^n \rho_r
-    \, \frac{ h_r(t) } { p_r }
-  ,
-\end{align*}
-%
-from Eq. \eqref{eq:eigenmode0},
-%
-%
-and by Eqs. \eqref{eq:x_def}, \eqref{eq:rhox_sum} and \eqref{eq:h_ave},
+Deducting the bin average, we get
 %
 $$
 \begin{aligned}
-  \dot x_i(t)
-  &= \alpha(t) \sum_{j=1}^n w_{ij}
-  \left(
-    \frac{ h_j(t) } { p_j }
+  \dot {\tilde x}_k(t)
+  &= \alpha(t) \, \lambda_k
+  \left[
+    {\tilde \eta}_k(t)
     -
-    \sum_{r = 1}^n
-      \rho_r \frac{ h_r(t) } { p_r }
-  \right)
+    {\tilde \eta}_\mathrm{av}(t) \, \delta_{k0}
+  \right]
   \\
   &\approx
-  -\alpha(t) \sum_{j = 1}^n
-  w_{ij} \bigl[ x_j(t) - \xi_j (t) \bigr]
-  .
+  -\alpha(t) \, \lambda_k \,
+  \bigl[ {\tilde x}_k(t) - {\tilde \xi}_k (t) \bigr]
+  ,
 \end{aligned}
 $$
-%where
-%we have expanded the right-hand side
-%in linear terms of $x_j$
-%on the second line.
-
-Diagonalizing the matrix, $\mathbf w$,
-using the eigenvectors defined in Eqs.
-\eqref{eq:eig_w}-\eqref{eq:eig_orthonormal_rows}
-yields a set of decoupled equations
-%
-\begin{equation}
-  \dot{\tilde x}_k(t)
-  =
-  -\alpha(t) \, \lambda_k \,
-  \left[{\tilde x}_k(t) - {\tilde \xi}_k(t) \right]
-  .
-  \notag
-  %\label{eq:yt_diffeq}
-\end{equation}
-%
-%are the deviation and noise (histogram fluctuation)
-%of mode $k$, respectively.
+where we have used the linear approximation
+introduced in Sec. \ref{sec:sbin_diffeq}.
 
 
 
@@ -1714,12 +1657,12 @@ can be rewritten in terms of the eigenmodes of $\mathbf w$,
     \left\langle x_i^2 \right\rangle
   =
   \sum_{i, j = 1}^n \sum_{k=0}^{n-1}
-   \phi_{ki} \, \phi_{kj}^* \,
+   \phi_{ki} \, \phi_{kj} \,
     \left\langle x_i \, x_j \right\rangle
   =
   \sum_{k = 0}^{n - 1}
     \left\langle
-      \bigl| {\tilde x}_k^2 \bigr|
+      {\tilde x}_k^2
     \right\rangle
   ,
 \notag
@@ -1740,7 +1683,7 @@ from $k = 1$,
   =
   \sum_{k = 1}^{n - 1}
     \left\langle
-      \bigl| {\tilde x}_k^2(T) \bigr|
+      {\tilde x}_k^2(T)
     \right\rangle
   .
 \label{eq:xt2_sum}
@@ -1797,14 +1740,14 @@ where
 and $\Gamma_k$ is computed from
 the autocorrelation function
 of the histogram fluctuation,
-$\kappa_k(t) \equiv \langle {\tilde \xi}_k^*(0) \, {\tilde \xi}_k(t) \rangle$,
+$\kappa_k(t) \equiv \langle {\tilde \xi}_k(0) \, {\tilde \xi}_k(t) \rangle$,
 as:
 %
 \begin{equation}
   \Gamma_k
   = \sum_{t = -\infty}^\infty \kappa_k(t)
   = \sum_{t = -\infty}^\infty
-  \left\langle {\tilde \xi}_k^*(0) \, {\tilde \xi}_k(t) \right\rangle
+  \left\langle {\tilde \xi}_k(0) \, {\tilde \xi}_k(t) \right\rangle
   .
   \label{eq:Gamma_sum}
 \end{equation}
@@ -1928,7 +1871,7 @@ for sufficiently long.
 Then, one can show that
 \begin{equation}
   \left\langle
-    \bigl| {\tilde x}_k^2(0) \bigr|
+    {\tilde x}_k^2(0)
   \right\rangle
   = \frac 1 2 \, \Gamma_k \, \lambda_k \, a_0
   ,
@@ -2629,13 +2572,13 @@ numerically integrating Eqs. \eqref{eq:q_opt} and \eqref{eq:mint}.
 We have used the standard trapezoidal rule\cite{press3rd},
 on $N+1$ grid points on $[0, q(T)]$ that are defined adaptively
 such that the resulting change of $t_{[i+1]}-t_{[i]}$
-is no less than $T/(2*N)$ and no greater than $2T/N$.
+is no less than $T/(2N)$ and no greater than $2T/N$.
 %
 The curve $q(t)$ is then defined on the grid points,
 $(q_{[i]}, t_{[i]})$,
 %
 and the updating magnitude can be obtained from numerical differentiation:
-$\alpha_i = 1 - \exp[-(q_{[i+1]} - q_{[i-1]}) / (t_{[i+1]} - t_{[i-1]})]$,
+    $\alpha_i = [1 - e^{-\lambda_1 (q_{[i+1]} - q_{[i-1]}) / (t_{[i+1]} - t_{[i-1]})}]/\lambda_1$,
 with
 $q_{[ -1]} \equiv q_{[0]} = 0$,
 $q_{[N+1]} \equiv q_{[N]} = q(T)$,
@@ -2876,7 +2819,7 @@ $$
 %
 Then, the updating matrix is given by
 %
-$$w_{ij} = n \sum_{k=0}^{K-1} \phi_{ki}^* \, \phi_{kj},$$
+$$w_{ij} = n \sum_{k=0}^{K-1} \phi_{ki} \, \phi_{kj},$$
 %
 and Eq. \eqref{eq:error_asym_singlebin} is modified as
 %
@@ -2959,12 +2902,12 @@ similar to those leading to Eq. \eqref{eq:xt2_sum}.
 \note{The derivation.
 From Eq. \eqref{eq:eig_orthonormal_cols}, we have
 $\sum_{i=1}^n \rho_i \langle x_i(t) \, x_i(0) \rangle
-=\sum_{k=1}^{n-1} \langle {\tilde x}_k(t) \, {\tilde x}_k^*(0) \rangle$,
+=\sum_{k=1}^{n-1} \langle {\tilde x}_k(t) \, {\tilde x}_k(0) \rangle$,
 so
 \begin{align*}
 \sum_{i=1}^n \rho_i G_i
 &=\sum_{t=-\infty}^\infty\sum_{i=1}^n \rho_i \langle x_i(t) \, x_i(0) \rangle \\
-  &=\sum_{t=-\infty}^\infty\sum_{k=1}^{n-1} \langle {\tilde x}_k(t) \, {\tilde x}_k^*(0) \rangle
+  &=\sum_{t=-\infty}^\infty\sum_{k=1}^{n-1} \langle {\tilde x}_k(t) \, {\tilde x}_k(0) \rangle
   =\sum_{k=1}^{n-1} \Gamma_k.
 \end{align*}
 }
@@ -3035,7 +2978,7 @@ Both the target and intrinsic distributions
 are assumed to be flat:
 $p^*_i = p_i = 1/n$,
 along with the distribution, $\rho_i$, in Eqs.
-\eqref{eq:vbar_def} and \eqref{eq:error_def}.
+\eqref{eq:vav_def} and \eqref{eq:error_def}.
 %
 %We wish to see how
 %the schedule, $\alpha(t)$,
@@ -4281,7 +4224,7 @@ for $k > 0$, we get
   =
   \sum_{i,j = 1}^n
   \phi_{ki} \phi_{kj}
-  \langle \xi_i^*(t) \, \xi_j(t') \rangle
+  \langle \xi_i(t) \, \xi_j(t') \rangle
   %
   =
   \sum_{i = 1}^n \frac{ \phi_{ki}^2 } { p_i }
