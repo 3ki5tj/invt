@@ -901,7 +901,8 @@ The total error is given by
 \begin{equation}
   \Err(t)
   =
-  \sum_{i = 1}^n \rho_i \, \left\langle x_i^2(t) \right\rangle
+  \sum_{i = 1}^n \rho_i \,
+  \left\langle v_{*i}^2(t) \right\rangle
   .
 \label{eq:error_def}
 \end{equation}
@@ -929,14 +930,14 @@ $\mathbf p^*$\cite{
 $\ln p_i = \ln {p^*_i}/(1+\Delta) + \mathrm{const.}$ for some positive $\Delta$,
 whereas $\pmb\rho$ is flat.}
 %
-From Eqs. \eqref{eq:x_def} and \eqref{eq:vav_def},
-we have
+%From Eqs. \eqref{eq:x_def} and \eqref{eq:vav_def},
+%we have
 %
-\begin{equation}
-  \sum_{i = 1}^n \rho_i \, x_i(t) = 0
-  .
-\label{eq:rhox_sum}
-\end{equation}
+%\begin{equation}
+%  \sum_{i = 1}^n \rho_i \, v_{*i}(t) = 0
+%  .
+%\label{eq:rhox_sum}
+%\end{equation}
 %
 
 
@@ -954,19 +955,17 @@ approximation requires us to shift the origin of time by $1$ in some cases.}
   \dot u_i(t)
   \equiv
   \frac{ d u_i(t) } { dt }
-  =
+  \approx
   \alpha(t) \, \frac{ h_i(t) } { p_i }
   \equiv
   \alpha(t) \, \eta_i(t)
   ,
-  \label{eq:vt_diffeq}
+  \label{eq:ut_diffeq}
 \end{equation}
 %
 with
 %
-$
-h_i(t) = \delta_{i, i(t)}
-$
+$h_i(t) = \delta_{i, i(t)}$
 %\begin{equation}
 %  h_i(t) = \delta_{i, i(t)}
 %  ,
@@ -984,13 +983,32 @@ in the last step.
 The shifted bias potential, $v_i(t)$,
 follows the same differential equation
 as the shift is a constant.
+%
+Thus, we have
+%
+\begin{equation}
+  \dot v_{*i}(t)
+  \approx
+  \alpha(t) \, \eta_{*i}(t)
+  ,
+  \label{eq:vt_diffeq}
+\end{equation}
+%
+where we have defined the bin-average-deducted
+histogram, $\eta_{*i}(t)$, in a similar way to
+$v_{*i}(t)$ [cf. Eq. \eqref{eq:x_def}].
 
 
-We now try to split the histogram into a deterministic averaged part
+We now split the histogram into
+a deterministic averaged part, $\langle \eta_i(t) \rangle$,
 and a random fluctuation part, $\zeta_i(t)$,
 %
 \begin{equation}
-  \eta_i(t) = \langle \eta_i(t) \rangle + \zeta_i(t).
+  \eta_i(t) =
+  \langle \eta_i(t) \rangle
+  +
+  \zeta_i(t)
+  .
   \label{eq:h_split}
 \end{equation}
 %
@@ -1020,21 +1038,21 @@ for the deterministic part
   &\approx
   \frac{ \pi_i(t) } { p_i }
   =
-  \frac{                       e^{-x_i(t)} }
-       { \sum_{j = 1}^n p_j \, e^{-x_j(t)} }
+  \frac{                       e^{-v_{*i}(t)} }
+       { \sum_{j = 1}^n p_j \, e^{-v_{*j}(t)} }
   \notag
   \\
   &\approx
-  1 - x_i(t) + \sum_{j = 1}^n p_j \, x_j(t)
+  1 - v_{*i}(t) + \sum_{j = 1}^n p_j \, v_{*j}(t)
   ,
   \notag
   %\label{eq:h_ave}
 \end{align}
 %
 where we have assumed the smallness
-of $x_i(t)$ in the linear expansion
-and used $\sum_{j=1}^n p_j = 1$
-on the second line.
+of $v_{*i}(t)$ in the linear expansion.
+%and used $\sum_{j=1}^n p_j = 1$
+%on the second line.
 %
 \note{
 The second step follows from
@@ -1042,78 +1060,50 @@ $$
 \frac{ \langle h_i(t) \rangle }
      { p_i }
 \approx
-\frac{                       1 - x_i  }
-     { \sum_{ r = 1 }^n p_j (1 - x_j) }
+\frac{                       1 - v_{*i}  }
+     { \sum_{ r = 1 }^n p_j (1 - v_{*j}) }
 =
-\frac{                       1 - x_i  }
-     { 1 - \sum_{ j = 1 }^n p_j \, x_j }
+\frac{                       1 - v_{*i}  }
+     { 1 - \sum_{ j = 1 }^n p_j \, v_{*j} }
 .
 $$
 }%
 %
-Deducting the bin average [similar to Eq. \eqref{eq:vav_def}],
-we have
+Deducting the bin average, we get
 %
 \begin{align}
-  \langle \eta_i(t)  - \eta_\mathrm{av}(t) \rangle
+  \langle \eta_{*i}(t) \rangle
   \equiv
   \langle \eta_i(t) \rangle -
   \sum_{j=1}^n \rho_j \langle \eta_j(t) \rangle
   &\approx
-  - x_i(t)
+  - v_{*i}(t)
   .
   \label{eq:sh_ave}
 \end{align}
 
+
+We will approximate the histogram fluctuation part, $\zeta_i(t)$,
+as white noise,
+and assume its validity for long simulations.
 %
-For the histogram fluctuation part,
-the average is zero by definition,
-$\langle \zeta_i(t) \rangle = 0$,
-%
-and we will approximate it as white noise.
-%i.e.
-%%The noise is not necessarily white,
-%%and the autocorrelation function
-%%depend only on the time difference
+The bin-average-deducted fluctuation, $\zeta_{*i}(t)$,
 %%
 %\begin{equation}
-%  \left\langle
-%    \zeta_i(t) \, \zeta_j(t')
-%  \right\rangle
-%  =
-%  %\sigma_{ij}(t - t')
-%  G^{(0)}_{ij} \, \delta(t - t')
+%  \zeta_{*i}(t)
+%  \equiv
+%  \zeta_i(t)
+%  -
+%  \sum_{ j = 1 }^n
+%    \rho_j \, \zeta_j(t)
 %  ,
 %  \notag
-%  %\label{eq:zeta_zeta_correlation}
+%  %\label{eq:xi_def}
 %\end{equation}
 %%
-%for some value of $G^{(0)}_{ij}$,
-%where $\sigma_{ij}(t)$ is an even function
-%that vanishes at large $t$.
-%
-This approximation is valid if the simulation period, $T$,
-is much longer than the autocorrelation time of noise.
-%
-The bin-average-deducted fluctuation
-%
+would also be governed by white noise as is $\zeta_i(t)$, i.e.,
 \begin{equation}
-  \xi_i(t)
-  \equiv
-  \zeta_i(t) - \zeta_\mathrm{av}(t)
-  \equiv
-  \zeta_i(t)
-  -
-  \sum_{ j = 1 }^n
-    \rho_j \, \zeta_j(t)
-  ,
-\label{eq:xi_def}
-\end{equation}
-%
-would also be governed by white noise as is $\zeta_i(t)$:
-%i.e. we may write
-\begin{equation}
-  \langle \xi_i(t) \, \xi_i(t') \rangle
+  \langle \zeta_{*i}(t) \, \zeta_{*i}(t') \rangle
   = G_i \, \delta(t - t')
   ,
   \label{eq:G_def}
@@ -1123,7 +1113,7 @@ and $\delta(t)$ is the Dirac's delta function.
 %
 For non-white noise,
 the equivalent value of $G_i$ can be approximately obtained as
-$\sum_{t = -\infty}^\infty \langle \xi_i(t) \, \xi_i(0) \rangle$.
+$\sum_{t = -\infty}^\infty \langle \zeta_{*i}(t) \, \zeta_{*i}(0) \rangle$.
 %
 \note{More explicitly,
 if the transition matrix of a period, $\tau$,
@@ -1142,23 +1132,15 @@ $
 
 
 From Eqs.
-\eqref{eq:x_def}, \eqref{eq:vt_diffeq}-\eqref{eq:xi_def},
-%\eqref{eq:v_def},
-%\eqref{eq:x_def},
-%\eqref{eq:vav_def},
-%\eqref{eq:rhox_sum},
-%\eqref{eq:vt_diffeq},
-%\eqref{eq:h_split}
-%\eqref{eq:h_ave},
-%\eqref{eq:dvbardt},
+\eqref{eq:vt_diffeq}-\eqref{eq:sh_ave},
 we get % a set of decoupled equations
 %
 \begin{equation}
-  \dot x_i(t)
+  \dot v_{*i}(t)
   =
-  \alpha(t) \, \left[ \eta_i(t) - \eta_\mathrm{av} \right]
+  \alpha(t) \, \left[ \langle \eta_{*i}(t) \rangle + \zeta_{*i}(t) \right]
   \approx
-  -\alpha(t) \, \left[ x_i(t) - \xi_i(t) \right]
+  -\alpha(t) \, \left[ v_{*i}(t) - \zeta_{*i}(t) \right]
   ,
   \notag
   %\label{eq:dxdt_singlebin}
@@ -1167,12 +1149,12 @@ we get % a set of decoupled equations
 and the formal solution is % of Eq. \eqref{eq:dxdt_singlebin} is
 %
 \begin{equation}
-x_i(T)
+  v_{*i}(T)
 =
-x_i(0) \, e^{-q(T)}
+  v_{*i}(0) \, e^{-q(T)}
 +
 \int_0^T
-  \dot y\bigl( q(t) \bigr) \, \xi_i(t) \, dt,
+  \dot y\bigl( q(t) \bigr) \, \zeta_{*i}(t) \, dt,
 \notag
 %\label{eq:xt_solution}
 \end{equation}
@@ -1222,7 +1204,7 @@ where
 
 The error depends implicitly on the curve, $\alpha(t)$,
 or, equivalently, the curve, $q(t)$,
-via $x_i(T)$, and
+via $v_{*i}(T)$, and
 our aim is to find the $q(t)$
 that minimizes this error.
 %
@@ -1407,8 +1389,9 @@ First, we have a fixed-point condition\cite{bussi2006, dama2014}.
 %
 To sample the desired distribution,
 $\mathbf p = (p_1, \dots, p_n)$,
+the growth rate of the bias potential,
 ${\dot u}_i(t)$
-in Eq. \eqref{eq:ut_diffeq_mbin}
+in Eq. \eqref{eq:ut_diffeq_mbin},
 should be a constant of $i$
 if $h_j(t)$ were the same as $p_j$,
 i.e.
@@ -1572,7 +1555,8 @@ for variable, $A_i$,
   \equiv \mathcal{F}[A_i]_k
   \equiv \sum_{i = 1}^n \phi_{ki} \, A_i
   ,
-  \label{eq:gft_def}
+  \notag
+  %\label{eq:gft_def}
 \end{equation}
 %
 and the inverse transform is
@@ -1581,26 +1565,31 @@ and the inverse transform is
   A_i =
   \frac{1}{\rho_i} \sum_{k = 1}^n \phi_{ki} \, \tilde{A}_k
   .
-  \label{eq:gft_inv}
+  \notag
+  %\label{eq:gft_inv}
 \end{equation}
 %
 Using this definition,
 we can rewrite Eq. \eqref{eq:ortho1} as
-%
+$\mathcal F[1]_k = \delta_{k0}$,
+and for the bin average of any quantity, $f$, we have
+$\bav{f}= \mathcal F[f_i]_0 = \tilde f_0$,
+and
 \begin{equation}
-  \mathcal F[1]_k = \delta_{k0}
-  ,
-  \label{eq:ortho0}
+  \tilde f_{*k}
+  = \tilde f_k - \bav{f} \, \delta_{k0}
+  =
+  \begin{dcases}
+    0           & k = 0, \\
+    \tilde f_k  & k > 0,
+  \end{dcases}
+  \label{eq:ftstar}
 \end{equation}
-%
-and the bin average, Eq. \eqref{eq:vav_def} can be written as
-\begin{equation}
-  v_\mathrm{av} = \mathcal F[v_i]_0 = \tilde v_0
-  .
-  \label{eq:vav_vt0}
-\end{equation}
+which means that the Fourier transform of
+a bin-average-deducted quantity always
+has a vanishing first mode.
 
-We can now diagonalize
+We can now use Eq. \eqref{eq:eig_w} to diagonalize
 the multiple-bin updating scheme, Eq. \eqref{eq:mbin_update},
 as
 %
@@ -1620,26 +1609,17 @@ or in the continuous-time form,
   \label{eq:ut_diffeq_mbin}
 \end{equation}
 %
-Deducting the bin average, we get
-%
+Deducting the bin average yields
 $$
-\begin{aligned}
-  \dot {\tilde x}_k(t)
-  &= \alpha(t) \, \lambda_k
-  \left[
-    {\tilde \eta}_k(t)
-    -
-    {\tilde \eta}_\mathrm{av}(t) \, \delta_{k0}
-  \right]
-  \\
-  &\approx
+  \dot {\tilde v}_{*k}(t)
+  = \alpha(t) \, \lambda_k \, {\tilde \eta}_{*k}(t)
+  \approx
   -\alpha(t) \, \lambda_k \,
-  \bigl[ {\tilde x}_k(t) - {\tilde \xi}_k (t) \bigr]
+  \bigl[ {\tilde v}_{*k}(t) - {\tilde \zeta}_{*k} (t) \bigr]
   ,
-\end{aligned}
 $$
 where we have used the linear approximation
-introduced in Sec. \ref{sec:sbin_diffeq}.
+as in Sec. \ref{sec:sbin_diffeq}.
 
 
 
@@ -1651,18 +1631,15 @@ The error defined in Eq. \eqref{eq:error_def}
 can be rewritten in terms of the eigenmodes of $\mathbf w$,
 %
 \begin{align}
-  \Err
-  \equiv
-  \sum_{i = 1}^n \rho_i \,
-    \left\langle x_i^2 \right\rangle
+  \Err(T)
   =
   \sum_{i, j = 1}^n \sum_{k=0}^{n-1}
-   \phi_{ki} \, \phi_{kj} \,
-    \left\langle x_i \, x_j \right\rangle
+   \phi_{ki} \, \phi_{kj}
+    \left\langle v_{*i}(T) \, v_{*j}(T) \right\rangle
   =
   \sum_{k = 0}^{n - 1}
     \left\langle
-      {\tilde x}_k^2
+      {\tilde v}_{*k}^2(T)
     \right\rangle
   ,
 \notag
@@ -1670,12 +1647,8 @@ can be rewritten in terms of the eigenmodes of $\mathbf w$,
 %
 where we have used Eq. \eqref{eq:eig_orthonormal_cols}.
 %
-From Eq. \eqref{eq:eigenmode0},
-the first eigenmode,
-${\tilde x}_0 = \sum_{j=1}^n \rho_j \, x_j$,
-vanishes identically by Eq. \eqref{eq:rhox_sum}.
-%
-Thus, we can start the last sum %in Eq. \eqref{eq:xt2_sum}
+By Eq. \eqref{eq:ftstar},
+we can start the last sum %in Eq. \eqref{eq:xt2_sum}
 from $k = 1$,
 %
 \begin{equation}
@@ -1683,7 +1656,7 @@ from $k = 1$,
   =
   \sum_{k = 1}^{n - 1}
     \left\langle
-      {\tilde x}_k^2(T)
+      {\tilde v}_{*k}^2(T)
     \right\rangle
   .
 \label{eq:xt2_sum}
@@ -1710,7 +1683,7 @@ is given by
   =
   \sum_{k = 1}^{n-1}
     \left\langle
-      \left| {\tilde x}_k^2(0) \right|
+      {\tilde v}_{*k}^2(0)
     \right\rangle \,
     e^{ - 2 \, \lambda_k  \, q(T) },
   \label{eq:error_res}
@@ -1740,14 +1713,16 @@ where
 and $\Gamma_k$ is computed from
 the autocorrelation function
 of the histogram fluctuation,
-$\kappa_k(t) \equiv \langle {\tilde \xi}_k(0) \, {\tilde \xi}_k(t) \rangle$,
+$\kappa_k(t) \equiv \langle {\tilde \zeta}_{*k}(0)
+\, {\tilde \zeta}_{*k}(t) \rangle$,
 as:
 %
 \begin{equation}
   \Gamma_k
   = \sum_{t = -\infty}^\infty \kappa_k(t)
   = \sum_{t = -\infty}^\infty
-  \left\langle {\tilde \xi}_k(0) \, {\tilde \xi}_k(t) \right\rangle
+  \left\langle {\tilde \zeta}_{*k}(0)
+            \, {\tilde \zeta}_{*k}(t) \right\rangle
   .
   \label{eq:Gamma_sum}
 \end{equation}
@@ -1758,9 +1733,10 @@ as:
 %\label{eq:Gamma_integral}
 %\end{equation}
 %
-Equation \eqref{eq:Gamma_sum}
-essentially maps the histogram fluctuation, ${\tilde \xi}_k(t)$,
-to the equivalent white noise
+We may understand Eq. \eqref{eq:Gamma_sum}
+as an attempt of modeling
+a general histogram fluctuation, ${\tilde \zeta}_{*k}(t)$,
+as an equivalent white noise
 so that the theory can be applicable to
 a general sampling process.
 %
@@ -1825,10 +1801,10 @@ from an adaptive FDS simulation.
 
 
 
-%\subsubsection{\label{sec:eqlerr}
-%Initial error
-%%from a simulation under a constant updating magnitude
-%}
+\subsubsection{\label{sec:eqlerr}
+Initial error
+%from a simulation under a constant updating magnitude
+}
 
 
 
@@ -1842,7 +1818,7 @@ from an adaptive FDS simulation.
 %%
 %\begin{align}
 %  \left\langle \left|
-%    {\tilde x}_k^2
+%    {\tilde v}_{*k}^2
 %  \right| \right\rangle
 %  &=
 %  \int_0^{T'}
@@ -1864,16 +1840,30 @@ from an adaptive FDS simulation.
 
 To model the initial error for Eq. \eqref{eq:error_res},
 we will assume that
-the adaptive FDS sampling
-was performed under a constant updating magnitude
-for sufficiently long.
+the preliminary adaptive FDS sampling has been
+performed under a constant updating magnitude for $T_0$, steps.
 %
-Then, one can show that
+If the starting bias potential is zero, $u_i = 0$,
+one can show that
 \begin{equation}
   \left\langle
-    {\tilde x}_k^2(0)
+    {\tilde v}_{*k}^2(0)
   \right\rangle
-  = \frac 1 2 \, \Gamma_k \, \lambda_k \, a_0
+  = \frac 1 2 \, a_0 \, \Gamma_k \, \lambda_k
+  + \tilde u_k^2 \, e^{-2\, \lambda_k \, T_0}
+  ,
+  \label{eq:xt2_eql1}
+\end{equation}
+%
+and if no eigenvalue is zero,
+then we can ignore the second term
+in the case of $T_0 \to \infty$,
+%
+\begin{equation}
+  \left\langle
+    {\tilde v}_{*k}^2(0)
+  \right\rangle
+  = \frac 1 2 \, a_0 \, \Gamma_k \, \lambda_k
   ,
   \label{eq:xt2_eql}
 \end{equation}
@@ -1886,15 +1876,15 @@ the $k$th component of the asymptotic error
 is given by
 %
 \begin{align*}
-  \left\langle \bigl|
-    {\tilde x}_k^2(T')
-  \bigr| \right\rangle
+  \left\langle
+    {\tilde v}_{*k}^2(T_0)
+  \right\rangle
   =
-  \int_0^{T'}
+  \int_0^{T_0}
     \Gamma_k \, (\lambda_k \, a_0)^2 \,
-      e^{ 2 \, \lambda_k \, a_0 \, (t - T') }
+      e^{ 2 \, \lambda_k \, a_0 \, (t - T_0) }
     \, dt
-  \stackrel{ T' \to \infty }
+  \stackrel{ T_0 \to \infty }
   { =\joinrel=\joinrel=\joinrel= }
   \frac 1 2 \, \Gamma_k \, \lambda_k \, a_0
   .
@@ -1909,14 +1899,14 @@ and
   \Err_R(T)
   =
   \sum_{k = 1}^{n - 1}
-      \frac 1 2 \, a_0 \, \Gamma_k \, \lambda_k \,
+    \left\langle
+      {\tilde v}_{*k}^2(0)
+    \right\rangle
       e^{  - 2 \, \lambda_k \, q(T) }
   .
   \label{eq:error_res1}
 \end{equation}
 %
-This expression excludes systematic bias
-and thus serves as a lower bound for a realistic simulation.
 
 
 
@@ -2901,13 +2891,15 @@ similar to those leading to Eq. \eqref{eq:xt2_sum}.
 %
 \note{The derivation.
 From Eq. \eqref{eq:eig_orthonormal_cols}, we have
-$\sum_{i=1}^n \rho_i \langle x_i(t) \, x_i(0) \rangle
-=\sum_{k=1}^{n-1} \langle {\tilde x}_k(t) \, {\tilde x}_k(0) \rangle$,
+$\sum_{i=1}^n \rho_i \langle v_{*i}(t) \, v_{*i}(0) \rangle
+=\sum_{k=1}^{n-1} \langle {\tilde v}_{*k}(t) \, {\tilde v}_{*k}(0) \rangle$,
 so
 \begin{align*}
 \sum_{i=1}^n \rho_i G_i
-&=\sum_{t=-\infty}^\infty\sum_{i=1}^n \rho_i \langle x_i(t) \, x_i(0) \rangle \\
-  &=\sum_{t=-\infty}^\infty\sum_{k=1}^{n-1} \langle {\tilde x}_k(t) \, {\tilde x}_k(0) \rangle
+&=\sum_{t=-\infty}^\infty\sum_{i=1}^n
+  \rho_i \langle v_{*i}(t) \, v_{*i}(0) \rangle \\
+  &=\sum_{t=-\infty}^\infty\sum_{k=1}^{n-1}
+  \langle {\tilde v}_{*k}(t) \, {\tilde v}_{*k}(0) \rangle
   =\sum_{k=1}^{n-1} \Gamma_k.
 \end{align*}
 }
@@ -4006,13 +3998,12 @@ is roughly equal to the final error.
 First, in the long time limit, the fluctuation of
 the instantaneous histogram is dominated by the random part,
 $h_i(t) \approx \zeta_i(t)$,
-and $\xi_i(t)$ defined in Eq. \eqref{eq:xi_def}
+and $\zeta_{*i}(t)$
 will dominate the shifted instantaneous histogram
 %
 \begin{equation}
-\xi_i(t) \approx
-\frac{ h_i(t) } { p_i }
-- \sum_{r = 1}^n \rho_r \frac{ h_r(t) } { p_r }
+\zeta_{*i}(t) \approx
+\eta_{*i}(t)
 .
 \label{eq:xi_h}
 \end{equation}
@@ -4052,7 +4043,7 @@ By using Eqs. \eqref{eq:H_def}, \eqref{eq:xi_h},
   %\left\langle
   %\left(
   %\frac{1}{T}
-  %\sum_{t = 1}^T \xi_i(t)
+  %\sum_{t = 1}^T \zeta_{*i}(t)
   %\right)^2
   %\right\rangle
   %\\
@@ -4061,7 +4052,7 @@ By using Eqs. \eqref{eq:H_def}, \eqref{eq:xi_h},
   \sum_{i = 1}^n \rho_i
   \sum_{t, t' = 1}^T
   \left\langle
-  \xi_i(t) \, \xi_i(t')
+  \zeta_{*i}(t) \, \zeta_{*i}(t')
   \right\rangle
   \approx
   \frac{1}{T}
@@ -4130,9 +4121,9 @@ at each time step $t$.
 %
 Further, in the asymptotic limit,
 $\langle h_i(t) \rangle = p_i$,
-we find from Eqs. \eqref{eq:h_split} and \eqref{eq:xi_def} that
+we find from Eq. \eqref{eq:h_split} that
 \begin{equation*}
-  \xi_i(t)
+  \zeta_{*i}(t)
   =
   \frac{ h_i(t) } { p_i }
   -
@@ -4145,7 +4136,7 @@ and
 %
 \begin{align}
   \left\langle
-    \xi_i(t) \, \xi_j(t')
+    \zeta_{*i}(t) \, \zeta_{*j}(t')
   \right\rangle
   %&=
   %\left\langle
@@ -4192,14 +4183,14 @@ and
   $$
   \begin{aligned}
   \left\langle
-    \xi_i(t) \, \xi_j(t')
+    \zeta_{*i}(t) \, \zeta_{*j}(t')
   \right\rangle
   &=
   \left\langle
-    \xi_i(t)
+    \zeta_{*i}(t)
   \right\rangle
   \left\langle
-    \xi_j(t')
+    \zeta_{*j}(t')
   \right\rangle
   =
   0.
@@ -4224,7 +4215,7 @@ for $k > 0$, we get
   =
   \sum_{i,j = 1}^n
   \phi_{ki} \phi_{kj}
-  \langle \xi_i(t) \, \xi_j(t') \rangle
+  \langle \zeta_{*i}(t) \, \zeta_{*j}(t') \rangle
   %
   =
   \sum_{i = 1}^n \frac{ \phi_{ki}^2 } { p_i }
@@ -4248,7 +4239,7 @@ $\Gamma_k = \sum_{ i = 1}^n \phi_{ki}^2 / p_i$.
   \sum_{i,j = 1}^n
   \phi_{ki}
   \phi_{kj}
-  \langle \xi_i(t) \, \xi_j(t') \rangle
+    \langle \zeta_{*i}(t) \, \zeta_{*j}(t') \rangle
   \\
   %
   &=
@@ -4426,8 +4417,8 @@ $
 
 To show Eq. \eqref{eq:varXt},
 we first note that
-the difference, $u_i - \bav{u}$,
-differs from the actual deviation, $x_i$,
+the difference, $u_{*i} = u_i - \bav{u}$,
+differs from the actual deviation, $v_{*i}$,
 defined in Eq. \eqref{eq:x_def},
 only by a constant shift,
 $\ln( p^*_i / p_i ) - \sum_{ j = 1 }^n \rho_j \, \ln( p^*_j / p_j )$.
@@ -4436,17 +4427,17 @@ Thus, the two share the same variance
 under time averaging.
 %
 It follows that the corresponding linear combinations,
-${\tilde X}_k$ and ${\tilde x}_k$, would also share the same variance.
+${\tilde V}_{*k}$ and ${\tilde v}_{*k}$, would also share the same variance.
 %
-But since the average of ${\tilde x}_k$ is zero,
+But since the average of ${\tilde v}_{*k}$ is zero,
 we have
-$$
-\operatorname{var} {\tilde X}_k
+\begin{equation*}
+\operatorname{var} {\tilde V}_{*k}
 =
-\operatorname{var} {\tilde x}_k
+\operatorname{var} {\tilde v}_{*k}
 =
-\left\langle {\tilde x}_k^2 \right\rangle.
-$$
+\left\langle {\tilde v}_{*k}^2 \right\rangle.
+\end{equation*}
 Finally, by using Eq. \eqref{eq:xt2_eql},
 we reach Eq. \eqref{eq:varXt}.
 
@@ -5661,7 +5652,7 @@ where $\nu_k \equiv \lambda_k / \lambda$.
 %the system was initially equilibrated
 %at a constant $a_0$,
 %such that the values of
-%$\left\langle {\tilde x}_k^2(0) \right\rangle$
+%$\left\langle {\tilde v}_{*k}^2(0) \right\rangle$
 %can be computed from Eq. \eqref{eq:xt2_eql},
 %as well as Eq. \eqref{eq:t0_sinc}.
 %
@@ -5781,10 +5772,10 @@ which is minimal at $\lambda = 1$.
     $u_i(t)$        &   Original bias potential. \\
     $v_i(t)$        &   Shifted bias potential. \\
     $\mathbf w$     &   Updating matrix. \\
-    $x_i(t)$        &   Average-deducted bias potential, Eq. \eqref{eq:x_def}. \\
-    $\xi_i(t)$      &   The noise, Eq. \eqref{eq:xi_def}. \\
-    ${\tilde x}_k(t)$        &   Mode of the shifted bias potential. \\
-    ${\tilde X}_k$           &   Mode of the original bias potential. \\
+    $v_{*i}(t)$        &   Bin-average-deducted bias potential, Eq. \eqref{eq:x_def}. \\
+    $\zeta_{*i}(t)$      &   The noise of histogram. \\
+    ${\tilde v}_{*k}(t)$        &   Mode of the shifted bias potential. \\
+    ${\tilde V}_{*k}$           &   Mode of the original bias potential. \\
     $z$             &   Reaction coordinate. \\
     $\zeta_i(t)$    &   The noise part of the instantaneous histogram, $h_i(t)$.
   \end{tabular}
