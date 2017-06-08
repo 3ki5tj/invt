@@ -3139,6 +3139,669 @@ at which $\lambda_k \approx 1/q(T)$.
 
 
 
+\section{\label{sec:results}
+Numerical results}
+
+
+
+We tested the above theory on a model system
+described in Sec. \ref{sec:results_system}.
+%
+We verify the method of computing errors
+%using an inverse-time schedule
+in Sec. \ref{sec:results_invt}
+%
+and study the optimal schedule from
+Eq. \eqref{eq:q_opt}
+in Sec. \ref{sec:results_optschedule}.
+%
+Finally, we compare the Gaussian and
+bandpass updating schemes %of different widths
+in Sec. \ref{sec:results_cmpschemes}.
+
+
+
+\subsection{\label{sec:results_system}
+Test system and simulation protocol}
+
+
+
+Our test system is a one-dimensional model system, in which
+$i$ represents a non-periodic variable,
+and $n = 100$.
+%
+Both the target and intrinsic distributions
+are assumed to be flat:
+$p^*_i = p_i = 1/n$,
+along with the distribution, $\rho_i$, in Eqs.
+\eqref{eq:vav_def} and \eqref{eq:error_def}.
+%
+%We wish to see how
+%the schedule, $\alpha(t)$,
+%affects the fluctuating error
+%of the bias potential
+%at the end of the simulation.
+%
+Initially,
+we set the bias potential to zero,
+$u_i \equiv 0$,
+and equilibrate the system for $10^7$ steps
+under a constant updating magnitude,
+$a_0 = 10^{-4}$.
+%
+This equilibration process models
+a stage of the WL algorithm or
+a regular metadynamics
+with a fixed updating magnitude.
+%
+Although the bias potential is correct initially,
+it would deviate from this value
+at the end of the equilibration.
+%
+Our aim is to see how well
+the bias potential is restored
+at the end of the testing schedule.
+%
+After the equilibration,
+we reset the origin of the time, $t$, to zero,
+and start the testing schedule
+for $T = 10^8$ steps.
+%
+We repeat the above process $1000$ times (unless specified otherwise)
+and report the averaged results.
+%specified by either
+%Eq. \eqref{eq:q_opt}
+%or
+%Eq. \eqref{eq:alpha_invtlambda}.
+
+
+
+For the Gaussian updating scheme,
+the kernel was truncated at
+$b = \min\{10 \, \sigma, n - 1\}$ bins
+and numerically stabilized
+using the technique
+in Appendix \ref{sec:stabilize_wband}.
+
+
+
+%Since the error depends on
+%the underlying sampling process,
+We tested two sampling processes.
+%a global one and a local one.
+%
+Both are based on
+a Metropolis MC algorithm\cite{
+  metropolis1953, newman, frenkel,
+  landau_binder}:
+%
+in each step, a new bin index $j$ is proposed
+and then accepted with probability
+%
+$
+A(i \to j) = \min\{ 1, \exp(u_i - u_j) \}.
+$
+However,
+in the first or global sampling process,
+we choose the destination $j$
+uniformly out of the $n$ bins.
+%
+In the second or local sampling process,
+$j$ is either $i - 1$ or $i + 1$
+(adjusted by the boundary condition)
+with equal probability $1/2$.
+%
+Asymptotically,
+the above global and local sampling processes
+emulate the perfect and one-step processes
+discussed in Appendix \ref{sec:Gamma},
+respectively,
+and we will use
+Eqs. \eqref{eq:Gamma_perfect}
+and \eqref{eq:Gamma_onestep}
+for the respective $\Gamma_k$'s
+in the theoretical predictions.
+%
+
+
+
+\subsection{\label{sec:results_invt}
+Scaled inverse-time schedule}
+
+
+Using the model system above, we
+tested our analysis of computing errors
+on the scaled inverse-time schedule,
+%
+\begin{equation}
+\alpha(t) = \frac{1}{\lambda \, (t + t_0) },
+\label{eq:alpha_invtlambda}
+\end{equation}
+%
+where $\lambda$ is a free parameter,
+and $t_0$ is given by Eq. \eqref{eq:t0_sinc}.
+%and $t_0 = 2/a_0$.
+%
+The error of this schedule
+can be computed analytically
+(cf. Appendix \ref{sec:sinvt_schedule}),
+and tested against simulation.
+
+
+
+We performed adaptive FDS simulations
+using the single-bin updating scheme.
+%and the triple-bin updating scheme with $\mu_1 = 0.24$.
+%
+%For each value of $\lambda$,
+%we ran $1000$ independent simulations
+%of $10^8$ steps, and averaged the results.
+%
+As shown in Fig. \ref{fig:errinvt},
+the errors from the simulations
+agreed well with those from the theory.
+
+
+\begin{figure}[h]
+\begin{center}
+  \makebox[\linewidth][c]{
+    \includegraphics[angle=0, width=1.0\linewidth]{fig/errinvt.pdf}
+  }
+  \caption{
+    \label{fig:errinvt}
+    Error, $\Err$, versus the parameter, $\lambda$,
+    for the single-bin updating scheme
+    using the scaled inverse-time schedule,
+    Eq. \eqref{eq:alpha_invtlambda}.
+    %
+    The points are results from averaging over $1000$ independent runs;
+    the curves are theoretical predictions.
+    %
+    \note{The figure was produced by \texttt{doc/fig/errinvt.gp}.
+      The data were produced by the script \texttt{data/invtcscan.py},
+      and saved under \texttt{data/invt}
+      (see the \texttt{Makefile} there).
+    }%
+  }
+\end{center}
+\end{figure}
+
+For the single-bin updating scheme,
+the optimal $\lambda$ occurred around $1.0$
+for both global and local sampling processes.
+%
+The sampling process affected the error function
+only by a multiplicative constant, $\Gamma$
+(cf. Appendix \ref{sec:sinvt_schedule}).
+%
+%For the triple-bin updating scheme,
+%the optimal $\lambda$ was less than $1.0$
+%for the global sampling process,
+%although it stayed around $1.0$
+%for the local sampling process,
+%also in agreement with the discussion
+%in Appendix \ref{sec:invt_nn}.
+%%
+%Thus, the inverse-time schedule,
+%Eq. \eqref{eq:alpha_invt1},
+%is optimal for the single-bin updating scheme,
+%but not necessarily so for a general multiple-bin updating scheme.
+%%
+
+
+
+
+\subsection{\label{sec:results_optschedule}
+Optimal schedule}
+
+
+
+To demonstrate the optimal schedule from Eq. \eqref{eq:q_opt},
+we used the Gaussian (with $\sigma = 10$ bins) updating scheme
+as an example.
+%
+This updating scheme is typically used in metadynamics simulations.
+%
+In Table \ref{tab:error_Gaussian},
+we showed that the optimal schedule
+produced smaller errors than
+the inverse-time schedules.
+%
+However, the optimal schedules
+decayed more slowly than
+the inverse-time formula, Eq. \eqref{eq:alpha_invt1},
+and depended on the sampling process,
+as shown in Fig. \ref{fig:optacmp}.
+%
+The impeded decay of the optimal schedule
+was necessary in order to
+damp out the short-wavelength eigenmodes
+(i.e. local noise).
+%
+%As shown in Fig. \ref{fig:xerr},
+%the inverse-time schedule was effective in error reduction
+%only for the first few eigenmodes,
+%whose eigenvalues were around $1.0$.
+%%
+%We can, however, ignore these local eigenmodes
+%by explicitly filtering them out from the final bias potential,
+%and truncating the error sum in Eq. \eqref{eq:error_def}
+%to the first few eigenmodes.
+%%
+%Then, the corresponding optimal schedule
+%from Eq. \eqref{eq:q_opt} that minimizes the truncated error
+%became similar to the inverse-time schedule,
+%Eq. \eqref{eq:alpha_invt1},
+%as exemplified in Fig. \ref{fig:optacmp}.
+%%
+
+
+
+\begin{table}[h]\footnotesize
+  \caption{\label{tab:error_Gaussian}
+    Error of the Gaussian updating scheme of $\sigma = 10$
+    under different updating schedules.
+    In Eqs. \eqref{eq:alpha_invt1} and \eqref{eq:alpha_invtlambda},
+    $t_0$ is given by Eq. \eqref{eq:t0_sinc};
+    and in Eq. \eqref{eq:alpha_invtlambda},
+    the optimal value of $\lambda$ is used.
+    \note{\newline
+      The data were collected in
+      \texttt{data/tab1} by running
+      the program \texttt{invt}.
+    }%
+  }
+  \setlength{\tabcolsep}{2pt}
+  \renewcommand\arraystretch{1.2}
+  \begin{tabular} { l | p{2.2cm} p{2.4cm} p{2.0cm} }
+    \hline
+      Schedule
+    &
+      $1/t$, \newline
+      Eq. \eqref{eq:alpha_invt1}
+    &
+      Scaled $1/t$, \newline
+      Eq.~\eqref{eq:alpha_invtlambda}
+    &
+      Optimal, \newline
+      Eq. \eqref{eq:q_opt}
+    \\
+    \hline
+    Global
+    &
+    $4.36(9) \times 10^{-6}$
+    &
+    $7.1(1) \times 10^{-7}$
+    &
+    $2.6(1) \times 10^{-7}$
+    \\
+    \hline
+    Local
+    &
+    $3.83(7) \times 10^{-4}$
+    &
+    $1.72(4) \times 10^{-4}$
+    &
+    $9.1(2) \times 10^{-5}$
+    \\
+    \hline
+  \end{tabular}
+\end{table}
+
+
+\begin{figure}[h]
+\begin{center}
+  \makebox[\linewidth][c]{
+    \includegraphics[angle=0, width=1.0\linewidth]{fig/optacmp.pdf}
+  }
+  \caption{
+    \label{fig:optacmp}
+    Optimal schedules from Eq. \eqref{eq:q_opt}
+    for the Gaussian updating scheme
+    with $\sigma = 10$.
+    %
+    The mode-limited schedules were produced by
+    limiting the sum in Eq. \eqref{eq:q_opt}
+    to the first four terms,
+    or the four longest wavelength modes.
+    %
+    They became similar to the inverse-time schedule,
+    Eq. \eqref{eq:alpha_invt1}.
+    %
+    \note{This figure was produced by \texttt{doc/fig/optacmp.gp}.
+      The data were computed by the program \texttt{prog/predict},
+      see particularly the function \texttt{intq\_save()}
+      in \texttt{prog/intq.h}.
+      The data were saved under the directory \texttt{data/opta}.
+    }%
+  }
+\end{center}
+\end{figure}
+
+
+An interesting prediction from the theory is Eq. \eqref{eq:half_alpha0},
+which states that the optimal schedule should always start from
+half of the magnitude from the previous equilibration run.
+%
+To verify this result,
+we computed the optimal schedules
+for different values of $q(T)$
+for the Gaussian updating scheme,
+and plotted the final error
+against the initial updating magnitude, $\alpha(0)$.
+%
+As shown in Fig. \ref{fig:erriascan},
+the minimal error was indeed reached at
+$\alpha(0) = a_0/2 = 5 \times 10^{-5}$,
+although the dependence on $\alpha(0)$
+is generally weak.\footnote{The weak dependence is best illustrated in
+the case of single-bin updating scheme,
+as the initial updating magnitude only
+affects the schedule by a shift of the origin of
+simulation time in the inverse-time schedule,
+Eq. \eqref{eq:alpha_invt1}.}
+
+
+\begin{figure}[h]
+\begin{center}
+  \makebox[\linewidth][c]{
+    \includegraphics[angle=0, width=1.0\linewidth]{fig/erriascan.pdf}
+  }
+  \caption{
+    \label{fig:erriascan}
+    Relative error
+    versus the initial updating magnitude, $\alpha(0)$,
+    for optimal schedules with different $q(T)$.
+    Assuming the Gaussian updating scheme
+    with $\sigma = 10$,
+    and $a_0 = 10^{-4}$.
+    %
+    The points were obtained from averaging results
+    from over 10000 independent simulations;
+    the curves are theoretical predictions.
+    %
+    The minimal should always occur at
+    $\alpha(0) = a_0/2 = 5 \times 10^{-5}$,
+    as predicted by Eq. \eqref{eq:half_alpha0}.
+    %
+    \note{This figure was produced by
+      \texttt{doc/fig/erriascan.gp}.
+      The data were saved under
+      \texttt{data/iascan}.
+    }%
+  }
+\end{center}
+\end{figure}
+
+
+
+
+
+
+\subsection{\label{sec:results_cmpschemes}
+Optimal updating schemes}
+
+
+
+For a finite-length simulation,
+the optimal updating scheme
+depends on the simulation length, $T$,
+and other parameters.
+%
+As an example,
+we compare Gaussian updating schemes
+with different widths, $\sigma$.
+%
+In Fig. \ref{fig:errsigscan},
+we present the errors, $\Err(T)$,
+normalized by the shifted simulation length, $T+t_0$,
+so that they could
+stay constant in the limit of single-bin updating scheme
+($\sigma \to 0$).
+%
+As shown in Fig. \ref{fig:errsigscan}(a)
+that the minimal error was achieved
+by the widest window %for the shorter simulation of $T = 10^8$,
+for the global sampling process,
+%
+although
+the minimum at $\sigma = 0$ became more favorable
+as the simulation lengthens.
+%
+However,
+for the local sampling process,
+the minimum stayed at zero width,
+as shown in Fig. \ref{fig:errsigscan}(b).
+
+
+In contrast,
+the normalized errors of the bandpass updating schemes
+were insensitive to the simulation length,
+in agreement with Eq. \eqref{eq:error_sinc}.
+%
+The bandpass updating schemes
+yielded smaller errors than
+the corresponding Gaussian ones,
+although the differences tended to
+be small for shorter simulations
+with the local sampling process.
+
+
+
+\begin{figure}[h]
+\begin{center}
+  \makebox[\linewidth][c]{
+    \includegraphics[angle=0, width=0.95\linewidth]{fig/errsigscan.pdf}
+  }
+  \caption{
+    \label{fig:errsigscan}
+    Normalized error, $(T + t_0) \, \Err(T)$,
+    versus the width, $\sigma$,
+    for the Gaussian
+    and the bandpass updating schemes,
+    with $t_0$ given by Eq. \eqref{eq:t0_sinc}.
+    %
+    In the latter case,
+    the equivalent width
+    $\sigma$ is given by Eq. \eqref{eq:sigma_equiv}.
+    %
+    The points were obtained from averaging results
+    from 1000 independent simulations;
+    the curves are theoretical predictions.
+    %
+    \note{This figure was produced by
+      \texttt{doc/fig/errsigscan.gp}.
+      The data were saved under
+      \texttt{data/scan}.
+    }%
+  }
+\end{center}
+\end{figure}
+
+
+
+As an example, we used the method to compute
+the integrals, $\Gamma_k$'s, from
+a local MC simulation
+(cf. Sec. \ref{sec:results_system})
+and an MD simulation,
+and compared them with those from
+the one-step sampling process.
+%
+As shown in Fig. \ref{fig:gamcmp},
+the $\Gamma_k$'s of the small-$k$ eigenmodes
+from the three sampling processes
+were almost proportional,
+suggesting that
+the optimal schedule
+for simulations using local sampling processes
+would be similar in general properties.
+
+
+
+\begin{figure}[h]
+\begin{center}
+  \makebox[\linewidth][c]{
+    \includegraphics[angle=0, width=0.95\linewidth]{fig/gamcmp.pdf}
+  }
+  \caption{
+    \label{fig:gamcmp}
+    Integrals of the autocorrelation functions
+    from a local MC simulation
+    and an MD simulation.
+    %
+    Each simulation was ran for $10^{10}$ steps.
+    %
+    The bin size $\Delta z = 2\, \pi /n$ with $n = 100$.
+    %
+    For the MD simulation,
+    the step size $\Delta t_\mathrm{MD} = 0.005$.
+    %
+    The velocity rescaling thermostat\cite{bussi2007} was
+    applied for the unit reduced temperature
+    every MD step with viscosity $20$.
+    %
+    The reflective boundary condition was used.
+    %
+    \note{The figure was produced by \texttt{doc/fig/gamcmp.gp}.
+      The data were saved under \texttt{data/gamcmp}
+      (see the \texttt{Makefile} there).
+    }%
+  }
+\end{center}
+\end{figure}
+
+
+
+
+\section{\label{sec:sinvt_schedule}
+Scaled inverse-time schedule}
+
+
+
+The error of the scaled inverse-time schedule,
+Eq. \eqref{eq:alpha_invtlambda},
+can be found by using Eq. \eqref{eq:alpha_invtlambda}
+in Eqs. \eqref{eq:error_asym} and \eqref{eq:error_res1}:
+%
+\begin{align}
+  \Err_A(T)
+  &=
+  \frac{    1    }
+       { T + t_0 }
+  \sum_{k = 1}^{n-1}
+    \frac{ \Gamma_k \, \nu_k^2 }
+         {    2 \, \nu_k - 1   }
+  \left[
+    1 - \left(
+          \frac {     t_0 }
+                { T + t_0 }
+        \right)^{ 2 \, \nu_k - 1 }
+  \right]
+  ,
+  \notag
+  %\label{eq:error_asym_invt}
+  \\
+  \Err_R(T)
+  &=
+  \frac { a_0 } { 2 }
+  \sum_{k = 1}^{n-1}
+  \Gamma_k \, \lambda_k \,
+  \left(
+      \frac{   t_0   }
+           { T + t_0 }
+  \right)^{ 2 \, \nu_k }
+  ,
+  \notag
+  %\label{eq:error_res_invt}
+\end{align}
+%
+where $\nu_k \equiv \lambda_k / \lambda$.
+%
+%with
+%$
+%  q(T)
+%  =
+%  ( 1 / \lambda )
+%  \ln\left(
+%    1 + T / t_0
+%  \right)
+%$
+%%
+%from integrating Eq. \eqref{eq:alpha_invtlambda}.
+%
+%We assume that
+%the system was initially equilibrated
+%at a constant $a_0$,
+%such that the values of
+%$\left\langle {\tilde v}_{*k}^2(0) \right\rangle$
+%can be computed from Eq. \eqref{eq:xt2_eql},
+%as well as Eq. \eqref{eq:t0_sinc}.
+%
+%The total error is
+%%
+%\begin{align}
+%\Err
+%&=
+%\Err_R + \Err_A
+%\notag
+%\\
+%&=
+%\sum_{ k = 1 }^{n-1}
+%  \frac
+%  {
+%    \Gamma_k \, \nu_k \,
+%    \left[
+%      \nu_k
+%      +
+%      (\nu_k - 1)
+%      \left(
+%        \frac{ t_0 } { T + t_0 }
+%      \right)^{ 2 \, \nu_k - 1 }
+%    \right]
+%  }
+%  {
+%    (T + t_0) \, (2 \, \nu_k - 1)
+%  }
+%  .
+%%\notag
+%\label{eq:error_invt}
+%\end{align}
+
+
+
+In particular,
+for the single-bin scheme, we have
+$\lambda_1 = \cdots = \lambda_{n-1} = 1$,
+and
+$\Gamma_k$'s affect the error
+only via the sum, $\Gamma = \sum_{k = 1}^{n-1} \Gamma_k$,
+as a multiple.
+%
+In the long time limit,
+we have for $\lambda < 2$,
+$$
+  \Err_A(T)
+  =
+  \frac { 1 } { T + t_0 }
+  \frac {         \Gamma           }
+        { \lambda \, (2 - \lambda) }
+  ,
+$$
+which is minimal at $\lambda = 1$.
+%
+\note{A higher-order correction:
+  $
+  \lambda = 1 -
+  \left[
+    1 - \frac 1 2 a_0 \, (T+t_0)
+  \right] r \, \log r
+  ,
+  $
+  where $r = t_0 / (T + t_0)$.
+}
+
+
 
 
 
