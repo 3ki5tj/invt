@@ -11,6 +11,7 @@ double delr = 0.01; /* spacing */
 const char *fnvbias = "vbias.dat";
 const char *fnvref = "vref.dat";
 const char *fnlog = "verr.log";
+const char *fnxerr = "xerr.dat";
 
 static void ljpar_help(void)
 {
@@ -102,57 +103,89 @@ static int gammrun(invtpar_t *m, metad_t *metad, lj_t *lj)
 }
 
 
-/* production run */
+/* production run
+ * `prod` use inverse-time or optimal schedule
+ * `*hfl` is the histogram fluctuation
+ * `*erc` is the error of the average histogram-corrected bias potential */
 static double prodrun(invtpar_t *m, metad_t *metad, lj_t *lj,
-    int prod, long nsteps, const char *fn, double *hfl, int *ntrip)
+    int prod, long nsteps, const char *fn, double *hfl, double *erc)
 {
-  int ir, n = metad->n, sgn = 0;
+  int ir;
   long t;
-  double t0, dr;
+  double t0, dr, err = 0;
 
   metad->a = m->alpha0;
   t0 = 2/metad->a;
   metad_clearh(metad);
-  *ntrip = 0;
+  metad_clearav(metad); /* clear the average correction data */
+  *erc = 0;
   for ( t = 1; t <= nsteps; t++ ) {
     lj_metroblk(lj, metad);
     ir = dist01(metad, lj, &dr);
-    if ( prod ) {
+    if ( prod ) { /* use the optimal schedule */
       if ( m->opta ) {
         //double a0 = intq_interpa(metad->intq, (double) t);
         metad->a = intq_evala(metad->intq, (double) t);
-        //printf("t %ld, %g %g\n", t, a0, metad->a); if (t %10000 == 0) getchar();
       } else {
         metad->a = 1.0/(t + t0);
       }
     }
-    /* update number of round trips */
-    if ( ir == 0 ) {
-      if ( sgn > 0 ) *ntrip += 1;
-      sgn = -1;
-    } else if ( ir == n - 1 ) {
-      if ( sgn < 0 ) *ntrip += 1;
-      sgn = 1;
-    }
-    if ( t % 10000 == 0 ) {
-      *hfl = metad_hfl(metad, -1);
-      fprintf(stderr, "%s t %8ld/%8ld = %5.2f%%, a %.3e, err %12.6e, hist. fl %12.6e/%5.3f%% ntrip %d %20s\r",
-          (prod ? "prod." : "prep."), t, nsteps, 100.*t/nsteps,
-          metad->a, metad_geterror(metad), (*hfl) * (*hfl), 100 * (*hfl), *ntrip, " ");
-    }
-    if ( t % 1000000 == 0 ) metad_save(metad, fn);
     metad_updatev(metad, ir);
+    metad_updateav(metad, ir); /* for the average histogram-corrected bias potential */
+    if ( t % 1000000 == 0 || t == nsteps )
+      metad_save(metad, fn);
+    if ( t % 10000 == 0 || t == nsteps ) {
+      *hfl = metad_hfl(metad, -1);
+      err = metad_geterrav(metad, erc);
+      fprintf(stderr, "%s t %8ld/%8ld = %5.2f%%, a %.3e, err %9.3e/%9.3e, "
+                      "hist. fl %9.3e/%5.3f%% %g %20s\r",
+          (prod ? "prod." : "prep."), t, nsteps, 100.*t/nsteps,
+          metad->a, err, *erc, (*hfl) * (*hfl), 100 * (*hfl), metad->avcnt," ");
+    }
   }
-  metad_save(metad, fn);
   *hfl *= *hfl;
-  return metad_geterror(metad);
+  return err;
+}
+
+/* save the error components */
+static int metad_save_cmvar(metad_t *metad,
+    cmvar_t *cmi, cmvar_t *cmf, cmvar_t *cci, cmvar_t *ccf,
+    const char *fn)
+{
+  int k, n = metad->n;
+  double uk;
+  FILE *fp;
+
+  cmvar_get(cmi);
+  cmvar_get(cmf);
+  cmvar_get(cci);
+  cmvar_get(ccf);
+  if ( (fp = fopen(fn, "w")) == NULL ) {
+    fprintf(stderr, "cannot open %s\n", fn);
+    return -1;
+  }
+
+  getcosmodes(metad->vref, n, metad->vft, metad->costab);
+  metad_saveheader(metad, fp);
+  fprintf(fp, "# %ld\n", cmi->cnt);
+  for ( k = 1; k < n; k++ ) {
+    uk = metad->vft[k];
+    fprintf(fp, "%d %g %g %g %g %g %g %g %g %g\n", k,
+        cmf->uvar[k], cmf->uave[k] - uk,
+        cmi->uvar[k], cmi->uave[k] - uk,
+        ccf->uvar[k], ccf->uave[k] - uk,
+        cci->uvar[k], cci->uave[k] - uk,
+        uk);
+  }
+  fclose(fp);
+  return 0;
 }
 
 static int work(invtpar_t *m)
 {
   lj_t *lj;
-  int ir, kcerr, ntrip;
-  double dr, errtrunc, hfl;
+  int ir, kcerr, n;
+  double dr, errtrunc, hfl, errc;
   metad_t *metad;
 
   //mtscramble(clock());
@@ -162,17 +195,18 @@ static int work(invtpar_t *m)
 
   metad = metad_openf(0, lj->l*0.5, delr, m->pbc,
       METAD_SHIFT_TAIL, m->gaussig, m->kc, m->win, m->winn);
+  n = metad->n;
   metad->a = m->alpha0;
   /* load the reference bias potential */
   metad_load(metad, metad->vref, fnvref);
   errtrunc = metad_errtrunc(metad, metad->vref, &kcerr, "vtrunc.dat");
   ir = dist01(metad, lj, &dr);
-  fprintf(stderr, "n %d, rmax %g, r %d/%g, err trunc %g, mode %d\n", metad->n, metad->xmax, ir, dr, errtrunc, kcerr);
+  fprintf(stderr, "n %d, rmax %g, r %d/%g, err trunc %g, mode %d\n", n, metad->xmax, ir, dr, errtrunc, kcerr);
 
   /* constant magnitude run */
   if ( m->gammethod != GAMMETHOD_NONE
     && m->gammethod != GAMMETHOD_LOAD ) {
-    prodrun(m, metad, lj, 0, m->nequil, "vg.dat", &hfl, &ntrip); /* equilibration */
+    prodrun(m, metad, lj, 0, m->nequil, "vg.dat", &hfl, &errc); /* equilibration */
     gammrun(m, metad, lj);
   }
 
@@ -183,36 +217,58 @@ static int work(invtpar_t *m)
 
   /* multiple production runs */
   {
-    int i, itr, ntrip0, ntrip1;
-    ave_t ei[1], ef[1], fi[1], ff[1];
-    double erri, errf, hfli, hflf; // , *v0;
+    int i, itr;
+    ave_t ei[1], ef[1], eci[1], ecf[1], fi[1], ff[1];
+    double erri, errf, erci, ercf, hfli, hflf;
+    cmvar_t *cmi, *cmf, *cci, *ccf;
     FILE *fplog;
 
-    ave_clear(ei);
-    ave_clear(ef);
+    ave_clear(ei); ave_clear(eci);
+    ave_clear(ef); ave_clear(ecf);
     ave_clear(fi);
     ave_clear(ff);
+    cmi = cmvar_open(n, 0); /* initial */
+    cmf = cmvar_open(n, 0); /* final */
+    cci = cmvar_open(n, 0); /* initial corrected */
+    ccf = cmvar_open(n, 0); /* final correct */
     fprintf(stderr, "starting %ld metadynamics run of %ld/%ld steps..., a %g, err %g -> %g\n",
         m->ntrials, m->nequil, m->nsteps, metad->a, metad->eiref, metad->efref);
+    /* write the header information for the log file */
     fplog = fopen(fnlog, "w");
     metad_saveheader(metad, fplog);
     fprintf(fplog, "# %ld %ld %ld %g %g %g\n",
         m->ntrials, m->nequil, m->nsteps, metad->a, metad->eiref, metad->efref);
     fclose(fplog);
     for ( itr = 0; itr < m->ntrials; itr++ ) {
-      for ( i = 0; i < metad->n; i++ ) metad->v[i] = 0; // v0[i];
-      erri = prodrun(m, metad, lj, 0, m->nequil, "vi.dat", &hfli, &ntrip0);
+      for ( i = 0; i < n; i++ ) metad->v[i] = 0; // v0[i];
+      erri = prodrun(m, metad, lj, 0, m->nequil, "vi.dat", &hfli, &erci);
       ave_add(ei, erri);
       ave_add(fi, hfli);
-      errf = prodrun(m, metad, lj, 1, m->nsteps, "vf.dat", &hflf, &ntrip1);
+      ave_add(eci, erci);
+      cmvar_add(cmi, metad->v);
+      cmvar_add(cci, metad->vc);
+      errf = prodrun(m, metad, lj, 1, m->nsteps, "vf.dat", &hflf, &ercf);
       ave_add(ef, errf);
       ave_add(ff, hflf);
-      printf("%4d: %9.7f %9.7f(%5.2f) %9.7f %9.7f(%5.2f) | %9.7f %9.7f %9.7f %9.7f | %d %d\n",
-          itr, errf, ef->ave, ef->ave/metad->efref, erri, ei->ave, ei->ave/metad->eiref, hflf, ff->ave, hfli, fi->ave, ntrip1, ntrip0);
+      ave_add(ecf, ercf);
+      cmvar_add(cmf, metad->v);
+      cmvar_add(ccf, metad->vc);
+      printf("%4d: %9.7f %9.7f/%9.7f(%5.2f/%5.2f) %9.7f %9.7f/%9.7f(%5.2f/%5.2f) | %9.7f %9.7f %9.7f %9.7f\n",
+          itr, errf, ef->ave, ecf->ave, ef->ave/metad->efref, ecf->ave/metad->efref,
+               erri, ei->ave, eci->ave, ei->ave/metad->eiref, eci->ave/metad->eiref,
+               hflf, ff->ave, hfli, fi->ave);
+      /* save the log file */
       fplog = fopen(fnlog, "a");
-      fprintf(fplog, "%d %.8f %.8f %.8f %.8f %d %d\n", itr, errf, erri, hflf, hfli, ntrip1, ntrip0);
+      fprintf(fplog, "%d %.8f %.8f %.8f %.8f %.8f %.8f\n",
+          itr, errf, erri, hflf, hfli, ercf, erci);
       fclose(fplog);
+      /* save the components */
+      metad_save_cmvar(metad, cmi, cmf, cci, ccf, fnxerr);
     }
+    cmvar_close(cmi);
+    cmvar_close(cmf);
+    cmvar_close(cci);
+    cmvar_close(ccf);
   }
 
   lj_close(lj);

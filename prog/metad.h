@@ -39,8 +39,11 @@ typedef struct {
   double *costab; /* cosine transform coefficients */
   double hfl;
   double *vft; /* Fourier transform of the bias potential */
-  double *vtmp;
-  double *hmod;
+  /* next variables for the average histogram correction */
+  double avcnt;
+  double *hav; /* histogram */
+  double *vav; /* average */
+  double *vc; /* corrected */
   intq_t *intq;
   double eiref, efref; /* estimated errors */
 } metad_t;
@@ -93,10 +96,17 @@ static metad_t *metad_open(int imin, int imax, int idel,
   xnew(metad->v, n);
   xnew(metad->h, n);
   xnew(metad->vref, n);
+  metad->avcnt = 0;
+  xnew(metad->hav, n);
+  xnew(metad->vav, n);
+  xnew(metad->vc, n);
   for ( i = 0; i < n; i++ ) {
     metad->v[i] = 0;
     metad->h[i] = 0;
     metad->vref[i] = 0;
+    metad->hav[i] = 0;
+    metad->vav[i] = 0;
+    metad->vc[i] = 0;
   }
   metad->a = 1.0 / n;
   metad->pbc = pbc;
@@ -112,8 +122,6 @@ static metad_t *metad_open(int imin, int imax, int idel,
   xnew(metad->tgamma, n);
   metad->costab = mkcostab(n, metad->pbc);
   xnew(metad->vft, n);
-  xnew(metad->vtmp, n);
-  xnew(metad->hmod, n);
   metad->intq = NULL;
   metad->eiref = metad->efref = 0;
   return metad;
@@ -148,8 +156,9 @@ static void metad_close(metad_t *metad)
   free(metad->tgamma);
   free(metad->costab);
   free(metad->vft);
-  free(metad->vtmp);
-  free(metad->hmod);
+  free(metad->vav);
+  free(metad->hav);
+  free(metad->vc);
   if ( metad->intq != NULL ) {
     intq_close( metad->intq );
   }
@@ -237,9 +246,6 @@ __inline static double metad_hfl(metad_t *metad, double lamcut)
     x = n * metad->vft[k] / tot;
     fl += x * x;
   }
-  ///* compute the filtered histogram */
-  //for ( ; k < n; k++ ) metad->vft[k] = 0;
-  //fromcosmodes(metad->hmod, n, metad->vft, metad->costab);
   return sqrt( fl );
 }
 
@@ -331,7 +337,8 @@ __inline static void metad_saveheader(metad_t *metad, FILE *fp)
     fprintf(fp, "# %d %d %d %d",
         metad->n, metad->imin, metad->imax, metad->idel);
   }
-  fprintf(fp, " %g %d %g %d\n", metad->a, metad->pbc, metad->gaussig, metad->kc);
+  fprintf(fp, " %g %d %g %d %g\n",
+      metad->a, metad->pbc, metad->gaussig, metad->kc, metad->avcnt);
 }
 
 /* return the value of the reaction coordinate for bin i */
@@ -375,81 +382,6 @@ __inline static double metad_errtrunc(metad_t *metad,
   return err;
 }
 
-/* save the bias potential to file */
-static int metad_save(metad_t *metad, const char *fn)
-{
-  FILE *fp;
-  int i, n = metad->n;
-  double x, dv;
-
-  if ( (fp = fopen(fn, "w")) == NULL ) {
-    fprintf(stderr, "cannot open %s\n", fn);
-    return -1;
-  }
-  dv = metad_getave(metad, metad->vref);
-  dv -= metad_getave(metad, metad->v);
-  getcosmodes(metad->v, n, metad->vft, metad->costab);
-
-  metad_saveheader(metad, fp);
-  for ( i = 0; i < n; i++ ) {
-    x = metad_getx(metad, i);
-    fprintf(fp, "%g %g %g %g %g\n", x,
-        metad->v[i] + dv, metad->h[i], metad->vref[i], metad->vft[i]);
-  }
-  fclose(fp);
-  return 0;
-}
-
-
-
-/* load the bias potential from file */
-__inline static int metad_load(metad_t *metad, double *v, const char *fn)
-{
-  FILE *fp;
-  int i, isfloat = (fabs(metad->xmax - metad->xmin) > 0), err = -1;
-  int n, imin, imax, idel;
-  double x, xmin, xmax, xdel;
-  static char buf[256];
-
-  if ( (fp = fopen(fn, "r")) == NULL ) {
-    fprintf(stderr, "cannot open %s\n", fn);
-    return -1;
-  }
-  fgets(buf, sizeof buf, fp);
-  if ( isfloat ) {
-    sscanf(buf, "# %d%lf%lf%lf", &n, &xmin, &xmax, &xdel);
-    if ( n != metad->n
-      || fabs(xmin - metad->xmin) > 1e-6
-      || fabs(xmax - metad->xmax) > 1e-6
-      || fabs(xdel - metad->xdel) > 1e-6 ) {
-      fprintf(stderr, "%s data mismatch\n", fn);
-      goto ERR;
-    }
-  } else {
-    sscanf(buf, "# %d%d%d%d", &n, &imin, &imax, &idel);
-    if ( n != metad->n
-      || imin != metad->imin
-      || imax != metad->imax
-      || idel != metad->idel ) {
-      fprintf(stderr, "%s data mismatch\n", fn);
-      goto ERR;
-    }
-  }
-  for ( i = 0; i < metad->n; i++ ) {
-    fgets(buf, sizeof buf, fp);
-    if ( 2 != sscanf(buf, "%lf%lf", &x, &v[i]) ) {
-      fprintf(stderr, "%s corrupted at line %d\n", fn, i);
-      goto ERR;
-    }
-  }
-  metad_shiftv(metad, v);
-  err = 0;
-ERR:
-  fclose(fp);
-  return err;
-}
-
-
 /* save the gamma values */
 __inline static int metad_savegamma(metad_t *metad,
     const double *gamma, int docm, const char *fn)
@@ -467,6 +399,7 @@ __inline static int metad_savegamma(metad_t *metad,
   for ( i = 1; i < n; i++ ) gamtot += gamma[i];
 
   if ( docm ) {
+    /* Fourier transform to get the initial bias */
     getcosmodes(metad->vref, n, metad->vft, metad->costab);
   }
   fprintf(fp, "# %d %g\n", n, gamtot);
@@ -690,21 +623,152 @@ static void metad_getalphaerr(metad_t *metad, int opta, double T, int gammethod,
 
 /* compute the root-mean-squared error of `v`
  * note: the baseline of `v` will be shifted  */
-static double metad_geterror(metad_t *metad)
+#define metad_geterror(m) metad_geterr(m, m->v)
+static double metad_geterr(metad_t *metad, const double *v)
 {
   double err = 0, x, v0, vref0;
   int i, n = metad->n;
 
-  v0 = metad_getave(metad, metad->v);
+  v0 = metad_getave(metad, v);
   vref0 = metad_getave(metad, metad->vref);
   for ( i = 0; i < n; i++ ) {
-    x = (metad->v[i] - v0) - (metad->vref[i] - vref0);
+    x = (v[i] - v0) - (metad->vref[i] - vref0);
     err += x * x;
   }
   err /= n;
   return err;
 }
 
+/* update the average histogram-corrected bias potential */
+__inline static void metad_updateav(metad_t *metad, int i)
+{
+  int j, n = metad->n;
+  double v0;
+
+  metad->avcnt += 1;
+  metad->hav[i] += 1;
+  v0 = metad_getave(metad, metad->v);
+  for ( j = 0; j < n; j++ ) {
+    metad->vav[j] += metad->v[j] - v0;
+  }
+}
+
+
+/* clear data for the average histogram-corrected bias potential */
+__inline static void metad_clearav(metad_t *metad)
+{
+  int i, n = metad->n;
+  metad->avcnt = 0;
+  for ( i = 0; i < n; i++ ) {
+    metad->hav[i] = 0;
+    metad->vav[i] = 0;
+  }
+}
+
+/* compute the average histogram corrected bias potential */
+__inline static void metad_calcav(metad_t *metad, double *vc)
+{
+  int i, n = metad->n;
+  double cnt = metad->avcnt;
+  if ( cnt > 0 ) {
+    for ( i = 0; i < n; i++ ) {
+      vc[i] = metad->vav[i]/cnt + metad->hav[i]*n/cnt - 1;
+    }
+  } else {
+    for ( i = 0; i < n; i++ ) vc[i] = 0;
+  }
+}
+
+static double metad_geterrav(metad_t *metad, double *erc)
+{
+  metad_calcav(metad, metad->vc);
+  *erc = metad_geterr(metad, metad->vc);
+  return metad_geterr(metad, metad->v);
+} 
+
+/* save the bias potential to file */
+static int metad_save(metad_t *metad, const char *fn)
+{
+  FILE *fp;
+  int i, n = metad->n;
+  double x, v0, dv, dvav = 0, avcnt = metad->avcnt;
+
+  if ( (fp = fopen(fn, "w")) == NULL ) {
+    fprintf(stderr, "cannot open %s\n", fn);
+    return -1;
+  }
+  v0 = metad_getave(metad, metad->vref);
+  dv = v0 - metad_getave(metad, metad->v);
+  if ( avcnt > 0 ) {
+    dvav = v0 - metad_getave(metad, metad->vav)/avcnt;
+    metad_calcav(metad, metad->vc);
+  }
+  getcosmodes(metad->v, n, metad->vft, metad->costab);
+
+  metad_saveheader(metad, fp);
+  for ( i = 0; i < n; i++ ) {
+    x = metad_getx(metad, i);
+    fprintf(fp, "%g %g %g %g %g", x,
+        metad->v[i] + dv, metad->h[i], metad->vref[i], metad->vft[i]);
+    if ( metad->avcnt > 0 ) {
+      fprintf(fp, " %g %g %g", 
+          metad->vav[i]/avcnt + dvav, metad->hav[i]/avcnt*n - 1, metad->vc[i]+dvav);
+    }
+    fprintf(fp, "\n");
+  }
+  fclose(fp);
+  return 0;
+}
+
+
+
+/* load the bias potential from file */
+__inline static int metad_load(metad_t *metad, double *v, const char *fn)
+{
+  FILE *fp;
+  int i, isfloat = (fabs(metad->xmax - metad->xmin) > 0), err = -1;
+  int n, imin, imax, idel;
+  double x, xmin, xmax, xdel;
+  static char buf[256];
+
+  if ( (fp = fopen(fn, "r")) == NULL ) {
+    fprintf(stderr, "cannot open %s\n", fn);
+    return -1;
+  }
+  fgets(buf, sizeof buf, fp);
+  if ( isfloat ) {
+    sscanf(buf, "# %d%lf%lf%lf", &n, &xmin, &xmax, &xdel);
+    if ( n != metad->n
+      || fabs(xmin - metad->xmin) > 1e-6
+      || fabs(xmax - metad->xmax) > 1e-6
+      || fabs(xdel - metad->xdel) > 1e-6 ) {
+      fprintf(stderr, "%s data mismatch\n", fn);
+      goto ERR;
+    }
+  } else {
+    sscanf(buf, "# %d%d%d%d", &n, &imin, &imax, &idel);
+    if ( n != metad->n
+      || imin != metad->imin
+      || imax != metad->imax
+      || idel != metad->idel ) {
+      fprintf(stderr, "%s data mismatch\n", fn);
+      goto ERR;
+    }
+  }
+  for ( i = 0; i < metad->n; i++ ) {
+    fgets(buf, sizeof buf, fp);
+    if ( 2 != sscanf(buf, "%lf%lf", &x, &v[i]) ) {
+      fprintf(stderr, "%s corrupted at line %d\n", fn, i);
+      goto ERR;
+    }
+  }
+  metad_shiftv(metad, v);
+  fprintf(stderr, "loaded bias potential from %s, %d values\n", fn, n);
+  err = 0;
+ERR:
+  fclose(fp);
+  return err;
+}
 
 
 #endif /* METAD_H__ */
