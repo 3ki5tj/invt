@@ -2336,9 +2336,8 @@ Estimate $\Gamma_k$'s from Eq. \eqref{eq:varXt}
 Compute the optimal $q(T)$ by solving Eq. \eqref{eq:opt_qT}.
 \footnote{We solved the equation for $\ln q(T)$ using
     a variant of the Newton-Raphson method
-    with the bisection method as fallback.
-    The initial value set to $q(T) = \ln(1+T\,a_0/2)$.
-    Other general methods can be more effective\cite{press3rd}.}
+    with the bisection method as a fallback.
+    The initial value is set to $q(T) = \ln(1+T\,a_0/2)$.}
 %
 %Since $m(Q)$ is a decreasing function of $Q$,
 %we can start from an interval $[Q_L, Q_R]$
@@ -2358,39 +2357,14 @@ Compute the optimal $q(T)$ by solving Eq. \eqref{eq:opt_qT}.
 
 \item \label{step:alpha}
 Compute the optimal schedule by
-numerically integrating Eqs. \eqref{eq:q_opt} and \eqref{eq:mint}.\footnote{
-  We have used the trapezoidal rule\cite{press3rd}
-  on an adaptively defined grid on $[0, q(T)]$ of $N+1$ points
-  (we chose $N=20000$)
-  such that the resulting change of $\Delta t_{[i]} \equiv t_{[i+1]}-t_{[i]}$
-  is no less than $T/(2N)$ and no greater than $2T/N$.
-  %
-  This requires a few (usually $2$ or $3$) rounds of iterations
-  to determine the constant $C$.
-  %
-  The first guess of $C$ is obtained from integrating
-  Eq. \eqref{eq:mint} on a uniform grid.
-  %
-  Then in each of the next few rounds, we determine the grid points
-  as follows.  For grid point $i = 0, 1, \dots, N - 1$,
-  we determine the stride
-  $\Delta q_{[i]} \equiv q_{[i+1]} - q_{[i]}$
-  by a few iterations.
-  Starting with the guess, $\bigl(q(T)-q_{[i]}\bigr)/(N-i)$,
-  if the resulting increment $\Delta t_{[i]}$
-  for grid point $i$ is less than $T/(2N)$,
-  we multiply $\Delta q_{[i]}$ by $3/2$
-  unless the resulting $q_{[i+1]} > q(T)$,
-  or if $\Delta t_{[i]} > 2T/N$,
-  we divide $\Delta q_{[i]}$ by $2/3$.
-  %
-  Once the grid points are defined,
-  we will determine the new value of $C$,
-  and if the new value differs from the old estimate
-  by more than $10\%$, we start another round of iteration.
+  numerically integrating Eqs. \eqref{eq:q_opt} and \eqref{eq:mint}.\footnote{
+  We have used the trapezoidal rule
+  on a $N+1$ point logarithm grid over $[0, q(T)]$:
+    $q_{[i]} = \bigl(q(T) + 1\bigr) - \bigl(q(T)+1\bigr)^{1-i/N}$,
+  where $i = 0, \dots, N$, and we chose $N=20000$.
 %
-%The curve $q(t)$ is then defined on the grid points,
-%$(q_{[i]}, t_{[i]})$,
+The integration yields a curve $q(t)$ on the grid points,
+$(q_{[i]}, t_{[i]})$.
 %
 The updating magnitude can then be obtained from numerical differentiation:
     $\alpha_i = (1 - e^{-\lambda_1 \, \hat \alpha_i})/\lambda_1$
@@ -2637,7 +2611,7 @@ For example,
 %if we can assume
 by assuming
 that the PMF is sufficiently smooth
-such that the eigenmodes can be limited to $k \le K$,
+such that the eigenmodes can be limited to $k < K$,
 %
 we can construct an updating scheme with
 $$
@@ -2695,7 +2669,7 @@ $$E(0) = \frac{1}{2} a_0 \sum_{k=1}^{n-1} \Gamma_k
 }
 %
 From Eqs. \eqref{eq:error_tot},
-\eqref{eq:error_res1},
+\eqref{eq:error_res},
 \eqref{eq:tk0},
 and
 \eqref{eq:error_asym_sinc},
@@ -2714,7 +2688,11 @@ we get
 %
 This result recovers Eq. \eqref{eq:Emin_singlebin}
 for the single-bin updating scheme:
-if we set $K + 1 = n$,
+if we set $K = n$, then\note{
+  From Eq. \eqref{eq:eig_orthonormal_cols}, we have
+  $\sum_{i=1}^n \rho_i \langle v_{*i}(t) \, v_{*i}(0) \rangle =\sum_{k=1}^{n-1} \langle {\tilde v}_k(t) \, {\tilde v}_k(0) \rangle.$
+  Then sum over $t$ from $\infty$ to $\infty$.
+}
 %
 \begin{equation}
   \sum_{k=1}^{n-1} \Gamma_k
@@ -2723,25 +2701,6 @@ if we set $K + 1 = n$,
   \notag
   %\label{eq:Gamma_G_sum}
 \end{equation}
-which can be shown by following the steps
-similar to those leading to Eq. \eqref{eq:xt2_sum}.
-%
-%
-%
-\note{The derivation.
-From Eq. \eqref{eq:eig_orthonormal_cols}, we have
-$\sum_{i=1}^n \rho_i \langle v_{*i}(t) \, v_{*i}(0) \rangle
-=\sum_{k=1}^{n-1} \langle {\tilde v}_{*k}(t) \, {\tilde v}_{*k}(0) \rangle$,
-so
-\begin{align*}
-\sum_{i=1}^n \rho_i G_i
-&=\sum_{t=-\infty}^\infty\sum_{i=1}^n
-  \rho_i \langle v_{*i}(t) \, v_{*i}(0) \rangle \\
-  &=\sum_{t=-\infty}^\infty\sum_{k=1}^{n-1}
-  \langle {\tilde v}_{*k}(t) \, {\tilde v}_{*k}(0) \rangle
-  =\sum_{k=1}^{n-1} \Gamma_k.
-\end{align*}
-}
 %
 This error is roughly proportional to the inverse simulation length,
 as one would expect from an equilibrium FDS simulation.

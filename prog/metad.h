@@ -609,7 +609,6 @@ static void metad_getalphaerr(metad_t *metad, int opta, double T,
   metad->eiref = y * y + err0;
 
   if ( opta ) {
-    printf("hahaha\n");
     y = esterror_optx(T, alpha0, xerr0, qT, qprec,
     //y = esterror_opt(T, alpha0, 0, qT, qprec,
         nint, &metad->intq, n, -1, metad->pbc,

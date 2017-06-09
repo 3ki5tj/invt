@@ -74,6 +74,8 @@ static void intq_setqgrid(intq_t *intq, double qT)
   }
 }
 
+
+
 /* compute the integrand for `intq` */
 static double intq_getmassx(intq_t *intq, double dq,
     double *massK)
@@ -131,67 +133,6 @@ static double intq_getq(intq_t *intq, double qT)
 
 
 
-/* compute the optimal schedule, in terms of q(t)
- * the results are saved to tarr[0..m], qarr[0..m]
- * */
-static double intq_getq_adp(intq_t *intq, double qT)
-{
-  const double r = 1.5;
-  int i, j, round, m = intq->m;
-  double c0, c, qp, dq, yK = 0, yK1 = 0, dt, del, T = intq->T;
-
-  /* get the normalization constant */
-  c0 = intq_getq(intq, qT);
-  printf("c %g\n", c0);
-  intq->tarr[0] = 0;
-  intq->qarr[0] = 0;
-
-  /* use several rounds to for improved estimate of c0
-   * usually one or two rounds would suffice */
-  for ( round = 0; round < 10; round++ ) {
-    intq_getmassx(intq, intq->qarr[0] - qT, &yK);
-    for ( j = 1; j <= m; j++ ) {
-      del = T / m;
-      qp = intq->qarr[j-1];
-      dq = (qT - qp) / (m + 1 - j);
-      /* adjust the integration step size */
-      for ( i = 0; i < 100; i++ ) {
-        intq_getmassx(intq, qp + dq - qT, &yK1);
-        dt = c0 * (yK + yK1) * 0.5 * dq;
-        //printf("point j %d, i %d, yK %g, %g, dq %g, dt %g, del %g, slope dq/dt %g | q %g, t %g\n", j, i, yK, yK1, dq/(qT-qp), dt/T, del, dq/dt, qp/qT, intq->tarr[j-1]/T);
-        /* skip the adjustment for the last point
-         * or if the step is already too small */
-        if ( j == m || dq < 1e-3 * qT/m ) {
-          break;
-        } else if ( dt < del/2 && qp + 2*dq < qT ) {
-          dq *= r;
-        } else if ( dt > del*2 ) {
-          dq /= r;
-        } else {
-          break;
-        }
-      }
-      intq->qarr[j] = intq->qarr[j-1] + dq;
-      intq->tarr[j] = intq->tarr[j-1] + dt;
-      yK = yK1;
-    }
-
-    /* normalize the time array */
-    c = intq->T / intq->tarr[m];
-    printf("round %d, c %g, c0 %g, tarr %g\n", round, c, c0, intq->tarr[m]); getchar();
-    c0 *= c;
-    for ( j = 1; j <= m; j++ )
-      intq->tarr[j] *= c;
-
-    /* stop if the estimated normalization is good */
-    if ( fabs(c - 1) < 0.1 ) break;
-  }
-  return c;
-}
-
-
-
-
 /* differentiate q(t) to get alpha(t) */
 static void intq_diffq(intq_t *intq)
 {
@@ -234,8 +175,7 @@ static void intq_diffinva(intq_t *intq)
  * */
 static void intq_geta(intq_t *intq, double qT)
 {
-  intq_getq_adp(intq, qT);
-  //intq_getq(intq, qT);
+  intq_getq(intq, qT);
 
   /* differentiate q(t) to get alpha(t) */
   intq_diffq(intq);
@@ -378,11 +318,11 @@ __inline static double intq_getmint(intq_t *intq, double qT,
     double *mint_ubound, const char *fnmass)
 {
   int i, k, m = intq->m, n = intq->n;
-  double dq, q, lambda, gamma, xp, y, mass, mint;
+  double q, dq, lambda, gamma, xp, y, mass, mint;
   double mass_ub, mint_ub;
   FILE *fpmass = NULL;
 
-  dq = qT / m;
+  intq_setqgrid(intq, qT);
   mint = 0;
   mint_ub = 0;
 
@@ -393,7 +333,9 @@ __inline static double intq_getmint(intq_t *intq, double qT,
 
   /* compute Int M(Q) dQ */
   for ( i = 0; i <= m; i++ ) {
-    q = i * dq;
+    q = qT - intq->qarr[m-i];
+    dq = (i < m ? intq->qarr[m-i] - intq->qarr[m-i-1] : 0)
+       + (i > 0 ? intq->qarr[m-i+1] - intq->qarr[m-i] : 0);
     y = 0;
     mass_ub = 0;
     for ( k = 1; k < n; k++ ) {
@@ -404,13 +346,8 @@ __inline static double intq_getmint(intq_t *intq, double qT,
       mass_ub += lambda * sqrt(gamma * xp);
     }
     mass = sqrt( y );
-    if ( i == 0 || i == m ) {
-      mint += mass * dq * 0.5;
-      mint_ub += mass_ub * dq * 0.5;
-    } else {
-      mint += mass * dq;
-      mint_ub += mass_ub * dq;
-    }
+    mint += mass * dq * 0.5;
+    mint_ub += mass_ub * dq * 0.5;
     if ( fpmass != NULL ) {
       fprintf(fpmass, "%g\t%g\t%g\t%g\t%g\n", q, mass, mint, mass_ub, mint_ub);
     }
@@ -443,12 +380,14 @@ static double intq_optqTfunc(intq_t *intq,
   int n = intq->n, K = intq->K, pbc = intq->pbc;
   double f, dq, q, lambda, gamma, xp, y, mint, mass;
 
-  dq = qT / m;
+  intq_setqgrid(intq, qT);
   mint = 0;
 
   /* compute Int M(Q) dQ */
   for ( i = 0; i <= m; i++ ) {
-    q = i * dq;
+    q = qT - intq->qarr[m-i];
+    dq = (i < m ? intq->qarr[m-i] - intq->qarr[m-i-1] : 0)
+       + (i > 0 ? intq->qarr[m-i+1] - intq->qarr[m-i] : 0);
     y = 0;
     for ( k = 1; k < n; k++ ) {
       if ( K >= 0 && k > K && (!pbc || k < n - K) )
@@ -459,11 +398,7 @@ static double intq_optqTfunc(intq_t *intq,
       y += gamma * lambda * lambda * xp;
     }
     mass = sqrt( y );
-    if ( i == 0 || i == m ) {
-      mint += mass * dq * 0.5;
-    } else {
-      mint += mass * dq;
-    }
+    mint += mass * dq * 0.5;
   }
   f = mint - mass * intq->T * initalpha;
 
@@ -495,7 +430,7 @@ static double intq_optqT(intq_t *intq, double initalpha,
 {
   double qT = log(1 + intq->T * initalpha / 2), dlnq;
   double f = DBL_MAX, df;
-  double qTmin = 1e-7, qTmax = 1e7, ql = 1e-7, qr = 1e7;
+  double qTmin = 1e-10, qTmax = 1e10, ql = 1e-10, qr = 1e10;
   int i;
 
   for ( i = 0; fabs(f) > 1e-10; i++ ) {
@@ -545,7 +480,7 @@ static double intq_optqTfuncx(intq_t *intq, double a0,
 {
   int i, k, m = intq->m;
   int n = intq->n, K = intq->K, pbc = intq->pbc;
-  double f, q, dq1, dq2, lambda, gamma, xp, y, z, w, mint, mass, dmass, T;
+  double f, q, dq, lambda, gamma, xp, y, z, w, mint, mass, dmass, T;
 
   intq_setqgrid(intq, qT);
   mint = 0;
@@ -553,6 +488,8 @@ static double intq_optqTfuncx(intq_t *intq, double a0,
   /* compute Int M(Q) dQ */
   for ( i = 0; i <= m; i++ ) {
     q = qT - intq->qarr[m-i];
+    dq = (i < m ? intq->qarr[m-i] - intq->qarr[m-i-1] : 0)
+       + (i > 0 ? intq->qarr[m-i+1] - intq->qarr[m-i] : 0);
     y = 0;
     for ( k = 1; k < n; k++ ) {
       if ( K >= 0 && k > K && (!pbc || k < n - K) )
@@ -563,9 +500,7 @@ static double intq_optqTfuncx(intq_t *intq, double a0,
       y += gamma * lambda * lambda * xp;
     }
     mass = sqrt( y );
-    dq1 = (i < m) ? intq->qarr[m-i] - intq->qarr[m-i-1] : 0;
-    dq2 = (i > 0) ? intq->qarr[m-i+1] - intq->qarr[m-i] : 0;
-    mint += 0.5 * mass * (dq1 + dq2);
+    mint += mass * dq * 0.5;
   }
 
   y = z = w = 0;
@@ -604,12 +539,12 @@ static double intq_optqTx(intq_t *intq, double a0,
 {
   double qT = log(1 + intq->T * a0), dlnq;
   double f = DBL_MAX, df;
-  double qTmin = 1e-7, qTmax = 1e7, ql = 0, qr = 1e7;
+  double qTmin = 1e-10, qTmax = 1e10, ql = 1e-10, qr = 1e10;
   int i;
 
   for ( i = 0; fabs(f) > 1e-10; i++ ) {
     f = intq_optqTfuncx(intq, a0, xerr, qT, &df);
-    double f1, df1; f1 = intq_optqTfuncx(intq, a0, xerr, qT+0.01, &df1);
+    //double f1, df1; f1 = intq_optqTfuncx(intq, a0, xerr, qT+0.01, &df1);
 
     /* update the bracket */
     if ( f < 0 && qT > ql ) ql = qT;
@@ -617,7 +552,7 @@ static double intq_optqTx(intq_t *intq, double a0,
 
     if ( df < fabs(f/qT) ) df = fabs(f/qT);
     dlnq = -f/df/qT;
-    printf("f %g, df %g,%g q %g, dlnq %g\n", f, df, (f1-f)/0.01, qT, dlnq); getchar();
+    //printf("f %g, df %g,%g q %g, dlnq %g\n", f, df, (f1-f)/0.01, qT, dlnq); getchar();
 
     if ( qT > qTmax*0.1 && f < 0 || qT < qTmin*10 && f > 0 || fabs(dlnq) < tol )
       break; /* break if qT is too large and the error is still decreasing */ 
@@ -919,7 +854,7 @@ static double esterror_optx(double T, double a0,
   /* compute the optimal schedule and error */
   if ( *qT <= 0 ) {
     *qT = intq_optqTx(intq, a0, xerr, qprec, verbose);
-    printf("qT %g\n", *qT); getchar();
+    //printf("qT %g\n", *qT); getchar();
   }
   err = intq_geterrx(intq, a0, xerr, *qT);
 
