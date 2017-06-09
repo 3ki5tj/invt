@@ -2334,9 +2334,11 @@ Estimate $\Gamma_k$'s from Eq. \eqref{eq:varXt}
 
 \item \label{step:qT}
 Compute the optimal $q(T)$ by solving Eq. \eqref{eq:opt_qT}.
-\footnote{We applied the Newton-Raphson method on $\ln q(T)$
-    with the initial value set to $q(T) = \ln(1+T\,a_0/2)$.
-    Other root-finding methods can be more effective\cite{press3rd}.}
+\footnote{We solved the equation for $\ln q(T)$ using
+    a variant of the Newton-Raphson method
+    with the bisection method as fallback.
+    The initial value set to $q(T) = \ln(1+T\,a_0/2)$.
+    Other general methods can be more effective\cite{press3rd}.}
 %
 %Since $m(Q)$ is a decreasing function of $Q$,
 %we can start from an interval $[Q_L, Q_R]$
@@ -2356,32 +2358,54 @@ Compute the optimal $q(T)$ by solving Eq. \eqref{eq:opt_qT}.
 
 \item \label{step:alpha}
 Compute the optimal schedule by
-numerically integrating Eqs. \eqref{eq:q_opt} and \eqref{eq:mint}.
-%
-%This can be done on an even grid of $N$ points
-%at $q_{[i]} = \frac{i}{N} \, q(T)$
-%($i = 0, 1, \dots, N$)
-We have used the trapezoidal rule\cite{press3rd}
+numerically integrating Eqs. \eqref{eq:q_opt} and \eqref{eq:mint}.\footnote{
+  We have used the trapezoidal rule\cite{press3rd}
   on an adaptively defined grid on $[0, q(T)]$ of $N+1$ points
-  such that the resulting change of $t_{[i+1]}-t_{[i]}$
+  (we chose $N=20000$)
+  such that the resulting change of $\Delta t_{[i]} \equiv t_{[i+1]}-t_{[i]}$
   is no less than $T/(2N)$ and no greater than $2T/N$.
+  %
+  This requires a few (usually $2$ or $3$) rounds of iterations
+  to determine the constant $C$.
+  %
+  The first guess of $C$ is obtained from integrating
+  Eq. \eqref{eq:mint} on a uniform grid.
+  %
+  Then in each of the next few rounds, we determine the grid points
+  as follows.  For grid point $i = 0, 1, \dots, N - 1$,
+  we determine the stride
+  $\Delta q_{[i]} \equiv q_{[i+1]} - q_{[i]}$
+  by a few iterations.
+  Starting with the guess, $\bigl(q(T)-q_{[i]}\bigr)/(N-i)$,
+  if the resulting increment $\Delta t_{[i]}$
+  for grid point $i$ is less than $T/(2N)$,
+  we multiply $\Delta q_{[i]}$ by $3/2$
+  unless the resulting $q_{[i+1]} > q(T)$,
+  or if $\Delta t_{[i]} > 2T/N$,
+  we divide $\Delta q_{[i]}$ by $2/3$.
+  %
+  Once the grid points are defined,
+  we will determine the new value of $C$,
+  and if the new value differs from the old estimate
+  by more than $10\%$, we start another round of iteration.
 %
-The curve $q(t)$ is then defined on the grid points,
-$(q_{[i]}, t_{[i]})$,
+%The curve $q(t)$ is then defined on the grid points,
+%$(q_{[i]}, t_{[i]})$,
 %
-and the updating magnitude can be obtained from numerical differentiation:
+The updating magnitude can then be obtained from numerical differentiation:
     $\alpha_i = (1 - e^{-\lambda_1 \, \hat \alpha_i})/\lambda_1$
     and
     $\hat \alpha_i \equiv (q_{[i+1]} - q_{[i-1]}) / (t_{[i+1]} - t_{[i-1]})$,
 with
-$q_{[ -1]} \equiv q_{[0]} = 0$,
-$q_{[N+1]} \equiv q_{[N]} = q(T)$,
-$t_{[ -1]} \equiv t_{[0]} = 0$, and
-$t_{[N+1]} \equiv t_{[N]} = T$.
+$q_{[ -1]} \equiv 0$,
+$q_{[N+1]} \equiv q(T)$,
+$t_{[ -1]} \equiv 0$, and
+$t_{[N+1]} \equiv T$.
 %
 The resulting values of $(t_{[i]}, \alpha_{[i]})$
 can be linear interpolated
 to get the updating magnitude, $\alpha(t)$, at any simulation time, $t$.
+}
 
 \item
   Compute the total error $\Err(T)$ from
@@ -2397,9 +2421,11 @@ The above procedure is still somewhat idealized.
 %
 The preliminary run in step \ref{step:prerun}
 needs to be sufficiently long to precisely
-estimate the $\Gamma_k$'s and the initial bias, $\epsilon_k$,
-which will be used to compute the optimal $q(T)$
-and schedule later.
+estimate the $\Gamma_k$'s and the initial bias, $\epsilon_k$
+(for which one may use the histogram-corrected bias potential).
+%
+However,
+
 
 
 

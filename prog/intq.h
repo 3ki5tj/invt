@@ -64,6 +64,15 @@ static void intq_close(intq_t *intq)
 }
 
 
+/* set the q grid points */
+static void intq_setqgrid(intq_t *intq, double qT)
+{
+  int i, m = intq->m;
+  double dlnq = log(qT+1)/m;
+  for ( i = 0; i <= m; i++ ) {
+    intq->qarr[i] = (qT+1) * (1 - exp(-i*dlnq));
+  }
+}
 
 /* compute the integrand for `intq` */
 static double intq_getmassx(intq_t *intq, double dq,
@@ -100,13 +109,12 @@ static double intq_getq(intq_t *intq, double qT)
   int j, m = intq->m;
   double c, dq, yK = 0, dt;
 
-  /* integrate over q over uniform grid */
-  dq = qT / m;
+  intq_setqgrid(intq, qT);
   intq->tarr[0] = 0;
   intq->qarr[0] = 0;
   intq_getmassx(intq, intq->qarr[0] - qT, &yK);
   for ( j = 1; j <= m; j++ ) {
-    intq->qarr[j] = intq->qarr[j-1] + dq;
+    dq = intq->qarr[j] - intq->qarr[j-1];
     dt = yK * 0.5 * dq;
     intq_getmassx(intq, intq->qarr[j] - qT, &yK);
     dt += yK * 0.5 * dq;
@@ -134,7 +142,7 @@ static double intq_getq_adp(intq_t *intq, double qT)
 
   /* get the normalization constant */
   c0 = intq_getq(intq, qT);
-  //printf("c %g\n", c0);
+  printf("c %g\n", c0);
   intq->tarr[0] = 0;
   intq->qarr[0] = 0;
 
@@ -143,7 +151,7 @@ static double intq_getq_adp(intq_t *intq, double qT)
   for ( round = 0; round < 10; round++ ) {
     intq_getmassx(intq, intq->qarr[0] - qT, &yK);
     for ( j = 1; j <= m; j++ ) {
-      del = 1.0 / (m + 1 - j);
+      del = T / m;
       qp = intq->qarr[j-1];
       dq = (qT - qp) / (m + 1 - j);
       /* adjust the integration step size */
@@ -155,9 +163,9 @@ static double intq_getq_adp(intq_t *intq, double qT)
          * or if the step is already too small */
         if ( j == m || dq < 1e-3 * qT/m ) {
           break;
-        } else if ( dt < del * T / r && qp + 2*dq < qT ) {
+        } else if ( dt < del/2 && qp + 2*dq < qT ) {
           dq *= r;
-        } else if ( dt > del * T * r ) {
+        } else if ( dt > del*2 ) {
           dq /= r;
         } else {
           break;
@@ -170,7 +178,7 @@ static double intq_getq_adp(intq_t *intq, double qT)
 
     /* normalize the time array */
     c = intq->T / intq->tarr[m];
-    //printf("round %d, c %g, c0 %g, tarr %g\n", round, c, c0, intq->tarr[m]); getchar();
+    printf("round %d, c %g, c0 %g, tarr %g\n", round, c, c0, intq->tarr[m]); getchar();
     c0 *= c;
     for ( j = 1; j <= m; j++ )
       intq->tarr[j] *= c;
@@ -537,14 +545,14 @@ static double intq_optqTfuncx(intq_t *intq, double a0,
 {
   int i, k, m = intq->m;
   int n = intq->n, K = intq->K, pbc = intq->pbc;
-  double f, dq, q, lambda, gamma, xp, y, z, w, mint, mass, dmass, T;
+  double f, q, dq1, dq2, lambda, gamma, xp, y, z, w, mint, mass, dmass, T;
 
-  dq = qT / m;
+  intq_setqgrid(intq, qT);
   mint = 0;
 
   /* compute Int M(Q) dQ */
   for ( i = 0; i <= m; i++ ) {
-    q = i * dq;
+    q = qT - intq->qarr[m-i];
     y = 0;
     for ( k = 1; k < n; k++ ) {
       if ( K >= 0 && k > K && (!pbc || k < n - K) )
@@ -555,11 +563,9 @@ static double intq_optqTfuncx(intq_t *intq, double a0,
       y += gamma * lambda * lambda * xp;
     }
     mass = sqrt( y );
-    if ( i == 0 || i == m ) {
-      mint += mass * dq * 0.5;
-    } else {
-      mint += mass * dq;
-    }
+    dq1 = (i < m) ? intq->qarr[m-i] - intq->qarr[m-i-1] : 0;
+    dq2 = (i > 0) ? intq->qarr[m-i+1] - intq->qarr[m-i] : 0;
+    mint += 0.5 * mass * (dq1 + dq2);
   }
 
   y = z = w = 0;
@@ -613,7 +619,7 @@ static double intq_optqTx(intq_t *intq, double a0,
     dlnq = -f/df/qT;
     printf("f %g, df %g,%g q %g, dlnq %g\n", f, df, (f1-f)/0.01, qT, dlnq); getchar();
 
-    if ( qT > qTmax && f < 0 || qT < qTmin && f > 0 || fabs(dlnq) < tol )
+    if ( qT > qTmax*0.1 && f < 0 || qT < qTmin*10 && f > 0 || fabs(dlnq) < tol )
       break; /* break if qT is too large and the error is still decreasing */ 
 
     if ( verbose ) {
