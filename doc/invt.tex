@@ -963,7 +963,7 @@ approximation requires us to shift the origin of time by $1$ in some cases.}
   \approx
   \alpha(t) \, \frac{ h_i(t) } { p_i }
   \equiv
-  \alpha(t) \, \eta_i(t)
+  \alpha(t) \, \xi_i(t)
   ,
   \label{eq:ut_diffeq}
 \end{equation}
@@ -982,7 +982,7 @@ which is equal to $1$
 for the bin $i(t)$ at time $t$
 or zero otherwise,
 and we have defined a relative histogram
-$\eta_i(t) \equiv h_i(t) /p_i$
+$\xi_i(t) \equiv h_i(t) /p_i$
 in the last step.
 %
 The shifted bias potential, $v_i(t)$,
@@ -995,19 +995,19 @@ we get
 \begin{equation}
   \dot v_{*i}(t)
   \approx
-  \alpha(t) \, \eta_{*i}(t)
+  \alpha(t) \, \xi_{*i}(t)
   .
   \label{eq:vt_diffeq}
 \end{equation}
 
 
 We can split the histogram into
-a deterministic averaged part, $\langle \eta_i(t) \rangle$,
+a deterministic averaged part, $\langle \xi_i(t) \rangle$,
 and a random fluctuation part, $\zeta_i(t)$,
 %
 \begin{equation}
-  \eta_i(t) =
-  \langle \eta_i(t) \rangle
+  \xi_i(t) =
+  \langle \xi_i(t) \rangle
   +
   \zeta_i(t)
   .
@@ -1015,7 +1015,8 @@ and a random fluctuation part, $\zeta_i(t)$,
 \end{equation}
 %
 The deterministic part can be related
-to an average in an ensemble consists of many similar simulation copies
+to an average in an ensemble consists of
+many copies of similar simulations
 sharing the same schedule $\alpha(t)$
 and the same bias potential at time $t$.
 %
@@ -1029,7 +1030,7 @@ such that
 %with the deterministic part specified by Eq. \eqref{eq:pi_p_V}:
 %
 \begin{align}
-  \langle \eta_i(t) \rangle
+  \langle \xi_i(t) \rangle
   %&=
   %\frac{ \langle h_i(t) } { p_i } \rangle
   &\approx
@@ -1067,10 +1068,10 @@ $$
 Deducting the bin average, we get
 %
 \begin{align}
-  \langle \eta_{*i}(t) \rangle
+  \langle \xi_{*i}(t) \rangle
   \equiv
-  \langle \eta_i(t) \rangle -
-  \sum_{j=1}^n \rho_j \langle \eta_j(t) \rangle
+  \langle \xi_i(t) \rangle -
+  \sum_{j=1}^n \rho_j \langle \xi_j(t) \rangle
   &\approx
   - v_{*i}(t)
   .
@@ -1096,22 +1097,6 @@ much longer than the autocorrelation time.
 For non-white noise,
 the equivalent value of $G_i$ can be approximately obtained as
 $\sum_{t = -\infty}^\infty \langle \zeta_{*i}(t) \, \zeta_{*i}(0) \rangle$.
-%
-\note{More explicitly,
-if the transition matrix of a period, $\tau$,
-is $T^\tau_{ij}$,
-then
-$
-  p_i p_j \langle \zeta_i(t) \, \zeta_j(t') \rangle
-  =
-  \langle h_i(t) \, h_j(t') \rangle
-  -
-  \langle h_i(t) \rangle \, \langle h_j(t') \rangle
-  =
-  T^{t - t'}_{ij} \, \pi_j - \pi_i \, \pi_j.
-$
-}%
-
 
 From Eqs.
 \eqref{eq:vt_diffeq}-\eqref{eq:sh_ave},
@@ -1120,7 +1105,7 @@ we get % a set of decoupled equations
 \begin{equation}
   \dot v_{*i}(t)
   =
-  \alpha(t) \, \left[ \langle \eta_{*i}(t) \rangle + \zeta_{*i}(t) \right]
+  \alpha(t) \, \left[ \langle \xi_{*i}(t) \rangle + \zeta_{*i}(t) \right]
   \approx
   -\alpha(t) \, \left[ v_{*i}(t) - \zeta_{*i}(t) \right]
   ,
@@ -1128,7 +1113,7 @@ we get % a set of decoupled equations
   %\label{eq:dxdt_singlebin}
 \end{equation}
 %
-and the formal solution is % of Eq. \eqref{eq:dxdt_singlebin} is
+and the formal solution is
 %
 \begin{equation}
   v_{*i}(T)
@@ -1205,62 +1190,6 @@ the process,
 while the second term is the action of a free particle.
 Thus, the velocity of $y(q(t))$ should be a constant:
 %
-%We will further demand that
-%%
-%\begin{equation}
-%  \lim_{t \to \infty} q(t) \to \infty.
-%  \label{eq:qt_limit}
-%\end{equation}
-%%
-%Then, for a large $t$,
-%the second term on the right-hand side
-%of Eq. \eqref{eq:xt_solution} can be neglected, and
-%%
-%\begin{align}
-%\left\langle x^2(t) \right\rangle
-%%&=
-%%\int_0^t \int_0^t \dot y(t') \, \dot y(t'')
-%%    \left\langle \xi(t') \xi(t'') \right\rangle dt'' \, dt'
-%%\notag
-%%\\
-%&=
-%\int_0^t \int_0^t
-%  \dot y\bigl( q(t') \bigr) \,
-%  \dot y\bigl( q(t'') \bigr) \,
-%  \kappa(t' - t'') \, dt'' \, dt'.
-%\label{eq:x2t_average_asym}
-%\end{align}
-%
-%By the Euler-Lagrange equation, we get
-%$$
-%\begin{aligned}
-%0
-%&=
-%\frac{d}{dt} \int_0^T
-%  \dot y\bigl( q(t') \bigr) \, \kappa(t' - t) \, dt'
-%\\
-%&= \int_0^T
-%  \ddot y\bigl( q(t') \bigr) \, \kappa(t' - t) \, dt',
-%\end{aligned}
-%$$
-%where we have dropped the boundary terms
-%by assuming Eq. \eqref{eq:kappa_limit}
-%and a large $T$.
-%
-%In fact, we can repeat the process $n$ times, and
-%$$
-%\int_0^t y^{(n)}(t') \, \kappa(t' - \tau) \, dt' = 0,
-%\qquad (n \ge 1)
-%$$
-%
-%In order for this to hold for any $t$,
-%we must have
-%%
-%$
-%\ddot y\bigl( q(t') \bigr) = 0
-%,
-%$
-%or
 \begin{equation}
   \dot y\bigl( q(t) \bigr) = c
   .
@@ -1354,9 +1283,6 @@ The key step comes from the
 projection of the bias potential to the $n$ eigenmodes
 of the updating matrix, $\mathbf w$,
 formed by the relative magnitudes, $w_{ij}$'s.
-%
-%However, we will assume some restrictions and approximations
-%to simplify the discussion.
 
 
 
@@ -1569,8 +1495,8 @@ so that
   \label{eq:ftstar}
 \end{equation}
 %
-which means that the only the only effect
-of bin average deduction is to
+which means that the only effect
+of the bin-average deduction is to
 annihilate the first mode, $\tilde f_0$.
 
 
@@ -1581,7 +1507,7 @@ as
 $$
 {\tilde v}_k(t + 1) =
 {\tilde v}_k(t) + \alpha(t) \, \lambda_k \,
-{\tilde \eta}_k(t)
+{\tilde \xi}_k(t)
 ,
 $$
 or in continuous time, we have, for $k > 0$,
@@ -1589,7 +1515,7 @@ or in continuous time, we have, for $k > 0$,
 \begin{equation}
   \dot{\tilde v}_k(t)
   =
-  \alpha(t) \, \lambda_k \, {\tilde \eta}_k(t)
+  \alpha(t) \, \lambda_k \, {\tilde \xi}_k(t)
   \approx
   -\alpha(t) \, \lambda_k \,
   \bigl[ {\tilde v}_k(t) - {\tilde \zeta}_k(t) \bigr]
@@ -1684,16 +1610,16 @@ where
 and $\Gamma_k$ is computed from
 the autocorrelation function
 of the histogram fluctuation,
-$\kappa_k(t) \equiv \bigl\langle {\tilde \zeta}_{*k}(0)
-\, {\tilde \zeta}_{*k}(t) \bigr\rangle$,
+$\kappa_k(t) \equiv \bigl\langle {\tilde \zeta}_k(0)
+\, {\tilde \zeta}_k(t) \bigr\rangle$,
 as:
 %
 \begin{equation}
   \Gamma_k
   = \sum_{t = -\infty}^\infty \kappa_k(t)
   = \sum_{t = -\infty}^\infty
-  \left\langle {\tilde \zeta}_{*k}(0)
-            \, {\tilde \zeta}_{*k}(t) \right\rangle
+  \left\langle {\tilde \zeta}_k(0)
+            \, {\tilde \zeta}_k(t) \right\rangle
   .
   \label{eq:Gamma_sum}
 \end{equation}
@@ -1706,7 +1632,7 @@ as:
 %
 We may understand Eq. \eqref{eq:Gamma_sum}
 as an attempt of modeling
-a general histogram fluctuation, ${\tilde \zeta}_{*k}(t)$,
+a general histogram fluctuation, ${\tilde \zeta}_k(t)$,
 as an equivalent white noise
 so that the theory can be applicable to
 a general sampling process.
@@ -1722,53 +1648,8 @@ persistent long-range motion
 in sampling complex or glassy systems.
 %
 In Appendix \ref{sec:Gamma},
-we evaluate $\Gamma_k$'s in two special cases,
-and show how to measure them
-from an adaptive FDS simulation.
+we discuss several ways of estimating $\Gamma_k$'s.
 %
-%\begin{equation}
-%  \Err_A(T)
-%  =
-%  \int_0^T \int_0^T
-%  \sum_{k = 1}^{n-1}
-%    \dot y_k\bigl( q(t) \bigr) \,
-%    \dot y_k\bigl( q(t') \bigr) \,
-%    \kappa_k(t - t') \, dt \, dt'
-%  ,
-%  \notag
-%  %\label{eq:error_asym0}
-%\end{equation}
-%%
-%with
-%and
-%$\kappa_k(t - t') \equiv \left\langle \theta_k(t) \, \theta_k(t') \right\rangle$.
-%
-%\begin{align*}
-%  y_k(q')
-%  &\equiv
-%  e^{\lambda_k \, [q' - q(T)]},
-%  \\
-%  \kappa_k(t - t')
-%  &\equiv
-%  \left\langle
-%    \theta_k(t) \, \theta_k(t')
-%  \right\rangle.
-%\end{align*}
-
-
-
-%\subsubsection{White-noise approximation}
-
-
-
-%In the asymptotic regime
-%(i.e. if the simulation period, $T$, is sufficiently long),
-%
-
-
-
-%\subsection{\label{sec:mbin_opta}
-%Optimal schedule for multiple-bin updating schemes}
 
 
 
@@ -1901,7 +1782,8 @@ defined the (square-root) mass function as
     \textstyle\sum_{ k = 1 }^{n - 1}\Gamma_k \, \lambda_k^2 \, e^{-2 \, \lambda_k \, Q}
   }
   .
-\label{eq:mass_func}
+  \notag
+  %\label{eq:mass_func}
 \end{equation}
 %
 In this mechanical analogy,
@@ -1938,10 +1820,9 @@ coincides with the Lagrangian:
 Since the Lagrangian
 does not explicitly depend on time, $t$,
 the Hamiltonian is conserved,
-i.e., the asymptotic error grows
-linearly with time at a rate of $\mathcal L$.
-%
-So we may set
+which means that the asymptotic error grows
+linearly with time at a rate of $\mathcal L$,
+and we may set
 %
 \begin{equation}
   \sqrt{ \mathcal H }
@@ -1959,8 +1840,7 @@ So we may set
 %
 for some positive $C$.
 %
-This serves
-as a generalization of Eq. \eqref{eq:dydt_const}.
+This serves as a generalization of Eq. \eqref{eq:dydt_const}.
 %
 By integrating this equation of motion, we get
 %
@@ -1991,7 +1871,23 @@ the $t = T$ case as
 Thus, we have an implicit equation for $q(t)$,
 and hence the optimal schedule,
 $\alpha(t) = \dot q(t)$.
-
+%
+The minimal asymptotic error is
+%
+\begin{equation}
+  \Err_A(T)
+  =
+  \mathcal L \, T
+  =
+  \frac { C^2 } { T }
+  =
+  \frac 1 T
+  \left(
+    \int_0^{ q(T) } M(Q) \, dQ
+  \right)^2
+  .
+\label{eq:error_asym2}
+\end{equation}
 
 
 
@@ -2029,6 +1925,37 @@ a normalized mass distribution as
 %
 such that
 $\int_0^{q(T)} m(Q) \, dQ = 1$.
+%
+Then from Eqs. \eqref{eq:Lagrangian_const} and \eqref{eq:q_opt},
+we find that for $Q = q(T) - q(t)$,
+%
+\begin{align}
+  m(Q)
+  &=
+  \frac{ 1 }
+       { T \, \alpha(t) }
+  ,
+\label{eq:mQ_invTa}
+  \\
+  \int_Q^{ q(T) }
+    m(Q') \, dQ'
+  &=
+  \frac t T
+  ,
+\label{eq:intmQ_tT}
+\end{align}
+%
+which means that each point,
+$\bigl(t, \alpha(t)\bigr)$,
+on the schedule can be mapped
+to a point,
+$\bigl(Q, m(Q)\bigr)$,
+on the mass distribution,
+such that the ordinate of the latter curve
+gives $1/(T\alpha)$,
+and the area under the curve in the domain, $[Q, q(T)]$,
+is equal to $t/T$,
+as shown in Fig. \ref{fig:massq}.
 %
 
 
@@ -2085,57 +2012,6 @@ $\int_0^{q(T)} m(Q) \, dQ = 1$.
 \end{figure}
 
 
-Then, from Eq. \eqref{eq:q_opt},
-we find that for $Q = q(T) - q(t)$,
-%
-\begin{align}
-  m(Q)
-  &=
-  \frac{ 1 }
-       { T \, \alpha(t) }
-  ,
-\label{eq:mQ_invTa}
-  \\
-  \int_Q^{ q(T) }
-    m(Q') \, dQ'
-  &=
-  \frac t T
-  ,
-\label{eq:intmQ_tT}
-\end{align}
-%
-which means that each point,
-$\bigl(t, \alpha(t)\bigr)$,
-on the schedule can be mapped
-to a point,
-$\bigl(Q, m(Q)\bigr)$,
-on the mass distribution,
-such that the ordinate of the latter curve
-gives $1/(T\alpha)$,
-and the area under the curve in the domain, $[Q, q(T)]$,
-is equal to $t/T$,
-as shown in Fig. \ref{fig:massq}.
-%
-The optimized asymptotic error
-can then be rewritten as
-%
-\begin{equation}
-  \Err_A(T)
-  =
-  \frac { C^2 } { T }
-  =
-  \frac 1 T
-  \left(
-    \int_0^{ q(T) } M(Q) \, dQ
-  \right)^2
-  ,
-\label{eq:error_asym2}
-\end{equation}
-%
-which follows from Eqs.
-\eqref{eq:error_asym_Lagrangian}
-and
-\eqref{eq:Lagrangian_const}.
 
 
 
@@ -2158,13 +2034,12 @@ we find that
 the optimal $q(T)$ satisfies
 %
 \begin{align}
-  a_0 \, M\bigl( q(T) \bigr)
-  +
-  \frac{ 2 }{M\bigl( q(T) \bigr)}
+  \frac{a_0}{2} \, M^2\bigl( q(T) \bigr)
+  &+
   \sum_{k = 1}^{n-1}
   \lambda_k \, \epsilon_k \, e^{-2\lambda_k \, q(T)}
   \notag \\
-  = \frac{2}{T} \int_0^{q(T)} M(Q') \, dQ'
+  &= \frac{ M\bigl( q(T) \bigr) } { T } \int_0^{q(T)} M(Q') \, dQ'
   .
 \label{eq:opt_qT}
 \end{align}
@@ -2358,7 +2233,7 @@ as shown in Fig. \ref{fig:vardep}.
 While the updating scheme alone
 determines $\lambda_k$'s,
 $\Gamma_k$'s depend also on the system
-and the underlying sampling process (MC or MD).
+and the underlying sampling process.
 %
 We have
 
@@ -2447,20 +2322,21 @@ the updating scheme should be stable
 with no negative eigenvalue
 (cf. the stabilization procedure in Appendix \ref{sec:stabilize_wband}).
 
-\item
+\item \label{step:prerun}
 Run a preliminary adaptive FDS simulation
 %using the updating scheme
 with a constant updating magnitude, $a_0$.
 
-\item
-Compute $\Gamma_k$'s from Eq. \eqref{eq:varXt}
-    (cf. Appendix \ref{sec:Gamma_measure}).
+\item \label{step:gamma}
+Estimate $\Gamma_k$'s from Eq. \eqref{eq:varXt}
+    (cf. Appendix \ref{sec:Gamma_measure})
+    as well as the initial bias $\epsilon_k$.
 
-\item
+\item \label{step:qT}
 Compute the optimal $q(T)$ by solving Eq. \eqref{eq:opt_qT}.
-\footnote{Our implementation used a variant of the Newton-Raphson method
-    with bracketing, and the initial value is set to $q(T) = \ln(1+T\,a_0/2)$,
-    but other methods might be more effective\cite{press3rd}.}
+\footnote{We applied the Newton-Raphson method on $\ln q(T)$
+    with the initial value set to $q(T) = \ln(1+T\,a_0/2)$.
+    Other root-finding methods can be more effective\cite{press3rd}.}
 %
 %Since $m(Q)$ is a decreasing function of $Q$,
 %we can start from an interval $[Q_L, Q_R]$
@@ -2478,7 +2354,7 @@ Compute the optimal $q(T)$ by solving Eq. \eqref{eq:opt_qT}.
 %%
 %and set $q(T)$ to $Q_M$.
 
-\item
+\item \label{step:alpha}
 Compute the optimal schedule by
 numerically integrating Eqs. \eqref{eq:q_opt} and \eqref{eq:mint}.
 %
@@ -2516,6 +2392,14 @@ Eqs. \eqref{eq:error_tot},
   \eqref{eq:error_asym2}.
 
 \end{enumerate}
+
+The above procedure is still somewhat idealized.
+%
+The preliminary run in step \ref{step:prerun}
+needs to be sufficiently long to precisely
+estimate the $\Gamma_k$'s and the initial bias, $\epsilon_k$,
+which will be used to compute the optimal $q(T)$
+and schedule later.
 
 
 
@@ -3457,7 +3341,7 @@ will dominate the shifted instantaneous histogram
 %
 \begin{equation}
 \zeta_{*i}(t) \approx
-\eta_{*i}(t)
+\xi_{*i}(t)
 .
 \label{eq:xi_h}
 \end{equation}
@@ -4935,7 +4819,7 @@ resulting the following algorithm.
     $k, l$          &   Mode indices. \\
     $K$             &   Cutoff wave number of bandpass updating schemes.  \\
     $\kappa_k(t)$   &   Autocorrelation function of mode $k$. \\
-    $M(Q)$          &   Mass function, Eq. \eqref{eq:mass_func}.   \\
+    $M(Q)$          &   Mass function.   \\
     $m(Q)$          &   Mass distribution,
                         $m(Q) \equiv M(Q)/\int_0^{ q(T) } M(Q') \, dQ'$.  \\
     $\mu_i$         &   Updating kernel of a homogeneous updating scheme. \\

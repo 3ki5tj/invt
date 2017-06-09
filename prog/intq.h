@@ -69,19 +69,22 @@ static void intq_close(intq_t *intq)
 static double intq_getmassx(intq_t *intq, double dq,
     double *massK)
 {
-  int i, n = intq->n, K = intq->K, pbc = intq->pbc;
+  int k, n = intq->n, K = intq->K, pbc = intq->pbc;
   double lam, y, mass = 0;
 
   *massK = 0;
-  for ( i = 1; i < n; i++ ) {
-    lam = intq->lambda[i];
-    y = intq->gamma[i] * lam * lam * exp( 2 * lam * dq );
+  for ( k = 1; k < n; k++ ) {
+    lam = intq->lambda[k];
+    y = intq->gamma[k] * lam * lam * exp( 2 * lam * dq );
     mass += y;
-    if ( K < 0 || i <= K || (pbc && i >= n - K) ) {
-      *massK += y;
+    if ( K < 0 || k <= K || (pbc && k >= n - K) ) {
+      *massK += y; /* for mode limited optimal schedule */
     }
   }
 
+  if ( mass < 0 || mass > 1e10 ) {
+    fprintf(stderr, "mass %g, dq %g\n", mass, dq);
+  }
   mass = sqrt( mass );
   *massK = sqrt( *massK );
   return mass;
@@ -125,8 +128,9 @@ static double intq_getq(intq_t *intq, double qT)
  * */
 static double intq_getq_adp(intq_t *intq, double qT)
 {
+  const double r = 1.5;
   int i, j, round, m = intq->m;
-  double c0, c, dq, yK = 0, yK1 = 0, dt, del, T = intq->T;
+  double c0, c, qp, dq, yK = 0, yK1 = 0, dt, del, T = intq->T;
 
   /* get the normalization constant */
   c0 = intq_getq(intq, qT);
@@ -140,25 +144,25 @@ static double intq_getq_adp(intq_t *intq, double qT)
     intq_getmassx(intq, intq->qarr[0] - qT, &yK);
     for ( j = 1; j <= m; j++ ) {
       del = 1.0 / (m + 1 - j);
-      dq = (qT - intq->qarr[j-1]) / (m + 1 - j);
+      qp = intq->qarr[j-1];
+      dq = (qT - qp) / (m + 1 - j);
       /* adjust the integration step size */
       for ( i = 0; i < 100; i++ ) {
-        intq_getmassx(intq, intq->qarr[j-1] + dq - qT, &yK1);
+        intq_getmassx(intq, qp + dq - qT, &yK1);
         dt = c0 * (yK + yK1) * 0.5 * dq;
-        //printf("point j %d, i %d, dq %g, dt %g, del %g, slope dq/dt %g | q %g, t %g\n", j, i, dq/(qT-q0), dt/T, del, dq/dt, q0/qT, intq->tarr[j-1]/T);
+        //printf("point j %d, i %d, yK %g, %g, dq %g, dt %g, del %g, slope dq/dt %g | q %g, t %g\n", j, i, yK, yK1, dq/(qT-qp), dt/T, del, dq/dt, qp/qT, intq->tarr[j-1]/T);
         /* skip the adjustment for the last point
          * or if the step is already too small */
         if ( j == m || dq < 1e-3 * qT/m ) {
           break;
-        } else if ( dt < del * T * 0.5 ) {
-          dq *= 2;
-        } else if ( dt > del * T * 2 ) {
-          dq *= 0.5;
+        } else if ( dt < del * T / r && qp + 2*dq < qT ) {
+          dq *= r;
+        } else if ( dt > del * T * r ) {
+          dq /= r;
         } else {
           break;
         }
       }
-      //getchar();
       intq->qarr[j] = intq->qarr[j-1] + dq;
       intq->tarr[j] = intq->tarr[j-1] + dt;
       yK = yK1;
@@ -166,10 +170,10 @@ static double intq_getq_adp(intq_t *intq, double qT)
 
     /* normalize the time array */
     c = intq->T / intq->tarr[m];
+    //printf("round %d, c %g, c0 %g, tarr %g\n", round, c, c0, intq->tarr[m]); getchar();
     c0 *= c;
     for ( j = 1; j <= m; j++ )
       intq->tarr[j] *= c;
-    //printf("round %d, c %g, c0 %g\n", round, c, c0); getchar();
 
     /* stop if the estimated normalization is good */
     if ( fabs(c - 1) < 0.1 ) break;
@@ -481,39 +485,23 @@ static double intq_optqTfunc(intq_t *intq,
 static double intq_optqT(intq_t *intq, double initalpha,
     double tol, int verbose)
 {
-  const double dqmax = 100000;
-  double qT = log(1 + intq->T * initalpha / 2), dq = tol * 2;
+  double qT = log(1 + intq->T * initalpha / 2), dlnq;
   double f = DBL_MAX, df;
-  double qTmin = 0, qTmax = DBL_MAX;
-  double fleft = -DBL_MAX, fright = DBL_MAX;
+  double qTmin = 1e-7, qTmax = 1e7, ql = 1e-7, qr = 1e7;
   int i;
 
-  for ( i = 0; fabs(dq) > tol && fabs(f) > 1e-10; i++ ) {
+  for ( i = 0; fabs(f) > 1e-10; i++ ) {
     f = intq_optqTfunc(intq, initalpha, qT, &df);
 
     /* update the bracket */
-    if ( f > 0 ) {
-      if ( f < fright ) {
-        qTmax = qT;
-        fright = f;
-      }
-    } else {
-      if ( f > fleft ) {
-        qTmin = qT;
-        fleft = f;
-      }
-    }
+    if ( f < 0 && qT > ql ) ql = qT;
+    if ( f > 0 && qT < qr ) qr = qT;
 
-    dq = -f/df;
+    if ( df < fabs(f/qT) ) df = fabs(f/qT);
+    dlnq = -f/df/qT;
 
-    /* limit the change */
-    if ( dq > dqmax ) {
-      dq = dqmax;
-    } else if (dq < -dqmax ) {
-      dq = -dqmax;
-    }
-
-    qT += dq;
+    if ( qT > qTmax && f < 0 || qT < qTmin && f > 0 || fabs(dlnq) < tol )
+      break; /* break if qT is too large and the error is still decreasing */
 
     /* limit qT within the bracket */
     if ( qT > qTmax ) {
@@ -523,9 +511,11 @@ static double intq_optqT(intq_t *intq, double initalpha,
     }
 
     if ( verbose ) {
-      fprintf(stderr, "%d: qT %g -> %g (%g:%g, %g:%g), dq %g, f %g, df %g\n",
-          i, qT, qT + dq, qTmin, fleft, qTmax, fright, dq, f, df);
+      fprintf(stderr, "%d: qT %g -> %g (%g, %g), dlnq %g, f %g, df %g\n",
+          i, qT, qT*exp(dlnq), qTmin, qTmax, dlnq, f, df);
     }
+    qT *= exp(dlnq);
+    if ( qT < ql || qT > qr ) qT = sqrt(ql * qr);
   }
   return qT;
 }
@@ -533,14 +523,13 @@ static double intq_optqT(intq_t *intq, double initalpha,
 
 
 /* evaulation the function
- *   F(qT) = Int {0 to qT} M(Q) dQ - T M(qT) a0 / 2
- *         - T Sum_k err_k lambda_k e^{-2 lambda_k Q} / M(qT)
+ *   F(qT) = M(qT) Int {0 to qT} M(Q) dQ - M^2(qT) a0 T / 2
+ *         - T Sum_k err_k lambda_k e^{-2 lambda_k Q}
  * where
  *   M^2(Q) =  Sum_k Gamma_k lambda_k^2 e^{-2 lambda_k Q}.
  * and the derivative
- *  F'(qT) = M(qT) + (T a0/2) M'(qT))
- *         + 2 T/M(qT) Sum_k xerr_k lambda_k^2 e^{-2 lambda_k Q}
- *         - T M'(qT)/M^2(qT) Sum_k xerr_k lambda_k e^{-2 lambda_k Q}.
+ *  F'(qT) = M^2(qT) + M'(qT) IntM - a0 T M(qT) M'(qT))
+ *         + 2 T Sum_k xerr_k lambda_k^2 e^{-2 lambda_k Q}.
  * where M'(qT) = Sum_k Gamma_k lambda_k^3 e^{-2 lambda_k Q} / M^2(Q)
  * */
 static double intq_optqTfuncx(intq_t *intq, double a0,
@@ -589,8 +578,8 @@ static double intq_optqTfuncx(intq_t *intq, double a0,
 
   dmass = -y/mass;
   T = intq->T;
-  f = mint - T*mass*a0/2 - T*z/mass;
-  *df = mass - T*a0/2*dmass + 2*T*w/mass - dmass*T*z/(mass*mass);
+  f = mass*mint - mass*mass*a0*T/2 - z*T;
+  *df = mass*mass + dmass*mint - a0*T*mass*dmass + 2*w*T;
   return f;
 }
 
@@ -599,62 +588,40 @@ static double intq_optqTfuncx(intq_t *intq, double a0,
 
 /* compute the optimal q(T) such that the initial
  * updating magnitude is initalpha
- * Solving the equation
- *   Int {0 to q(T)} M(Q) dQ - M(q(T)) T a0/2
- *    - Sum_k xerr_k lambda_k e^{-2 lambda_k qT} T / M(qT) == 0
+ * Solving the equation (derivative of the total error)
+ *   M(q(T))/T Int {0 to q(T)} M(Q) dQ - M^2(q(T)) a0/2
+ *    - Sum_k xerr_k lambda_k e^{-2 lambda_k qT} == 0
  * by the Newton-Raphson method
  * */
 static double intq_optqTx(intq_t *intq, double a0,
     double *xerr, double tol, int verbose)
 {
-  const double dqmax = 100000;
-  double qT = log(1 + intq->T * a0), dq = tol * 2;
+  double qT = log(1 + intq->T * a0), dlnq;
   double f = DBL_MAX, df;
-  double qTmin = 1e-6, qTmax = DBL_MAX;
-  double fleft = -DBL_MAX, fright = DBL_MAX;
+  double qTmin = 1e-7, qTmax = 1e7, ql = 0, qr = 1e7;
   int i;
 
-  for ( i = 0; fabs(dq) > tol && fabs(f) > 1e-10; i++ ) {
+  for ( i = 0; fabs(f) > 1e-10; i++ ) {
     f = intq_optqTfuncx(intq, a0, xerr, qT, &df);
+    double f1, df1; f1 = intq_optqTfuncx(intq, a0, xerr, qT+0.01, &df1);
 
     /* update the bracket */
-    if ( f > 0 ) {
-      if ( f < fright ) {
-        qTmax = qT;
-        fright = f;
-      }
-    } else {
-      if ( f > fleft ) {
-        qTmin = qT;
-        fleft = f;
-      }
-    }
-    // TODO:
-    if ( df < 0 ) df = 1.0;
+    if ( f < 0 && qT > ql ) ql = qT;
+    if ( f > 0 && qT < qr ) qr = qT;
 
-    dq = -f/df;
-    //printf("f %g, %g, df %g, %g(%g), dq %g\n", f, f1, df, df1, (f1-f)/0.01, dq); getchar();
+    if ( df < fabs(f/qT) ) df = fabs(f/qT);
+    dlnq = -f/df/qT;
+    printf("f %g, df %g,%g q %g, dlnq %g\n", f, df, (f1-f)/0.01, qT, dlnq); getchar();
 
-    /* limit the change */
-    if ( dq > dqmax ) {
-      dq = dqmax;
-    } else if (dq < -dqmax ) {
-      dq = -dqmax;
-    }
+    if ( qT > qTmax && f < 0 || qT < qTmin && f > 0 || fabs(dlnq) < tol )
+      break; /* break if qT is too large and the error is still decreasing */ 
 
     if ( verbose ) {
-      fprintf(stderr, "%d: qT %g -> %g (%g:%g, %g:%g), dq %g, f %g, df %g\n",
-          i, qT, qT + dq, qTmin, fleft, qTmax, fright, dq, f, df);
+      fprintf(stderr, "%d: qT %g -> %g (%g, %g), dlnq %g, f %g, df %g\n",
+          i, qT, qT*exp(dlnq), qTmin, qTmax, dlnq, f, df);
     }
-    qT += dq;
-    //printf("qT %g, qTmin %g\n", qT, qTmin); getchar();
-
-    /* limit qT within the bracket */
-    if ( qT > qTmax ) {
-      qT = qTmax - 0.1 * (qTmax - qTmin);
-    } else if ( qT < qTmin ) {
-      qT = qTmin;
-    }
+    qT *= exp(dlnq);
+    if ( qT < ql || qT > qr ) qT = sqrt(ql * qr);
     //printf("qT %g, qTmin %g\n", qT, qTmin); getchar();
   }
   return qT;
@@ -946,7 +913,7 @@ static double esterror_optx(double T, double a0,
   /* compute the optimal schedule and error */
   if ( *qT <= 0 ) {
     *qT = intq_optqTx(intq, a0, xerr, qprec, verbose);
-    //printf("qT %g\n", *qT); getchar();
+    printf("qT %g\n", *qT); getchar();
   }
   err = intq_geterrx(intq, a0, xerr, *qT);
 

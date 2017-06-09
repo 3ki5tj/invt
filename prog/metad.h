@@ -418,17 +418,21 @@ __inline static int metad_savegamma(metad_t *metad,
 }
 
 
-
 /* update the accumulator for computing the gamma */
-__inline static void metad_add_varv(metad_t *metad)
+__inline static void metad_varv_add(metad_t *metad)
 {
   cmvar_add(metad->cm, metad->v);
+}
+
+__inline static void metad_varv_clear(metad_t *metad)
+{
+  cmvar_clear(metad->cm);
 }
 
 /* compute the autocorrelation integrals (gamma)
  * from the variance of the bias potential (cmvar) */
 __inline static void metad_getgamma_varv(metad_t *metad, double alpha0,
-    const char *fn)
+    double *gamma, const char *fn)
 {
   int i, n = metad->n;
 
@@ -436,9 +440,9 @@ __inline static void metad_getgamma_varv(metad_t *metad, double alpha0,
   for ( i = 1; i < n; i++ ) {
     double lam = metad->lambda[i];
     if ( lam < 0.1 ) lam = 0.1;
-    metad->gamma[i] = metad->cm->uvar[i]*2/alpha0/lam;
+    gamma[i] = metad->cm->uvar[i]*2/alpha0/lam;
   }
-  if ( fn != NULL ) metad_savegamma(metad, metad->gamma, 1, fn);
+  if ( fn != NULL ) metad_savegamma(metad, gamma, 1, fn);
 }
 
 /* compute the normalized transition matrix */
@@ -507,7 +511,7 @@ __inline static int metad_save_tmat(const double *mat, int n, const char *fn)
 
 /* compute the autocorrelation integrals (gamma) from the transition matrix */
 __inline static void metad_getgamma_tmat(metad_t *metad, double dt,
-    const char *fn)
+    double *gamma, const char *fn)
 {
   int i, j, k, n = metad->n;
   double *mat, *val, *vec, *g, x, gam;
@@ -536,7 +540,7 @@ __inline static void metad_getgamma_tmat(metad_t *metad, double dt,
       }
       gam += g[j] * x * x;
     }
-    metad->tgamma[k] = gam / n;
+    gamma[k] = gam / n;
   }
 
   free(mat);
@@ -544,37 +548,36 @@ __inline static void metad_getgamma_tmat(metad_t *metad, double dt,
   free(vec);
   free(g);
 
-  if ( fn != NULL ) metad_savegamma(metad, metad->tgamma, 0, fn);
+  if ( fn != NULL ) metad_savegamma(metad, gamma, 0, fn);
 }
 
 /* estimate the components of the systematic bias error */
 __inline static double *metad_estxerr(metad_t *metad,
-    double alpha0, double nequil, double *err0)
+    const double *v, double alpha0, double T0, double *err0)
 {
-  int i, n = metad->n;
-  double v, *xerr;
+  int k, n = metad->n;
+  double vk, *xerr;
 
   /* estimate the minimum and maximum */
   //double vmin, vmax; vmin = vmax = metad->vref[0];
   //for ( i = 1; i < n; i++ ) {
-  //  if ( (v = metad->vref[i]) > vmax ) {
-  //    vmax = v;
-  //  } else if ( v < vmin ) {
-  //    vmin = v;
+  //  if ( (vi = v[i]) > vmax ) {
+  //    vmax = vi;
+  //  } else if ( vi < vmin ) {
+  //    vmin = vi;
   //  }
   //}
 
-  getcosmodes(metad->vref, n, metad->vft, metad->costab);
+  getcosmodes(v, n, metad->vft, metad->costab);
 
   xnew(xerr, n);
   *err0 = 0;
-  for ( i = 1; i < n; i++ ) {
-    //double vest = sqrt(8)/(M_PI*M_PI*i*i) * (vmax - vmin);
-    v = metad->vft[i];
-    v *= exp(-metad->lambda[i]*alpha0*nequil);
-    //if (i < 20) printf("i %d, lambda %g, y %g, vest %g, %g\n", i, metad->lambda[i], v, vest, metad->vft[i]);
-    xerr[i] = v * v;
-    *err0 += xerr[i];
+  for ( k = 1; k < n; k++ ) {
+    //double vest = sqrt(8)/(M_PI*M_PI*k*k) * (vmax - vmin);
+    vk = metad->vft[k] * exp(-metad->lambda[k]*alpha0*T0);
+    //if (i < 20) printf("i %d, lambda %g, vk %g, %g\n", i, metad->lambda[i], v, metad->vft[i]);
+    xerr[k] = vk * vk;
+    *err0 += xerr[k];
   }
   //getchar();
   return xerr;
@@ -582,8 +585,9 @@ __inline static double *metad_estxerr(metad_t *metad,
 
 
 /* compute the optimal schedule and its error */
-static void metad_getalphaerr(metad_t *metad, int opta, double T, int gammethod,
-    const char *fngamma, int sampmethod, double alpha0, double T0, double *qT,
+static void metad_getalphaerr(metad_t *metad, int opta, double T,
+    int gammethod, const char *fngamma, int sampmethod,
+    const double *vest, double alpha0, double T0, double *qT,
     double qprec, int nint, const char *fnalpha)
 {
   double *gamma = metad->gamma, t0 = 2/alpha0, y, *xerr0, err0 = 0;
@@ -599,12 +603,13 @@ static void metad_getalphaerr(metad_t *metad, int opta, double T, int gammethod,
   }
 
   /* estimate the initial systematic error */
-  xerr0 = metad_estxerr(metad, alpha0, T0, &err0);
+  xerr0 = metad_estxerr(metad, vest, alpha0, T0, &err0);
 
   y = esterror_eql(alpha0, n, NULL, metad->lambda, gamma);
   metad->eiref = y * y + err0;
 
   if ( opta ) {
+    printf("hahaha\n");
     y = esterror_optx(T, alpha0, xerr0, qT, qprec,
     //y = esterror_opt(T, alpha0, 0, qT, qprec,
         nint, &metad->intq, n, -1, metad->pbc,
@@ -686,7 +691,8 @@ static double metad_geterrav(metad_t *metad, double *erc)
   return metad_geterr(metad, metad->v);
 } 
 
-/* save the bias potential to file */
+/* save the bias potential to file
+ * the histogram-corrected version will also be computed */
 static int metad_save(metad_t *metad, const char *fn)
 {
   FILE *fp;

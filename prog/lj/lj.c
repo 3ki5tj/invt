@@ -8,6 +8,7 @@ double rcdef = 100.0;
 double tp = 3.0;
 int mcblk = 5;
 double delr = 0.01; /* spacing */
+long nstsave = 1000000; /* interval of saving data */
 const char *fnvbias = "vbias.dat";
 const char *fnvref = "vref.dat";
 const char *fnlog = "verr.log";
@@ -73,7 +74,7 @@ static double lj_metroblk(lj_t *lj, metad_t *metad)
 
 /* constant updating magnitude run
  * to compute the gamma values */
-static int gammrun(invtpar_t *m, metad_t *metad, lj_t *lj)
+static int gammrun(invtpar_t *m, metad_t *metad, lj_t *lj, long nsteps)
 {
   long t;
   int ir0, ir;
@@ -82,33 +83,36 @@ static int gammrun(invtpar_t *m, metad_t *metad, lj_t *lj)
   metad->a = m->alpha0;
   ir0 = dist01(metad, lj, &dr);
 
-  fprintf(stderr, "starting constant magnitude %g metadynamics run of %ld steps...\n",
-      metad->a, m->gam_nsteps);
-  for ( t = 1; t <= m->gam_nsteps; t++ ) {
+  fprintf(stderr, "starting gamma run of %ld steps (updating magnitude %g)...%20s\n",
+      nsteps, metad->a, "");
+  metad_varv_clear(metad);
+  metad_clearav(metad); /* clear the average correction data */
+  for ( t = 1; t <= nsteps; t++ ) {
     sacc += lj_metroblk(lj, metad);
     ir = dist01(metad, lj, &dr);
     metad_updatev(metad, ir);
+    metad_updateav(metad, ir); /* for the average histogram-corrected bias potential */
     metad->tmat[ir*metad->n + ir0] += 1;
     ir0 = ir;
-    if ( t % 10 == 0 )
-      metad_add_varv(metad);
-    if ( t % 10000 == 0 ) fprintf(stderr, "t %ld/%ld = %5.2f%%, acc %.2f%% \r", t, m->gam_nsteps, 100.*t/m->gam_nsteps, 100*sacc/t);
-    if ( t % 1000000 == 0 || t == m->gam_nsteps ) {
-      metad_getgamma_varv(metad, m->alpha0, "gamma.dat");
-      metad_getgamma_tmat(metad, 1, "tgamma.dat");
+    if ( t % 100 == 0 )
+      metad_varv_add(metad);
+    if ( t % 10000 == 0 ) fprintf(stderr, "t %ld/%ld = %5.2f%%, acc %.2f%% \r", t, nsteps, 100.*t/nsteps, 100*sacc/t);
+    if ( t % nstsave == 0 || t == nsteps ) {
+      metad_getgamma_varv(metad, m->alpha0, metad->gamma, "gamma.dat");
+      metad_getgamma_tmat(metad, 1, metad->tgamma, "tgamma.dat");
+      metad_save(metad, fnvbias);
     }
   }
-  metad_save(metad, fnvbias);
   return 0;
 }
 
 
 /* production run
- * `prod` use inverse-time or optimal schedule
+ * `fixa` use a fixed updating magnitude
  * `*hfl` is the histogram fluctuation
  * `*erc` is the error of the average histogram-corrected bias potential */
 static double prodrun(invtpar_t *m, metad_t *metad, lj_t *lj,
-    int prod, long nsteps, const char *fn, double *hfl, double *erc)
+    int fixa, long nsteps, const char *fn, double *hfl, double *erc)
 {
   int ir;
   long t;
@@ -118,11 +122,13 @@ static double prodrun(invtpar_t *m, metad_t *metad, lj_t *lj,
   t0 = 2/metad->a;
   metad_clearh(metad);
   metad_clearav(metad); /* clear the average correction data */
+  //if ( fixa )
+  //  metad_varv_clear(metad);
   *erc = 0;
   for ( t = 1; t <= nsteps; t++ ) {
     lj_metroblk(lj, metad);
     ir = dist01(metad, lj, &dr);
-    if ( prod ) { /* use the optimal schedule */
+    if ( !fixa ) { /* use the optimal schedule */
       if ( m->opta ) {
         //double a0 = intq_interpa(metad->intq, (double) t);
         metad->a = intq_evala(metad->intq, (double) t);
@@ -132,17 +138,21 @@ static double prodrun(invtpar_t *m, metad_t *metad, lj_t *lj,
     }
     metad_updatev(metad, ir);
     metad_updateav(metad, ir); /* for the average histogram-corrected bias potential */
-    if ( t % 1000000 == 0 || t == nsteps )
+    //if ( fixa && t % 100 == 0 )
+    //  metad_add_varv(metad);
+    if ( t % nstsave == 0 || t == nsteps )
       metad_save(metad, fn);
     if ( t % 10000 == 0 || t == nsteps ) {
       *hfl = metad_hfl(metad, -1);
       err = metad_geterrav(metad, erc);
       fprintf(stderr, "%s t %8ld/%8ld = %5.2f%%, a %.3e, err %9.3e/%9.3e, "
                       "hist. fl %9.3e/%5.3f%% %g %20s\r",
-          (prod ? "prod." : "prep."), t, nsteps, 100.*t/nsteps,
+          (fixa ? "fix-a" : "var-a"), t, nsteps, 100.*t/nsteps,
           metad->a, err, *erc, (*hfl) * (*hfl), 100 * (*hfl), metad->avcnt," ");
     }
   }
+  //if ( fixa )
+  //  metad_getgamma_varv(metad, m->alpha0, metad->tgamma, "gam.dat");
   *hfl *= *hfl;
   return err;
 }
@@ -203,20 +213,28 @@ static int work(invtpar_t *m)
   ir = dist01(metad, lj, &dr);
   fprintf(stderr, "n %d, rmax %g, r %d/%g, err trunc %g, mode %d\n", n, metad->xmax, ir, dr, errtrunc, kcerr);
 
-  /* constant magnitude run */
+  /* constant magnitude run, to activate, use the options
+   * --gam=varv --gamnsteps=10000000 */
   if ( m->gammethod != GAMMETHOD_NONE
     && m->gammethod != GAMMETHOD_LOAD ) {
-    prodrun(m, metad, lj, 0, m->nequil, "vg.dat", &hfl, &errc); /* equilibration */
-    gammrun(m, metad, lj);
+    prodrun(m, metad, lj, 1, m->nequil, "vg.dat", &hfl, &errc); /* equilibration */
+    gammrun(m, metad, lj, m->gam_nsteps);
+    /* compute the optimal schedule based the histogram-corrected
+     * bias potential obtained from the gamma run */
+    metad_getalphaerr(metad, m->opta, (double) m->nsteps,
+        m->gammethod, m->fngamma, m->sampmethod,
+        metad->vc, m->alpha0, (double) m->nequil, &m->qT,
+        m->qprec, m->alpha_nint, "alpha_vc.dat");
   }
 
   /* compute the optimal schedule and the error */
-  metad_getalphaerr(metad, m->opta, (double) m->nsteps, m->gammethod,
-      m->fngamma, m->sampmethod, m->alpha0, (double) m->nequil, &m->qT,
+  metad_getalphaerr(metad, m->opta, (double) m->nsteps,
+      m->gammethod, m->fngamma, m->sampmethod,
+      metad->vref, m->alpha0, (double) m->nequil, &m->qT,
       m->qprec, m->alpha_nint, m->fnalpha);
 
   /* multiple production runs */
-  {
+  if ( m->ntrials > 0 ) {
     int i, itr;
     ave_t ei[1], ef[1], eci[1], ecf[1], fi[1], ff[1];
     double erri, errf, erci, ercf, hfli, hflf;
@@ -241,13 +259,13 @@ static int work(invtpar_t *m)
     fclose(fplog);
     for ( itr = 0; itr < m->ntrials; itr++ ) {
       for ( i = 0; i < n; i++ ) metad->v[i] = 0; // v0[i];
-      erri = prodrun(m, metad, lj, 0, m->nequil, "vi.dat", &hfli, &erci);
+      erri = prodrun(m, metad, lj, 1, m->nequil, "vi.dat", &hfli, &erci);
       ave_add(ei, erri);
       ave_add(fi, hfli);
       ave_add(eci, erci);
       cmvar_add(cmi, metad->v);
       cmvar_add(cci, metad->vc);
-      errf = prodrun(m, metad, lj, 1, m->nsteps, "vf.dat", &hflf, &ercf);
+      errf = prodrun(m, metad, lj, 0, m->nsteps, "vf.dat", &hflf, &ercf);
       ave_add(ef, errf);
       ave_add(ff, hflf);
       ave_add(ecf, ercf);

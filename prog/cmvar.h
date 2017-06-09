@@ -15,27 +15,32 @@ typedef struct {
   double *costab;
 } cmvar_t;
 
-__inline static cmvar_t *cmvar_open(int n, int pbc)
+__inline static void cmvar_clear(cmvar_t *cm)
 {
-  cmvar_t *cm;
   int i;
-
-  xnew(cm, 1);
-  cm->n = n;
-  cm->costab = mkcostab(n, pbc);
   cm->cnt = 0;
-  xnew(cm->u, n);
-  xnew(cm->usum, n);
-  xnew(cm->usqr, n);
-  xnew(cm->uave, n);
-  xnew(cm->uvar, n);
-  for ( i = 0; i < n; i++ ) {
+  for ( i = 0; i < cm->n; i++ ) {
     cm->u[i] = 0;
     cm->usum[i] = 0;
     cm->usqr[i] = 0;
     cm->uave[i] = 0;
     cm->uvar[i] = 0;
   }
+}
+
+__inline static cmvar_t *cmvar_open(int n, int pbc)
+{
+  cmvar_t *cm;
+
+  xnew(cm, 1);
+  cm->n = n;
+  cm->costab = mkcostab(n, pbc);
+  xnew(cm->u, n);
+  xnew(cm->usum, n);
+  xnew(cm->usqr, n);
+  xnew(cm->uave, n);
+  xnew(cm->uvar, n);
+  cmvar_clear(cm);
   return cm;
 }
 

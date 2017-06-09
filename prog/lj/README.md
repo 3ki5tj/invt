@@ -42,8 +42,14 @@ cp vtrunc.dat dr0.01/rho0.1/vref.dat
 
 ### Compute the gamma value
 
+Single-bin (WL)
 ```
-./lj --try=0 --gamnsteps=100000000 --gam=varv
+./lj --try=0 --nequil=100000 --gamnsteps=10000000 --gam=varv
+```
+
+Gaussian
+```
+./lj --try=0 --nequil=1000000 --gamnsteps=10000000 --gam=varv --sig=0.5 --opta
 ```
 
 ### Compute the reference value, `vref.dat`
