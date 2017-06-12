@@ -555,7 +555,7 @@ static double intq_optqTx(intq_t *intq, double a0,
     //printf("f %g, df %g,%g q %g, dlnq %g\n", f, df, (f1-f)/0.01, qT, dlnq); getchar();
 
     if ( qT > qTmax*0.1 && f < 0 || qT < qTmin*10 && f > 0 || fabs(dlnq) < tol )
-      break; /* break if qT is too large and the error is still decreasing */ 
+      break; /* break if qT is too large and the error is still decreasing */
 
     if ( verbose ) {
       fprintf(stderr, "%d: qT %g -> %g (%g, %g), dlnq %g, f %g, df %g\n",
@@ -751,7 +751,7 @@ __inline static int intq_save(intq_t *intq,
 {
   FILE *fp;
   int i, id, m = intq->m;
-  double a1, q1, t, a, q, dinva, T, qT;
+  double t, a, q, dinva, T, qT;
 
   if ( fn == NULL || fn[0] == '\0' ) {
     return -1;
@@ -770,9 +770,9 @@ __inline static int intq_save(intq_t *intq,
   /* differentiate 1/a(t) */
   intq_diffinva(intq);
 
-  fprintf(fp, "# %d %d %g %g %g %g %g %g\n",
+  fprintf(fp, "# %d %d %g %g %g %g %.10f %g %g\n",
       m, intq->n, intq->E, intq->Ea, intq->Er,
-      T, qT, t0);
+      T, qT, t0, c);
   for ( i = 0; i <= m; i++ ) {
     if ( resample ) {
       t = T * i / m;
@@ -786,11 +786,8 @@ __inline static int intq_save(intq_t *intq,
       q = intq->qarr[i];
       dinva = intq->dinva[i];
     }
-    a1 = c / (t + t0);
-    q1 = c * log( 1 + t / t0 );
-    fprintf(fp, "%12.3f\t%20.8e\t%12.6f\t%20.8e\t"
-        "%20.8e\t%12.6f\t%20.8e\n",
-        t, a, q, dinva, a1, q1, 1.0 / c);
+    fprintf(fp, "%12.3f\t%20.8e\t%12.6f\t%20.8e\n",
+        t, a, q, dinva);
   }
 
   fclose(fp);

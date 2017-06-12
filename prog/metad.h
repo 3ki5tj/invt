@@ -673,10 +673,12 @@ __inline static void metad_clearav(metad_t *metad)
 __inline static void metad_calcav(metad_t *metad, double *vc)
 {
   int i, n = metad->n;
-  double cnt = metad->avcnt;
+  double cnt = metad->avcnt, y;
   if ( cnt > 0 ) {
     for ( i = 0; i < n; i++ ) {
-      vc[i] = metad->vav[i]/cnt + metad->hav[i]*n/cnt - 1;
+      y = metad->hav[i] * n / cnt;
+      y = ( y > 0 ) ? log(y) : y - 1;
+      vc[i] = metad->vav[i]/cnt + y;
     }
   } else {
     for ( i = 0; i < n; i++ ) vc[i] = 0;
@@ -688,7 +690,7 @@ static double metad_geterrav(metad_t *metad, double *erc)
   metad_calcav(metad, metad->vc);
   *erc = metad_geterr(metad, metad->vc);
   return metad_geterr(metad, metad->v);
-} 
+}
 
 /* save the bias potential to file
  * the histogram-corrected version will also be computed */
@@ -716,7 +718,7 @@ static int metad_save(metad_t *metad, const char *fn)
     fprintf(fp, "%g %g %g %g %g", x,
         metad->v[i] + dv, metad->h[i], metad->vref[i], metad->vft[i]);
     if ( metad->avcnt > 0 ) {
-      fprintf(fp, " %g %g %g", 
+      fprintf(fp, " %g %g %g",
           metad->vav[i]/avcnt + dvav, metad->hav[i]/avcnt*n - 1, metad->vc[i]+dvav);
     }
     fprintf(fp, "\n");
