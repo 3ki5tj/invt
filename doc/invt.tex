@@ -2785,27 +2785,50 @@ collected from the equilibration phase of each individual run.
 
 As shown in Table 1,
 both the inverse-time and optimal schedule reduced
-the error significantly.
+the error significantly,
+and the errors roughly matched the predicted values
+calculated from the precomputed $\Gamma_k$'s and $\epsilon_k$'s.
 %
-The Gaussian scheme appeared to be superier
+The Gaussian scheme appeared to be superior
 to the single-bin scheme in the $\varrho^* = 0.1$ case,
-but not in the $\varrho^* = 0.8$ case,
-and in the latter case,
-an overly large width of the Gaussian
-was counterproductive.
+but not in the $\varrho^* = 0.8$ case.
 %
+In either case, there was an optimal width of Gaussian
+(which was $\sigma = 0.37$ for $\varrho^* = 0.1$
+or $0.07$ for $\varrho^* = 0.8$),
+an overly large width was counterproductive.
+%
+In Figure \ref{fig:lj_xerr},
+we plotted the error components against the eigenmode index
+for the Gaussian updating scheme of width $\sigma = 0.2$.
+%
+While the Gaussian updating scheme effectively suppressed
+the initial errors for short-range (large $k$) modes,
+it also slowed down the reduction of errors of these modes.
+%
+As a result, the final errors of the long-range (small $k$) modes
+were larger than those from the single-bin scheme.
+%
+For the Gaussian updating scheme
+the inverse-time schedule tended to reduce the updating magnitude too rapid
+leaving a hump on the error profile for the middle-range modes.
+%
+The optimal schedule improved over the inverse-time schedule
+and produced a flatter profile for the final error.
 
 
 \begin{table}[h]\footnotesize
   \caption{\label{tab:error_LJ}
     Error of the LJ system.
-    The numbers in parentheses are predicted values;
+    The numbers have been averaged over multiple runs,
+    and the numbers in parentheses are predicted values;
     $\Err_\mathrm{init.}$
     denotes the error
     at the end of the equilibration phase with a constant magnitude;
     $\Err_\mathrm{final}$
     denotes the error at the end of the production phase under
     either the inverse-time ($1/t$) or optimal schedule (opt.).
+    \note{The reference values can be found on the second line of \texttt{verr.log}.}
   }
   \setlength{\tabcolsep}{2pt}
   \renewcommand\arraystretch{1.4}
@@ -2829,32 +2852,32 @@ was counterproductive.
     \\
     %\hline
     $\sigma=0.1$ & opt.
-    & $7.6\times10^{-3}$
-    & $3.2\times10^{-5}$
+    & $7.6(8.9)\times10^{-3}$
+    & $3.2(3.9)\times10^{-5}$
     \\
     %\hline
     $\sigma=0.2$ & $1/t$
-    & $6.5\times10^{-3}$
-    & $4.0\times10^{-5}$
+    & $6.5(7.8)\times10^{-3}$
+    & $4.0(4.8)\times10^{-5}$
     \\
     %\hline
     $\sigma=0.2$ & opt.
-    & $7.0\times10^{-3}$
-    & $2.5\times10^{-5}$
+    & $7.0(7.8)\times10^{-3}$
+    & $2.5(2.8)\times10^{-5}$
     \\
     %\hline
     $\sigma=0.5$ & $1/t$
-    & $5.5\times10^{-3}$
-    & $3.2\times10^{-5}$
+    & $5.5(6.6)\times10^{-3}$
+    & $3.2(3.8)\times10^{-5}$
     \\
     %\hline
     $\sigma=0.5$ & opt.
-    & $5.8\times10^{-3}$
-    & $2.6\times10^{-5}$
+    & $5.8(6.6)\times10^{-3}$
+    & $2.6(3.0)\times10^{-5}$
     \\
     %\hline
     $K=20$ & $1/t$
-    & $8.1(9.0)\times10^{-3}$
+    & $8.1(8.9)\times10^{-3}$
     & $1.6(1.8)\times10^{-5}$
     \\
     \hline
@@ -2871,28 +2894,28 @@ was counterproductive.
     \\
     %\hline
     $\sigma=0.1$ & opt.
-    & $1.2$
-    & $2.8\times10^{-3}$
+    & $1.2(1.3)$
+    & $2.8(2.8)\times10^{-3}$
     \\
     %\hline
     $\sigma=0.2$ & $1/t$
-    & $1.3$
-    & $3.4\times10^{-3}$
+    & $1.3(1.2)$
+    & $3.4(3.2)\times10^{-3}$
     \\
     %\hline
     $\sigma=0.2$ & opt.
-    & $1.2$
-    & $3.1\times10^{-3}$
+    & $1.2(1.2)$
+    & $3.1(2.9)\times10^{-3}$
     \\
     %\hline
     $\sigma=0.5$ & $1/t$
-    & $0.95$
-    & $9.8\times10^{-3}$
+    & $0.9(0.9)$
+    & $9.8(8.0)\times10^{-3}$
     \\
     %\hline
     $\sigma=0.5$ & opt.
-    & $1.0$
-    & $5.8\times10^{-3}$
+    & $1.0(0.9)$
+    & $5.8(5.4)\times10^{-3}$
     \\
     %\hline
     $K=20$ & $1/t$
@@ -2902,6 +2925,29 @@ was counterproductive.
     \hline
   \end{tabular}
 \end{table}
+
+
+
+\begin{figure}[h]
+\begin{center}
+  \makebox[\linewidth][c]{
+    \includegraphics[angle=0, width=1.0\linewidth]{fig/lj_xerr.pdf}
+  }
+  \caption{
+    \label{fig:lj_xerr}
+    Error components for the FDS simulation
+    using the Gaussian updating scheme with $\sigma = 0.2$.
+    The optimal schedule (opt.) is more effective
+    in reducing the errors of middle-range modes
+    than the inverse-time ($1/t$) schedule.
+    The points are joined as a guide to the eyes.
+  }
+\end{center}
+\end{figure}
+
+
+
+
 
 
 
@@ -3528,7 +3574,7 @@ as a substitute of the inverse-time schedule.
 
 
 \section{\label{sec:Gamma_measure}
-Measurement of the integrals of the autocorrelation function
+Measurement of the integrals of the autocorrelation functions of the eigenmodes
 }
 
 
@@ -3644,8 +3690,7 @@ Eigenvalues and eigenvectors}
 
 
 
-It is natural to first introduce homogeneous updating schemes
-for a periodic variable\cite{dama2014},
+For a periodic variable\cite{dama2014},
 the updating matrix, $\mathbf w$,
 assumes the following form
 %
@@ -4146,11 +4191,7 @@ to satisfy the constraint, $\mu_n = 0$.
 
 
 
-\subsection{Examples}
-
-
-
-\subsubsection{Gaussian updating scheme}
+\subsection{Gaussian updating scheme}
 
 
 
@@ -4268,7 +4309,7 @@ and inversely computing the kernel using Eq. \eqref{eq:mu_from_lambda}.
 
 
 
-\subsubsection{\label{sec:homo_bandpass}
+\subsection{\label{sec:homo_bandpass}
 Bandpass updating schemes}
 
 

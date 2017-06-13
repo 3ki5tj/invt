@@ -59,7 +59,7 @@ static void metad_prepwin(metad_t *metad,
   xnew(metad->win, n);
   if ( gaussig > 0 ) {
     mkgauswin(gaussig, n, pbc, metad->win, &metad->winn);
-  } else if ( kc >= 0 ) {
+  } else if ( kc > 0 ) {
     mksincwin(kc, n, pbc, metad->win, &metad->winn);
   } else {
     /* copy the user window */
@@ -351,7 +351,12 @@ __inline static double metad_getx(metad_t *metad, int i)
   }
 }
 
-/* compute the mode-trunction error */
+/* estimate the mode-trunction error
+ * This routine should work for the bandpass updating scheme
+ * for estimating the bias of ignoring certain Fourier modes
+ * Since the Gaussian updating scheme does not have
+ * a clear cutoff, the routine will only give rough
+ * estimate for the truncation error */
 __inline static double metad_errtrunc(metad_t *metad,
     double *v, int *kc, const char *fntrunc)
 {

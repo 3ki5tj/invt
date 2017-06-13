@@ -164,10 +164,10 @@ static void invtpar_init(invtpar_t *m)
   m->fnwin[0] = '\0';
   m->fnwinmat[0] = '\0';
 
-  m->kc = -1; /* disable the bandpass scheme */
+  m->kc = 0; /* disable the bandpass scheme */
 
   m->initrand = 0;
-  m->errkc = -1;
+  m->errkc = 0;
   m->sampmethod = 0;
   m->mvsize = 1.0;
   m->tcorr = 1.0; /* only used for the Ornstein-Uhlenbeck process */

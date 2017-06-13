@@ -139,26 +139,26 @@ static void mkgauswin(double sig, int n, int pbc, double *win, int *winn)
 static void mksincwin(int km, int n, int pbc, double *win, int *winn)
 {
   int i;
-  double k2p1 = km * 2 + 1, ang, y;
+  double k2m1 = km * 2 - 1, ang, y;
 
   *winn = pbc ? (n/2 + 1) : n;
 
   if ( pbc ) {
-    /* win[i] = sin((2*km+1)*i*Pi/n)/sin(i*Pi/n)/n; */
-    win[0] = 1.0 * k2p1 / n;
+    /* win[i] = sin((2*km-1)*i*Pi/n)/sin(i*Pi/n)/n; */
+    win[0] = 1.0 * k2m1 / n;
     for ( i = 1; i < *winn; i++ ) {
       ang = i * M_PI / n;
-      y = sin(k2p1 * ang);
+      y = sin(k2m1 * ang);
       win[i] = y / sin(ang) / n;
     }
   } else {
-    /* win[i] = {(-1)^(n+km+i-1)+
-     *         sin[(2*km+1)*i*Pi/2/n]/sin(i*Pi/2/n)}/(2*n); */
-    win[0] = ((((n + km) % 2) ? 1 : -1) + k2p1)/ (2.0 * n);
+    /* win[i] = {(-1)^(n+km+i)+
+     *         sin[(2*km-1)*i*Pi/2/n]/sin(i*Pi/2/n)}/(2*n); */
+    win[0] = ((((n + km) % 2) ? -1 : 1) + k2m1)/ (2.0 * n);
     for ( i = 1; i < n; i++ ) {
       ang = i * M_PI / (2 * n);
-      y = sin(k2p1 * ang);
-      win[i] = ( ((n + km + i) % 2 ? 1 : -1)
+      y = sin(k2m1 * ang);
+      win[i] = ( ((n + km + i) % 2 ? -1 : 1)
              + y / sin(ang) ) / (2 * n);
     }
   }
@@ -390,7 +390,7 @@ __inline static double *prepwin(double *lambda, int n,
 
   if ( gaussig > 0 ) {
     mkgauswin(gaussig, n, pbc, win, winn);
-  } else if ( kc >= 0 ) {
+  } else if ( kc > 0 ) {
     mksincwin(kc, n, pbc, win, winn);
   } else {
     /* copy the user window */
