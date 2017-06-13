@@ -1,5 +1,6 @@
 \documentclass[reprint, superscriptaddress, floatfix]{revtex4-1}
 \usepackage{amsmath}
+\usepackage{amsfonts}
 \usepackage{mathtools}
 \usepackage{upgreek}
 \usepackage[table,usenames,dvipsnames]{xcolor}
@@ -533,7 +534,7 @@ accumulated from the simulation as
 %allows us to correct $u_i$ as
 %
 \begin{equation}
-  u^\mathrm{corr}_i
+  \hat u_i
   =
   u_i
   +
@@ -549,7 +550,7 @@ accumulated from the simulation as
     &\propto p^*_i \, e^{-u_i},
     \\
     p_i
-    &\propto p^*_i \, e^{-v^{0, \mathrm{corr}}_i}.
+    &\propto p^*_i \, e^{-\hat u_i}.
   \end{aligned}
   $$
 }
@@ -900,11 +901,11 @@ $\pmb \rho = (\rho_1, \dots, \rho_n)$
 Below we will use the notations, $f_{*i}$ and $\bav{f}$,
 for an arbitrary variable, $f_i$.
 %
-Note that the distribution, $\pmb\rho$, is arbitrary
-and independent of
+Note that the distribution, $\pmb\rho$,
+can be independent of
 the target distribution,
 $\mathbf p = (p_1, \dots, p_n)$,
-although it is usually flat.\footnote{In
+and chosen for convenience.\footnote{In
 well-tempered metadynamics,
 $\mathbf p$ is an attenuated version of
 $\mathbf p^*$\cite{
@@ -924,26 +925,6 @@ The total error is given by
 \end{equation}
 
 
-
-
-%Although the above error weighting distribution, $\pmb\rho$,
-%is usually flat,
-%i.e. $\rho_i \equiv 1/n$,
-%in practice,
-%a non-flat distribution
-%is sometimes more convenient in analyzing
-%some multiple-bin updating schemes later on.
-%
-%
-%From Eqs. \eqref{eq:x_def} and \eqref{eq:vav_def},
-%we have
-%
-%\begin{equation}
-%  \sum_{i = 1}^n \rho_i \, v_{*i}(t) = 0
-%  .
-%\label{eq:rhox_sum}
-%\end{equation}
-%
 
 
 \subsubsection{\label{sec:sbin_diffeq}
@@ -2333,11 +2314,12 @@ Estimate $\Gamma_k$'s from Eq. \eqref{eq:varXt}
     as well as the initial bias $\epsilon_k$.
 
 \item \label{step:qT}
-Compute the optimal $q(T)$ by solving Eq. \eqref{eq:opt_qT}.
-\footnote{We solved the equation for $\ln q(T)$ using
-    a variant of the Newton-Raphson method
-    with the bisection method as a fallback.
-    The initial value is set to $q(T) = \ln(1+T\,a_0/2)$.}
+Compute the optimal value of $q(T)$ by solving Eq. \eqref{eq:opt_qT}.
+%
+We implemented a variant of the Newton-Raphson method\cite{press3rd}
+(for $\ln q(T)$ to avoid negative values)
+with the bisection method\cite{press3rd} as a fallback.
+The initial value is set to $q(T) = \ln(1+T\,a_0/2)$.
 %
 %Since $m(Q)$ is a decreasing function of $Q$,
 %we can start from an interval $[Q_L, Q_R]$
@@ -2357,29 +2339,31 @@ Compute the optimal $q(T)$ by solving Eq. \eqref{eq:opt_qT}.
 
 \item \label{step:alpha}
 Compute the optimal schedule by
-  numerically integrating Eqs. \eqref{eq:q_opt} and \eqref{eq:mint}.\footnote{
-  We have used the trapezoidal rule
-  on a $N+1$ point logarithm grid over $[0, q(T)]$:
-    $q_{[i]} = \bigl(q(T) + 1\bigr) - \bigl(q(T)+1\bigr)^{1-i/N}$,
-  where $i = 0, \dots, N$, and we chose $N=20000$.
+  numerically integrating Eqs. \eqref{eq:q_opt} and \eqref{eq:mint}.
 %
-The integration yields a curve $q(t)$ on the grid points,
-$(q_{[i]}, t_{[i]})$.
+To handle Gaussian updating schemes more effectively,
+  we have chosen the $\mathcal N+1$ grid points over $[0, q(T)]$ to be given by
+  $q_{[i]} = \bigl(q(T) + 1\bigr) - \bigl(q(T)+1\bigr)^{1-i/\mathcal N}$,
+  where $i = 0, \dots, \mathcal N$, and we chose $\mathcal N=20000$.
 %
-The updating magnitude can then be obtained from numerical differentiation:
-    $\alpha_i = (1 - e^{-\lambda_1 \, \hat \alpha_i})/\lambda_1$
-    and
-    $\hat \alpha_i \equiv (q_{[i+1]} - q_{[i-1]}) / (t_{[i+1]} - t_{[i-1]})$,
-with
-$q_{[ -1]} \equiv 0$,
-$q_{[N+1]} \equiv q(T)$,
-$t_{[ -1]} \equiv 0$, and
-$t_{[N+1]} \equiv T$.
+The curve $q(t)$ is then integrated
+  using the trapezoidal rule\cite{press3rd},
+  resulting in a list of values, $\bigl(q_{[i]}, t_{[i]} \bigr)$.
+%
+We then compute the updating magnitude by numerical differentiation:
+  $\alpha_i = (1 - e^{-\lambda_1 \, \hat \alpha_i})/\lambda_1$
+  and
+  $\hat \alpha_i \equiv (q_{[i+1]} - q_{[i-1]}) / (t_{[i+1]} - t_{[i-1]})$,
+  with
+  $q_{[ -1]} \equiv 0$,
+  $q_{[N+1]} \equiv q(T)$,
+  $t_{[ -1]} \equiv 0$, and
+  $t_{[N+1]} \equiv T$.
 %
 The resulting values of $(t_{[i]}, \alpha_{[i]})$
-can be linear interpolated
-to get the updating magnitude, $\alpha(t)$, at any simulation time, $t$.
-}
+  can be linear interpolated
+  to get the updating magnitude, $\alpha(t)$, at any simulation time, $t$.
+
 
 \item
   Compute the total error $\Err(T)$ from
@@ -2391,15 +2375,19 @@ Eqs. \eqref{eq:error_tot},
 
 \end{enumerate}
 
-The above procedure is still somewhat idealized.
+The above procedure is not always necessary.
 %
-The preliminary run in step \ref{step:prerun}
-needs to be sufficiently long to precisely
-estimate the $\Gamma_k$'s and the initial bias, $\epsilon_k$
-(for which one may use the histogram-corrected bias potential).
+As shown below, for a class of bandpass updating schemes,
+  which resemble the Gaussian updating schemes,
+  the asymptotically optimal schedule
+  is simply given by the inverse-time schedule, Eq. \eqref{eq:alpha_invt1}.
 %
-However,
-
+For these updating schemes,
+  the preliminary run with a constant updating magntiude
+  can be replaced by the WL-style stagewise reduction
+  until the updating magnitude falls under
+  the value given the inverse-time prescription\cite{
+    belardinelli2007, *belardinelli2007jcp, *belardinelli2008, *belardinelli2016}.
 
 
 
@@ -2410,7 +2398,7 @@ Comparison of updating schemes}
 Now that we can compute the optimal schedule
 for a given updating scheme,
 we will turn to the problem of finding
-optimal updating schemes below.
+optimal updating schemes.
 
 
 \subsubsection{\label{sec:optWL}
@@ -2741,36 +2729,171 @@ Numerical results}
 \subsection{\label{sec:lj}Lennard-Jones}
 
 
-100 particle
+Our first test system is a Lennard-Jones fluid of $N=100$ particles,
+and we wish to compute the PMF along the distance of two special particles, $r$.
+%
+The two special particles are mutually non-interacting
+but interact normally with other particles
+(they have placed on an axis parallel to a side of the cubic box),
+and the intrinsic distribution, $p^*$, is often referred to as
+the cavity distribution function, $y(r)$.
+%
+We will assume reduced units in this calculation
+%
+The reference values were pre-calculated from a long simulation.
+%
+We used the Metropolis algorithm for configuration sampling\cite{frenkel}.
+%
+Each step consists of five MC trials of displacing a random particle,
+one for one of the two special particles,
+and the rest four for the other particles.
+%
+The MC displacement along each dimension is uniform,
+with the size given by $0.1/\varrho^*$ to ensure the acceptance ratio is around 50\%,
+where $\varrho^*$ is the reduced number density.
+
+
+The PMF was calculated from $r = 0$ to half of the box dimension
+on a grid of size $\Delta r = 0.01$ in reduced units.
+%
+Two densities were tried, $\varrho^* = 0.1$ and $0.8$,
+and the numbers of bins were $500$ and $250$, respectively.
+%
+We tested the single-bin, Gaussian, and bandpass updating schemes.
+%
+Each simulation had an ``equilibration'' phase
+of $10^7$ steps with a fixed updating magnitude, $a_0 = 10^{-4}$,
+followed by a production phase
+with updating magnitude given by
+either the inverse-time or optimal schedule.
+%
+Each simulation was repeated multiple times
+and the average are reported.
+%
+For multiple runs under the same condition,
+the optimal schedule was pre-computed from a set of fixed values of
+$\Gamma_k$ and $\epsilon_k$,
+although they can also be fairly accurately estimated from the data
+collected from the equilibration phase
+of each individual run.
+
+
+
+As shown in Table 1,
+both the inverse-time and optimal schedule reduced
+the error significantly.
+%
+The Gaussian scheme appeared to be superier
+to the single-bin scheme in the $\varrho^* = 0.1$ case,
+but not in the $\varrho^* = 0.8$ case,
+and in the latter case,
+an overly large width of the Gaussian
+was counterproductive.
+%
+
+
 \begin{table}[h]\footnotesize
   \caption{\label{tab:error_LJ}
-    Error of the LJ system
-    \note{\newline
-      The data were collected in
-      \texttt{data/tab1} by running
-      the program \texttt{invt}.
-    }%
+    Error of the LJ system.
+    The numbers in parentheses are predicted values;
+    $\Err_\mathrm{init.}$
+    denotes the error
+    at the end of the equilibration phase with a constant magnitude;
+    $\Err_\mathrm{final}$
+    denotes the error at the end of the production phase under
+    either the inverse-time ($1/t$) or optimal schedule (opt.).
   }
   \setlength{\tabcolsep}{2pt}
-  \renewcommand\arraystretch{1.2}
-  \begin{tabular} { l | p{2.2cm} p{2.4cm} p{2.0cm} }
+  \renewcommand\arraystretch{1.4}
+  \begin{tabular} { l c c c c }
     \hline
-      XXX
-    &
-    &
-    &
+    Scheme & Sched. &
+    $\Err_\mathrm{init.}$ &
+    $\Err_\mathrm{final}$
     \\
     \hline
-    Global
-    &
-    &
-    &
+    \multicolumn{4}{c}{$\varrho^* = 0.1$, $500$ bins} \\
+    \hline
+    single-bin & $1/t$
+    & $5.7(5.7)\times10^{-2}$
+    & $9.1(11.4)\times10^{-5}$
+    \\
+    %\hline
+    $\sigma=0.1$ & $1/t$
+    & $7.7(8.9)\times10^{-3}$
+    & $6.8(8.2)\times10^{-5}$
+    \\
+    %\hline
+    $\sigma=0.1$ & opt.
+    & $7.6\times10^{-3}$
+    & $3.2\times10^{-5}$
+    \\
+    %\hline
+    $\sigma=0.2$ & $1/t$
+    & $6.5\times10^{-3}$
+    & $4.0\times10^{-5}$
+    \\
+    %\hline
+    $\sigma=0.2$ & opt.
+    & $7.0\times10^{-3}$
+    & $2.5\times10^{-5}$
+    \\
+    %\hline
+    $\sigma=0.5$ & $1/t$
+    & $5.5\times10^{-3}$
+    & $3.2\times10^{-5}$
+    \\
+    %\hline
+    $\sigma=0.5$ & opt.
+    & $5.8\times10^{-3}$
+    & $2.6\times10^{-5}$
+    \\
+    %\hline
+    $K=20$ & $1/t$
+    & $8.1(9.0)\times10^{-3}$
+    & $1.6(1.8)\times10^{-5}$
     \\
     \hline
-    Local
-    &
-    &
-    &
+    \multicolumn{4}{c}{$\varrho^* = 0.8$, $250$ bins} \\
+    \hline
+    single-bin & $1/t$
+    & $1.3(1.4)$
+    & $2.7(2.7)\times10^{-3}$
+    \\
+    %\hline
+    $\sigma=0.1$ & $1/t$
+    & $1.3(1.3)$
+    & $2.9(2.8)\times10^{-3}$
+    \\
+    %\hline
+    $\sigma=0.1$ & opt.
+    & $1.2$
+    & $2.8\times10^{-3}$
+    \\
+    %\hline
+    $\sigma=0.2$ & $1/t$
+    & $1.3$
+    & $3.4\times10^{-3}$
+    \\
+    %\hline
+    $\sigma=0.2$ & opt.
+    & $1.2$
+    & $3.1\times10^{-3}$
+    \\
+    %\hline
+    $\sigma=0.5$ & $1/t$
+    & $0.95$
+    & $9.8\times10^{-3}$
+    \\
+    %\hline
+    $\sigma=0.5$ & opt.
+    & $1.0$
+    & $5.8\times10^{-3}$
+    \\
+    %\hline
+    $K=20$ & $1/t$
+    & $1.3(1.3)$
+    & $3.0(2.7)\times10^{-3}$
     \\
     \hline
   \end{tabular}
@@ -2953,10 +3076,9 @@ This research used computing resources of the National Science Foundation XSEDE 
 
 
 \section{\label{sec:equilerr}
-Inverse-time schedule as a result of increasing sample size
-in a runtime average
+Runtime average interpretation
+of the inverse-time schedule
 }
-
 
 
 The optimality of the inverse-time schedule can be considered
@@ -2964,42 +3086,34 @@ as a natural consequence of the stabilization of a runtime average
 as the sample size increases\cite{
   marsili2006, barducci2008}.
 %
-We first note that the normalized histogram, $H_i(t)$,
-is a runtime average of the instantaneous histogram, $h_i(t)$.
-%
-\begin{equation*}
-  H_i(t)
-  =
-  \frac{ h_i(1) + \cdots + h_i(t) } { t }
+We first note that a runtime average
+\begin{equation}
+  X(t) = \frac{x(1) + \cdots + x(t)}{t}
   .
-\end{equation*}
+  \label{eq:avx}
+\end{equation}
+can be written as a recurrence relation
+\begin{equation}
+  X(t) = X(t - 1) + \frac{x(t) - X(t-1)}{t}
+  .
+  \label{eq:avx_recur}
+\end{equation}
 %
-This formula can written as a recurrence relation regarding
-the addition of the last data point,
-%
-\begin{align}
-  H_i(t)
-  &=
-  H_i(t-1) + \frac{ h_i(t) - H_i(t-1) } { t }
-  ,
-  \label{eq:av_recur}
-\end{align}
-%
-%If we interpret $x(t) - X(t-1)$
-%as the independent correction to the previous average,
-%$X(t-1)$, proposed by the last data point, $x(t)$,
-%then this correction is absorbed into the average with
-%a diminishing weight $1/t$ as the sample size, $t$, increases.
-%
-which allows us to incrementally improve the estimated
+Here $x(t) - X(t-1)$ serves as an independent correction
+from data point at time $t$ to the previous average value,
+and this correction is absorbed into the new value, $X(t)$,
+with a weight of $1/t$,
+which is the inverse sample size.
+
+We can use Eq. \eqref{eq:avx_recur} to incrementally
+improve the estimated
 bias potential given by Eq. \eqref{eq:vcorr_equil}.
 %
-With
-$u^\mathrm{corr}_i \to u_i(t+1)$, $u_i \to u_i(1)$,
-we have
+Assuming the correction, $\hat u_i$, is done at every step,
+then
 %
 \begin{equation*}
-  u_i(t+1) = u_i(1) +
+  \hat u_i(t+1) = u_i(1) +
   \ln \frac{ H_i(t) } { p_i }
   \approx
   u_i(1) +
@@ -3010,35 +3124,44 @@ where we have assumed that
 the normalized histogram, $H_i(t)$,
 is sufficiently precise in the second step.
 %
-%where the ``$-1$'' on the right-hand side
-%can be ignored as a uniform shift
-%that does not affect the distribution.
+Since the normalized histogram, $H_i(t)$,
+is an average of the instantaneous histogram, $h_i(t)$,
+$H_i(t) = \frac 1 t \sum_{\tau = 1}^t h_i(\tau)$,
+we have, from Eq. \eqref{eq:avx_recur},
+%
+\begin{align}
+  H_i(t)
+  &=
+  H_i(t-1) + \frac{ h_i(t) - H_i(t-1) } { t }
+  ,
+  \label{eq:avH_recur}
+\end{align}
 %
 Thus,
 %Since $H_i(t)$ is the average of the instantaneous histogram, $h_i(t)$,
 %we may apply Eq. \eqref{eq:av_recur}, and
 %
 \begin{align}
-  u_i(t+1)
+  \hat u_i(t+1)
   &=
-  u_i(t)
+  \hat u_i(t)
   +
   \frac{ H_i(t) - H_i(t-1) }{ p_i }
   \notag
   \\
   &=
-  u_i(t)
+  \hat u_i(t)
   +
   \frac{1}{t} \frac{ h_i(t) }{ p_i }
   -\frac{1}{t} \frac{ H_i(t-1) }{ p_i }
   .
-  \label{eq:vbar_update}
+  \label{eq:vhat_update}
 \end{align}
 %
 Now if we drop the last term,
 which tends to a uniform shift of the bias potential
 in the asymptotic limit,
-Eq. \eqref{eq:vbar_update} recovers
+Eq. \eqref{eq:vhat_update} recovers
 the single-bin updating scheme, Eq. \eqref{eq:wl_update},
 under
 the inverse-time schedule, Eq. \eqref{eq:alpha_invt}.
@@ -3052,19 +3175,31 @@ with a few related FDS methods.
 First,
 it establishes an efficiency equivalence
 between an adaptive WL simulation under the inverse-time schedule
-and the ideal equilibrium FDS counterpart
-with a nearly perfect bias potential.
+and one with a fixed and nearly perfect bias potential.
 %
-The bias potentials from the two approaches
-would reach similar precision at long times.
+Since the bias potential in the former approach
+essentially follows the same time evolution
+for the correction,
+$\hat u_i(t)$, Eq. \eqref{eq:vhat_update},
+the two would reach similar precision at long times.
 %
-Thus, it is unnecessary to convert
-a sufficiently convergent adaptive FDS simulation
-to the corresponding equilibrium FDS simulation
-with a fixed bias potential just for better precision
+Thus, it is unnecessary to fix the bias potential
+after an adaptive FDS simulation has reached
+sufficiently convergent just for better precision
 of the final PMF.
 
 Second,
+it shows close connection between
+the WL algorithm under the inverse-time schedule
+and self-healing umbrella sampling.
+In the latter,
+the bias potential is computed from
+a weighted runtime average of the histogram\cite{
+  marsili2006, barducci2008},
+which is analogous to the adaptive bias force method\cite{
+  darve2001, *darve2008}.
+
+Third,
 it also relates a WL simulation under the inverse-time schedule
 to a time-averaged variant of the regular WL simulation.
 %
@@ -3083,15 +3218,6 @@ the on-the-fly updating scheme\cite{
   zhou2005, zhou2008},
 which is ignored in this analysis.
 
-Third,
-it is possible to reformulate the WL algorithm
-under the inverse-time schedule
-as an explicit adaptive average method
-such that the bias potential is computed from
-a weighted runtime average of the histogram\cite{
-  marsili2006, barducci2008},
-which is analogous to the adaptive bias force method\cite{
-  darve2001, *darve2008}.
 
 
 
