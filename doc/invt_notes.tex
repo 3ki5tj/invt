@@ -3802,6 +3802,279 @@ which is minimal at $\lambda = 1$.
 }
 
 
+\section{\label{sec:Gamma}
+Integrals of the autocorrelation functions}
+
+
+
+Here, we evaluate the integrals of
+the autocorrelation functions,
+$\Gamma_k$'s,
+in two special cases
+in Secs. \ref{sec:Gamma_perfect}
+and \ref{sec:Gamma_onestep}
+in the asymptotic limit,
+and describe a general method of measuring them
+in Sec. \ref{sec:Gamma_measure}.
+
+
+
+\subsection{\label{sec:Gamma_perfect}
+Perfect sampling}
+
+
+First, if the sampling is perfect,
+%
+%\begin{equation}
+%  \Gamma_k = 1.
+%\label{eq:Gamma_perfect}
+%\end{equation}
+%
+%To see this, we note that
+the bin index, $i$, is an independent random variable
+at each time step $t$.
+%
+Further, in the asymptotic limit,
+$\langle h_i(t) \rangle = p_i$,
+we find from Eq. \eqref{eq:h_split} that
+\begin{equation*}
+  \zeta_{*i}(t)
+  =
+  \frac{ h_i(t) } { p_i }
+  -
+  \sum_{ r = 1 }^n
+    \rho_r \frac{ h_r(t) } { p_r }
+  ,
+\end{equation*}
+%
+and
+%
+\begin{align}
+  \left\langle
+    \zeta_{*i}(t) \, \zeta_{*j}(t')
+  \right\rangle
+  %&=
+  %\left\langle
+  %  \left(
+  %    \frac{ h_i(t) } { p_i }
+  %    -
+  %    \sum_{ r = 1 }^n
+  %      \rho_r \frac{ h_r(t) } { p_r }
+  %  \right)
+  %\right.
+  %\notag \\
+  %&\hphantom{==}\cdot
+  %\left.
+  %  \left(
+  %    \frac{ h_j(t') } { p_i }
+  %    -
+  %    \sum_{ s = 1 }^n
+  %      \rho_s \frac{ h_s(t') } { p_s }
+  %  \right)
+  %\right\rangle
+  %\notag
+  %\\
+  &=
+  \left(
+    \frac{ \delta_{ij} } { p_i }
+    -
+    \frac{ \rho_i } { p_i }
+    -
+    \frac{ \rho_j } { p_j }
+    +
+    \sum_{r = 1}^n
+    \frac{ \rho_r^2 } { p_r }
+  \right) \,
+  \delta_{t, t'}
+  .
+\label{eq:zz_perfect}
+\end{align}
+%
+%$\delta(t - t')$ is the equivalent of $\delta_{t, t'}$
+%in the continuous limit.
+%
+\note{To show Eq. \eqref{eq:zz_perfect}, we first note that
+  with $t \ne t'$ (going back to the discrete time case),
+  $$
+  \begin{aligned}
+  \left\langle
+    \zeta_{*i}(t) \, \zeta_{*j}(t')
+  \right\rangle
+  &=
+  \left\langle
+    \zeta_{*i}(t)
+  \right\rangle
+  \left\langle
+    \zeta_{*j}(t')
+  \right\rangle
+  =
+  0.
+  \end{aligned}
+  $$
+  Next, for $t = t'$, we have
+  $$
+  \langle
+    h_i(t) \, h_j(t)
+  \rangle
+  = \delta_{ij} \, p_i
+  ,
+  $$
+  which leads to Eq. \eqref{eq:zz_perfect}.
+}
+%
+Thus,
+for $k > 0$, we get
+%
+\begin{equation}
+  \kappa_k(t - t')
+  =
+  \sum_{i,j = 1}^n
+  \phi_{ki} \phi_{kj}
+  \langle \zeta_{*i}(t) \, \zeta_{*j}(t') \rangle
+  %
+  =
+  \sum_{i = 1}^n \frac{ \phi_{ki}^2 } { p_i }
+  \, \delta_{t, t'},
+\notag
+%\label{eq:kappa_perfect}
+\end{equation}
+%
+where we have used
+Eqs. \eqref{eq:ortho1},
+\eqref{eq:zz_perfect}.
+%
+Thus, the white-noise approximation is exact,
+with
+$\Gamma_k = \sum_{ i = 1}^n \phi_{ki}^2 / p_i$.
+\note{Proof.%Eq. \eqref{eq:kappa_perfect},
+  $$
+  \begin{aligned}
+  \kappa_k(t - t')
+  &=
+  \sum_{i,j = 1}^n
+  \phi_{ki}
+  \phi_{kj}
+    \langle \zeta_{*i}(t) \, \zeta_{*j}(t') \rangle
+  \\
+  %
+  &=
+  \sum_{i,j = 1}^n
+  \phi_{ki}
+  \phi_{kj}
+  \left(
+    \frac{ \delta_{ij} } { p_i }
+    -
+    \frac{ \rho_i } { p_i }
+    -
+    \frac{ \rho_j } { p_j }
+    +
+    \sum_{r = 1}^n
+    \frac{ \rho_r^2 } { p_r }
+  \right) \,
+  \, \delta_{t, t'}
+  .
+  \end{aligned}
+  $$
+  where,
+  we have used
+  Eq. \eqref{eq:zz_perfect}
+  on the second line.
+  %
+  With Eq. \eqref{eq:ortho1},
+  only the first term in the parentheses survives.
+}
+In particular, if $p_i = \rho_i$, then, by
+Eq. \eqref{eq:eig_orthonormal_rows}, we have
+$\kappa_k(t - t') = \delta_{t, t'}$, or
+\begin{equation}
+  \Gamma_k = 1
+  .
+\label{eq:Gamma_perfect}
+\end{equation}
+
+
+
+
+\subsection{\label{sec:Gamma_onestep}
+One-step process}
+
+
+Another special case is the
+one-dimensional one-step process\cite{vankampen},
+which models a local sampling process.
+In each step, the system hops to
+one of the two neighboring bins
+with equal probability, $1/2$.
+%
+The transition matrix is
+%
+\begin{equation}
+  \arraycolsep=3.6pt\def\arraystretch{1.4}
+  \mathbf A
+  =
+  \left(
+    \begin{array}{cccccccc}
+      \frac \sigma 2 & \frac 1 2 & 0 & \dots & \frac {1 - \sigma} 2 \\
+      \frac 1 2 & 0         & \frac 1 2 & \dots & 0 \\
+      \vdots & &  & & \vdots \\
+      \frac {1 - \sigma} 2 & \dots &  & \frac 1 2 & \frac \sigma 2
+    \end{array}
+  \right),
+\notag
+%\label{eq:T_nn}
+\end{equation}
+%
+where $\sigma = 0$ for a periodic variable, or $1$ otherwise.
+%
+For many updating schemes
+(cf. Sec. \ref{sec:band-matrix}),
+we can further assume that
+the transition matrix $\mathbf A$ and
+the updating matrix $\mathbf w$
+share the eigenvectors,
+with $\rho_i = p_i = 1/n$.
+%but not the eigenvalues.
+%
+The eigenvalues of $\mathbf A$ are
+$$
+  \Lambda_k
+  =
+  \cos \frac{ (k - 1) \, 2 \, \pi }
+            {       g \, n        }
+  ,
+$$
+where
+$g = 1$ for a periodic variable, or $2$ otherwise.
+%Note that these $\Lambda_k$'s are
+%not to be confused with the eigenvalues of $\mathbf w$,
+%$\lambda_k$'s.
+%
+In this case,
+the autocorrelation function, $\kappa_k(t)$,
+decays as $\kappa_k(0) \, \Lambda_k^t$,
+with $\kappa_k(0) = 1$ being the same as
+the value in perfect sampling.
+%
+Thus,
+%$\Gamma_k$ is roughly twice the autocorrelation time, and
+from Eq. \eqref{eq:Gamma_sum}, we get
+%
+\begin{equation}
+  \Gamma_k
+  =
+  1 + 2 \, \sum_{t = 1}^\infty \Lambda_k^t
+  =
+  \frac{ 1 + \Lambda_k }
+       { 1 - \Lambda_k }
+  =
+  \cot^2 \left[
+    \frac{ (k - 1) \, \pi }
+         {       g \, n   }
+  \right]
+  .
+\label{eq:Gamma_onestep}
+\end{equation}
+
 
 
 

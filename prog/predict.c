@@ -233,7 +233,7 @@ static void invt_geterr(invtpar_t *m,
     } else {
       /* inverse-time schedule */
       err0 = esterror_invt_x(T, m->c, m->alpha0, m->t0, m->n,
-          NULL, NULL, xerrf, xerrf_r, xerrf_a, lambda, gamma);
+          NULL, NULL, NULL, xerrf, xerrf_r, xerrf_a, lambda, gamma);
     }
     save_xerr(m, m->fnxerr, xerri, xerrf, xerrf_r, xerrf_a,
         lambda, gamma, qT, inita);
@@ -360,18 +360,13 @@ static void invt_scan(invtpar_t *m,
   xnew(lambda, m->n);
 
   /* initialize the scanning variable */
-  if ( scantype == SCAN_NB )
-  {
+  if ( scantype == SCAN_NB ) {
     nb = nbmin;
     printf("# nb    ");
-  }
-  else if ( scantype == SCAN_SIG )
-  {
+  } else if ( scantype == SCAN_SIG ) {
     sig = sigmin;
     printf("# sigma ");
-  }
-  else if ( scantype == SCAN_KC )
-  {
+  } else if ( scantype == SCAN_KC ) {
     kc = kcdel;
     printf("# Kmax  ");
   }
@@ -380,13 +375,11 @@ static void invt_scan(invtpar_t *m,
       "   t0    \t   q(T)\n");
 
   for ( ; ; ) {
-    if ( scantype == SCAN_NB )
-    {
+    if ( scantype == SCAN_NB ) {
       /* avoid the round-off error in case
        * we start from a negative value of nb */
-      if ( fabs(nb) < DBL_EPSILON * 100 ) {
+      if ( fabs(nb) < DBL_EPSILON * 100 )
         nb = 0;
-      }
 
       /* create the updating window */
       m->winn = 2;
@@ -394,16 +387,12 @@ static void invt_scan(invtpar_t *m,
       m->win[0] = 1 - nb;
       geteigvals(lambda, m->n, m->win, m->winn, m->pbc,
           0, &eigerr, 1);
-    }
-    else if ( scantype == SCAN_SIG )
-    {
+    } else if ( scantype == SCAN_SIG ) {
       /* make the Gaussian window */
       m->gaussig = sig;
       mkgauswin(sig, m->n, m->pbc, m->win, &m->winn);
       stablizewin(lambda, m->n, m->win, &m->winn, m->pbc, 0.0, m->verbose);
-    }
-    else if ( scantype == SCAN_KC )
-    {
+    } else if ( scantype == SCAN_KC ) {
       /* make the bandpass sinc window */
       m->kc = kc;
       mksincwin(kc, m->n, m->pbc, m->win, &m->winn);
@@ -437,16 +426,11 @@ static void invt_scan(invtpar_t *m,
     err2norm = err2 * sqrt(T + t0);
 
     /* print the scanning variable */
-    if ( scantype == SCAN_NB )
-    {
+    if ( scantype == SCAN_NB ) {
       printf("%+8.5f\t", nb);
-    }
-    else if ( scantype == SCAN_SIG )
-    {
+    } else if ( scantype == SCAN_SIG ) {
       printf("%+8.5f\t", sig);
-    }
-    else if ( scantype == SCAN_KC )
-    {
+    } else if ( scantype == SCAN_KC ) {
       printf("%8d\t", kc);
     }
 
@@ -456,18 +440,13 @@ static void invt_scan(invtpar_t *m,
     free(lambda);
 
     /* update the scanning variable and stop */
-    if ( scantype == SCAN_NB )
-    {
+    if ( scantype == SCAN_NB ) {
       nb += nbdel;
       if ( nb > nbmax + 0.01 * nbdel ) break;
-    }
-    else if ( scantype == SCAN_SIG )
-    {
+    } else if ( scantype == SCAN_SIG ) {
       sig += sigdel;
       if ( sig > sigmax + 0.01 * sigdel ) break;
-    }
-    else if ( scantype == SCAN_KC )
-    {
+    } else if ( scantype == SCAN_KC ) {
       kc += kcdel;
       if ( kc > kcmax ) break;
     }
@@ -491,7 +470,8 @@ int main(int argc, char **argv)
   xnew(gamma, m->n);
   estgamma(gamma, m->n, m->sampmethod, m->pbc, m->mvsize);
   if ( m->fngamma[0] != '\0' ) {
-    if ( m->sampmethod == SAMPMETHOD_MD ) {
+    if ( m->sampmethod == SAMPMETHOD_MD
+      || m->gammethod == GAMMETHOD_LOAD ) {
       loadgamma(m->n, gamma, m->fngamma);
     } else {
       savegamma(m->n, gamma, m->fngamma);

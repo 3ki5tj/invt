@@ -63,6 +63,7 @@ static int gammrun(invtpar_t *m, metad_t *metad, is2_t *is)
   int id, h, acc;
   int icur, inew, enew, iold;
 
+  metad_varv_clear(metad);
   metad->a = m->alpha0;
   iold = icur = metad_getindex(metad, is->E);
 
@@ -82,12 +83,12 @@ static int gammrun(invtpar_t *m, metad_t *metad, is2_t *is)
     metad->tmat[icur*metad->n + iold] += 1;
     iold = icur;
     if ( t % m->gam_nstave == 0 )
-      metad_add_varv(metad);
+      metad_varv_add(metad);
   }
 
   /* estimate gamma */
-  metad_getgamma_varv(metad, m->alpha0, "gamma.dat");
-  metad_getgamma_tmat(metad, 1, "tgamma.dat");
+  metad_getgamma_varv(metad, m->alpha0, metad->gamma, "gamma.dat");
+  metad_getgamma_tmat(metad, 1, metad->tgamma, "tgamma.dat");
 
   return 0;
 }
@@ -197,12 +198,13 @@ static int invt_is2_run(invtpar_t *m)
     gammrun(m, metad, is);
 
   /* compute the optimal schedule */
-  metad_getalphaerr(metad, m->opta, (double) m->nsteps, m->gammethod,
-      m->fngamma, m->sampmethod, m->alpha0, &m->qT,
+  metad_getalphaerr(metad, m->opta, (double) m->nsteps,
+      m->gammethod, m->fngamma, m->sampmethod,
+      metad->vref, m->alpha0, (double) m->nequil, &m->qT,
       m->qprec, m->alpha_nint, m->fnalpha);
 
   /* multiple production runs */
-  {
+  if ( m->ntrials > 0 ) {
     int i;
     ave_t ei[1], ef[1];
     double erri, errf, *v0;

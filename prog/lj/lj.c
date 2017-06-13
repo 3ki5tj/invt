@@ -94,7 +94,7 @@ static int gammrun(invtpar_t *m, metad_t *metad, lj_t *lj, long nsteps)
     metad_updateav(metad, ir); /* for the average histogram-corrected bias potential */
     metad->tmat[ir*metad->n + ir0] += 1;
     ir0 = ir;
-    if ( t % 100 == 0 )
+    if ( t % m->gam_nstave == 0 )
       metad_varv_add(metad);
     if ( t % 10000 == 0 ) fprintf(stderr, "t %ld/%ld = %5.2f%%, acc %.2f%% \r", t, nsteps, 100.*t/nsteps, 100*sacc/t);
     if ( t % nstsave == 0 || t == nsteps ) {
@@ -219,12 +219,12 @@ static int work(invtpar_t *m)
     && m->gammethod != GAMMETHOD_LOAD ) {
     prodrun(m, metad, lj, 1, m->nequil, "vg.dat", &hfl, &errc); /* equilibration */
     gammrun(m, metad, lj, m->gam_nsteps);
-    /* compute the optimal schedule based the histogram-corrected
-     * bias potential obtained from the gamma run */
-    metad_getalphaerr(metad, m->opta, (double) m->nsteps,
-        m->gammethod, m->fngamma, m->sampmethod,
-        metad->vc, m->alpha0, (double) m->nequil, &m->qT,
-        m->qprec, m->alpha_nint, "alpha_vc.dat");
+    ///* compute the optimal schedule based the histogram-corrected
+    // * bias potential obtained from the gamma run */
+    //metad_getalphaerr(metad, m->opta, (double) m->nsteps,
+    //    m->gammethod, m->fngamma, m->sampmethod,
+    //    metad->vc, m->alpha0, (double) m->nequil, &m->qT,
+    //    m->qprec, m->alpha_nint, "alpha_vc.dat");
   }
 
   /* compute the optimal schedule and the error */
@@ -302,6 +302,7 @@ int main(int argc, char **argv)
   m->n = 0;
   m->alpha0 = 1e-4; /* updating magnitude for equilibration and gamma run */
   m->gam_nsteps = 10000000L;
+  m->gam_nstave = 100;
   m->nequil = 10000000L;
   m->nsteps = 10000000L;
   m->ntrials = 1000;

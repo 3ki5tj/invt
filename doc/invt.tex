@@ -905,8 +905,20 @@ Note that the distribution, $\pmb\rho$,
 can be independent of
 the target distribution,
 $\mathbf p = (p_1, \dots, p_n)$,
-and chosen for convenience.\footnote{In
-well-tempered metadynamics,
+and chosen for convenience.\footnote{Alternatively,
+we may define $v_{*i}(t)$ such that
+$\rho_i \, e^{-v_{*i}(t)}$ is a normalized distribution,
+i.e.,
+$$
+v_{*i}(t) \to -\log\left(
+  \frac{ (p^*_i/p_i) \, e^{ -u_i(t) } } 
+  { \sum_{j=1}^n \rho_j \, (p^*_j/p_j) \, e^{ -u_j(t) } } 
+\right).
+$$
+One can readily show that the two definitions are equivalent
+for small $v_{*i}$.
+%
+In well-tempered metadynamics,
 $\mathbf p$ is an attenuated version of
 $\mathbf p^*$\cite{
   barducci2008, dama2014}:
@@ -934,8 +946,10 @@ Differential equation}
 
 To proceed, we will
 approximate the finite difference Eq. \eqref{eq:wl_update}
-by a differential equation\footnote{This
-approximation requires us to shift the origin of time by $1$ in some cases.}
+by a differential equation\footnote{In
+going to the continuous time setup,
+we find it more convenient to shift the origin of time by $-1$,
+e.g. the sum $\sum_{i=1}^T$ is mapped to the integral $\int_0^T dt$.}
 %
 \begin{equation}
   \dot u_i(t)
@@ -962,9 +976,8 @@ being the instantaneous histogram,
 which is equal to $1$
 for the bin $i(t)$ at time $t$
 or zero otherwise,
-and we have defined a relative histogram
-$\xi_i(t) \equiv h_i(t) /p_i$
-in the last step.
+and we have defined
+$\xi_i(t) \equiv h_i(t) /p_i$.
 %
 The shifted bias potential, $v_i(t)$,
 follows the same differential equation
@@ -996,7 +1009,7 @@ and a random fluctuation part, $\zeta_i(t)$,
 \end{equation}
 %
 The deterministic part can be related
-to an average in an ensemble consists of
+to an average in an ensemble consisting of
 many copies of similar simulations
 sharing the same schedule $\alpha(t)$
 and the same bias potential at time $t$.
@@ -1075,9 +1088,9 @@ and $\delta(t)$ is the Dirac's delta function.
 We expect the approximation to hold for simulation
 much longer than the autocorrelation time.
 %
-For non-white noise,
-the equivalent value of $G_i$ can be approximately obtained as
-$\sum_{t = -\infty}^\infty \langle \zeta_{*i}(t) \, \zeta_{*i}(0) \rangle$.
+%For non-white noise,
+%the equivalent value of $G_i$ can be approximately obtained as
+%$\sum_{t = -\infty}^\infty \langle \zeta_{*i}(t) \, \zeta_{*i}(0) \rangle$.
 
 From Eqs.
 \eqref{eq:vt_diffeq}-\eqref{eq:sh_ave},
@@ -1190,7 +1203,7 @@ Then, by using Eq. \eqref{eq:y_def}, we have
 \label{eq:expqt}
 \end{equation}
 where $t_0$ is some constant,
-and the other constant, $c$, has been determined
+and $c$ has been determined
 from the $t = T$ case
 in the second step.
 %
@@ -1221,7 +1234,7 @@ we find the final total error to be
 %
 $E(T) = [ E(0) \, t_0^2 + \Gamma \, T ]/(t_0 + T)^2$,
 %
-which is minimized if
+which is minimal at
 %
 \begin{equation}
 t_0 = \frac{ \Gamma }
@@ -1230,7 +1243,7 @@ t_0 = \frac{ \Gamma }
   \label{eq:t0_singlebin}
 \end{equation}
 %
-and at this point, the error is given by
+and the minimum is
 %
 \begin{equation}
   E(T)
@@ -1241,9 +1254,8 @@ and at this point, the error is given by
 \end{equation}
 %
 This error is roughly equal to
-the overall histogram flatness\cite{zhou2005, zhou2008}
-and thus it can be conveniently estimated
-(see also Appendix \ref{sec:flatness}).
+the average histogram fluctuation\cite{zhou2005, zhou2008}
+(see also Appendix \ref{sec:hfluc}).
 
 
 
@@ -1327,14 +1339,10 @@ the detailed balance condition,
 for the error weighting distribution, $\pmb \rho$,
 introduced in Eq. \eqref{eq:vav_def}.
 %
-This requires the updating matrix, $\mathbf w$
-to be symmetric
-for a uniform $\pmb\rho$,
-or more generally,
-the scaled matrix, $\sqrt{ \rho_i/\rho_j } \, w_{ij}$,
-to be symmetric.
-%
-This symmetry allows the diagonalization
+This requires the scaled updating matrix,
+$\sqrt{ \rho_i/\rho_j } \, w_{ij}$,
+to be symmetric,
+and the symmetry allows the diagonalization
 of $\mathbf w$ with a set of
 eigenvectors, $\phi_{ki}$,
 %
@@ -1408,17 +1416,17 @@ while the orthogonality demands
 \label{eq:ortho1}
 \end{equation}
 %
-We may write the updating matrix in $\phi_{ki}$'s
-as\cite{bussi2006}
-%
-\begin{equation}
-  w_{ij}
-  =
-  \frac{1}{\rho_i} \sum_{k=0}^{n - 1}
-  \lambda_k \, \phi_{ki} \, \phi_{kj}
-  .
-  \notag
-\end{equation}
+%We may write the updating matrix in $\phi_{ki}$'s
+%as\cite{bussi2006}
+%%
+%\begin{equation}
+%  w_{ij}
+%  =
+%  \frac{1}{\rho_i} \sum_{k=0}^{n - 1}
+%  \lambda_k \, \phi_{ki} \, \phi_{kj}
+%  .
+%  \notag
+%\end{equation}
 
 
 %It is worth pointing out
@@ -1462,9 +1470,13 @@ and the inverse transform is
 Using this definition,
 we can rewrite Eq. \eqref{eq:ortho1} as
 $\mathcal F[1]_k = \delta_{k0}$,
-and for the bin average of any quantity, $f$, we have
-$\bav{f}= \mathcal F[f_i]_0 = \tilde f_0$,
-so that
+%
+and Eq. \eqref{eq:eigenmode0} means that
+the bin average of any quantity, $f$,
+is the first mode of the Fourier transform:
+$\bav{f}= \mathcal F[f_i]_0 = \tilde f_0$.
+%
+So
 \begin{equation}
   \tilde f_{*k}
   = \tilde f_k - \bav{f} \, \delta_{k0}
@@ -1477,7 +1489,7 @@ so that
 \end{equation}
 %
 which means that the only effect
-of the bin-average deduction is to
+of the bin-average deduction on $\tilde f_k$ is to
 annihilate the first mode, $\tilde f_0$.
 
 
@@ -1506,7 +1518,7 @@ or in continuous time, we have, for $k > 0$,
 %
 where we have removed the bin average,
 and used the transformed version of Eq. \eqref{eq:sh_ave}
-[the subscript ``$_*$'' is dropped by Eq. \eqref{eq:ftstar}].
+[but the subscript ``$_*$'' is dropped by Eq. \eqref{eq:ftstar}].
 In the second step, we have used the linear approximation
 as in Sec. \ref{sec:sbin_diffeq}.
 
@@ -1611,25 +1623,18 @@ as:
 %\label{eq:Gamma_integral}
 %\end{equation}
 %
-We may understand Eq. \eqref{eq:Gamma_sum}
-as an attempt of modeling
+Equation \eqref{eq:Gamma_sum} provides a way
+of approximately modeling
 a general histogram fluctuation, ${\tilde \zeta}_k(t)$,
-as an equivalent white noise
-so that the theory can be applicable to
-a general sampling process.
-%
+as an equivalent white noise.
 In this way,
 the underlying sampling process
 affects the error only through the
 few numbers, $\Gamma_k$'s.
 %
-For example, we expect large values of $\Gamma_k$
-from eigenmodes corresponding to
-persistent long-range motion
-in sampling complex or glassy systems.
-%
-In Appendix \ref{sec:Gamma},
-we discuss several ways of estimating $\Gamma_k$'s.
+In Appendix \ref{sec:Gamma_measure},
+we discuss a way of estimating $\Gamma_k$
+from an FDS simulation with a constant magnitude.
 %
 
 
@@ -1644,7 +1649,7 @@ Initial error
 To model the initial error for Eq. \eqref{eq:error_res},
 we will assume that
 the preliminary adaptive FDS sampling has been
-performed under a constant updating magnitude for $T_0$, steps.
+performed under a constant updating magnitude for $T_0$ steps.
 %
 If the starting bias potential is zero, $u_i = 0$,
 one can show that
@@ -2679,7 +2684,7 @@ for the single-bin updating scheme:
 if we set $K = n$, then\note{
   From Eq. \eqref{eq:eig_orthonormal_cols}, we have
   $\sum_{i=1}^n \rho_i \langle v_{*i}(t) \, v_{*i}(0) \rangle =\sum_{k=1}^{n-1} \langle {\tilde v}_k(t) \, {\tilde v}_k(0) \rangle.$
-  Then sum over $t$ from $\infty$ to $\infty$.
+  Then sum over $t$ from $-\infty$ to $\infty$.
 }
 %
 \begin{equation}
@@ -2729,26 +2734,26 @@ Numerical results}
 \subsection{\label{sec:lj}Lennard-Jones}
 
 
-Our first test system is a Lennard-Jones fluid of $N=100$ particles,
+Our test system is a Lennard-Jones fluid of $N=100$ particles,
 and we wish to compute the PMF along the distance of two special particles, $r$.
 %
 The two special particles are mutually non-interacting
-but interact normally with other particles
-(they have placed on an axis parallel to a side of the cubic box),
-and the intrinsic distribution, $p^*$, is often referred to as
-the cavity distribution function, $y(r)$.
+but they interact normally with other particles,\footnote{they
+have placed on an axis parallel to a side of the cubic box}
+and the intrinsic distribution, $p^*$, is
+the cavity distribution function, $y(r)$\cite{hansen}.
 %
-We will assume reduced units in this calculation
+We will assume reduced units in this calculation.
 %
-The reference values were pre-calculated from a long simulation.
-%
+The reference bias potential was pre-calculated from a long simulation.
+
 We used the Metropolis algorithm for configuration sampling\cite{frenkel}.
 %
-Each step consists of five MC trials of displacing a random particle,
-one for one of the two special particles,
-and the rest four for the other particles.
+Each step consists of
+one MC trial for displacing one of the two special particles,
+and another four trials for displacing the other particles.
 %
-The MC displacement along each dimension is uniform,
+In each trial, the displacement along each dimension is uniform,
 with the size given by $0.1/\varrho^*$ to ensure the acceptance ratio is around 50\%,
 where $\varrho^*$ is the reduced number density.
 
@@ -2761,21 +2766,20 @@ and the numbers of bins were $500$ and $250$, respectively.
 %
 We tested the single-bin, Gaussian, and bandpass updating schemes.
 %
-Each simulation had an ``equilibration'' phase
+Each simulation started with an ``equilibration'' phase
 of $10^7$ steps with a fixed updating magnitude, $a_0 = 10^{-4}$,
 followed by a production phase
 with updating magnitude given by
 either the inverse-time or optimal schedule.
 %
-Each simulation was repeated multiple times
-and the average are reported.
+We repeated each simulation multiple times
+and report the average.
 %
-For multiple runs under the same condition,
+To make sure the same schedule for multiple runs under the same condition,
 the optimal schedule was pre-computed from a set of fixed values of
 $\Gamma_k$ and $\epsilon_k$,
 although they can also be fairly accurately estimated from the data
-collected from the equilibration phase
-of each individual run.
+collected from the equilibration phase of each individual run.
 
 
 
@@ -3101,7 +3105,7 @@ can be written as a recurrence relation
 %
 Here $x(t) - X(t-1)$ serves as an independent correction
 from data point at time $t$ to the previous average value,
-and this correction is absorbed into the new value, $X(t)$,
+and this correction is absorbed into the average
 with a weight of $1/t$,
 which is the inverse sample size.
 
@@ -3118,22 +3122,27 @@ then
   \approx
   u_i(1) +
   \frac{ H_i(t) } { p_i } - 1
-  ,
+  .
 \end{equation*}
-where we have assumed that
-the normalized histogram, $H_i(t)$,
+%
+Here the normalized histogram, $H_i(t)$,
+is a runtime average of the instantaneous histogram, $h_i(t)$,
+%
+\begin{equation}
+  H_i(t) = \frac 1 t \sum_{\tau = 1}^t h_i(\tau),
+  \label{eq:hav_def}
+\end{equation}
+%
+and we have assumed that it
 is sufficiently precise in the second step.
 %
-Since the normalized histogram, $H_i(t)$,
-is an average of the instantaneous histogram, $h_i(t)$,
-$H_i(t) = \frac 1 t \sum_{\tau = 1}^t h_i(\tau)$,
-we have, from Eq. \eqref{eq:avx_recur},
+Applying Eq. \eqref{eq:avx_recur} to the histogram yields
 %
 \begin{align}
   H_i(t)
   &=
   H_i(t-1) + \frac{ h_i(t) - H_i(t-1) } { t }
-  ,
+  .
   \label{eq:avH_recur}
 \end{align}
 %
@@ -3152,71 +3161,68 @@ Thus,
   &=
   \hat u_i(t)
   +
-  \frac{1}{t} \frac{ h_i(t) }{ p_i }
-  -\frac{1}{t} \frac{ H_i(t-1) }{ p_i }
+  \frac{1}{t} \left[
+    \frac{ h_i(t) }{ p_i }
+   -\frac{ H_i(t-1) }{ p_i }
+  \right]
   .
   \label{eq:vhat_update}
 \end{align}
 %
-Now if we drop the last term,
-which tends to a uniform shift of the bias potential
-in the asymptotic limit,
-Eq. \eqref{eq:vhat_update} recovers
+In the long time limit, we may assume that $H_i(t-1) \to p_i$
+and the second term in the square bracket
+becomes a constant shift that can be safely dropped.
+%
+Then Eq. \eqref{eq:vhat_update} is identical to
 the single-bin updating scheme, Eq. \eqref{eq:wl_update},
-under
-the inverse-time schedule, Eq. \eqref{eq:alpha_invt}.
+under the inverse-time schedule, Eq. \eqref{eq:alpha_invt}.
+%
+In other words, the bias potential obtained from the latter approach
+represents a runtime average.
+%Thus, the bias potential from a WL simulation
+%(which typically uses the single-bin updating scheme)
+%under the inverse-time schedule
+%would reach a similar precision
+%as an ideal multicanonical simulation
+%with fixed and nearly perfect bias potential.
+%the precision at long times.
+%%
+%Thus, it is unnecessary to fix the bias potential
+%after an adaptive FDS simulation has reached
+%sufficiently convergent just for better precision
+%of the final PMF.
 
 
 
-The above demonstration implies several connections
-between the WL algorithm under the optimal inverse-time schedule
-with a few related FDS methods.
+%Second,
+%it shows close connection between
+%the WL algorithm under the inverse-time schedule
+%and self-healing umbrella sampling.
+%In the latter,
+%the bias potential is computed from
+%a weighted runtime average of the histogram\cite{
+%  marsili2006, barducci2008},
+%which is analogous to the adaptive bias force method\cite{
+%  darve2001, *darve2008}.
 %
-First,
-it establishes an efficiency equivalence
-between an adaptive WL simulation under the inverse-time schedule
-and one with a fixed and nearly perfect bias potential.
-%
-Since the bias potential in the former approach
-essentially follows the same time evolution
-for the correction,
-$\hat u_i(t)$, Eq. \eqref{eq:vhat_update},
-the two would reach similar precision at long times.
-%
-Thus, it is unnecessary to fix the bias potential
-after an adaptive FDS simulation has reached
-sufficiently convergent just for better precision
-of the final PMF.
-
-Second,
-it shows close connection between
-the WL algorithm under the inverse-time schedule
-and self-healing umbrella sampling.
-In the latter,
-the bias potential is computed from
-a weighted runtime average of the histogram\cite{
-  marsili2006, barducci2008},
-which is analogous to the adaptive bias force method\cite{
-  darve2001, *darve2008}.
-
-Third,
-it also relates a WL simulation under the inverse-time schedule
-to a time-averaged variant of the regular WL simulation.
-%
-In the variant, the updating magnitude is fixed,
-but the bias potential over the simulation course is averaged
-as the final result\cite{zhou2005}.
-%
-The above demonstration shows that the inverse-time schedule
-has already effectively implemented an implicit average
-so that no explicit averaging is needed in the former approach.
-%
-The inverse-time schedule approach is preferred, however,
-because with a decreasing updating magnitude,
-it minimizes the systematic error caused by
-the on-the-fly updating scheme\cite{
-  zhou2005, zhou2008},
-which is ignored in this analysis.
+%Third,
+%it also relates a WL simulation under the inverse-time schedule
+%to a time-averaged variant of the regular WL simulation.
+%%
+%In the variant, the updating magnitude is fixed,
+%but the bias potential over the simulation course is averaged
+%as the final result\cite{zhou2005}.
+%%
+%The above demonstration shows that the inverse-time schedule
+%has already effectively implemented an implicit average
+%so that no explicit averaging is needed in the former approach.
+%%
+%The inverse-time schedule approach is preferred, however,
+%because with a decreasing updating magnitude,
+%it minimizes the systematic error caused by
+%the on-the-fly updating scheme\cite{
+%  zhou2005, zhou2008},
+%which is ignored in this analysis.
 
 
 
@@ -3435,98 +3441,82 @@ is identical to that from Eq. \eqref{eq:alpha_invt1}.
 
 
 
-\section{\label{sec:flatness}
-Histogram flatness}
+\section{\label{sec:hfluc}
+Histogram fluctuation}
 
 
-Here we wish to show that for an optimal WL simulation
-(also for an FDS simulation with a perfect bias potential),
-the overall histogram flatness
+Here we wish to show that for an FDS simulation
+with a nearly-perfect bias potential
+(e.g. a long WL simulation under the single-bin updating scheme
+with the inverse-time schedule),
+the histogram fluctuation
 is roughly equal to the final error.
 %
 First, in the long time limit, the fluctuation of
 the instantaneous histogram is dominated by the random part,
-$h_i(t) \approx \zeta_i(t)$,
-and $\zeta_{*i}(t)$
-will dominate the shifted instantaneous histogram
 %
 \begin{equation}
-\zeta_{*i}(t) \approx
-\xi_{*i}(t)
-.
-\label{eq:xi_h}
-\end{equation}
-%
-If we define the overall or time-averaged histogram as
-\begin{equation}
-  H_i \equiv \frac{1}{T} \sum_{t=1}^T h_i(t)
+  \xi_i(t) \approx \zeta_i(t)
   ,
-  \label{eq:H_def}
+  \label{eq:xi_zeta}
 \end{equation}
-then the time average of the right-hand side of Eq. \eqref{eq:xi_h}
-represents the fractional deviation of the shifted histogram.
+and we would have for the Fourier transform,
+$\tilde \xi_k(t) \approx \tilde \zeta_k(t).$
 %
-We way thus define the histogram flatness as
-%
-\begin{equation}
-  F
-  \equiv
-  \left\langle
-  \sum_{i = 1}^n \rho_i
-  \left(
-  \frac{ H_i } { p_i }
-  - \sum_{r = 1}^n \rho_r \frac{ H_r } { p_r }
-  \right)^2
-  \right\rangle
-  .
-  \label{eq:F_def}
-\end{equation}
-%
-By using Eqs. \eqref{eq:H_def}, \eqref{eq:xi_h},
-\eqref{eq:G_def}, and \eqref{eq:Gamma_def}, we have
-%
+If we define the time average,
+$$
+\tilde \Xi_k(T) \equiv \frac 1 T \sum_{t = 1}^T \tilde \xi_k(t)
+=\mathcal F\left[ \frac{ H_i } { p_i } \right]_k
+,
+$$
+then the histogram fluctuation of mode $k$ is given by
+$\left\langle \tilde \Xi_k^2(T) \right\rangle$,
+and from Eq. \eqref{eq:xi_zeta}, we have
 \begin{align*}
-  F
-  %&\approx
-  %\sum_{i = 1}^n \rho_i
-  %\left\langle
-  %\left(
-  %\frac{1}{T}
-  %\sum_{t = 1}^T \zeta_{*i}(t)
-  %\right)^2
-  %\right\rangle
-  %\\
-  &\approx
-  \frac{1}{T^2}
-  \sum_{i = 1}^n \rho_i
-  \sum_{t, t' = 1}^T
-  \left\langle
-  \zeta_{*i}(t) \, \zeta_{*i}(t')
-  \right\rangle
-  \approx
-  \frac{1}{T}
-  \sum_{i = 1}^n \rho_i \, G_i
-  =
-  \frac{ \Gamma } { T }
-  .
+\left\langle \tilde \Xi_k^2(T) \right\rangle
+&=
+\frac{1}{T}
+\sum_{t=-\infty}^\infty
+\left\langle
+  \tilde \xi_k(t) \, \tilde \xi_k(0)
+\right\rangle
+\\
+&\approx
+\frac{1}{T}
+\sum_{t=-\infty}^\infty
+\left\langle
+  \tilde \zeta_k(t) \, \tilde \zeta_k(0)
+\right\rangle
+=
+\frac{ \Gamma_k } { T }
+.
 \end{align*}
 %
-Compare the last expression to Eq. \eqref{eq:Emin_singlebin},
+The total histogram fluctuation is
+$$
+F(T)
+=
+\sum_{k=1}^{n-1} \left\langle \tilde \Xi_k^2(T) \right\rangle
+=
+\frac{ \Gamma } { T }.
+$$
+%
+Comparing this to Eq. \eqref{eq:Emin_singlebin},
 we conclude
 \begin{equation}
-  F \approx E(T)
+  F(T+t_0) \approx E(T)
   .
   \notag
-  %\label{eq:flatness}
+  %\label{eq:fluc}
 \end{equation}
-%and the histogram flatness
+%and the histogram fluc
 %serves as a good estimate of the final error.
+%
+\note{
 Note that the expected histogram flatness
 was previously used to define the error\cite{zhou2005, zhou2008},
 and the above demonstration shows the definition
 is compatible with ours, Eq. \eqref{eq:error_def}, in the long-time limit.
-%
-\note{
 An interesting application\cite{zhou2008},
 of the above result is
 to set the updating magnitude by $F/\Gamma$
@@ -3536,368 +3526,66 @@ as a substitute of the inverse-time schedule.
 
 
 
-\section{\label{sec:Gamma}
-Integrals of the autocorrelation functions}
+
+\section{\label{sec:Gamma_measure}
+Measurement of the integrals of the autocorrelation function
+}
 
 
 
-Here, we evaluate the integrals of
-the autocorrelation functions,
-$\Gamma_k$'s,
-in two special cases
-in Secs. \ref{sec:Gamma_perfect}
-and \ref{sec:Gamma_onestep}
-in the asymptotic limit,
-and describe a general method of measuring them
-in Sec. \ref{sec:Gamma_measure}.
-
-
-
-\subsection{\label{sec:Gamma_perfect}
-Perfect sampling}
-
-
-First, if the sampling is perfect,
+Here we give a method of measuring
+the integrals of the autocorrelation functions, $\Gamma_k$'s,
+in an adaptive FDS simulation
+with a constant updating magnitude.
 %
-%\begin{equation}
-%  \Gamma_k = 1.
-%\label{eq:Gamma_perfect}
-%\end{equation}
+This method has the advantage of not requiring
+explicit computation of 
+the autocorrelation functions of the eigenmodes.
 %
-%To see this, we note that
-the bin index, $i$, is an independent random variable
-at each time step $t$.
+The basic idea is to use Eq. \eqref{eq:xt2_eql}.
 %
-Further, in the asymptotic limit,
-$\langle h_i(t) \rangle = p_i$,
-we find from Eq. \eqref{eq:h_split} that
+However,
+without knowing the intrinsic distribution, $p^*_i$,
+we cannot compute the shifted bias potential, $v_i$.
+%
+The problem can be avoided by replacing the shift
+by the time average of the bias potential.
+
+We first note that the difference, 
+$u_i(t) - v_i(t) = \ln(p^*_i/p_i)$, is a constant of time,
+so is its Fourier transform,
+$\tilde u_k(t) - \tilde v_k(t)$.
+%
+It follows that
+${\tilde u}_{k}$ and ${\tilde v}_{k}$ would also share the same variance.
+%
+But since the ensemble average of ${\tilde v}_{k}$
+is zero, we have
 \begin{equation*}
-  \zeta_{*i}(t)
+  \operatorname{var} {\tilde u}_{k}
   =
-  \frac{ h_i(t) } { p_i }
-  -
-  \sum_{ r = 1 }^n
-    \rho_r \frac{ h_r(t) } { p_r }
-  ,
+  \operatorname{var} {\tilde v}_{k}
+  =
+  \left\langle {\tilde v}_{k}^2 \right\rangle
+  .
 \end{equation*}
 %
-and
-%
-\begin{align}
-  \left\langle
-    \zeta_{*i}(t) \, \zeta_{*j}(t')
-  \right\rangle
-  %&=
-  %\left\langle
-  %  \left(
-  %    \frac{ h_i(t) } { p_i }
-  %    -
-  %    \sum_{ r = 1 }^n
-  %      \rho_r \frac{ h_r(t) } { p_r }
-  %  \right)
-  %\right.
-  %\notag \\
-  %&\hphantom{==}\cdot
-  %\left.
-  %  \left(
-  %    \frac{ h_j(t') } { p_i }
-  %    -
-  %    \sum_{ s = 1 }^n
-  %      \rho_s \frac{ h_s(t') } { p_s }
-  %  \right)
-  %\right\rangle
-  %\notag
-  %\\
-  &=
-  \left(
-    \frac{ \delta_{ij} } { p_i }
-    -
-    \frac{ \rho_i } { p_i }
-    -
-    \frac{ \rho_j } { p_j }
-    +
-    \sum_{r = 1}^n
-    \frac{ \rho_r^2 } { p_r }
-  \right) \,
-  \delta_{t, t'}
-  .
-\label{eq:zz_perfect}
-\end{align}
-%
-%$\delta(t - t')$ is the equivalent of $\delta_{t, t'}$
-%in the continuous limit.
-%
-\note{To show Eq. \eqref{eq:zz_perfect}, we first note that
-  with $t \ne t'$ (going back to the discrete time case),
-  $$
-  \begin{aligned}
-  \left\langle
-    \zeta_{*i}(t) \, \zeta_{*j}(t')
-  \right\rangle
-  &=
-  \left\langle
-    \zeta_{*i}(t)
-  \right\rangle
-  \left\langle
-    \zeta_{*j}(t')
-  \right\rangle
-  =
-  0.
-  \end{aligned}
-  $$
-  Next, for $t = t'$, we have
-  $$
-  \langle
-    h_i(t) \, h_j(t)
-  \rangle
-  = \delta_{ij} \, p_i
-  ,
-  $$
-  which leads to Eq. \eqref{eq:zz_perfect}.
-}
-%
-Thus,
-for $k > 0$, we get
+Finally, by using Eq. \eqref{eq:xt2_eql},
+we get
 %
 \begin{equation}
-  \kappa_k(t - t')
-  =
-  \sum_{i,j = 1}^n
-  \phi_{ki} \phi_{kj}
-  \langle \zeta_{*i}(t) \, \zeta_{*j}(t') \rangle
-  %
-  =
-  \sum_{i = 1}^n \frac{ \phi_{ki}^2 } { p_i }
-  \, \delta_{t, t'},
-\notag
-%\label{eq:kappa_perfect}
-\end{equation}
-%
-where we have used
-Eqs. \eqref{eq:ortho1},
-\eqref{eq:zz_perfect}.
-%
-Thus, the white-noise approximation is exact,
-with
-$\Gamma_k = \sum_{ i = 1}^n \phi_{ki}^2 / p_i$.
-\note{Proof.%Eq. \eqref{eq:kappa_perfect},
-  $$
-  \begin{aligned}
-  \kappa_k(t - t')
-  &=
-  \sum_{i,j = 1}^n
-  \phi_{ki}
-  \phi_{kj}
-    \langle \zeta_{*i}(t) \, \zeta_{*j}(t') \rangle
-  \\
-  %
-  &=
-  \sum_{i,j = 1}^n
-  \phi_{ki}
-  \phi_{kj}
-  \left(
-    \frac{ \delta_{ij} } { p_i }
-    -
-    \frac{ \rho_i } { p_i }
-    -
-    \frac{ \rho_j } { p_j }
-    +
-    \sum_{r = 1}^n
-    \frac{ \rho_r^2 } { p_r }
-  \right) \,
-  \, \delta_{t, t'}
-  .
-  \end{aligned}
-  $$
-  where,
-  we have used
-  Eq. \eqref{eq:zz_perfect}
-  on the second line.
-  %
-  With Eq. \eqref{eq:ortho1},
-  only the first term in the parentheses survives.
-}
-In particular, if $p_i = \rho_i$, then, by
-Eq. \eqref{eq:eig_orthonormal_rows}, we have
-$\kappa_k(t - t') = \delta_{t, t'}$, or
-\begin{equation}
-  \Gamma_k = 1
-  .
-\label{eq:Gamma_perfect}
-\end{equation}
-
-
-
-
-\subsection{\label{sec:Gamma_onestep}
-One-step process}
-
-
-Another special case is the
-one-dimensional one-step process\cite{vankampen},
-which models a local sampling process.
-In each step, the system hops to
-one of the two neighboring bins
-with equal probability, $1/2$.
-%
-The transition matrix is
-%
-\begin{equation}
-  \arraycolsep=3.6pt\def\arraystretch{1.4}
-  \mathbf A
-  =
-  \left(
-    \begin{array}{cccccccc}
-      \frac \sigma 2 & \frac 1 2 & 0 & \dots & \frac {1 - \sigma} 2 \\
-      \frac 1 2 & 0         & \frac 1 2 & \dots & 0 \\
-      \vdots & &  & & \vdots \\
-      \frac {1 - \sigma} 2 & \dots &  & \frac 1 2 & \frac \sigma 2
-    \end{array}
-  \right),
-\notag
-%\label{eq:T_nn}
-\end{equation}
-%
-where $\sigma = 0$ for a periodic variable, or $1$ otherwise.
-%
-For many updating schemes
-(cf. Sec. \ref{sec:band-matrix}),
-we can further assume that
-the transition matrix $\mathbf A$ and
-the updating matrix $\mathbf w$
-share the eigenvectors,
-with $\rho_i = p_i = 1/n$.
-%but not the eigenvalues.
-%
-The eigenvalues of $\mathbf A$ are
-$$
-  \Lambda_k
-  =
-  \cos \frac{ (k - 1) \, 2 \, \pi }
-            {       g \, n        }
-  ,
-$$
-where
-$g = 1$ for a periodic variable, or $2$ otherwise.
-%Note that these $\Lambda_k$'s are
-%not to be confused with the eigenvalues of $\mathbf w$,
-%$\lambda_k$'s.
-%
-In this case,
-the autocorrelation function, $\kappa_k(t)$,
-decays as $\kappa_k(0) \, \Lambda_k^t$,
-with $\kappa_k(0) = 1$ being the same as
-the value in perfect sampling.
-%
-Thus,
-%$\Gamma_k$ is roughly twice the autocorrelation time, and
-from Eq. \eqref{eq:Gamma_sum}, we get
-%
-\begin{equation}
-  \Gamma_k
-  =
-  1 + 2 \, \sum_{t = 1}^\infty \Lambda_k^t
-  =
-  \frac{ 1 + \Lambda_k }
-       { 1 - \Lambda_k }
-  =
-  \cot^2 \left[
-    \frac{ (k - 1) \, \pi }
-         {       g \, n   }
-  \right]
-  .
-\label{eq:Gamma_onestep}
-\end{equation}
-
-
-\subsection{\label{sec:Gamma_measure}
-Measurement via an adaptive FDS simulation
-}
-
-
-
-%To use Eq. \eqref{eq:q_opt} in a real simulation,
-%we need to know both $\lambda_k$'s and $\Gamma_k$'s.
-%
-For an unknown system,
-we can use Eq. \eqref{eq:xt2_eql} to
-measure $\Gamma_k$'s in
-an adaptive FDS simulation
-with a constant schedule,
-$\alpha(t) = a_0$.
-%
-%A practical difficulty is that
-However,
-we often do not know a priori the intrinsic distribution, $p^*_i$,
-and hence
-cannot compute the deviation
-of the bias potential, $u_i$.
-%
-To circumvent the problem, we
-modify Eq. \eqref{eq:xt2_eql} as
-%
-\begin{equation}
-  \operatorname{var} {\tilde X}_k
+  \operatorname{var} {\tilde u}_k
   =
   \frac{1}{2} \,
   a_0 \, \Gamma_k \, \lambda_k,
 \label{eq:varXt}
 \end{equation}
 %
-where
-``$\operatorname{var}$''
-means the variance from the sampling (time) average,
-and
+where the variance can be computed from trajectory averages.
 %
-\begin{align*}
-{\tilde X}_k
-&=
-\sum_{ i = 1 }^n
-  \phi_{k i} \, (u_i - \bav{u}),
-%\label{eq:Xt_def}
-\end{align*}
-%
-with
-$
-\bav{u}
-\equiv
-\sum_{ j = 1 }^n \rho_j \, u_j.
-$
-
-To show Eq. \eqref{eq:varXt},
-we first note that
-the difference, $u_{*i} = u_i - \bav{u}$,
-differs from the actual deviation, $v_{*i}$,
-defined in Eq. \eqref{eq:x_def},
-only by a constant shift,
-$\ln( p^*_i / p_i ) - \sum_{ j = 1 }^n \rho_j \, \ln( p^*_j / p_j )$.
-%
-Thus, the two share the same variance
-under time averaging.
-%
-It follows that the corresponding linear combinations,
-${\tilde V}_{*k}$ and ${\tilde v}_{*k}$, would also share the same variance.
-%
-But since the average of ${\tilde v}_{*k}$ is zero,
-we have
-\begin{equation*}
-\operatorname{var} {\tilde V}_{*k}
-=
-\operatorname{var} {\tilde v}_{*k}
-=
-\left\langle {\tilde v}_{*k}^2 \right\rangle.
-\end{equation*}
-Finally, by using Eq. \eqref{eq:xt2_eql},
-we reach Eq. \eqref{eq:varXt}.
-
-\note{In practice, Eq. \eqref{eq:varXt}
-in inapplicable to zero eigenvalues, $\lambda_k$'s.
-%
-However, these eigenmodes can be ignored
-as they do not contribute to the Lagrangian defined by
-Eq. \eqref{eq:Lagrangian_const}.
-}
-
+A practical limitation is that Eq. \eqref{eq:varXt}
+would fail if some eigenvalue, $\lambda_k$, is close to zero.
+So it is best used for the single-bin updating scheme.
 
 
 
