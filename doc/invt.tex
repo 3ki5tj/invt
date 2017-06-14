@@ -308,12 +308,12 @@ and sensitive to the simulation length
 and the width of the Gaussian window.
 %
 %In either case, however,
-Ideally,
-the optimal initial updating magnitude
-can be set to
-half of the previous equilibrium value,
-which amounts to a shift of the origin of time
-in the single-bin case.
+%Ideally,
+%the optimal initial updating magnitude
+%can be set to
+%half of the previous equilibrium value,
+%which amounts to a shift of the origin of time
+%in the single-bin case.
 %
 Further, we will show that
 the single-bin updating scheme
@@ -2080,7 +2080,7 @@ Then solve $\partial (\Err_R + \Err_A) / \partial Q_c = 0$.
 We can rewrite the condition in terms of
 the initial updating magnitude by Eq. \eqref{eq:mQ_invTa},
 \begin{align}
-  \alpha(t = 0)
+  \alpha(0)
   =
   \frac{1}{T \, m\bigl( q(T) \bigr) }
   =
@@ -2091,14 +2091,14 @@ the initial updating magnitude by Eq. \eqref{eq:mQ_invTa},
     \lambda_k \, \epsilon_k \, e^{-2\lambda_k \, q(T)}
   }{M^2\bigl( q(T) \bigr)}
   .
-  \notag %\label{eq:opt_alpha0}
+  \label{eq:opt_alpha0}
 \end{align}
 %
 If the initial bias, $\epsilon_k$, is negligible, then
 %
 \begin{equation}
   \alpha( t = 0 )
-  =
+  \approx
   \frac{ a_0 }
        { 2 }
   ,
@@ -2311,7 +2311,7 @@ with no negative eigenvalue
 \item \label{step:prerun}
 Run a preliminary adaptive FDS simulation
 %using the updating scheme
-with a constant updating magnitude, $a_0$.
+with constant updating magnitude, $a_0$.
 
 \item \label{step:gamma}
 Estimate $\Gamma_k$'s from Eq. \eqref{eq:varXt}
@@ -2734,7 +2734,7 @@ Numerical results}
 \subsection{\label{sec:lj}Lennard-Jones}
 
 
-Our test system is a Lennard-Jones fluid of $N=100$ particles,
+Our test system is a Lennard-Jones (LJ) fluid of $N=100$ particles,
 and we wish to compute the PMF along the distance of two special particles, $r$.
 %
 The two special particles are mutually non-interacting
@@ -2795,11 +2795,11 @@ but not in the $\varrho^* = 0.8$ case.
 %
 In either case, there was an optimal width of Gaussian
 (which was $\sigma = 0.37$ for $\varrho^* = 0.1$
-or $0.07$ for $\varrho^* = 0.8$),
-an overly large width was counterproductive.
-%
-In Figure \ref{fig:lj_xerr},
-we plotted the error components against the eigenmode index
+or $0.07$ for $\varrho^* = 0.8$ in this case),
+an overly large width could be counterproductive.
+
+In Fig. \ref{fig:lj_xerr},
+we show the error components against the eigenmode index
 for the Gaussian updating scheme of width $\sigma = 0.2$.
 %
 While the Gaussian updating scheme effectively suppressed
@@ -2815,6 +2815,48 @@ leaving a hump on the error profile for the middle-range modes.
 %
 The optimal schedule improved over the inverse-time schedule
 and produced a flatter profile for the final error.
+%
+It is also possible to roughly
+recover the single-bin result by using the correction formula
+based on the histogram, Eq. \eqref{eq:UHcorr}.
+%
+This correction usually improves the accuracy of the small $k$ modes
+but not necessarily for the large $k$ modes.
+
+
+In Fig. \ref{fig:lj_alpha}. 
+we show the optimal schedules in a few cases.
+%
+Generally, the optimal schedule
+for the $\varrho^* = 0.8$ case
+was closer to the inverse-time schedule
+than that for the $\varrho^* = 0.1$ case.
+%
+This was probably because in the former case
+the first mode dominates the total error,
+$\Gamma_1 \approx \Gamma$,
+and the schedule was roughly optimized for this mode,
+resulting in
+$\alpha(t) \approx 1/[\lambda_1 (t + t_0)] \approx 1/(t+t_0)$
+as $\lambda_1 \approx 1$
+[especially when width of the Gaussian is small,
+cf. Eq. \eqref{eq:lambda_Gaussian}].
+%
+Since we have chosen a long equilibration period
+for preliminary run with a constant updating magnitude,
+the starting magnitude was usually around $a_0/2 = 5\times10^{-5}$
+[cf. Eq. \eqref{eq:half_alpha0}].
+%
+But if the Gaussian is too wide,
+such as the $\sigma = 0.6$ case,
+the eigenvalues $\lambda_k$ of some modes
+became too small to damp out the initial bias,
+resulting in nonnegligible $\epsilon_k$,
+and much larger initial updating magnitude, $\alpha(0)$
+[cf. Eq. \eqref{eq:opt_alpha0}].
+%
+In this case, our method would fail
+because the resulting bias potential would no longer be small.
 
 
 \begin{table}[h]\footnotesize
@@ -2839,7 +2881,12 @@ and produced a flatter profile for the final error.
     $\Err_\mathrm{final}$
     \\
     \hline
-    \multicolumn{4}{c}{$\varrho^* = 0.1$, $500$ bins} \\
+    \multicolumn{4}{c}{
+      $\varrho^* = 0.1$,
+      $500$ bins,
+      $\Gamma_1 \approx 111$,
+      $\Gamma \approx 1.1\times10^3$.
+    } \\
     \hline
     single-bin & $1/t$
     & $5.7(5.7)\times10^{-2}$
@@ -2881,7 +2928,12 @@ and produced a flatter profile for the final error.
     & $1.6(1.8)\times10^{-5}$
     \\
     \hline
-    \multicolumn{4}{c}{$\varrho^* = 0.8$, $250$ bins} \\
+    \multicolumn{4}{c}{
+      $\varrho^* = 0.8$,
+      $250$ bins,
+      $\Gamma_1 \approx 2.0\times10^4$,
+      $\Gamma \approx 2.7\times10^4$
+    } \\
     \hline
     single-bin & $1/t$
     & $1.3(1.4)$
@@ -2935,12 +2987,34 @@ and produced a flatter profile for the final error.
   }
   \caption{
     \label{fig:lj_xerr}
-    Error components for the FDS simulation
-    using the Gaussian updating scheme with $\sigma = 0.2$.
+    Error components for the FDS simulation on the LJ system
+    using the Gaussian updating scheme with width $\sigma = 0.2$.
+    %
     The optimal schedule (opt.) is more effective
     in reducing the errors of middle-range modes
     than the inverse-time ($1/t$) schedule.
-    The points are joined as a guide to the eyes.
+    The lines are a guide to the eyes.
+  }
+\end{center}
+\end{figure}
+
+
+
+\begin{figure}[h]
+\begin{center}
+  \makebox[\linewidth][c]{
+    \includegraphics[angle=0, width=1.0\linewidth]{fig/lj_alpha.pdf}
+  }
+  \caption{
+    \label{fig:lj_alpha}
+    Optimal schedule of the Gaussian updating scheme
+    for the LJ system.
+    %
+    The starting updating magnitude was usually
+    around $a_0/2 = 5\times10^{-5}$
+    as given by Eq. \eqref{eq:half_alpha0}.
+    But an overly wide Gaussian window ($\sigma = 0.6$)
+    resulted in a much larger updating magnitude.
   }
 \end{center}
 \end{figure}
@@ -2989,9 +3063,9 @@ of computing the PMF.
 
 
 The optimal schedule depends on the updating window function,
-which is limited to a single-bin in the WL case,
-but can be extended to several neighboring bins
-taking a Gaussian shape in the metadynamics case.
+which can be limited to a single-bin (as often in the WL case),
+or extended to several neighboring bins
+taking a Gaussian shape (as often in the metadynamics case).
 %
 More generally,
 each adaptive FDS method is associated with
@@ -3007,13 +3081,13 @@ the eigenvalues of the updating matrix,
 and the integrals of the autocorrelation functions
 of the eigenmodes.
 %
-For the single-bin (WL) scheme,
-the optimal schedule from our method
+For the single-bin scheme,
+we confirmed that the optimal schedule
 is given by the inverse-time formula,
 Eq. \eqref{eq:alpha_invt1}.
 %
 For a general multiple-bin scheme,
-including the Gaussian one used in metadynamics,
+including the Gaussian one,
 the optimal schedule is not given by a simple closed form,
 but is implicitly given by an equation of motion
 of a free particle with a position-dependent mass, Eq. \eqref{eq:q_opt}.
@@ -3022,8 +3096,8 @@ In this case,
 the optimal schedule and error
 can be sensitive to the simulation length.
 %
-The initial updating magnitude is always
-half of the previous equilibrium value.
+%The initial updating magnitude is always
+%half of the previous equilibrium value.
 % the value used during equilibration.
 
 We have also shown that
@@ -3042,26 +3116,24 @@ that are also optimal for asymptotic convergence.
 The optimal schedule of these bandpass schemes
 is always given by an inverse-time formula.
 
-Although the bandpass updating schemes
-appeared to outperform similar Gaussian schemes
-in our model study,
-they are global in nature
-and hence more expensive.
+We believe that one of the main appeals
+of the Gaussian updating scheme
+is its ability to maintain a smooth bias potential,
+which is useful for MD applications.
 %
-However, the performance gain
-is relatively small for short simulations
-with a local sampling process such as MD.
+However, it requires a careful choice of the width and
+a sufficiently long equilibration phase under constant updating magnitude.
 %
-\note{
-One way to improve the Gaussian updating schemes
-is to use it with a hard cutoff of eigenmodes
-(as we did for Fig. \ref{fig:optacmp}).
-%
-Then the optimal schedule
-would be similar to the inverse-time one,
-and the error, with the short-wavelength eigenmodes filtered,
-would be close to that of the bandpass scheme.
-}
+For reasonable parameters,
+one may use the histogram correction, Eq. \eqref{eq:UHcorr},
+in a post-simulation analysis
+to recover the possible accuracy loss
+and obtain a bias potential similar to
+that from the optimized single-bin scheme.
+%%
+%However, the performance gain
+%is relatively small for short simulations
+%with a local sampling process such as MD.
 
 
 
@@ -3136,95 +3208,139 @@ as a natural consequence of the stabilization of a runtime average
 as the sample size increases\cite{
   marsili2006, barducci2008}.
 %
-We first note that a runtime average
-\begin{equation}
-  X(t) = \frac{x(1) + \cdots + x(t)}{t}
-  .
-  \label{eq:avx}
-\end{equation}
-can be written as a recurrence relation
-\begin{equation}
-  X(t) = X(t - 1) + \frac{x(t) - X(t-1)}{t}
-  .
-  \label{eq:avx_recur}
-\end{equation}
-%
-Here $x(t) - X(t-1)$ serves as an independent correction
-from data point at time $t$ to the previous average value,
-and this correction is absorbed into the average
-with a weight of $1/t$,
-which is the inverse sample size.
+%We first note that a runtime average
+%\begin{equation}
+%  X(t) = \frac{x(1) + \cdots + x(t)}{t}
+%  .
+%  \label{eq:avx}
+%\end{equation}
+%can be written as a recurrence relation
+%\begin{equation}
+%  X(t) = X(t - 1) + \frac{x(t) - X(t-1)}{t}
+%  .
+%  \label{eq:avx_recur}
+%\end{equation}
+%%
+%Here $x(t) - X(t-1)$ serves as an independent correction
+%from data point at time $t$ to the previous average value,
+%and this correction is absorbed into the average
+%with a weight of $1/t$,
+%which is the inverse sample size.
 
-We can use Eq. \eqref{eq:avx_recur} to incrementally
-improve the estimated
-bias potential given by Eq. \eqref{eq:vcorr_equil}.
+%We can use Eq. \eqref{eq:avx_recur} to incrementally
+%improve the estimated
+%bias potential given by Eq. \eqref{eq:vcorr_equil}.
 %
-Assuming the correction, $\hat u_i$, is done at every step,
-then
+Assuming that we can linearize the histogram correction
+in Eq. \eqref{eq:vcorr_equil} as
+$\ln x \approx x - 1$ % (for $x \approx 1$),
+and apply it to the instantaneous histogram, $h_i(t)$,
+then the independent estimate of bias potential in each step
+is given by
 %
 \begin{equation*}
-  \hat u_i(t+1) = u_i(1) +
-  \ln \frac{ H_i(t) } { p_i }
-  \approx
-  u_i(1) +
-  \frac{ H_i(t) } { p_i } - 1
+  \hat u_i(t) \approx u_i(t) + \frac{ h_i(t) } { p_i } - 1
   .
+  \label{eq:uhatt}
 \end{equation*}
 %
-Here the normalized histogram, $H_i(t)$,
-is a runtime average of the instantaneous histogram, $h_i(t)$,
-%
-\begin{equation}
-  H_i(t) = \frac 1 t \sum_{\tau = 1}^t h_i(\tau),
-  \label{eq:hav_def}
-\end{equation}
-%
-and we have assumed that it
-is sufficiently precise in the second step.
-%
-Applying Eq. \eqref{eq:avx_recur} to the histogram yields
-%
+The time average
+$\hat U_i(t) \equiv (1/t) \sum_{\tau=1}^t \hat u_i(\tau)$
+is
 \begin{align}
-  H_i(t)
-  &=
-  H_i(t-1) + \frac{ h_i(t) - H_i(t-1) } { t }
-  .
-  \label{eq:avH_recur}
-\end{align}
-%
-Thus,
-%Since $H_i(t)$ is the average of the instantaneous histogram, $h_i(t)$,
-%we may apply Eq. \eqref{eq:av_recur}, and
-%
-\begin{align}
-  \hat u_i(t+1)
-  &=
-  \hat u_i(t)
-  +
-  \frac{ H_i(t) - H_i(t-1) }{ p_i }
-  \notag
-  \\
-  &=
-  \hat u_i(t)
-  +
-  \frac{1}{t} \left[
-    \frac{ h_i(t) }{ p_i }
-   -\frac{ H_i(t-1) }{ p_i }
+  \hat U_i(t)
+  &\approx
+  \frac{1}{t} \sum_{\tau=1}^t
+  \left[
+    u_i(\tau) + \frac{ h_i(\tau) } { p_i } - 1
   \right]
   .
-  \label{eq:vhat_update}
+  \label{eq:Uhatt}
 \end{align}
 %
-In the long time limit, we may assume that $H_i(t-1) \to p_i$
-and the second term in the square bracket
-becomes a constant shift that can be safely dropped.
+For a fixed bias potential, the above formula
+recovers the linearize Eq. \eqref{eq:vcorr_equil}.
 %
-Then Eq. \eqref{eq:vhat_update} is identical to
-the single-bin updating scheme, Eq. \eqref{eq:wl_update},
-under the inverse-time schedule, Eq. \eqref{eq:alpha_invt}.
+But with the single-bin updating scheme,
+Eq. \eqref{eq:wl_update}
+we have, up to a constant shift,
 %
-In other words, the bias potential obtained from the latter approach
-represents a runtime average.
+\begin{align}
+  \hat U_i(t)
+  &\approx
+  \frac{1}{t} \sum_{\tau=1}^t
+  \left[
+    u_i(\tau) +
+    \frac{ u_i(\tau + 1) - u_i(\tau) } { \alpha(t) }
+  \right]
+  ,
+  \notag
+  \\
+  &\approx
+  \Delta u_i
+  +
+  \sum_{\tau=1}^t
+  \left[
+    1 + \frac{1}{\alpha(\tau - 1)} - \frac{1}{\alpha(\tau)}
+  \right]
+  \frac{ u_i(\tau) } {t}
+  ,
+  \label{eq:Uhat_sum}
+\end{align}
+where
+$$
+\Delta u_i \equiv \frac{u_i(t+1)}{t \, \alpha(t)}
+- \frac{u_i(1)}{t \, \alpha(0)}.
+$$
+%
+With the inverse-time schedule, Eq. \eqref{eq:alpha_invt},
+each term in the square brackets vanishes,
+and if we further define $\alpha(0) \to \infty$
+$$
+u_i(t+1) = \hat U_i(t),
+$$
+the bias potential represents
+the runtime average of the correction, $\hat u_i(t)$.
+%
+Another special case is $\alpha(\tau) = 0$ for $\tau = 0, 1, \dots$,
+then Eq. \eqref{eq:Uhat_sum} is reduced to a plain average
+$$
+\hat U_i(t) \approx \frac 1 t \sum_{\tau=1}^t u_i(\tau).
+$$
+where we have assumed an equilibrium condition
+such that $u_i(t+1) \approx u_i(1)$.
+
+For other updating schemes and schedules, we may still use
+Eq. \eqref{eq:Uhatt} to construct a correction:
+%
+\begin{align}
+  \hat U_i(t)
+  &\approx
+  U_i(t)
+  +
+  \frac{ H_i(t) } { p_i } - 1
+  \approx
+  U_i(t)
+  +
+  \ln \frac{ H_i(t) } { p_i }
+  ,
+  \label{eq:UHcorr}
+\end{align}
+%
+where
+\begin{align}
+  U_i(t)
+  &= \frac 1 t \sum_{\tau = 1}^t u_i(\tau)
+  ,
+  \notag
+  %\label{eq:uav_def}
+  \\
+  H_i(t)
+  &= \frac 1 t \sum_{\tau = 1}^t h_i(\tau)
+  .
+  \label{eq:hav_def}
+\end{align}
+%
 %Thus, the bias potential from a WL simulation
 %(which typically uses the single-bin updating scheme)
 %under the inverse-time schedule

@@ -729,7 +729,7 @@ __inline static int loadgamma(int n, double *gamma,
   FILE *fp;
   char buf[128];
   int i, id;
-  double x;
+  double x, sum = 0;
 
   if ( (fp = fopen(fn, "r")) == NULL ) {
     fprintf(stderr, "cannot open %s\n", fn);
@@ -758,9 +758,10 @@ __inline static int loadgamma(int n, double *gamma,
     }
     //fprintf(stderr, "gamma(%d) = %g -> %g\n", i, gamma[i], x);
     gamma[i] = x;
+    sum += x;
   }
-  fprintf(stderr, "loaded %d gamma values %g,...%g, from %s\n",
-      i-1, gamma[1], gamma[i-1], fn);
+  fprintf(stderr, "loaded %d gamma values %g,...%g, sum %g, from %s\n",
+      i-1, gamma[1], gamma[i-1], sum, fn);
   fclose(fp);
 
   return 0;
