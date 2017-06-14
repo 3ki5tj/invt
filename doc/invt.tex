@@ -1270,7 +1270,21 @@ By definition, Eq. \eqref{eq:mbin_update},
 a visit to bin $j$ in this case results in updates of the bias potential
 not only at bin $j$, but also at a few neighboring bins $i$'s.
 %
-The optimization procedure is similar to the single-bin case.
+Similar to Eq. \eqref{eq:ut_diffeq},
+we can approximate the updating scheme
+as a differential equation,
+%
+\begin{equation}
+  \dot u_i(t)
+  \approx
+  \alpha(t) \,
+  \sum_{j=1}^n w_{ij} \, \frac{ h_j(t) } { p_j }
+  .
+  \label{eq:ut_diffeq_mbin}
+\end{equation}
+%
+The optimization procedure is similar to
+the single-bin case.
 %
 The key step comes from the
 projection of the bias potential to the $n$ eigenmodes
@@ -1321,8 +1335,8 @@ in our cases.
 Below we will take advantage of the analogy
 and borrow techniques used
 in studying transition matrices\cite{vankampen}
-(we will only use results that are unaffected by the allowance
-of negative elements into $\mathbf w$).
+(we will only use properties that are unaffected
+by the admission of negative elements into $\mathbf w$).
 
 
 %To simplify the ensuing discussion,
@@ -1513,7 +1527,7 @@ or in continuous time, we have, for $k > 0$,
   -\alpha(t) \, \lambda_k \,
   \bigl[ {\tilde v}_k(t) - {\tilde \zeta}_k(t) \bigr]
   ,
-  \label{eq:ut_diffeq_mbin}
+  \label{eq:vt_diffeq_mbin}
 \end{equation}
 %
 where we have removed the bin average,
@@ -1521,6 +1535,12 @@ and used the transformed version of Eq. \eqref{eq:sh_ave}
 [but the subscript ``$_*$'' is dropped by Eq. \eqref{eq:ftstar}].
 In the second step, we have used the linear approximation
 as in Sec. \ref{sec:sbin_diffeq}.
+%
+Equation \eqref{eq:vt_diffeq_mbin}
+shows that the rate of error reduction
+is now mode-dependent,
+and the minimization of the final error
+involves a compromise of the individual modes.
 
 
 
@@ -2734,10 +2754,10 @@ Numerical results}
 
 
 
-\subsection{\label{sec:lj}Lennard-Jones}
+%\subsection{\label{sec:lj}Lennard-Jones}
 
 
-Our test system is a Lennard-Jones (LJ) fluid of $N=100$ particles,
+Our test system is a Lennard-Jones (LJ) fluid of $100$ particles,
 and we wish to compute the PMF along the distance of two special particles, $r$.
 %
 The two special particles are mutually non-interacting
@@ -2767,13 +2787,15 @@ on a grid of size $\Delta r = 0.01$ in reduced units.
 Two densities were tried, $\varrho^* = 0.1$ and $0.8$,
 and the numbers of bins were $n = 500$ and $250$, respectively.
 %
+The reduced temperature was $T^* = 3$.
+%
 We tested the single-bin, Gaussian, and bandpass updating schemes.
 %
 Each simulation started with an ``equilibration'' phase
 of $10^7$ steps under constant updating magnitude,
 $a_0 = 10^{-4}$,\footnote{The equivalent $\ln f = n \, a_0$ for the WL algorithm
 was $0.05$ and $0.025$, respectively.}
-followed by a production phase
+followed by a production phase of another $10^7$ steps
 with updating magnitude given by
 either the inverse-time or optimal schedule.
 %
@@ -2783,7 +2805,7 @@ and report the average.
 To make sure the same schedule for multiple runs under the same condition,
 the optimal schedule was pre-computed from a set of fixed values of
 $\Gamma_k$ and $\epsilon_k$,
-although they can also be fairly accurately estimated from the data
+although they can be fairly accurately estimated from the data
 collected from the equilibration phase of each individual run.
 
 
@@ -2798,18 +2820,30 @@ The Gaussian scheme appeared to be superior
 to the single-bin scheme in the $\varrho^* = 0.1$ case,
 but not in the $\varrho^* = 0.8$ case.
 %
+In the latter case,
+the error was dominated by the $k=1$ eigenmode
+corresponding to the longest range motion, as $\Gamma_1 \approx \Gamma$,
+and the suppression of local noise
+had little effect on reducing the total error.
+%
 In either case, there was an optimal width of Gaussian
-(which was $\sigma = 0.37$ for $\varrho^* = 0.1$
-or $0.07$ for $\varrho^* = 0.8$ in this case),
 an overly large width could be counterproductive.
+%
+The optimal width was $\sigma = 0.37$ for $\varrho^* = 0.1$
+or $0.07$ for $\varrho^* = 0.8$ in this case,
+although it depended on the simulation length.
 
-In Fig. \ref{fig:lj_xerr},
-we show the error components against the eigenmode index
-for the Gaussian updating scheme of width $\sigma = 0.2$.
+To further investigate the behavior of the Gaussian updating scheme,
+we show in Fig. \ref{fig:lj_xerr}
+the error components, $\langle \tilde v_k^2 \rangle$,
+against the eigenmode index
+for the $\varrho^* = 0.1$ case
+with width $\sigma = 0.2$.
 %
 While the Gaussian updating scheme effectively suppressed
 the initial errors for short-range or large-$k$ modes,
-it also slowed down the reduction of errors of these modes.
+it also slowed down the error reduction of these modes
+[cf. Eq. \eqref{eq:vt_diffeq_mbin} and \eqref{eq:lambda_Gaussian}].
 %
 As a result, the final errors of the long-range or small-$k$ modes
 were larger than those from the single-bin scheme.

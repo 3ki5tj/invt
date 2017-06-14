@@ -1,6 +1,6 @@
 prj=invt
 
-ver=5.8
+ver=5.9
 
 figgps=$(wildcard fig/*.gp)
 pdffigs=$(patsubst %.gp,%.pdf, $(figgps))
@@ -45,7 +45,8 @@ $(prj)docV$(ver).zip::
 	  ln -sf ../../fig .
 	cd old/V$(ver) && \
 	  python deannote.py -v -c -i $(prj)_annotatedV$(ver).tex -o $(prj)V$(ver).tex
-	#make diff
+	make all -C old/V$(ver)/
+	make diff
 	make all -C old/V$(ver)/
 	cd old/V$(ver) && \
 	  zip -r ../../$(prj)docV$(ver).zip *.tex *.pdf simul.bib *.py \
@@ -61,7 +62,7 @@ $(prj)doc.zip: $(prj).tex $(prj).pdf \
 	       Makefile README.md
 	zip -r $@ $^
 
-refver=5.3
+refver=5.8
 
 diff::
 	mkdir -p old/V$(ver)
