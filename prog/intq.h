@@ -15,7 +15,7 @@ typedef struct {
   double *aarr; /* alpha(t) */
   double *dinva; /* instantaneous eigenvalue d(1/alpha(t))/dt */
   int n; /* number of bins or modes */
-  int K; /* cutoff mode */
+  int kc; /* cutoff mode for the error definition */
   int pbc; /* periodic boundary condition */
   const double *lambda; /* eigenvalues of the updating magnitude */
   const double *gamma; /* autocorrelation integrals */
@@ -27,7 +27,7 @@ typedef struct {
 
 
 static intq_t *intq_open(double T, int m,
-    int n, int K, int pbc,
+    int n, int kc, int pbc,
     const double *lambda, const double *gamma)
 {
   intq_t *intq;
@@ -40,7 +40,7 @@ static intq_t *intq_open(double T, int m,
   xnew(intq->dinva, m + 1);
   intq->T = T;
   intq->n = n;
-  intq->K = K;
+  intq->kc = kc;
   intq->pbc = pbc;
   intq->lambda = lambda;
   intq->gamma = gamma;
@@ -80,7 +80,7 @@ static void intq_setqgrid(intq_t *intq, double qT)
 static double intq_getmassx(intq_t *intq, double dq,
     double *massK)
 {
-  int k, n = intq->n, K = intq->K, pbc = intq->pbc;
+  int k, n = intq->n, kc = intq->kc, pbc = intq->pbc;
   double lam, y, mass = 0;
 
   *massK = 0;
@@ -88,7 +88,7 @@ static double intq_getmassx(intq_t *intq, double dq,
     lam = intq->lambda[k];
     y = intq->gamma[k] * lam * lam * exp( 2 * lam * dq );
     mass += y;
-    if ( K < 0 || k <= K || (pbc && k >= n - K) ) {
+    if ( kc <= 0 || k < kc || (pbc && k > n - kc) ) {
       *massK += y; /* for mode limited optimal schedule */
     }
   }
@@ -223,16 +223,16 @@ static double intq_asymerr(intq_t *intq, double qT)
 /* compute the square-root residue error */
 static double intq_reserr(intq_t *intq, double a0, const double *xerr, double qT)
 {
-  int i, n = intq->n, K = intq->K, pbc = intq->pbc;
+  int k, n = intq->n, kc = intq->kc, pbc = intq->pbc;
   double y;
 
   intq->Er = intq->EKr = 0;
-  for ( i = 1; i < n; i++ ) {
-    y = 0.5 * a0 * intq->gamma[i] * intq->lambda[i];
-    if ( xerr != NULL ) y += xerr[i];
-    y *= exp(-2.0 * intq->lambda[i] * qT);
+  for ( k = 1; k < n; k++ ) {
+    y = 0.5 * a0 * intq->gamma[k] * intq->lambda[k];
+    if ( xerr != NULL ) y += xerr[k];
+    y *= exp(-2.0 * intq->lambda[k] * qT);
     intq->Er += y;
-    if ( K < 0 || i <= K || (!pbc && i >= n - K) )
+    if ( kc <= 0 || k < kc || (!pbc && k > n - kc) )
       intq->EKr += y;
   }
   return sqrt( intq->Er );
@@ -244,16 +244,15 @@ static double intq_reserr(intq_t *intq, double a0, const double *xerr, double qT
 __inline static double intq_errcomp(intq_t *intq, double a0,
     double qT, double *xerr, double *xerr_r, double *xerr_a)
 {
-  int i, j, m = intq->m, n = intq->n;
-  // K = intq->K, pbc = intq->pbc;
+  int k, j, m = intq->m, n = intq->n;
   double err_r, err_a, err;
   double a, y, dq, dt, errtot = 0, lam, gam;
 
   /* loop over modes, starting from mode 1
    * since mode 0 is always zero */
-  for ( i = 1; i < n; i++ ) {
-    lam = intq->lambda[i];
-    gam = intq->gamma[i];
+  for ( k = 1; k < n; k++ ) {
+    lam = intq->lambda[k];
+    gam = intq->gamma[k];
 
     /* residual error */
     err_r = 0.5 * a0 * gam * lam * exp(-2.0 * lam * qT);
@@ -274,11 +273,11 @@ __inline static double intq_errcomp(intq_t *intq, double a0,
       err_a += y * dt;
     }
 
-    if ( xerr_r != NULL ) xerr_r[i] = err_r;
-    if ( xerr_a != NULL ) xerr_a[i] = err_a;
+    if ( xerr_r != NULL ) xerr_r[k] = err_r;
+    if ( xerr_a != NULL ) xerr_a[k] = err_a;
 
     err = err_r + err_a;
-    xerr[i] = err;
+    xerr[k] = err;
     errtot += err;
   }
 
@@ -377,7 +376,7 @@ static double intq_optqTfunc(intq_t *intq,
     double initalpha, double qT, double *df)
 {
   int i, k, m = intq->m;
-  int n = intq->n, K = intq->K, pbc = intq->pbc;
+  int n = intq->n, kc = intq->kc, pbc = intq->pbc;
   double f, dq, q, lambda, gamma, xp, y, mint, mass;
 
   intq_setqgrid(intq, qT);
@@ -390,7 +389,7 @@ static double intq_optqTfunc(intq_t *intq,
        + (i > 0 ? intq->qarr[m-i+1] - intq->qarr[m-i] : 0);
     y = 0;
     for ( k = 1; k < n; k++ ) {
-      if ( K >= 0 && k > K && (!pbc || k < n - K) )
+      if ( kc > 0 && k >= kc && (!pbc || k <= n - kc) )
         continue;
       gamma = intq->gamma[k];
       lambda = intq->lambda[k];
@@ -403,7 +402,7 @@ static double intq_optqTfunc(intq_t *intq,
   f = mint - mass * intq->T * initalpha;
 
   for ( y = 0, k = 1; k < n; k++ ) {
-    if ( K >= 0 && k > K && (!pbc || k < n - K) )
+    if ( kc > 0 && k >= kc && (!pbc || k <= n - kc) )
       continue;
     gamma = intq->gamma[k];
     lambda = intq->lambda[k];
@@ -413,7 +412,7 @@ static double intq_optqTfunc(intq_t *intq,
   }
 
   *df = mass + y / mass * intq->T * initalpha;
-  //printf("qT %g, f %g, mass %g, df %g, y %g, K %d\n", qT, f, mass, *df, y, K);
+  //printf("qT %g, f %g, mass %g, df %g, y %g, kc %d\n", qT, f, mass, *df, y, kc);
   return f;
 }
 
@@ -479,7 +478,7 @@ static double intq_optqTfuncx(intq_t *intq, double a0,
     double *xerr, double qT, double *df)
 {
   int i, k, m = intq->m;
-  int n = intq->n, K = intq->K, pbc = intq->pbc;
+  int n = intq->n, kc = intq->kc, pbc = intq->pbc;
   double f, q, dq, lambda, gamma, xp, y, z, w, mint, mass, dmass, T;
 
   intq_setqgrid(intq, qT);
@@ -492,7 +491,7 @@ static double intq_optqTfuncx(intq_t *intq, double a0,
        + (i > 0 ? intq->qarr[m-i+1] - intq->qarr[m-i] : 0);
     y = 0;
     for ( k = 1; k < n; k++ ) {
-      if ( K >= 0 && k > K && (!pbc || k < n - K) )
+      if ( kc > 0 && k >= kc && (!pbc || k <= n - kc) )
         continue;
       gamma = intq->gamma[k];
       lambda = intq->lambda[k];
@@ -505,16 +504,14 @@ static double intq_optqTfuncx(intq_t *intq, double a0,
 
   y = z = w = 0;
   for ( k = 1; k < n; k++ ) {
-    if ( K >= 0 && k > K && (!pbc || k < n - K) )
+    if ( kc > 0 && k >= kc && (!pbc || k <= n - kc) )
       continue;
     gamma = intq->gamma[k];
     lambda = intq->lambda[k];
     xp = exp(-2 * lambda * q);
     y += gamma * lambda * lambda * lambda * xp;
-    if ( k > 0 ) {
-      z += xerr[k] * lambda * xp;
-      w += xerr[k] * lambda * lambda * xp;
-    }
+    z += xerr[k] * lambda * xp;
+    w += xerr[k] * lambda * lambda * xp;
   }
 
   dmass = -y/mass;
@@ -803,14 +800,14 @@ __inline static int intq_save(intq_t *intq,
 static double esterror_opt(double T, double a0,
     double initalpha, double *qT, double qprec,
     int m, intq_t **intq_ptr,
-    int n, int K, int pbc,
+    int n, int kc, int pbc,
     const double *lambda, const double *gamma,
     int verbose)
 {
   intq_t *intq;
   double err;
 
-  intq = intq_open(T, m, n, K, pbc, lambda, gamma);
+  intq = intq_open(T, m, n, kc, pbc, lambda, gamma);
 
   /* compute the optimal schedule and error */
   if ( *qT <= 0 ) {
@@ -839,14 +836,14 @@ static double esterror_opt(double T, double a0,
 static double esterror_optx(double T, double a0,
     double *xerr, double *qT, double qprec,
     int m, intq_t **intq_ptr,
-    int n, int K, int pbc,
+    int n, int kc, int pbc,
     const double *lambda, const double *gamma,
     int verbose)
 {
   intq_t *intq;
   double err;
 
-  intq = intq_open(T, m, n, K, pbc, lambda, gamma);
+  intq = intq_open(T, m, n, kc, pbc, lambda, gamma);
 
   /* compute the optimal schedule and error */
   if ( *qT <= 0 ) {
