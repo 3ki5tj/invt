@@ -420,7 +420,7 @@ For a continuous quantity, $z$,
 we can discretize it
 such that the integer $i$ represents
 the index of a small interval, or a bin,
-$(z, z + \Delta z)$.
+$(z, z + \delta z)$.
 %
 %The distribution is normalized as
 %$\sum_{i = 1}^n p^*_i = 1$.
@@ -910,9 +910,9 @@ we may define $v_{*i}(t)$ such that
 $\rho_i \, e^{-v_{*i}(t)}$ is a normalized distribution,
 i.e.,
 $$
-v_{*i}(t) \to -\log\left(
-  \frac{ (p^*_i/p_i) \, e^{ -u_i(t) } } 
-  { \sum_{j=1}^n \rho_j \, (p^*_j/p_j) \, e^{ -u_j(t) } } 
+v_{*i}(t) \to -\ln\left(
+  \frac{ (p^*_i/p_i) \, e^{ -u_i(t) } }
+  { \sum_{j=1}^n \rho_j \, (p^*_j/p_j) \, e^{ -u_j(t) } }
 \right).
 $$
 One can readily show that the two definitions are equivalent
@@ -1430,17 +1430,17 @@ while the orthogonality demands
 \label{eq:ortho1}
 \end{equation}
 %
-%We may write the updating matrix in $\phi_{ki}$'s
-%as\cite{bussi2006}
-%%
-%\begin{equation}
-%  w_{ij}
-%  =
-%  \frac{1}{\rho_i} \sum_{k=0}^{n - 1}
-%  \lambda_k \, \phi_{ki} \, \phi_{kj}
-%  .
-%  \notag
-%\end{equation}
+We may reconstruct the updating matrix in $\phi_{ki}$'s
+as\cite{bussi2006}
+%
+\begin{equation}
+  w_{ij}
+  =
+  \frac{1}{\rho_i} \sum_{k=0}^{n - 1}
+  \lambda_k \, \phi_{ki} \, \phi_{kj}
+  .
+  \label{eq:w_from_phi}
+\end{equation}
 
 
 %It is worth pointing out
@@ -1623,13 +1623,12 @@ where
 and $\Gamma_k$ is computed from
 the autocorrelation function
 of the histogram fluctuation,
-$\kappa_k(t) \equiv \bigl\langle {\tilde \zeta}_k(0)
+$\bigl\langle {\tilde \zeta}_k(0)
 \, {\tilde \zeta}_k(t) \bigr\rangle$,
 as:
 %
 \begin{equation}
   \Gamma_k
-  = \sum_{t = -\infty}^\infty \kappa_k(t)
   = \sum_{t = -\infty}^\infty
   \left\langle {\tilde \zeta}_k(0)
             \, {\tilde \zeta}_k(t) \right\rangle
@@ -2114,7 +2113,9 @@ the initial updating magnitude by Eq. \eqref{eq:mQ_invTa},
   \label{eq:opt_alpha0}
 \end{align}
 %
-If the initial bias, $\epsilon_k$, is negligible, then
+If the initial bias, $\epsilon_k$, is negligible,
+which is typically true if no eigenvalue is close to $0$,
+then
 %
 \begin{equation}
   \alpha( t = 0 )
@@ -2338,8 +2339,14 @@ multiple of $1.0$.
 
 \item \label{step:gamma}
 Estimate $\Gamma_k$'s from Eq. \eqref{eq:varXt}
-    (cf. Appendix \ref{sec:Gamma_measure})
-    as well as the initial bias $\epsilon_k$.
+(cf. Appendix \ref{sec:Gamma_measure})
+as well as the initial bias $\epsilon_k$.\footnote{The
+  value of $\tilde u_k$ can be estimated
+  from the histogram-corrected bias potential
+  by Eq. \eqref{eq:uhatav},
+  although it can overestimate
+  $\epsilon_k$ for large-$k$ modes.
+}
 
 \item \label{step:qT}
 Compute the optimal value of $q(T)$ by solving Eq. \eqref{eq:opt_qT}.
@@ -2577,9 +2584,29 @@ The asymptotic error is then
        { (T + t_0)^2 }
   \sum_{ k = 1 }^{n-1}
     \Gamma_k
-  .
+  =
+  \frac{ \Gamma \, T     }
+       { (T + t_0)^2 }
+  ,
 \label{eq:error_asym_singlebin}
 \end{align}
+%
+where we have used
+%
+\begin{align}
+  \sum_{k=1}^{n-1} \Gamma_k
+  &=
+  \sum_{t=-\infty}^\infty \sum_{k=1}^{n-1} \langle {\tilde v}_k(t) \, {\tilde v}_k(0) \rangle
+  \notag
+  \\
+  &=
+  \sum_{t=-\infty}^\infty \sum_{i=1}^n \rho_i \langle v_{*i}(t) \, v_{*i}(0) \rangle
+  = \sum_{i=1}^n \rho_i \, G_i = \Gamma
+  .
+  \notag
+  %\label{eq:Gamma_G_sum}
+\end{align}
+%
 %
 If we further assume $\lambda_1 = \cdots = \lambda_{n-1} = 1$,
 %the optimal schedule given by
@@ -2619,12 +2646,13 @@ perfect (brick-wall) \emph{bandpass} updating schemes
 that ignore short-wavelength eigenmodes,
 which are typically local noise.
 %
-Mathematically, these updating schemes
-allow us to assign zero eigenvalues
-to modes that are likely absent from the PMF.
+A bandpass updating scheme is essentially
+the single-bin updating scheme
+supplied with a perfect filter
+for the noise modes,
+and zero eigenvalues are assigned to the noise modes.
 %
 For example,
-%if we can assume
 by assuming
 that the PMF is sufficiently smooth
 such that the eigenmodes can be limited to $k < K$,
@@ -2636,22 +2664,10 @@ $$
 \lambda_K = \cdots = \lambda_{n-1} = 0.
 $$
 %
-Then, the updating matrix is given by
+Then, the updating matrix is, according to
+Eq. \eqref{eq:w_from_phi},
 %
 $$w_{ij} = n \sum_{k=0}^{K-1} \phi_{ki} \, \phi_{kj},$$
-%
-and Eq. \eqref{eq:error_asym_singlebin} is modified as
-%
-\begin{equation}
-  \Err_A(T)
-  =
-  \frac {       T     }
-        { (T + t_0)^2 }
-  \sum_{ k = 1 }^{K-1}
-    \Gamma_k.
-%\notag
-\label{eq:error_asym_sinc}
-\end{equation}
 %
 The optimal schedule of these schemes
 remains to be the inverse-time schedule
@@ -2684,12 +2700,13 @@ $$E(0) = \frac{1}{2} a_0 \sum_{k=1}^{n-1} \Gamma_k
 = \frac{1}{2} \, a_0 \, \Gamma.$$
 }
 %
-From Eqs. \eqref{eq:error_tot},
-\eqref{eq:error_res},
-\eqref{eq:tk0},
-and
-\eqref{eq:error_asym_sinc},
-we get
+%From Eqs. \eqref{eq:error_tot},
+%\eqref{eq:error_res},
+%\eqref{eq:tk0},
+%and
+%\eqref{eq:error_asym_sinc},
+%we get
+The final error is given by
 %
 \begin{equation}
   \Err(T)
@@ -2698,28 +2715,30 @@ we get
        { T + t_0 }
   \sum_{ k = 1 }^{ K - 1 }
     \Gamma_k
-  .
+  ,
 \label{eq:error_sinc}
 \end{equation}
 %
-This result recovers Eq. \eqref{eq:Emin_singlebin}
-for the single-bin updating scheme:
-if we set $K = n$, then\note{
-  From Eq. \eqref{eq:eig_orthonormal_cols}, we have
-  $\sum_{i=1}^n \rho_i \langle v_{*i}(t) \, v_{*i}(0) \rangle =\sum_{k=1}^{n-1} \langle {\tilde v}_k(t) \, {\tilde v}_k(0) \rangle.$
-  Then sum over $t$ from $-\infty$ to $\infty$.
-}
+as a generalization of Eq. \eqref{eq:Emin_singlebin}
+for the single-bin updating scheme.
+
+Since the bandpass updating scheme is
+a straightforward generalization of
+the single-bin updating scheme,
+we can also borrow the WL algorithm
+to control the updating magnitude
+in initial stages of the simulation.
 %
-\begin{equation}
-  \sum_{k=1}^{n-1} \Gamma_k
-  = \sum_{i=1}^n \rho_i \, G_i = \Gamma
-  ,
-  \notag
-  %\label{eq:Gamma_G_sum}
-\end{equation}
+However, the histogram fluctuation should
+be limited to first few modes, $k = 1, \dots, K$,
+as the bandpass updating scheme
+only partially flattens the histogram
+of these modes (cf. Appendix \ref{sec:hfluc}).
+
+
 %
-This error is roughly proportional to the inverse simulation length,
-as one would expect from an equilibrium FDS simulation.
+%This error is roughly proportional to the inverse simulation length,
+%as one would expect from an equilibrium FDS simulation.
 %In Appendix \ref{sec:equilerr},
 %we show that the above error tends
 %to the error of the ideal equilibrium FDS simulation
@@ -2782,7 +2801,7 @@ where $\varrho^*$ is the reduced number density.
 
 
 The PMF was calculated from $r = 0$ to half of the box dimension
-on a grid of size $\Delta r = 0.01$ in reduced units.
+on a grid of size $\delta r = 0.01$ in reduced units.
 %
 Two densities were tried, $\varrho^* = 0.1$ and $0.8$,
 and the numbers of bins were $n = 500$ and $250$, respectively.
@@ -2856,15 +2875,17 @@ leaving a hump on the error profile for the middle-range eigenmodes.
 The optimal schedule improved over the inverse-time schedule
 and produced a flatter profile for the final error.
 %
-It was also possible to roughly
+Even without the optimal schedule,
+it was also possible to roughly
 recover the single-bin result by using the correction formula
-based on the histogram, Eq. \eqref{eq:UHcorr}.
+based on the histogram, Eq. \eqref{eq:uhatav}.
 %
-This correction usually benefited the small-$k$ modes
+This correction usually improves
+the estimate for the small-$k$ modes
 but not necessarily for the large-$k$ modes.
 
 
-In Fig. \ref{fig:lj_alpha}. 
+In Fig. \ref{fig:lj_alpha}.
 we show the optimal schedules in a few cases.
 %
 Generally, the optimal schedule
@@ -3164,7 +3185,8 @@ However, it requires a careful choice of the width and
 a sufficiently long equilibration phase under constant updating magnitude.
 %
 For reasonable parameters,
-one may use the histogram correction, Eq. \eqref{eq:UHcorr},
+one may use the histogram correction,
+Eq. \eqref{eq:uhatav},
 in a post-simulation analysis
 to recover the possible accuracy loss
 and obtain a bias potential similar to
@@ -3277,35 +3299,55 @@ and apply it to the instantaneous histogram, $h_i(t)$,
 then the independent estimate of bias potential in each step
 is given by
 %
-\begin{equation*}
+\begin{equation}
   \hat u_i(t) \approx u_i(t) + \frac{ h_i(t) } { p_i } - 1
+  = u_i(t) + \xi_i(t) - 1
   .
   \label{eq:uhatt}
-\end{equation*}
+\end{equation}
 %
-The time average
-$\hat U_i(t) \equiv (1/t) \sum_{\tau=1}^t \hat u_i(\tau)$
-is
+We define a time average for variable, $f$ as
+\begin{equation}
+\overline{f}(t) \equiv \frac{1}{t} \sum_{\tau=1}^t f(\tau)
+.
+  \label{eq:timeav}
+\end{equation}
+%
+Then after time averaging, Eq. \eqref{eq:uhatt} becomes
 \begin{align}
-  \hat U_i(t)
+  \overline{ \hat u_i }(t)
   &\approx
-  \frac{1}{t} \sum_{\tau=1}^t
-  \left[
-    u_i(\tau) + \frac{ h_i(\tau) } { p_i } - 1
-  \right]
-  .
-  \label{eq:Uhatt}
+  \overline{ u_i } (t)
+  + \overline{ \xi_i } (t) - 1
+  \approx
+  \overline{ u_i } (t)
+  + \ln \frac{ H_i(t) } { p_i }
+  ,
+  \label{eq:uhatav}
 \end{align}
 %
-For a fixed bias potential, the above formula
-recovers the linearize Eq. \eqref{eq:vcorr_equil}.
+where we have introduced average histogram
 %
-But with the single-bin updating scheme,
-Eq. \eqref{eq:wl_update}
+\begin{align}
+  H_i(t)
+  &= \frac 1 t \sum_{\tau = 1}^t h_i(\tau)
+  = \overline{ \xi_i } (t) \, p_i
+  .
+  \label{eq:hav_def}
+\end{align}
+
+Equation \eqref{eq:uhatav} serves as
+a generalization of Eq. \eqref{eq:vcorr_equil}
+for FDS simulations under a variable bias potential
+and it can be used to improve the estimated PMF
+after simulation.
+%
+In particular, for the single-bin updating scheme,
+Eq. \eqref{eq:wl_update},
 we have, up to a constant shift,
 %
 \begin{align}
-  \hat U_i(t)
+  \overline{ \hat u_i}(t)
   &\approx
   \frac{1}{t} \sum_{\tau=1}^t
   \left[
@@ -3334,52 +3376,23 @@ $$
 %
 With the inverse-time schedule, Eq. \eqref{eq:alpha_invt},
 each term in the square brackets vanishes,
-and if we further define $\alpha(0) \to \infty$
+and if we further define $\alpha(0) \to \infty$,
+then
 $$
-u_i(t+1) = \hat U_i(t),
+u_i(t+1) = \overline{ \hat u_i}(t),
 $$
-the bias potential represents
-the runtime average of the correction, $\hat u_i(t)$.
+i.e. the bias potential in this case coincides with
+the runtime average of the correction, $\hat u_i(t)$
+at any step, $t$.
 %
 Another special case is $\alpha(\tau) = 0$ for $\tau = 0, 1, \dots$,
-then Eq. \eqref{eq:Uhat_sum} is reduced to a plain average
+then Eq. \eqref{eq:Uhat_sum} is reduced to a plain average\cite{zhou2005}
 $$
-\hat U_i(t) \approx \frac 1 t \sum_{\tau=1}^t u_i(\tau).
+\overline{\hat u_i}(t) \approx \overline{ u_i }(t).
 $$
-where we have assumed an equilibrium condition
-such that $u_i(t+1) \approx u_i(1)$.
+if we can assume an equilibrium condition
+with $u_i(t+1) \approx u_i(1)$.
 
-For other updating schemes and schedules, we may still use
-Eq. \eqref{eq:Uhatt} to construct a correction:
-%
-\begin{align}
-  \hat U_i(t)
-  &\approx
-  U_i(t)
-  +
-  \frac{ H_i(t) } { p_i } - 1
-  \approx
-  U_i(t)
-  +
-  \ln \frac{ H_i(t) } { p_i }
-  ,
-  \label{eq:UHcorr}
-\end{align}
-%
-where
-\begin{align}
-  U_i(t)
-  &= \frac 1 t \sum_{\tau = 1}^t u_i(\tau)
-  ,
-  \notag
-  %\label{eq:uav_def}
-  \\
-  H_i(t)
-  &= \frac 1 t \sum_{\tau = 1}^t h_i(\tau)
-  .
-  \label{eq:hav_def}
-\end{align}
-%
 %Thus, the bias potential from a WL simulation
 %(which typically uses the single-bin updating scheme)
 %under the inverse-time schedule
@@ -3653,7 +3666,7 @@ with the inverse-time schedule),
 the histogram fluctuation
 is roughly equal to the final error.
 %
-First, in the long time limit, the fluctuation of
+In the long time limit, the fluctuation of
 the instantaneous histogram is dominated by the random part,
 %
 \begin{equation}
@@ -3667,12 +3680,33 @@ $\tilde \xi_k(t) \approx \tilde \zeta_k(t).$
 If we define the time average,
 $$
 \tilde \Xi_k(T) \equiv \frac 1 T \sum_{t = 1}^T \tilde \xi_k(t)
-=\mathcal F\left[ \frac{ H_i } { p_i } \right]_k
+=\mathcal F\left[ \frac{ H_i(T) } { p_i } \right]_k
 ,
 $$
-then the histogram fluctuation of mode $k$ is given by
-$\left\langle \tilde \Xi_k^2(T) \right\rangle$,
-and from Eq. \eqref{eq:xi_zeta}, we have
+for the histogram fluctuation of mode $k$,
+then the total fluctuation is
+%
+\begin{align}
+F(T)
+&\equiv
+\sum_{k=1}^{n-1} \tilde \Xi_k^2(T)
+=
+\sum_{i=1}^{n} \rho_i \, \Xi_{*i}^2(T)
+  \notag
+  \\
+  &=
+\left\langle
+  \sum_{i=1}^n \rho_i
+  \left(
+  \frac{H_i(T)}{p_i}
+  -
+  \sum_{j=1}^n \rho_j \frac{ H_j(T) } {p_j}
+  \right)^2
+\right\rangle
+.
+  \label{eq:hfluc_def}
+\end{align}
+From Eq. \eqref{eq:xi_zeta}, we have
 \begin{align*}
 \left\langle \tilde \Xi_k^2(T) \right\rangle
 &=
@@ -3694,24 +3728,40 @@ and from Eq. \eqref{eq:xi_zeta}, we have
 \end{align*}
 %
 The total histogram fluctuation is
-$$
-F(T)
-=
+\begin{equation}
+\langle F(T) \rangle
+\equiv
 \sum_{k=1}^{n-1} \left\langle \tilde \Xi_k^2(T) \right\rangle
 =
 \frac{ \Gamma } { T }.
-$$
+  \label{eq:hfluc}
+\end{equation}
 %
 Comparing this to Eq. \eqref{eq:Emin_singlebin},
 we conclude
 \begin{equation}
-  F(T+t_0) \approx E(T)
+  \langle F(T+t_0) \rangle \approx E(T)
   .
   \notag
   %\label{eq:fluc}
 \end{equation}
 %and the histogram fluc
 %serves as a good estimate of the final error.
+%
+
+The relation between error and histogram fluctuation
+supports the WL criterion for
+checking convergence at stage transitions.
+%
+For bandpass updating scheme,
+we may borrow this criterion
+in initial stages, with a modified definiton
+for the histogram fluctuation
+$$
+F_{<K}(T) = \sum_{k=1}^{K-1} \tilde \Xi_k^2(T),
+$$
+since the histogram-flatten
+is only partially applied to modes less $K$.
 %
 \note{
 Note that the expected histogram flatness
@@ -3740,7 +3790,7 @@ in an adaptive FDS simulation
 under constant updating magnitude.
 %
 This method has the advantage of not requiring
-explicit computation of 
+explicit computation of
 the autocorrelation functions of the eigenmodes.
 %
 The basic idea is to use Eq. \eqref{eq:xt2_eql}.
@@ -3752,7 +3802,7 @@ we cannot compute the shifted bias potential, $v_i$.
 The problem can be avoided by replacing the shift
 by the time average of the bias potential.
 
-We first note that the difference, 
+We first note that the difference,
 $u_i(t) - v_i(t) = \ln(p^*_i/p_i)$, is a constant of time,
 so is the Fourier transform,
 $\tilde u_k(t) - \tilde v_k(t)$.
@@ -3787,6 +3837,86 @@ where the variance can be computed from trajectory averages.
 A practical limitation is that Eq. \eqref{eq:varXt}
 would fail if some eigenvalue, $\lambda_k$, is close to zero.
 So it is best used for the single-bin updating scheme.
+
+Alternatively,
+if the propagation along the collective-variable is Markovian,
+then in the long time limit, the evolution can be approximately
+described by a transition matrix, $\mathbf A$, with
+$$
+\langle h_i(t) \rangle = p_i,
+\quad
+\langle h_i(t) \, h_j(0) \rangle = \bigl(\mathbf A^t\bigr)_{ij} \, p_j
+\quad \mbox{(for $t \ge 0$)}
+.
+$$
+Further if the transition matrix satisfies detailed balance
+with a set of eigenvectors, $\psi_{li}$,
+that are orthonormal with respect to $\mathbf p$
+[cf. Eqs. \eqref{eq:eig_orthonormal_cols} and
+\eqref{eq:eig_orthonormal_rows}]
+then we have the decomposition
+$A_{ij} = \sum_{l=0}^{n-1} \Lambda_l \, \psi_{li} \, \psi_{lj} / p_j$,
+with $\Lambda_l$ being the eigenvalue of mode $l$.
+%
+The autocorrelation function can then be computed as
+%
+\begin{align*}
+\left\langle
+  \tilde \xi_k(t) \, \tilde \xi_k(0)
+\right\rangle
+=
+\sum_{l = 0}^{n-1} \Lambda_l^t \,
+\left(
+  \sum_{i=1}^n \frac{ \phi_{ki} \, \psi_{li} }{ p_i }
+\right)^2
+.
+\end{align*}
+%
+In particular, if the eigenvectors, $\pmb \phi_k$
+and $\pmb \psi_k$, coincide and $\mathbf p = \pmb \rho$,
+we would have
+$\bigl\langle
+  \tilde \xi_k(t) \, \tilde \xi_k(0)
+\bigr\rangle
+=
+\Lambda_k^t,$
+and
+\begin{equation}
+  \Gamma_k = 1 + 2 \, \sum_{t=1}^\infty \left\langle
+    \tilde \xi_k(t) \, \tilde \xi_k(0)
+  \right\rangle = \frac{1+\Lambda_k}{1-\Lambda_k}
+  .
+  \label{eq:Gamma_est}
+\end{equation}
+
+The transition matrix method usually only for
+simple sampling processes without major barrier
+along the collective variable, $z$.
+%
+We may nonetheless estimate the magnitude of $\Gamma_k$
+in a few special cases.
+%
+If sampling is perfect, $\Lambda_k = \delta_{k, 0}$,
+then $\Gamma_k = 1$ for $k > 0$.
+%
+For a local sampling process,
+if we borrow \eqref{eq:lambda_Gaussian}
+for $\Lambda_k$,
+with $\sigma_z$ interpreted as the average move size along $z$,
+then
+$$
+\Gamma_k = \coth\left[
+  \left(
+    \frac{ \pi \, k \, \sigma_z } { g \, \Delta z}
+  \right)^2
+  \right].
+$$
+For small $k$, we have $\Gamma_k \propto \Delta z^2/(\sigma_z \, k)^2$,
+which means that a doubled sampling range, $\Delta z$,
+would make the histogram flattening
+at least four times as difficult,
+i.e. FDS methods are most effective
+for short ranges\cite{wang2001, *wang2001pre}.
 
 
 
@@ -4366,11 +4496,11 @@ For $n \gg 1$,
 we define an equivalent angular variable, $\varphi$,
 over $[0, 2 \, \pi/g]$
 with bin size
-$\Delta \varphi = 2 \, \pi/(g \, n)$.
+$\delta \varphi = 2 \, \pi/(g \, n)$.
 The variable is related to the bin index, $l$, as
-$\varphi = l \, \Delta \varphi$,
+$\varphi = l \, \delta \varphi$,
 and
-$\mu_l = \mu(\varphi) \, \Delta \varphi$.
+$\mu_l = \mu(\varphi) \, \delta \varphi$.
 %
 By assuming the largest bin cutoff, $b \approx g \, n/2$,
 we can approximate Eq. \eqref{eq:wband_eigenvalue}
@@ -4397,18 +4527,18 @@ $
   \int_0^b \mu_l \, \cos(k \, \varphi) \, dl
   \\
   &=
-  \int_0^b \mu(\varphi) \, \cos(k \, \varphi) \, \Delta \varphi \, dl
+  \int_0^b \mu(\varphi) \, \cos(k \, \varphi) \, \delta \varphi \, dl
   \\
   &=
-  \int_0^{b \, \Delta \varphi} \mu(\varphi) \, \cos(k \, \varphi) \, d\varphi
+  \int_0^{b \, \delta \varphi} \mu(\varphi) \, \cos(k \, \varphi) \, d\varphi
 \end{align*}
 The upper limit,
-$b \, \Delta \varphi \approx (g\,n/2) \, [2\,\pi/(g\,n)] = \pi$.
+$b \, \delta \varphi \approx (g\,n/2) \, [2\,\pi/(g\,n)] = \pi$.
 }
 
 For the Gaussian updating kernel,
 if the width of the angular variable, $\sigma_\varphi$,
-satisfies $\Delta \varphi \ll \sigma_\varphi \ll \pi$,
+satisfies $\delta \varphi \ll \sigma_\varphi \ll \pi$,
 we can extend
 the upper limit of the integrals
 to infinity, and
@@ -4442,16 +4572,15 @@ It follows that all eigenvalues are positive\cite{bussi2006}:
         -\frac 1 2
         \left(
          \frac{ 2 \, \pi \, k \, \sigma_z }
-              { g \, n \, \Delta z  }
+              { g \, \Delta z  }
         \right)^2
       \right]
   ,
 %\notag
 \label{eq:lambda_Gaussian}
 \end{align}
-where $\sigma_z$ and $\Delta z$
-are the width of the Gaussian
-and the bin width
+where $\sigma_z$ and $\Delta z = z_{\max} - z_{\min}$
+are the width of the Gaussian and span
 in the original collective variable, $z$,
 respectively.
 
@@ -4813,7 +4942,6 @@ resulting the following algorithm.
     $\lambda_k$     &   The $k$th eigenvalue of the updating matrix. \\
     $k, l$          &   Mode indices. \\
     $K$             &   Cutoff wave number of bandpass updating schemes.  \\
-    $\kappa_k(t)$   &   Autocorrelation function of mode $k$. \\
     $M(Q)$          &   Mass function.   \\
     $m(Q)$          &   Mass distribution,
                         $m(Q) \equiv M(Q)/\int_0^{ q(T) } M(Q') \, dQ'$.  \\
