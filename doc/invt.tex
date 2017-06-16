@@ -2,6 +2,7 @@
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{mathtools}
+\usepackage{array}
 \usepackage{upgreek}
 \usepackage[table,usenames,dvipsnames]{xcolor}
 \usepackage{tikz}
@@ -396,12 +397,12 @@ in Sec. \ref{sec:cmpschemes}.
 
 
 \subsection{\label{sec:background}
-Background}
+Flat-distribution sampling}
 
 
 
 \subsubsection{\label{sec:FDS}
-Flat-distribution sampling}
+Bias potential}
 
 
 
@@ -1781,10 +1782,11 @@ used Eq. \eqref{eq:uk_def} and
 defined the (square-root) mass function as
 %
 \begin{equation}
-  M(Q)
+  M(q')
   \equiv
   \sqrt{
-    \textstyle\sum_{ k = 1 }^{n - 1}\Gamma_k \, \lambda_k^2 \, e^{-2 \, \lambda_k \, Q}
+    \textstyle\sum_{ k = 1 }^{n - 1}
+    \Gamma_k \, \lambda_k^2 \, e^{-2 \, \lambda_k \, q'}
   }
   .
   \notag
@@ -1851,9 +1853,9 @@ By integrating this equation of motion, we get
 %
 \begin{equation}
   \int_{ q(T) - q(t) }^{ q(T) }
-    M(Q)
+    M(q')
     \;
-    d Q
+    d q'
   =
   C \, \frac t T
   ,
@@ -1866,9 +1868,9 @@ the $t = T$ case as
 \begin{equation}
   C =
   \int_{ 0 }^{ q(T) }
-    M( Q )
+    M( q' )
     \;
-    d Q
+    d q'
   .
   \label{eq:mint}
 \end{equation}
@@ -1888,7 +1890,7 @@ The minimal asymptotic error is
   =
   \frac 1 T
   \left(
-    \int_0^{ q(T) } M(Q) \, dQ
+    \int_0^{ q(T) } M(q') \, d q'
   \right)^2
   .
 \label{eq:error_asym2}
@@ -1908,17 +1910,17 @@ First, we define
 a normalized mass distribution as
 %
 \begin{equation}
-  m(Q)
+  m(\bar q)
   =
   \frac{
-    M(Q)
+    M(\bar q)
   }
   {
-    \int_0^{ q(T) } M(Q') \, d Q'
+    \int_0^{ q(T) } M(q') \, d q'
   }
   =
   \frac{
-    M(Q)
+    M(\bar q)
   }
   {
     C
@@ -1929,40 +1931,37 @@ a normalized mass distribution as
 \end{equation}
 %
 such that
-$\int_0^{q(T)} m(Q) \, dQ = 1$.
+$\int_0^{q(T)} m(\bar q) \, d\bar q = 1$.
 %
 Then from Eqs. \eqref{eq:Lagrangian_const} and \eqref{eq:q_opt},
-we find that for $Q = q(T) - q(t)$,
+we find that for $\bar q(t) \equiv q(T) - q(t)$,
 %
 \begin{align}
-  m(Q)
+  m\left( \bar q(t) \right)
   &=
   \frac{ 1 }
        { T \, \alpha(t) }
   ,
-\label{eq:mQ_invTa}
+  \label{eq:mQ_invTa}
   \\
-  \int_Q^{ q(T) }
-    m(Q') \, dQ'
+  \int_{\bar q(t)}^{ q(T) }
+    m(q') \, dq'
   &=
   \frac t T
   ,
-\label{eq:intmQ_tT}
+  \label{eq:intmQ_tT}
 \end{align}
 %
-which means that each point,
+Thus, each point on the schedule,
 $\bigl(t, \alpha(t)\bigr)$,
-on the schedule can be mapped
-to a point,
-$\bigl(Q, m(Q)\bigr)$,
+can be mapped to a point,
+$\bigl(\bar q, m(\bar q)\bigr)$,
 on the mass distribution,
 such that the ordinate of the latter curve
-gives $1/(T\alpha)$,
-and the area under the curve in the domain, $[Q, q(T)]$,
+is $1/(T\alpha)$,
+and the area under the curve in the domain, $[\bar q(t), q(T)]$,
 is equal to $t/T$,
 as shown in Fig. \ref{fig:massq}.
-%
-
 
 \begin{figure}[h]
 \begin{center}
@@ -1992,11 +1991,12 @@ as shown in Fig. \ref{fig:massq}.
     %\node[fill=white] at (0.4, 0.7) {$\dfrac{1}{Ta}$};
 
     \draw[] (0.5, 0.99488) -- (0.7, 0.99488);
-    \draw[->] (0, 0) -- node[below, inner sep=5mm] {$Q$} (2.8, 0);
-    \draw[->] (0, 0) -- node[above, rotate=90] {$m(Q)$} (0, 1.9);
+    \draw[->] (0, 0) -- node[below, inner sep=7mm] {$\bar q$} (2.8, 0);
+    \draw[->] (0, 0) -- node[above, rotate=90] {$m(\bar q)$} (0, 1.9);
 
     % xtics
     \draw[] (0.0, 0.1) -- (0.0, 0.0) node[below] {$0$};
+    \draw[] (0.7, 0.1) -- (0.7, 0.0) node[below] {$q(T) - q(t)$};
     \draw[] (2.2, 0.1) -- (2.2, 0.0) node[below] {$q(T)$};
   \end{tikzpicture}
   %\makebox[\linewidth][c]{
@@ -2006,7 +2006,7 @@ as shown in Fig. \ref{fig:massq}.
     \label{fig:massq}
     Geometric characterization of the optimal schedule,
     $\alpha(t)$,
-    via the normalized mass distribution, $m(Q)$.
+    via the normalized mass distribution, $m(\bar q)$.
     %
     \note{
       The figure was produced by \texttt{tikz}.
@@ -2015,6 +2015,92 @@ as shown in Fig. \ref{fig:massq}.
   }
 \end{center}
 \end{figure}
+
+We may consider the schedule, $\alpha(t)$,
+as a variable transformation of
+the mass distribution, $m(\bar q)$.
+%much like the Legendre transform.
+%
+If we define
+$\bar q^* \equiv \bar q/q(T)$
+and $t^* \equiv t/T$
+such that both are limited in $[0, 1]$,
+as well as
+\begin{align*}
+  m^*       &\equiv q(T) \, m(\bar q) = -\frac{ dt^* } { d\bar q^* },
+  \\
+  \alpha^*  &\equiv \frac{T}{q(T)} \, \alpha(t) = -\frac{ d\bar q^* } { dt^* },
+\end{align*}
+then it is clear that
+both $m^*(\bar q^*)$ and $\alpha^*(t^*)$
+can describe the differential relation
+between $\bar q^*$ and $t^*$,
+but with the natural variables
+being $\bar q^*$ and $t^*$, respectively.
+%
+Further, the transformation is an involution:
+if we apply the same transform on $\alpha^*(t^*)$
+we would recover $m^*(\bar q^*)$.
+%
+A few examples are shown in Table \ref{tab:m_and_a}.
+%
+For example, in the single-bin scheme,
+the mass distribution is a single exponential decay,
+and we would have the inverse-time schedule.
+%
+On the other hand,
+if the mass distribution is inversely proportional to $\bar q$,
+which is approximately true for the Gaussian updating scheme
+at large $\bar q$,
+then we would have an exponentially decaying schedule.
+
+\begin{table}[h]\footnotesize
+  \caption{\label{tab:m_and_a}
+    Variable transformation between the
+    reduced schedule, $\alpha^*(t^*)$,
+    and the reduced mass distribution, $m^*(\bar q^*)$,
+    as defined in Eqs. \eqref{eq:mQ_invTa}
+    and \eqref{eq:intmQ_tT}.
+  }
+  \setlength{\tabcolsep}{3pt} % spacing between columns
+  \renewcommand\arraystretch{2.3} % spacing between rows
+  \begin{tabular} { c c c }
+    \hline
+    $m^*(\bar q^*) = -\dfrac{d t^*}{d\bar q^*}$ &
+    $\alpha^*(t^*) = -\dfrac{d\bar q^*}{d t^*}$ &
+    $\bar q^*(t^*)$
+    \\
+    \hline
+    $\dfrac{c \, a}{\left( {\bar q}^* + q^*_0 \right)^{a+1}}$ &
+    $\dfrac{c^{1/a} \, (1/a)}{\left( t^* + t^*_0 \right)^{(1/a)+1}}$ &
+    $\left( \dfrac{c}{t^* + t^*_0} \right)^{1/a}$
+    %$\,\begin{aligned}
+    %  &a, q^*_0 > 0, \\
+    %  &\frac{1}{t^*_0} \equiv \left(1+\frac{1}{q^*_0}\right)^a - 1, \\
+    %  &c \equiv {q^*_0}^a(t^*_0 + 1)
+    %\end{aligned}$
+    \\
+    $\dfrac{1}{\gamma \, {\bar q}^* + \frac{\gamma}{e^\gamma - 1}}$ &
+    $\dfrac{\gamma}{1-e^{-\gamma}} \, e^{-\gamma \, t^*}$ &
+    $\dfrac{e^{-\gamma \, t^*} - e^{-\gamma}}{1-e^{-\gamma}}$
+    \\
+    $\dfrac{\gamma}{1 - e^{-\gamma}} e^{-\gamma \, {\bar q}^*}$ &
+    $\dfrac{1}{ \gamma \, t^* + \frac{\gamma}{e^\gamma - 1} }$ &
+    $\dfrac{\ln\left[(1-e^{-\gamma}) \, t^* + e^{-\gamma} \right]}{-\gamma}$
+    \\
+    \hline
+    \multicolumn{3}{c}{
+    Here,
+    $a, q^*_0, \gamma > 0$,
+    ${t^*_0}^{-1} \equiv \left(1+{q^*_0}^{-1}\right)^a - 1$,
+    and
+    $c \equiv {q^*_0}^a(t^*_0 + 1)$.
+    } \\
+    \hline
+  \end{tabular}
+\end{table}
+
+
 
 
 
@@ -2039,12 +2125,15 @@ we find that
 the optimal $q(T)$ satisfies
 %
 \begin{align}
-  \frac{a_0}{2} \, M^2\bigl( q(T) \bigr)
-  &+
-  \sum_{k = 1}^{n-1}
-  \lambda_k \, \epsilon_k \, e^{-2\lambda_k \, q(T)}
+  \mathcal Y\bigl( q(T) \bigr)
+  &\equiv
+  \frac{ M\bigl( q(T) \bigr) } { T } \int_0^{q(T)} M(q') \, dq'
+  -\frac{a_0}{2} \, M^2\bigl( q(T) \bigr)
   \notag \\
-  &= \frac{ M\bigl( q(T) \bigr) } { T } \int_0^{q(T)} M(Q') \, dQ'
+  &
+  -\sum_{k = 1}^{n-1}
+  \lambda_k \, \epsilon_k \, e^{-2\lambda_k \, q(T)}
+  =0
   .
 \label{eq:opt_qT}
 \end{align}
@@ -2087,7 +2176,7 @@ $$
   &=
   \frac 2 T \,
   M(q_T) \,
-  \int_0^{ q_T } M(Q) \, dQ
+  \int_0^{ q_T } M(q) \, dq
   =
   \frac{ 2 \, C } { T } \, M(q_T)
   .
@@ -2137,17 +2226,17 @@ wang2001, *wang2001pre}.
 
 
 %For simulations with the same $a_0$,
-%the shape of the mass distribution, $m(Q)$,
+%the shape of the mass distribution, $m(\bar q)$,
 %also determines how much the optimal schedule
 %would depend on the simulation length, $T$.
 %%
-%Since both $M(Q)$ and $m(Q)$ decrease monotonically with $Q$,
+%Since both $M(\bar q)$ and $m(\bar q)$ decrease monotonically with $\bar q$,
 %Eq. \eqref{eq:opt_qT} shows that
 %the optimal $q(T)$ increases with
 %the simulation length, $T$,
-%more so if $M(Q)$ has a long tail.
+%more so if $M(\bar q)$ has a long tail.
 %%
-%Thus, if $M(Q)$ decays slowly because of
+%Thus, if $M(\bar q)$ decays slowly because of
 %many near zero eigenvalues, $\lambda_k$'s,
 %as in the metadynamics case,
 %both the optimal schedule and
@@ -2163,8 +2252,8 @@ wang2001, *wang2001pre}.
 %is roughly a constant
 %[cf. Eq. \eqref{eq:error_singlebin}].
 %
-%If $M(Q)$ decays rapidly,
-%the distribution $m(Q)$ does not critically
+%If $M(\bar q)$ decays rapidly,
+%the distribution $m(\bar q)$ does not critically
 %depend on the cutoff $q(T)$,
 %once $q(T)$ is sufficiently large.
 %%
@@ -2172,7 +2261,7 @@ wang2001, *wang2001pre}.
 %approximately satisfy the scaling relations
 %described in Sec. \ref{sec:mass_distr}.
 %%
-%If, however, $M(Q)$ has a long tail
+%If, however, $M(\bar q)$ has a long tail
 %because of some near-zero $\lambda_k$'s,
 %increasing the simulation length $T$
 %generally alters the shape of the optimal schedule.
@@ -2202,10 +2291,10 @@ as a cosine transform,
   \mu_0
   +
   2 \,
-  \sum_{ l = 1 }^b
-  \mu_l
+  \sum_{ i = 1 }^b
+  \mu_i
   \cos\left(
-  \frac{ k \, l \, 2 \, \pi }
+  \frac{ k \, i \, 2 \, \pi }
        {      g \, n        }
   \right)
   ,
@@ -2216,6 +2305,31 @@ where $g = 1$ here for the periodic variable,
 or $2$ for a non-periodic one
 (cf. Appendix \ref{sec:more_wband}).
 
+In particular, for the Gaussian updating scheme,
+we have\cite{bussi2006}
+\begin{align}
+  \lambda_k
+  &=
+  \exp\left(
+        -\frac{ k^2 \, \sigma_\varphi^2 }
+              {           2             }
+      \right)
+  =
+  \exp\left[
+        -\frac 1 2
+        \left(
+         \frac{ 2 \, \pi \, k \, \sigma_z }
+              { g \, \Delta z  }
+        \right)^2
+      \right]
+  ,
+%\notag
+\label{eq:lambda_Gaussian}
+\end{align}
+where $\sigma_z$ and $\Delta z = z_{\max} - z_{\min}$
+are the width of the Gaussian and span
+in the original collective variable, $z$,
+respectively.
 
 
 \subsubsection{\label{sec:procedure}
@@ -2258,7 +2372,7 @@ We have
     (lambda) at (2.2, 3) {Eigenvalues,\\$\lambda_1, \dots, \lambda_{n-1}$};
 
   \node[draw, text width={width("Integrals, iii")}]
-    (gamma) at (2.1, 1) {Integrals, \\$\Gamma_1, \dots, \Gamma_{n-1}$};
+    (Gamma) at (2.1, 1) {Integrals, \\$\Gamma_1, \dots, \Gamma_{n-1}$};
 
   \node[draw, text width={width("Simulation")}]
     (T) at (2.2, -0.5) {Simulation\\time, $T$};
@@ -2282,12 +2396,12 @@ We have
 
   \draw[->, >=latex, thick]
     (w) edge (lambda)
-    (w) edge (gamma)
-    (sys) edge (gamma);
+    (w) edge (Gamma)
+    (sys) edge (Gamma);
 
   \draw[->, >=latex, thick]
     (lambda) -| (M1)
-    (gamma)  -- (M1)
+    (Gamma)  -- (M1)
     (T)      -| (M1)
     (M1)     -- (R1)
     (R1)     |- (qT);
@@ -2337,7 +2451,7 @@ The updating magnitude should be sufficiently small
 such that the resulting error is no greater than
 multiple of $1.0$.
 
-\item \label{step:gamma}
+\item \label{step:Gamma}
 Estimate $\Gamma_k$'s from Eq. \eqref{eq:varXt}
 (cf. Appendix \ref{sec:Gamma_measure})
 as well as the initial bias $\epsilon_k$.\footnote{The
@@ -2352,11 +2466,18 @@ as well as the initial bias $\epsilon_k$.\footnote{The
 Compute the optimal value of $q(T)$ by solving Eq. \eqref{eq:opt_qT}.
 %
 We implemented a variant of the Newton-Raphson method\cite{press3rd}
-(for $\ln q(T)$ to avoid negative values)
-with the bisection method\cite{press3rd} as a fallback.
+with the bisection method\cite{press3rd}
+as a fallback.\footnote{
+The equation was solved for $\ln q(T)$
+to avoid negative values of $q(T)$,
+and we imposed a lower bound,
+$\bigl|\mathcal Y/q(T)\bigr|$, for
+$\mathcal Y'\bigl(q(T)\bigr)$
+in computing its change.
+}
 The initial value is set to $q(T) = \ln(1+T\,a_0/2)$.
 %
-%Since $m(Q)$ is a decreasing function of $Q$,
+%Since $m(\bar q)$ is a decreasing function of $\bar q$,
 %we can start from an interval $[Q_L, Q_R]$
 %that satisfies $m(Q_L) > 2/(T\,a_0) > m(Q_R)$
 %(e.g. we can choose $Q_L = 0$,
@@ -2829,30 +2950,44 @@ collected from the equilibration phase of each individual run.
 
 
 
-As shown in Table 1,
+As shown in Table \ref{tab:lj_error},
 both the inverse-time and optimal schedule reduced
 the error significantly,
 and the errors roughly matched the predicted values
 calculated from the precomputed $\Gamma_k$'s and $\epsilon_k$'s.
 %
-The Gaussian scheme appeared to be superior
-to the single-bin scheme in the $\varrho^* = 0.1$ case,
+The Gaussian scheme produced less error than
+the single-bin scheme in the $\varrho^* = 0.1$ case,
 but not in the $\varrho^* = 0.8$ case.
 %
-In the latter case,
+In the low density case,
+when the local noise contributes significantly to the total error,
+the Gaussian scheme
+yielded less error than the single bin scheme,
+and the optimal schedule was more effective
+in reducing the error than the inverse-time schedule.
+%
+However, in the high-density case
 the error was dominated by the $k=1$ eigenmode
-corresponding to the longest range motion, as $\Gamma_1 \approx \Gamma$,
-and the suppression of local noise
-had little effect on reducing the total error.
+corresponding to the longest range motion,
+as $\Gamma_1 \approx \Gamma$,
+and the reduction of local noise
+had little effect on the total error.
 %
-In either case, there was an optimal width of Gaussian
-an overly large width could be counterproductive.
-%
-The optimal width was $\sigma = 0.37$ for $\varrho^* = 0.1$
+The bandpass updating scheme behaved similarly,
+and in the low density case when
+local noise is important,
+this scheme (with the mode cutoff $K = 20$)
+was superior to the Gaussian counterpart.
+
+The Gaussian updating scheme was most effective
+at an optimal width, which
+was $\sigma = 0.37$ for $\varrho^* = 0.1$
 or $0.07$ for $\varrho^* = 0.8$ in this case,
 although it depended on the simulation length.
-
-To further investigate the behavior of the Gaussian updating scheme,
+%
+%
+To further investigate its behavior
 we show in Fig. \ref{fig:lj_xerr}
 the error components, $\langle \tilde v_k^2 \rangle$,
 against the eigenmode index
@@ -2919,8 +3054,14 @@ because the resulting bias potential would no longer be small,
 
 
 \begin{table}[h]\footnotesize
-  \caption{\label{tab:error_LJ}
-    Error of the LJ system.
+  \caption{\label{tab:lj_error}
+    Error of the bias potential under
+    the single-bin,
+    Gaussian (labeled by the width, $\sigma$),
+    and bandpass (labeled by the mode cutoff, $K$)
+    updating schemes
+    on the LJ system.
+    %
     The numbers have been averaged over multiple runs,
     and the predicted values are shown in parentheses for comparison;
     $\Err_\mathrm{init.}$
@@ -2929,6 +3070,7 @@ because the resulting bias potential would no longer be small,
     $\Err_\mathrm{final}$
     denotes the error at the end of the production phase under
     either the inverse-time ($1/t$) or optimal schedule (opt.).
+    %
     \note{The reference values can be found
     on the second line of \texttt{verr.log}.}%
   }
@@ -3666,7 +3808,8 @@ with the inverse-time schedule),
 the histogram fluctuation
 is roughly equal to the final error.
 %
-In the long time limit, the fluctuation of
+With a sufficiently accurate and stable bias potential,
+the fluctuation of
 the instantaneous histogram is dominated by the random part,
 %
 \begin{equation}
@@ -3674,7 +3817,7 @@ the instantaneous histogram is dominated by the random part,
   ,
   \label{eq:xi_zeta}
 \end{equation}
-and we would have for the Fourier transform,
+and the same holds for the Fourier transform,
 $\tilde \xi_k(t) \approx \tilde \zeta_k(t).$
 %
 If we define the time average,
@@ -3687,7 +3830,7 @@ for the histogram fluctuation of mode $k$,
 then the total fluctuation is
 %
 \begin{align}
-F(T)
+G(T)
 &\equiv
 \sum_{k=1}^{n-1} \tilde \Xi_k^2(T)
 =
@@ -3695,33 +3838,32 @@ F(T)
   \notag
   \\
   &=
-\left\langle
   \sum_{i=1}^n \rho_i
   \left(
   \frac{H_i(T)}{p_i}
   -
   \sum_{j=1}^n \rho_j \frac{ H_j(T) } {p_j}
   \right)^2
-\right\rangle
 .
   \label{eq:hfluc_def}
 \end{align}
 From Eq. \eqref{eq:xi_zeta}, we have
+%
 \begin{align*}
-\left\langle \tilde \Xi_k^2(T) \right\rangle
+\bigl\langle \tilde \Xi_k^2(T) \bigr\rangle
 &=
 \frac{1}{T}
 \sum_{t=-\infty}^\infty
-\left\langle
+\bigl\langle
   \tilde \xi_k(t) \, \tilde \xi_k(0)
-\right\rangle
+\bigr\rangle
 \\
 &\approx
 \frac{1}{T}
 \sum_{t=-\infty}^\infty
-\left\langle
+\bigl\langle
   \tilde \zeta_k(t) \, \tilde \zeta_k(0)
-\right\rangle
+\bigr\rangle
 =
 \frac{ \Gamma_k } { T }
 .
@@ -3729,23 +3871,29 @@ From Eq. \eqref{eq:xi_zeta}, we have
 %
 The total histogram fluctuation is
 \begin{equation}
-\langle F(T) \rangle
+\bigl\langle G(T) \bigr\rangle
 \equiv
-\sum_{k=1}^{n-1} \left\langle \tilde \Xi_k^2(T) \right\rangle
+\sum_{k=1}^{n-1}
+  \bigl\langle
+    \tilde \Xi_k^2(T)
+  \bigr\rangle
 =
 \frac{ \Gamma } { T }.
   \label{eq:hfluc}
 \end{equation}
 %
 Comparing this to Eq. \eqref{eq:Emin_singlebin},
-we conclude
+we may rephrase the optimality of the inverse-time schedule
+as the inequality,
 \begin{equation}
-  \langle F(T+t_0) \rangle \approx E(T)
+  E(T)
+  \ge
+  \bigl\langle G(T+t_0) \bigr\rangle
   .
   \notag
   %\label{eq:fluc}
 \end{equation}
-%and the histogram fluc
+%and the histogram fluctuation
 %serves as a good estimate of the final error.
 %
 
@@ -3755,13 +3903,22 @@ checking convergence at stage transitions.
 %
 For bandpass updating scheme,
 we may borrow this criterion
-in initial stages, with a modified definiton
+in initial stages, with a modified definition
 for the histogram fluctuation
 $$
-F_{<K}(T) = \sum_{k=1}^{K-1} \tilde \Xi_k^2(T),
+G_{<K}(T) \equiv \sum_{k=1}^{K-1} \tilde \Xi_k^2(T),
 $$
-since the histogram-flatten
+since the histogram flattening
 is only partially applied to modes less $K$.
+%
+One can alternatively define the histogram fluctuation
+from the largest mode
+$$
+\max_{k=1, \dots, K-1} \left| \, \tilde \Xi_k(T) \, \right|
+.
+$$
+For a local sampling process,
+we expect that the two definition would behave similarly.
 %
 \note{
 Note that the expected histogram flatness
@@ -3779,7 +3936,7 @@ as a substitute of the inverse-time schedule.
 
 
 \section{\label{sec:Gamma_measure}
-Measurement of the integrals of the autocorrelation functions of the eigenmodes
+Integrals of the autocorrelation functions of the eigenmodes
 }
 
 
@@ -3911,12 +4068,22 @@ $$
   \right)^2
   \right].
 $$
-For small $k$, we have $\Gamma_k \propto \Delta z^2/(\sigma_z \, k)^2$,
+For small $k$,
+we have $\Gamma_k \propto \Delta z^2/(\sigma_z \, k)^2$,\cite{bussi2006}
 which means that a doubled sampling range, $\Delta z$,
 would make the histogram flattening
 at least four times as difficult,
 i.e. FDS methods are most effective
 for short ranges\cite{wang2001, *wang2001pre}.
+%
+Using finer bins would, however, not change this value.
+%
+For a modestly large $k$,
+$\Gamma_k \approx 1$.
+and by Eq. \eqref{eq:xt2_eql},
+we would expect a roughly flat profile
+for the single-bin updating scheme,
+cf. Fig. \ref{fig:lj_xerr}.
 
 
 
@@ -4439,13 +4606,13 @@ by a cosine transform,
 we can invert the relation as
 %
 \begin{equation}
-  \mu_l
+  \mu_i
   =
   \frac { 1 } { g \, n }
   \sum_{ k = 0 }^{ g \, n - 1 }
   \lambda_k
   \cos \left(
-       \frac{ k \, l \, 2 \, \pi }
+       \frac{ k \, i \, 2 \, \pi }
             {      g \, n        }
   \right)
   .
@@ -4511,15 +4678,15 @@ as an integral:
   =
   2 \int_0^\pi
     \mu(\varphi) \, \cos (k \, \varphi) \, d\varphi,
-\notag
-%\label{eq:lambda_int}
+\label{eq:lambda_int}
 \end{equation}
 %
 with the normalization
 %
-$
+\begin{equation}
   1 = 2 \int_0^\pi \mu(\varphi) \, d\varphi.
-$
+\label{eq:mu_int}
+\end{equation}
 \note{
 \begin{align*}
   \lambda_k
@@ -4536,18 +4703,16 @@ The upper limit,
 $b \, \delta \varphi \approx (g\,n/2) \, [2\,\pi/(g\,n)] = \pi$.
 }
 
-For the Gaussian updating kernel,
-if the width of the angular variable, $\sigma_\varphi$,
-satisfies $\delta \varphi \ll \sigma_\varphi \ll \pi$,
-we can extend
-the upper limit of the integrals
-to infinity, and
+If the width of the Gaussian updating kernel
+is very small compared to $\sigma_\varphi$,
+then we can extend the upper limit of the integral
+in Eq. \eqref{eq:mu_int} to $\infty$, and
 %
 \begin{equation}
   \mu(\varphi)
   =
   \frac{            1            }
-       { \sqrt{ 2 \pi \sigma_\varphi^2 } }
+       { \sqrt{ 2 \pi } \sigma_\varphi }
   %
   \exp\left(
         -\frac{   \varphi^2   }
@@ -4557,39 +4722,17 @@ to infinity, and
 \notag
 \end{equation}
 %
-%
-It follows that all eigenvalues are positive\cite{bussi2006}:
-%
-\begin{align}
-  \lambda_k
-  &=
-  \exp\left(
-        -\frac{ k^2 \, \sigma_\varphi^2 }
-              {           2             }
-      \right)
-  =
-  \exp\left[
-        -\frac 1 2
-        \left(
-         \frac{ 2 \, \pi \, k \, \sigma_z }
-              { g \, \Delta z  }
-        \right)^2
-      \right]
-  ,
-%\notag
-\label{eq:lambda_Gaussian}
-\end{align}
-where $\sigma_z$ and $\Delta z = z_{\max} - z_{\min}$
-are the width of the Gaussian and span
-in the original collective variable, $z$,
-respectively.
+Then, from Eq. \eqref{eq:wband_eigenvalue},
+we get Eq. \eqref{eq:lambda_Gaussian},
+which shows that all eigenvalues are positive.
 
-
-For a finite bin width,
-some eigenvalues can be negative.
-However, we can avoid the stability problem
-by starting with the eigenvalues given by Eq. \eqref{eq:lambda_Gaussian}
+In general, some eigenvalues can turn negative
+because of truncation and discretization.
+%
+We can however maintain the stability of updating scheme
+by starting with Eq. \eqref{eq:lambda_Gaussian}
 and inversely computing the kernel using Eq. \eqref{eq:mu_from_lambda}.
+%
 
 
 
@@ -4927,7 +5070,7 @@ resulting the following algorithm.
     $\mathbf{A}$    &   Transition matrix. \\
     $\alpha$        &   Updating magnitude. \\
     $b$             &   Cutoff of the kernel of homogeneous updating schemes. \\
-    $C$             &   $C \equiv \int_0^{ q(T) } M(Q) \, dQ$.  \\
+    $C$             &   $C \equiv \int_0^{ q(T) } M(q) \, dq$.  \\
     $\delta$        &   Dirac's or discrete $\delta$-function. \\
     $c$             &   Constant. \\
     $\Err, \Err_R, \Err_A$          &   Error, residual error, asymptotic error. \\
@@ -4942,16 +5085,16 @@ resulting the following algorithm.
     $\lambda_k$     &   The $k$th eigenvalue of the updating matrix. \\
     $k, l$          &   Mode indices. \\
     $K$             &   Cutoff wave number of bandpass updating schemes.  \\
-    $M(Q)$          &   Mass function.   \\
-    $m(Q)$          &   Mass distribution,
-                        $m(Q) \equiv M(Q)/\int_0^{ q(T) } M(Q') \, dQ'$.  \\
+    $M(q)$          &   Mass function.   \\
+    $m(q)$          &   Mass distribution,
+                        $m(q) \equiv M(q)/\int_0^{ q(T) } M(q') \, dq'$.  \\
     $\mu_i$         &   Updating kernel of a homogeneous updating scheme. \\
     $n$             &   Number of bins. \\
     $\nu_k$         &   $\nu_k \equiv \lambda_k / \lambda$. \\
     $p_i$           &   Distribution. \\
     $\pi_i$         &   (Instantaneous) distribution, Eq. \eqref{eq:pi_p_V}. \\
     $q(t)$          &   $\int_0^t \alpha(t') \, dt'$.  \\
-    $Q$             &   $q(T) - q(t)$.  \\
+    $\bar q(t)$     &   $q(T) - q(t)$.  \\
     $\rho_i$        &   Distribution used to define the error. \\
     $s, S$          &   Stage index and the total number of stages in the Wang-Landau algorithm. \\
     $\sigma_{ij}(t)$   &   Autocorrelation function of $\zeta_i(t)$. \\
