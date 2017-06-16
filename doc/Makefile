@@ -1,6 +1,6 @@
 prj=invt
 
-ver=5.9
+ver=6.0
 
 figgps=$(wildcard fig/*.gp)
 pdffigs=$(patsubst %.gp,%.pdf, $(figgps))
@@ -45,9 +45,9 @@ $(prj)docV$(ver).zip::
 	  ln -sf ../../fig .
 	cd old/V$(ver) && \
 	  python deannote.py -v -c -i $(prj)_annotatedV$(ver).tex -o $(prj)V$(ver).tex
-	make all -C old/V$(ver)/
+	make -C old/V$(ver)/ $(prj)V$(ver).pdf
+	make -C old/V$(ver)/ $(prj)_annotatedV$(ver).pdf
 	make diff
-	make all -C old/V$(ver)/
 	cd old/V$(ver) && \
 	  zip -r ../../$(prj)docV$(ver).zip *.tex *.pdf simul.bib *.py \
 	       $(epsfigs) $(pdffigs) $(figgps) Makefile README.md
@@ -70,8 +70,8 @@ diff::
 	# consider the flag --math-markup=0 if there is trouble for formulae
 	cd old/V$(ver) && latexdiff \
 	  --config="PICTUREENV=(?:picture|DIFnomarkup|align|equation|tikzpicture|table|tabular|enumerate)[\w\d*@]*" \
-	  ../V$(refver)/invt_annotatedV$(refver).tex invt_annotatedV$(ver).tex > invt_diffV$(ver).tex
-	make -C old/V$(ver) invt_diffV$(ver).pdf
+	  ../V$(refver)/$(prj)_annotatedV$(refver).tex $(prj)_annotatedV$(ver).tex > $(prj)_diffV$(ver).tex
+	make -C old/V$(ver) $(prj)_diffV$(ver).pdf
 
 refver2=4.1_jd
 
