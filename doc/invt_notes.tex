@@ -3673,6 +3673,292 @@ would be similar in general properties.
 
 
 
+\section{\label{sec:wltoinvt}
+Inverse-time schedule as the optimal limit of the WL algorithm}
+
+
+We may understand the inverse-time schedule %, Eq. \eqref{eq:},
+as an optimal limit of the stage-wise WL updating scheme.
+%
+%Our calculation below will focus on the one-variable problem,
+%as in Sec. \ref{sec:onevar}.
+
+To begin, we split the entire simulation into $S$ stages,
+each with a fixed magnitude, $\alpha_s$ ($1 \le s \le S$).
+%
+We denote the number of steps in stage $s$ as $T_s$, and
+$\sum_{s=1}^S T_s = T$.
+%
+%\begin{equation}
+%  \sum_{s = 1}^S T_s = T
+%  ,
+%  \label{eq:sumT}
+%\end{equation}
+%
+We assume that
+the magnitude follows geometrically,
+%
+\begin{equation}
+  \alpha_s = \alpha_0 \, r^s
+  ,
+  \label{eq:alphas}
+\end{equation}
+%
+with $0 < r < 1$.
+%
+%and that the system is properly equilibrated
+%under constant magnitude initially.
+%
+We wish to find the best distribution of the simulation time
+into the $S$ stages
+as well as
+the optimal number of stages and $r$.
+
+
+If we denote the error at the end of stage $s$ as $E_s$,
+then $q\left( \tau^{(s)} \right) = \alpha_s \, \tau^{(s)}$,
+where $\tau^{(s)}$ denotes the number of steps in stage $s$,
+and from Eq. \eqref{eq:ET_average}, we have
+%
+\begin{align}
+  E_s
+  &=
+  E_{s - 1} \, e^{-2 \, \alpha_s \, T_s }
+  +
+  \Gamma \, \int_0^{T_s}
+  \alpha_s^2 \,
+  e^{ -2 \, \alpha_s \, \left(T_s - \tau^{(s)}\right) }
+  \, d \tau^{(s)}
+  \notag
+  \\
+  &=
+  \left(
+    E_{s - 1} - \frac{ \Gamma \, \alpha_s } { 2 }
+  \right)
+  e^{ - 2 \, \alpha_s \, T_s }
+  +
+  \frac{ \Gamma \, \alpha_s } { 2 }
+  .
+  \label{eq:errorstage}
+\end{align}
+%
+Our aim is to minimize the error
+of the final stage, $E_S$.
+%
+To do so, let us consider shifting simulation time
+by $\delta T$ from
+stage $s+1$ to stage $s$,
+then $E_{s+1}$ is affected as
+%
+\begin{align*}
+  \delta E_{s+1}
+  =
+\left[
+  2 \, \alpha_{s+1}
+  \left(
+    E_s - \tfrac{ \Gamma \, \alpha_{s+1} } { 2 }
+  \right)
+  +
+  \frac{ \partial E_s } { \partial T_s }
+\right]
+e^{-2 \, \alpha_{s+1} \, T_{s+1} }
+\,
+\delta T
+.
+\end{align*}
+%
+Since this variation does not directly affect the error of later stages,
+the above expression must be zero to minimize the final error, i.e,
+%
+\begin{align*}
+  2 \, \alpha_{s+1}
+  \left(
+    E_s - \frac{ \Gamma \, \alpha_{s+1} } { 2 }
+  \right)
+  &=
+  -\frac{ \partial E_s } { \partial T_s }
+  %\\
+  %&=
+  %2 \, \alpha_s \, e^{-2 \, \alpha_s \, T_s}
+  %\left(
+  %  E_{s-1} - \frac{ \Gamma \, \alpha_s } { 2 }
+  %\right)
+  %\\
+  =
+  2 \, \alpha_s \, \left(E_s - \frac{ \Gamma \, \alpha_s } { 2 }  \right)
+  ,
+\end{align*}
+%
+where we have used Eq. \eqref{eq:errorstage}
+in the second step.
+%
+Thus,
+\begin{equation}
+  E_s
+  =
+  \frac{ \Gamma } { 2 } \, ( \alpha_s + \alpha_{s+1} )
+  =
+  \frac{ \Gamma } { 2 } \, \alpha_s ( 1 + r )
+  .
+  \label{eq:Es}
+\end{equation}
+%
+Using Eqs. \eqref{eq:Es} and \eqref{eq:alphas}
+in Eq. \eqref{eq:errorstage}, we get
+%
+\begin{equation}
+  e^{-\alpha_s \, T_s } = r
+  .
+  \label{eq:exp_r}
+\end{equation}
+%
+
+To compute the optimal schedule,
+we map the overall simulation time, $t$,
+to the stage number, $s$, as
+%
+\begin{align*}
+  t
+  = \sum_{s' = 1}^s T_{s'}
+  = \frac{ 1 - r^s } { 1 - r } \, T_s
+  = \frac{ 1 } { \gamma } \,
+  \left(
+    \frac{1}{\alpha_s}
+    -
+    \frac{1}{\alpha_0}
+  \right)
+  ,
+\end{align*}
+where
+$\gamma = ( 1 - r ) / \ln(1/r)$,
+and we have used Eq. \eqref{eq:exp_r} in the last step.
+%
+Thus,
+%
+\begin{equation}
+  \alpha_s =
+  \frac{ 1 }
+  { \gamma \, t + \alpha_0^{-1} }
+  ,
+  \label{eq:alphas_t}
+\end{equation}
+%
+and the final error is given by
+%
+\begin{align}
+  E_S
+  =
+  \frac{\Gamma}{2}
+  \frac{ 1 + r }
+  { \gamma \, T + \alpha_0^{-1} }
+  ,
+  \notag
+\end{align}
+%
+which is minimized as $r \to 1$
+for a large $T$
+(at this point, $\gamma \to 1$).
+%
+\note{
+  For a large $T$, $E_S \approx \frac{\Gamma}{2T} \frac{1+r}{\gamma}$.
+  Define $\delta = 1 - r$,
+  we have $1/\gamma = 1+ \delta/2 + \delta^2/3 + \cdots$,
+  and
+  $$
+  \frac{1+r}{\gamma}
+  =
+  (2 - \delta)
+  \left(
+  1 + \frac{\delta}{2} + \frac{\delta^2}{3} + \cdots
+  \right)
+  =
+  2 + \sum_{n=1}^\infty \frac{n-1}{n(n+1)}\delta^n \ge 2
+  .
+  $$
+}
+%
+If we identify the parameter, $\alpha_0$,
+as the initial updating magnitude, $\alpha(t = 0)$,
+then this result agrees with Eq. \eqref{eq:t0_sinc},
+with $t_0 = \alpha_0^{-1}$,
+and the schedule given by Eq. \eqref{eq:alphas_t}
+is identical to that from Eq. \eqref{eq:alpha_invt1}.
+
+
+
+\subsection{\label{sec:stabilize_wband}
+Stabilization}
+
+
+
+%A practical problem of using homogeneous updating scheme
+%is the following.
+%
+A homogeneous updating scheme
+specified by an arbitrary kernel
+is not necessarily stable,
+i.e. some eigenvalues can be negative.
+%
+Here we show how to minimally modify
+the updating kernel
+to stabilize it.
+%
+\note{The relative code is \texttt{trimwindow()} in \texttt{invt.h}.
+}
+
+
+Given an updating kernel,
+we can compute the eigenvalues from
+Eq. \eqref{eq:wband_eigenvalue}.
+%
+By replacing negative eigenvalues with zeros and
+using the inversion formula,
+Eq. \eqref{eq:mu_from_lambda},
+we get a new updating kernel,
+which is stable by construction.
+%
+However, the new kernel is widened
+as $\mu_l$ may be nonzero for $l > b$.
+%
+If we truncate the new kernel at $\mu_b$,
+the stability problem remains,
+although the negative eigenvalues
+tend to be smaller in magnitude.
+%
+Thus, to stabilize the updating kernel
+without increasing the width,
+we need to iterate the above process many times,
+resulting the following algorithm.
+
+
+%
+\begin{enumerate}
+  \item
+    Given an updating kernel, $\mu_0, \dots, \mu_b$,
+    compute the eigenvalues,
+    $\lambda_1, \dots, \lambda_{n-1}$,
+    from Eq. \eqref{eq:wband_eigenvalue}.
+  \item
+    If all eigenvalues are nonnegative within the numerical error,
+    we are done. % and exit the loop.
+  \item
+    Otherwise, replace negative eigenvalues by zeros,
+    and compute the new kernel,
+    $\mu_0, \dots, \mu_b$, from
+    Eq. \eqref{eq:mu_from_lambda},
+    with $\mu_l = 0$ for $l > b$.
+    Go to step 1.
+\end{enumerate}
+
+
+
+
+
+
+
+
+
+
 
 \section{\label{sec:sinvt_schedule}
 Scaled inverse-time schedule}

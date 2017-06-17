@@ -47,7 +47,7 @@ $(prj)docV$(ver).zip::
 	  python deannote.py -v -c -i $(prj)_annotatedV$(ver).tex -o $(prj)V$(ver).tex
 	make -C old/V$(ver)/ $(prj)V$(ver).pdf
 	make -C old/V$(ver)/ $(prj)_annotatedV$(ver).pdf
-	make diff
+	#make diff
 	cd old/V$(ver) && \
 	  zip -r ../../$(prj)docV$(ver).zip *.tex *.pdf simul.bib *.py \
 	       $(epsfigs) $(pdffigs) $(figgps) Makefile README.md
