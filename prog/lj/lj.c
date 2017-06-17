@@ -252,7 +252,7 @@ static int work(invtpar_t *m)
     fprintf(stderr, "starting %ld metadynamics run of %ld/%ld steps..., a %g, err %g -> %g\n",
         m->ntrials, m->nequil, m->nsteps, metad->a, metad->eiref, metad->efref);
     /* write the header information for the log file */
-    fplog = fopen(fnlog, "w");
+    fplog = fopen(fnlog, "a");
     metad_saveheader(metad, fplog);
     fprintf(fplog, "# %ld %ld %ld %g %g %g\n",
         m->ntrials, m->nequil, m->nsteps, metad->a, metad->eiref, metad->efref);

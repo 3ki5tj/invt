@@ -1141,9 +1141,9 @@ the total error defined in Eq. \eqref{eq:error_def}
 is given by
 %
 \begin{align}
-  E(T)
+  \Err(T)
   =
-  E(0) \, e^{-2 \, q(T)}
+  \Err(0) \, e^{-2 \, q(T)}
   +
   \Gamma \,
   \int_0^T
@@ -1227,20 +1227,21 @@ from the $t = 0$ case of Eq. \eqref{eq:expqt}\big].
 By using Eq. \eqref{eq:alpha_invt} in Eq. \eqref{eq:ET_average},
 we find the final total error to be
 %
-$E(T) = [ E(0) \, t_0^2 + \Gamma \, T ]/(t_0 + T)^2$,
+$\Err(T) = [ \Err(0) \, t_0^2 + \Gamma \, T ]/(t_0 + T)^2$,
 %
 which is minimal at
 %
 \begin{equation}
-  t_0 = \frac{ \Gamma } { E(0) }
+  t_0 = \frac{ \Gamma } { \Err(0) }
   ,
-  \label{eq:t0_singlebin}
+  \notag
+  %\label{eq:t0_singlebin}
 \end{equation}
 %
 and the minimum is
 %
 \begin{equation}
-  E(T)
+  \Err(T)
   =
   \frac{ \Gamma } { T + t_0 }
   .
@@ -2614,7 +2615,8 @@ $A_1^2 - 4 \, A_0 \, A_2 \le 0$.},
       1 - e^{ -\lambda_k \, q(T) }
     \right]
 \right)^2.
-\label{eq:CSineq}
+\notag
+%\label{eq:CSineq}
 \end{align}
 %
 Note that the last expression %of Eq. \eqref{eq:CSineq}
@@ -2805,11 +2807,11 @@ in the second step.
 %
 \note{
 For the single-bin updating scheme,
-it recovers Eq. \eqref{eq:t0_singlebin}
+it recovers $t_0 = \Gamma/\Err(0)$ %Eq. \eqref{eq:t0_singlebin}
 under the assumption of Eq. \eqref{eq:xt2_eql}.
 %
 From Eq. \eqref{eq:xt2_eql}, we have
-$$E(0) = \frac{1}{2} a_0 \sum_{k=1}^{n-1} \Gamma_k
+$$\Err(0) = \frac{1}{2} a_0 \sum_{k=1}^{n-1} \Gamma_k
 = \frac{1}{2} \, a_0 \, \Gamma.$$
 }
 %
@@ -2829,7 +2831,8 @@ The final error is given by
   \sum_{ k = 1 }^{ K - 1 }
     \Gamma_k
   ,
-\label{eq:error_sinc}
+  \notag
+  %\label{eq:error_sinc}
 \end{equation}
 %
 as a generalization of Eq. \eqref{eq:Emin_singlebin}
@@ -3501,7 +3504,8 @@ time average: for variable $x$, we define
 \begin{equation}
   X(t) \equiv \frac{1}{t} \sum_{\tau=1}^t x(\tau)
   .
-  \label{eq:timeav}
+  \notag
+  %\label{eq:timeav}
 \end{equation}
 %
 Then after time averaging, Eq. \eqref{eq:uhatt} becomes
@@ -3886,7 +3890,8 @@ G(T)
   1
   \right)^2
 .
-  \label{eq:hfluc_def}
+  \notag
+  %\label{eq:hfluc_def}
 \end{align}
 From Eq. \eqref{eq:xi_zeta}, we have
 %
@@ -3919,15 +3924,17 @@ The total histogram fluctuation is
     \tilde F_k^2(T)
   \bigr\rangle
 =
-\frac{ \Gamma } { T }.
-  \label{eq:hfluc}
+\frac{ \Gamma } { T }
+  .
+  \notag
+  %\label{eq:hfluc}
 \end{equation}
 %
 Comparing this to Eq. \eqref{eq:Emin_singlebin},
 we may rephrase the optimality of the inverse-time schedule
 as the inequality,
 \begin{equation}
-  E(T)
+  \Err(T)
   \ge
   \bigl\langle G(T+t_0) \bigr\rangle
   .
@@ -4084,10 +4091,11 @@ and
     \tilde f_k(t) \, \tilde f_k(0)
   \right\rangle = \frac{1+\Lambda_k}{1-\Lambda_k}
   .
-  \label{eq:Gamma_est}
+  \notag
+  %\label{eq:Gamma_est}
 \end{equation}
 
-The transition matrix method usually only for
+The transition matrix method usually works only for
 simple sampling processes without major barrier
 along the collective variable, $z$.
 %
@@ -4913,7 +4921,8 @@ as an integral:
   =
   2 \int_0^\pi
     \mu(\varphi) \, \cos (k \, \varphi) \, d\varphi,
-\label{eq:lambda_int}
+  \notag
+  %\label{eq:lambda_int}
 \end{equation}
 %
 with the normalization
