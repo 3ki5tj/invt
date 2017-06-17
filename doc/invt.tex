@@ -1772,15 +1772,14 @@ used Eq. \eqref{eq:uk_def} and
 defined the (square-root) mass function as
 %
 \begin{equation}
-  M(q')
+  M(\bar q)
   \equiv
   \sqrt{
     \textstyle\sum_{ k = 1 }^{n - 1}
-    \Gamma_k \, \lambda_k^2 \, e^{-2 \, \lambda_k \, q'}
+    \Gamma_k \, \lambda_k^2 \, e^{-2 \, \lambda_k \, \bar q}
   }
   .
-  \notag
-  %\label{eq:mass_func}
+  \label{eq:mass_func}
 \end{equation}
 %
 In this mechanical analogy,
@@ -1830,12 +1829,12 @@ and we may set
   \;
   \dot q(t)
   =
-  \frac{C}{T}
+  \frac{C_M}{T}
   ,
   \label{eq:Lagrangian_const}
 \end{equation}
 %
-for some positive $C$.
+for some positive $C_M$.
 %
 This serves as a generalization of Eq. \eqref{eq:dydt_const}.
 %
@@ -1843,24 +1842,24 @@ By integrating this equation of motion, we get
 %
 \begin{equation}
   \int_{ q(T) - q(t) }^{ q(T) }
-    M(q')
+    M(\bar q)
     \;
-    d q'
+    d \bar q
   =
-  C \, \frac t T
+  C_M \, \frac t T
   ,
   \label{eq:q_opt}
 \end{equation}
 %
-and $C$ can be determined from
+and $C_M$ can be determined from
 the $t = T$ case as
 %
 \begin{equation}
-  C =
+  C_M =
   \int_{ 0 }^{ q(T) }
-    M( q' )
+    M( \bar q )
     \;
-    d q'
+    d \bar q
   .
   \label{eq:mint}
 \end{equation}
@@ -1876,11 +1875,11 @@ The minimal asymptotic error is
   =
   \mathcal L \, T
   =
-  \frac { C^2 } { T }
+  \frac { C_M^2 } { T }
   =
   \frac 1 T
   \left(
-    \int_0^{ q(T) } M(q') \, d q'
+    \int_0^{ q(T) } M(\bar q) \, d \bar q
   \right)^2
   .
 \label{eq:error_asym2}
@@ -1913,7 +1912,7 @@ a normalized mass distribution as
     M(\bar q)
   }
   {
-    C
+    C_M
   }
   ,
 \notag
@@ -1935,7 +1934,7 @@ we find that for $\bar q(t) \equiv q(T) - q(t)$,
   \label{eq:mQ_invTa}
   \\
   \int_{\bar q(t)}^{ q(T) }
-    m(q') \, dq'
+    m(q') \, d q'
   &=
   \frac t T
   ,
@@ -2041,7 +2040,7 @@ and we would have the inverse-time schedule.
 On the other hand,
 if the mass distribution is inversely proportional to $\bar q$,
 which is approximately true for the Gaussian updating scheme
-at large $\bar q$,
+at large $\bar q$ (cf. Appendix \ref{sec:seplambda}),
 then we would have an exponentially decaying schedule.
 
 \begin{table}[h]\footnotesize
@@ -2119,7 +2118,8 @@ the optimal $q(T)$ satisfies
 \begin{align}
   \mathcal Y\bigl( q(T) \bigr)
   &\equiv
-  \frac{ M\bigl( q(T) \bigr) } { T } \int_0^{q(T)} M(q') \, dq'
+  \frac{ M\bigl( q(T) \bigr) } { T }
+    \int_0^{q(T)} M(q') \, d q'
   -\frac{a_0}{2} \, M^2\bigl( q(T) \bigr)
   \notag \\
   &
@@ -2133,7 +2133,7 @@ the optimal $q(T)$ satisfies
 %\begin{align}
 %  m\bigl( q(T) \bigr)
 %  +
-%  \frac{2}{a_0 \, C \, M\bigl( q(T) \bigr)}
+%  \frac{2}{a_0 \, C_M \, M\bigl( q(T) \bigr)}
 %  \sum_{k = 1}^{n-1}
 %  \lambda_k \, \tilde u_k^2 \,
 %  e^{-2 \, \lambda_k \, [a_0 \, T_0 + q(T)] }
@@ -2170,7 +2170,7 @@ $$
   M(q_T) \,
   \int_0^{ q_T } M(q) \, dq
   =
-  \frac{ 2 \, C } { T } \, M(q_T)
+  \frac{ 2 \, C_M } { T } \, M(q_T)
   .
 \end{aligned}
 $$
@@ -3190,7 +3190,7 @@ the error from $9.8\times10^{-3}$
     in reducing the errors of middle-range eigenmodes
     than the inverse-time schedule ($1/t$).
     The ``corrected'' values were obtained from
-    Eq. \eqref{eq:uhatt}. 
+    Eq. \eqref{eq:uhatt}.
     The lines are a guide to the eyes.
   }
 \end{center}
@@ -4102,13 +4102,14 @@ if we borrow \eqref{eq:lambda_Gaussian}
 for $\Lambda_k$,
 with $\sigma_z$ interpreted as the average move size along $z$,
 then
-\begin{align*}
+\begin{align}
 \Gamma_k = \coth\left[
   \left(
     \frac{ \pi \, k \, \sigma_z } { g \, \Delta z}
   \right)^2
   \right].
-\end{align*}
+\label{eq:Gamma_local}
+\end{align}
 For small $k$,
 we have $\Gamma_k \propto \Delta z^2/(\sigma_z \, k)^2$,\cite{bussi2006}
 which means that a doubled sampling range, $\Delta z$,
@@ -4122,9 +4123,212 @@ Using finer bins would, however, not change this value.
 For a modestly large $k$,
 $\Gamma_k \approx 1$.
 and by Eq. \eqref{eq:xt2_eql},
-we would expect a roughly flat profile
-for the single-bin updating scheme,
+we would expect a roughly flat tail
+for the single-bin updating scheme
+as $\langle \tilde v_k^2 \rangle \propto \Gamma_k$,
 cf. Fig. \ref{fig:lj_xerr}.
+
+
+
+
+
+\section{\label{sec:seplambda}
+Updating scheme
+with a set of well-separated eigenvalues}
+
+
+We will study updating schemes
+with a set of well-separated eigenvalues,
+as a model for the large $k$ eigenmodes
+of the Gaussian updating scheme.
+%
+We will show that the mass distribution will have
+an inverse-$\bar q$ profile,
+and derive a upper bound for the asymptotic error.
+
+
+Starting from the definition, Eq. \eqref{eq:mass_func}, we have
+$$
+  M(\bar q)
+  \le
+  \sum_{k = 2}^n
+  \sqrt{ \Gamma_k } \, \lambda_k \, e^{ -\lambda_k \, \bar q }
+  .
+$$
+Thus,
+it follows from Eq. \eqref{eq:mint} that, as $q(T) \to \infty$,
+%
+\begin{equation}
+  C_M
+  =
+  \int_0^\infty
+  M(\bar q) \, d \bar q
+  \le
+  \sum_{k = 1}^{n-1} \sqrt{ \Gamma_k }
+  ,
+  \label{eq:mint_ubound}
+\end{equation}
+%
+and the asymptotic error from Eq. \eqref{eq:error_asym2}
+is bounded as
+\begin{equation}
+  \Err_A(T)
+  =
+  \frac{ C_M^2 } { T }
+  \le
+  \frac 1 T
+  \left(
+    \sum_{k=1}^{n-1} \sqrt{ \Gamma_k }
+  \right)^2
+  .
+  \label{eq:error_asym_ubound}
+\end{equation}
+%
+It is readily seen that this bound is always
+greater than the lower bound given by Eq. \eqref{eq:error_asym_singlebin},
+%
+$$
+\frac{T}{(T+t_0)^2} \, \sum_{k=1}^{n-1} \Gamma_k
+\le
+\frac{1}{T} \sum_{k=1}^{n-1} \Gamma_k
+\le
+\frac{1}{T} \left( \sum_{k=1}^{n-1} \sqrt{ \Gamma_k } \right)^2
+.
+$$
+
+
+
+Next, we will show that this bound represents
+updating schemes with a set of very different eigenvalues.
+%
+First, we have for any mode $k^*$ $(k^* > 0)$,
+%
+\begin{align}
+  M(\bar q)
+  &
+  \ge
+  \sqrt{ \Gamma_{ k^* } } \,
+  \lambda_{ k^* } \,
+  e^{ -\lambda_{ k^* } \, \bar q }
+  \ge
+  \frac{ \sqrt{ \Gamma_{ k^* } } } { \bar q }
+  ,
+\label{eq:MQ_lbound1}
+\end{align}
+%
+where the first inequality
+would approach an equality if the $k^*$ mode
+dominates the mass function, $M(\bar q)$,
+and the second inequality
+represent the limit of $\lambda_{k^*} \to 1/\bar q$.
+%
+Then, for the $k$th component of the asymptotic error,
+we have from Eq. \eqref{eq:error_asym_Lagrangian}
+%
+\begin{align}
+  \left\langle
+  \tilde v_k^2(T)
+  \right\rangle_A
+  &=
+  \int_0^T
+  \Gamma_k \, \lambda_k^2 \, e^{2 \, \lambda_k \, [q(t) - q(T)] }
+  \, {\dot q}^2(t) \, dt
+  \notag
+  \\
+  &=
+  \frac{ C_M } { T }
+  \, \Gamma_k \, \lambda_k^2
+  \int_0^{q(T)}
+  \frac{ e^{-2 \, \lambda_k \, \bar q } } { M(\bar q) }
+  \,  \, d \bar q
+  \notag
+  \\
+  &\le
+  \frac{ C_M }{ T } \,
+  \frac{ \Gamma_k \, \lambda_k^2 } { \sqrt{ \Gamma_{k^*} } \, \lambda_{k^*} }
+  \int_0^{q(T)}
+    e^{-(2 \, \lambda_k - \lambda_{k^*} ) \, \bar q}
+    \, d \bar q
+  \notag
+  \\
+  &\le
+  \frac{ C_M }{ T } \,
+  \cdot
+  \frac{ \Gamma_k }
+  { \sqrt{ \Gamma_{k^*} } }
+  \cdot
+  \frac{ \lambda_k^2 }
+  { \lambda_{k^*} \, (2 \, \lambda_k -\lambda_{k^*}) }
+  ,
+  \label{eq:y2_ubound_k}
+\end{align}
+%
+where we have
+used Eqs. \eqref{eq:Lagrangian_const} and \eqref{eq:MQ_lbound1}
+on the second and third lines, respectively,
+and extended the upper limit to infinity on the last line.
+%
+For a set of well-separated eigenvalues,
+$\lambda_k$ depends on the mode index, $k$,
+much more critically than $\Gamma_k$.
+%
+Thus, the tightest upper bound
+can be approximately obtained from minimizing the last factor
+on the right-hand side of Eq. \eqref{eq:y2_ubound_k},
+and the minimal is reached at $k^* = k$,
+when $\lambda_{k^*} = \lambda_k$.
+%
+So
+%
+\begin{equation}
+  \left\langle
+  \tilde v_k^2(T)
+  \right\rangle_A
+  \le
+  %\approx
+  \frac{ C_M }{ T }
+  \sqrt{ \Gamma_k }
+  .
+  \label{eq:y2_ubound}
+\end{equation}
+%
+By summing over $k$
+and using Eq. \eqref{eq:mint_ubound},
+we recover Eq. \eqref{eq:error_asym_ubound}.
+
+From Eq. \eqref{eq:Gamma_local},
+we know that $\Gamma_k$ would quickly approach a constant.
+%
+Then Eq. \eqref{eq:y2_ubound} shows that
+the asymptotic error profile would also
+approach a plateau in this case
+(cf. Fig. \ref{fig:lj_xerr}
+for a Gaussian example).
+%
+However, to reach this upper bound
+the simulation has to be long enough
+such that the upper limit of the integral
+can be extended from $q(T)$ to infinity
+in the last step of Eq. \eqref{eq:y2_ubound_k}.
+%
+As a result,
+the flatter profile from Eq. \eqref{eq:y2_ubound}
+would stop at mode $k$,
+at which $\lambda_k \approx 1/q(T)$.
+
+Finally, from Eqs. \eqref{eq:MQ_lbound1} and \eqref{eq:Gamma_local}
+we know that for a large $\bar q$, which implies a sufficiently
+large matching mode $k^*$ with $\lambda_{k^*} \approx 1/\bar q$,
+the mass function would be roughly proportional to $1/\bar q$,
+and so is the mass distribution, i.e.
+\begin{equation}
+  m(\bar q) \propto \frac{ 1} { \bar q },
+  \qquad
+  \mbox{for large $\bar q$.}
+  \label{eq:m_invq}
+\end{equation}
+
+
 
 
 
@@ -5093,7 +5297,7 @@ resulting the following algorithm.
     $\mathbf{A}$    &   Transition matrix. \\
     $\alpha$        &   Updating magnitude. \\
     $b$             &   Cutoff of the kernel of homogeneous updating schemes. \\
-    $C$             &   $C \equiv \int_0^{ q(T) } M(q) \, dq$.  \\
+    $C_M$           &   Integral of the mass function, $M(\bar q)$.  \\
     $\delta$        &   Dirac's or discrete $\delta$-function. \\
     $c$             &   Constant. \\
     $\Err, \Err_R, \Err_A$          &   Error, residual error, asymptotic error. \\
