@@ -392,6 +392,7 @@ __inline static int gaus_wlcheckx(gaus_t *gaus,
 
 
 
+/* transition to a neighboring umbrella */
 __inline static int gaus_move(gaus_t *gaus, double x, int *id)
 {
   int acc = 0;

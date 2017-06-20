@@ -2876,36 +2876,41 @@ Eqs. \eqref{eq:w_from_phi} and \eqref{eq:lambda_bandpass} as
 where we have dropped the $k=0$ mode
 that corresponds to the uniform shift of the bias potential.
 %
-In this way, the bias potential is a superposition of the polynomials
+This results in a polynomial bias potential
+that can be written as a superposition
 $$
-u(z, t) = \sum_{k=1}^{K-1} a_k(t) \, R_k(z),
+u(z, t) = \sum_{k=1}^{K-1} c_k(t) \, R_k(z),
 $$
 with the coefficients updated as, according to Eq. \eqref{eq:mbin_update},
 $$
-a_k(t+1) = a_k(t) + \alpha(t) \, R_k\bigl( z(t) \bigr).
+c_k(t+1) = c_k(t) + \alpha(t) \, R_k\bigl( z(t) \bigr).
 $$
 
 
-For example, by assuming the Legendre polynomials\cite{arfken}
-on a flat distribution over $[z_c - \Delta z/2, z_c + \Delta z/2]$
-and $K = 2$,
+For example,
+to sample a flat distribution, $\rho(z)$,
+over $[z_c - \Delta z/2, z_c + \Delta z/2]$,
+we can use the Legendre polynomials\cite{arfken},
+and with $K = 2$,
 the bias potential contains only a linear mode for
 $R_1(z) = 2 \sqrt{3} (z - z_c)/\Delta z$,
-and we recover the algorithm by
+which recovers the algorithm by
 Langfeld, Lucini and Rago\cite{langfeld2012}.
 %
 Applied to the energy space, $z = E$,
-$a_1(t)$ represents the local or
+$c_1(t)$ represents the scaled local or
 statistical temperature\cite{kim2006, *kim2007},
 and the inverse-time schedule
 was recommended for its update\cite{pellegrini2014}.
 
-Alternatively, by assuming the Hermite polynomials\cite{arfken}
-on a Gaussian distribution centered at $z_c$ with width $\sigma_z$
-and $K=3$,
+Alternatively,
+to sample a Gaussian distribution
+centered at $z_c$ with width $\sigma_z$
+we can use the Hermite polynomials\cite{arfken},
+and with $K=3$,
 we have a quadratic bias potential
-as a linear combination of
-$R_1(z) = (z-z_c)/\sigma_z$
+from a linear combination of
+$R_1(z) = (z - z_c)/\sigma_z$
 and
 $R_2(z) = (z - z_c)^2 /\left(\sqrt 2 \, \sigma_z^2\right)$.
 %
@@ -2913,11 +2918,13 @@ This bias potential was commonly empolyed
 in umbrella sampling (see e.g. Ref. \cite{zhu2012})
 and the method of Gaussian ensemble\cite{hetherington1987,
 *challa1988, *costeniuc2006, neuhaus2006, *neuhaus2007},
-which is helpful in overcoming the barrier
-in a first-order phase transition.
+which is helpful in overcoming barriers
+in first-order phase transitions.
 %
-Initially, we can employ the WL strategy
-to control the updating magnitude
+While the asymptotic updating magntiude
+would be given by the inverse-time formula,
+we can employ the WL strategy early in simulation
+to control the updating magnitude in stages
 with the histogram fluctuation redefined as
 $$
 \max\left\{
@@ -2934,6 +2941,68 @@ $$
 $$
 where the overline denotes the time average.
 
+With only two nontrivial modes,
+the above strategy usually only works
+for a Gaussian with a narrow width.
+%
+We can, however, use it as a building block
+to construct an expanded ensemble with
+multiple Gaussians centered at different places.
+%
+Such a construction can be realized via
+either the replica exchange
+(parallel tempering)\cite{swendsen1986,
+*geyer1991, *hukushima1996, *hansmann1997}
+or the simulated tempering\cite{marinari1992,
+  *lyubartsev1992, li2007,
+  park2007, *nguyen2013, *zhang2015st}
+framework.
+While the mutual exchange probabiliy
+can be readily derived in the former
+framework\cite{neuhaus2006, *neuhaus2007},
+the transition probability in the latter case is
+requires estimation of the partition function
+of the Gaussian ensemble
+$Z \equiv \int e^{-\beta \, E(\mathbf x)-u(z(\mathbf x),t)} \, d\mathbf x$,
+where $\mathbf x$ denotes the molecular coordinates,
+$E(\mathbf x)$ is the unbiased energy function,
+$\beta$ is the inverse temperature,
+and the collective variable, $z$,
+has also been written as a function of $\mathbf x$.
+%
+The transition probabiliy from
+the $i$th Gaussian to the $j$th is given by
+is given by
+\begin{align*}
+A(i\to j) =
+\min\left\{1,
+  \frac{Z^{(i)}}{Z^{j}}
+  \exp\left[u^{(i)}\bigl( z(t) \bigr)
+   - u^{(j)}\bigl( z(t) \bigr) \right]
+  \right\}
+  ,
+\end{align*}
+where $z(t)$ is the current value of $z$.
+%
+For a neighboring pair, $j = i\pm 1$,
+we can estimate the ratio $Z^{(i)}/Z^{(j)}$
+from the following approximate formula
+%
+\begin{align*}
+  \frac{Z_i}{Z_j}
+  =
+  \frac{\sigma_i}{\sigma_j}
+  \exp\left[
+    u^{(j)}\bigl( z^{(i,j)} \bigr)
+   -u^{(i)}\bigl( z^{(i,j)} \bigr)
+  \right]
+  ,
+\end{align*}
+%
+where
+$z^{(i,j)} \equiv
+\bigl( z_c^{(i)}/\sigma_z^{(i)} + z_c^{(j)}/\sigma_z^{(j)} \bigr) /
+\bigl(         1/\sigma_z^{(i)} +         1/\sigma_z^{(j)} \bigr)$.
 
 
 \section{\label{sec:results}
@@ -3513,9 +3582,11 @@ of the inverse-time schedule
 
 
 
-We wish to show that with the inverse-time schedule,
-the bias potential under the single-bin updating scheme
-happens to coincide with a runtime average
+We wish to show the optimality of the inverse-time schedule
+for the single-bin updating scheme
+from the observation that
+it leads to a bias potential
+that coincides with a runtime average
 of the independent corrections.
 %as a natural consequence of the stabilization of a runtime average
 %as the sample size increases\cite{
