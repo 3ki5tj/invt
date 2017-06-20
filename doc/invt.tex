@@ -41,7 +41,7 @@
 
 
 
-\title{Optimal updating factor in adaptive flat-distribution-sampling simulations}
+\title{Optimal updating magnitude in adaptive flat-distribution-sampling simulations}
 
 \author{Cheng Zhang}
 \author{Justin A. Drake}
@@ -185,8 +185,9 @@ have been introduced,
 including the Wang-Landau (WL) algorithm\cite{
   wang2001, *wang2001pre}
 and metadynamics\cite{huber1994,
-*laio2002, *laio2008, *barducci2011, *sutto2012},
-popular for MC and MD simulations, respectively\cite{junghans2014}.
+  *laio2002, *laio2008, *barducci2011, *sutto2012, micheletti2004}
+among others\cite{kim2006, *kim2007, junghans2014,
+  langfeld2012, pellegrini2014}.
 %
 %flat-distribution-sampling (FDS) techniques
 %that build the bias potential adaptively or on the fly.
@@ -213,12 +214,16 @@ in WL,
 or that of a Gaussian
 in metadynamics.
 %
-Although the two window functions
-are not always associated with
-the two methods\cite{micheletti2004, kim2006, *kim2007, junghans2014},
-we will colloquially use the terms WL and metadynamics
-to represent FDS simulations using the
-single-bin and Gaussian window functions, respectively.
+We will refer to the two updating schemes
+as the single-bin
+and Gaussian updating schemes, respectively.
+%
+While the former is popular for MC simulations\cite{wang2001,
+  wang2001pre, kim2006, *kim2007},
+the latter is more popular for MD simulations
+as it provides a smoother bias potential
+that can be readily differentiated for force calculation.\cite{huber1994,
+  *laio2002, *laio2008, *barducci2011, *sutto2012, junghans2014}
 %
 %is that in the WL case,
 %each updating step is limited to the bin
@@ -273,8 +278,8 @@ the inverse number of updating steps.
   But I find the paper is a bit hard to read.
   There, however, the formula is $t_0/t$ instead of $1/t$.
 }
-The same schedule also applies to a variant of
-the WL algorithm\cite{langfeld2012, pellegrini2014}.
+%The same schedule also applies to a variant of
+%the WL algorithm\cite{langfeld2012, pellegrini2014}.
 %
 %The optimal schedule for metadynamics,
 %however, is less studied.
@@ -288,7 +293,7 @@ of a general updating scheme,
 including the single-bin and Gaussian one
 used in the WL algorithm and metadynamics.
 %
-Our method maps the optimization problem to a mechanical one,
+We will map the optimization problem to a mechanical one,
 in which the schedule plays the role of the velocity of
 a free particle with a position-dependent mass,
 and the final error becomes the action.
@@ -323,7 +328,7 @@ to a class of asymptotically optimal
 bandpass updating schemes.
 %
 The latter, however,
-allow one to selectively flatten only
+allow one to partially flatten
 a few long-range histogram modes,
 and to avoid introducing local noise
 into the bias potential during the updating process.
@@ -331,10 +336,11 @@ into the bias potential during the updating process.
 The optimal schedule of bandpass updating schemes
 is also the inverse-time schedule.
 %
-Interestingly, several previous FDS algorithms\cite{
-  langfeld2012, pellegrini2014,
-  neuhaus2006, *neuhaus2007}
-can be cast as special cases of bandpass updating schemes.
+A previous FDS algorithm\cite{langfeld2012, pellegrini2014}
+can be cast as a special case of the bandpass updating scheme,
+and a similarly application can help other FDS
+algorithms\cite{neuhaus2006, *neuhaus2007, zhu2012}
+adjust the parameters of the bias potential automatically.
 
 %For finite-length simulations, however,
 %metadynamics may deliver better performance.
@@ -398,8 +404,8 @@ Flat-distribution sampling}
 
 
 
-\subsubsection{\label{sec:FDS}
-Bias potential}
+%\subsubsection{\label{sec:FDS}
+%Bias potential}
 
 
 
@@ -440,9 +446,9 @@ $(z, z + \delta z)$.
 %%as entropic or multicanonical sampling.
 %
 %To do so, we introduce a bias potential, $u_i$,
-The challenge of sampling a multimodal distribution, $p_i$,
-with deep valley(s) can often be eased by
-biased sampling targeting a smoother distribution, $\rho_i$.
+The difficulty of sampling a multimodal distribution
+with deep valley(s) can sometimes be eased by
+sampling a smoother biased distribution, $\rho_i$.
 %
 %
 %where the proportionality constant, $C_i$,
@@ -612,15 +618,15 @@ and we will focus on these methods below.
 %%the bias potential in the WL algorithm
 %%will evolve similar to Eq. \eqref{eq:vcorr_equil}
 %%with the precision of the histogram as simulation lengthens.
-
-
-\subsubsection{Updating schemes}
-
-
-
+%
+%
+%\subsubsection{Updating schemes}
+%
+%
+%
 %We will mainly focus on the adaptive methods below.
 %
-In the original WL algorithm\cite{wang2001, *wang2001pre},
+In the WL algorithm\cite{wang2001, *wang2001pre},
 the bias potential, $u_i(t)$, is updated
 at each sampling step $t$ as
 %
@@ -645,9 +651,8 @@ for it applies only to the bias potential
 at the current bin, $i(t)$.
 %
 In a more general \emph{multiple-bin scheme},
-including the Gaussian updating scheme
-used in metadynamics,
-several neighboring bins are updated:
+%including the Gaussian updating scheme used in metadynamics,
+the updating also involves neighboring bins:
 %
 \begin{equation}
   u_i(t+1)
@@ -670,7 +675,7 @@ then $t$ means the number of updating steps.
 
 
 
-\subsubsection{Updating magnitude and the inverse-time formula}
+%\subsubsection{Updating magnitude and the inverse-time formula}
 
 
 
@@ -876,7 +881,7 @@ for average growth\cite{
 dama2014}.
 %
 We define a bin-average-deducted bias potential
-as\footnote{Alternatively,
+as\note{Alternatively,
 we may define $v_{*i}(t)$ such that
 $\rho_i \, e^{-v_{*i}(t)}$ is a normalized distribution,
 i.e.,
@@ -1454,7 +1459,7 @@ while the orthogonality demands
   =
   \delta_{k0}
   .
-\label{eq:ortho1}
+\label{eq:ortho0}
 \end{equation}
 %
 We may reconstruct the updating matrix in $\phi_{ki}$'s
@@ -1494,7 +1499,7 @@ $x_i = \sum_{k = 0}^{n-1} \phi_{ki} \, \tilde{x}_k / \rho_i$.
 %\end{equation}
 %
 Using this definition,
-we can rewrite Eq. \eqref{eq:ortho1} as
+we can rewrite Eq. \eqref{eq:ortho0} as
 $\mathcal F[1]_k = \delta_{k0}$,
 %
 and Eq. \eqref{eq:eigenmode0} means that
@@ -1756,8 +1761,8 @@ of a particle whose position is given by $q(t)$:
     {\mathcal L} \bigl[ q(t)\bigr]
     \, dt
   ,
-%\notag
-\label{eq:error_asym_Lagrangian}
+  \notag
+  %\label{eq:error_asym_Lagrangian}
 \end{equation}
 %
 where the Lagrangian is
@@ -1795,7 +1800,8 @@ defined the (square-root) mass function as
     \Gamma_k \, \lambda_k^2 \, e^{-2 \, \lambda_k \, \bar q}
   }
   .
-  \label{eq:mass_func}
+  \notag
+  %\label{eq:mass_func}
 \end{equation}
 %
 In this mechanical analogy,
@@ -1831,7 +1837,7 @@ coincides with the Lagrangian:
 %
 Since the Lagrangian
 does not explicitly depend on time, $t$,
-the Hamiltonian is conserved,
+the Hamiltonian is conserved,\cite{}
 which means that the asymptotic error grows
 linearly with time at a rate of $\mathcal L$,
 and we may set
@@ -2058,7 +2064,7 @@ and we would have the inverse-time schedule.
 On the other hand,
 if the mass distribution is inversely proportional to $\bar q$,
 which is approximately true for the Gaussian updating scheme
-at large $\bar q$ (cf. Appendix \ref{sec:seplambda}),
+at large $\bar q$,
 then we would have an exponentially decaying schedule.
 
 \begin{table}[h]
@@ -2315,16 +2321,11 @@ as a cosine transform,
 where $g = 1$ here for the periodic variable,
 or $2$ for a non-periodic one
 (cf. Appendix \ref{sec:more_wband}).
-
-In particular, for the Gaussian updating scheme,
+%
+For the Gaussian updating scheme,
 we have\cite{bussi2006}
 \begin{align}
   \lambda_k
-  &=
-  \exp\left(
-        -\frac{ k^2 \, \sigma_\varphi^2 }
-              {           2             }
-      \right)
   =
   \exp\left[
         -\frac 1 2
@@ -2456,9 +2457,9 @@ no eigenvalue can be negative for the updating scheme to be stable.
 Run a preliminary adaptive FDS simulation
 under constant updating magnitude, $a_0$.
 %
-The updating magnitude should be sufficiently small
-such that the resulting error is no greater than
-multiple of $1.0$.
+\note{The updating magnitude should be sufficiently small
+  such that the resulting error is no greater than
+  multiple of $1.0$.}
 
 \item \label{step:Gamma}
 Estimate $\Gamma_k$'s from Eq. \eqref{eq:varXt}
@@ -2704,8 +2705,8 @@ if we notice [cf. Eq. \eqref{eq:parseval}]
   \rho_i \bigl\langle \zeta_{*i}(t) \, \zeta_{*i}(0) \bigr\rangle
   = \sum_{i=1}^n \rho_i \, G_i = \Gamma
   .
-  %\notag
-  \label{eq:Gamma_G_sum}
+  \notag
+  %\label{eq:Gamma_G_sum}
 \end{align}
 %%
 %\begin{equation}
@@ -2767,13 +2768,6 @@ if we notice [cf. Eq. \eqref{eq:parseval}]
 %
 %
 
-%
-%
-%In Appendix \ref{sec:seplambda},
-%we will show that the opposite limit of
-%a set of well-separated eigenvalues
-%will provide an upper bound for
-%the asymptotic error, Eq. \eqref{eq:error_asym_ubound}.
 
 
 
@@ -2795,27 +2789,30 @@ and zero eigenvalues are assigned to these modes.
 %
 For example,
 by assuming
-that the PMF is sufficiently smooth
-such that the eigenmodes can be limited to $k < K$,
+that the PMF is so smooth
+that it can be represented by the first $K$ modes,
 %
 we demand
 %
 \begin{equation}
-  \lambda_0 = \cdots = \lambda_{K-1} = 1,
+  \lambda_1 = \cdots = \lambda_{K-1} = 1,
   \mathrm{\; and \;}
   \lambda_K = \cdots = \lambda_{n-1} = 0.
   \label{eq:lambda_bandpass}
 \end{equation}
 %
-Then, the updating matrix is, according to
-Eq. \eqref{eq:w_from_phi},
-%
-$$w_{ij} = n \sum_{k=0}^{K-1} \phi_{ki} \, \phi_{kj}.$$
+%Then, the updating matrix is, according to
+%Eq. \eqref{eq:w_from_phi},
+%%
+%$$w_{ij} = \frac{1}{\rho_i} \sum_{k=0}^{K-1} \phi_{ki} \, \phi_{kj}.$$
+%%
+The asymptotic error is then
+$\Err_A(T) = \sum_{ k = 1 }^{ K - 1 } \Gamma_k T/(T + t_0)^2$,
+which is less than that from Eq. \eqref{eq:EA_sbin1}.
 %
 The optimal schedule of these schemes
 remains to be the inverse-time schedule
-given by Eq. \eqref{eq:alpha_invt1},
-%
+given by Eq. \eqref{eq:alpha_invt1}
 with $t_0$ given by Eq. \eqref{eq:t0_sbin}.
 %
 %The asymptotic error is given by
@@ -2835,49 +2832,107 @@ with $t_0$ given by Eq. \eqref{eq:t0_sbin}.
 %as a generalization of Eq. \eqref{eq:Emin_sbin}
 %for the single-bin updating scheme.
 
-Since the bandpass updating scheme is
-a straightforward generalization of
+Since bandpass updating schemes
+straightforward generalizations of
 the single-bin updating scheme,
 we can also borrow the WL algorithm
 to control the updating magnitude
 in initial stages of the simulation.
 %
 However, the histogram fluctuation should
-be limited to first few modes,
+be limited to first $K$ modes,
 as the bandpass updating scheme
-only partially flattens the histogram
-of these modes (cf. Appendix \ref{sec:hfluc}).
+only partially flattens these histogram
+modes (cf. Appendix \ref{sec:hfluc}).
 
 
+In addition to the application to homogeneous updating schemes
+(Appendix \ref{sec:homo_bandpass}),
+bandpass updating schemes can also be applied to
+a continuous variable, $z$,\footnote{
+  In the transition to a continuous variable,
+  we will map
+  $\rho_i$ to $\rho(z) \delta z$,
+  $\phi_{ki}$ to $\phi_k(z) \delta z$,
+  $w_{ij}$ to $w(z, z') \delta z$, etc.}
+with the eigenmodes derived from orthogonal polynomials, $R_k(z)$,
+satisfying
+\begin{align*}
+  \int R_k(z) R_{k'}(z) \rho(z) \, d z = \delta_{k, k'}
+  .
+\end{align*}
 %
-%This error is roughly proportional to the inverse simulation length,
-%as one would expect from an equilibrium FDS simulation.
-%In Appendix \ref{sec:equilerr},
-%we show that the above error tends
-%to the error of the ideal equilibrium FDS simulation
-%in the asymptotic limit.
-
-
-
-
-
+With $\phi_k(z) = R_k(z) \, \rho(z)$,
+we can readily satisfy Eqs. \eqref{eq:eig_orthonormal_cols}-\eqref{eq:ortho0},
+and construct the updating matrix by
+Eqs. \eqref{eq:w_from_phi} and \eqref{eq:lambda_bandpass} as
+\begin{align*}
+  w(z, z')
+  =
+  \sum_{k=1}^{K-1} \frac{ \phi_k(z) \, \phi_k(z') } { \rho(z) }
+  = \sum_{k=1}^{K-1} R_k(z) \, R_k(z') \, \rho(z'),
+\end{align*}
 %
-%For example, consider a system that is initially
-%prepared under a fixed $a_0$
-%at the beginning of the schedule $\alpha(t)$.
-%%
-%Then for shorter times, $T \approx 0$,
-%the error, dominated by the residual error
-%given by Eq. \eqref{eq:error_res1},
-%is clearly smaller if some eigenvalues
-%are less than $1.0$ (the single-bin case).
+where we have dropped the $k=0$ mode
+that corresponds to the uniform shift of the bias potential.
 %
-%In practice, real simulations
-%may have long achieved the desired precision
-%before reaching the asymptotic regime,
-%especially if the updating matrix
-%has some $\lambda_k$'s close to $0$.
+In this way, the bias potential is a superposition of the polynomials
+$$
+u(z, t) = \sum_{k=1}^{K-1} a_k(t) \, R_k(z),
+$$
+with the coefficients updated as, according to Eq. \eqref{eq:mbin_update},
+$$
+a_k(t+1) = a_k(t) + \alpha(t) \, R_k\bigl( z(t) \bigr).
+$$
 
+
+For example, by assuming the Legendre polynomials\cite{arfken}
+on a flat distribution over $[z_c - \Delta z/2, z_c + \Delta z/2]$
+and $K = 2$,
+the bias potential contains only a linear mode for
+$R_1(z) = 2 \sqrt{3} (z - z_c)/\Delta z$,
+and we recover the algorithm by
+Langfeld, Lucini and Rago\cite{langfeld2012}.
+%
+Applied to the energy space, $z = E$,
+$a_1(t)$ represents the local or
+statistical temperature\cite{kim2006, *kim2007},
+and the inverse-time schedule
+was recommended for its update\cite{pellegrini2014}.
+
+Alternatively, by assuming the Hermite polynomials\cite{arfken}
+on a Gaussian distribution centered at $z_c$ with width $\sigma_z$
+and $K=3$,
+we have a quadratic bias potential
+as a linear combination of
+$R_1(z) = (z-z_c)/\sigma_z$
+and
+$R_2(z) = (z - z_c)^2 /\left(\sqrt 2 \, \sigma_z^2\right)$.
+%
+This bias potential was commonly empolyed
+in umbrella sampling (see e.g. Ref. \cite{zhu2012})
+and the method of Gaussian ensemble\cite{hetherington1987,
+*challa1988, *costeniuc2006, neuhaus2006, *neuhaus2007},
+which is helpful in overcoming the barrier
+in a first-order phase transition.
+%
+Initially, we can employ the WL strategy
+to control the updating magnitude
+with the histogram fluctuation redefined as
+$$
+\max\left\{
+  \left|
+    \frac{ \overline z - z_c } { \sigma_z }
+  \right|
+  ,
+  \left|
+    \frac{ \overline{ (z - z_c)^2 } - \sigma_z^2 }
+    { \sqrt 2 \, \sigma_z^2 }
+  \right|
+  \right\}
+  ,
+$$
+where the overline denotes the time average.
 
 
 
@@ -2902,18 +2957,21 @@ We will assume reduced units in this calculation.
 %
 The reference bias potential was pre-calculated from a long simulation.
 
-We used the Metropolis algorithm\cite{frenkel, metropolis1953} for configuration sampling.
+We used the Metropolis algorithm\cite{frenkel, metropolis1953}
+for configuration sampling.
 %
 Each step consists of
 one MC trial for displacing one of the two special particles,
 and another four trials for displacing the other particles.
 %
 In each trial, the displacement along each dimension is uniform,
-with the size given by $0.1/\varrho^*$ to ensure the acceptance ratio is around 50\%,
+with the size given by $0.1/\varrho^*$
+to ensure the acceptance ratio is around 50\%,
 where $\varrho^*$ is the reduced number density.
 
 
-The PMF was calculated from $r = 0$ to half of the box dimension
+The PMF was calculated from $r = 0$ to half of the box size
+(also the cutoff distance of the potential)
 on a grid of size $\delta r = 0.01$ in reduced units.
 %
 Two densities were tried, $\varrho^* = 0.1$ and $0.8$,
@@ -3199,19 +3257,19 @@ the error from $9.8\times10^{-3}$
 In Fig. \ref{fig:lj_alpha},
 we show the optimal schedules in a few cases.
 %
-Generally, the optimal schedule
-for the $\varrho^* = 0.8$ case
-was closer to the inverse-time schedule
-than that for the $\varrho^* = 0.1$ case.
-%
-This was probably because in the former case
-the first mode dominates the total error,
-$\Gamma_1 \approx \Gamma$,
-and the schedule was roughly optimized for this mode,
-resulting in
-$\alpha(t) \approx 1/[\lambda_1 (t + t_0)] \approx 1/(t+t_0)$
-as $\lambda_1 \approx 1$
-[cf. Eq. \eqref{eq:lambda_Gaussian}].
+%Generally, the optimal schedule
+%for the $\varrho^* = 0.8$ case
+%was closer to the inverse-time schedule
+%than that for the $\varrho^* = 0.1$ case.
+%%
+%This was probably because in the former case
+%the first mode dominates the total error,
+%$\Gamma_1 \approx \Gamma$,
+%and the schedule was roughly optimized for this mode,
+%resulting in
+%$\alpha(t) \approx 1/[\lambda_1 (t + t_0)] \approx 1/(t+t_0)$
+%as $\lambda_1 \approx 1$
+%[cf. Eq. \eqref{eq:lambda_Gaussian}].
 %
 Since we have chosen a long equilibration period
 for the preliminary run under constant updating magnitude,
@@ -3454,10 +3512,14 @@ of the inverse-time schedule
 }
 
 
-The optimality of the inverse-time schedule can be considered
-as a natural consequence of the stabilization of a runtime average
-as the sample size increases\cite{
-  marsili2006, barducci2008}.
+
+We wish to show that with the inverse-time schedule,
+the bias potential under the single-bin updating scheme
+happens to coincide with a runtime average
+of the independent corrections.
+%as a natural consequence of the stabilization of a runtime average
+%as the sample size increases\cite{
+%  marsili2006, barducci2008}.
 %
 %We first note that a runtime average
 %\begin{equation}
@@ -3496,8 +3558,8 @@ is given by
   \label{eq:uhatt}
 \end{equation}
 %
-Below we shall use capital letter to denote
-time average: for variable $x$, we define
+Below we shall use capital letters to denote
+time averages, e.g. for variable $x$, we define
 $X(t) \equiv \frac{1}{t} \sum_{\tau=1}^t x(\tau)$.
 %\begin{equation}
 %  X(t) \equiv \frac{1}{t} \sum_{\tau=1}^t x(\tau)
@@ -3894,7 +3956,8 @@ then
     \frac{ \pi \, k \, \sigma_z^\mathrm{(samp)} } { g \, \Delta z}
   \right)^2
   \right].
-\label{eq:Gamma_local}
+  \notag
+  %\label{eq:Gamma_local}
 \end{align}
 For small $k$,
 we have $\Gamma_k \propto \Delta z^2/k^2$,\cite{bussi2006}
@@ -3913,208 +3976,6 @@ we would expect a roughly flat tail
 for the single-bin updating scheme
 as $\langle \tilde v_k^2 \rangle \propto \Gamma_k$,
 cf. Fig. \ref{fig:lj_xerr}.
-
-
-
-
-
-\section{\label{sec:seplambda}
-Updating scheme
-with a set of well-separated eigenvalues}
-
-
-We will study updating schemes
-with a set of well-separated eigenvalues,
-as a model for the large $k$ eigenmodes
-of the Gaussian updating scheme.
-%
-We will show that the mass distribution will have
-an inverse-$\bar q$ profile,
-and derive a upper bound for the asymptotic error.
-
-
-Starting from the definition, Eq. \eqref{eq:mass_func}, we have
-$$
-  M(\bar q)
-  \le
-  \sum_{k = 2}^n
-  \sqrt{ \Gamma_k } \, \lambda_k \, e^{ -\lambda_k \, \bar q }
-  .
-$$
-Thus,
-it follows from Eq. \eqref{eq:mint} that, as $q(T) \to \infty$,
-%
-\begin{equation}
-  C_M
-  =
-  \int_0^\infty
-  M(\bar q) \, d \bar q
-  \le
-  \sum_{k = 1}^{n-1} \sqrt{ \Gamma_k }
-  ,
-  \label{eq:mint_ubound}
-\end{equation}
-%
-and the asymptotic error from Eq. \eqref{eq:error_asym2}
-is bounded as
-\begin{equation}
-  \Err_A(T)
-  =
-  \frac{ C_M^2 } { T }
-  \le
-  \frac 1 T
-  \left(
-    \sum_{k=1}^{n-1} \sqrt{ \Gamma_k }
-  \right)^2
-  .
-  \label{eq:error_asym_ubound}
-\end{equation}
-%
-It is readily seen that this bound is always
-greater than the lower bound given by
-Eq. \eqref{eq:EA_sbin1} [cf. Eq. \eqref{eq:Gamma_G_sum}]:
-%
-$$
-\frac{T}{(T+t_0)^2} \, \sum_{k=1}^{n-1} \Gamma_k
-\le
-\frac{1}{T} \sum_{k=1}^{n-1} \Gamma_k
-\le
-\frac{1}{T} \left( \sum_{k=1}^{n-1} \sqrt{ \Gamma_k } \right)^2
-.
-$$
-
-
-
-Next, we will show that this bound represents
-updating schemes with a set of very different eigenvalues.
-%
-First, we have for any mode $k^*$ $(k^* > 0)$,
-%
-\begin{align}
-  M(\bar q)
-  &
-  \ge
-  \sqrt{ \Gamma_{ k^* } } \,
-  \lambda_{ k^* } \,
-  e^{ -\lambda_{ k^* } \, \bar q }
-  \ge
-  \frac{ \sqrt{ \Gamma_{ k^* } } } { \bar q }
-  ,
-\label{eq:MQ_lbound1}
-\end{align}
-%
-where the first inequality
-would approach an equality if the $k^*$ mode
-dominates the mass function, $M(\bar q)$,
-and the second inequality
-represent the limit of $\lambda_{k^*} \to 1/\bar q$.
-%
-Then, for the $k$th component of the asymptotic error,
-we have from Eq. \eqref{eq:error_asym_Lagrangian}
-%
-\begin{align}
-  \left\langle
-  \tilde v_k^2(T)
-  \right\rangle_A
-  &=
-  \int_0^T
-  \Gamma_k \, \lambda_k^2 \, e^{2 \, \lambda_k \, [q(t) - q(T)] }
-  \, {\dot q}^2(t) \, dt
-  \notag
-  \\
-  &=
-  \frac{ C_M } { T }
-  \, \Gamma_k \, \lambda_k^2
-  \int_0^{q(T)}
-  \frac{ e^{-2 \, \lambda_k \, \bar q } } { M(\bar q) }
-  \,  \, d \bar q
-  \notag
-  \\
-  &\le
-  \frac{ C_M }{ T } \,
-  \frac{ \Gamma_k \, \lambda_k^2 } { \sqrt{ \Gamma_{k^*} } \, \lambda_{k^*} }
-  \int_0^{q(T)}
-    e^{-(2 \, \lambda_k - \lambda_{k^*} ) \, \bar q}
-    \, d \bar q
-  \notag
-  \\
-  &\le
-  \frac{ C_M }{ T } \,
-  \cdot
-  \frac{ \Gamma_k }
-  { \sqrt{ \Gamma_{k^*} } }
-  \cdot
-  \frac{ \lambda_k^2 }
-  { \lambda_{k^*} \, (2 \, \lambda_k -\lambda_{k^*}) }
-  ,
-  \label{eq:y2_ubound_k}
-\end{align}
-%
-where we have
-used Eqs. \eqref{eq:Lagrangian_const} and \eqref{eq:MQ_lbound1}
-on the second and third lines, respectively,
-and extended the upper limit to infinity on the last line.
-%
-For a set of well-separated eigenvalues,
-$\lambda_k$ depends on the mode index, $k$,
-much more critically than $\Gamma_k$.
-%
-Thus, the tightest upper bound
-can be approximately obtained from minimizing the last factor
-on the right-hand side of Eq. \eqref{eq:y2_ubound_k},
-and the minimal is reached at $k^* = k$,
-when $\lambda_{k^*} = \lambda_k$.
-%
-So
-%
-\begin{equation}
-  \left\langle
-  \tilde v_k^2(T)
-  \right\rangle_A
-  \le
-  %\approx
-  \frac{ C_M }{ T }
-  \sqrt{ \Gamma_k }
-  .
-  \label{eq:y2_ubound}
-\end{equation}
-%
-By summing over $k$
-and using Eq. \eqref{eq:mint_ubound},
-we recover Eq. \eqref{eq:error_asym_ubound}.
-
-From Eq. \eqref{eq:Gamma_local},
-we know that $\Gamma_k$ would quickly approach a constant.
-%
-Then Eq. \eqref{eq:y2_ubound} shows that
-the asymptotic error profile would also
-approach a plateau in this case
-(cf. Fig. \ref{fig:lj_xerr}
-for a Gaussian example).
-%
-However, to reach this upper bound
-the simulation has to be long enough
-such that the upper limit of the integral
-can be extended from $q(T)$ to infinity
-in the last step of Eq. \eqref{eq:y2_ubound_k}.
-%
-As a result,
-the flatter profile from Eq. \eqref{eq:y2_ubound}
-would stop at mode $k$,
-at which $\lambda_k \approx 1/q(T)$.
-
-Finally, from Eqs. \eqref{eq:MQ_lbound1} and \eqref{eq:Gamma_local}
-we know that for a large $\bar q$, which implies a sufficiently
-large matching mode $k^*$ with $\lambda_{k^*} \approx 1/\bar q$,
-the mass function would be roughly proportional to $1/\bar q$,
-and so is the mass distribution, i.e.
-\begin{equation}
-  m(\bar q) \propto \frac{ 1} { \bar q },
-  \qquad
-  \mbox{for large $\bar q$.}
-  \label{eq:m_invq}
-\end{equation}
-
 
 
 
@@ -4394,7 +4255,7 @@ and change the form of the updating matrix to
   \mu_{ i + j - 2 n - 1 }
   ,
   \notag
-  %\label{eq:w_band_refl}
+  \label{eq:w_band_refl}
 \end{equation}
 %
 where the last two terms on the right hand side,
@@ -4532,6 +4393,47 @@ and the eigenvalues are given by
 }%
 %
 
+\subsection{\label{sec:invert_wband}
+Inversion}
+
+Since the eigenvalues are related to the updating kernel
+by a cosine transform,
+we can invert the relation as
+%
+\begin{equation}
+  \mu_i
+  =
+  \frac { 1 } { g \, n }
+  \sum_{ k = 0 }^{ g \, n - 1 }
+  \lambda_k
+  \cos \left(
+       \frac{ k \, i \, 2 \, \pi }
+            {      g \, n        }
+  \right)
+  .
+\label{eq:mu_from_lambda}
+\end{equation}
+%
+In the non-periodic case,
+we have defined
+$\lambda_k \equiv \lambda_{2 \, n - k}$
+for $k = n + 1, \dots, 2 \, n - 1$,
+as well as
+%
+\begin{align}
+  \lambda_n
+  =
+  (-1)^{ n - 1 }
+  \lambda_0
+  +
+  2 \, \sum_{ k = 1 }^{ n - 1 }
+      (-1)^{n - k - 1} \, \lambda_k
+  ,
+\label{eq:lambdan}
+\end{align}
+to satisfy the constraint, $\mu_n = 0$.
+%
+
 \note{On the inversion.
 Eq. \eqref{eq:lambdan}
   ensures that the $\mu_n$
@@ -4561,7 +4463,7 @@ Eq. \eqref{eq:lambdan}
   \end{align}
   %
   This formula for $\lambda_k$
-  can be readily extended to $k = 1 \, n - 1$,
+  can be readily extended to $k = 2 \, n - 1$,
   and we have
   %
   $
@@ -4618,47 +4520,6 @@ Eq. \eqref{eq:lambdan}
   yielding Eq. \eqref{eq:lambdan}.
 }
 
-
-\subsection{\label{sec:invert_wband}
-Inversion}
-
-Since the eigenvalues are related to the updating kernel
-by a cosine transform,
-we can invert the relation as
-%
-\begin{equation}
-  \mu_i
-  =
-  \frac { 1 } { g \, n }
-  \sum_{ k = 0 }^{ g \, n - 1 }
-  \lambda_k
-  \cos \left(
-       \frac{ k \, i \, 2 \, \pi }
-            {      g \, n        }
-  \right)
-  .
-\label{eq:mu_from_lambda}
-\end{equation}
-%
-In the non-periodic case,
-we have defined
-$\lambda_k \equiv \lambda_{2 \, n - k}$
-for $k = n + 1, \dots, 2 \, n - 1$,
-as well as
-%
-\begin{align}
-  \lambda_n
-  =
-  (-1)^{ n - 1 }
-  \lambda_0
-  +
-  2 \, \sum_{ k = 1 }^{ n - 1 }
-      (-1)^{n - k - 1} \, \lambda_k
-  ,
-\label{eq:lambdan}
-\end{align}
-to satisfy the constraint, $\mu_n = 0$.
-%
 
 
 
@@ -4748,18 +4609,18 @@ Bandpass updating schemes}
 
 For the bandpass updating schemes,
 the eigenvalues are either $0$ or $1$ and
-we can use Eq. \eqref{eq:mu_from_lambda}
+it is convenient to set $\lambda_0 = 1$.
+%
+We can use Eq. \eqref{eq:mu_from_lambda}
 to find the updating kernel.
 %
-For a periodic variable,
-to take into account the two-fold degeneracy,
+To take into account the two-fold degeneracy
+for a periodic variable,
 we will modify the mode cutoff such that
 $\lambda_{K} = \cdots = \lambda_{n-K} = 0$,
 and the rest of the eigenvalues are $1$.
 %
-Then by using
-Eq. \eqref{eq:mu_from_lambda},
-we get
+Then, $w_{ij} = \mu_{i-j}$, and
 \begin{equation}
   \mu_l
   =
@@ -4771,11 +4632,10 @@ we get
   {
     n \, \sin \frac{ l \, \pi } { n }
   }
-  ,
+  .
 \notag
 %\label{eq:mu_sinc_pbc}
 \end{equation}
-and $w_{ij} = \mu_{i-j}$.
 %
 \note{Derivation.
 \begin{align*}
@@ -4813,9 +4673,8 @@ and $w_{ij} = \mu_{i-j}$.
 
 For a non-periodic variable,
 we have $\lambda_n = (-1)^{n-K}$
-from Eqs. \eqref{eq:lambda_bandpass} and \eqref{eq:lambdan}.
-Then, from Eq. \eqref{eq:mu_from_lambda},
-we have
+from Eqs. \eqref{eq:lambda_bandpass} and \eqref{eq:lambdan},
+and
 \begin{equation}
   \mu_l
   =
@@ -4856,18 +4715,24 @@ The updating matrix is given by
     {
       2 \, n \, \sin \frac{ (i+j-1) \, \pi } { 2 \, n }
     }
-  .
+  ,
   \notag
 \end{equation}
 %
-Although the kernel is a sawtooth
-because of the term, $(-1)^{n-K+l}$,
-the ruggedness disappears
-in the updating matrix
-as the above oscillatory term for $l = i - j$
-is canceled by the term for either $l = i + j - 1$
-or $l = i + j - 2 \, n - 1$
-with the opposite sign.
+which is free from the oscillatory term, $(-1)^{n-K+1}$,
+that appeared in the kernel
+[its contribution to $\mu_{i-j}$ in Eq. \eqref{eq:w_band_refl}
+is canceled by its contribution to either $\mu_{i+j-1}$
+or $\mu_{i+j-2n-1}$,
+whichever exists, of the opposite sign].
+%Although the kernel is a sawtooth
+%because of the term, $(-1)^{n-K+l}$,
+%the ruggedness disappears
+%in the updating matrix
+%as the above oscillatory term for $l = i - j$
+%is canceled by the term for either $l = i + j - 1$
+%or $l = i + j - 2 \, n - 1$
+%with the opposite sign.
 %
 \note{Derivation.
 \begin{align*}
