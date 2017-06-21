@@ -25,6 +25,7 @@ Test programs
 modetest  | Test program for mode decomposition
 langtest  | Test for Langevin equations
 outest    | Test for the Ornstein-Uhlenbeck process
+plotm     | Plot the mass distribution against qbar
 
 
 Source code

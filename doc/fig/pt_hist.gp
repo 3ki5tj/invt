@@ -36,7 +36,7 @@ set xrange [-1850:-800]
 #set format y "10^{/*0.8 %T}"
 set ytics 0.01 offset 0.5, 0
 set mytics 10
-set yrange [0:0.013]
+set yrange [0:0.014]
 set ylabel "Histogram" offset 2.5, 0
 
 
@@ -67,11 +67,12 @@ plot [:][:] \
 set origin 0, 0
 set size 1, ht3
 
-set bmargin 3
+set bmargin 2.8
 
 set xtics 200 offset 0, 0.3
 set mxtics 2
 set format x "%g"
+set xlabel "Energy, {/Times-Italic E}" offset 0, 0.3
 
 set ytics 0.1
 set yrange [0.55:0.85]
