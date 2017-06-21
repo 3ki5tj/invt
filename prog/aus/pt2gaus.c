@@ -1,4 +1,6 @@
+#ifndef POTTS2_LB
 #define POTTS2_LB 5
+#endif
 #include "potts2.h"
 #include "util.h"
 #include "gaus.h"
@@ -111,6 +113,7 @@ static void potts2_gaus(potts2_t *pt,
   ecmax = -0.9 * pt->n;
   esig = pt->l;
   m = (int) ((ecmax - ecmin) / esig) + 1;
+  //esig *= 0.3; // make the Gaussian width narrower to test the correction
   potts2_equil(pt, ecmin);
   if (lnzmethod == LNZ_WL) {
     fl = 0.2;

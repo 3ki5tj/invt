@@ -13,6 +13,9 @@
 /* values for lnzmethod */
 enum { LNZ_WL, LNZ_AVE };
 
+#ifndef SQRT2
+#define SQRT2 1.4142135623730951
+#endif
 
 typedef struct {
   int n;
@@ -132,12 +135,14 @@ static void gaus_trimv(gaus_t *gaus, double *v)
  * lnz[j] - lnz[i] */
 __inline static double gaus_getlnzaveij(gaus_t *gaus, int j, int i, int corr)
 {
-  double sigi = gaus->sig[i], sigj = gaus->sig[j];
-  double dx = gaus->ave[j] - gaus->ave[i], dv;
+  double sigi = gaus->sig[i], sigj = gaus->sig[j], sigij, dx, dv;
 
-  dv = 0.5 * (gaus->c1[j]/sigj + gaus->c1[i]/sigi) * dx;
+  sigij = sigi + sigj;
+  dx = (gaus->ave[j] - gaus->ave[i]) / sigij;
+  dv = (gaus->c1[j] + gaus->c1[i]) * dx;
+  dv += log(sigj/sigi);
   if ( corr )
-    dv += 0.125 * (gaus->c2[i]/(sigi*sigi) - gaus->c2[j]/(sigj*sigj)) * dx * dx;
+    dv += (gaus->c2[i] - gaus->c2[j]) * (dx * dx - 1) / SQRT2;
   return dv;
 }
 
@@ -224,7 +229,7 @@ static void savehistlow(int id, double *h, int n,
   for ( i = 0; i < n; i++ ) {
     if ( h[i] <= 0 ) continue;
     x = xmin + i*dx;
-    if ( sig > 0 ) {
+    if ( sig > 0 ) { /* compute the reference distribution */
       x2 = (x - ave) / sig;
       f = exp(-0.5 * x2 * x2) * f0;
     } else {
@@ -279,7 +284,7 @@ __inline static void gaus_add(gaus_t *gaus, int i, int x, int acc)
   alpha = gaus_getalpha(gaus, i, &alphamm);
 
   y1 = (x - ave) / sig;
-  y2 = y1 * y1 - 1;
+  y2 = (y1 * y1 - 1) / SQRT2;
   gaus->c1[i] += y1 * alphamm;
   gaus->c2[i] += y2 * alphamm;
   mmwl_add(mm, y1, y2);
@@ -415,8 +420,8 @@ __inline static int gaus_move(gaus_t *gaus, double x, int *id)
   /* compute the acceptance probability */
   xi = (x - gaus->ave[*id]) / sigi;
   xj = (x - gaus->ave[ jd]) / sigj;
-  vi = gaus->c1[*id] * xi + gaus->c2[*id] * 0.5 * xi * xi;
-  vj = gaus->c1[ jd] * xj + gaus->c2[ jd] * 0.5 * xj * xj;
+  vi = gaus->c1[*id] * xi + gaus->c2[*id] * (xi * xi - 1) / SQRT2;
+  vj = gaus->c1[ jd] * xj + gaus->c2[ jd] * (xj * xj - 1) / SQRT2;
   dv += vj - vi;
   acc = ( dv <= 0 || rand01() < exp(-dv) );
   if ( acc ) *id = jd;

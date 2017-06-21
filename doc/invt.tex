@@ -2771,7 +2771,7 @@ if we notice [cf. Eq. \eqref{eq:parseval}]
 
 
 
-\subsubsection{\label{sec:optscheme}
+\subsubsection{\label{sec:bandpass}
 Bandpass updating schemes}
 
 
@@ -2856,9 +2856,9 @@ a continuous variable, $z$,\footnote{
   $\phi_{ki}$ to $\phi_k(z) \delta z$,
   $w_{ij}$ to $w(z, z') \delta z$, etc.}
 with the eigenmodes derived from orthogonal polynomials, $R_k(z)$,
-satisfying
+that satisfy
 \begin{align*}
-  \int R_k(z) R_{k'}(z) \rho(z) \, d z = \delta_{k, k'}
+  \int R_k(z) \, R_{k'}(z) \, \rho(z) \, d z = \delta_{k, k'}
   .
 \end{align*}
 %
@@ -2893,12 +2893,12 @@ over $[z_c - \Delta z/2, z_c + \Delta z/2]$,
 we can use the Legendre polynomials\cite{arfken},
 and with $K = 2$,
 the bias potential contains only a linear mode for
-$R_1(z) = 2 \sqrt{3} (z - z_c)/\Delta z$,
+$R_1(z) = 2 \sqrt{3} \, (z - z_c)/\Delta z$,
 which recovers the algorithm by
 Langfeld, Lucini and Rago\cite{langfeld2012}.
 %
 Applied to the energy space, $z = E$,
-$c_1(t)$ represents the scaled local or
+$c_1(t)/\sigma_z$ represents the scaled local or
 statistical temperature\cite{kim2006, *kim2007},
 and the inverse-time schedule
 was recommended for its update\cite{pellegrini2014}.
@@ -2912,7 +2912,7 @@ we have a quadratic bias potential
 from a linear combination of
 $R_1(z) = (z - z_c)/\sigma_z$
 and
-$R_2(z) = (z - z_c)^2 /\left(\sqrt 2 \, \sigma_z^2\right)$.
+$R_2(z) = \bigl[(z - z_c)^2 - \sigma_z^2\bigr] /\left(\sqrt 2 \, \sigma_z^2\right)$.
 %
 This bias potential was commonly empolyed
 in umbrella sampling (see e.g. Ref. \cite{zhu2012})
@@ -2925,58 +2925,53 @@ While the asymptotic updating magntiude
 would be given by the inverse-time formula,
 we can employ the WL strategy early in simulation
 to control the updating magnitude in stages
-with the histogram fluctuation redefined as
-$$
-\max\left\{
-  \left|
-    \frac{ \overline z - z_c } { \sigma_z }
-  \right|
-  ,
-  \left|
-    \frac{ \overline{ (z - z_c)^2 } - \sigma_z^2 }
-    { \sqrt 2 \, \sigma_z^2 }
-  \right|
-  \right\}
-  ,
-$$
-where the overline denotes the time average.
+with the histogram fluctuation redefined by
+Eq. \eqref{eq:maxFk}.
+%
+This method will be referred to as
+the adaptive Gaussian ensemble method below.
 
-With only two nontrivial modes,
-the above strategy usually only works
-for a Gaussian with a narrow width.
+The use of polynomial basis makes
+the bias potential smooth and differentiable,
+and hence suitable for MD applications.\cite{zhu2012}
 %
-We can, however, use it as a building block
-to construct an expanded ensemble with
-multiple Gaussians centered at different places.
+However, since we only used two modes
+for controlling the mean and variance,
+the method only works
+for narrow distributions.
 %
-Such a construction can be realized via
+To sample a wider range,
+we can construct an expanded ensemble with
+multiple Gaussian distributions
+centered at different places via
 either the replica exchange
-(parallel tempering)\cite{swendsen1986,
+(or parallel tempering)\cite{swendsen1986,
 *geyer1991, *hukushima1996, *hansmann1997}
 or the simulated tempering\cite{marinari1992,
   *lyubartsev1992, li2007,
   park2007, *nguyen2013, *zhang2015st}
 framework.
-While the mutual exchange probabiliy
+%
+While the mutual exchange probability
 can be readily derived in the former
 framework\cite{neuhaus2006, *neuhaus2007},
-the transition probability in the latter case is
+the transition probability in the latter case
 requires estimation of the partition function
 of the Gaussian ensemble
-$Z \equiv \int e^{-\beta \, E(\mathbf x)-u(z(\mathbf x),t)} \, d\mathbf x$,
+$Z \equiv \int e^{-\beta \, \mathcal U(\mathbf x)-u(z(\mathbf x),t)} \, d\mathbf x$,
 where $\mathbf x$ denotes the molecular coordinates,
-$E(\mathbf x)$ is the unbiased energy function,
+$\mathcal U(\mathbf x)$ is the unbiased potential energy function,
 $\beta$ is the inverse temperature,
 and the collective variable, $z$,
 has also been written as a function of $\mathbf x$.
 %
-The transition probabiliy from
+The transition probability from
 the $i$th Gaussian to the $j$th is given by
 is given by
 \begin{align*}
 A(i\to j) =
 \min\left\{1,
-  \frac{Z^{(i)}}{Z^{j}}
+  \frac{Z^{(i)}}{Z^{(j)}}
   \exp\left[u^{(i)}\bigl( z(t) \bigr)
    - u^{(j)}\bigl( z(t) \bigr) \right]
   \right\}
@@ -2985,17 +2980,15 @@ A(i\to j) =
 where $z(t)$ is the current value of $z$.
 %
 For a neighboring pair, $j = i\pm 1$,
-we can estimate the ratio $Z^{(i)}/Z^{(j)}$
+we can estimate the ratio $Z^{(j)}/Z^{(i)}$
 from the following approximate formula
 %
 \begin{align*}
-  \frac{Z_i}{Z_j}
-  =
-  \frac{\sigma_i}{\sigma_j}
-  \exp\left[
-    u^{(j)}\bigl( z^{(i,j)} \bigr)
-   -u^{(i)}\bigl( z^{(i,j)} \bigr)
-  \right]
+  \ln\frac{ Z^{(j)} }{ Z^{(i)} }
+  \approx
+  \ln\frac{ \sigma_j }{ \sigma_i }
+   -u^{(j)}\bigl( z^{(i,j)} \bigr)
+   +u^{(i)}\bigl( z^{(i,j)} \bigr)
   ,
 \end{align*}
 %
@@ -3003,6 +2996,21 @@ where
 $z^{(i,j)} \equiv
 \bigl( z_c^{(i)}/\sigma_z^{(i)} + z_c^{(j)}/\sigma_z^{(j)} \bigr) /
 \bigl(         1/\sigma_z^{(i)} +         1/\sigma_z^{(j)} \bigr)$.
+\note{For implementation, we can further simplify
+\begin{align*}
+  &-u^{(j)}\bigl( z^{(i,j)} \bigr)
+   +u^{(i)}\bigl( z^{(i,j)} \bigr)
+   \\
+   &=
+   (c_1^{(i)} + c_1^{(j)}) \, \Delta z^*
+   +
+   (c_2^{(i)} - c_2^{(j)}) \, \frac{{\Delta z^*}^2 - 1} {\sqrt 2}
+   ,
+\end{align*}
+where $\Delta z^* = [z_c^{(j)} - z_c^{(i)}]/[\sigma_z^{(j)} + \sigma_z^{(i)}]$.
+}
+
+
 
 
 \section{\label{sec:results}
@@ -3010,7 +3018,8 @@ Numerical results}
 
 
 
-%\subsection{\label{sec:lj}Lennard-Jones}
+\subsection{\label{sec:lj}
+Comparison of updating schemes on a Lennard-Jones fluid}
 
 
 Our test system is a Lennard-Jones (LJ) fluid of $100$ particles,
@@ -3343,8 +3352,8 @@ we show the optimal schedules in a few cases.
 Since we have chosen a long equilibration period
 for the preliminary run under constant updating magnitude,
 the starting magnitude was around
-the ideal value of $a_0/2 = 5\times10^{-5}$,
-as given by Eq. \eqref{eq:half_alpha0}.
+the ideal value of $a_0/2 = 5\times10^{-5}$
+given by Eq. \eqref{eq:half_alpha0}.
 %
 But if the Gaussian were too wide,
 e.g. if $\sigma = 0.6$,
@@ -3354,7 +3363,7 @@ resulting in much larger initial updating magnitude, $\alpha(0)$
 [cf. Eq. \eqref{eq:opt_alpha0}].
 %
 In this case, the schedule predicted by our method
-would be inaccurate because the resulting deviation in the bias potential
+would be unusable because the resulting deviation in the bias potential
 was no longer small,
 and one may have to either decrease the width
 or to elongate the preliminary simulation under constant magnitude.
@@ -3384,8 +3393,30 @@ or to elongate the preliminary simulation under constant magnitude.
 
 
 
+\subsection{\label{sec:potts}
+Adaptive Gaussian ensemble}
 
 
+As a proof of principle,
+we tested the adaptive Gaussian ensemble method
+introduced in Sec. \ref{sec:bandpass}
+on the two-dimensional $L\times L$ $10$-state
+Potts model\cite{wu1982, newman, wang2001, wang2001pre}
+along the energy space.
+%
+We used $L = 32$ here.
+%
+We used $26$ Gaussian distributions of width $L$,
+and spread them over $[-1.7L^2, -0.9L^2]$.
+%
+For configuration sampling,
+we used the Wolff algorithm\cite{wolff1989, newman}
+at temperature $c_1/\sigma_z$
+followed by a Metropolis acceptance step
+to correct for the quadratic potential, $R_2$.
+%
+The acceptance ratio for configuration moves
+was no less than 90\%.
 
 
 
@@ -3872,12 +3903,16 @@ is only partially applied to modes less $K$.
 %
 One can alternatively define the histogram fluctuation
 from the largest mode
-$$
-\max_{k=1, \dots, K-1} \left| \, \tilde F_k(T) \, \right|
-.
-$$
-For a local sampling process,
-we expect that the two definition would behave similarly.
+%$\max_{k=1, \dots, K-1} \left| \, \tilde F_k(T) \, \right|$.
+\begin{align}
+  \max_{k=1, \dots, K-1} \left| \, \tilde F_k(T) \, \right|.
+  \label{eq:maxFk}
+\end{align}
+This definition can be readily extended
+to the continuous variable case, with
+$\tilde F_k(T) = \frac 1 T \sum_{t = 1}^T R_k\bigl( z(t) \bigr)$.
+%For a local sampling process,
+%we expect that the two definition would behave similarly.
 %
 \note{
 Note that the expected histogram flatness
