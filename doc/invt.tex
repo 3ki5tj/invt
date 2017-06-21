@@ -2929,7 +2929,7 @@ with the histogram fluctuation redefined by
 Eq. \eqref{eq:maxFk}.
 %
 This method will be referred to as
-the adaptive Gaussian ensemble method below.
+the adaptive Gaussian umbrella sampling below.
 
 The use of polynomial basis makes
 the bias potential smooth and differentiable,
@@ -2996,6 +2996,9 @@ where
 $z^{(i,j)} \equiv
 \bigl( z_c^{(i)}/\sigma_z^{(i)} + z_c^{(j)}/\sigma_z^{(j)} \bigr) /
 \bigl(         1/\sigma_z^{(i)} +         1/\sigma_z^{(j)} \bigr)$.
+%
+In the $1/t$ scheme,
+%
 \note{For implementation, we can further simplify
 \begin{align*}
   &-u^{(j)}\bigl( z^{(i,j)} \bigr)
@@ -3008,6 +3011,8 @@ $z^{(i,j)} \equiv
    ,
 \end{align*}
 where $\Delta z^* = [z_c^{(j)} - z_c^{(i)}]/[\sigma_z^{(j)} + \sigma_z^{(i)}]$.
+%
+However, the $c_2$ term does not appear to improve histogram flatness. Ideas?
 }
 
 
@@ -3394,31 +3399,72 @@ or to elongate the preliminary simulation under constant magnitude.
 
 
 \subsection{\label{sec:potts}
-Adaptive Gaussian ensemble}
+Adaptive Gaussian umbrella sampling}
 
 
 As a proof of principle,
-we tested the adaptive Gaussian ensemble method
+we tested the method of adaptive Gaussian umbrella sampling
 introduced in Sec. \ref{sec:bandpass}
-on the two-dimensional $L\times L$ $10$-state
+on the two-dimensional $L\times L$ ten-state
 Potts model\cite{wu1982, newman, wang2001, wang2001pre}
 along the energy space.
 %
-We used $L = 32$ here.
-%
-We used $26$ Gaussian distributions of width $L$,
-and spread them over $[-1.7L^2, -0.9L^2]$.
+We used $L = 32$ and $26$ Gaussian distributions of
+the same width $\sigma_E = L$ over $[-1.7L^2, -0.9L^2]$
+(the spacing between neighboring Gaussian centers and the width
+were roughly the same).
 %
 For configuration sampling,
-we used the Wolff algorithm\cite{wolff1989, newman}
-at temperature $c_1/\sigma_z$
+although one can use the Metropolis algorithm,
+we found it more efficient to use
+the Wolff algorithm\cite{wolff1989, newman}
+at temperature $c_1/\sigma_E$
 followed by a Metropolis acceptance step
-to correct for the quadratic potential, $R_2$.
+to correct for the quadratic potential, $R_2$
+(the acceptance ratio was no less than 92\%).
 %
-The acceptance ratio for configuration moves
-was no less than 90\%.
+The results after $10^5 L^2$ steps are shown in
+Fig. \ref{fig:pt_hist}.
+%
+The Gaussian histograms were evenly spaced with similar width as intended,
+and the overall energy histogram was roughly flat,
+as shown in \ref{fig:pt_hist}(a).
+%
+The parameter $c_1/\sigma_E$ roughly represents the local temperature,
+and it demonstrated
+the backbending behavior\cite{kim2006, *kim2007}
+typical in a first-order phase transitions,
+as shown in Fig. \ref{fig:pt_hist}(b).
+%
+The parameter $c_2$ represents the amount of ``pressure''
+to restrain the distribution width,
+and its value was maximal around the center critical region,
+as shown in Fig. \ref{fig:pt_hist}(c). 
 
 
+\begin{figure}[h]
+\begin{center}
+  \makebox[\linewidth][c]{
+    \includegraphics[angle=0, width=1.0\linewidth]{fig/pt_hist.pdf}
+  }
+  \caption{
+    \label{fig:pt_hist}
+    Application of the adaptive Gaussian umbrella sampling
+    on the $32 \times 32$ ten state Potts model.
+    %
+    (a) Normalized histograms (solid lines) from adaptive Gaussian umbrella sampling
+    matched the intended distributions.
+    The overall histogram (dashed line) was roughly flat.
+    %
+    (b) The parameter, $c_1/\sigma_E$, roughly corresponding to
+    the statistical temperature, $\beta(E)$,
+    demonstrated the backbending behavior.
+    %
+    (c) The parameter $c_2$ for restraining the variance
+    was maximal around the critical region.
+  }
+\end{center}
+\end{figure}
 
 
 
@@ -3521,6 +3567,7 @@ that are also optimal for asymptotic convergence.
 %
 The optimal schedule of these bandpass schemes
 is always given by an inverse-time formula.
+
 
 The Gaussian updating scheme
 has the appeal of being able to maintain the smoothness
@@ -4884,60 +4931,6 @@ So
 }%
 
 
-%\begin{figure}[h]
-%\begin{center}
-%  \makebox[\linewidth][c]{
-%    \includegraphics[angle=0, width=0.95\linewidth]{fig/sinc.pdf}
-%  }
-%  \caption{
-%    \label{fig:sinc}
-%    Updating kernels of the bandpass updating schemes
-%    compared to a Gaussian with a similar width.
-%    %
-%    The lines are a guide to the eyes.
-%    Inset. Updating matrix in the non-periodic case.
-%    %
-%    \note{This figure was produced by \texttt{doc/fig/sinc.gp}.
-%      The data were computed by the program \texttt{prog/predict},
-%      see particularly the function \texttt{intq\_save()}
-%      in \texttt{prog/intq.h} for panel (a),
-%      and the functions \texttt{savewin()}
-%      and \texttt{savewinmat()}
-%      in \texttt{prog/invt.h} for panel (b),
-%      The data were saved under the directory \texttt{data/sinc}.
-%      See the \texttt{make} object \texttt{sincsingle}
-%      in the \texttt{Makefile} there.
-%    }%
-%  }
-%\end{center}
-%\end{figure}
-
-
-%In Fig. \ref{fig:sinc},
-%we give examples of the updating kernels
-%of the bandpass updating schemes,
-%compared to a Gaussian
-%with a similar width, $\sigma$,
-%%
-%\begin{equation}
-%  \sigma
-%  \approx
-%  \frac
-%  {
-%    g \, n
-%  }
-%  {
-%    \sqrt{ 2 \, \pi } \, 2 \, K
-%  }
-%  .
-%\label{eq:sigma_equiv}
-%\end{equation}
-%%
-%%where $g = 1$ for the periodic case
-%%or $g = 2$ otherwise.
-%%
-
-
 \note{The table of symbols is listed in Table \ref{tab:symbols}.
   \begin{table*}
   \footnotesize
@@ -4986,10 +4979,10 @@ So
     $u_i(t)$        &   Original bias potential. \\
     $v_i(t)$        &   Shifted bias potential. \\
     $\mathbf w$     &   Updating matrix. \\
-    $v_{*i}(t)$        &   Bin-average-deducted bias potential, Eq. \eqref{eq:x_def}. \\
-    $\zeta_{*i}(t)$      &   The noise of histogram. \\
-    ${\tilde v}_k$        &   Mode of the shifted bias potential. \\
-    ${\tilde u}_k$           &   Mode of the original bias potential. \\
+    $v_{*i}(t)$     &   Bin-average-deducted bias potential, Eq. \eqref{eq:x_def}. \\
+    $\zeta_{*i}(t)$ &   The noise of histogram. \\
+    ${\tilde v}_k$  &   Mode of the shifted bias potential. \\
+    ${\tilde u}_k$  &   Mode of the original bias potential. \\
     $z$             &   Reaction coordinate. \\
     $\zeta_i(t)$    &   The noise part of the instantaneous histogram, $h_i(t)$.
   \end{tabular}
