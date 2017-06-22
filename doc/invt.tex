@@ -1800,8 +1800,8 @@ defined the (square-root) mass function as
     \Gamma_k \, \lambda_k^2 \, e^{-2 \, \lambda_k \, \bar q}
   }
   .
-  \notag
-  %\label{eq:mass_func}
+  %\notag
+  \label{eq:mass_func}
 \end{equation}
 %
 In this mechanical analogy,
@@ -2064,7 +2064,14 @@ and we would have the inverse-time schedule.
 On the other hand,
 if the mass distribution is inversely proportional to $\bar q$,
 which is approximately true for the Gaussian updating scheme
-at large $\bar q$,
+at large $\bar q$,\footnote{If
+  the magntidue of the eigenvalues, $\lambda_k$'s,
+  span a wide range, then for a large $\bar q$,
+  the sum in Eq. \eqref{eq:mass_func} will be dominated by
+  the largest term, where $\lambda_k \approx 1/\bar q$,
+  and $M(\bar q) \approx \sqrt{\Gamma_k}/\bar q$.
+  }
+  %
 then we would have an exponentially decaying schedule.
 
 \begin{table}[h]
@@ -2790,8 +2797,12 @@ and zero eigenvalues are assigned to these modes.
 For example,
 by assuming
 that the PMF is so smooth
-that it can be represented by the first $K$ modes,
-%
+that it can be represented by the first $K$
+modes,\footnote{As an estimate of error,
+  we note that truncating a linear or quadratic function
+  at mode $K$ (for a non-periodic variable)
+  results in an error roughly proportional to
+  $|\max_i u_i - \min_i u_i|^2/K^3$.}
 we demand
 %
 \begin{equation}
@@ -2831,6 +2842,7 @@ with $t_0$ given by Eq. \eqref{eq:t0_sbin}.
 %%
 %as a generalization of Eq. \eqref{eq:Emin_sbin}
 %for the single-bin updating scheme.
+%
 
 Since bandpass updating schemes
 straightforward generalizations of
@@ -2894,8 +2906,8 @@ we can use the Legendre polynomials\cite{arfken},
 and with $K = 2$,
 the bias potential contains only a linear mode for
 $R_1(z) = 2 \sqrt{3} \, (z - z_c)/\Delta z$,
-which recovers the algorithm by
-Langfeld, Lucini and Rago\cite{langfeld2012}.
+which recovers the Langfeld, Lucini and Rago (LLR)
+algorithm\cite{langfeld2012}.
 %
 Applied to the energy space, $z = E$,
 $c_1(t)/\sigma_z$ represents the scaled local or
@@ -2907,29 +2919,30 @@ Alternatively,
 to sample a Gaussian distribution
 centered at $z_c$ with width $\sigma_z$
 we can use the Hermite polynomials\cite{arfken},
-and with $K=3$,
-we have a quadratic bias potential
-from a linear combination of
+and with $K=3$.
+%
+This results in a quadratic bias potential
+that can be written as a linear combination of
 $R_1(z) = (z - z_c)/\sigma_z$
 and
 $R_2(z) = \bigl[(z - z_c)^2 - \sigma_z^2\bigr] /\left(\sqrt 2 \, \sigma_z^2\right)$.
 %
-This bias potential was commonly empolyed
+This form of bias potential was commonly employed
 in umbrella sampling (see e.g. Ref. \cite{zhu2012})
 and the method of Gaussian ensemble\cite{hetherington1987,
 *challa1988, *costeniuc2006, neuhaus2006, *neuhaus2007},
 which is helpful in overcoming barriers
 in first-order phase transitions.
 %
-While the asymptotic updating magntiude
+While the asymptotic updating magnitude
 would be given by the inverse-time formula,
 we can employ the WL strategy early in simulation
 to control the updating magnitude in stages
 with the histogram fluctuation redefined by
 Eq. \eqref{eq:maxFk}.
 %
-This method will be referred to as
-the adaptive Gaussian umbrella sampling below.
+We will refer to this method as
+adaptive Gaussian umbrella sampling below.
 
 The use of polynomial basis makes
 the bias potential smooth and differentiable,
@@ -2937,12 +2950,12 @@ and hence suitable for MD applications.\cite{zhu2012}
 %
 However, since we only used two modes
 for controlling the mean and variance,
-the method only works
-for narrow distributions.
+the method can only be applied
+to a narrow distribution.
 %
 To sample a wider range,
 we can construct an expanded ensemble with
-multiple Gaussian distributions
+multiple Gaussian umbrellas
 centered at different places via
 either the replica exchange
 (or parallel tempering)\cite{swendsen1986,
@@ -3403,32 +3416,40 @@ Adaptive Gaussian umbrella sampling}
 
 
 As a proof of principle,
-we tested the method of adaptive Gaussian umbrella sampling
+we tested the adaptive Gaussian umbrella sampling method
 introduced in Sec. \ref{sec:bandpass}
 on the two-dimensional $L\times L$ ten-state
 Potts model\cite{wu1982, newman, wang2001, wang2001pre}
-along the energy space.
+in the energy space.
 %
-We used $L = 32$ and $26$ Gaussian distributions of
+We spread the Gaussian umbrellas
 the same width $\sigma_E = L$ over $[-1.7L^2, -0.9L^2]$
-(the spacing between neighboring Gaussian centers and the width
-were roughly the same).
+with a spacing of $2L$.
 %
-For configuration sampling,
-although one can use the Metropolis algorithm,
-we found it more efficient to use
-the Wolff algorithm\cite{wolff1989, newman}
+For configuration sampling for each umbrella,
+we used the Wolff algorithm\cite{wolff1989, newman}
+(which appeared to be more efficient than the Metropolis algorithm),
 at temperature $c_1/\sigma_E$
-followed by a Metropolis acceptance step
-to correct for the quadratic potential, $R_2$
-(the acceptance ratio was no less than 92\%).
+followed by a Metropolis step with
+acceptance probability
+$\min\bigl\{1, e^{c_2 [R_2(E) - R_2(E')]} \bigr\}$,
+whose average was no less than 92\%.
 %
-The results after $10^5 L^2$ steps are shown in
-Fig. \ref{fig:pt_hist}.
+To ensure stability,
+we avoid transitions among umbrellas
+until the current umbrella has
+completed the WL stage-wise way of
+reducing the updating magnitude
+and started the inverse-time schedule.\cite{belardinelli2007,
+*belardinelli2007jcp, *belardinelli2008, *belardinelli2016}
+  
+The results for the $L = 64$ case
+after $10^5 L^2$ steps are shown
+in Fig. \ref{fig:pt_hist}.
 %
 The Gaussian histograms were evenly spaced with similar width as intended,
 and the overall energy histogram was roughly flat,
-as shown in \ref{fig:pt_hist}(a).
+as shown in Fig. \ref{fig:pt_hist}(a).
 %
 The parameter $c_1/\sigma_E$ roughly represents the local temperature,
 and it demonstrated
@@ -3449,8 +3470,8 @@ as shown in Fig. \ref{fig:pt_hist}(c).
   }
   \caption{
     \label{fig:pt_hist}
-    Application of the adaptive Gaussian umbrella sampling
-    on the $32 \times 32$ ten state Potts model.
+    Application of adaptive Gaussian umbrella sampling
+    on the $64 \times 64$ ten state Potts model.
     %
     (a) Normalized histograms (solid lines) from adaptive Gaussian umbrella sampling
     matched the intended distributions.
@@ -3506,25 +3527,17 @@ which can be limited to a single-bin (as often in the WL case),
 or extended to several neighboring bins
 taking a Gaussian shape (as often in the metadynamics case).
 %
-More generally,
-each adaptive FDS method is associated with
-an updating scheme
-that can be mathematically characterized
-by an updating matrix.
-%
-Each column of the matrix gives the normalized
-window function for the bin corresponding to the column.
+We can generally characterize
+an updating scheme with an updating matrix,
+with each column being the normalized
+window function for the bin of the column.
 %
 Our method computes the optimal schedule from
 the eigenvalues of the updating matrix,
-and the integrals of the autocorrelation functions
+which represent the relative rates of error reduction,
+and the integrals of the autocorrelation functions,
+which represent the intrinsic histogram fluctuation,
 of the eigenmodes.
-%
-The eigenvalues represent
-the relative rate of error reduction,
-and the autocorrelation integrals
-represent the intrinsic fluctuation
-of the histograms modes.
 %
 For the single-bin scheme with a set of uniform eigenvalues,
 we confirmed that the optimal schedule
@@ -3533,9 +3546,8 @@ Eq. \eqref{eq:alpha_invt1}.
 %
 For a general multiple-bin scheme,
 including the Gaussian one,
-the errors were reduced at different paces in various eigenmodes,
-and the optimal schedule,
-representing a compromise of the eigenmodes,
+the optimal schedule, having to balance
+the different rates of error reduction of the eigenmodes,
 is usually not given by a simple closed form,
 but is implicitly given by an equation of motion
 of a free particle with a position-dependent mass,
@@ -3545,10 +3557,31 @@ In this case,
 the optimal schedule and error
 can be sensitive to the simulation length
 and other parameters.
+
+In particular, the Gaussian updating scheme is often
+equipped with a set of rapidly diminishing eigenvalues.
 %
-%The initial updating magnitude is always
-%half of the previous equilibrium value.
-% the value used during equilibration.
+While this feature helps suppressing
+the accumulation of random error and
+maintaining the smoothness of the bias potential,
+it also slows down the reduction
+of the initial bias, if any,
+in the middle-range eigenmodes.
+%
+Thus, one needs to carefully choose the width of the Gaussian
+and the optimal schedule of decreasing the updating magnitude,
+which sometimes needs to be fixed at a maximal acceptable level
+for a long period before any reduction can happen.
+%
+The possible efficiency loss in
+error reduction of the long- and middle-range modes
+can often be compensated
+by the histogram-based correction formula, Eq. \eqref{eq:uhatav},
+for post-simulation analysis,
+which ideally would remove the remaining bias
+and recover a bias potential with precision
+similar to that from the single-bin case.
+
 
 In comparing different updating schemes,
 we found that
@@ -3556,40 +3589,24 @@ the single-bin updating scheme was optimal
 in error reduction
 in the long time limit
 without a priori assumptions
-about the smoothness of the PMF.
+on the smoothness of the PMF.
 %
-However, if some eigenmodes
-correspond to local noise
-that is expected to be absent from the PMF,
-we can construct a
-class of bandpass updating schemes
-that are also optimal for asymptotic convergence.
+This scheme can be generalized to
+a class of bandpass updating schemes,
+which are also asymptotically optimal,
+but completely filter the components
+in the noise modes.
 %
-The optimal schedule of these bandpass schemes
+The optimal schedule of the bandpass schemes
 is always given by an inverse-time formula.
-
-
-The Gaussian updating scheme
-has the appeal of being able to maintain the smoothness
-of the bias potential,
-which is important for stable MD applications.
 %
-However, it requires a careful choice of the width and
-the updating magnitude should often be fixed at constant level
-for a sufficiently long period before
-a magnitude-decreasing schedule could start.
-%
-For reasonable parameters,
-one may use the histogram correction,
-Eq. \eqref{eq:uhatav},
-in a post-simulation analysis
-to regain the possible accuracy loss
-and obtain a bias potential similar to
-that from the optimized single-bin scheme.
-%%
-%However, the performance gain
-%is relatively small for short simulations
-%with a local sampling process such as MD.
+If the bandpass updating scheme was constructed
+from orthogonal polynomials,
+the updating scheme became a generalization
+of the LLR algorithm\cite{langfeld2012, *pellegrini2014},
+and it could be used for parameter adjustment
+in umbrella sampling with quadratic
+bias potentials\cite{neuhaus2006, *neuhaus2007, zhu2012}.
 
 
 

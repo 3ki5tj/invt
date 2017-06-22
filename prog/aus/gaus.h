@@ -43,14 +43,14 @@ typedef struct {
 
 
 __inline static gaus_t *gaus_open(double xcmin, double xcmax,
-    int n, double sig, int lnzmethod, double c1, double alpha0,
+    double delx, double sig, int lnzmethod, double c1, double alpha0,
     int xmin, int xmax, int dx, int pbc)
 {
   gaus_t *gaus;
-  int i, xn;
-  double delx;
+  int i, xn, n;
 
   xnew(gaus, 1);
+  n = (int)((xcmax - xcmin) / delx) + 1;
   gaus->n = n;
   gaus->lnzmethod = lnzmethod;
   gaus->alpha0 = alpha0;
@@ -64,7 +64,6 @@ __inline static gaus_t *gaus_open(double xcmin, double xcmax,
   xnew(gaus->cnt, n);
   xnew(gaus->acc, n);
   xnew(gaus->hfl, n);
-  delx = (xcmax - xcmin) / (n - 1);
   for ( i = 0; i < n; i++ ) {
     gaus->ave[i] = xcmin + i * delx;
     gaus->sig[i] = sig;
@@ -93,8 +92,8 @@ __inline static gaus_t *gaus_open(double xcmin, double xcmax,
   gaus->t0 = 1;
   gaus->invt = 0;
   gaus->costab = mkcostab(n, pbc);
-  fprintf(stderr, "%d states Ec %g ... %g\n",
-      n, gaus->ave[0], gaus->ave[n-1]);
+  fprintf(stderr, "%d states Ec %g, %g, ... %g\n",
+      n, gaus->ave[0], gaus->ave[1], gaus->ave[n-1]);
 
   return gaus;
 }

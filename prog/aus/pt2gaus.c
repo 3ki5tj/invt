@@ -102,7 +102,7 @@ static void potts2_gaus(potts2_t *pt,
     int sampmethod, int lnzmethod, long nsteps)
 {
   long t, nstsave;
-  int m, id, acc;
+  int id, acc;
   double ecmin, ecmax, esig, beta1, beta2, fl, alpha0;
   const double beta_c = 1.4;
   gaus_t *gaus;
@@ -112,8 +112,6 @@ static void potts2_gaus(potts2_t *pt,
   ecmin = -1.7 * pt->n;
   ecmax = -0.9 * pt->n;
   esig = pt->l;
-  m = (int) ((ecmax - ecmin) / esig) + 1;
-  //esig *= 0.3; // make the Gaussian width narrower to test the correction
   potts2_equil(pt, ecmin);
   if (lnzmethod == LNZ_WL) {
     fl = 0.2;
@@ -122,7 +120,7 @@ static void potts2_gaus(potts2_t *pt,
     fl = 0.05;
     alpha0 = 0.001;
   }
-  gaus = gaus_open(ecmin, ecmax, m, esig, lnzmethod,
+  gaus = gaus_open(ecmin, ecmax, 2*esig, esig, lnzmethod,
       beta_c * esig, alpha0, -2*pt->n, 0, 1, 0);
 
   id = 0;
