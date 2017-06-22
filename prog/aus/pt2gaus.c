@@ -90,8 +90,10 @@ static void potts2_equil(potts2_t *pt, double ene)
   long t;
 
   for ( t = 1; ; t++ ) {
-    POTTS2_PICK(pt, id, h, sn);
-    POTTS2_FLIP(pt, id, h, sn);
+    id = potts2_pick(pt, &h, &sn);
+    potts2_flip(pt, id, h, sn);
+    //POTTS2_PICK(pt, id, h, sn);
+    //POTTS2_FLIP(pt, id, h, sn);
     if ( pt->E > ene ) break;
   }
 }
@@ -120,7 +122,7 @@ static void potts2_gaus(potts2_t *pt,
     fl = 0.05;
     alpha0 = 0.001;
   }
-  gaus = gaus_open(ecmin, ecmax, 2*esig, esig, lnzmethod,
+  gaus = gaus_open(ecmin, ecmax, esig*2, esig, lnzmethod,
       beta_c * esig, alpha0, -2*pt->n, 0, 1, 0);
 
   id = 0;

@@ -134,14 +134,17 @@ static void gaus_trimv(gaus_t *gaus, double *v)
  * lnz[j] - lnz[i] */
 __inline static double gaus_getlnzaveij(gaus_t *gaus, int j, int i, int corr)
 {
-  double sigi = gaus->sig[i], sigj = gaus->sig[j], sigij, dx, dv;
+  double sigi = gaus->sig[i], sigj = gaus->sig[j], dx, dv, dy;
 
-  sigij = sigi + sigj;
-  dx = (gaus->ave[j] - gaus->ave[i]) / sigij;
-  dv = (gaus->c1[j] + gaus->c1[i]) * dx;
+  dx = gaus->ave[j] - gaus->ave[i];
+  dv = 0.5 * (gaus->c1[i]/sigi + gaus->c1[j]/sigj) * dx;
   dv += log(sigj/sigi);
-  if ( corr )
-    dv += (gaus->c2[i] - gaus->c2[j]) * (dx * dx - 1) / SQRT2;
+  if ( corr ) {
+    dy = (gaus->c2[j]*SQRT2 - 1)/(sigj*sigj)
+       - (gaus->c2[i]*SQRT2 - 1)/(sigi*sigi);
+    dv -= 0.25*dy*(dx*dx/3 + sigi*sigi + sigj*sigj);
+    dv += (gaus->c2[j] - gaus->c2[i]) / SQRT2;
+  }
   return dv;
 }
 
@@ -253,6 +256,8 @@ __inline static int gaus_savehist(gaus_t *gaus, const char *fn)
     fprintf(stderr, "cannot open %s\n", fn);
     return -1;
   }
+  /* print the header */
+  fprintf(fp, "# %d %d %g %g\n", n, xn, xmin, dx); 
   gaus_trimv(gaus, gaus->lnz);
   for ( j = 0; j < xn; j++ )
     gaus->htot[j] = 0;
@@ -423,7 +428,13 @@ __inline static int gaus_move(gaus_t *gaus, double x, int *id)
   vj = gaus->c1[ jd] * xj + gaus->c2[ jd] * (xj * xj - 1) / SQRT2;
   dv += vj - vi;
   acc = ( dv <= 0 || rand01() < exp(-dv) );
-  if ( acc ) *id = jd;
+  if ( acc ) {
+    if ( gaus->cnt[jd] <= 0 ) {
+      gaus->c1[jd] = gaus->c1[*id];
+      gaus->c2[jd] = gaus->c2[*id];
+    }
+    *id = jd;
+  }
   return acc;
 }
 
