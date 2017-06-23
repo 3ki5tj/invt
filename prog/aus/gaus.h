@@ -249,7 +249,7 @@ __inline static int gaus_savehist(gaus_t *gaus, const char *fn)
 {
   FILE *fp;
   int i, j, n = gaus->n, xn = gaus->xn;
-  double xmin = gaus->xmin, dx = gaus->dx;
+  int xmin = gaus->xmin, dx = gaus->dx;
   mmwl_t *mm;
 
   if ( (fp = fopen(fn, "w")) == NULL ) {
@@ -257,7 +257,7 @@ __inline static int gaus_savehist(gaus_t *gaus, const char *fn)
     return -1;
   }
   /* print the header */
-  fprintf(fp, "# %d %d %g %g\n", n, xn, xmin, dx); 
+  fprintf(fp, "# %d %d %d %d\n", n, xn, xmin, dx);
   gaus_trimv(gaus, gaus->lnz);
   for ( j = 0; j < xn; j++ )
     gaus->htot[j] = 0;
@@ -275,6 +275,43 @@ __inline static int gaus_savehist(gaus_t *gaus, const char *fn)
   fclose(fp);
   return 0;
 }
+
+/*
+__inline static int gaus_loadhist(gaus_t *gaus, const char *fn)
+{
+  FILE *fp;
+  char buf[256];
+  int i, ix, n = gaus->n;
+  double x, y, z, h;
+
+  if ( (fp = fopen(fn, "r")) == NULL ) {
+    return -1;
+  }
+  fgets(buf, sizeof buf, fp);
+  for ( i = 0; i < n; i++ ) {
+    fgets(buf, sizeof buf, fp);
+    if ( buf[0] != '#' ) {
+      fprintf(stderr, "cannot read histogram %d/%d from %s\n",
+          i, n, fn);
+      fclose(fp);
+      return -1;
+    }
+    gaus->cnt[i] = 0;
+    while ( fgets(buf, sizeof buf, fp) ) {
+      strstrip(buf);
+      if (buf[0] == '\0') break;
+      sscanf(buf, "%lf %lf %lf %lf", &x, &y, &z, &h);
+      ix = (int)((x - gaus->xmin)/gaus->dx + 0.5);
+      gaus->hist[i*gaus->xn + ix] = h;
+      gaus->htot[ix] += h;
+      gaus->cnt[i] += h;
+    }
+  }
+  fclose(fp);
+  return 0;
+}
+*/
+
 
 
 
@@ -342,6 +379,7 @@ __inline static void gaus_switch(gaus_t *gaus, double magred, int extended)
   gaus->t = 0;
   for ( i = 0; i < n; i++ ) {
     if ( extended ) {
+      /* also check the local updating schedule */
       mmwl_init(gaus->mmwl + i, gaus->alphawl);
       gaus->mmwl[i].invt = gaus->invt;
       gaus->mmwl[i].t0 = gaus->t0;

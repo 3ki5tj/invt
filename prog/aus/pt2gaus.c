@@ -16,18 +16,19 @@ enum { SAMP_METROPOLIS, SAMP_WOLFF };
 
 
 
-/* modified Metropolis algorithm */
+/* modified Metropolis algorithm
+ * p(E) ~ exp(-b1*(E-Eave)-b2*(E-Eave)^2/2) */
 __inline static int potts2_metro_mod(potts2_t *pt,
-    double c1, double c2, double Eave)
+    double b1, double b2, double Eave)
 {
   int id, h, sn, enew;
   double edev, dv;
 
   POTTS2_PICK(pt, id, h, sn);
   enew = pt->E + h;
-  /* compute the change of bias potential */
+  /* compute the change of the bias potential */
   edev = (enew + pt->E)*.5 - Eave;
-  dv = h * (c1 + c2 * edev);
+  dv = h * (b1 + b2 * edev);
   if ( dv <= 0 || rand01() < exp(-dv) ) {
     POTTS2_FLIP(pt, id, h, sn);
     return 1;
@@ -37,14 +38,15 @@ __inline static int potts2_metro_mod(potts2_t *pt,
 
 
 
-/* modified Wolff algorithm */
+/* modified Wolff algorithm
+ * p(E) ~ exp(-b1*(E-Eave)-b2*(E-Eave)^2/2) */
 __inline static int potts2_wolff_mod(potts2_t *pt,
-    double c1, double c2, double Eave)
+    double b1, double b2, double Eave)
 {
   int l = pt->l, n = pt->n, i, ix, iy, id, so, sn, cnt = 0, h = 0;
   double padd, enew, dv;
 
-  padd = 1 - exp(-c1);
+  padd = 1 - exp(-b1);
 
   /* randomly selected a seed */
   id = (int) ( rand01() * n );
@@ -69,7 +71,7 @@ __inline static int potts2_wolff_mod(potts2_t *pt,
   }
 
   enew = pt->E + h;
-  dv = h * c2 * ((enew + pt->E)*.5 - Eave);
+  dv = h * b2 * ((enew + pt->E)*.5 - Eave);
   if ( dv <= 0 || rand01() < exp(-dv) ) {
     pt->E += h;
     return 1;
@@ -105,15 +107,16 @@ static void potts2_gaus(potts2_t *pt,
 {
   long t, nstsave;
   int id, acc;
-  double ecmin, ecmax, esig, beta1, beta2, fl, alpha0;
+  double ecmin, ecmax, esig, espc, beta1, beta2, fl, alpha0;
   const double beta_c = 1.4;
   gaus_t *gaus;
 
   //mtscramble(clock());
 
-  ecmin = -1.7 * pt->n;
-  ecmax = -0.9 * pt->n;
+  ecmin = -(int) (1.8 * pt->n + 0.5);
+  ecmax = -(int) (0.8 * pt->n + 0.5);
   esig = pt->l;
+  espc = esig;
   potts2_equil(pt, ecmin);
   if (lnzmethod == LNZ_WL) {
     fl = 0.2;
@@ -122,7 +125,7 @@ static void potts2_gaus(potts2_t *pt,
     fl = 0.05;
     alpha0 = 0.001;
   }
-  gaus = gaus_open(ecmin, ecmax, esig*2, esig, lnzmethod,
+  gaus = gaus_open(ecmin, ecmax, espc, esig, lnzmethod,
       beta_c * esig, alpha0, -2*pt->n, 0, 1, 0);
 
   id = 0;

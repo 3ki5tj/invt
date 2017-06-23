@@ -153,7 +153,7 @@ cancels the PMF.
 %
 Ideally, then, sampling yields a flat distribution
 along $z$\cite{mezei1987, berg1992, *lee1993,
-wang2001, *wang2001pre,
+wang2001, wang2001pre,
 huber1994,
 *laio2002, *laio2008, *barducci2011, *sutto2012}.
 %
@@ -163,7 +163,7 @@ be observed with traditional simulations.
 %
 %A better solution is to artificially flatten
 %the target distribution along $z$\cite{mezei1987, berg1992, *lee1993,
-%wang2001, *wang2001pre,
+%wang2001, wang2001pre,
 %huber1994,
 %*laio2002, *laio2008, *barducci2011, *sutto2012}.
 %%
@@ -183,7 +183,7 @@ Many efficient flat-distribution-sampling (FDS) techniques
 based on adaptive construction of the bias potential
 have been introduced,
 including the Wang-Landau (WL) algorithm\cite{
-  wang2001, *wang2001pre}
+  wang2001, wang2001pre}
 and metadynamics\cite{huber1994,
   *laio2002, *laio2008, *barducci2011, *sutto2012, micheletti2004}
 among others\cite{kim2006, *kim2007, junghans2014,
@@ -520,7 +520,7 @@ deduced from the bias potential. % $u_i$.
 
 
 Many methods\cite{mezei1987, berg1992, *lee1993,
-wang2001, *wang2001pre, huber1994,
+wang2001, wang2001pre, huber1994,
 *laio2002, *laio2008, *barducci2011, *sutto2012}
 have been developed to find the proper bias potential.
 %
@@ -565,7 +565,7 @@ continuous improvement of the bias potential
 as simulation lengthens.
 
 An other class of adaptive FDS methods,
-including the WL algorithm\cite{wang2001, *wang2001pre}
+including the WL algorithm\cite{wang2001, wang2001pre}
 and metadynamics\cite{huber1994, laio2002, *laio2008, *barducci2011, *sutto2012},
 address the above shortcoming
 by continuously and incrementally updating the bias potential,
@@ -626,7 +626,7 @@ and we will focus on these methods below.
 %
 %We will mainly focus on the adaptive methods below.
 %
-In the WL algorithm\cite{wang2001, *wang2001pre},
+In the WL algorithm\cite{wang2001, wang2001pre},
 the bias potential, $u_i(t)$, is updated
 at each sampling step $t$ as
 %
@@ -717,8 +717,8 @@ removed by gradually decreasing the updating magnitude\cite{
 
 
 
-In the original WL papers\cite{
-wang2001, *wang2001pre},
+In the original WL algorithm\cite{
+wang2001, wang2001pre},
 the updating magnitude, $\alpha(t)$,
 (or $\ln f$ therein)
 is controlled in stages.
@@ -731,7 +731,7 @@ is collected and monitored.
 Once the histogram is sufficiently flat,
 we switch to a new stage
 with $\alpha(t)$ reduced by a factor of $1/2$\cite{
-wang2001, *wang2001pre}.
+wang2001, wang2001pre}.
 %
 While this scheme works well for early stages,
 it tends to reduce the magnitude
@@ -1540,12 +1540,14 @@ We can now use Eq. \eqref{eq:eig_w} to diagonalize
 the multiple-bin updating scheme, Eq. \eqref{eq:mbin_update},
 as
 %
-$$
-{\tilde v}_k(t + 1) =
-{\tilde v}_k(t) + \alpha(t) \, \lambda_k \,
-{\tilde f}_k(t)
-,
-$$
+\begin{equation}
+  {\tilde v}_k(t + 1) =
+  {\tilde v}_k(t) + \alpha(t) \, \lambda_k \,
+  {\tilde f}_k(t)
+  ,
+  \label{eq:vkupdate}
+\end{equation}
+%
 or in continuous time, we have, for $k > 0$,
 %
 \begin{equation}
@@ -2245,7 +2247,7 @@ happens to coincide with the
 recommended reduction factor of the updating magnitude
 at stage transitions
 in the original WL algorithm\cite{
-wang2001, *wang2001pre}.
+wang2001, wang2001pre}.
 }
 
 
@@ -2524,7 +2526,9 @@ The curve $q(t)$ is then integrated
   resulting in a list of values, $\bigl(q_{[i]}, t_{[i]} \bigr)$.
 %
 We then compute the updating magnitude by numerical differentiation:
-  $\alpha_i = (1 - e^{-\lambda_1 \, \hat \alpha_i})/\lambda_1$
+  $\alpha_i = (1 - e^{-\lambda_1 \, \hat \alpha_i})/\lambda_1$\footnote{This
+    discretization follows from runtime average interpretation
+    discussed in Appendix \ref{sec:equilerr}.}
   and
   $\hat \alpha_i \equiv (q_{[i+1]} - q_{[i-1]}) / (t_{[i+1]} - t_{[i-1]})$,
   with
@@ -2555,12 +2559,12 @@ As shown below, for a class of bandpass updating schemes,
   the asymptotically optimal schedule
   is simply given by the inverse-time schedule, Eq. \eqref{eq:alpha_invt1}.
 %
-For these updating schemes,
-  the preliminary run with a constant updating magntiude
-  can be replaced by the WL-style stagewise reduction
-  until the updating magnitude falls under
-  the value given the inverse-time prescription\cite{
-    belardinelli2007, *belardinelli2007jcp, *belardinelli2008, *belardinelli2016}.
+%For these updating schemes,
+%  the preliminary run with a constant updating magntiude
+%  can be replaced by the WL-style stagewise reduction
+%  until the updating magnitude falls under
+%  the value given the inverse-time prescription\cite{
+%    belardinelli2007, *belardinelli2007jcp, *belardinelli2008, *belardinelli2016}.
 
 
 
@@ -2886,17 +2890,19 @@ Eqs. \eqref{eq:w_from_phi} and \eqref{eq:lambda_bandpass} as
 \end{align*}
 %
 where we have dropped the $k=0$ mode
-that corresponds to the uniform shift of the bias potential.
+that corresponds to a uniform shift
+of the bias potential.
 %
-This results in a polynomial bias potential
-that can be written as a superposition
-$$
-u(z, t) = \sum_{k=1}^{K-1} c_k(t) \, R_k(z),
-$$
+The resulting bias potential
+assumes a polynomial form
+and can be written as a superposition
+$u(z, t) = \sum_{k=1}^{K-1} c_k(t) \, R_k(z)$,
 with the coefficients updated as, according to Eq. \eqref{eq:mbin_update},
-$$
-c_k(t+1) = c_k(t) + \alpha(t) \, R_k\bigl( z(t) \bigr).
-$$
+\begin{equation}
+  c_k(t+1) = c_k(t) + \alpha(t) \, R_k\bigl( z(t) \bigr)
+  .
+  \label{eq:ckupdate}
+\end{equation}
 
 
 For example,
@@ -2906,64 +2912,61 @@ we can use the Legendre polynomials\cite{arfken},
 and with $K = 2$,
 the bias potential contains only a linear mode for
 $R_1(z) = 2 \sqrt{3} \, (z - z_c)/\Delta z$,
-which recovers the Langfeld, Lucini and Rago (LLR)
-algorithm\cite{langfeld2012}.
+with its coefficient, $c_1$, updated according to
+the difference between the average of $z$
+and the center $z_c$.
 %
-Applied to the energy space, $z = E$,
-$c_1(t)/\sigma_z$ represents the scaled local or
-statistical temperature\cite{kim2006, *kim2007},
+We thus recover the Langfeld-Lucini-Rago (LLR)
+algorithm\cite{langfeld2012},
 and the inverse-time schedule
-was recommended for its update\cite{pellegrini2014}.
+was recommended for optimal convergence of $c_1$\cite{pellegrini2014}.
 
 Alternatively,
 to sample a Gaussian distribution
 centered at $z_c$ with width $\sigma_z$
-we can use the Hermite polynomials\cite{arfken},
-and with $K=3$.
+we can use the Hermite polynomials\cite{arfken}.
 %
-This results in a quadratic bias potential
-that can be written as a linear combination of
+With $K = 3$, the bias potential is quadratic
+and is a linear combination of
 $R_1(z) = (z - z_c)/\sigma_z$
 and
 $R_2(z) = \bigl[(z - z_c)^2 - \sigma_z^2\bigr] /\left(\sqrt 2 \, \sigma_z^2\right)$.
 %
-This form of bias potential was commonly employed
+Note that quadratic bias potentials are commonly employed
 in umbrella sampling (see e.g. Ref. \cite{zhu2012})
 and the method of Gaussian ensemble\cite{hetherington1987,
 *challa1988, *costeniuc2006, neuhaus2006, *neuhaus2007},
 which is helpful in overcoming barriers
 in first-order phase transitions.
 %
-While the asymptotic updating magnitude
-would be given by the inverse-time formula,
-we can employ the WL strategy early in simulation
-to control the updating magnitude in stages
-with the histogram fluctuation redefined by
-Eq. \eqref{eq:maxFk}.
+By Eq. \eqref{eq:ckupdate},
+$c_1$ and $c_2$ are updated
+according to the first and second
+central moments of $z$, respectively.
 %
-We will refer to this method as
-adaptive Gaussian umbrella sampling below.
+Below we will refer to this application
+as adaptive Gaussian umbrella sampling.
 
 The use of polynomial basis makes
 the bias potential smooth and differentiable,
 and hence suitable for MD applications.\cite{zhu2012}
 %
-However, since we only used two modes
-for controlling the mean and variance,
-the method can only be applied
-to a narrow distribution.
+However,
+the distribution, $\rho_i$,
+has to be sufficiently narrow
+because of the limited number of modes
+in controlling the moments.
 %
-To sample a wider range,
-we can construct an expanded ensemble with
-multiple Gaussian umbrellas
+We can nonetheless sample a wider range
+by constructing a mixture or expanded ensemble
+from a superposition of multiple Gaussian umbrellas
 centered at different places via
-either the replica exchange
-(or parallel tempering)\cite{swendsen1986,
-*geyer1991, *hukushima1996, *hansmann1997}
-or the simulated tempering\cite{marinari1992,
+the frameworks of
+parallel\cite{swendsen1986,
+  *geyer1991, *hukushima1996, *hansmann1997, *sugita1999, *earl2005}
+and/or simulated tempering\cite{marinari1992,
   *lyubartsev1992, li2007,
-  park2007, *nguyen2013, *zhang2015st}
-framework.
+  park2007, *nguyen2013, *zhang2015st}.
 %
 While the mutual exchange probability
 can be readily derived in the former
@@ -2972,15 +2975,14 @@ the transition probability in the latter case
 requires estimation of the partition function
 of the Gaussian ensemble
 $Z \equiv \int e^{-\beta \, \mathcal U(\mathbf x)-u(z(\mathbf x),t)} \, d\mathbf x$,
-where $\mathbf x$ denotes the molecular coordinates,
-$\mathcal U(\mathbf x)$ is the unbiased potential energy function,
+where
 $\beta$ is the inverse temperature,
-and the collective variable, $z$,
-has also been written as a function of $\mathbf x$.
+$\mathcal U(\mathbf x)$ is the unbiased potential energy
+as a function of molecular coordinates, $\mathbf x$,
+and $z$ has also been written as a function of $\mathbf x$.
 %
 The transition probability from
-the $i$th Gaussian to the $j$th is given by
-is given by
+the $i$th umbrella to the $j$th is given by
 \begin{align*}
 A(i\to j) =
 \min\left\{1,
@@ -2992,42 +2994,89 @@ A(i\to j) =
 \end{align*}
 where $z(t)$ is the current value of $z$.
 %
-For a neighboring pair, $j = i\pm 1$,
-we can estimate the ratio $Z^{(j)}/Z^{(i)}$
-from the following approximate formula
+While the asymptotic updating magnitude
+would be given by the inverse-time formula,
+we can employ the WL strategy early in simulation
+to control the updating magnitude in stages
+with the histogram fluctuation
+redefined by Eq. \eqref{eq:maxFk}
+(including the intra-umbrella and inter-umbrella
+components).
 %
-\begin{align*}
-  \ln\frac{ Z^{(j)} }{ Z^{(i)} }
-  \approx
-  \ln\frac{ \sigma_j }{ \sigma_i }
-   -u^{(j)}\bigl( z^{(i,j)} \bigr)
-   +u^{(i)}\bigl( z^{(i,j)} \bigr)
-  ,
-\end{align*}
+The weighted histogram analysis method
+(WHAM)\cite{ferrenberg1988, *ferrenberg1989,
+*kumar1992, *roux1995, *bartels1997, *souaille2001,
+*kobrak2003, *gallicchio2005, *chodera2007, zhu2012, newman, frenkel,
+fenwick2008, *kim2011}
+can be used to recover the unbiased distribution
+after simulation.
 %
-where
-$z^{(i,j)} \equiv
-\bigl( z_c^{(i)}/\sigma_z^{(i)} + z_c^{(j)}/\sigma_z^{(j)} \bigr) /
-\bigl(         1/\sigma_z^{(i)} +         1/\sigma_z^{(j)} \bigr)$.
-%
-In the $1/t$ scheme,
-%
-\note{For implementation, we can further simplify
-\begin{align*}
-  &-u^{(j)}\bigl( z^{(i,j)} \bigr)
-   +u^{(i)}\bigl( z^{(i,j)} \bigr)
-   \\
-   &=
-   (c_1^{(i)} + c_1^{(j)}) \, \Delta z^*
-   +
-   (c_2^{(i)} - c_2^{(j)}) \, \frac{{\Delta z^*}^2 - 1} {\sqrt 2}
-   ,
-\end{align*}
-where $\Delta z^* = [z_c^{(j)} - z_c^{(i)}]/[\sigma_z^{(j)} + \sigma_z^{(i)}]$.
-%
-However, the $c_2$ term does not appear to improve histogram flatness. Ideas?
-}
 
+\note{The
+  following method appeared to have some stability issues,
+  so we switched back to the double-WL approach,
+  which hopefully is stable.
+  %
+  The reason of instability might be
+  that the inter-umbrella fluctuation
+  and the intra-umbrella fluctuation are some coupled.
+  So the updating magnitude cannot be adjusted individually
+  for the each umbrella.
+  %
+  Following the method for weight determination
+  in simulated tempering\cite{park2007,
+  *nguyen2013, *zhang2015st},
+  we can estimate $Z^{(j)}/Z^{(i)}$
+  for a neighboring pair, $(i, j)$, as
+  %
+  \begin{align*}
+    &\ln\frac{ Z^{(j)} }{ Z^{(i)} }
+    \approx
+    \ln\frac{ \sigma_z^{(j)} }{ \sigma_z^{(i)} }
+    +
+    \frac{ \Delta z_c } { 2 }
+    \left(
+      \frac{ c_1^{(i)} } { \sigma_z^{(i) 2} }
+      +
+      \frac{ c_1^{(j)} } { \sigma_z^{(j) 2} }
+    \right)
+    +
+    \frac{ c_2^{(j)} - c_2^{(i)} } { \sqrt 2 }
+    \\
+    &-
+    \left(
+      \frac{ \sqrt 2 \, c_2^{(j)} - 1 }
+           { 2 \, \sigma_z^{(j)} }
+      -
+      \frac{ \sqrt 2 \, c_2^{(i)} - 1 }
+           { 2 \, \sigma_z^{(i)} }
+    \right)
+    \left(
+      \frac{ \Delta z_c^{2} } { 6 }
+      +
+      \frac{ \sigma_z^{(i) 2} + \sigma_z^{(j) 2} } { 2 }
+    \right)
+    ,
+  \end{align*}
+  %
+  where
+  $\Delta z_c \equiv z_c^{(j)} - z_c^{(i)}$.
+  For equal width, we have
+  \begin{align*}
+    \ln\frac{ Z^{(j)} }{ Z^{(i)} }
+    \approx
+    \frac{ \Delta z_c \, ( c_1^{(i)} + c_1^{(j)} ) } { 2 \, \sigma_z }
+    -
+    \left(
+      \frac{ c_2^{(j)} - c_2^{(i)} }
+           { 6 \sqrt 2 }
+    \right)
+    \left(
+      \frac{ \Delta z_c^{2} } { \sigma_z^2 }
+    \right)
+    .
+  \end{align*}
+}
 
 
 
@@ -3111,7 +3160,7 @@ but not in the $\varrho^* = 0.8$ case.
 %
 The effectiveness of the Gaussian updating scheme
 in the low density case
-was probably because that the sampling along
+was probably because the sampling along
 the collective variable was free from major barriers
 and thus the histogram fluctuation largely
 resulted from local noise.
@@ -3170,37 +3219,37 @@ had little effect on the total error.
     \hline
     single-bin & $1/t$
     & $5.7(5.7)\times10^{-2}$
-    & $9.1(11.4)\times10^{-5}$
+    & $9.2(11.4)\times10^{-5}$
     \\
     %\hline
     $\sigma=0.1$ & $1/t$
-    & $7.7(8.9)\times10^{-3}$
+    & $7.5(8.9)\times10^{-3}$
     & $6.8(8.2)\times10^{-5}$
     \\
     %\hline
     $\sigma=0.1$ & opt.
-    & $7.6(8.9)\times10^{-3}$
-    & $3.2(3.9)\times10^{-5}$
+    & $7.5(8.9)\times10^{-3}$
+    & $3.3(3.9)\times10^{-5}$
     \\
     %\hline
     $\sigma=0.2$ & $1/t$
-    & $6.5(7.8)\times10^{-3}$
-    & $4.0(4.8)\times10^{-5}$
+    & $6.6(7.8)\times10^{-3}$
+    & $3.9(4.8)\times10^{-5}$
     \\
     %\hline
     $\sigma=0.2$ & opt.
-    & $7.0(7.8)\times10^{-3}$
-    & $2.5(2.8)\times10^{-5}$
+    & $6.7(7.8)\times10^{-3}$
+    & $2.4(2.9)\times10^{-5}$
     \\
     %\hline
     $\sigma=0.5$ & $1/t$
-    & $5.5(6.6)\times10^{-3}$
-    & $3.2(3.8)\times10^{-5}$
+    & $5.4(6.6)\times10^{-3}$
+    & $3.3(3.8)\times10^{-5}$
     \\
     %\hline
     $\sigma=0.5$ & opt.
     & $5.8(6.6)\times10^{-3}$
-    & $2.6(3.0)\times10^{-5}$
+    & $2.7(3.0)\times10^{-5}$
     \\
     %\hline
     $K=20$ & $1/t$
@@ -3319,7 +3368,8 @@ the flatter profile seen in the single-bin case.
 However, this correction also introduced
 some local noise in the large $k$ modes,
 and it would be best used as a post-simulation
-analysis tool for simulations with detectable bias.
+analysis tool for simulations
+with detectable residual bias.
 %
 For example, for the simulation in the $\varrho^* = 0.8$ case
 with $\sigma = 0.5$ and the inverse-time schedule,
@@ -3380,7 +3430,7 @@ became too small to damp out the initial bias,
 resulting in much larger initial updating magnitude, $\alpha(0)$
 [cf. Eq. \eqref{eq:opt_alpha0}].
 %
-In this case, the schedule predicted by our method
+In this case, the predicted schedule
 would be unusable because the resulting deviation in the bias potential
 was no longer small,
 and one may have to either decrease the width
@@ -3396,7 +3446,7 @@ or to elongate the preliminary simulation under constant magnitude.
   }
   \caption{
     \label{fig:lj_alpha}
-    Optimal schedule of the Gaussian updating scheme
+    Optimal schedules of Gaussian updating schemes
     for the LJ system.
     %
     The starting updating magnitude was usually
@@ -3423,44 +3473,76 @@ Potts model\cite{wu1982, newman, wang2001, wang2001pre}
 in the energy space.
 %
 We spread the Gaussian umbrellas
-the same width $\sigma_E = L$ over $[-1.7L^2, -0.9L^2]$
-with a spacing of $2L$.
+of the same width $\sigma_E = L$ over $[-1.8L^2, -0.8L^2]$
+with a spacing of $L$.
 %
-For configuration sampling for each umbrella,
+For simplicity,
+only transitions between neighboring umbrellas
+were used.
+%
+For configuration sampling in each umbrella,
 we used the Wolff algorithm\cite{wolff1989, newman}
-(which appeared to be more efficient than the Metropolis algorithm),
+(which is more efficient than the Metropolis algorithm)
 at temperature $c_1/\sigma_E$
 followed by a Metropolis step with
 acceptance probability
 $\min\bigl\{1, e^{c_2 [R_2(E) - R_2(E')]} \bigr\}$,
 whose average was no less than 92\%.
 %
-To ensure stability,
-we avoid transitions among umbrellas
-until the current umbrella has
-completed the WL stage-wise way of
-reducing the updating magnitude
-and started the inverse-time schedule.\cite{belardinelli2007,
-*belardinelli2007jcp, *belardinelli2008, *belardinelli2016}
-  
+The updating magnitude started at $0.01$,
+and it underwent the WL procedure
+with the fluctuation threshold being $0.2$
+[using the definition of Eq. \eqref{eq:maxFk}]
+and the reduction factor being $1/2$
+until it fell below
+the value given the inverse-time schedule\cite{
+belardinelli2007, *belardinelli2007jcp, *belardinelli2008, *belardinelli2016}.
+%
+This updating magnitude was
+used to update the values of both $\ln Z^{(i)}$'s
+for inter-umbrella transitions
+and $c_1^{(i)}$'s and $c_2^{(i)}$'s
+for intra-umbrella sampling.
+
+%To ensure stability,
+%we avoid transitions among umbrellas
+%until the current umbrella has
+%completed the WL stage-wise way of
+%reducing the updating magnitude
+%and started the inverse-time schedule.\cite{belardinelli2007,
+%*belardinelli2007jcp, *belardinelli2008, *belardinelli2016}
+
 The results for the $L = 64$ case
 after $10^5 L^2$ steps are shown
 in Fig. \ref{fig:pt_hist}.
 %
 The Gaussian histograms were evenly spaced with similar width as intended,
-and the overall energy histogram was roughly flat,
+%and the overall energy histogram was roughly flat,
 as shown in Fig. \ref{fig:pt_hist}(a).
 %
-The parameter $c_1/\sigma_E$ roughly represents the local temperature,
+By WHAM, we found the critical temperature at $0.70161$
+in agreement with the previous study\cite{wang2001pre}.
+%
+The parameter, $c_1/\sigma_E$, roughly represents
+the local or statistical temperature,
 and it demonstrated
 the backbending behavior\cite{kim2006, *kim2007}
-typical in a first-order phase transitions,
+typical in a first-order phase transition,
 as shown in Fig. \ref{fig:pt_hist}(b).
 %
-The parameter $c_2$ represents the amount of ``pressure''
-to restrain the distribution width,
-and its value was maximal around the center critical region,
-as shown in Fig. \ref{fig:pt_hist}(c). 
+The second term of the bias potential,
+$c_2 \, R_2(E) = \sqrt 2 \, c_2 \, [(E - E_c)^2/(2 \, \sigma_E^2) - \frac 1 2]$,
+provides a quadratic restraint on the distribution width.
+%
+The value of $\sqrt 2 \, c_2$ represents the amount of ``pressure''
+needed to restore the target Gaussian,
+$\rho(E) \propto \exp[-(E - E_c)^2/(2 \, \sigma_E^2)]$,
+and a value over $1.0$ suggests
+that the intrinsic distribution
+(or the density of states here)
+is locally convex,
+which was so in the critical region,
+as shown in Fig. \ref{fig:pt_hist}(c).
 
 
 \begin{figure}[h]
@@ -3470,19 +3552,20 @@ as shown in Fig. \ref{fig:pt_hist}(c).
   }
   \caption{
     \label{fig:pt_hist}
-    Application of adaptive Gaussian umbrella sampling
-    on the $64 \times 64$ ten state Potts model.
+    Adaptive Gaussian umbrella sampling
+    on the $64 \times 64$ ten-state Potts model.
     %
-    (a) Normalized histograms (solid lines) from adaptive Gaussian umbrella sampling
-    matched the intended distributions.
-    The overall histogram (dashed line) was roughly flat.
+    (a) Normalized histograms (solid lines)
+    and the reweighted distribution
+    at the critical temperature (dashed line).
     %
     (b) The parameter, $c_1/\sigma_E$, roughly corresponding to
     the statistical temperature, $\beta(E)$,
     demonstrated the backbending behavior.
     %
-    (c) The parameter $c_2$ for restraining the variance
-    was maximal around the critical region.
+    (c) The parameter, $\sqrt 2 \, c_2$, exceeds $1.0$
+    in the critical region, indicating local convexity
+    of the density of states.
   }
 \end{center}
 \end{figure}
@@ -3640,6 +3723,14 @@ Although this assumption appeared to work well
 on our test system for modeling long simulations,
 they may break down for relatively short simulations
 of glassy systems.
+%
+Finally, the adaptive Gaussian umbrella sampling
+approach still needs some refinement to improve
+its stability for general application.
+%
+We find that with slow sampling processes,
+the updating scheme may occationally overly update
+the parameter, $c_2$, leading to unreasonable values.
 %Our immediate interest is to apply these relations to
 %problems containing aqueous mixtures of proteins and nucleic acids.
 
@@ -3677,11 +3768,11 @@ of the inverse-time schedule
 
 
 
-We wish to show the optimality of the inverse-time schedule
+The optimality of the inverse-time schedule
 for the single-bin updating scheme
-from the observation that
-it leads to a bias potential
-that coincides with a runtime average
+can be understood from the observation that
+the schedule allows the bias potential
+to coincide with a runtime average
 of the independent corrections.
 %as a natural consequence of the stabilization of a runtime average
 %as the sample size increases\cite{
@@ -3714,8 +3805,8 @@ Assuming that we can linearize the histogram correction
 in Eq. \eqref{eq:vcorr_equil} as
 $\ln x \approx x - 1$ % (for $x \approx 1$),
 and apply it to the instantaneous histogram, $h_i(t)$,
-then the independent estimate of bias potential in each step
-is given by
+the independent estimate of bias potential in each step
+would be given by
 %
 \begin{equation}
   \hat u_i(t) \approx u_i(t) + \frac{ h_i(t) } { \rho_i } - 1
@@ -3746,11 +3837,12 @@ Time averaging Eq. \eqref{eq:uhatt} yields
   .
   \label{eq:uhatav}
 \end{align}
-
-Equation \eqref{eq:uhatav} serves as
+%
+%Equation \eqref{eq:uhatav}
+This equation serves as
 a generalization of Eq. \eqref{eq:vcorr_equil}
 for FDS simulations under a variable bias potential
-and it can be used to improve the estimated PMF
+and we can use it to improve the estimated PMF
 after simulation.
 %
 In particular, for the single-bin updating scheme,
@@ -3780,72 +3872,115 @@ we have, up to a constant shift,
   \label{eq:Uhat_sum}
 \end{align}
 where
-$$
-\Delta u_i \equiv \frac{u_i(t+1)}{t \, \alpha(t)}
-- \frac{u_i(1)}{t \, \alpha(0)}.
-$$
+$\Delta u_i \equiv u_i(t+1) /[t \, \alpha(t)]
+- u_i(1)/[t \, \alpha(0)]$.
+%$$
+%\Delta u_i \equiv \frac{u_i(t+1)}{t \, \alpha(t)}
+%- \frac{u_i(1)}{t \, \alpha(0)}.
+%$$
 %
 With the inverse-time schedule, Eq. \eqref{eq:alpha_invt},
-each term in the square brackets vanishes,
+each term in the sum vanishes,
 and if we further define $\alpha(0) \to \infty$,
 then
 $$
 u_i(t+1) = \hat U_i(t),
 $$
 i.e. the bias potential in this case coincides with
-the runtime average of the correction, $\hat u_i(t)$
-at any step, $t$.
+the runtime average of the correction, $\hat u_i(t)$,
+at every step, $t$.
 %
-Another special case is $\alpha(\tau)$ is a constant for $\tau = 0, 1, \dots$,
-then Eq. \eqref{eq:Uhat_sum} is reduced to a plain average\cite{zhou2005}:
+On the other hand,
+with a constant $\alpha(\tau) = a_0$ for $\tau = 0, 1, \dots$,
+Eq. \eqref{eq:Uhat_sum} is approximately a plain average\cite{zhou2005}:
 $\hat U_i(t) \approx U_i(t)$,
 if we can assume an equilibrium condition
 with $u_i(t+1) \approx u_i(1)$.
+\note{This would be rather risky for metadynamics,
+because we know that the certain noise modes
+do not easily go away, although the plain average
+formula was also recommended for metadynamics.}
 
-%Thus, the bias potential from a WL simulation
-%(which typically uses the single-bin updating scheme)
-%under the inverse-time schedule
-%would reach a similar precision
-%as an ideal multicanonical simulation
-%with fixed and nearly perfect bias potential.
-%the precision at long times.
-%%
-%Thus, it is unnecessary to fix the bias potential
-%after an adaptive FDS simulation has reached
-%sufficiently convergent just for better precision
-%of the final PMF.
-
-
-
-%Second,
-%it shows close connection between
-%the WL algorithm under the inverse-time schedule
-%and self-healing umbrella sampling.
-%In the latter,
-%the bias potential is computed from
-%a weighted runtime average of the histogram\cite{
-%  marsili2006, barducci2008},
-%which is analogous to the adaptive bias force method\cite{
-%  darve2001, *darve2008}.
+We can also cast other updating relations,
+such as Eqs. \eqref{eq:wl_update}
+and \eqref{eq:vkupdate},
+as runtime averages,
+but with dynamic weights.
 %
-%Third,
-%it also relates a WL simulation under the inverse-time schedule
-%to a time-averaged variant of the regular WL simulation.
-%%
-%In the variant, the updating magnitude is fixed,
-%but the bias potential over the simulation course is averaged
-%as the final result\cite{zhou2005}.
-%%
-%The above demonstration shows that the inverse-time schedule
-%has already effectively implemented an implicit average
-%so that no explicit averaging is needed in the former approach.
-%%
-%The inverse-time schedule approach is preferred, however,
-%because with a decreasing updating magnitude,
-%it minimizes the systematic error caused by
-%the on-the-fly updating scheme\cite{
-%  zhou2005, zhou2008},
-%which is ignored in this analysis.
+The weighted average
+%
+\begin{align*}
+  X_\omega(t)
+  =
+  \frac{
+    \omega(0) \, x(0) + \cdots + \omega(t) \, x(t)
+  }
+  {
+    \Omega(t)
+  }
+  ,
+\end{align*}
+%
+where
+$\Omega(t) \equiv \omega(0) + \cdots + \omega(t)$
+is the accumulated weight,
+is equivalent to the recurrence relation
+%
+\begin{align*}
+X_\omega(t) = X_\omega(t-1)
+  + \frac{\omega(t)}{\Omega(t)}
+  \Delta \, x(t)
+,
+\end{align*}
+where
+$\Delta x(t) \equiv x(t) - X_\omega(t-1)$
+is the proposed change from the previous average
+from the data point at step $t$.
+%
+The relative weight, $\omega(t)/\Omega(t)$,
+can be identified as the updating magnitude,
+\begin{equation}
+  \alpha^*(t) \equiv
+  \frac{ \omega(t) } {\Omega(t)}
+  =
+  1 - \frac{ \Omega(t-1) } {\Omega(t)}
+  .
+  \label{eq:alpha_from_Omega}
+\end{equation}
+%
+For a plain average, $\omega(t) = 1$, for $t > 0$,
+the updating magnitude would follow
+the inverse-time schedule, Eq. \eqref{eq:alpha_invt1},
+and updating magnitudes above and below this value
+correspond to runtime averages that favor future and past data,
+respectively.
+%
+In the case of Eq. \eqref{eq:vkupdate},
+we can identify
+the bias potential $\tilde v_k(t)$
+as $x(t)$,
+$\tilde f_k(t)$ as $\Delta x(t)$
+by Eq. \eqref{eq:uhatt},
+and
+the mode-$k$ updating magnitude,
+$\alpha(t) \, \lambda_k$,
+as $\alpha^*(t)$.
+%
+This mapping shows that
+updating magnitude should not exceed $1.0$.
+%
+One way to satisfy this condition
+in converting the results
+from the continuous-time setup is
+to use Eq. \eqref{eq:alpha_from_Omega}
+with
+$\Omega(t) = \prod_{\tau=1}^t [1- \alpha^*(\tau)]^{-1}
+\approx \exp\left(\int_0^t \alpha^*(\tau) \, d\tau \right)$.
+%
+
+
+
+
 
 
 
@@ -4135,7 +4270,7 @@ which means that doubling the sampling range, $\Delta z$,
 would make the histogram flattening
 at least four times as difficult,
 i.e. FDS methods are most effective
-for short ranges\cite{wang2001, *wang2001pre}.
+for short ranges\cite{wang2001, wang2001pre}.
 %
 %Using finer bins would, however, not change this value.
 %

@@ -4,6 +4,13 @@
 * Remember to use "--opta" for the optimal schedule for the Gaussian updating scheme.
 
 
+For reference values of Table 2,
+rho = 0.1
+head -n2 brun*/*log
+rho = 0.8
+head -n2 arun*/*log
+
+
 ### List of truncation error
 
 Data for bin width (0.01).
