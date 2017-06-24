@@ -1,4 +1,4 @@
-\documentclass[reprint, superscriptaddress, floatfix]{revtex4-1}
+\documentclass[preprint, superscriptaddress, floatfix]{revtex4-1}
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{mathtools}
@@ -935,7 +935,7 @@ Differential equation}
 To proceed, we will
 approximate the finite difference Eq. \eqref{eq:wl_update}
 by a differential equation\footnote{In
-going to the continuous time setup,
+going to the continuous-time setup,
 we find it more convenient to shift the origin of time by $-1$,
 e.g. the sum $\sum_{i=1}^T$ is mapped to the integral $\int_0^T dt$.}
 %
@@ -1684,7 +1684,8 @@ we will assume that
 the preliminary adaptive FDS sampling has been
 performed under a constant updating magnitude for $T_0$ steps.
 %
-If the starting bias potential is zero,
+If the initial bias potential
+before the priliminary run is zero,
 one can show that
 \begin{equation}
   \left\langle
@@ -1831,8 +1832,6 @@ coincides with the Lagrangian:
   =
   \mathcal L
   .
-  %=
-  %\mathrm{const.}
   \notag
   %\label{eq:error_asym_Hamiltonian}
 \end{equation}
@@ -1974,58 +1973,95 @@ such that the ordinate of the latter curve
 is $1/(T\alpha)$,
 and the area under the curve in the domain, $[\bar q(t), q(T)]$,
 is equal to $t/T$,
-as shown in Fig. \ref{fig:massq}.
+as shown in Fig. \ref{fig:massq}(a).
 
 \begin{figure}[h]
 \begin{center}
-  \begin{tikzpicture}[very thick, scale=2.5, every node/.style={scale=1.5}]
+  \begin{tikzpicture}[thick, scale=1.25, every node/.style={scale=0.8}]
+    \node [] at (-0.3, 2.0) {(a)};
     % distribution
-    \draw[domain=0:2.5, variable=\x, dashed, gray, ultra thick]
-      plot({\x}, {sqrt(2*exp(-2*\x)+exp(-\x))});
+    \draw[domain=0:2.5, variable=\x, dashed, gray, very thick]
+      plot({\x}, {2*exp(-\x)});
 
     % shade
     \fill [gray!30!white, domain=0.7:2.2, variable=\x]
       (0.7, 0) --
-      plot ({\x}, {sqrt(2*exp(-2*\x)+exp(-\x))})
+      plot ({\x}, {2*exp(-\x)})
       -- (2.2, 0) -- cycle;
 
     % thick curve
-    \draw[domain=0:2.2, variable=\x, ultra thick]
-      plot({\x}, {sqrt(2*exp(-2*\x)+exp(-\x))});
+    \draw[domain=0:2.2, variable=\x, very thick]
+      plot({\x}, {2*exp(-\x)});
 
     % label for the shaded area
-    \node[] at (1.1, 0.40) {$\dfrac{t}{T}$};
+    \node[] at (1.1, 0.36) {$\dfrac{t}{T}$};
 
     \draw[<->] (0.6, 0)  --
                node[left, inner sep=1mm]
                {$\dfrac{1}{T \, \alpha}$}
-               (0.6, 0.99488);
+               (0.6, 0.99317);
     % label for the ordinate
     %\node[fill=white] at (0.4, 0.7) {$\dfrac{1}{Ta}$};
 
-    \draw[] (0.5, 0.99488) -- (0.7, 0.99488);
+    \draw[] (0.5, 0.99317) -- (0.7, 0.99317);
     \draw[->] (0, 0) -- (2.8, 0);
     \node[] at (2.8, -0.2) {$\bar q$};
-    \draw[->] (0, 0) -- node[above, rotate=90] {$m(\bar q)$} (0, 1.9);
+    \draw[->] (0, 0) -- node[above, rotate=90] {$m(\bar q)$} (0, 2.2);
 
     % xtics
     \draw[] (0.0, 0.1) -- (0.0, 0.0) node[below] {$0$};
     \draw[] (0.7, 0.1) -- (0.7, 0.0) node[below] {$q(T) - q(t)$};
     \draw[] (2.2, 0.1) -- (2.2, 0.0) node[below] {$q(T)$};
   \end{tikzpicture}
-  %\makebox[\linewidth][c]{
-  %  \includegraphics[angle=0, width=0.9\linewidth]{fig/massq.pdf}
-  %}
+%
+  \begin{tikzpicture}[thick, scale=1.25, every node/.style={scale=0.8}]
+    \node [] at (-0.3, 2.0) {(b)};
+    % distribution
+    \draw[domain=0:2.3, variable=\x, dashed, gray, very thick]
+      plot({\x}, {1/(\x+0.5)});
+
+    % shade
+    \fill [gray!30!white, domain=0.7:2.0, variable=\x]
+      (0.7, 0) --
+      plot ({\x}, {1/(\x+0.5)})
+      -- (2.0, 0) -- cycle;
+
+    % thick curve
+    \draw[domain=0:2.0, variable=\x, very thick]
+      plot({\x}, {1/(\x+0.5)});
+
+    % label for the shaded area
+    \node[] at (1.1, 0.40) {$\bar q(t)$};
+
+    \draw[<->] (0.6, 0)  --
+               node[left, inner sep=1mm]
+               {$\dfrac{1}{T \, m}$}
+               (0.6, 0.83333);
+    % label for the ordinate
+    %\node[fill=white] at (0.4, 0.7) {$\dfrac{1}{Ta}$};
+
+    \draw[] (0.5, 0.83333) -- (0.7, 0.83333);
+    \draw[->] (0, 0) -- (2.6, 0);
+    \node[] at (2.6, -0.2) {$t$};
+    \draw[->] (0, 0) -- node[above, rotate=90] {$\alpha(t)$} (0, 2.2);
+
+    % xtics
+    \draw[] (0.0, 0.1) -- (0.0, 0.0) node[below] {$0$};
+    \draw[] (0.7, 0.1) -- (0.7, 0.0) node[below] {$t$};
+    \draw[] (2.0, 0.1) -- (2.0, 0.0) node[below] {$T$};
+  \end{tikzpicture}
   \caption{
     \label{fig:massq}
-    Geometric construction of the optimal schedule,
+    (a) Geometric construction of the optimal schedule,
     $\alpha(t)$,
     from the normalized mass distribution,
     $m(\bar q)$.
     %
+    (b) Inverse construction of $m(\bar q)$
+    from the optimal schedule $\alpha(t)$.
+    %
     \note{
       The figure was produced by \texttt{tikz}.
-      % Gnuplot version by doc/fig/massq.gp
     }%
   }
 \end{center}
@@ -2055,7 +2091,8 @@ being $\bar q^*$ and $t^*$, respectively.
 %
 Further, the transformation is an involution:
 if we apply the same transform on $\alpha^*(t^*)$
-we would recover $m^*(\bar q^*)$.
+we would recover $m^*(\bar q^*)$,
+as shown in Fig. \ref{fig:massq}.
 %
 A few examples are shown in Table \ref{tab:m_and_a}.
 %
@@ -2067,7 +2104,7 @@ On the other hand,
 if the mass distribution is inversely proportional to $\bar q$,
 which is approximately true for the Gaussian updating scheme
 at large $\bar q$,\footnote{If
-  the magntidue of the eigenvalues, $\lambda_k$'s,
+  the magnitude of the eigenvalues, $\lambda_k$'s,
   span a wide range, then for a large $\bar q$,
   the sum in Eq. \eqref{eq:mass_func} will be dominated by
   the largest term, where $\lambda_k \approx 1/\bar q$,
@@ -2084,7 +2121,7 @@ then we would have an exponentially decaying schedule.
     as defined in Eqs. \eqref{eq:mQ_invTa}
     and \eqref{eq:intmQ_tT}.
   }
-  \setlength{\tabcolsep}{3pt} % spacing between columns
+  \setlength{\tabcolsep}{2pt} % spacing between columns
   \renewcommand\arraystretch{2.0} % spacing between rows
   \begin{tabular} { c c c }
     \hline
@@ -2104,7 +2141,7 @@ then we would have an exponentially decaying schedule.
     $\dfrac{c \, a}{\left( {\bar q}^* + q^*_0 \right)^{a+1}}$ &
     $\dfrac{c^{1/a} \, (1/a)}{\left( t^* + t^*_0 \right)^{(1/a)+1}}$ &
     %$\left( \dfrac{c}{t^* + t^*_0} \right)^{1/a} - q^*_0$
-    $q^*_0 \left[\left( \dfrac{1+t^*_0}{t^* + t^*_0} \right)^{\frac 1 a} - 1\right]$
+    $q^*_0 \left[\left( \dfrac{1+t^*_0}{t^* + t^*_0} \right)^{1/a} - 1\right]$
     %$\,\begin{aligned}
     %  &a, q^*_0 > 0, \\
     %  &\frac{1}{t^*_0} \equiv \left(1+\frac{1}{q^*_0}\right)^a - 1, \\
@@ -2251,49 +2288,6 @@ wang2001, wang2001pre}.
 }
 
 
-%For simulations with the same $a_0$,
-%the shape of the mass distribution, $m(\bar q)$,
-%also determines how much the optimal schedule
-%would depend on the simulation length, $T$.
-%%
-%Since both $M(\bar q)$ and $m(\bar q)$ decrease monotonically with $\bar q$,
-%Eq. \eqref{eq:opt_qT} shows that
-%the optimal $q(T)$ increases with
-%the simulation length, $T$,
-%more so if $M(\bar q)$ has a long tail.
-%%
-%Thus, if $M(\bar q)$ decays slowly because of
-%many near zero eigenvalues, $\lambda_k$'s,
-%as in the metadynamics case,
-%both the optimal schedule and
-%normalized asymptotic error, $\Err_A(T) \cdot T$,
-%would be sensitive to the simulation length, $T$.
-%%
-%In contrast, if all eigenvalues are $1.0$
-%as in the single-bin or WL updating scheme discussed previously,
-%the optimal schedule is
-%given by the universal inverse-time formula,
-%Eq. \eqref{eq:alpha_invt1},
-%and the normalized asymptotic error
-%is roughly a constant
-%[cf. Eq. \eqref{eq:error_singlebin}].
-%
-%If $M(\bar q)$ decays rapidly,
-%the distribution $m(\bar q)$ does not critically
-%depend on the cutoff $q(T)$,
-%once $q(T)$ is sufficiently large.
-%%
-%So the optimal schedules of these simulations
-%approximately satisfy the scaling relations
-%described in Sec. \ref{sec:mass_distr}.
-%%
-%If, however, $M(\bar q)$ has a long tail
-%because of some near-zero $\lambda_k$'s,
-%increasing the simulation length $T$
-%generally alters the shape of the optimal schedule.
-
-
-
 
 \subsubsection{\label{sec:band-matrix}
 Homogeneous updating schemes}
@@ -2369,8 +2363,6 @@ from the given system and updating scheme (input),
 and then apply them to Eq. \eqref{eq:q_opt}
 for the schedule,
 as shown in Fig. \ref{fig:vardep}.
-%
-%The dependence of variables are shown in Fig. \ref{fig:vardep}.
 %
 While the updating scheme alone
 determines $\lambda_k$'s,
@@ -2519,7 +2511,13 @@ Compute the optimal schedule by
 To handle Gaussian updating schemes more effectively,
   we have chosen the $\mathcal N+1$ grid points over $[0, q(T)]$ to be given by
   $q_{[i]} = \bigl(q(T) + 1\bigr) - \bigl(q(T)+1\bigr)^{1-i/\mathcal N}$,
-  where $i = 0, \dots, \mathcal N$, and we chose $\mathcal N=20000$.
+  where $i = 0, \dots, \mathcal N$,\footnote{For
+    a mass distribution, $m(\bar q)$, that is
+    inversely proportional to $\bar q$,
+    this grid would make the integral,
+    or the difference, $t_{[i+1]} - t_{[i]}$,
+    roughly a constant.}
+  and we chose $\mathcal N=20000$.
 %
 The curve $q(t)$ is then integrated
   using the trapezoidal rule\cite{press3rd},
@@ -2560,7 +2558,7 @@ As shown below, for a class of bandpass updating schemes,
   is simply given by the inverse-time schedule, Eq. \eqref{eq:alpha_invt1}.
 %
 %For these updating schemes,
-%  the preliminary run with a constant updating magntiude
+%  the preliminary run with a constant updating magnitude
 %  can be replaced by the WL-style stagewise reduction
 %  until the updating magnitude falls under
 %  the value given the inverse-time prescription\cite{
@@ -2604,8 +2602,8 @@ $$
   A_2 \, \chi^2 + A_1 \, \chi + A_0
   ,
 $$
-which must carry a non-positive discriminant:
-$A_1^2 - 4 \, A_0 \, A_2 \le 0$.},
+which implies a nonpositive discriminant,
+$A_1^2 - 4 \, A_0 \, A_2$.}
 %
 %
 \begin{align}
@@ -2720,64 +2718,6 @@ if we notice [cf. Eq. \eqref{eq:parseval}]
   %\label{eq:Gamma_G_sum}
 \end{align}
 %%
-%\begin{equation}
-%  \alpha(t) = \frac{              1             }
-%                   { \lambda_k \, (t + t_{k0} ) },
-%\label{eq:alpha_invtk}
-%\end{equation}
-%with
-%\begin{equation}
-%  t_{k0} = \frac{             T            }
-%                { e^{ \lambda_k q(T) } - 1 }.
-%\label{eq:tk0}
-%\end{equation}
-%%
-%\note{Derivation.
-%  Integrating $\dot \vartheta_k = c_k$ yields
-%  \begin{equation}
-%    \vartheta_k(t) = c_k \left(t + t_{k0} \right).
-%  \tag{UK}
-%  \label{neq:ui_solution}
-%  \end{equation}
-%  Given that $\vartheta_k(T) = 1$ and
-%  $\vartheta_k(0) = e^{-\lambda_k \, q(T)}$,
-%  we have
-%  $$
-%  c_k = \frac{ 1 }{ T + t_{k0} },
-%  \quad
-%  \mathrm{and\;}
-%  \frac{ t_{k0} } { T + t_{k0} }
-%  =
-%  e^{ -\lambda_k \, q(T) }.
-%  $$
-%  Taking the logarithm of Eq. \eqref{neq:ui_solution} yields
-%  $$
-%  -\lambda_k \, q(T) + \lambda_k \, q(t)
-%  = \ln c_k + \ln \left( t + t_{k0} \right).
-%  $$
-%  Differentiating this with respect to $t$ yields
-%  Eq. \eqref{eq:alpha_invtk}.
-%}
-%%
-%Such a solution is possible only if
-%all nontrivial eigenvalues are equal,
-%%
-%%\begin{equation}
-%  $\lambda_1 = \dots = \lambda_{n-1}$.
-%%  \notag
-%%\end{equation}
-%%
-%Then, by Eq. \eqref{eq:tk0},
-%all $t_{k0}$'s also share the same value,
-%$t_0$,
-%such that
-%$\vartheta_k = (t + t_0) / (T + t_0)$,
-%and
-%$c_k = 1/(T + t_0)$
-%for $k > 0$.
-%%
-%
-%
 
 
 
@@ -2868,9 +2808,9 @@ bandpass updating schemes can also be applied to
 a continuous variable, $z$,\footnote{
   In the transition to a continuous variable,
   we will map
-  $\rho_i$ to $\rho(z) \delta z$,
-  $\phi_{ki}$ to $\phi_k(z) \delta z$,
-  $w_{ij}$ to $w(z, z') \delta z$, etc.}
+  $\rho_i$ to $\rho(z) \, \delta z$,
+  $\phi_{ki}$ to $\phi_k(z) \, \delta z$,
+  $w_{ij}$ to $w(z, z') \, \delta z$, etc.}
 with the eigenmodes derived from orthogonal polynomials, $R_k(z)$,
 that satisfy
 \begin{align*}
@@ -3093,8 +3033,8 @@ Our test system is a Lennard-Jones (LJ) fluid of $100$ particles,
 and we wish to compute the PMF along the distance of two special particles, $r$.
 %
 The two special particles are mutually non-interacting
-but they interact normally with other particles,\footnote{they
-have placed on an axis parallel to a side of the cubic box}
+but they interact normally with other particles,\footnote{They
+were placed on an axis parallel to a side of the cubic box}
 and the intrinsic distribution, $p(r)$, is
 the cavity distribution function, $y(r)$\cite{hansen}.
 %
@@ -3151,7 +3091,7 @@ with either the inverse-time or optimal schedule
 were able to reduced
 the error significantly,
 and the errors roughly matched the predicted values
-calculated from the precomputed
+calculated from the pre-computed
 $\Gamma_k$'s and $\epsilon_k$'s.
 %
 The Gaussian updating scheme produced less error than
@@ -3265,23 +3205,23 @@ had little effect on the total error.
     } \\
     \hline
     single-bin & $1/t$
-    & $1.3(1.4)$
-    & $2.7(2.7)\times10^{-3}$
+    & $1.4(1.4)$
+    & $3.4(2.7)\times10^{-3}$
     \\
     %\hline
     $\sigma=0.1$ & $1/t$
     & $1.3(1.3)$
-    & $2.9(2.8)\times10^{-3}$
+    & $3.0(2.8)\times10^{-3}$
     \\
     %\hline
     $\sigma=0.1$ & opt.
     & $1.2(1.3)$
-    & $2.8(2.8)\times10^{-3}$
+    & $3.0(2.8)\times10^{-3}$
     \\
     %\hline
     $\sigma=0.2$ & $1/t$
     & $1.3(1.2)$
-    & $3.4(3.2)\times10^{-3}$
+    & $3.5(3.2)\times10^{-3}$
     \\
     %\hline
     $\sigma=0.2$ & opt.
@@ -3290,17 +3230,17 @@ had little effect on the total error.
     \\
     %\hline
     $\sigma=0.5$ & $1/t$
-    & $0.9(0.9)$
-    & $9.8(8.0)\times10^{-3}$
+    & $1.0(0.9)$
+    & $9.7(8.0)\times10^{-3}$
     \\
     %\hline
     $\sigma=0.5$ & opt.
     & $1.0(0.9)$
-    & $5.8(5.4)\times10^{-3}$
+    & $5.9(5.4)\times10^{-3}$
     \\
     %\hline
     $K=20$ & $1/t$
-    & $1.3(1.3)$
+    & $1.4(1.3)$
     & $3.1(2.7)\times10^{-3}$
     \\
     \hline
@@ -3352,8 +3292,16 @@ and produced a flatter profile for the final error.
 %
 As a result, the optimal schedule usually produced
 less error than the inverse-time schedule
-for the Gaussian updating scheme,
 as shown in Table \ref{tab:lj_error}.
+%
+Although the difference was small in the reported cases,
+the gain of using the optimal schedule
+would increase with the simulation length.\footnote{
+  For example, for the $\varrho^* = 0.1$ case
+  with width $\sigma = 0.2$,
+  the predicted error of a simulation of $10^8$ steps
+  was $2.5\times10^{-5}$ for the inverse-time schedule
+  or $3.7\times10^{-6}$ for the optimal schedule.}
 
 One way to overcome the systematic bias
 in the Gaussian updating scheme
@@ -3419,7 +3367,7 @@ we show the optimal schedules in a few cases.
 %
 Since we have chosen a long equilibration period
 for the preliminary run under constant updating magnitude,
-the starting magnitude was around
+the initial magnitude was around
 the ideal value of $a_0/2 = 5\times10^{-5}$
 given by Eq. \eqref{eq:half_alpha0}.
 %
@@ -3474,11 +3422,11 @@ in the energy space.
 %
 We spread the Gaussian umbrellas
 of the same width $\sigma_E = L$ over $[-1.8L^2, -0.8L^2]$
-with a spacing of $L$.
+with an even spacing of $L$.
 %
 For simplicity,
 only transitions between neighboring umbrellas
-were used.
+were performed.
 %
 For configuration sampling in each umbrella,
 we used the Wolff algorithm\cite{wolff1989, newman}
@@ -3520,8 +3468,8 @@ The Gaussian histograms were evenly spaced with similar width as intended,
 %and the overall energy histogram was roughly flat,
 as shown in Fig. \ref{fig:pt_hist}(a).
 %
-By WHAM, we found the critical temperature at $0.70161$
-in agreement with the previous study\cite{wang2001pre}.
+By WHAM, we found the critical temperature at {\color{red}$0.70162$}
+in agreement with a previous study\cite{wang2001pre}.
 %
 The parameter, $c_1/\sigma_E$, roughly represents
 the local or statistical temperature,
@@ -3534,13 +3482,13 @@ The second term of the bias potential,
 $c_2 \, R_2(E) = \sqrt 2 \, c_2 \, [(E - E_c)^2/(2 \, \sigma_E^2) - \frac 1 2]$,
 provides a quadratic restraint on the distribution width.
 %
-The value of $\sqrt 2 \, c_2$ represents the amount of ``pressure''
+The coefficient, $\sqrt 2 \, c_2$, represents the amount of ``pressure''
 needed to restore the target Gaussian,
 $\rho(E) \propto \exp[-(E - E_c)^2/(2 \, \sigma_E^2)]$,
 and a value over $1.0$ suggests
 that the intrinsic distribution
 (or the density of states here)
-is locally convex,
+is locally convex or unstable,
 which was so in the critical region,
 as shown in Fig. \ref{fig:pt_hist}(c).
 
@@ -3644,9 +3592,9 @@ and other parameters.
 In particular, the Gaussian updating scheme is often
 equipped with a set of rapidly diminishing eigenvalues.
 %
-While this feature helps suppressing
+While this feature helps suppress
 the accumulation of random error and
-maintaining the smoothness of the bias potential,
+maintain the smoothness of the bias potential,
 it also slows down the reduction
 of the initial bias, if any,
 in the middle-range eigenmodes.
@@ -3774,33 +3722,7 @@ can be understood from the observation that
 the schedule allows the bias potential
 to coincide with a runtime average
 of the independent corrections.
-%as a natural consequence of the stabilization of a runtime average
-%as the sample size increases\cite{
-%  marsili2006, barducci2008}.
-%
-%We first note that a runtime average
-%\begin{equation}
-%  X(t) = \frac{x(1) + \cdots + x(t)}{t}
-%  .
-%  \label{eq:avx}
-%\end{equation}
-%can be written as a recurrence relation
-%\begin{equation}
-%  X(t) = X(t - 1) + \frac{x(t) - X(t-1)}{t}
-%  .
-%  \label{eq:avx_recur}
-%\end{equation}
-%%
-%Here $x(t) - X(t-1)$ serves as an independent correction
-%from data point at time $t$ to the previous average value,
-%and this correction is absorbed into the average
-%with a weight of $1/t$,
-%which is the inverse sample size.
 
-%We can use Eq. \eqref{eq:avx_recur} to incrementally
-%improve the estimated
-%bias potential given by Eq. \eqref{eq:vcorr_equil}.
-%
 Assuming that we can linearize the histogram correction
 in Eq. \eqref{eq:vcorr_equil} as
 $\ln x \approx x - 1$ % (for $x \approx 1$),
@@ -4108,7 +4030,7 @@ from the largest mode
   \label{eq:maxFk}
 \end{align}
 This definition can be readily extended
-to the continuous variable case, with
+to a continuous variable, $z$, with
 $\tilde F_k(T) = \frac 1 T \sum_{t = 1}^T R_k\bigl( z(t) \bigr)$.
 %For a local sampling process,
 %we expect that the two definition would behave similarly.
@@ -4143,13 +4065,11 @@ This method has the advantage of not requiring
 explicit computation of
 the autocorrelation functions of the eigenmodes.
 %
-The basic idea is to use Eq. \eqref{eq:xt2_eql}.
-%
-However,
-without knowing the intrinsic distribution, $p_i$,
-we cannot compute the shifted bias potential, $v_i$.
-%
-The problem can be avoided by replacing the shift
+The basic idea is to use Eq. \eqref{eq:xt2_eql},
+and to avoid the problem of not
+knowing the intrinsic distribution, $p_i$,
+hence the potential shift, $\ln(p_i/\rho_i)$,
+we should replace the shift
 by the time average of the bias potential.
 
 We first note that the difference,
@@ -4321,9 +4241,6 @@ and the updating kernel.
 
 \subsection{\label{sec:wband_eig}
 Eigenvalues and eigenvectors}
-
-%\subsubsection{\label{sec:bandkernel}
-%Updating kernel and eigenvalues}
 
 
 

@@ -237,7 +237,7 @@ static int work(invtpar_t *m)
   if ( m->ntrials > 0 ) {
     int i, itr;
     ave_t ei[1], ef[1], eci[1], ecf[1], fi[1], ff[1];
-    double erri, errf, erci, ercf, hfli, hflf;
+    double erri, errf, erci, ercf, hfli, hflf, alpha0;
     cmvar_t *cmi, *cmf, *cci, *ccf;
     FILE *fplog;
 
@@ -249,8 +249,9 @@ static int work(invtpar_t *m)
     cmf = cmvar_open(n, 0); /* final */
     cci = cmvar_open(n, 0); /* initial corrected */
     ccf = cmvar_open(n, 0); /* final correct */
-    fprintf(stderr, "starting %ld metadynamics run of %ld/%ld steps..., a %g, err %g -> %g\n",
-        m->ntrials, m->nequil, m->nsteps, metad->a, metad->eiref, metad->efref);
+    alpha0 = m->opta ? metad->intq->aarr[0] : metad->a/2; 
+    fprintf(stderr, "starting %ld metadynamics run of %ld/%ld steps..., a %g (%g), err %g -> %g\n",
+        m->ntrials, m->nequil, m->nsteps, metad->a, alpha0, metad->eiref, metad->efref);
     /* write the header information for the log file */
     fplog = fopen(fnlog, "a");
     metad_saveheader(metad, fplog);
