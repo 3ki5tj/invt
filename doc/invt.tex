@@ -57,7 +57,7 @@ Baylor College of Medicine, Houston, Texas 77030, USA}
 Department of Bioengineering,
 Rice University, Houston, Texas 77005, USA}
 \author{B. Montgomery Pettitt}
-\email{bmpettitt@utmb.edu}
+\email{mpettitt@utmb.edu}
 \affiliation{
 Sealy Center for Structural Biology and Molecular Biophysics,
 The University of Texas Medical Branch,
@@ -96,7 +96,7 @@ Galveston, Texas 77555-0304, USA}
   %
   While the asymptotically optimal schedule for
   the single-bin updating scheme (commonly used in WL)
-  is given by inverse-time formula,
+  is given by an inverse-time formula,
   that for the Gaussian updating scheme (commonly used in metadynamics)
   is often more complex.
   %and the initial updating magnitude is ideally half of
@@ -143,7 +143,7 @@ is $-\ln p(z)$.
 %
 However, accurately estimating the PMF is often difficult
 when the collective variable is energetically restricted to local regions
-of the complex, multimodal free energy surface.
+of the complicated, multimodal free energy surface.
 %
 Thus,
 to overcome these energetic barriers and
@@ -160,22 +160,6 @@ huber1994,
 The flat-distribution sampling can be used to accelerate
 sampling of slow transitions that otherwise would not readily
 be observed with traditional simulations.
-%
-%A better solution is to artificially flatten
-%the target distribution along $z$\cite{mezei1987, berg1992, *lee1993,
-%wang2001, wang2001pre,
-%huber1994,
-%*laio2002, *laio2008, *barducci2011, *sutto2012}.
-%%
-%This alleviates the above problem of local trapping
-%by forcing the system to travel more
-%deliberately along $z$,
-%which often represents
-%a direction of slow motion.
-%%
-%To achieve a flat distribution, however,
-%the method must be able to construct a
-%bias potential that cancels the PMF.
 
 
 
@@ -189,15 +173,9 @@ and metadynamics\cite{huber1994,
 among others\cite{kim2006, *kim2007, junghans2014,
   langfeld2012, pellegrini2014}.
 %
-%flat-distribution-sampling (FDS) techniques
-%that build the bias potential adaptively or on the fly.
-%
 These techniques regularly update the bias potential
 to discourage future visits to previously sampled configurations
-by incrementally elevating the bias potential,
-%and they are closely-related\cite{junghans2014, micheletti2004}.
-%
-%The bias potential is associated with discrete values of $z$.
+by incrementally elevating the bias potential.
 %
 A key difference lies
 in the updating window function,
@@ -207,7 +185,7 @@ $z$ on the free energy surface
 where the updating should occur
 as well as the relative updating magnitude.
 %
-Usually, the window function
+Often, the window function
 takes the form of a discrete
 $\delta$-function (a boxcar function one histogram bin wide)
 in WL,
@@ -225,24 +203,8 @@ as it provides a smoother bias potential
 that can be readily differentiated for force calculation.\cite{huber1994,
   *laio2002, *laio2008, *barducci2011, *sutto2012, junghans2014}
 %
-%is that in the WL case,
-%each updating step is limited to the bin
-%containing the current $z$,
-%while metadynamics adopts an extended
-%Gaussian window
-%covering several neighboring bins.
-%%
-%The latter is more often used in MD simulations
-%as it guarantees a smooth profile
-%of the bias potential
-%suitable for numerical differentiation
-%in deriving the bias force.
-%
 In both cases,
 regular updates to the bias potential
-%in both cases, the bias potential
-%is updated frequently (usually every few MC or MD steps),
-%and the fluctuation
 disrupts the underlying equilibrium
 sampling\cite{zhou2005, morozov2007, zhou2008},
 and for convergence of the estimated PMF
@@ -280,9 +242,6 @@ the inverse number of updating steps.
 }
 %The same schedule also applies to a variant of
 %the WL algorithm\cite{langfeld2012, pellegrini2014}.
-%
-%The optimal schedule for metadynamics,
-%however, is less studied.
 
 
 In this study,
@@ -290,8 +249,7 @@ we present a method of computing
 the optimal schedule
 for an adaptive FDS method
 of a general updating scheme,
-including the single-bin and Gaussian one
-used in the WL algorithm and metadynamics.
+including the single-bin and Gaussian versions.
 %
 We will map the optimization problem to a mechanical one,
 in which the schedule plays the role of the velocity of
@@ -334,7 +292,7 @@ and to avoid introducing local noise
 into the bias potential during the updating process.
 %
 The optimal schedule of bandpass updating schemes
-is also the inverse-time schedule.
+is also an inverse-time schedule.
 %
 A previous FDS algorithm\cite{langfeld2012, pellegrini2014}
 can be cast as a special case of the bandpass updating scheme,
@@ -342,18 +300,10 @@ and a similarly application can help other FDS
 algorithms\cite{neuhaus2006, *neuhaus2007, zhu2012}
 adjust the parameters of the bias potential automatically.
 
-%For finite-length simulations, however,
-%metadynamics may deliver better performance.
-%
-%These results may help to better
-%plan and optimize FDS simulations.
-
-
-
 The article is organized as follows.
 %
 We present the analytical results in Sec. \ref{sec:theory},
-numerically verify some aspects
+provide numerical examples
 in Sec. \ref{sec:results},
 and conclude the article
 in Sec. \ref{sec:conclusion}.
@@ -370,20 +320,17 @@ We develop the theory
 in the following order.
 %
 In Sec. \ref{sec:background},
-we first review the basics of FDS
+we briefly review the basics of FDS
 and some known aspects of the optimal schedule.
 %
 Then, in Sec. \ref{sec:single-bin},
-we illustrate the method of
+we derive the method of
 computing the optimal schedule
 in the simple case of the
 single-bin updating scheme
 used by the WL algorithm,
 by proving the optimality
 of the known inverse-time formula.
-%
-%The above two introductory sections help define our notations,
-%and an expert reader may wish to skip them.
 %
 Next, we extend the method to the general case
 of a multiple-bin updating scheme
@@ -421,8 +368,7 @@ for a given system.
 %
 For a continuous quantity, $z$,
 %which is often the case in a (classical) molecular system,
-we can discretize it
-such that the integer $i$ represents
+we can use the equivalent integer $i$ to represent
 the index of a small interval, or a bin,
 $(z, z + \delta z)$.
 %
@@ -469,7 +415,7 @@ sampling a smoother biased distribution, $\rho_i$.
 We will broadly define
 a flat-distribution-sampling (FDS) simulation
 as a biased simulation
-targeting a flat $\rho_i$ (i.e. $\rho_i \equiv 1/n$)
+targeting a flat $\rho_i$ (i.e. $\rho_i \equiv 1/n$ for $n$ bins)
 or nearly flat one\cite{
 dayal2004, *trebst2004, barducci2008, singh2011}.
 %
@@ -490,7 +436,7 @@ the biased equilibrium distribution becomes
   %\label{eq:pi_p_V}
 \end{equation}
 %
-and our aim is to find a biased potential
+and our aim is to find a bias potential
 such that the resulting $\pi_i$ would coincide
 with the desired $\rho_i$.
 %
@@ -667,7 +613,7 @@ the updating also involves neighboring bins:
 \end{equation}
 %
 The Gaussian updating scheme used in metadynamics
-is an example, with $w_{ij}$ being a Gaussian of $i-j$.
+is an example, with $w_{ij}$ being a Gaussian centered on $j$.
 %
 Note that if the updating occurs
 only every few sampling steps,
@@ -851,7 +797,7 @@ upon convergence.
 Note that the updates to $v_i(t)$ are
 equivalent to the updates to $u_i(t)$,
 since the shift
-remains a constant during the course of simulation,
+remains a constant during the course of simulation.
 %%
 %In terms of $v_i$'s, Eq. \eqref{eq:pi_p_V}
 %becomes
@@ -880,40 +826,33 @@ and a baseline value, $\bav{v}(t)$,
 for average growth\cite{
 dama2014}.
 %
-We define a bin-average-deducted bias potential
-as\note{Alternatively,
-we may define $v_{*i}(t)$ such that
-$\rho_i \, e^{-v_{*i}(t)}$ is a normalized distribution,
-i.e.,
-$$
-v_{*i}(t) \to -\ln\left(
-  \frac{ (p_i/\rho_i) \, e^{ -u_i(t) } }
-  { \sum_{j=1}^n p_j \, e^{ -u_j(t) } }
-\right).
-$$
-One can readily show that the two definitions are equivalent
-for small $v_{*i}$.}
+We define the bias potential deviation from the
+bin average, $\bav{v}(t) \equiv \sum_{i=1}^n \rho_i \, v_i(t)$,
+as
 %
 \begin{equation}
   v_{*i}(t) \equiv v_i(t) - \bav{v}(t)
-  ,
+  .
 \label{eq:x_def}
 \end{equation}
 %
-where we have defined the bin average,
-$\bav{v}(t) \equiv \sum_{i=1}^n \rho_i \, v_i(t)$.
-%
-%\begin{equation}
-%  \bav{v}(t)
-%  \equiv \sum_{i = 1}^n \rho_i \, v_i(t)
-%  .
-%  \label{eq:vav_def}
-%\end{equation}
+\note{Alternatively,
+  we may define $v_{*i}(t)$ such that
+  $\rho_i \, e^{-v_{*i}(t)}$ is a normalized distribution,
+  i.e.,
+  $$
+  v_{*i}(t) \to -\ln\left(
+    \frac{ (p_i/\rho_i) \, e^{ -u_i(t) } }
+    { \sum_{j=1}^n p_j \, e^{ -u_j(t) } }
+  \right).
+  $$
+  One can readily show that the two definitions are equivalent
+  for small $v_{*i}$.}%
 %
 Below we will use the notations, $x_{*i}$ and $\bav{x}$,
 for a general variable, $x_i$.
 %
-The total error is given by
+The total error is then given by
 %
 \begin{equation}
   \Err(t)
@@ -993,7 +932,7 @@ we get
 
 We can split the histogram into
 a deterministic averaged part, $\langle f_i(t) \rangle$,
-and a random fluctuation part, $\zeta_i(t)$,
+and a random fluctuating part, $\zeta_i(t)$,
 %
 \begin{equation}
   f_i(t) =
@@ -1071,7 +1010,7 @@ Deducting the bin average and using Eq. \eqref{eq:fav1}, we get
 
 
 We will approximate the histogram fluctuation part, $\zeta_i(t)$,
-hence its bin-average-deducted version, $\zeta_{*i}(t)$,
+hence its deviation from the bin average, $\zeta_{*i}(t)$,
 as white noise such that
 \begin{equation}
   \langle \zeta_{*i}(t) \, \zeta_{*i}(t') \rangle
@@ -1081,7 +1020,7 @@ as white noise such that
   %\label{eq:G_def}
 \end{equation}
 for some $G_i$,
-and $\delta(t)$ is the Dirac's delta function.
+and $\delta(t)$ is the Dirac delta function.
 %
 We expect the approximation to hold for simulation
 much longer than the autocorrelation time.
@@ -1141,8 +1080,8 @@ e^{q' - q(T)}.
 
 At the end of period $T$,
 the total error defined in Eq. \eqref{eq:error_def}
-is a sum of a residual error (from the decay of the initial error)
-and an asymptotic error:
+is a sum of a residual error, $E_R$ (from the decay of the initial error)
+and an asymptotic error, $E_A$:
 %
 \begin{align}
   \Err(T)
@@ -1524,9 +1463,9 @@ and
 %
 Thus, the only effect
 of the bin-average deduction on $\tilde x_k$ is to
-annihilate the first mode, $\tilde x_0$.
+annihilate the $k=0$ mode.
 %
-It follows Parseval's theorem,
+We also have Parseval's theorem,
 \begin{equation}
   \sum_{k=1}^{n-1} \tilde x_k \, \tilde y_k
   =
@@ -1578,7 +1517,7 @@ for $k > 0$.
 With a set of heterogeneous eigenvalues,
 the errors of the eigenmodes are reduced at different rates.
 %
-Thus, the optimization problem on the final error
+Thus, the optimization problem of the final error
 becomes more complicated and it often
 involves a compromise of the individual modes.
 
@@ -1815,8 +1754,7 @@ and the above Lagrangian, containing only the kinetic energy,
 describes a free particle
 with a position-dependent mass.
 %
-Besides, the Hamiltonian
-coincides with the Lagrangian:
+Here, the Hamiltonian coincides with the Lagrangian:
 %
 \begin{equation}
   \mathcal H
@@ -1838,7 +1776,7 @@ coincides with the Lagrangian:
 %
 Since the Lagrangian
 does not explicitly depend on time, $t$,
-the Hamiltonian is conserved,\cite{}
+the Hamiltonian is conserved,
 which means that the asymptotic error grows
 linearly with time at a rate of $\mathcal L$,
 and we may set
@@ -2075,7 +2013,7 @@ the mass distribution, $m(\bar q)$.
 If we define
 $\bar q^* \equiv \bar q/q(T)$
 and $t^* \equiv t/T$
-such that both are limited in $[0, 1]$,
+such that both are limited to the interval $[0, 1]$,
 as well as
 \begin{align*}
   m^*       &\equiv q(T) \, m(\bar q) = -\frac{ dt^* } { d\bar q^* },
@@ -2536,7 +2474,7 @@ We then compute the updating magnitude by numerical differentiation:
   $t_{[N+1]} \equiv T$.
 %
 The resulting values of $(t_{[i]}, \alpha_{[i]})$
-  can be linear interpolated
+  can be linearly interpolated
   to get the updating magnitude, $\alpha(t)$, at any simulation time, $t$.
 
 
@@ -2674,7 +2612,7 @@ with identical eigenvalues\footnote{Since
   the updating scheme.}
 is a multiple of the identity matrix,
 %
-and if the eigenvalues are set to $1$,
+if the eigenvalues are set to $1$,
 we recover the single-bin scheme.
 %
 This means that the single-bin scheme is most efficient
@@ -2766,7 +2704,7 @@ $\Err_A(T) = \sum_{ k = 1 }^{ K - 1 } \Gamma_k T/(T + t_0)^2$,
 which is less than that from Eq. \eqref{eq:EA_sbin1}.
 %
 The optimal schedule of these schemes
-remains to be the inverse-time schedule
+remains the inverse-time schedule
 given by Eq. \eqref{eq:alpha_invt1}
 with $t_0$ given by Eq. \eqref{eq:t0_sbin}.
 %
@@ -2887,7 +2825,7 @@ central moments of $z$, respectively.
 Below we will refer to this application
 as adaptive Gaussian umbrella sampling.
 
-The use of polynomial basis makes
+The use of a polynomial basis makes
 the bias potential smooth and differentiable,
 and hence suitable for MD applications.\cite{zhu2012}
 %
@@ -2898,7 +2836,8 @@ because of the limited number of modes
 in controlling the moments.
 %
 We can nonetheless sample a wider range
-by constructing a mixture or expanded ensemble
+by constructing a mixture\cite{shirts2017}
+or an expanded ensemble
 from a superposition of multiple Gaussian umbrellas
 centered at different places via
 the frameworks of
@@ -2946,8 +2885,9 @@ components).
 The weighted histogram analysis method
 (WHAM)\cite{ferrenberg1988, *ferrenberg1989,
 *kumar1992, *roux1995, *bartels1997, *souaille2001,
-*kobrak2003, *gallicchio2005, *chodera2007, zhu2012, newman, frenkel,
-fenwick2008, *kim2011}
+*kobrak2003, *gallicchio2005, *chodera2007,
+*fenwick2008, *kim2011, *shirts2008,
+zhu2012, newman, frenkel},
 can be used to recover the unbiased distribution
 after simulation.
 %
@@ -3231,7 +3171,7 @@ had little effect on the total error.
     %\hline
     $\sigma=0.5$ & $1/t$
     & $1.0(0.9)$
-    & $9.7(8.0)\times10^{-3}$
+    & $9.9(8.0)\times10^{-3}$
     \\
     %\hline
     $\sigma=0.5$ & opt.
@@ -3375,7 +3315,7 @@ But if the Gaussian were too wide,
 e.g. if $\sigma = 0.6$,
 the eigenvalues $\lambda_k$ of some modes
 became too small to damp out the initial bias,
-resulting in much larger initial updating magnitude, $\alpha(0)$
+resulting in a much larger initial updating magnitude, $\alpha(0)$
 [cf. Eq. \eqref{eq:opt_alpha0}].
 %
 In this case, the predicted schedule
@@ -3413,7 +3353,7 @@ or to elongate the preliminary simulation under constant magnitude.
 Adaptive Gaussian umbrella sampling}
 
 
-As a proof of principle,
+As another proof of principle,
 we tested the adaptive Gaussian umbrella sampling method
 introduced in Sec. \ref{sec:bandpass}
 on the two-dimensional $L\times L$ ten-state
@@ -3468,7 +3408,7 @@ The Gaussian histograms were evenly spaced with similar width as intended,
 %and the overall energy histogram was roughly flat,
 as shown in Fig. \ref{fig:pt_hist}(a).
 %
-By WHAM, we found the critical temperature at {\color{red}$0.70162$}
+By WHAM, we found the critical temperature at $0.70162$
 in agreement with a previous study\cite{wang2001pre}.
 %
 The parameter, $c_1/\sigma_E$, roughly represents
@@ -3668,16 +3608,16 @@ we have represented the autocorrelation function
 of each eigenmode by a single number, $\Gamma_k$.
 %
 Although this assumption appeared to work well
-on our test system for modeling long simulations,
-they may break down for relatively short simulations
+on our test systems modeling long simulations,
+it may break down for relatively short simulations
 of glassy systems.
 %
 Finally, the adaptive Gaussian umbrella sampling
-approach still needs some refinement to improve
+approach requires refinement to improve
 its stability for general application.
 %
 We find that with slow sampling processes,
-the updating scheme may occationally overly update
+the updating scheme may occasionally overly update
 the parameter, $c_2$, leading to unreasonable values.
 %Our immediate interest is to apply these relations to
 %problems containing aqueous mixtures of proteins and nucleic acids.
@@ -4014,13 +3954,13 @@ The relation between error and histogram fluctuation
 supports the WL criterion for
 checking convergence at stage transitions.
 %
-For bandpass updating scheme,
+For the bandpass updating scheme,
 we may borrow this criterion
 in initial stages, with a modified definition
 for the histogram fluctuation
 $F^2_{<K}(T) \equiv \sum_{k=1}^{K-1} \tilde F_k^2(T),$
 since the histogram flattening
-is only partially applied to modes less $K$.
+is only partially applied to modes less than $K$.
 %
 One can alternatively define the histogram fluctuation
 from the largest mode
@@ -4064,14 +4004,14 @@ under constant updating magnitude.
 This method has the advantage of not requiring
 explicit computation of
 the autocorrelation functions of the eigenmodes.
-%
-The basic idea is to use Eq. \eqref{eq:xt2_eql},
-and to avoid the problem of not
+
+The basic idea is to use Eq. \eqref{eq:xt2_eql};
+to avoid the problem of not
 knowing the intrinsic distribution, $p_i$,
 hence the potential shift, $\ln(p_i/\rho_i)$,
 we should replace the shift
 by the time average of the bias potential.
-
+%
 We first note that the difference,
 $u_i(t) - v_i(t) = \ln(p_i/\rho_i)$, is a constant of time,
 so is the Fourier transform,

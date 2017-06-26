@@ -175,12 +175,12 @@ static double seekcrit(int *x1, int *x2)
     ix1 = findpeak(lng, bc, 0, im, &y1);
     ix2 = findpeak(lng, bc, im, xn, &y2);
     printf("%d: bc %g, x %d(%g) %d(%g) | %d(%d) %g\n", t, bc, xmin + ix1*dx, y1, xmin + ix2*dx, y2, xmin + im*dx, im, fabs(y2-y1));
-    if ( fabs(y2-y1) < 1e-10 ) break;
+    if ( fabs(y2-y1) < 1e-14 ) break;
     bc += (y2 - y1) / ((ix2 - ix1)*dx);
   }
   *x1 = xmin + ix1*dx;
   *x2 = xmin + ix2*dx;
-  printf("bc %g, T %g, x %d %d\n", bc, 1/bc, xmin + ix1*dx, xmin + ix2*dx);
+  printf("bc %.8f, T %.8f, x %d %d\n", bc, 1/bc, xmin + ix1*dx, xmin + ix2*dx);
 
   /* normalize lng at the critical point */
   lns = LN0;

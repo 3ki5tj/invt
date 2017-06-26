@@ -1,4 +1,4 @@
-\documentclass{article}
+\documentclass[preprint, superscriptaddress, floatfix]{revtex4-1}
 \usepackage{amsmath}
 \begin{document}
 
@@ -16,6 +16,255 @@ The old degeneracy $g$ is replaced by $2/g$ for the multiple of period.
 %
 We have defined $f_i \equiv h_i/\rho_i$.
 We changed $Q \to \bar q$ to imply the meaning of complement.
+
+Added description for the duality between the mass distribution and schedule.
+
+Added a histogram correction formula.
+
+Improved Appendix A.
+
+Added an appendix for histogram fluctuation.
+
+
+\section{Reviewer \#1 Evaluations:}
+
+Recommendation: Major revision
+
+New Potential Energy Surface: No
+
+Reviewer \#1 (Comments to the Author):
+
+My review is attached.
+
+This manuscript proposes a method to compute the optimal schedule of the update magnitude for
+adaptive flat-distribution-sampling (FDS) free energy simulation methods, including the Wang-
+Landau (WL) algorithm and metadynamics. This method characterizes each adaptive FDS
+simulation by its updating scheme encoded in an updating matrix, and then computes the optimal
+schedule by solving a numerical variational problem, which uses the eigenvalues and
+eigenvectors of the updating as input along with other quantities to the variational equations to
+be minimized. The authors show that the optimal schedule for the single-bin (WL) scheme is
+given by the well known inverse-time formula. Making an interesting analogy, they point out
+that for a general multiple-bin scheme, the optical schedule is implicitly given by an equation of
+motion of a free particle with a position-dependent mass. They suggest a “bandpass” updating
+scheme which they show has better convergence than the metadynamics Gaussian updating
+scheme.
+
+There are several very interesting ideas introduced in this paper, and I recommend publication
+following revisions to address my questions and concerns.
+
+The manuscript is highly mathematical, and it is difficult to follow all the details without
+devoting a very large amount of time to studying it. The authors can do a better job of
+explaining their mathematical analysis of FDS updating schemes, by reorganizing their
+manuscript, moving some sections of the manuscript to the appendix and expanding the
+explanations, while moving one section which is currently in an appendix to the main text. The
+procedure for computing the optimal schedule and error in Appendix D should be moved to the
+main text and the steps involved explained in more detail in a single section. An explanation of
+how eq. 55 is solved for q(T) is needed, this can be placed in an appendix, and an explanation of
+how eq. 49 is numerically integrated is also needed. A clearer discussion of what autocorrelation
+functions are being calculated, and how they are used in the variational optimization is also
+needed.
+
+Response.
+We are grateful to the reviewer for the time and effort in reviewing the manuscript and we apologize for the lack of polishing and structure in the manuscript.
+We have move the old Appendix D to the main text (current section II.F)
+and added some technical details.
+In particular, q(T) is solved from the bisection method.
+For the optimal schedule,
+Eqs. (48) and (49) are integrated on an even grid of q,
+using the standard trapezoidal rule.
+We have added some details in the new section IIF.
+Thank you.
+
+
+
+My biggest concern with the paper relates to the numerical example. It seems that the single test
+system studied in detail is a completely flat “potential”. While it is interesting to note that
+different FDS schemes will exhibit different efficiencies on this “trivial” example, it doesn’t give
+the reader any feeling of the corresponding results on the simplest “non-trivial” 1D or 2D
+problem with multiple wells and barriers, which at least begins to approach problems that
+motivate the need for advanced sampling schemes. The authors should report the results of at
+least one example of this kind in addition to the test system reported. While I am not requiring
+the authors to analyze how their (bandpass) FDS scheme and analysis methods perform on more
+realistic potentials than 1D or 2D potential with multiple barriers, I would point out that a key
+issue is whether metadynamics or any FDS scheme can really perform well on problems where
+there is a free energy balance between stable basins separated by free energy barriers, and the
+balance involves a competition between the enthalpic stabilization of one basin and the entropic
+stabilization of the other. The authors may want to comment on whether they think FDS
+sampling schemes are well suited for these kinds of landscape problems.
+
+Some additional questions:
+1. During the derivations of Eq.(22) and Eq.(49), the end point value $q(T)$ is fixed. Does
+this mean that the optimal schedule of the update magnitude suggested by Eq.(22) or (49)
+is only for a subgroup simulations which have the same $q(T)$? Please clarify this issue or
+add the corresponding discussion to the manuscript.
+
+Response.  This is correct. The optimizations are done for a subgroup of simulations with the same value of $q(T)$, and the value of $q(T)$ has to be further determined to complete the problem.
+For the single-bin case, the latter step is equivalent to the best choice of $t_0$, the new Eq. (23).
+For the multiple-bin case, the optimal value of $q(T)$ is solved from Eq. (55).
+We have added a few comments in the two respective sections to clarify the procedure.
+We thank the referee to point out these ambiguities.
+
+
+2.How to determine the time of the preliminary adaptive FDS simulations with a constant
+updating magnitude?
+
+
+
+3.The study of the updating matrix borrows techniques used in studying transition matrices.
+Does this require all the elements in the updating matrix $w_{ij}$ to be nonnegative? If it is
+true, please mention this requirement after Eq.(28).
+
+Response: The elements in the updating matrix can be negative.
+Fortunately, the balance property, as well as a few ensuing properties, are unaffected by the allowance of the negative numbers.
+For example, the balance property follows directly from
+the detailed balance condition as demonstrated in Eq. (28).
+The existence of a set of orthonormal eigenvector follows from
+the symmetry of the scaled version of w:
+$sqrt(rho_i/rho_j) w_{ij}$.
+We have added a note to clarify this, as well as several one-line derivations in section IIC.1 to show that the quoted results are unaffected by the negative matrix elements.
+Thank you for pointing out this subtle issue.
+
+
+4. For Eq.(5): perhaps Change $p_i$ to $p_{i(t)}$.
+
+Response: Corrected.  Thank you.
+
+5. Eq. 11 expresses the total error in the cumulative bias potential as a weighted average
+over the errors in each bin, weighted by the density rho, which is the equilibrium
+eigenvector of the updating matrix w. Why is the equilibrium eigenvector of the
+updating matrix, the correct way to weight the errors in the cumulative bias in the bins?
+Can the authors provide a physical explanation of why this is the case, as well as a
+mathematical justification.
+
+Response:
+This is an astute observation, and we also find this setup somewhat awkward.
+While the equilibrium eigenvector rho of matrix w may not be the most straightforward way of weighting errors, it sometimes serves as a mathematically convenient way of doing so.
+By adopting a looser weighting function of the error, we can analyze a larger class of updating matrices with somewhat simpler formulas using properties of transition matrices.
+
+%For example, the matrix
+%     0.6  0.4  0
+%w =  0.2  0.6  0.2
+%     0    0.4  0.6
+%is not symmetric, yet it satisfies detailed balance for the left equilibrium vector (0.25, 0.5, 0.25).
+
+Another way to think about this is the following.
+Instead of thinking of the equilibrium eigenvector of the updating matrix has to be correct way of weighting the errors, we may think of the updating matrix must adjust its elements such that the correct weighting vector is its eigenvector.
+In practice, the vector rho is almost always the uniform vector 1/n,
+which is a fair way of weighting the matrix.
+We have added several comments in sections II.B.1 and II.C.1 to clarify this point.
+Thank you.
+
+
+
+\section{Reviewer \#2 Evaluations:}
+
+Recommendation: Major revision
+
+New Potential Energy Surface: No
+
+Reviewer \#2 (Comments to the Author):
+
+The authors present a method of computing the optimal schedule of the updating magnitude for free energy calculations such as Wang-Landau or metadynamics. The method maps that optimization problem to a mechanical one, with the update schedule taking the role of a velocity of a free particle and the error becomes the action. This an interesting twist leading to new insight in this plaguing problem. In general, I would like to see this published at some point, but there are a few major issues which, in my opinion, make it not publishable at this point.
+
+1) There seems to be some misconception about the relation between WL and metadynamics. I recommend to adapt the wording in order to give less of an impression that WL and metadynamics are different methods.
+a) The authors agree both methods are "closely related", referring to [9]. In fact, it has been shown that both methods can be made identical by applying the same schedule of the updating magnitude, see C Junghans, D Perez, T Vogel, Journal of Chemical Theory and Computation (JCTC) 10 (5), 1843 (2014). At that point, the authors should also recognize the existence of Statistical Temperature Molecular Dynamics, see J. Kim, J. E. Straub, and T. Keyes, Phys. Rev. Lett. 97, 050601 (2006); and J. Chem. Phys. 126, 135101 (2007).
+b) It is not true that "the difference" [between WL and metadynamics] "lies in the updating window function". While a discrete delta-function is often used in practice, WL was introduced saying that any kernel function can be used for updates, and a Gaussian one was explicitly mentioned in the original WL papers.
+c) It is true that it is commonly accepted that the 1/t method is "optimal" for WL, so it should be for metadynamics. Given the equivalence of WL and metadynamics, it is not obvious that "the resulting optimal schedule is different in the WL and metadynamics cases." Rephrasing this, for example, into "depends on the updating window function applied in either method" could help to clarify this point.
+d) Given the vast number of publications in the metadynamics community, I would also not agree that "the optimal schedule for metadynamics is less studied."
+
+Response.
+We apologize for the inaccurate wording in framing WL and metadynamics.
+The more precise and technical terms of differentiating the updating schemes, as the referee kindly pointed out, should be the single-bin updating scheme and the Gaussian updating scheme.
+We have corrected the terms in the abstract,
+and added an explicit note in the introduction that the terms "WL" and "metadynamics" are used as pseudonyms in this study in the loose sense to refer the two updating schemes.
+For 1.a), we apologize for ignoring the references
+and we have added the suggested references to the paper.
+For 1.b), we have changed the phrase "the difference" to "a key difference."
+For 1.d), we have deleted the sentence. "the optimal schedule for metadynamics is less studied."
+
+
+2) The length of the paper, also pointed out by the editor.
+a) I recommend to drastically shorten section IIA, this is too detailed given that it is just a review and
+b) shorten section IIB, since the content is also largely known to the community.
+The authors should focus on sections IID-F, which contains the new developments.
+
+Response.  We agree and we apologize for the length of the manuscript.
+For 2.a), we have shorten section IIA and keeping only what is necessary for introducing the notations and key equations useful for later development.
+For 2.b), similarly, section IIB was indeed too verbose with many unnecessary repetitions. We have now shortened it, and the original sections IIB.3 and IIB.4 are merged.
+The purpose of section IIB is mainly to fix the notations and definitions.
+
+We have added a note in the introduction of section II to explain the introductory nature of the sections so that an expert reader can readily skip it.
+We have slightly expanded section IID-F to explain several ambiguities, and we have included a section on the practical procedure that was originally in the Appendices, as suggested by the reviewer.
+
+
+
+3) The choice of an artificial, "trivial" test system to demonstrate the advantage of the proposed method.
+a) The model system is artificial in the sense that "intrinsic distributions are assumed to be flat". So, where is the challenge? I understand that the theory section of the paper is very general and "generic", but numerical checks should be performed using known, well-studied, and challenging systems. The presented numerical checks are not very convincing this way.
+b) "the errors from the simulations agreed well with those from theory". In particular this is not a surprise for a system with intrinsically flat distributions.
+c) In general, all the focus is on minimizing the statistical errors. While that is "neat", it is most often not the main issue in a "real world" study and neither critical. WL is correctly applied to determine the weights for multicanonical simulations. Multicanonical sampling is statistically correct and unacceptably large errors in the weight function, both statistical and systematic, become evident immediately. So, minimizing the statistical errors is mostly not a major concern. Being able to move through the whole phase space is. The real question should rather be: Can this new method and insight help to study systems that were formerly inaccessible to FDS methods? This question is not answered. To the contrary, the authors themselves admit that their assumptions "may break down for relatively short simulations of glassy systems". Did the authors try a glassy system?
+
+Response.
+
+Point 3.a) Add an example.
+
+Point 3.b) This is a subtle and important point on correctly modeling the initial error.
+The challenge lies in the recovery from the error introduced during the equilibration phase.
+Even though the error is zero at the beginning, the equilibration phase with a constant updating magnitude will introduce some error that would become challenging to remove in the production run.
+The single-bin updating scheme does not differentiate the source of error, either systematic or random.
+However, for the multiple-bin updating scheme, like the Gaussian one, the random error built from the equilibration phase will be sufficiently smooth with very little minimal short-wave (local) error, because these local modes are coupled to very small eigenvalues of the updating matrix.  Even in such case, Gaussian updating scheme will have trouble in removing these short-wave or not-so-short-wave error modes in the long run, because the small eigenvalues coupled to local modes also represent how quickly the errors in these modes (if any) would be removed.  Thus, if the intrinsic PMF is not smooth enough (or equivalently if the Gaussian window is chosen too wide), the real error would be must larger than those reported in our trivial test system.
+
+Point 3.c)
+We believe that even for hard and glassy problems, the long-time correlation might have already been taken into account, at least partially, by the integrals of the autocorrelation functions defined here.
+Thus, even if the integrals, $Gamma_k$'s may take very large values and difficult to estimate accurately, we can still hopefully use this framework to analyze these challenging problem, at least for long simulations.
+The removal of the systematic error can often by addressed with the usual WL and metadynamics techniques.
+We agree with the reviewer that the failure of multicanonical sampling lies in its lack of responsiveness of the updating scheme to the bias potential.
+The final stages of the WL algorithm suffers from a similar problem of losing responsiveness, where, the updating magnitude is reduced too quickly, making the iterative updating scheme ineffective.
+Our belief is that these issues, even for hard problems, can be addressed in the present framework.
+A practically difficulty may lie in the attainment of the correlation integrals, $Gamma_k$'s, which reflect the difficulty of phase-space sampling.
+Similarly, the Gaussian updating scheme can be inefficient in removing local errors, if any, in the long run without a proper scheduling.
+The method we present here aims at improve the situation in improve long-term convergence of the Gaussian updating scheme. However, we do not imagine a dramatic improvement on previous methods for these very challenging problems, which are associated with very long correlation times and likely hard to simulate even with the perfect bias potential.  Thus, to best simulate these system, new simulation methods.
+
+We have added some discussion in the section IIA to address this issue.
+
+
+Overall, while points 1) and 2) should be straightforward to revise, point 3) makes me believe that this paper, even though doubtlessly very interesting, will have a limited impact on the community in practice.
+
+\section{Dr. Pettitt's response}
+
+We thank the referees for their thoughtful critique of our work. We have taken their suggestions and have returned a much improved manuscript.
+
+Referee 1: We have worked to better explain our mathematical analysis for flat-distribution-sampling errors from updating schemes. We also moved the method of computing the optimal schedule from the appendix to the main text and moved the solution for q(t) to appendix as requested. We now include an analysis of the errors in two nontrivial problems, the potential of mean force for a dense Lennard-Jones fluid and the 64x64 10 -tate Potts model.
+
+1) q(t) is integral of the updating magnitude, α(t). We better explain the variational problem and solution of varying q(t) on the interval [0,T]
+
+2) In Appendix D, we discuss a way of estimating Γk from an FDS simulation under constant magnitude.
+
+3) We now discuss the consequences of the sign of the elements of w.
+
+4) Done as suggested.
+
+5) Our choice was one of convenience and we now better discuss and justify the choice. (CZ: We could provide more explanation in the text for this)
+
+Referee 2:
+
+1a) We had made distinctions between WL and metadynamics for convenience in our analysis but we take the referee’s point and emphasize the close relation between the methods to avoid any confusion.
+
+1b) True and we have made the wording clear that we will consider only single bin WL and multi bin metadynamics as practical cases.
+
+1c) We agree. Done
+
+1d) Corrected.
+
+2a) We have greatly shortened section IIA.
+
+2b) We have also shortened IIB as requested.
+
+3a) We have removed the ideal system example and replaced it with a calculation of the PMF in a Lennard-Jones system
+
+3b) Same as above.
+
+3c) We chose the Lennard-Jones fluid as a well know example. We also consider the 64x64 10-state Potts model. We will use the method in the future on more interesting (difficult) examples. Here we give the theory and practical, familiar examples.
+
 
 
 

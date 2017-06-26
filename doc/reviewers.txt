@@ -1,10 +1,4 @@
-The definition of g has changed: g --> 2/g.
 
-We have added a note that for the single-bin updating scheme
-the histogram flatness is roughly equal to the error,
-as well as a proof for this in the new appendix C.
-
-Deepens our understanding.
 
 
 Reviewer #1 Evaluations:
@@ -205,3 +199,5 @@ We have added some discussion in the section IIA to address this issue.
 
 
 Overall, while points 1) and 2) should be straightforward to revise, point 3) makes me believe that this paper, even though doubtlessly very interesting, will have a limited impact on the community in practice.
+
+
