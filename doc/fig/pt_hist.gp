@@ -65,6 +65,7 @@ set ylabel "{/Times-Italic c}_1/{/Symbol-Oblique s}_{/Times-Italic E}"
 
 
 plot [:][:] \
+    "../../data/pt/lng_L64b.dat"     u 1:($1 < -3200 ? $3 : 1/0)                 w l ls 2 lw 1 t "", \
     "../../data/pt/pt2gaus_L64b.dat" u 2:($4/64) w p pt 4 lc "black" notitle
 
 

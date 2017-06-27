@@ -467,6 +467,7 @@ __inline static int gaus_move(gaus_t *gaus, double x, int *id)
   dv += vj - vi;
   acc = ( dv <= 0 || rand01() < exp(-dv) );
   if ( acc ) {
+    /* copy parameters to the new umbrella */
     if ( gaus->cnt[jd] <= 0 ) {
       gaus->c1[jd] = gaus->c1[*id];
       gaus->c2[jd] = gaus->c2[*id];

@@ -1925,7 +1925,7 @@ being $\bar q^*$ and $t^*$, respectively.
 Further, the transformation is an involution:
 if we apply the same transform on $\alpha^*(t^*)$
 we would recover $m^*(\bar q^*)$,
-as shown in Fig. \ref{fig:massq}.
+as shown in Fig. \ref{fig:massq}(b).
 %
 A few examples are shown in Table \ref{tab:m_and_a}.
 %
@@ -2099,7 +2099,7 @@ the initial updating magnitude by Eq. \eqref{eq:mQ_invTa},
 \end{align}
 %
 If the initial bias, $\epsilon_k$, is negligible,
-which is typically true if no eigenvalue is close to $0$,
+which is often true if no eigenvalue is close to $0$,
 then
 %
 \begin{equation}
@@ -2133,7 +2133,9 @@ used in metadynamics,
 can be characterized by a rigid window
 centered on the current bin.
 %
-The eigenvalues of these translationally invariant or homogeneous
+If we denote the relative updating magnitude on
+the $i$th bin from the center by $\mu_i$,
+the eigenvalues of these translationally invariant or homogeneous
 schemes can be readily deduced
 from the window function ($\mu_0, \mu_1, \dots, \mu_b$)
 as a cosine transform,
@@ -2302,7 +2304,7 @@ as well as the initial bias $\epsilon_k$.\footnote{The
   from the histogram-corrected bias potential
   by Eq. \eqref{eq:uhatav},
   although it leads to overestimated
-  $\epsilon_k$ for large-$k$ modes.
+  $\epsilon_k$'s for large-$k$ modes.
 }
 
 \item \label{step:qT}
@@ -2317,7 +2319,7 @@ and we imposed a lower bound,
 $\bigl|\mathcal Y\bigl(q(T)\bigr)/q(T)\bigr|$, for
 $\mathcal Y'\bigl(q(T)\bigr)$
 in computing its change.
-The initial value is set to $q(T) = \ln(1+T\,a_0/2)$.
+The initial value was set to $q(T) = \ln(1+T\,a_0/2)$.
 }
 %
 %Since $m(\bar q)$ is a decreasing function of $\bar q$,
@@ -2358,7 +2360,7 @@ The curve $q(t)$ is then integrated
 %
 We then compute the updating magnitude by numerical differentiation:
   $\alpha_i = (1 - e^{-\lambda_1 \, \hat \alpha_i})/\lambda_1$\footnote{This
-    discretization follows from runtime average interpretation
+    discretization follows from the runtime average interpretation
     discussed in Appendix \ref{sec:equilerr}.}
   and
   $\hat \alpha_i \equiv (q_{[i+1]} - q_{[i-1]}) / (t_{[i+1]} - t_{[i-1]})$,
@@ -2385,8 +2387,7 @@ Eqs. \eqref{eq:error_tot},
 
 The above procedure is not always necessary.
 %
-As shown below, for a class of bandpass updating schemes,
-  which resemble the Gaussian updating schemes,
+As we will show below, for a class of bandpass updating schemes,
   the asymptotically optimal schedule
   is simply given by the inverse-time schedule, Eq. \eqref{eq:alpha_invt1}.
 %
@@ -2500,7 +2501,7 @@ and identical $c_k$'s.
 Since an updating matrix
 with identical eigenvalues
 is a multiple of the identity matrix,\footnote{Since
-  the eigenmode of $k = 0$ represents
+  the $k = 0$ eigenmode represents
   a uniform shift of the bias potential,
   we can freely set $\lambda_0$ to be
   the same as $\lambda_1$
@@ -2561,7 +2562,7 @@ that the PMF is so smooth
 that it can be represented by the first $K$
 modes,\footnote{As an estimate of error,
   we note that truncating a linear or quadratic function
-  at mode $K$ (for a non-periodic variable)
+  at mode $K$ for a non-periodic variable
   results in an error roughly proportional to
   $|\max_i u_i - \min_i u_i|^2/K^3$.}
 we demand
@@ -2605,7 +2606,7 @@ with $t_0$ given by Eq. \eqref{eq:t0_sbin}.
 %for the single-bin updating scheme.
 %
 
-Since bandpass updating schemes
+Since bandpass updating schemes are
 straightforward generalizations of
 the single-bin updating scheme,
 we can also borrow the WL algorithm
@@ -2898,7 +2899,7 @@ We tested the single-bin, Gaussian, and bandpass updating schemes.
 Each simulation started with an ``equilibration'' phase
 of $10^7$ steps under a constant updating magnitude,
 $a_0 = 10^{-4}$,\footnote{The equivalent $\ln f = n \, a_0$ for the WL algorithm
-was $0.05$ and $0.025$, respectively.}
+were $0.05$ and $0.025$ for $\varrho^* = 0.1$ and $\varrho^* = 0.8$, respectively.}
 followed by a production phase of another $10^7$ steps
 with updating magnitude given by
 either the inverse-time or optimal schedule.
@@ -2909,7 +2910,7 @@ and report the average.
 To make sure the same schedule for multiple runs under the same condition,
 the optimal schedule was pre-computed from a set of fixed
 $\Gamma_k$'s and $\epsilon_k$'s,
-although ideally they should be estimated from the data
+although ideally they could be estimated from the data
 collected from the equilibration phase in individual runs.
 
 
@@ -2944,7 +2945,7 @@ by using the bandpass updating scheme
 On the other hand, in the high-density case,
 the error was dominated by the $k=1$ eigenmode
 corresponding to the longest range fluctuation,
-$\Gamma_1 \approx \Gamma$,
+as $\Gamma_1 \approx \Gamma$,
 and the reduction of local noise
 had little effect on the total error.
 
@@ -3107,12 +3108,12 @@ with width $\sigma = 0.2$.
 %
 For modes $k=10$ to $25$,
 the final errors from the Gaussian updating scheme
-were greater than those from the single-bin updating scheme
+were greater than those from the single-bin updating scheme,
 although the initial values were less.
 %
 For the Gaussian updating scheme,
 the inverse-time schedule tended to
-reduce the updating magnitude too quickly
+reduce the updating magnitude too quickly,
 leaving a hump on the error profile
 for these middle-range eigenmodes.
 %
@@ -3120,7 +3121,7 @@ The optimal schedule improved over the inverse-time schedule
 and produced a flatter profile for the final error.
 %
 As a result, the optimal schedule usually produced
-less error than the inverse-time schedule
+less error than the inverse-time schedule,
 as shown in Table \ref{tab:lj_error}.
 %
 Although the gain of using the optimal schedule
@@ -3134,8 +3135,8 @@ it would increase with the simulation length.\footnote{
 
 One way to overcome the systematic bias
 in the Gaussian updating scheme
-is to use the correction formula
-based on histogram, Eq. \eqref{eq:uhatav}.
+is to use the histogram-based correction formula,
+Eq. \eqref{eq:uhatav}.
 %
 As shown in Fig. \ref{fig:lj_xerr},
 even for the simulation using the non-optimal $1/t$ schedule,
@@ -3211,8 +3212,7 @@ In this case, the predicted schedule
 would be unusable because the resulting deviation in the bias potential
 was no longer small,
 and one may have to either decrease the width
-or to elongate the preliminary simulation
-under the constant magnitude.
+or to elongate the preliminary run.
 
 
 
@@ -3230,7 +3230,7 @@ under the constant magnitude.
     The starting updating magnitude was usually
     around $a_0/2 = 5\times10^{-5}$
     as given by Eq. \eqref{eq:half_alpha0}.
-    But an overly wide Gaussian window ($\sigma = 0.6$)
+    But an overly wide window ($\sigma = 0.6$)
     led to a much larger updating magnitude.
   }
 \end{center}
@@ -3250,6 +3250,10 @@ on the two-dimensional $L\times L$ ten-state
 Potts model\cite{wu1982, newman, wang2001, wang2001pre}
 in the energy space.
 %
+In this case, $\mathcal U(\mathbf x) = 0$
+and the intrinsic distribution is
+the density of states, $\ln g(E)$.
+%
 We spread the Gaussian umbrellas
 of the same width $\sigma_E = L$ over $[-1.8L^2, -0.8L^2]$
 with an even spacing of $L$.
@@ -3258,7 +3262,7 @@ For simplicity,
 only transitions between neighboring umbrellas
 were performed.
 %
-Initially, we set $c_1 = 1.4 \sigma_E$, and $c_2 = 0$.
+Initially, we set $c_1 = 1.4 \sigma_E$ and $c_2 = 0$.
 %
 For configuration sampling in each umbrella,
 we used the Wolff algorithm\cite{wolff1989, newman}
@@ -3275,8 +3279,17 @@ with the fluctuation threshold being $0.2$
 [using the definition of Eq. \eqref{eq:maxFk}]
 and the reduction factor being $1/2$
 until it fell below
-the value given the inverse-time schedule\cite{
-belardinelli2007, *belardinelli2007jcp, *belardinelli2008, *belardinelli2016}.
+the value given the inverse-time schedule.\footnote{We
+  slightly modified the switch criterion from the WL
+  to the inverse-time schedule\cite{belardinelli2007,
+  *belardinelli2007jcp, *belardinelli2008, *belardinelli2016}.
+  Such a switch was only permitted
+  upon completion of a WL stage,
+  and the time, $t$, was interpreted as the number of updating steps
+  in this just completed WL stage.
+  If the switch was successful,
+  the above $t$ was used as the offset $t_0$
+  in the inverse-time regime.}
 %
 This updating magnitude was
 used to update the values of both $\ln Z^{(i)}$'s
@@ -3304,7 +3317,7 @@ By WHAM, we found the critical temperature at $0.70162$
 in agreement with a previous study\cite{wang2001pre}.
 %
 The parameter, $c_1/\sigma_E$, roughly represents
-the local or statistical temperature,
+the local or statistical temperature, $\beta(E) = d\ln g(E)/dE$,
 and it demonstrated
 the backbending behavior\cite{kim2006, *kim2007, kim2010}
 typical in a first-order phase transition,
@@ -3339,11 +3352,13 @@ as shown in Fig. \ref{fig:pt_hist}(c).
     and the reweighted distribution
     at the critical temperature (dashed line).
     %
-    (b) The parameter, $c_1/\sigma_E$, roughly corresponding to
+    (b) The parameter, $c_1/\sigma_E$ (squares), roughly corresponding to
     the statistical temperature, $\beta(E)$,
+    (dashed line, estimated from the smoothed density of states)
     demonstrated the backbending behavior.
     %
-    (c) The parameter, $\sqrt 2 \, c_2$, exceeds $1.0$
+    (c) The parameter, $\sqrt 2 \, c_2$ (squares),
+    exceeded $1.0$
     in the critical region, indicating local convexity
     of the density of states.
   }
@@ -3391,7 +3406,7 @@ or extended to several neighboring bins
 taking a Gaussian shape (as often in the metadynamics case).
 %
 We can generally characterize
-an updating scheme with an updating matrix,
+an updating scheme by an updating matrix,
 with each column being the normalized
 window function for the bin of the column.
 %
@@ -3443,7 +3458,7 @@ by the histogram-based correction formula, Eq. \eqref{eq:uhatav},
 for post-simulation analysis,
 which ideally would remove the remaining bias
 and recover a bias potential with precision
-similar to that from the single-bin case.
+similar to that from the single-bin simulation.
 
 
 In comparing different updating schemes,
@@ -3457,17 +3472,16 @@ on the smoothness of the PMF.
 This scheme can be generalized to
 a class of bandpass updating schemes,
 which are also asymptotically optimal,
-but completely filter the components
-in the noise modes.
+but completely filter the noise modes.
 %
 The optimal schedule of the bandpass schemes
 is always given by an inverse-time formula.
 %
 If the bandpass updating scheme was constructed
 from orthogonal polynomials,
-the updating scheme became a generalization
+it became a generalization
 of the LLR algorithm\cite{langfeld2012, pellegrini2014},
-and it could be used for parameter adjustment
+and could be used for parameter adjustment
 in umbrella sampling with
 quadratic\cite{neuhaus2006, *neuhaus2007, zhu2012}
 or similar\cite{kim2010}
@@ -3597,19 +3611,19 @@ Time averaging Eq. \eqref{eq:uhatt} yields
 \end{align}
 %
 %Equation \eqref{eq:uhatav}
-This equation can also be derived\footnote{From Eq. \eqref{eq:uhatt},
+This equation serves as
+a generalization of Eq. \eqref{eq:vcorr_equil}
+for FDS simulations under a variable bias potential
+and we can use it to improve the estimated PMF
+after simulation.\footnote{Equation \eqref{eq:uhatav}
+  can also be derived
+  from the self-healing umbrella sampling method\cite{marsili2006}.
+  From Eq. \eqref{eq:uhatt},
   we can construct an independent estimator
   of the unbiased distribution as
   $\hat p_i(t) \approx h_i(t) \, e^{ u_i(t) }$.
   Upon time averaging, we get
   $\rho_i e^{\hat U_i(t)} = \hat P_i(t) \approx H_i \, e^{ U_i(t) }$.}
-from the self-healing umbrella sampling
-method\cite{marsili2006},
-and it serves as
-a generalization of Eq. \eqref{eq:vcorr_equil}
-for FDS simulations under a variable bias potential
-and we can use it to improve the estimated PMF
-after simulation.
 %
 In particular, for the single-bin updating scheme,
 Eq. \eqref{eq:wl_update},
@@ -3671,7 +3685,7 @@ We can also cast other updating relations,
 such as Eqs. \eqref{eq:wl_update}
 and \eqref{eq:vkupdate},
 as runtime averages,
-but with a dynamic weight.
+but with dynamic weights.
 %
 The weighted average
 %
@@ -3715,7 +3729,7 @@ can be identified as the updating magnitude,
 \end{equation}
 %
 The inverse-time schedule, Eq. \eqref{eq:alpha_invt1},
-follows from the plain average,
+follows from the case of unweighted average,
 $\omega(t) = 1$ (for $t > 0$),
 and updating magnitudes above and below this value
 correspond to runtime averages that favor future and past data,
@@ -3921,14 +3935,13 @@ hence the potential shift,
 $u_i(t) - v_i(t) = \ln(p_i/\rho_i)$.
 %
 Since the shift,
-$u_i(t) - v_i(t)$,
 hence its Fourier transform,
 $\tilde u_k(t) - \tilde v_k(t)$,
 is a constant of time,
 ${\tilde u}_{k}$ and ${\tilde v}_{k}$
 should share the same variance.
 %
-But since the ensemble average of ${\tilde v}_{k}$
+But as the ensemble average of ${\tilde v}_{k}$
 is zero, we have
 $\operatorname{var} {\tilde u}_{k} =
  \operatorname{var} {\tilde v}_{k} =

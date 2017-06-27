@@ -11,7 +11,7 @@ const char *fnhis = "pt2gaus.his";
 int n; /* number of Gaussians */
 double *ave, *sig, *c1, *c2, *lnz, *cnt;
 double xcmin, xcmax, delx;
-double *hist, *htot, *lng;
+double *hist, *htot, *lng, *lngs;
 int xmin, xmax, dx, xn;
 
 /* load the dat file */
@@ -61,6 +61,7 @@ static int gethisinfo(const char *fn)
   xnew(hist, n * xn);
   xnew(htot, xn);
   xnew(lng, xn);
+  xnew(lngs, xn);
   for ( ix = 0; ix < xn; ix++ ) htot[ix] = 0;
 
   for ( i = 0; i < n; i++ ) {
@@ -125,7 +126,33 @@ static void reweight(void)
   }
 }
 
-static int findpeak(double *arr, double bc, int ileft, int iright, double *ym)
+/* smooth array `arr` to `arrs` */
+static void smooth(double *arrs, double *arr, int nb)
+{
+  int ix, jx, jmin, jmax;
+  double sx, sy;
+
+  for ( ix = 0; ix < xn; ix++ ) {
+    if ( arr[ix] <= LN0 ) {
+      arrs[ix] = LN0;
+      continue;
+    }
+    jmin = ix - nb;
+    if ( jmin < 0 ) jmin = 0;
+    jmax = ix + nb + 1;
+    if ( jmax > xn ) jmax = xn;
+    sx = sy = 0;
+    for ( jx = jmin; jx < jmax; jx++ ) {
+      if ( arr[jx] <= LN0 ) continue;
+      sy += arr[jx];
+      sx += 1;
+    }
+    arrs[ix] = sy / sx;
+  }
+}
+
+/* find the peak of arr[i] - x_i * bc in [ileft, iright) */
+static int findpeak(const double *arr, double bc, int ileft, int iright, double *ym)
 {
   double x, y;
   int i, imax = ileft;
@@ -145,21 +172,21 @@ static int findpeak(double *arr, double bc, int ileft, int iright, double *ym)
 }
 
 /* find the critical point */
-static double seekcrit(int *x1, int *x2)
+static double seekcrit(const double *arr, int *x1, int *x2, double *shift)
 {
   double bc, beta, w, sw, y1, y2, y, lns;
   int ix, ix1, ix2, il = -1, ir, im, t, x;
 
   bc = sw = 0;
   for ( ix = 0; ix < xn - 1; ix++ ) {
-    if ( lng[ix] <= LN0 || lng[ix+1] < LN0 ) {
+    if ( arr[ix] <= LN0 || arr[ix+1] < LN0 ) {
       continue;
     } else if ( il < 0 ) {
       il = ix;
     } else {
       ir = ix;
     }
-    beta = (lng[ix + 1] - lng[ix]) / dx;
+    beta = (arr[ix + 1] - arr[ix]) / dx;
     w = (htot[ix] + htot[ix+1]) / 2;
     bc += beta * w;
     sw += w;
@@ -172,8 +199,8 @@ static double seekcrit(int *x1, int *x2)
   ix1 = il;
   ix2 = ir;
   for ( t = 0; t < 10; t++ ) {
-    ix1 = findpeak(lng, bc, 0, im, &y1);
-    ix2 = findpeak(lng, bc, im, xn, &y2);
+    ix1 = findpeak(arr, bc, 0, im, &y1);
+    ix2 = findpeak(arr, bc, im, xn, &y2);
     printf("%d: bc %g, x %d(%g) %d(%g) | %d(%d) %g\n", t, bc, xmin + ix1*dx, y1, xmin + ix2*dx, y2, xmin + im*dx, im, fabs(y2-y1));
     if ( fabs(y2-y1) < 1e-14 ) break;
     bc += (y2 - y1) / ((ix2 - ix1)*dx);
@@ -185,15 +212,14 @@ static double seekcrit(int *x1, int *x2)
   /* normalize lng at the critical point */
   lns = LN0;
   for ( ix = 0; ix < xn; ix++ ) {
-    if ( lng[ix] <= LN0 ) continue;
+    if ( arr[ix] <= LN0 ) continue;
     x = xmin + ix * dx;
-    y = lng[ix] - x * bc;
+    y = arr[ix] - x * bc;
     lns = lnadd(lns, y);
   }
   lns += log(dx);
   printf("lns %g\n", lns);
-  for ( ix = 0; ix < xn; ix++ )
-    lng[ix] -= lns;
+  *shift = lns;
   return bc;
 }
 
@@ -201,7 +227,7 @@ static int save(const char *fn, double bc, int x1, int x2)
 {
   int ix;
   FILE *fp;
-  double x, beta, y;
+  double x, beta, y, ys;
 
   if ( (fp = fopen(fn, "w")) == NULL ) {
     fprintf(stderr, "cannot open %s\n", fn);
@@ -212,9 +238,11 @@ static int save(const char *fn, double bc, int x1, int x2)
   for ( ix = 0; ix < xn; ix++ ) {
     if ( htot[ix] <= 0 ) continue;
     x = xmin + ix * dx;
-    if ( ix < xn - 1 ) beta = (lng[ix + 1] - lng[ix])/dx;
+    if ( ix < xn - 1 ) beta = (lngs[ix + 1] - lngs[ix])/dx;
     y = exp(lng[ix] - bc*x);
-    fprintf(fp, "%g %g %g %g %g\n", x, lng[ix], beta, y, htot[ix]);
+    ys = exp(lngs[ix] - bc*x);
+    fprintf(fp, "%g %g %g %g %g %g %g\n",
+        x, lng[ix], beta, y, htot[ix], lngs[ix], ys);
   }
   fclose(fp);
   fprintf(stderr, "saved lng to %s\n", fn);
@@ -224,12 +252,22 @@ static int save(const char *fn, double bc, int x1, int x2)
 
 int main(int argc, char **argv)
 {
-  double bc;
-  int x1, x2;
+  double bc, lns;
+  int ix, x1, x2, nb = 25;
+
+  if ( argc > 1 ) fndat = argv[1];
+  if ( argc > 2 ) fnhis = argv[2];
+  if ( argc > 3 ) nb = atoi( argv[3] );
+
   if ( getdatinfo(fndat) != 0 ) return -1;
   if ( gethisinfo(fnhis) != 0 ) return -1;
   reweight();
-  bc = seekcrit(&x1, &x2);
+  smooth(lngs, lng, nb);
+  bc = seekcrit(lngs, &x1, &x2, &lns);
+  for ( ix = 0; ix < xn; ix++ ) {
+    lng[ix] -= lns;
+    lngs[ix] -= lns;
+  }
   save("lng.dat", bc, x1, x2);
   return 0;
 }
