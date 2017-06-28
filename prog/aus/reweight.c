@@ -225,7 +225,7 @@ static double seekcrit(const double *arr, int *x1, int *x2, double *shift)
 
 static int save(const char *fn, double bc, int x1, int x2)
 {
-  int ix;
+  int ix, i1, i0;
   FILE *fp;
   double x, beta, y, ys;
 
@@ -238,7 +238,12 @@ static int save(const char *fn, double bc, int x1, int x2)
   for ( ix = 0; ix < xn; ix++ ) {
     if ( htot[ix] <= 0 ) continue;
     x = xmin + ix * dx;
-    if ( ix < xn - 1 ) beta = (lngs[ix + 1] - lngs[ix])/dx;
+    i0 = ix - 1;
+    if ( i0 < 0 || htot[i0] <= 0 ) i0 = ix;
+    i1 = ix + 1;
+    if ( i1 >= xn || htot[i1] <= 0 ) i1 = ix;
+    if ( i0 < i1 ) beta = (lngs[i1] - lngs[i0])/(dx*(i1 - i0));
+    else beta = 0;
     y = exp(lng[ix] - bc*x);
     ys = exp(lngs[ix] - bc*x);
     fprintf(fp, "%g %g %g %g %g %g %g\n",

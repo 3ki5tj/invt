@@ -1,0 +1,76 @@
+\documentclass{article}
+\begin{document}
+
+We thank the referees for their thoughtful critique of our work. We have taken their suggestions and have returned a much improved manuscript.
+
+\section{Referee 1}
+
+We have worked to better explain our mathematical analysis for flat-distribution-sampling errors from updating schemes. We also moved the method of computing the optimal schedule from the appendix to the main text and explained the solution of $q(T)$ as well as the integration scheme for the mass function as requested. We now include an analysis of the errors in the problem of computing the potential of mean force for a dense Lennard-Jones fluid and a nontrivial application of the bandpass updating scheme on the $64\times64$ 10-state Potts model.
+
+\begin{enumerate}
+
+\item
+In Appendix C, we have improved the discussion the method of estimating $\Gamma_k$ from an FDS simulation under constant magnitude.
+This method does not require explicit computation
+of the autocorrelation functions.
+It only requires accumulation of data for
+the Fourier transformed bias potential,
+just like what we usually do for computing the average and variance of the potential energy.
+Thank you.
+
+\item
+As the reviewer correctly stated, the computed optimal schedule is indeed only for a subgroup simulations sharing the same value of $q(T)$.
+We now better explain the variational problem and its solution of varying $q(t)$ on the interval $[0,T]$ at the beginning of Sec II C 3.
+Thank you.
+
+\item
+We now discuss the effect of the time of the preliminary run with a constant magnitude in the Results section via an example.
+Indeed, a short preliminary run can lead to unreasonably high initial updating magnitude, and thus should be avoided.
+Thank you for pointing this out.
+
+\item
+We now discuss the consequences of the sign of the elements of $\mathbf w$.
+%
+The elements can be negative, but we use only a subset of properties of the transition matrix theory that are unaffected by the admission of negative elements.
+Thanks.
+
+\item
+(Change $p_i$ to $p_{i(t)}$.)
+Done as suggested.
+Thanks.
+
+\item
+We believe that the error weighting distribution is rather arbitrary, and our choice was one of convenience and we now better discuss and justify the choice.
+For simplicity, we now assume that the target distribution, $p_i$, and error weighting distribution, $\rho_i$, are the same.
+The target distribution, $p_i$, hopefully serves as a natural and convenient choice for error weights.
+Thank you.
+
+
+\end{enumerate}
+
+
+\section{Referee 2}
+
+1a) We had made distinctions between WL and metadynamics for convenience in our analysis,
+but we now take the referee's point and emphasize the close relation and distinction between the methods to avoid any confusion. Thank you for the advice.
+
+1b) True and we have made the wording clear that we will study only single-bin and multiple-bin updating schemes instead of WL and metadynamics. Thanks.
+
+1c) We agree. Done. Thanks.
+
+1d) Corrected. Thanks.
+
+2a) We have greatly shortened section IIA. Thanks.
+
+2b) We have also shortened IIB as requested. Thanks.
+
+3a) We have removed the ideal system example and replaced it with a calculation of the PMF in a Lennard-Jones system. Thank you for the suggestion.
+
+3b) Same as above.
+
+3c) As suggested by the reviewer, aside from the statistical error, the systematic error can also play a key role in the optimal schedule and the final error.  This is particular so for certain multiple-bin updating scheme, where the systematic bias can be nonnegligible even after a long simulation time. We have reflected on this point and made a few corrections in the procedure of computing the optimal schedule, in particular Eq. (40) in estimating the effect of the initial bias. Mathematically, we believe that the framework still works, but we need to more carefully choose the value of $q(T)$ in the second step of the optimization to ensure sufficient reduction of the systematic bias.  We now also illustrate this point on the Lennard-Jones fluid test case, and emphasize the optimal schedule calculated here only applies to long simulations.
+
+We agree that the effective exploration of the phase space can be a more important problem. To illustrate potential applications in this area, we now show that the bandpass updating scheme can be constructed from a orthogonal polynomial basis, serving as a generalization of the Langfeld-Lucini-Rago algorithm, which is modification of the WL and has found successful applications in quantum field theory. We wish to show that similar modifications are possible. To this end, we have considered the $64\times64$ 10-state Potts model to illustrate the application of bandpass updating schemes in parameter tuning of the Gaussian ensemble method. Hopefully we may use the method in the future on more interesting (difficult) examples. Here we give the theory and practical, familiar examples. Thank you.
+
+
+\end{document}
