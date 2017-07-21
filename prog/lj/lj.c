@@ -249,7 +249,7 @@ static int work(invtpar_t *m)
     cmf = cmvar_open(n, 0); /* final */
     cci = cmvar_open(n, 0); /* initial corrected */
     ccf = cmvar_open(n, 0); /* final correct */
-    alpha0 = m->opta ? metad->intq->aarr[0] : metad->a/2; 
+    alpha0 = m->opta ? metad->intq->aarr[0] : metad->a/2;
     fprintf(stderr, "starting %ld metadynamics run of %ld/%ld steps..., a %g (%g), err %g -> %g\n",
         m->ntrials, m->nequil, m->nsteps, metad->a, alpha0, metad->eiref, metad->efref);
     /* write the header information for the log file */

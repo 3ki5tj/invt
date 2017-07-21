@@ -103,11 +103,11 @@ static void potts2_equil(potts2_t *pt, double ene)
 
 
 static void potts2_gaus(potts2_t *pt,
-    int sampmethod, int lnzmethod, long nsteps)
+    int sampmethod, int lnzmethod, long nsteps, double sig)
 {
-  long t, nstsave;
-  int id, acc;
-  double ecmin, ecmax, esig, espc, beta1, beta2, fl, alpha0;
+  long t, nstsave, ntrips = 0;
+  int id, acc, sgn = 0;
+  double ecmin, ecmax, esig, espacing, beta1, beta2, fl, alpha0;
   const double beta_c = 1.4;
   gaus_t *gaus;
 
@@ -115,8 +115,8 @@ static void potts2_gaus(potts2_t *pt,
 
   ecmin = -(int) (1.8 * pt->n + 0.5);
   ecmax = -(int) (0.8 * pt->n + 0.5);
-  esig = pt->l;
-  espc = esig;
+  esig = sig * pt->l;
+  espacing = esig;
   potts2_equil(pt, ecmin);
   if (lnzmethod == LNZ_WL) {
     fl = 0.2;
@@ -125,10 +125,11 @@ static void potts2_gaus(potts2_t *pt,
     fl = 0.05;
     alpha0 = 0.001;
   }
-  gaus = gaus_open(ecmin, ecmax, espc, esig, lnzmethod,
+  gaus = gaus_open(ecmin, ecmax, espacing, esig, lnzmethod,
       beta_c * esig, alpha0, -2*pt->n, 0, 1, 0);
 
   id = 0;
+  sgn = 0;
   if (sampmethod == SAMP_WOLFF) {
     nstsave = 100000;
   } else {
@@ -145,6 +146,14 @@ static void potts2_gaus(potts2_t *pt,
     }
     gaus_add(gaus, id, pt->E, acc);
     gaus_move(gaus, pt->E, &id);
+
+    /* update the number of round trips */
+    if ( (sgn == 0 && id == gaus->n - 1) 
+      || (sgn == 1 && id == 0) ) {
+      sgn = !sgn;
+      ntrips++;
+    }
+
     if ( t % 100 == 0 ) {
       gaus_wlcheckx(gaus, fl, 0.5);
     }
@@ -153,8 +162,8 @@ static void potts2_gaus(potts2_t *pt,
       alpha = gaus_getalpha(gaus, id, &alphamm);
       gaus_save(gaus, fndat);
       gaus_savehist(gaus, fnhis);
-      printf("t %ld/%g, flatness %g, alpha %g/%g, id %d, invt %d\n",
-          t, gaus->t, gaus->hflatness, alpha, alphamm, id, gaus->invt);
+      printf("t %ld/%g, flatness %g, alpha %g/%g, id %d, invt %d, trips %ld\n",
+          t, gaus->t, gaus->hflatness, alpha, alphamm, id, gaus->invt, ntrips);
     }
   }
   gaus_close(gaus);
@@ -167,17 +176,19 @@ int main(int argc, char **argv)
   potts2_t *pt;
   int sampmethod = SAMP_METROPOLIS, lnzmethod = LNZ_WL, q = 10;
   long nsteps = 0;
+  double sig = 1.0;
 
   if ( argc > 1 ) sampmethod = atoi( argv[1] );
   if ( argc > 2 ) lnzmethod  = atoi( argv[2] );
-  if ( argc > 3 ) q          = atoi( argv[3] );
-  if ( argc > 4 ) nsteps     = atol( argv[4] );
+  if ( argc > 3 ) nsteps     = atol( argv[3] );
+  if ( argc > 4 ) sig        = atof( argv[4] );
+  if ( argc > 5 ) q          = atoi( argv[5] );
   if ( nsteps <= 0 )
     nsteps = (sampmethod == 0) ? 100000000L : 100000L;
 
   pt = potts2_open(POTTS2_L, q);
   nsteps *= pt->n;
-  potts2_gaus(pt, sampmethod, lnzmethod, nsteps);
+  potts2_gaus(pt, sampmethod, lnzmethod, nsteps, sig);
   potts2_close(pt);
   return 0;
 }
