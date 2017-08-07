@@ -1,4 +1,4 @@
-\documentclass[preprint, superscriptaddress, floatfix]{revtex4-1}
+\documentclass[reprint, superscriptaddress, floatfix]{revtex4-1}
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{mathtools}
@@ -283,7 +283,7 @@ and the width of the Gaussian window.
 %which amounts to a shift of the origin of time
 %in the single-bin case.
 %
-Further, we will show that
+We will also show that
 the single-bin updating scheme
 is optimal for asymptotic convergence,
 and it can be generalized
@@ -294,17 +294,27 @@ The latter allow one to partially flatten
 a few long-range histogram modes,
 and to avoid introducing local noise
 into the bias potential during the updating process.
+
+The bandpass updating schemes are convenient
+in that their optimal schedule is simply given by
+the inverse-time formula,
+and thus requires no extra calculation.
 %
-The optimal schedule of bandpass updating schemes
-is also an inverse-time schedule.
+They can be constructed from any orthogonal basis\cite{bussi2006},
+and for a polynomial basis,
+this construction results in
+a class of adaptive FDS algorithms that
+update the bias potential based on the
+statistical moments of observed distribution
+as a generalization of the Langfeld-Lucini-Rago (LLR)
+algorithm\cite{langfeld2012, pellegrini2014}.
 %
-Constructed from orthogonal polynomials,
-bandpass updating schemes serve as
-generalizations of the Langfeld-Lucini-Rago (LLR)
-algorithm\cite{langfeld2012, pellegrini2014},
-and can help other FDS
-algorithms\cite{neuhaus2006, *neuhaus2007, zhu2012}
-adjust the parameters of the bias potential automatically.
+We show that a similar construction
+can help FDS algorithms with
+quadratic bias potentials\cite{neuhaus2006, *neuhaus2007, zhu2012}
+automatically adjust the parameters
+to reach a set of Gaussian distributions
+with desired means and variances.
 
 The article is organized as follows.
 %
@@ -343,12 +353,17 @@ of a multiple-bin updating scheme
 that encompasses the Gaussian scheme used in metadynamics
 in Sec. \ref{sec:multiple-bin}.
 %
-Finally, we compare different updating schemes
+We then compare different updating schemes
 and show that the single-bin scheme
 and a class of generalized bandpass schemes
 are optimal for convergence
 in the long time limit
 in Sec. \ref{sec:cmpschemes}.
+%
+Finally,
+we use the bandpass updating schemes
+to build a class of adaptive FDS algorithms
+that based on the statistical moments.
 
 
 
@@ -932,12 +947,18 @@ we get % a set of decoupled equations
   %\alpha(t) \, \left[ \langle f_{*i}(t) \rangle + \zeta_{*i}(t) \right]
   \approx
   -\alpha(t) \, \left[ v_{*i}(t) - \zeta_{*i}(t) \right]
-  ,
-  \notag
-  %\label{eq:dxdt_singlebin}
+  .
+  %\notag
+  \label{eq:dxdt_singlebin}
 \end{equation}
 %
-and the formal solution is
+Without the random part, $\zeta_{*i}(t)$,
+this equation would drive
+the deviation of the bias potential, $v_{*i}(t)$,
+to $0$ at long times,
+implying the convergence.
+%
+The formal solution of Eq. \eqref{eq:dxdt_singlebin} is
 %
 \begin{equation}
   v_{*i}(T)
@@ -1167,6 +1188,12 @@ Updating matrix and eigenmode decomposition}
 
 
 
+We will first study the eigenvalue decomposition
+of the updating matrix, $\mathbf w$,
+which helps establish the convergence criterion
+and the decomposition of error into
+independent eigenmodes.
+%
 The matrix, $\mathbf w$, is subject to several conditions.
 %
 First, we have a fixed-point condition\cite{bussi2006, dama2014}.
@@ -1318,19 +1345,19 @@ for variable, $x_i$,
   \equiv \mathcal{F}[x_i]_k
   \equiv \sum_{i = 1}^n \phi_{ki} \, x_i
   ,
-  \notag
-  %\label{eq:gft_def}
+  %\notag
+  \label{eq:gft_def}
 \end{equation}
 %
 and the inverse transform is
-$x_i = \sum_{k = 0}^{n-1} \phi_{ki} \, \tilde{x}_k / \rho_i$.
+%$x_i = \sum_{k = 0}^{n-1} \phi_{ki} \, \tilde{x}_k / \rho_i$.
 %
-%\begin{equation}
-%  x_i = \frac{1}{\rho_i} \sum_{k = 0}^{n-1} \phi_{ki} \, \tilde{x}_k
-%  .
-%  \notag
-%  %\label{eq:gft_inv}
-%\end{equation}
+\begin{equation}
+  x_i = \frac{1}{\rho_i} \sum_{k = 0}^{n-1} \phi_{ki} \, \tilde{x}_k
+  .
+  %\notag
+  \label{eq:gft_inv}
+\end{equation}
 %
 Then,
 we can rewrite Eq. \eqref{eq:ortho0} as
@@ -1360,15 +1387,28 @@ Thus, the only effect
 of the bin-average deduction on $\tilde x_k$ is to
 annihilate the $k=0$ mode.
 %
-We also have Parseval's theorem,
+From Eqs. \eqref{eq:gft_def} and \eqref{eq:gft_inv},
+we have Parseval's theorem,
 \begin{equation}
   \sum_{k=1}^{n-1} \tilde x_k \, \tilde y_k
   =
   \sum_{k=0}^{n-1} \tilde x_{*k} \, \tilde y_{*k}
   =
-  \sum_{i=1}^n x_{*i} \, y_{*i}
+  \sum_{i=1}^n \rho \, x_{*i} \, y_{*i}
+  .
   \label{eq:parseval}
 \end{equation}
+\note{Proof:
+$$
+  \sum_{k=0}^{n-1} \tilde x_{*k} \, \tilde y_{*k}
+  =
+  \sum_{k=0}^{n-1} \tilde x_{*k} \sum_{i=1}^n \phi_{ki} \, y_{*i}
+  =
+  \sum_{i=1}^n \left( \sum_{k=0}^{n-1} \tilde x_{*k} \, \phi_{ki} \right) \, y_{*i}
+  =
+  \sum_{i=1}^n \rho \, x_{*i} \, y_{*i}.
+$$
+}
 
 We can now use Eq. \eqref{eq:eig_w} to diagonalize
 the multiple-bin updating scheme, Eq. \eqref{eq:mbin_update},
@@ -1423,18 +1463,27 @@ involves a compromise among eigenmodes.
 
 By Eq. \eqref{eq:parseval},
 we can rewrite the error defined in Eq. \eqref{eq:error_def} as
-$\Err(T) = \sum_{k = 1}^{n - 1} \left\langle {\tilde v}_k^2(T) \right\rangle$.
+a sum of the errors in individual modes\footnote{If
+the error weighting distribution differs from $\rho_i$
+in Eq. \eqref{eq:error_def},
+the error would contain quadratic cross terms among different eigenmodes.
 %
-%\begin{align}
-%  \Err(T)
-%  =
-%  \sum_{k = 1}^{n - 1}
-%    \left\langle
-%      {\tilde v}_k^2(T)
-%    \right\rangle
-%  .
-%\notag
-%\end{align}
+While the solution for the optimal schedule retains the same form,
+the mass function defined in Eq. \eqref{eq:mass_func}
+will include the corresponding cross terms.
+}
+%$\Err(T) = \sum_{k = 1}^{n - 1} \left\langle {\tilde v}_k^2(T) \right\rangle$.
+%
+\begin{align}
+  \Err(T)
+  =
+  \sum_{k = 1}^{n - 1}
+    \left\langle
+      {\tilde v}_k^2(T)
+    \right\rangle
+  .
+  \notag
+\end{align}
 %
 As in Eq. \eqref{eq:error_tot},
 we can decompose the error as the sum
@@ -1501,74 +1550,6 @@ few numbers, $\Gamma_k$'s.
 In Appendix \ref{sec:Gamma_measure},
 we discuss a way of estimating $\Gamma_k$
 from an FDS simulation under a constant magnitude.
-%
-
-
-
-%\subsubsection{\label{sec:eqlerr}
-%Initial error
-%%from a simulation under a constant updating magnitude
-%}
-
-
-
-To model the initial error for Eq. \eqref{eq:error_res},
-we will assume that
-the preliminary adaptive FDS sampling has been
-performed under a constant updating magnitude for $T_0$ steps.
-%
-If the initial bias potential
-before the preliminary run is zero,
-one can show that
-\begin{equation}
-  \left\langle
-    {\tilde v}_k^2(0)
-  \right\rangle
-  = \frac 1 2 \, a_0 \, \Gamma_k \, \lambda_k
-  + \epsilon_k
-  ,
-  \label{eq:xt2_eql1}
-\end{equation}
-%
-where
-$\epsilon_k \equiv \tilde u_k^2 \, e^{-2\, \lambda_k \, a_0 \, T_0}$
-and if no eigenvalue is zero,
-then we can ignore the $\epsilon_k$ term
-in the case of $T_0 \to \infty$,
-%
-\begin{equation}
-  \left\langle
-    {\tilde v}_k^2(0)
-  \right\rangle
-  = \frac 1 2 \, a_0 \, \Gamma_k \, \lambda_k
-  .
-  \label{eq:xt2_eql}
-\end{equation}
-%
-\note{
-Consider a long period, $T_0$, under a fixed schedule,
-$\alpha(t) = a_0$,
-the residual error becomes negligible, and
-the $k$th component of the asymptotic error
-is given by
-%
-\begin{align*}
-  \left\langle
-    {\tilde v}_k^2(T_0)
-  \right\rangle
-  =
-  \int_0^{T_0}
-    \Gamma_k \, (\lambda_k \, a_0)^2 \,
-      e^{ 2 \, \lambda_k \, a_0 \, (t - T_0) }
-    \, dt
-  \stackrel{ T_0 \to \infty }
-  { =\joinrel=\joinrel=\joinrel= }
-  \frac 1 2 \, \Gamma_k \, \lambda_k \, a_0
-  .
-\notag
-%\label{eq:error_eql}
-\end{align*}
-}
 %
 
 
@@ -1742,263 +1723,10 @@ The minimal asymptotic error is
 
 
 
-\subsubsection{\label{sec:mass_distr}
-Characterization of optimal schedules}
-
-
-
-We can characterize the optimal schedule
-geometrically as follows.
-%
-First, we define
-a normalized mass distribution as
-%
-\begin{equation}
-  m(\bar q)
-  =
-  \frac{
-    M(\bar q)
-  }
-  {
-    \int_0^{ q(T) } M(q') \, d q'
-  }
-  =
-  \frac{
-    M(\bar q)
-  }
-  {
-    C_M
-  }
-  ,
-\notag
-%\label{eq:mass_distr}
-\end{equation}
-%
-such that
-$\int_0^{q(T)} m(\bar q) \, d\bar q = 1$.
-%
-Then from Eqs. \eqref{eq:Lagrangian_const} and \eqref{eq:q_opt},
-we find that for $\bar q(t) \equiv q(T) - q(t)$,
-%
-\begin{align}
-  m\left( \bar q(t) \right)
-  &=
-  \frac{ 1 }
-       { T \, \alpha(t) }
-  ,
-  \label{eq:mQ_invTa}
-  \\
-  \int_{\bar q(t)}^{ q(T) }
-    m(q') \, d q'
-  &=
-  \frac t T
-  ,
-  \label{eq:intmQ_tT}
-\end{align}
-%
-Thus, each point on the schedule,
-$\bigl(t, \alpha(t)\bigr)$,
-can be mapped to a point,
-$\Bigl(\bar q(t), m\bigl(\bar q(t)\bigr)\Bigr)$,
-on the mass distribution,
-such that the ordinate of the latter curve
-is $1/(T\alpha)$,
-and the area under the curve in the domain, $[\bar q(t), q(T)]$,
-is equal to $t/T$,
-as shown in Fig. \ref{fig:massq}(a).
-
-\begin{figure}[h]
-\begin{center}
-  \begin{tikzpicture}[thick, scale=1.4, every node/.style={scale=0.9}]
-    \node [] at (-0.3, 2.0) {(a)};
-
-    % distribution
-    \draw[domain=0:2.0, variable=\x, dashed, gray, very thick]
-      plot({\x}, {2*exp(-\x)});
-
-    % shade
-    \fill [gray!30!white, domain=0.7:1.609, variable=\x]
-      (0.7, 0) --
-      plot ({\x}, {2*exp(-\x)})
-      -- (1.609, 0) -- cycle;
-
-    % thick curve
-    \draw[domain=0:1.609, variable=\x, very thick]
-      plot({\x}, {2*exp(-\x)});
-
-    % label for the shaded area
-    \node[] at (1.1, 0.32) {$\dfrac{t}{T}$};
-
-    \draw[<->] (0.6, 0)  --
-               node[left, inner sep=1mm]
-               {$\dfrac{1}{T \, \alpha}$}
-               (0.6, 0.99317);
-    % label for the ordinate
-    %\node[fill=white] at (0.4, 0.7) {$\dfrac{1}{Ta}$};
-
-    \draw[] (0.5, 0.99317) -- (0.7, 0.99317);
-    \draw[->] (0, 0) -- (2.2, 0);
-    \node[] at (2.2, -0.2) {$\bar q$};
-    \draw[->] (0, 0) -- node[above, rotate=90] {$m(\bar q)$} (0, 2.2);
-
-    % xtics
-    \draw[] (0.0, 0.1) -- (0.0, 0.0) node[below] {$0$};
-    \draw[] (0.7, 0.1) -- (0.7, 0.0) node[below] {$q(T) - q(t)$};
-    \draw[] (1.609, 0.1) -- (1.609, 0.0) node[below] {$q(T)$};
-  \end{tikzpicture}
-%
-  \begin{tikzpicture}[thick, scale=1.4, every node/.style={scale=0.9}]
-    \node [] at (-0.3, 2.0) {(b)};
-    % distribution
-    \draw[domain=0:2.3, variable=\x, dashed, gray, very thick]
-      plot({\x}, {1/(\x+0.5)});
-
-    % shade
-    \fill [gray!30!white, domain=0.7:2.0, variable=\x]
-      (0.7, 0) --
-      plot ({\x}, {1/(\x+0.5)})
-      -- (2.0, 0) -- cycle;
-
-    % thick curve
-    \draw[domain=0:2.0, variable=\x, very thick]
-      plot({\x}, {1/(\x+0.5)});
-
-    % label for the shaded area
-    \node[] at (1.1, 0.35) {$\bar q(t)$};
-
-    \draw[<->] (0.6, 0)  --
-               node[left, inner sep=1mm]
-               {$\dfrac{1}{T \, m}$}
-               (0.6, 0.83333);
-    % label for the ordinate
-    %\node[fill=white] at (0.4, 0.7) {$\dfrac{1}{Ta}$};
-
-    \draw[] (0.5, 0.83333) -- (0.7, 0.83333);
-    \draw[->] (0, 0) -- (2.6, 0);
-    \node[] at (2.6, -0.2) {$t$};
-    \draw[->] (0, 0) -- node[above, rotate=90] {$\alpha(t)$} (0, 2.2);
-
-    % xtics
-    \draw[] (0.0, 0.1) -- (0.0, 0.0) node[below] {$0$};
-    \draw[] (0.7, 0.1) -- (0.7, 0.0) node[below] {$t$};
-    \draw[] (2.0, 0.1) -- (2.0, 0.0) node[below] {$T$};
-  \end{tikzpicture}
-  \caption{
-    \label{fig:massq}
-    (a) Geometric construction of the optimal schedule,
-    $\alpha(t)$,
-    from the normalized mass distribution,
-    $m(\bar q)$.
-    %
-    (b) Inverse construction of $m(\bar q)$
-    from the optimal schedule $\alpha(t)$.
-    %
-    \note{
-      The figure was produced by \texttt{tikz}.
-    }%
-  }
-\end{center}
-\end{figure}
-
-The schedule, $\alpha(t)$,
-also defines a variable transformation from
-the mass distribution, $m(\bar q)$.
-%much like the Legendre transform.
-%
-If we define
-$\bar q^* \equiv \bar q/q(T)$
-and $t^* \equiv t/T$
-such that both are limited to the interval $[0, 1]$,
-as well as
-\begin{align*}
-  m^*       &\equiv q(T) \, m(\bar q) = -\frac{ dt^* } { d\bar q^* },
-  \\
-  \alpha^*  &\equiv \frac{T}{q(T)} \, \alpha(t) = -\frac{ d\bar q^* } { dt^* },
-\end{align*}
-then it is clear that
-both $m^*(\bar q^*)$ and $\alpha^*(t^*)$
-can describe the differential relation
-between $\bar q^*$ and $t^*$,
-but with the natural variables
-being $\bar q^*$ and $t^*$, respectively.
-%
-Further, the transformation is an involution:
-if we apply the same transform on $\alpha^*(t^*)$
-we would recover $m^*(\bar q^*)$,
-as shown in Fig. \ref{fig:massq}(b).
-%
-A few examples are shown in Table \ref{tab:m_and_a}.
-%
-For example, in the single-bin scheme,
-the mass distribution decays exponentially,
-and we would have the inverse-time schedule.
-%
-On the other hand,
-if the mass distribution is inversely proportional to $\bar q$,
-which is approximately true for the Gaussian updating scheme
-at large $\bar q$,\footnote{If
-  the magnitudes of the eigenvalues, $\lambda_k$'s,
-  span a wide range, then for a large $\bar q$,
-  the sum in Eq. \eqref{eq:mass_func} will be dominated by
-  the largest term, where $\lambda_k \approx 1/\bar q$,
-  and $M(\bar q) \approx \sqrt{\Gamma_k}/\bar q$.
-  }
-  %
-then we would have an exponentially decaying schedule.
-
-\begin{table}[h]
-  \caption{\label{tab:m_and_a}
-    Examples of the variable transformation between the
-    reduced schedule, $\alpha^*(t^*)$,
-    and the reduced mass distribution, $m^*(\bar q^*)$,
-    as defined in Eqs. \eqref{eq:mQ_invTa}
-    and \eqref{eq:intmQ_tT}.
-  }
-  \setlength{\tabcolsep}{2pt} % spacing between columns
-  \renewcommand\arraystretch{2.0} % spacing between rows
-  \begin{tabular} { c c c }
-    \hline
-    $m^*(\bar q^*)$ &
-    $\alpha^*(t^*)$ &
-    $\bar q^*(t^*)$
-    \\
-    \hline
-    $\dfrac{1}{\gamma \, ({\bar q}^* + s_\gamma) }$ &
-    $(1 + s_\gamma) \, \gamma \, e^{-\gamma \, t^*}$ &
-    $(1 + s_\gamma) \, e^{-\gamma \, t^*} - s_\gamma$
-    \\
-    $(1+ s_\gamma) \, \gamma \, e^{-\gamma \, {\bar q}^*}$ &
-    $\dfrac{1}{ \gamma \, (t^* + s_\gamma) }$ &
-    $\dfrac{1}{\gamma} \ln\left(\dfrac{1 + s_\gamma}{t^* + s_\gamma} \right)$
-    \\
-    $\dfrac{c \, a}{\left( {\bar q}^* + q^*_0 \right)^{a+1}}$ &
-    $\dfrac{c^{1/a} \, (1/a)}{\left( t^* + t^*_0 \right)^{(1/a)+1}}$ &
-    %$\left( \dfrac{c}{t^* + t^*_0} \right)^{1/a} - q^*_0$
-    $q^*_0 \left[\left( \dfrac{1+t^*_0}{t^* + t^*_0} \right)^{1/a} - 1\right]$
-    %$\,\begin{aligned}
-    %  &a, q^*_0 > 0, \\
-    %  &\frac{1}{t^*_0} \equiv \left(1+\frac{1}{q^*_0}\right)^a - 1, \\
-    %  &c \equiv {q^*_0}^a(t^*_0 + 1)
-    %\end{aligned}$
-    \\
-    \hline
-    \multicolumn{3}{p{8cm}}{
-    Here,
-    $\gamma > 0$,
-    and we have defined
-    $s_\gamma \equiv 1/(e^\gamma - 1)$,
-    ${t^*_0}^{-1} \equiv \left(1+{q^*_0}^{-1}\right)^a - 1$,
-    and
-    $c \equiv {q^*_0}^a(1 + t^*_0)$.
-    } \\
-    \hline
-  \end{tabular}
-\end{table}
-
-
-
-
-
+%\subsubsection{\label{sec:eqlerr}
+%Initial error
+%%from a simulation under a constant updating magnitude
+%}
 
 
 
@@ -2010,9 +1738,68 @@ then we would have an exponentially decaying schedule.
 We now determine the optimal value of $q(T)$
 that minimizes the total error defined in Eq. \eqref{eq:error_tot}.
 %
-We will consider simulations in which
-the system is initially equilibrated
-at a constant updating magnitude, $a_0$.
+To model the initial error for Eq. \eqref{eq:error_res},
+we will assume that
+the system undergoes a preliminary FDS simulation
+under a constant updating magnitude, $a_0$,
+for $T_0$ steps.
+%
+If the initial bias potential
+before the preliminary run is zero,
+one can show that
+\begin{equation}
+  \left\langle
+    {\tilde v}_k^2(0)
+  \right\rangle
+  = \frac 1 2 \, a_0 \, \Gamma_k \, \lambda_k
+  + \epsilon_k
+  ,
+  \label{eq:xt2_eql1}
+\end{equation}
+%
+where
+$\epsilon_k \equiv \tilde u_k^2 \, e^{-2\, \lambda_k \, a_0 \, T_0}$
+and if no eigenvalue is zero,
+then we can ignore the $\epsilon_k$ term
+in the case of $T_0 \to \infty$,
+%
+\begin{equation}
+  \left\langle
+    {\tilde v}_k^2(0)
+  \right\rangle
+  = \frac 1 2 \, a_0 \, \Gamma_k \, \lambda_k
+  .
+  \label{eq:xt2_eql}
+\end{equation}
+%
+\note{
+Consider a long period, $T_0$, under a fixed schedule,
+$\alpha(t) = a_0$,
+the residual error becomes negligible, and
+the $k$th component of the asymptotic error
+is given by
+%
+\begin{align*}
+  \left\langle
+    {\tilde v}_k^2(T_0)
+  \right\rangle
+  =
+  \int_0^{T_0}
+    \Gamma_k \, (\lambda_k \, a_0)^2 \,
+      e^{ 2 \, \lambda_k \, a_0 \, (t - T_0) }
+    \, dt
+  \stackrel{ T_0 \to \infty }
+  { =\joinrel=\joinrel=\joinrel= }
+  \frac 1 2 \, \Gamma_k \, \lambda_k \, a_0
+  .
+\notag
+%\label{eq:error_eql}
+\end{align*}
+}
+%
+
+
+
 %
 From Eqs. \eqref{eq:error_res}, \eqref{eq:xt2_eql1},
 and \eqref{eq:error_asym2},
@@ -2082,11 +1869,11 @@ Then solve $\partial (\Err_R + \Err_A) / \partial Q_c = 0$.
 }
 %
 We can rewrite the condition in terms of
-the initial updating magnitude by Eq. \eqref{eq:mQ_invTa},
+the initial updating magnitude by Eq. \eqref{eq:Lagrangian_const} %\eqref{eq:mQ_invTa},
 \begin{align}
   \alpha(0)
-  =
-  \frac{1}{T \, m\bigl( q(T) \bigr) }
+  %=
+  %\frac{1}{T \, m\bigl( q(T) \bigr) }
   =
   \frac{ a_0 } { 2 }
   +
@@ -2547,25 +2334,20 @@ Bandpass updating schemes}
 We can generalize
 the single-bin scheme to a class of
 perfect (brick-wall) \emph{bandpass} updating schemes
-that completely eliminates certain short-wavelength eigenmodes,
-which are typically local noise.
+that completely discard certain short-wavelength eigenmodes
+that are deemed as local noise.
 %
-A bandpass updating scheme is essentially
-the single-bin updating scheme
-accompanied by a perfect filter
-for the designated noise modes,
-which are assigned with zero eigenvalues.
-%
-For example,
-by assuming
-that the PMF is so smooth
-that it can be represented by the first $K$
-modes,\footnote{As an estimate of error,
+If the eigenmodes are sorted in descending order
+of the wavelength,
+and the PMF is sufficiently smooth
+to be representable by the first $K$
+eigenmodes,\footnote{As an estimate of error,
   we note that truncating a linear or quadratic function
   at mode $K$ for a non-periodic variable
   results in an error roughly proportional to
   $|\max_i u_i - \min_i u_i|^2/K^3$.}
-we demand
+we may construct an updating scheme
+from Eq. \eqref{eq:w_from_phi} with
 %
 \begin{equation}
   \lambda_1 = \cdots = \lambda_{K-1} = 1,
@@ -2579,46 +2361,49 @@ we demand
 %%
 %$$w_{ij} = \frac{1}{\rho_i} \sum_{k=0}^{K-1} \phi_{ki} \, \phi_{kj}.$$
 %%
+With the eigenvalues for the non-noise and noise modes being
+$1$ and $0$, respectively,
+a bandpass updating scheme is essentially
+the single-bin updating scheme
+accompanied by a perfect filter
+for the designated noise modes.
+%
 The asymptotic error is then
 $\Err_A(T) = \sum_{ k = 1 }^{ K - 1 } \Gamma_k T/(T + t_0)^2$,
 which is less than that from Eq. \eqref{eq:EA_sbin1}.
 %
-The optimal schedule of these schemes
-remains the inverse-time schedule
-given by Eq. \eqref{eq:alpha_invt1}
-with $t_0$ given by Eq. \eqref{eq:t0_sbin}.
-%
-%The asymptotic error is given by
-%%
-%\begin{equation}
-%  \Err_A(T)
-%  =
-%  \frac{   T     }
-%       { (T + t_0)^2 }
-%  \sum_{ k = 1 }^{ K - 1 }
-%    \Gamma_k
-%  ,
-%  \notag
-%  %\label{eq:error_sinc}
-%\end{equation}
-%%
-%as a generalization of Eq. \eqref{eq:Emin_sbin}
-%for the single-bin updating scheme.
-%
 
-Since bandpass updating schemes are
-straightforward generalizations of
-the single-bin updating scheme,
-we can also borrow the WL algorithm
-to control the updating magnitude
-in initial stages of the simulation.
+Comparing Eq. \eqref{eq:lambda_bandpass}
+with Eq. \eqref{eq:lambda_Gaussian},
+we find that the bandpass updating scheme serves
+as an idealization of the Gaussian updating scheme
+with the Gaussian spectrum of eigenvalues
+being replaced by a step function.
 %
-However, the histogram fluctuation should
-be limited to first $K$ modes,
-as the bandpass updating scheme
-only partially flattens these histogram
-modes (cf. Appendix \ref{sec:hfluc}).
+Although both updating schemes are able to remove local noise
+from the bias potential,
+the bandpass updating schemes have the advantage
+of allowing convenient control of the updating magnitude.
+%
+In the asymptotic regime,
+the optimal schedule is simply given
+by the inverse-time schedule, Eq. \eqref{eq:alpha_invt1},
+%with $t_0$ given by Eq. \eqref{eq:t0_sbin},
+just like the single-bin scheme,
+and it is therefore unnecessary to go through
+the procedure in Sec. \ref{sec:procedure}
+for a general updating scheme.
+%
+In initial stages, when the inverse-time schedule
+may be inapplicable,
+we can instead use the stage-wise WL technique
+as long as the histogram fluctuation
+used for stage transitions
+is computed from the first $K$ modes
+(cf. Appendix \ref{sec:hfluc}).
 
+\subsection{\label{sec:bandpass_poly}
+Bandpass updating schemes constructed from polynomial bases}
 
 In addition to the application to homogeneous updating schemes
 (Appendix \ref{sec:homo_bandpass}),
@@ -3126,12 +2911,18 @@ as shown in Table \ref{tab:lj_error}.
 %
 Although the gain of using the optimal schedule
 was modest in the reported cases,
-it would increase with the simulation length.\footnote{
-  For example, for the $\varrho^* = 0.1$ case
-  with width $\sigma = 0.2$,
-  the predicted error of a simulation of $10^8$ steps
-  was $2.5\times10^{-5}$ for the inverse-time schedule
-  or $3.7\times10^{-6}$ for the optimal schedule.}
+it would increase with the simulation length.
+%
+For example, for the $\varrho^* = 0.1$ case
+with width $\sigma = 0.2$,
+if we increase the simulation length to $10^8$ steps,
+the error for the optimal schedule was
+$2.9\times10^{-6}$,
+which was much smaller than that
+for the inverse-time schedule
+$1.8\times10^{-5}$.
+\note{The predicted errors were
+$3.7\times10^{-6}$ and $1.8\times10^{-5}$, respectively.}
 
 One way to overcome the systematic bias
 in the Gaussian updating scheme
@@ -4064,6 +3855,266 @@ we would expect a roughly flat tail
 for the single-bin updating scheme
 as $\langle \tilde v_k^2 \rangle \propto \Gamma_k$,
 cf. Fig. \ref{fig:lj_xerr}.
+
+
+
+
+
+\section{\label{sec:schedule_geometry}
+Characterization of optimal schedules}
+
+
+
+We can characterize the optimal schedule
+geometrically as follows.
+%
+First, we define
+a normalized mass distribution as
+%
+\begin{equation}
+  m(\bar q)
+  =
+  \frac{
+    M(\bar q)
+  }
+  {
+    \int_0^{ q(T) } M(q') \, d q'
+  }
+  =
+  \frac{
+    M(\bar q)
+  }
+  {
+    C_M
+  }
+  ,
+\notag
+%\label{eq:mass_distr}
+\end{equation}
+%
+such that
+$\int_0^{q(T)} m(\bar q) \, d\bar q = 1$.
+%
+Then from Eqs. \eqref{eq:Lagrangian_const} and \eqref{eq:q_opt},
+we find that for $\bar q(t) \equiv q(T) - q(t)$,
+%
+\begin{align}
+  m\left( \bar q(t) \right)
+  &=
+  \frac{ 1 }
+       { T \, \alpha(t) }
+  ,
+  \label{eq:mQ_invTa}
+  \\
+  \int_{\bar q(t)}^{ q(T) }
+    m(q') \, d q'
+  &=
+  \frac t T
+  ,
+  \label{eq:intmQ_tT}
+\end{align}
+%
+Thus, each point on the schedule,
+$\bigl(t, \alpha(t)\bigr)$,
+can be mapped to a point,
+$\Bigl(\bar q(t), m\bigl(\bar q(t)\bigr)\Bigr)$,
+on the mass distribution,
+such that the ordinate of the latter curve
+is $1/(T\alpha)$,
+and the area under the curve in the domain, $[\bar q(t), q(T)]$,
+is equal to $t/T$,
+as shown in Fig. \ref{fig:massq}(a).
+
+\begin{figure}[h]
+\begin{center}
+  \begin{tikzpicture}[thick, scale=1.4, every node/.style={scale=0.9}]
+    \node [] at (-0.3, 2.0) {(a)};
+
+    % distribution
+    \draw[domain=0:2.0, variable=\x, dashed, gray, very thick]
+      plot({\x}, {2*exp(-\x)});
+
+    % shade
+    \fill [gray!30!white, domain=0.7:1.609, variable=\x]
+      (0.7, 0) --
+      plot ({\x}, {2*exp(-\x)})
+      -- (1.609, 0) -- cycle;
+
+    % thick curve
+    \draw[domain=0:1.609, variable=\x, very thick]
+      plot({\x}, {2*exp(-\x)});
+
+    % label for the shaded area
+    \node[] at (1.1, 0.32) {$\dfrac{t}{T}$};
+
+    \draw[<->] (0.6, 0)  --
+               node[left, inner sep=1mm]
+               {$\dfrac{1}{T \, \alpha}$}
+               (0.6, 0.99317);
+    % label for the ordinate
+    %\node[fill=white] at (0.4, 0.7) {$\dfrac{1}{Ta}$};
+
+    \draw[] (0.5, 0.99317) -- (0.7, 0.99317);
+    \draw[->] (0, 0) -- (2.2, 0);
+    \node[] at (2.2, -0.2) {$\bar q$};
+    \draw[->] (0, 0) -- node[above, rotate=90] {$m(\bar q)$} (0, 2.2);
+
+    % xtics
+    \draw[] (0.0, 0.1) -- (0.0, 0.0) node[below] {$0$};
+    \draw[] (0.7, 0.1) -- (0.7, 0.0) node[below] {$q(T) - q(t)$};
+    \draw[] (1.609, 0.1) -- (1.609, 0.0) node[below] {$q(T)$};
+  \end{tikzpicture}
+%
+  \begin{tikzpicture}[thick, scale=1.4, every node/.style={scale=0.9}]
+    \node [] at (-0.3, 2.0) {(b)};
+    % distribution
+    \draw[domain=0:2.3, variable=\x, dashed, gray, very thick]
+      plot({\x}, {1/(\x+0.5)});
+
+    % shade
+    \fill [gray!30!white, domain=0.7:2.0, variable=\x]
+      (0.7, 0) --
+      plot ({\x}, {1/(\x+0.5)})
+      -- (2.0, 0) -- cycle;
+
+    % thick curve
+    \draw[domain=0:2.0, variable=\x, very thick]
+      plot({\x}, {1/(\x+0.5)});
+
+    % label for the shaded area
+    \node[] at (1.1, 0.35) {$\bar q(t)$};
+
+    \draw[<->] (0.6, 0)  --
+               node[left, inner sep=1mm]
+               {$\dfrac{1}{T \, m}$}
+               (0.6, 0.83333);
+    % label for the ordinate
+    %\node[fill=white] at (0.4, 0.7) {$\dfrac{1}{Ta}$};
+
+    \draw[] (0.5, 0.83333) -- (0.7, 0.83333);
+    \draw[->] (0, 0) -- (2.6, 0);
+    \node[] at (2.6, -0.2) {$t$};
+    \draw[->] (0, 0) -- node[above, rotate=90] {$\alpha(t)$} (0, 2.2);
+
+    % xtics
+    \draw[] (0.0, 0.1) -- (0.0, 0.0) node[below] {$0$};
+    \draw[] (0.7, 0.1) -- (0.7, 0.0) node[below] {$t$};
+    \draw[] (2.0, 0.1) -- (2.0, 0.0) node[below] {$T$};
+  \end{tikzpicture}
+  \caption{
+    \label{fig:massq}
+    (a) Geometric construction of the optimal schedule,
+    $\alpha(t)$,
+    from the normalized mass distribution,
+    $m(\bar q)$.
+    %
+    (b) Inverse construction of $m(\bar q)$
+    from the optimal schedule $\alpha(t)$.
+    %
+    \note{
+      The figure was produced by \texttt{tikz}.
+    }%
+  }
+\end{center}
+\end{figure}
+
+The schedule, $\alpha(t)$,
+also defines a variable transformation from
+the mass distribution, $m(\bar q)$.
+%much like the Legendre transform.
+%
+If we define
+$\bar q^* \equiv \bar q/q(T)$
+and $t^* \equiv t/T$
+such that both are limited to the interval $[0, 1]$,
+as well as
+\begin{align*}
+  m^*       &\equiv q(T) \, m(\bar q) = -\frac{ dt^* } { d\bar q^* },
+  \\
+  \alpha^*  &\equiv \frac{T}{q(T)} \, \alpha(t) = -\frac{ d\bar q^* } { dt^* },
+\end{align*}
+then it is clear that
+both $m^*(\bar q^*)$ and $\alpha^*(t^*)$
+can describe the differential relation
+between $\bar q^*$ and $t^*$,
+but with the natural variables
+being $\bar q^*$ and $t^*$, respectively.
+%
+Further, the transformation is an involution:
+if we apply the same transform on $\alpha^*(t^*)$
+we would recover $m^*(\bar q^*)$,
+as shown in Fig. \ref{fig:massq}(b).
+%
+A few examples are shown in Table \ref{tab:m_and_a}.
+%
+For example, in the single-bin scheme,
+the mass distribution decays exponentially,
+and we would have the inverse-time schedule.
+%
+On the other hand,
+if the mass distribution is inversely proportional to $\bar q$,
+which is approximately true for the Gaussian updating scheme
+at large $\bar q$,\footnote{If
+  the magnitudes of the eigenvalues, $\lambda_k$'s,
+  span a wide range, then for a large $\bar q$,
+  the sum in Eq. \eqref{eq:mass_func} will be dominated by
+  the largest term, where $\lambda_k \approx 1/\bar q$,
+  and $M(\bar q) \approx \sqrt{\Gamma_k}/\bar q$.
+  }
+  %
+then we would have an exponentially decaying schedule.
+
+\begin{table}[h]
+  \caption{\label{tab:m_and_a}
+    Examples of the variable transformation between the
+    reduced schedule, $\alpha^*(t^*)$,
+    and the reduced mass distribution, $m^*(\bar q^*)$,
+    as defined in Eqs. \eqref{eq:mQ_invTa}
+    and \eqref{eq:intmQ_tT}.
+  }
+  \setlength{\tabcolsep}{2pt} % spacing between columns
+  \renewcommand\arraystretch{2.0} % spacing between rows
+  \begin{tabular} { c c c }
+    \hline
+    $m^*(\bar q^*)$ &
+    $\alpha^*(t^*)$ &
+    $\bar q^*(t^*)$
+    \\
+    \hline
+    $\dfrac{1}{\gamma \, ({\bar q}^* + s_\gamma) }$ &
+    $(1 + s_\gamma) \, \gamma \, e^{-\gamma \, t^*}$ &
+    $(1 + s_\gamma) \, e^{-\gamma \, t^*} - s_\gamma$
+    \\
+    $(1+ s_\gamma) \, \gamma \, e^{-\gamma \, {\bar q}^*}$ &
+    $\dfrac{1}{ \gamma \, (t^* + s_\gamma) }$ &
+    $\dfrac{1}{\gamma} \ln\left(\dfrac{1 + s_\gamma}{t^* + s_\gamma} \right)$
+    \\
+    $\dfrac{c \, a}{\left( {\bar q}^* + q^*_0 \right)^{a+1}}$ &
+    $\dfrac{c^{\frac 1 a} / a}{\left( t^* + t^*_0 \right)^{\frac{1}{a}+1}}$ &
+    %$\left( \dfrac{c}{t^* + t^*_0} \right)^{1/a} - q^*_0$
+    $q^*_0 \left[\left( \dfrac{1+t^*_0}{t^* + t^*_0} \right)^\frac{1}{a} - 1\right]$
+    %$\,\begin{aligned}
+    %  &a, q^*_0 > 0, \\
+    %  &\frac{1}{t^*_0} \equiv \left(1+\frac{1}{q^*_0}\right)^a - 1, \\
+    %  &c \equiv {q^*_0}^a(t^*_0 + 1)
+    %\end{aligned}$
+    \\
+    \hline
+    \multicolumn{3}{p{8cm}}{
+    Here,
+    $\gamma > 0$,
+    and we have defined
+    $s_\gamma \equiv 1/(e^\gamma - 1)$,
+    ${t^*_0}^{-1} \equiv \left(1+{q^*_0}^{-1}\right)^a - 1$,
+    and
+    $c \equiv {q^*_0}^a(1 + t^*_0)$.
+    } \\
+    \hline
+  \end{tabular}
+\end{table}
+
+
+
 
 
 

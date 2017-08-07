@@ -45,6 +45,8 @@ static int getdatinfo(const char *fn)
   return 0;
 }
 
+/* get the number of histograms and number of bins, etc
+ * from the tag line of the histogram file */
 static int gethisinfo(const char *fn)
 {
   FILE *fp;
@@ -171,7 +173,7 @@ static int findpeak(const double *arr, double bc, int ileft, int iright, double 
   return imax;
 }
 
-/* find the critical point */
+/* find the critical inverse temperature */
 static double seekcrit(const double *arr, int *x1, int *x2, double *shift)
 {
   double bc, beta, w, sw, y1, y2, y, lns;
@@ -218,7 +220,7 @@ static double seekcrit(const double *arr, int *x1, int *x2, double *shift)
     lns = lnadd(lns, y);
   }
   lns += log(dx);
-  printf("lns %g\n", lns);
+  printf("lns %g for normalization\n", lns);
   *shift = lns;
   return bc;
 }
@@ -268,7 +270,7 @@ int main(int argc, char **argv)
   if ( gethisinfo(fnhis) != 0 ) return -1;
   reweight();
   smooth(lngs, lng, nb);
-  bc = seekcrit(lngs, &x1, &x2, &lns);
+  bc = seekcrit(lng, &x1, &x2, &lns);
   for ( ix = 0; ix < xn; ix++ ) {
     lng[ix] -= lns;
     lngs[ix] -= lns;
