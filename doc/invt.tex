@@ -213,14 +213,14 @@ regular updates to the bias potential
 disrupts the underlying equilibrium
 sampling\cite{zhou2005, morozov2007, zhou2008},
 and for convergence of the estimated PMF
-one has to gradually decrease
+one needs to gradually decrease
 the updating magnitude of the bias.
 
 
 
 The schedule of reducing
-the updating magnitude,
-therefore, critically affects
+the updating magnitude
+can critically affect
 the precision of the final bias potential,
 and hence that of the PMF\cite{laio2005, bussi2006, poulain2006,
 belardinelli2007, *belardinelli2007jcp, *belardinelli2008, *belardinelli2016,
@@ -228,6 +228,10 @@ liang2007, min2007,
 morozov2007, zhou2008,
 komura2012, *caparica2012, *caparica2014,
 barducci2008, dickson2011, dama2014}.
+%
+While a slow reduction leads to large variation of the bias potential,
+a rapid reduction can converge the bias potential
+to a wrong value.
 %
 For the single-bin case, the optimal updating schedule
 is a function of the
@@ -263,7 +267,7 @@ and the final error becomes the action.
 %
 In this way, the optimal schedule
 can be deduced from the equation of motion
-of the particle that minimizes the action.
+that minimizes the action.
 %
 The resulting optimal schedule
 depends on the updating window function
@@ -275,25 +279,21 @@ that for Gaussian case is more complex
 and sensitive to the simulation length
 and the width of the Gaussian window.
 %
-%In either case, however,
-%Ideally,
-%the optimal initial updating magnitude
-%can be set to
-%half of the previous equilibrium value,
-%which amounts to a shift of the origin of time
-%in the single-bin case.
+Further, we will compare
+the highest efficiency of error reduction
+of different updating schemes.
 %
-We will also show that
+We will show that
 the single-bin updating scheme
-is optimal for asymptotic convergence,
+is optimal for long simulations,
 and it can be generalized
-to a class of asymptotically optimal
-bandpass updating schemes.
+to a class of bandpass updating schemes
+that are equally optimal.
 %
 The latter allow one to partially flatten
 a few long-range histogram modes,
-and to avoid introducing local noise
-into the bias potential during the updating process.
+and to filter local noise
+during the updating process.
 
 The bandpass updating schemes are convenient
 in that their optimal schedule is simply given by
@@ -397,11 +397,10 @@ $(z, z + \delta z)$.
 %$\sum_{i = 1}^n p_i = 1$.
 
 
-
-The difficulty of sampling a multimodal distribution
-with deep valley(s) can sometimes be eased by
-sampling a smoother biased distribution, $\rho_i$.
-%
+Sampling a multimodal distribution with deep valley(s)
+is often challenging in traditional simulations,
+and a common remedy is to apply a bias potential
+to sample a smoother distribution, $\rho_i$.
 %
 We will broadly define
 a flat-distribution-sampling (FDS) simulation
@@ -410,7 +409,7 @@ targeting a flat $\rho_i$ (i.e. $\rho_i \equiv 1/n$ for $n$ bins)
 or a nearly flat one\cite{
 dayal2004, *trebst2004, barducci2008, singh2011}.
 %
-The biased equilibrium distribution
+Since the equilibrium distribution
 under a bias potential, $u_i$, is given by
 %
 \begin{equation}
@@ -427,8 +426,8 @@ under a bias potential, $u_i$, is given by
   %\label{eq:pi_p_V}
 \end{equation}
 %
-and our aim is to find a bias potential
-such that the resulting $\pi_i$ would coincide
+our aim is to find a bias potential that allows
+the resulting $\pi_i$ to coincide
 with the desired $\rho_i$.
 %
 Upon convergence, the bias potential would satisfy
@@ -461,7 +460,7 @@ wang2001, wang2001pre, huber1994,
 *laio2002, *laio2008, *barducci2011, *sutto2012}
 have been developed to find the proper bias potential.
 %
-In a class of equilibrium FDS methods\cite{
+In an earlier class of equilibrium FDS methods\cite{
   mezei1987, berg1992, *lee1993, marinari1992, *lyubartsev1992},
 the bias potential, $u_i$, is
 estimated a priori and fixed
@@ -501,10 +500,10 @@ continuous improvement of the bias potential
 %(hence that of the PMF)
 as simulation lengthens.
 
-Below we will focus on another class of adaptive FDS methods,
+Below we will focus on a more recent class of adaptive FDS methods,
 including the WL algorithm\cite{wang2001, wang2001pre}
 and metadynamics\cite{huber1994, laio2002, *laio2008, *barducci2011, *sutto2012},
-address the above shortcoming
+which address the above shortcoming
 by continuously and incrementally updating the bias potential.
 %
 %\subsubsection{Updating schemes}
@@ -529,11 +528,13 @@ $\delta_{i, \, i(t)}$ is the Kronecker delta function,
 which is $1$ when $i = i(t)$ or $0$ otherwise,
 and $\alpha(t)$ is the updating magnitude.
 %
-We refer to this scheme as the \emph{single-bin scheme},
+We refer to this scheme as
+the \emph{single-bin (updating) scheme},
 for it applies only to the bias potential
 at the current bin, $i(t)$.
 %
-In a more general \emph{multiple-bin scheme},
+In a more general
+\emph{multiple-bin (updating) scheme},
 %including the Gaussian updating scheme used in metadynamics,
 the updating also involves neighboring bins:
 %
@@ -550,13 +551,12 @@ the updating also involves neighboring bins:
 \end{equation}
 %
 The Gaussian updating scheme used in metadynamics
-is an example, with $w_{ij}$ being a Gaussian centered on $j$.
+is an example, with $w_{ij}$ being
+roughly a Gaussian centered on bin $j$.
 %
 Note that if the updating occurs
 only every few sampling steps,
 then $t$ means the number of updating steps.
-
-
 
 %\subsubsection{Updating magnitude and the inverse-time formula}
 
@@ -698,8 +698,7 @@ we introduce a shifted bias potential
   \ln \frac { p_i }
             { \rho_i }
   ,
-  \notag
-  %\label{eq:v_def}
+  \label{eq:v_def}
 \end{equation}
 %
 which should tend to a constant of $i$
@@ -819,7 +818,10 @@ $f_i(t) \equiv h_i(t) /\rho_i$.
 Clearly,
 %
 \begin{equation}
-  \bav{f}(t) = \sum_{i=1}^n h_i(t) = 1
+  \bav{f}(t)
+  = \sum_{i=1}^n \rho_i \cdot \frac{ h_i(t) } { \rho_i }
+  = \sum_{i=1}^n \delta_{i, i(t)}
+  = 1
   ,
   \label{eq:fav1}
 \end{equation}
@@ -1028,40 +1030,49 @@ The error depends implicitly on the curve, $\alpha(t)$,
 or, equivalently, the curve, $q(t)$,
 via $v_{*i}(T)$.
 %
-If $\alpha(t)$ is a constant, $a_0$,
-so that $q(t) = a_0 \, t$,
-then after a long period,
-the error approach an equilibrium value
-%
-\begin{equation}
-  \Err_\mathrm{equil.}
-  = \Err_A = \Gamma \int_0^\infty e^{-2\,q'} \, a_0 \, d q'
-  = \frac{1}{2} a_0 \Gamma
-  .
-  \label{eq:error_equil_sbin}
-\end{equation}
+%If $\alpha(t)$ is a constant, $a_0$,
+%so that $q(t) = a_0 \, t$,
+%then after a long period,
+%the error approach an equilibrium value
+%%
+%\begin{equation}
+%  \Err_\mathrm{equil.}
+%  = \Err_A = \Gamma \int_0^\infty e^{-2\,q'} \, a_0 \, d q'
+%  = \frac{1}{2} a_0 \Gamma
+%  .
+%  \label{eq:error_equil_sbin}
+%\end{equation}
 %
 Our aim is to find the $q(t)$
 that minimizes this error.
 %
-We now fix the endpoint value, $q(T)$,
-and vary the curve, $q(t)$ ($0 < t < T$).
+It is convenient to
+vary the curve, $q(t)$ ($0 < t < T$),
+under a fixed value of $q(T)$,
+since it allows us to focus on
+the asymptotic error, $E_A(T)$.
 %
-This is equivalent to varying the curve,
-$\vartheta\bigl( q(t) \bigr)$,
-with fixed endpoints,
+The contribution of the residual error
+will be considered later
+by adjusting the value of $q(T)$.
+%
+Note that the asymptotic error
+has the form of an action of a free particle
+at $\vartheta\bigl( q(t) \bigr)$,
+with the endpoints fixed at
 $\vartheta\bigl( q(0) \bigr)  = e^{- q(T)}$
 and
 $\vartheta\bigl( q(T) \bigr) = 1$.
 %
-Since the residual error
-is fixed during the process,
-the asymptotic error,
-resembling the action of a free particle,
-demands a constant velocity
+Thus, the velocity should be a constant
+%Since the residual error
+%is fixed during the process,
+%the asymptotic error,
+%resembling the action of a free particle,
+%demands a constant velocity
 %
 \begin{equation}
-  \dot \vartheta\bigl( q(t) \bigr) = c
+  \frac{d}{dt} \vartheta\bigl( q(t) \bigr) = c
   .
 \label{eq:dthetadt_const}
 \end{equation}
@@ -1079,8 +1090,8 @@ Then, by using Eq. \eqref{eq:theta_def}, we have
 \label{eq:expqt}
 \end{equation}
 %
-where $t_0$ is some constant,
-and $c$ has been determined
+where $t_0$ and $c$ are two constants,
+and the latter has been determined
 from the $t = T$ case
 in the second step.
 %
@@ -1131,8 +1142,21 @@ and the total has a minimum of
   \label{eq:Emin_sbin}
 \end{equation}
 %
-which is reached at $t_0 = \Gamma /\Err(0)$,
-or if we assume Eq. \eqref{eq:error_equil_sbin} for $\Err(0)$,
+reachable at $t_0 = \Gamma /\Err(0)$.
+%
+If we assume that at the beginning, $t = 0$,
+the system has gone through a long simulation
+under a constant updating magnitude, $a_0$,
+then the initial error can be computed from Eq. \eqref{eq:EA_sbin}
+as
+\begin{equation}
+  \Err(0)
+  = \Gamma \int_0^\infty e^{-2\,q'} \, a_0 \, d q'
+  = \frac{1}{2} a_0 \Gamma
+  ,
+  \label{eq:error_equil_sbin}
+\end{equation}
+and
 %
 \begin{equation}
   t_0 = \frac{ 2 } { a_0 } = \frac{1}{ \alpha(t = 0) }
@@ -1140,9 +1164,9 @@ or if we assume Eq. \eqref{eq:error_equil_sbin} for $\Err(0)$,
   \label{eq:t0_sbin}
 \end{equation}
 %
-The minimum error can be related to
-the expected histogram fluctuation\cite{zhou2005, zhou2008}
-(cf. Appendix \ref{sec:hfluc}).
+%The minimum error can be related to
+%the expected histogram fluctuation\cite{zhou2005, zhou2008}
+%(cf. Appendix \ref{sec:hfluc}).
 
 
 
@@ -1210,8 +1234,9 @@ $\sum_{j=1}^n w_{ij}$ should be a constant
 to allow the bias potential to grow uniformly
 in the asymptotic regime.
 %
-By a proper overall scaling of $\mathbf w$,
-we may write this condition as
+If the rate of growth is positive,
+we can, by a proper overall scaling of $\mathbf w$,
+write this condition as
 %
 \begin{equation}
   \sum_{j = 1}^n w_{ij} = 1
@@ -1279,7 +1304,7 @@ satisfying the orthonormal conditions\cite{vankampen}:
   \label{eq:eig_orthonormal_rows}
 \end{align}
 %
-where we have set the index of the first eigenmode to $0$
+where we have started the index of the eigenmodes at $0$
 instead of $1$ for later convenience.
 
 The above symmetry implies the existence of
@@ -1322,19 +1347,6 @@ while the orthogonality demands
   .
 \label{eq:ortho0}
 \end{equation}
-%
-We may reconstruct the updating matrix in $\phi_{ki}$'s
-as\cite{bussi2006}
-%
-\begin{equation}
-  w_{ij}
-  =
-  \frac{1}{\rho_i} \sum_{k=0}^{n - 1}
-  \lambda_k \, \phi_{ki} \, \phi_{kj}
-  .
-  \label{eq:w_from_phi}
-\end{equation}
-
 
 We can further define
 a generalized Fourier transform, $\mathcal{F}$,
@@ -1440,12 +1452,13 @@ we have used Eq. \eqref{eq:xtstar} and
 the transformed version of Eq. \eqref{eq:sh_ave}
 in the second step.
 
-Equation \eqref{eq:vt_diffeq_mbin}
-shows that the rate of error reduction
-is given by $\alpha(t) \, \lambda_k$.
+Equation \eqref{eq:vt_diffeq_mbin} shows that
+in the absence of the fluctuating term, $\tilde \zeta_k(t)$,
+the deviation of the bias potential would tend to zero
+at a rate of $\alpha(t) \, \lambda_k$.
 %
-Thus, a \emph{stable} updating scheme
-permits no negative eigenvalue, $\lambda_k$,
+Thus, the updating scheme is convergent
+only if no eigenvalue, $\lambda_k$, is negative
 for $k > 0$.
 %
 With a set of heterogeneous eigenvalues,
@@ -1547,9 +1560,9 @@ the underlying sampling process
 affects the error only through the
 few numbers, $\Gamma_k$'s.
 %
-In Appendix \ref{sec:Gamma_measure},
-we discuss a way of estimating $\Gamma_k$
-from an FDS simulation under a constant magnitude.
+%In Appendix \ref{sec:Gamma_measure},
+%we discuss a way of estimating $\Gamma_k$
+%from an FDS simulation under a constant magnitude.
 %
 
 
@@ -1909,66 +1922,6 @@ wang2001, wang2001pre}.
 
 
 
-\subsubsection{\label{sec:band-matrix}
-Homogeneous updating schemes}
-
-
-
-Many commonly-used updating schemes,
-such as the Gaussian updating scheme
-used in metadynamics,
-can be characterized by a rigid window
-centered on the current bin.
-%
-If we denote the relative updating magnitude on
-the $i$th bin from the center by $\mu_i$,
-the eigenvalues of these translationally invariant or homogeneous
-schemes can be readily deduced
-from the window function ($\mu_0, \mu_1, \dots, \mu_b$)
-as a cosine transform,
-%
-\begin{equation}
-  \lambda_k
-  =
-  \mu_0
-  +
-  2 \,
-  \sum_{ i = 1 }^b
-  \mu_i
-  \cos\left(
-  \frac{ k \, i \, 2 \, \pi }
-       {      g \, n        }
-  \right)
-  ,
-  \label{eq:wband_eigenvalue}
-\end{equation}
-%
-where $g = 1$ here for the periodic variable,
-or $2$ for a non-periodic one
-(cf. Appendix \ref{sec:more_wband}).
-%
-For the Gaussian updating scheme,
-we have\cite{bussi2006}
-\begin{align}
-  \lambda_k
-  =
-  \exp\left[
-        -\frac 1 2
-        \left(
-         \frac{ 2 \, \pi \, k \, \sigma_z }
-              { g \, \Delta z  }
-        \right)^2
-      \right]
-  ,
-%\notag
-\label{eq:lambda_Gaussian}
-\end{align}
-where $\sigma_z$ and $\Delta z = z_{\max} - z_{\min}$
-are the width of the Gaussian and the span
-in the original collective variable, $z$,
-respectively.
-
-
 \subsubsection{\label{sec:procedure}
 Procedure of computing the optimal schedule and error
 }
@@ -2187,6 +2140,98 @@ As we will show below, for a class of bandpass updating schemes,
 
 
 
+\subsubsection{\label{sec:Gaussian_scheme}
+Gaussian and homogeneous updating schemes}
+
+
+
+Perhaps the most commonly-used multiple-bin updating scheme in metadynamics
+is the Gaussian updating scheme,
+whose updating matrix can be characterized by
+a fixed Gaussian centered on the bin of visit,
+with some boundary adjustment
+to satisfy the constraints discussed
+in Sec. \ref{sec:updating-matrix},
+as shown in Fig. \ref{fig:mat}(a).
+%
+The eigenvalues of this scheme are given by\cite{bussi2006}
+\begin{align}
+  \lambda_k
+  =
+  \exp\left[
+        -\frac 1 2
+        \left(
+         \frac{ 2 \, \pi \, k \, \sigma_z }
+              { g \, \Delta z  }
+        \right)^2
+      \right]
+  ,
+%\notag
+\label{eq:lambda_Gaussian}
+\end{align}
+where $\sigma_z$ and $\Delta z = z_{\max} - z_{\min}$
+are the width of the Gaussian and the span
+in the original collective variable, $z$,
+respectively.
+
+\begin{figure}[h]
+\begin{center}
+  \makebox[\linewidth][c]{
+    \includegraphics[angle=0, width=1.0\linewidth]{fig/mat.pdf}
+  }
+  \caption{
+    \label{fig:mat}
+    Updating matrix, $w_{ij}$, for
+    a non-periodic variable ($n = 500$).
+    Here $j$ is the bin of the current collective variable,
+    and $i$ is the bin where the bias potential is updated.
+    %
+    (a) The Gaussian updating scheme of width $\sigma = 20$ bins.
+    (b) The bandpass updating scheme of $K = 20$.
+    %
+    Both updating schemes are homogeneous in that
+    they can be characterized a rigid window
+    centered on the current bin, $j$,
+    with some boundary corrections.
+  }
+\end{center}
+\end{figure}
+
+
+More generally, we can define a class of
+translationally invariant or \emph{homogeneous} updating schemes
+that can be characterized by a rigid window function
+with a floating center.
+%
+These homogeneous updating schemes share
+the same set of orthonormal eigenmodes, $\phi_{ki}$,
+(which are sines and cosines),
+and differ only by the eigenvalues.
+%
+By the completeness of the eigenmodes,
+we can readily reconstruct the updating matrix
+as\cite{bussi2006}
+%
+\begin{equation}
+  w_{ij}
+  =
+  \frac{1}{\rho_i} \sum_{k=0}^{n - 1}
+  \lambda_k \, \phi_{ki} \, \phi_{kj}
+  .
+  \label{eq:w_from_phi}
+\end{equation}
+%
+This formula allows us to define new updating schemes
+whose spectrum of eigenvalues are optimal
+for asymptotic convergence,
+which we will discuss below.
+%
+The result is a class of bandpass updating schemes,
+as shown in Fig. \ref{fig:mat}(b).
+
+
+
+
 \subsection{\label{sec:cmpschemes}
 Comparison of updating schemes}
 
@@ -2194,7 +2239,9 @@ Comparison of updating schemes}
 Now that we can compute the optimal schedule
 for a given updating scheme,
 we will turn to the problem of finding
-optimal updating schemes.
+optimal updating schemes
+given that each updating scheme
+adopts the optimal schedule.
 
 
 \subsubsection{\label{sec:optWL}
@@ -2334,8 +2381,8 @@ Bandpass updating schemes}
 We can generalize
 the single-bin scheme to a class of
 perfect (brick-wall) \emph{bandpass} updating schemes
-that completely discard certain short-wavelength eigenmodes
-that are deemed as local noise.
+that completely discard certain noise modes
+of short wavelengths.
 %
 If the eigenmodes are sorted in descending order
 of the wavelength,
@@ -2346,43 +2393,53 @@ eigenmodes,\footnote{As an estimate of error,
   at mode $K$ for a non-periodic variable
   results in an error roughly proportional to
   $|\max_i u_i - \min_i u_i|^2/K^3$.}
-we may construct an updating scheme
-from Eq. \eqref{eq:w_from_phi} with
+we may assign the first $K$ eigenmodes with eigenvalue $1$
+and the rest of eigenmodes with eigenvalue $0$:
 %
 \begin{equation}
-  \lambda_1 = \cdots = \lambda_{K-1} = 1,
+  \lambda_1 = \cdots = \lambda_{K-1} = 1
+  ,
   \mathrm{\; and \;}
-  \lambda_K = \cdots = \lambda_{n-1} = 0.
+  \lambda_K = \cdots = \lambda_{n-1} = 0
+  .
   \label{eq:lambda_bandpass}
 \end{equation}
+%
+We can then obtain the updating matrix
+from the eigenvalues by Eq. \eqref{eq:w_from_phi}
+(cf. Sec. \ref{sec:homo_bandpass} for the case
+of homogeneous updating schemes).
 %
 %Then, the updating matrix is, according to
 %Eq. \eqref{eq:w_from_phi},
 %%
 %$$w_{ij} = \frac{1}{\rho_i} \sum_{k=0}^{K-1} \phi_{ki} \, \phi_{kj}.$$
-%%
-With the eigenvalues for the non-noise and noise modes being
-$1$ and $0$, respectively,
-a bandpass updating scheme is essentially
-the single-bin updating scheme
-accompanied by a perfect filter
-for the designated noise modes.
 %
-The asymptotic error is then
-$\Err_A(T) = \sum_{ k = 1 }^{ K - 1 } \Gamma_k T/(T + t_0)^2$,
-which is less than that from Eq. \eqref{eq:EA_sbin1}.
+In effect, each updating step of the bandpass updating scheme
+is equivalent to a single-bin updating step,
+Eq. \eqref{eq:wl_update},
+followed by a filtering step
+that completely removes the components of the noise modes
+from the potential of mean force.
 %
+%The asymptotic error is then
+%$\Err_A(T) = \sum_{ k = 1 }^{ K - 1 } \Gamma_k T/(T + t_0)^2$,
+%which is less than that from Eq. \eqref{eq:EA_sbin1}.
 
-Comparing Eq. \eqref{eq:lambda_bandpass}
-with Eq. \eqref{eq:lambda_Gaussian},
-we find that the bandpass updating scheme serves
-as an idealization of the Gaussian updating scheme
-with the Gaussian spectrum of eigenvalues
-being replaced by a step function.
+
+For homogeneous updating schemes,
+the bandpass updating scheme resembles Gaussian updating schemes,
+but contains long-range wiggles,
+as shown in Fig. \ref{fig:mat}(b).
 %
-Although both updating schemes are able to remove local noise
-from the bias potential,
-the bandpass updating schemes have the advantage
+Both updating scheme are able to deliver
+a smooth and differentiable potential of mean force,
+the former is expected to be superior in asymptotic convergence,
+%
+With a $0$-or-$1$ spectrum of eigenvalues,
+Eq. \eqref{eq:lambda_bandpass},
+instead of a Gaussian one, Eq. \eqref{eq:lambda_Gaussian},
+the bandpass updating scheme has the advantage
 of allowing convenient control of the updating magnitude.
 %
 In the asymptotic regime,
@@ -2396,35 +2453,45 @@ for a general updating scheme.
 %
 In initial stages, when the inverse-time schedule
 may be inapplicable,
-we can instead use the stage-wise WL technique
-as long as the histogram fluctuation
-used for stage transitions
-is computed from the first $K$ modes
+we can instead use the WL style stage-wise control
+for the updating magnitude.
+%
+In this case, the histogram fluctuation used for stage transitions
+should be computed from only the first $K$ modes,
+where the histogram flattening was performed
 (cf. Appendix \ref{sec:hfluc}).
 
 \subsection{\label{sec:bandpass_poly}
 Bandpass updating schemes constructed from polynomial bases}
 
-In addition to the application to homogeneous updating schemes
-(Appendix \ref{sec:homo_bandpass}),
-bandpass updating schemes can also be applied to
-a continuous variable, $z$,\footnote{
-  In the transition to a continuous variable,
-  we will map
-  $\rho_i$ to $\rho(z) \, \delta z$,
+\subsubsection{Orthogonal polynomial basis}
+
+We can also construct the bandpass updating schemes
+from an orthogonal polynomial basis,
+which can simplify the functional form of the bias potential.
+%
+In discussing this application,
+it is more convenient to switch to a continuous-variable setup:
+%
+We will replace the discrete bin index by the continuous variable, $z$.
+%
+and map $\rho_i$ to $\rho(z) \, \delta z$,
   $\phi_{ki}$ to $\phi_k(z) \, \delta z$,
-  $w_{ij}$ to $w(z, z') \, \delta z$, etc.}
-with the eigenmodes derived from orthogonal polynomials, $R_k(z)$,
-that satisfy
+  $w_{ij}$ to $w(z, z') \, \delta z$, etc.
+%
+We define the eigenvectors by
+$\phi_k(z) = R_k(z) \, \rho(z)$,
+where $R_k(z)$ are a set of orthogonal polynomials
+satisfying
 \begin{align*}
   \int R_k(z) \, R_{k'}(z) \, \rho(z) \, d z = \delta_{k, k'}
   .
 \end{align*}
 %
-With $\phi_k(z) = R_k(z) \, \rho(z)$,
-we can readily satisfy Eqs. \eqref{eq:eig_orthonormal_cols}-\eqref{eq:ortho0},
-and construct the updating matrix by
-Eqs. \eqref{eq:w_from_phi} and \eqref{eq:lambda_bandpass} as
+These eigenvectors allow us to construct the updating matrix
+Eq. \eqref{eq:w_from_phi},
+%we can readily satisfy Eqs. \eqref{eq:eig_orthonormal_cols}-\eqref{eq:ortho0},
+with the eigenvalues given by \eqref{eq:lambda_bandpass}:
 \begin{align*}
   w(z, z')
   =
@@ -2447,6 +2514,7 @@ with the coefficients updated as, according to Eq. \eqref{eq:mbin_update},
   \label{eq:ckupdate}
 \end{equation}
 
+\subsubsection{LLR algorithm}
 
 For example,
 to sample a flat distribution, $\rho(z)$,
@@ -2463,6 +2531,8 @@ We thus recover the LLR
 algorithm\cite{langfeld2012},
 and the inverse-time schedule
 was recommended for optimal convergence of $c_1$\cite{pellegrini2014}.
+
+\subsubsection{Adaptive Gaussian umbrella sampling}
 
 Alternatively,
 to sample a Gaussian distribution
@@ -2520,12 +2590,12 @@ framework\cite{neuhaus2006, *neuhaus2007, kim2010},
 the transition probability in the latter case
 requires estimation of the partition function
 of the Gaussian ensemble
-$Z \equiv \int e^{-\beta \, \mathcal U(\mathbf x)-u(z(\mathbf x),t)} \, d\mathbf x$
+$Z \equiv \int e^{-\beta \, \Phi(\mathbf x)-u(z(\mathbf x),t)} \, d\mathbf x$
 as the bias potential for inter-umbrella transitions.
 %
 Here,
 $\beta$ is the inverse temperature,
-$\mathcal U(\mathbf x)$ is the unbiased potential energy
+$\Phi(\mathbf x)$ is the unbiased potential energy
 as a function of molecular coordinates, $\mathbf x$,
 and $z$ has also been written as a function of $\mathbf x$.
 %
@@ -2640,18 +2710,40 @@ Numerical results}
 Comparison of updating schemes}
 
 
+\subsubsection{System and simulation details}
+
 Our first test system is
 a Lennard-Jones (LJ) fluid of $100$ particles,
 and we wish to compute the PMF along
 the distance, $r$, between two special particles.
 %
-The two special particles are mutually non-interacting
-but they interact normally with other particles,\footnote{The
-two special particles were placed on an axis parallel to a side of the cubic box}
-and the intrinsic distribution, $p(r)$, is
-the cavity distribution function, $y(r)$\cite{hansen}.
+We will assume reduced units in the calculation.
 %
-We will assume reduced units in this calculation.
+The two special particles are mutually non-interacting
+but they interact normally with other particles
+via the pair potential $u(r) = 4(r^{-12} - r^{-6})$.
+%
+The intrinsic distribution of distance, $p(r)$, is
+\begin{align*}
+  p(r) = \langle \delta(\mathbf r_{12} - \mathbf r) \rangle
+  =
+  \frac{V}{Z}
+  \int e^{-\Phi(\mathbf r^N)/(k_B T)}
+  d\mathbf r_3 \cdots d\mathbf r_N
+  ,
+\end{align*}
+where
+$\Phi(\mathbf r^{N}) = \sum_{j=3}^N\sum_{i=1}^{j-1} \phi(r_{ij})$,
+%
+and it is related the cavity distribution function, $y(r)$\cite{hansen},
+as $y(r) = \left(1 - \frac{1}{N}\right) \, V \, p(r)$.
+%
+In biased sampling, we fixed the two special particles on the $x$-axis,
+and varied their distance $r$ along the axis.
+%
+Further, we added a bias potential $k_B T \, u(r)$,
+which would ideally bias $p(r)$
+to a flat distribution along $r$.
 %
 The reference bias potential was pre-calculated from a long simulation.
 
@@ -2663,7 +2755,7 @@ one MC trial for displacing one of the two special particles,
 and another four trials for displacing the other particles.
 %
 In each trial,
-a random particle is displaced in each dimension
+a random particle is displaced in each permissible dimension
 according to a uniform distribution over $(-\varepsilon^*, \varepsilon^*)$.
 We used $\varepsilon^* = 0.1/\varrho^*$
 to ensure reasonable acceptance ratio,
@@ -2679,7 +2771,8 @@ and the numbers of bins were $n = 500$ and $250$, respectively.
 %
 The reduced temperature was $T^* = 3$.
 %
-We tested the single-bin, Gaussian, and bandpass updating schemes.
+We tested the single-bin, Gaussian,
+and homogeneous bandpass updating schemes.
 %
 Each simulation started with an ``equilibration'' phase
 of $10^7$ steps under a constant updating magnitude,
@@ -2688,6 +2781,13 @@ were $0.05$ and $0.025$ for $\varrho^* = 0.1$ and $\varrho^* = 0.8$, respectivel
 followed by a production phase of another $10^7$ steps
 with updating magnitude given by
 either the inverse-time or optimal schedule.
+%
+The deviation of the bias potential was calculated from
+Eqs. \eqref{eq:v_def} and \eqref{eq:x_def},
+and decomposed to eigenmodes by
+Eqs. \eqref{eq:gft_def} and \eqref{eq:wband_eigenvector_refl}.
+%
+The error was computed from Eq. \eqref{eq:error_def}.
 %
 We repeated each simulation multiple times
 and report the average.
@@ -2699,6 +2799,7 @@ although ideally they could be estimated from the data
 collected from the equilibration phase in individual runs.
 
 
+\subsubsection{Results}
 
 As shown in Table \ref{tab:lj_error},
 all updating schemes
@@ -3041,7 +3142,7 @@ on the two-dimensional $L\times L$ ten-state
 Potts model\cite{wu1982, newman, wang2001, wang2001pre}
 in the energy space.
 %
-In this case, $\mathcal U(\mathbf x) = 0$
+In this case, $\Phi(\mathbf x) = 0$
 and the intrinsic distribution is
 the density of states, $\ln g(E)$.
 %
@@ -3328,7 +3429,9 @@ and the parameters used here might not be optimal.
 We thank Dr. Y. Mei, J. Wang,
 O. Nassar, Dr. C. Lai, Dr. S. Ou, D. Stuhlsatz,
 Dr. C. Myers, and Dr. O. Samoylova
-for helpful discussions.
+for helpful discussions,
+and the two anonymous reviewers for critical reading
+of earlier versions of the manuscript.
 %
 We gratefully acknowledge the Robert A. Welch Foundation (H-0037),
 the National Science Foundation (CHE-1152876)
@@ -4126,11 +4229,22 @@ Homogeneous updating schemes
 
 
 Here, we give some mathematical details
-on the homogeneous updating schemes.
+on the homogeneous updating schemes,
+%
+The updating matrix of the updating schemes, $w_{ij}$,
+can be characterized by
+a fixed window function, $\mu_0, \mu_1, \dots, \mu_b$,
+that shifts with the bin $j$.
+%
+Here $\mu_l$ denotes the relative updating magnitude
+on the $l$th bin from the center
+(excluding the boundary adjustment).
+%
+We will show below that the eigenvalues of the updating matrix
+is related to the window function as a cosine transform.
 %
 By the translational invariance,
-these schemes
-satisfy detailed balance,
+these schemes satisfy detailed balance,
 Eq. \eqref{eq:w_detailedbalance},
 for the flat distribution, $\rho_i = 1/n$,
 i.e. the updating matrix, $\mathbf w$,
@@ -4329,8 +4443,26 @@ where the function takes the cosine form for $k \le n/2$,
 or the sine form otherwise.
 %
 Then one can readily verify that the eigenvalues are given by
-  Eq. \eqref{eq:wband_eigenvalue},
-  and there is a two-fold degeneracy,
+\begin{equation}
+  \lambda_k
+  =
+  \mu_0
+  +
+  2 \,
+  \sum_{ l = 1 }^b
+  \mu_l
+  \cos\left(
+  \frac{ k \, l \, 2 \, \pi }
+       {      g \, n        }
+  \right)
+  ,
+  \label{eq:wband_eigenvalue}
+\end{equation}
+%
+where $g = 1$ here, with a two-fold degeneracy,
+%for the periodic variable,
+%or $2$ for a non-periodic one
+%There is a two-fold degeneracy,
   $\lambda_{n - k} = \lambda_k$.
 \note{Consider the unnormalized exponential equivalent
   \begin{align*}
@@ -4479,14 +4611,14 @@ and be even functions about the same axis:
        \frac{ k \, \left( i - \frac 1 2 \right) \, 2 \, \pi}
             {             2 \, n                           }
        \right]
-  ,
-\notag
-%\label{eq:wband_eigenvector_refl}
+  .
+  %\notag
+  \label{eq:wband_eigenvector_refl}
 \end{equation}
 %
-and the eigenvalues are given by
-  Eq. \eqref{eq:wband_eigenvalue}
-  with $g = 2$.
+%and the eigenvalues are given by
+%  Eq. \eqref{eq:wband_eigenvalue}
+%  with $g = 2$.
 
 \note{Derivation.
   First consider the unnormalized eigenvectors,
@@ -4732,7 +4864,7 @@ using Eq. \eqref{eq:mu_from_lambda}.
 
 
 \subsection{\label{sec:homo_bandpass}
-Bandpass updating schemes}
+Homogeneous bandpass updating schemes}
 
 
 

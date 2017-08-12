@@ -74,7 +74,7 @@ static void metad_prepwin(metad_t *metad,
   /* save the window kernel */
   savewin(metad->win, metad->winn, "ker.dat");
   /* save the n x n updating matrix */
-  savewinmat(metad->win, metad->winn, n, pbc, "win.dat");
+  savewinmat(metad->win, metad->winn, n, pbc, "win.dat", 0);
 }
 
 static metad_t *metad_open(int imin, int imax, int idel,

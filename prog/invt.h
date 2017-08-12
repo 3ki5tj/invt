@@ -238,7 +238,7 @@ __inline static int savewin(double *win, int winn,
 /* save the updating window function
  * in matrix form */
 __inline static int savewinmat(double *win, int winn,
-    int n, int pbc, const char *fn)
+    int n, int pbc, const char *fn, int matrix)
 {
   FILE *fp;
   int i, j, ks[3], k, l;
@@ -261,6 +261,7 @@ __inline static int savewinmat(double *win, int winn,
         ks[1] = i + j - 1;
         ks[2] = i + j - 2 * n - 1;
       }
+      /* add contributions from ks[0], ks[1], ks[2] */
       for ( l = 0; l < 3; l++ ) {
         k = ks[l];
         if ( k < winn && k > -winn ) {
@@ -273,7 +274,11 @@ __inline static int savewinmat(double *win, int winn,
       }
       if ( y > ymax ) ymax = y;
       if ( y < ymin ) ymin = y;
-      fprintf(fp, "%9.6f ", y);
+      if ( matrix ) { /* matrix form */
+        fprintf(fp, "%9.6f ", y);
+      } else { /* plain form */
+        fprintf(fp, "%d %d %9.6f\n", i, j, y);
+      }
     }
     fprintf(fp, "\n");
   }
@@ -408,7 +413,7 @@ __inline static double *prepwin(double *lambda, int n,
   }
   if ( fnwinmat[0] != '\0' ) {
     /* save the n x n updating matrix */
-    savewinmat(win, *winn, n, pbc, fnwinmat);
+    savewinmat(win, *winn, n, pbc, fnwinmat, 0);
   }
   return win;
 }
