@@ -1,9 +1,9 @@
 prj=invt
 
-ver=7.3
+ver=7.4
 
 figgps=$(wildcard fig/*.gp)
-pdffigs=$(patsubst %.gp,%.pdf, $(figgps))
+pdffigs=$(patsubst %.gp,%.pdf, $(figgps)) massq.pdf vardep.pdf
 epsfigs=$(patsubst %.gp,%.eps, $(figgps))
 
 texpdf = $(prj).pdf $(prj)_notes.pdf
@@ -50,7 +50,7 @@ $(prj)docV$(ver).zip::
 	make diff
 	cd old/V$(ver) && \
 	  zip -r ../../$(prj)docV$(ver).zip *.tex *.pdf simul.bib *.py \
-	       $(epsfigs) $(pdffigs) $(figgps) Makefile README.md
+	       $(epsfigs) $(pdffigs) $(figgps) fig/figs.tex fig/Makefile Makefile README.md
 
 #	rsync -avz $(prj)_notes.tex old/V$(ver)/$(prj)_notesV$(ver).tex
 

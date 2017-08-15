@@ -318,11 +318,11 @@ __inline static int gaus_loadhist(gaus_t *gaus, const char *fn)
 /* update the parameters of the bias potential */
 __inline static void gaus_add(gaus_t *gaus, int i, int x, int acc)
 {
-  double ave = gaus->ave[i], sig = gaus->sig[i], y1, y2, alphamm, alpha;
+  double ave = gaus->ave[i], sig = gaus->sig[i], y1, y2, alphamm;
   int j;
   mmwl_t *mm = gaus->mmwl + i;
 
-  alpha = gaus_getalpha(gaus, i, &alphamm);
+  gaus_getalpha(gaus, i, &alphamm);
 
   y1 = (x - ave) / sig;
   y2 = (y1 * y1 - 1) / SQRT2;
@@ -333,8 +333,6 @@ __inline static void gaus_add(gaus_t *gaus, int i, int x, int acc)
   gaus->t += 1;
   gaus->cnt[i] += 1;
   gaus->acc[i] += acc;
-  if ( gaus->lnzmethod == LNZ_WL )
-    gaus->lnz[i] += alpha;
   j = (x - gaus->xmin) / gaus->dx;
   gaus->hist[i * gaus->xn + j] += 1;
 }
@@ -473,6 +471,11 @@ __inline static int gaus_move(gaus_t *gaus, double x, int *id)
       gaus->c2[jd] = gaus->c2[*id];
     }
     *id = jd;
+  }
+  if ( gaus->lnzmethod == LNZ_WL ) {
+    double alpha, alphamm;
+    alpha = gaus_getalpha(gaus, *id, &alphamm);
+    gaus->lnz[*id] += alpha;
   }
   return acc;
 }

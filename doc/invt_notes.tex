@@ -4364,6 +4364,71 @@ from Eq. \eqref{eq:Gamma_sum}, we get
 \end{equation}
 
 
+The
+  following method appeared to have some stability issues,
+  so we switched back to the double-WL approach,
+  which hopefully is stable.
+  %
+  The reason of instability might be
+  that the inter-umbrella fluctuation
+  and the intra-umbrella fluctuation are some coupled.
+  So the updating magnitude cannot be adjusted individually
+  for the each umbrella.
+  %
+  Following the method for weight determination
+  in simulated tempering\cite{park2007,
+  *nguyen2013, *zhang2015st},
+  we can estimate $Z^{(j)}/Z^{(i)}$
+  for a neighboring pair, $(i, j)$, as
+  %
+  \begin{align*}
+    &\ln\frac{ Z^{(j)} }{ Z^{(i)} }
+    \approx
+    \ln\frac{ \sigma_z^{(j)} }{ \sigma_z^{(i)} }
+    +
+    \frac{ \Delta z_c } { 2 }
+    \left(
+      \frac{ c_1^{(i)} } { \sigma_z^{(i) 2} }
+      +
+      \frac{ c_1^{(j)} } { \sigma_z^{(j) 2} }
+    \right)
+    +
+    \frac{ c_2^{(j)} - c_2^{(i)} } { \sqrt 2 }
+    \\
+    &-
+    \left(
+      \frac{ \sqrt 2 \, c_2^{(j)} - 1 }
+           { 2 \, \sigma_z^{(j)} }
+      -
+      \frac{ \sqrt 2 \, c_2^{(i)} - 1 }
+           { 2 \, \sigma_z^{(i)} }
+    \right)
+    \left(
+      \frac{ \Delta z_c^{2} } { 6 }
+      +
+      \frac{ \sigma_z^{(i) 2} + \sigma_z^{(j) 2} } { 2 }
+    \right)
+    ,
+  \end{align*}
+  %
+  where
+  $\Delta z_c \equiv z_c^{(j)} - z_c^{(i)}$.
+  For equal width, we have
+  \begin{align*}
+    \ln\frac{ Z^{(j)} }{ Z^{(i)} }
+    \approx
+    \frac{ \Delta z_c \, ( c_1^{(i)} + c_1^{(j)} ) } { 2 \, \sigma_z }
+    -
+    \left(
+      \frac{ c_2^{(j)} - c_2^{(i)} }
+           { 6 \sqrt 2 }
+    \right)
+    \left(
+      \frac{ \Delta z_c^{2} } { \sigma_z^2 }
+    \right)
+    .
+  \end{align*}
+
 
 
 \bibliography{simul}

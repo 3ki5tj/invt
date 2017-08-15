@@ -4,10 +4,11 @@ EPSGP = $(filter-out $(PNGGP), $(GP))
 EPS = $(patsubst %.gp,%.eps, $(EPSGP))
 PDF = $(patsubst %.gp,%.pdf, $(EPSGP))
 PNG = $(patsubst %.gp,%.png, $(PNGGP))
+XPDF = massq.pdf vardep.pdf
 epsdeps = Makefile $(wildcard ../data/*/*.dat)
 pngdeps = Makefile
 
-all: $(PNG) $(PDF)
+all: $(PNG) $(PDF) $(XPDF)
 
 $(PNG) : %.png : %.gp $(pngdeps)
 	gnuplot $<
@@ -17,6 +18,11 @@ $(PDF) : %.pdf : %.eps $(epsdeps)
 
 $(EPS) : %.eps : %.gp $(epsdeps)
 	gnuplot $<
+
+$(XPDF): figs.tex
+	pdflatex -shell-escape $<
+	mv figs-figure0.pdf massq.pdf
+	mv figs-figure1.pdf vardep.pdf
 
 clean:
 	rm -f $(PDF) $(EPS) $(PNG) *~
