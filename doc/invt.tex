@@ -2801,38 +2801,20 @@ collected from the equilibration phase in individual runs.
 \subsubsection{Results}
 
 As shown in Table \ref{tab:lj_error},
-all updating schemes
-with either the inverse-time or optimal schedule
-were able to reduced
-the error significantly,
-and the errors roughly matched the predicted values
+both the optimal and inverse-time schedules
+were able to reduced the error significantly,
+suggesting the potential benefit of using a decreasing updating magnitude
+even with a sometimes sub-optimal schedule.
+%
+It is also reassuring to see that
+the errors roughly matched the predicted values
 calculated using the pre-computed
 $\Gamma_k$'s and $\epsilon_k$'s.
 %
-The Gaussian updating scheme produced less error than
-the single-bin scheme in the $\varrho = 0.1$ case,
-but not in the $\varrho = 0.8$ case.
-%
-The effectiveness of the Gaussian updating scheme
-in the low-density case
-was probably because the sampling along
-the collective variable was free from major barriers
-and thus the histogram fluctuation largely
-came from local noise.
-%
-%The optimal schedule also appeared to be more effective
-%in reducing the error than the inverse-time schedule.
-%%
-In this case, we could further reduced the error
-by using the bandpass updating scheme
-(with the mode cutoff $K = 20$).
-%
-On the other hand, in the high-density case,
-the error was dominated by the $k=1$ eigenmode
-corresponding to the longest range fluctuation,
-as $\Gamma_1 \approx \Gamma$,
-and the reduction of local noise
-had little effect on the total error.
+Since the two schedules are identical
+in the single-bin and bandpass updating schemes,
+we will focus on the Gaussian updating scheme below
+in discussing the optimal schedule.
 
 
 \begin{table}[h]\footnotesize
@@ -2962,27 +2944,31 @@ had little effect on the total error.
   \end{tabular}
 \end{table}
 
-For the Gaussian updating scheme,
-there was an optimal width for maximum effectiveness.
+As shown in Fig. \ref{fig:lj_alpha},
+the optimal schedules for the Gaussian updating schemes
+differed from inverse-time one,
+and the former tended to be larger.
 %
-The optimal width was $\sigma = 0.37$ for $\varrho = 0.1$
-or $0.07$ for $\varrho = 0.8$,
-and it also depended on the simulation length
-and other parameters.
+The optimal schedule was more effective
+than the sub-optimal inverse-time schedule
+in reducing the error,
+as shown in Table \eqref{tab:lj_error}.
 %
-Although widening the Gaussian can
-effectively suppress random error
-from local histogram fluctuation,
-it also increased the risk of including
-more systematic bias in middle-range modes,
-which can be difficult to remove
-even with the optimal schedule.
+Although the advantage of the former
+was modest in the reported cases,
+it would increase with the simulation length.
 %
-This is because the rate of error reduction
-is proportional to the eigenvalue, $\lambda_k$
-[cf. Eq. \eqref{eq:vt_diffeq_mbin}],
-which decreases rapidly with the mode index $k$,
-cf. Eq. \eqref{eq:lambda_Gaussian}.
+For example, for the case of
+$\varrho = 0.1$ and Gaussian width $\sigma = 0.2$,
+if we extend the simulation to $10^8$ steps,
+the error for the optimal schedule was
+$2.9\times10^{-6}$,
+which was much smaller than that
+for the inverse-time schedule
+$1.8\times10^{-5}$.
+  \note{The predicted errors were
+  $3.7\times10^{-6}$ and $1.8\times10^{-5}$, respectively.}
+
 
 To illustrate the mode dependence of the error,
 we show in Fig. \ref{fig:lj_xerr}
@@ -3009,20 +2995,6 @@ As a result, the optimal schedule usually produced
 less error than the inverse-time schedule,
 as shown in Table \ref{tab:lj_error}.
 %
-Although the gain of using the optimal schedule
-was modest in the reported cases,
-it would increase with the simulation length.
-%
-For example, for the $\varrho = 0.1$ case
-with width $\sigma = 0.2$,
-if we extend the simulation to $10^8$ steps,
-the error for the optimal schedule was
-$2.9\times10^{-6}$,
-which was much smaller than that
-for the inverse-time schedule
-$1.8\times10^{-5}$.
-\note{The predicted errors were
-$3.7\times10^{-6}$ and $1.8\times10^{-5}$, respectively.}
 
 One way to overcome the systematic bias
 in the Gaussian updating scheme
@@ -3049,6 +3021,46 @@ the error from $9.8\times10^{-3}$
 
 \begin{figure}[h]\centering
   \makebox[\linewidth][c]{
+    \includegraphics[angle=0, width=1.0\linewidth]{fig/lj_alpha.pdf}
+  }
+  \caption{
+    \label{fig:lj_alpha}
+    Optimal schedules of Gaussian updating schemes
+    for the LJ system.
+    %
+    The starting updating magnitude was usually
+    around $a_0/2 = 5\times10^{-5}$
+    as given by Eq. \eqref{eq:half_alpha0}.
+    But an overly wide window ($\sigma = 0.6$)
+    led to a much larger updating magnitude.
+  }
+\end{figure}
+
+For the Gaussian updating scheme,
+there was an optimal width for maximum effectiveness.
+%
+The optimal width was $\sigma = 0.37$ for $\varrho = 0.1$
+or $0.07$ for $\varrho = 0.8$,
+and it also depended on the simulation length
+and other parameters.
+%
+Although widening the Gaussian can
+effectively suppress random error
+from local histogram fluctuation,
+it also increased the risk of including
+more systematic bias in middle-range modes,
+which can be difficult to remove
+even with the optimal schedule.
+%
+This is because the rate of error reduction
+is proportional to the eigenvalue, $\lambda_k$
+[cf. Eq. \eqref{eq:vt_diffeq_mbin}],
+which decreases rapidly with the mode index $k$,
+cf. Eq. \eqref{eq:lambda_Gaussian}.
+
+
+\begin{figure}[h]\centering
+  \makebox[\linewidth][c]{
     \includegraphics[angle=0, width=1.0\linewidth]{fig/lj_xerr.pdf}
   }
   \caption{
@@ -3067,29 +3079,31 @@ the error from $9.8\times10^{-3}$
   }
 \end{figure}
 
-In Fig. \ref{fig:lj_alpha},
-we show the optimal schedules in a few cases.
+The Gaussian updating scheme produced less error than
+the single-bin scheme in the $\varrho = 0.1$ case,
+but not in the $\varrho = 0.8$ case.
 %
-%Generally, the optimal schedule
-%for the $\varrho = 0.8$ case
-%was closer to the inverse-time schedule
-%than that for the $\varrho = 0.1$ case.
+The effectiveness of the Gaussian updating scheme
+in the low-density case
+was probably because the sampling along
+the collective variable was free from major barriers
+and thus the histogram fluctuation largely
+came from local noise.
+%
+%The optimal schedule also appeared to be more effective
+%in reducing the error than the inverse-time schedule.
 %%
-%This was probably because in the former case
-%the first mode dominates the total error,
-%$\Gamma_1 \approx \Gamma$,
-%and the schedule was roughly optimized for this mode,
-%resulting in
-%$\alpha(t) \approx 1/[\lambda_1 (t + t_0)] \approx 1/(t+t_0)$
-%as $\lambda_1 \approx 1$
-%[cf. Eq. \eqref{eq:lambda_Gaussian}].
+In this case, we could further reduced the error
+by using the bandpass updating scheme
+(with the mode cutoff $K = 20$).
 %
-Since we have chosen a long equilibration period
-for the preliminary run under the constant updating magnitude, $a_0$,
-the initial magnitude was around
-the ideal value of $a_0/2 = 5\times10^{-5}$
-given by Eq. \eqref{eq:half_alpha0}.
-%
+On the other hand, in the high-density case,
+the error was dominated by the $k=1$ eigenmode
+corresponding to the longest range fluctuation,
+as $\Gamma_1 \approx \Gamma$,
+and the reduction of local noise
+had little effect on the total error.
+
 But if the Gaussian were too wide,
 e.g. if $\sigma = 0.6$,
 the eigenvalues $\lambda_k$ of some modes
@@ -3103,25 +3117,15 @@ was no longer small,
 and one may have to either decrease the width
 or to elongate the preliminary run.
 
+The initial magnitude was, however, around
+the ideal value of $a_0/2 = 5\times10^{-5}$
+given by Eq. \eqref{eq:half_alpha0}.
+%
+Since we have chosen a long equilibration period
+for the preliminary run under the constant updating magnitude, $a_0$,
 
 
 
-\begin{figure}[h]\centering
-  \makebox[\linewidth][c]{
-    \includegraphics[angle=0, width=1.0\linewidth]{fig/lj_alpha.pdf}
-  }
-  \caption{
-    \label{fig:lj_alpha}
-    Optimal schedules of Gaussian updating schemes
-    for the LJ system.
-    %
-    The starting updating magnitude was usually
-    around $a_0/2 = 5\times10^{-5}$
-    as given by Eq. \eqref{eq:half_alpha0}.
-    But an overly wide window ($\sigma = 0.6$)
-    led to a much larger updating magnitude.
-  }
-\end{figure}
 
 
 
