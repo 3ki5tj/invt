@@ -220,10 +220,8 @@ the updating magnitude of the bias.
 
 
 
-The schedule of reducing
-the updating magnitude
-can critically affect
-the precision of the final bias potential,
+The schedule of reducing the updating magnitude
+can critically affect the precision of the final bias potential,
 and hence that of the PMF\cite{laio2005, bussi2006, poulain2006,
 belardinelli2007, *belardinelli2007jcp, *belardinelli2008, *belardinelli2016,
 liang2007, min2007,
@@ -231,10 +229,8 @@ morozov2007, zhou2008,
 komura2012, *caparica2012, *caparica2014,
 barducci2008, dickson2011, dama2014}.
 %
-While a slow reduction of the updating magnitude
-leads to large variation of the bias potential,
-a rapid reduction can converge the bias potential
-to a wrong value.
+Overly slow and rapid reduction of the updating magnitude
+can hurt the precision and accuracy of the bias potential.
 %
 For the single-bin case, it is known that
 the optimal updating schedule is given by the
@@ -270,50 +266,45 @@ While the optimal schedule in the single-bin case
 is given by the known inverse-time formula,
 that for Gaussian case is more complex
 and sensitive to the simulation length
-and the width of the Gaussian window.
+and the width of the Gaussian.
 
-We will then compare
+We will then show by comparing
 the efficiency of error reduction
-of different updating schemes.
-%
-We find that
+of different updating schemes
+that
 the single-bin updating scheme
 is optimal for long simulations
 without a priori assumption of the smoothness of the PMF.
 %
-More generally,
-it can be generalized to
+The same asymptotic optimality also applies to
 a class of bandpass updating schemes
-that are equally optimal.
+that flatten only
+a few long-range distribution modes.
 %
-The bandpass updating schemes
-can avoid local noise
-by partially flattening a few long-range distribution modes.
-%
-The bandpass updating schemes
-are easier to use than the Gaussian updating scheme
-in that the optimal schedule of the former
-is simply given by the inverse-time formula,
-saving the effort of going through the general procedure described above.
+The bandpass updating schemes allow
+simpler control of the updating magnitude
+than the Gaussian updating scheme
+for the asymptotically optimal schedule of the former
+is given by the inverse-time formula.
 
 Finally, we present an application of
 the bandpass updating schemes
-by constructing it from
+by construction from
 a sequence of orthogonal polynomials.
 %
-The bias potential is a linear combination
-of orthogonal polynomials
-and the coefficients are adjusted on-the-fly
-based on the observed statistical moments.
+The bias potential in this case assumes
+a polynomial form,
+and coefficients adjusted on-the-fly
+to achieve the desired target distribution.
 %
-This application can be regarded
+This method serves
 as a generalization of the Langfeld-Lucini-Rago (LLR)
-algorithm\cite{langfeld2012, pellegrini2014}.
-%
-A similar construction with
+algorithm\cite{langfeld2012, pellegrini2014},
+and we show that
+a similar construction with
 a quadratic bias potential\cite{neuhaus2006, *neuhaus2007, zhu2012}
 allows one to sample an array of Gaussian distributions
-with desired means and variances.
+with predefined means and variances.
 
 The article is organized as follows.
 %
@@ -800,13 +791,13 @@ we get
 
 We can split the histogram into
 a deterministic averaged part, $\langle f_i(t) \rangle$,
-and a random fluctuating part, $\zeta_i(t)$,
+and a random fluctuating part, $\xi_i(t)$,
 %
 \begin{equation}
   f_i(t) =
   \langle f_i(t) \rangle
   +
-  \zeta_i(t)
+  \xi_i(t)
   .
   \notag
   %\label{eq:h_split}
@@ -868,22 +859,18 @@ Deducting the bin average and using Eq. \eqref{eq:fav1}, we get
 $\langle f_{*i}(t) \rangle \equiv \langle f_i(t) \rangle - 1 \approx - v_{*i}(t)$,
 and
 %
-\begin{align}
-  f_{*i}(t)
-  &\approx
-  - v_{*i}(t)
-  +
-  \zeta_i(t)
+\begin{equation}
+  f_{*i}(t) \approx - v_{*i}(t) + \xi_{*i}(t)
   .
   \label{eq:sh_ave}
-\end{align}
+\end{equation}
 
 
-We will approximate the histogram fluctuation part, $\zeta_i(t)$,
-hence its deviation from the bin average, $\zeta_{*i}(t)$,
+We will approximate the histogram fluctuation part, $\xi_i(t)$,
+hence its deviation from the bin average, $\xi_{*i}(t)$,
 as white noise such that
 \begin{equation}
-  \langle \zeta_{*i}(t) \, \zeta_{*i}(t') \rangle
+  \langle \xi_{*i}(t) \, \xi_{*i}(t') \rangle
   = G_i \, \delta(t - t')
   ,
   \notag
@@ -902,15 +889,15 @@ we get % a set of decoupled equations
 \begin{equation}
   \dot v_{*i}(t)
   %=
-  %\alpha(t) \, \left[ \langle f_{*i}(t) \rangle + \zeta_{*i}(t) \right]
+  %\alpha(t) \, \left[ \langle f_{*i}(t) \rangle + \xi_{*i}(t) \right]
   \approx
-  -\alpha(t) \, \left[ v_{*i}(t) - \zeta_{*i}(t) \right]
+  -\alpha(t) \, \left[ v_{*i}(t) - \xi_{*i}(t) \right]
   .
   %\notag
   \label{eq:dxdt_singlebin}
 \end{equation}
 %
-Without the random part, $\zeta_{*i}(t)$,
+Without the random part, $\xi_{*i}(t)$,
 this equation would drive
 the deviation of the bias potential, $v_{*i}(t)$,
 to $0$ at long times,
@@ -924,7 +911,7 @@ The formal solution of Eq. \eqref{eq:dxdt_singlebin} is
   v_{*i}(0) \, e^{-q(T)}
   +
   \int_0^T
-    \dot{\vartheta}\bigl( q(t) \bigr) \, \zeta_{*i}(t) \, dt,
+    \dot{\vartheta}\bigl( q(t) \bigr) \, \xi_{*i}(t) \, dt,
   \label{eq:xt_solution}
 \end{equation}
 %
@@ -972,7 +959,7 @@ where
   \sum_{i=1}^n \rho_i
     \int_0^T\!\!\int_0^T
     \langle
-      \zeta_{*i}(t) \zeta_{*i}(t')
+      \xi_{*i}(t) \xi_{*i}(t')
     \rangle
     \dot \vartheta\bigl( q(t) \bigr)
     \dot \vartheta\bigl( q(t') \bigr)
@@ -984,7 +971,8 @@ where
 \end{align}
 with
 %$\Gamma \equiv \sum_{i=1}^n \rho_i \, G_i$.
-$\Gamma \equiv \sum_{i=1}^n \rho_i \, G_i \approx \sum_{i=1}^n \rho_i \int_{-\infty}^{\infty} \langle \zeta_{*i}(t) \zeta_{*i}(0) \rangle \, dt$.
+$\Gamma \equiv \sum_{i=1}^n \rho_i \, G_i
+\approx \sum_{i=1}^n \rho_i \int_{-\infty}^{\infty} \langle \xi_{*i}(t) \xi_{*i}(0) \rangle \, dt$.
 %\begin{equation}
 %  \Gamma \equiv \sum_{i=1}^n \rho_i \, G_i
 %  =
@@ -1411,7 +1399,7 @@ or in continuous time, we have, for $k > 0$,
   \alpha(t) \, \lambda_k \, {\tilde f}_k(t)
   \approx
   -\alpha(t) \, \lambda_k \,
-  \bigl[ {\tilde v}_k(t) - {\tilde \zeta}_k(t) \bigr]
+  \bigl[ {\tilde v}_k(t) - {\tilde \xi}_k(t) \bigr]
   ,
   \label{eq:vt_diffeq_mbin}
 \end{equation}
@@ -1422,7 +1410,7 @@ the transformed version of Eq. \eqref{eq:sh_ave}
 in the second step.
 
 Equation \eqref{eq:vt_diffeq_mbin} shows that
-in the absence of the fluctuating term, $\tilde \zeta_k(t)$,
+in the absence of the fluctuating term, $\tilde \xi_k(t)$,
 the deviation of the bias potential would tend to zero
 at a rate of $\alpha(t) \, \lambda_k$.
 %
@@ -1443,9 +1431,10 @@ The formal solution is given by
   \tilde v_k(0) \, e^{-\lambda_k \, q(T)}
   +
   \int_0^T
-    \dot{\vartheta}_k\bigl( q(t) \bigr) \, \tilde\zeta_k(t) \, dt
+    \dot{\vartheta}_k\bigl( q(t) \bigr) \, \tilde\xi_k(t) \, dt
   ,
-  \label{eq:xt_solution}
+  \notag
+  %\label{eq:xt_solution}
 \end{equation}
 where
 \begin{equation}
@@ -1505,8 +1494,8 @@ of the residual error and the asymptotic error, with
   \sum_{k=1}^{n-1}
   \int_0^T\!\!\int_0^T
   \langle
-    \tilde\zeta_k(t)
-    \tilde\zeta_k(t')
+    \tilde\xi_k(t)
+    \tilde\xi_k(t')
   \rangle
   \vartheta_k\bigl(q(t)\bigr)
   \vartheta_k\bigl(q(t')\bigr)
@@ -1525,8 +1514,8 @@ where
 %$\Gamma_k$ is computed from
 %the autocorrelation function
 %of the histogram fluctuation,
-%$\bigl\langle {\tilde \zeta}_k(0)
-%\, {\tilde \zeta}_k(t) \bigr\rangle$,
+%$\bigl\langle {\tilde \xi}_k(0)
+%\, {\tilde \xi}_k(t) \bigr\rangle$,
 %as:
 %
 \begin{equation}
@@ -1534,13 +1523,13 @@ where
   \approx
   \int_{-\infty}^\infty
   \bigl\langle
-    \tilde\zeta_k(t) \tilde\zeta_k(0)
+    \tilde\xi_k(t) \tilde\xi_k(0)
   \bigr\rangle
   \, dt
   \to
   \sum_{t = -\infty}^\infty
   \bigl\langle
-    \tilde\zeta_k(t) \tilde\zeta_k(0)
+    \tilde\xi_k(t) \tilde\xi_k(0)
   \bigr\rangle
   ,
   \label{eq:Gamma_sum}
@@ -1551,7 +1540,7 @@ the equivalent in the discrete-time setting.
 %
 Equation \eqref{eq:Gamma_sum} represents
 a first approximation for modeling
-a general fluctuation, ${\tilde \zeta}_k(t)$,
+a general fluctuation, ${\tilde \xi}_k(t)$,
 as an equivalent white noise.
 In this way,
 the underlying sampling process
@@ -1559,8 +1548,8 @@ affects the error only through the
 few numbers, $\Gamma_k$'s.
 %
 Note that by Eq. \eqref{eq:parseval}, we have
-$\sum_{k=1}^{n-1} \bigl\langle {\tilde \zeta}_k(t) \, {\tilde \zeta}_k(0) \bigr\rangle
-= \sum_{i=1}^n \rho_i \bigl\langle \zeta_{*i}(t) \, \zeta_{*i}(0) \bigr\rangle,$
+$\sum_{k=1}^{n-1} \bigl\langle {\tilde \xi}_k(t) \, {\tilde \xi}_k(0) \bigr\rangle
+= \sum_{i=1}^n \rho_i \bigl\langle \xi_{*i}(t) \, \xi_{*i}(0) \bigr\rangle,$
 and after summing $t$ from $-\infty$ to $\infty$,
 \begin{equation}
   \sum_{k=1}^{n-1} \Gamma_k = \sum_{i=1}^n \rho_i \, G_i = \Gamma
@@ -1978,7 +1967,7 @@ We have
 \begin{enumerate}
 
 \item
-Compute the eigenvalues, $\lambda_k$'s
+Compute the eigenvalues, $\lambda_k$'s,
 from the updating matrix, $\mathbf w$.
 %
 Note that
@@ -2004,16 +1993,17 @@ as well as the initial bias $\epsilon_k$.\footnote{The
 }
 
 \item \label{step:qT}
-Compute the optimal value of $q(T)$ by solving Eq. \eqref{eq:opt_qT},
-using, e.g. the Newton-Raphson method\cite{press3rd}\footnote{In
-  our implementation, the equation was solved for $\ln q(T)$
+Compute the optimal value of $q(T)$
+by solving Eq. \eqref{eq:opt_qT}.\footnote{We
+  used a variant of the Newton-Raphson method\cite{press3rd}
+  with the bisection method as a fallback.
+  We solved the equation for $\ln q(T)$
   to avoid negative values of $q(T)$,
-  and we imposed a lower bound,
+  and imposed a lower bound,
   $\bigl|\mathcal Y\bigl(q(T)\bigr)/q(T)\bigr|$, for
   $\mathcal Y'\bigl(q(T)\bigr)$
   in computing its change.
-  The initial value was set to $q(T) = \ln(1+T\,a_0/2)$.
-  We also used the bisection method as a fallback.}
+  The initial value was set to $q(T) = \ln(1+T\,a_0/2)$.}
 %
 %Since $m(\bar q)$ is a decreasing function of $\bar q$,
 %we can start from an interval $[Q_L, Q_R]$
@@ -2258,7 +2248,7 @@ a set of identical eigenvalues,
 $\lambda_1 = \cdots = \lambda_{n-1}$
 and identical $c_k$'s.
 
-We can show that the above optimal solution for asymptotic convergence
+We can show that the above optimal solution
 represents the single-bin updating scheme.
 %
 Since the $k = 0$ eigenmode represents
@@ -2464,7 +2454,14 @@ from its expectation.
 Since high-order moments are generally less reliable,
 this method is best used with a small $K$ for a narrow distribution.
 %
-However, by constructing a mixture or expanded ensemble,
+However, by constructing a mixture\cite{shirts2017}
+or expanded ensemble\cite{swendsen1986,
+  *geyer1991, *hukushima1996, *hansmann1997, *sugita1999,
+  *earl2005, *zuckerman2011, *rauscher2009,
+  neuhaus2006, *neuhaus2007, kim2010,
+  marinari1992,
+  *lyubartsev1992, li2007,
+  park2007, *nguyen2013, *zhang2015st},
 we can simultaneously sample multiple target distributions
 spread over a wider range, as exemplified below.
 
@@ -2521,9 +2518,9 @@ a quadratic one,
 $R_2(z) = \bigl[(z - z_c)^2 - \sigma_z^2\bigr] /\left(\sqrt 2 \, \sigma_z^2\right)$,
 to restrict the sampling region.
 %
-This results in a quadratic bias
-potential\cite{maragliano2006, *abrams2008, zhu2012, neuhaus2006, *neuhaus2007},
-as commonly employed in umbrella sampling\cite{torrie1974, *torrie1977}
+The bias potential is
+quadratic\cite{maragliano2006, *abrams2008, zhu2012, neuhaus2006, *neuhaus2007},
+which is common in umbrella sampling\cite{torrie1974, *torrie1977}
 and the method of Gaussian ensemble\cite{hetherington1987,
 *challa1988, *costeniuc2006}.
 
@@ -2549,8 +2546,7 @@ where the PMF is locally concave,
 $-d^2\ln p(z)/dz^2 < 0$.
 
 We can extend the sampling range
-by constructing a mixture\cite{shirts2017}
-or an expanded ensemble
+by constructing an expanded ensemble
 from a superposition of multiple Gaussian umbrellas
 centered at different places via
 the frameworks of
@@ -2578,21 +2574,27 @@ A(i\to j) =
   ,
   \label{eq:transprob_st}
 \end{align}
-where $z(t)$ is the current value of $z$,
-and $Z^{(i)} \equiv \int e^{-\beta \, \Phi(\mathbf x)-u^{(i)}(z(\mathbf x),t)} \, d\mathbf x$
-is the partition function.
+where $z(t)$ is the current value of $z$.
 %
-Here,
+The parameter, $Z^{(i)}$, is the inverse weight of the $i$th umbrella,
+in the expanded ensemble,
+and $\ln Z^{(i)}$ serves as the bias potential
+for inter-umbrella transitions.
+%
+We can be estimate $\ln Z^{(i)}$'s on-the-fly
+using the single-bin updating scheme,
+Eq. \eqref{eq:wl_update}\cite{li2007}.
+%
+Upon convergence, $Z^{(i)}$ should be proportional to
+the partition function,
+$\int e^{-\beta \, \Phi(\mathbf x)-u^{(i)}(z(\mathbf x),t)} \, d\mathbf x$,
+as in simulated tempering,
+where
 $\beta = 1/(k_B T)$ is the inverse temperature,
 $\mathbf x$ denotes the internal degrees of freedoms,
 and
 $\Phi(\mathbf x)$ is the unbiased potential energy.
 %
-Note that the unknown parameters, $\ln Z^{(i)}$'s,
-serve as the bias potential
-for inter-umbrella transitions, and thus can be updated
-using the single-bin scheme,
-Eq. \eqref{eq:wl_update}\cite{li2007}.
 
 Since bandpass updating schemes are straightforward extension
 of the single-bin updating scheme,
@@ -3030,7 +3032,7 @@ the Gaussian updating scheme.
 As shown in Table \ref{tab:lj_error},
 the Gaussian updating schemes,
 or more generally the bandpass updating schemes,
-produced less error than the single-bin scheme 
+produced less error than the single-bin scheme
 only in the low-density $\varrho = 0.1$ case,
 but not in the high-density $\varrho = 0.8$ case.
 %
@@ -3077,7 +3079,7 @@ by Eq. \eqref{eq:lambda_Gaussian}.
 Thus, although widening the Gaussian can
 effectively suppress random error
 from local histogram fluctuation,
-it also increased the risk of including 
+it also increased the risk of including
 more systematic bias in middle-range modes,
 which can be difficult to remove
 as the rate of error reduction
@@ -3643,11 +3645,10 @@ Characterization of optimal schedules}
 
 
 
-We can characterize the optimal schedule
-geometrically as follows.
+Here we give a geometric characterization
+of the optimal schedule.
 %
-First, we define
-a normalized mass distribution as
+First, we define a normalized mass distribution as
 %
 \begin{equation}
   m(\bar q)
@@ -3688,13 +3689,13 @@ we find that for $\bar q(t) \equiv q(T) - q(t)$,
     m(q') \, d q'
   &=
   \frac t T
-  ,
+  .
   \label{eq:intmQ_tT}
 \end{align}
 %
-Thus, each point on the schedule,
+This allows each point on the schedule,
 $\bigl(t, \alpha(t)\bigr)$,
-can be mapped to a point,
+to be mapped to a point,
 $\Bigl(\bar q(t), m\bigl(\bar q(t)\bigr)\Bigr)$,
 on the mass distribution,
 such that the ordinate of the latter curve
@@ -3840,17 +3841,17 @@ hence the potential shift,
 $u_i(t) - v_i(t) = \ln(p_i/\rho_i)$.
 %
 Since the shift,
-hence its Fourier transform,
+hence its generalized Fourier transform,
 $\tilde u_k(t) - \tilde v_k(t)$,
 is a constant of time,
 ${\tilde u}_{k}$ and ${\tilde v}_{k}$
-should share the same variance.
-%
-But as the ensemble average of ${\tilde v}_{k}$
-is zero, we have
+should share the same variance,
 $\operatorname{var} {\tilde u}_{k} =
  \operatorname{var} {\tilde v}_{k} =
  \left\langle {\tilde v}_{k}^2 \right\rangle$,
+where we have used the fact that
+the ensemble average of ${\tilde v}_{k}$
+is zero in the last step.
 %\begin{equation*}
 %  \operatorname{var} {\tilde u}_{k}
 %  =
@@ -3860,18 +3861,19 @@ $\operatorname{var} {\tilde u}_{k} =
 %  .
 %\end{equation*}
 %
-and by using Eq. \eqref{eq:xt2_eql},
-we get
+From Eq. \eqref{eq:xt2_eql}, we get
 %
 \begin{equation}
   \operatorname{var} {\tilde u}_k
   =
   \frac{1}{2} \,
-  a_0 \, \Gamma_k \, \lambda_k,
+  a_0 \, \Gamma_k \, \lambda_k
+  .
 \label{eq:varXt}
 \end{equation}
 %
-where the variance can be computed from trajectory averages.
+The variance, $\tilde u_k$, can be computed
+by trajectory averaging.
 %
 In practice, Eq. \eqref{eq:varXt}
 would fail if some eigenvalue, $\lambda_k$, is close to zero.
@@ -3933,7 +3935,7 @@ and
   %\label{eq:Gamma_est}
 \end{equation}
 
-The above transition matrix method
+The above method
 tends to underestimate
 the first few $\Gamma_k$'s.
 %
@@ -4034,7 +4036,7 @@ Eigenvalues and window function}
 
 For a periodic variable\cite{dama2014},
 the updating matrix, $w_{ij}$,
-must be a function of $(i-j)\mod n$,
+can only be a function of the difference of indices, $i-j$, modulo $n$,
 and we write it as
 %
 \begin{equation}
@@ -4301,37 +4303,39 @@ on a finite grid.
 
 
 We recall that
-for continuous variable, $z$, over $[0, \Delta z]$
-the bin index, $i$, is related to $z$ as
+the bin index, $i$, can be related to
+the continuous variable $z$ as
 $z = i \, \delta z$,
 where
-$\delta z = \Delta z/(g \, n)$ is th bin size.
-
+$\delta z$ is the bin size.
+%
+We further define
+$\mu(z) \equiv \mu_i/\delta z$
 and
-$\mu_i = \mu(z) \, \delta z$.
+$\Delta z = b \delta z$
+for the largest bin cutoff $b = gn/2$.
 %
 For $n \gg 1$,
-By assuming the largest bin cutoff, $b \approx g \, n/2$,
 we can approximate Eq. \eqref{eq:wband_eigenvalue}
 as an integral:
 %
 \begin{equation}
   \lambda_k
   =
-  \int_{-\Delta z/2}^{\Delta z/2}
-    \mu(z) \, \cos\left( \frac{ 2 \, \pi \, k \, z } { \Delta z} \right)
+  \int_{-\Delta z}^{\Delta z}
+    \mu(z) \, \cos\left( \frac{ \pi \, k \, z } { \Delta z} \right)
     \, d z,
   \notag
   %\label{eq:lambda_int}
 \end{equation}
 %
 with the normalization
-$1 = \int_{-\Delta z/2}^{\Delta z/2} \mu(z) \, dz$.
+$1 = \int_{-\Delta z}^{\Delta z} \mu(z) \, dz$.
 
 If the width of the Gaussian window, $\sigma_z$,
-is very small compared to $\Delta z$,
+is much less than $\Delta z$,
 then we can extend the limits of the integrals
-to infinity, and
+to infinity, and normalize $\mu(z)$ as
 %
 \begin{equation}
   \mu(z)
@@ -4351,8 +4355,9 @@ Then, from Eq. \eqref{eq:wband_eigenvalue},
 we get Eq. \eqref{eq:lambda_Gaussian},
 which shows that all eigenvalues are positive.
 %
-In practice, however, some eigenvalues can turn negative
-when discretized on a finite grid.
+However,
+when discretized on a finite grid,
+some eigenvalues can turn negative.
 %
 We can maintain the convergence of the updating scheme
 by redefining the Gaussian scheme
@@ -4478,24 +4483,27 @@ for the bandpass updating scheme based on orthogonal polynomials.
 
 \subsection{Histogram fluctuation and error}
 
-Let us consider an FDS simulation under a sufficiently accurate bias potential.
-The fluctuation of the instantaneous histogram
-is then dominated by the random part,
+Consider an ideal FDS simulation under the exact bias potential.
+%
+By Eq. \eqref{eq:sh_ave},
+the fluctuation of the instantaneous histogram
+is then given by the random part,
 %
 \begin{equation}
-  f_i(t) \approx \zeta_i(t)
+  f_{*i}(t) = \xi_{*i}(t)
   ,
-  \label{eq:xi_zeta}
+  \label{eq:f_xi}
 \end{equation}
-and the same holds for the Fourier transform,
-$\tilde f_k(t) \approx \tilde \zeta_k(t).$
+and
+%the same holds for the Fourier transform,
+$\tilde f_k(t) \approx \tilde \xi_k(t).$
 %
 If we define the time average,
 %
 \begin{align*}
-\tilde F_k(T) \equiv \frac 1 T \sum_{t = 1}^T \tilde f_k(t)
-=\mathcal F\left[ \frac{ H_i(T) } { \rho_i } \right]_k
-,
+  \tilde F_k(T) \equiv \frac 1 T \sum_{t = 1}^T \tilde f_k(t)
+  =\mathcal F\left[ \frac{ H_i(T) } { \rho_i } \right]_k
+  ,
 \end{align*}
 %
 for the histogram fluctuation of mode $k$,
@@ -4515,7 +4523,7 @@ then the total fluctuation is
   %\label{eq:hfluc_def}
 \end{align}
 %
-From Eq. \eqref{eq:xi_zeta}, we have
+From Eq. \eqref{eq:f_xi}, we have
 %$$\bigl\langle \tilde F_k^2(T) \bigr\rangle
 %=
 %\sum_{t=-\infty}^\infty
@@ -4527,7 +4535,7 @@ From Eq. \eqref{eq:xi_zeta}, we have
 %\sum_{t=-\infty}^\infty
 %\frac{
 %\bigl\langle
-%  \tilde \zeta_k(t) \, \tilde \zeta_k(0)
+%  \tilde \xi_k(t) \, \tilde \xi_k(0)
 %\bigr\rangle } { T }
 %=
 %\frac{ \Gamma_k } { T },$$
@@ -4545,7 +4553,7 @@ From Eq. \eqref{eq:xi_zeta}, we have
 \frac{1}{T}
 \sum_{t=-\infty}^\infty
 \bigl\langle
-  \tilde \zeta_k(t) \, \tilde \zeta_k(0)
+  \tilde \xi_k(t) \, \tilde \xi_k(0)
 \bigr\rangle
 =
 \frac{ \Gamma_k } { T }
@@ -4576,8 +4584,8 @@ Eq. \eqref{eq:Emin_sbin}, as
 %as the inequality,
 \begin{equation}
   \Err(T)
-  \ge
-  \bigl\langle F^2(T+t_0) \bigr\rangle
+  \approx
+  \bigl\langle F^2(T) \bigr\rangle
   .
   \notag
   %\label{eq:fluc}
@@ -4622,16 +4630,17 @@ is given by
 
 If the eigenmodes are made of a sequence of orthogonal polynomials
 as in Sec. \ref{sec:bandpass_poly},
-we have
-\begin{align*}
-\tilde f_k(t)
-=
-\int \phi_k(z) \, \frac{ \delta\bigl(z(t) - z\bigr) } { \rho(z) } \, dz
-=
-R_k\bigl( z(t) \bigr)
-,
-\end{align*}
-so that
+then
+$\tilde f_k(t) = R_k\bigl( z(t) \bigr)$,
+%\begin{align*}
+%\tilde f_k(t)
+%=
+%\int \phi_k(z) \, \frac{ \delta\bigl(z(t) - z\bigr) } { \rho(z) } \, dz
+%=
+%R_k\bigl( z(t) \bigr)
+%,
+%\end{align*}
+and
 \begin{equation}
   \tilde F_k(T)
   =
@@ -4687,7 +4696,7 @@ so that
     $q(t)$          &   $\int_0^t \alpha(t') \, dt'$.  \\
     $\bar q(t)$     &   $q(T) - q(t)$.  \\
     $s, S$          &   Stage index and the total number of stages in the Wang-Landau algorithm. \\
-    $\sigma_{ij}(t)$   &   Autocorrelation function of $\zeta_i(t)$. \\
+    $\sigma_{ij}(t)$   &   Autocorrelation function of $\xi_i(t)$. \\
     $t, \tau$       &   Time. \\
     $T$             &   Simulation length. \\
     $\vartheta_k(q')$       &   $\vartheta_k(q') \equiv e^{\lambda_k \, [q - q(T)]}$. \\
@@ -4695,11 +4704,11 @@ so that
     $v_i(t)$        &   Shifted bias potential. \\
     $\mathbf w$     &   Updating matrix. \\
     $v_{*i}(t)$     &   Bin-average-deducted bias potential, Eq. \eqref{eq:x_def}. \\
-    $\zeta_{*i}(t)$ &   The noise of histogram. \\
+    $\xi_{*i}(t)$ &   The noise of histogram. \\
     ${\tilde v}_k$  &   Mode of the shifted bias potential. \\
     ${\tilde u}_k$  &   Mode of the original bias potential. \\
     $z$             &   Reaction coordinate. \\
-    $\zeta_i(t)$    &   The noise part of the instantaneous histogram, $h_i(t)$.
+    $\xi_i(t)$    &   The noise part of the instantaneous histogram, $h_i(t)$.
   \end{tabular}
   \end{table*}
 }
