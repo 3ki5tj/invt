@@ -2777,16 +2777,14 @@ $a_0 = 10^{-4}$,\footnote{The
   in the WL algorithm.
   The $\ln f$ was $0.05$ for $\varrho = 0.1$,
   or $0.025$ for $\varrho = 0.8$.}
-followed by a production phase of another $10^7$ steps
+followed by a production phase of
+another $10^7$ steps (unless indicated otherwise)
 with updating magnitude given by
 either the inverse-time or optimal schedule.
 %
 The deviation of the bias potential was calculated from
 Eqs. \eqref{eq:v_def} and \eqref{eq:x_def},
-and decomposed to eigenmodes by
-Eqs. \eqref{eq:gft_def} and \eqref{eq:wband_eigenvector_refl}.
-%
-The error was computed from Eq. \eqref{eq:error_def}.
+and the error from Eq. \eqref{eq:error_def}.
 %
 We repeated each simulation multiple times
 and report the average.
@@ -2969,56 +2967,6 @@ $1.8\times10^{-5}$.
   \note{The predicted errors were
   $3.7\times10^{-6}$ and $1.8\times10^{-5}$, respectively.}
 
-
-To illustrate the mode dependence of the error,
-we show in Fig. \ref{fig:lj_xerr}
-the error components, $\langle \tilde v_k^2 \rangle$,
-against the eigenmode index, $k$,
-for the $\varrho = 0.1$ case
-with width $\sigma = 0.2$.
-%
-For modes $k=10$ to $25$,
-the final errors from the Gaussian updating scheme
-were greater than those from the single-bin updating scheme,
-although the initial values were less.
-%
-For the Gaussian updating scheme,
-the inverse-time schedule tended to
-reduce the updating magnitude too quickly,
-leaving a hump on the error profile
-for these middle-range eigenmodes.
-%
-The optimal schedule improved over the inverse-time schedule
-and produced a flatter profile for the final error.
-%
-As a result, the optimal schedule usually produced
-less error than the inverse-time schedule,
-as shown in Table \ref{tab:lj_error}.
-%
-
-One way to overcome the systematic bias
-in the Gaussian updating scheme
-is to use the histogram-based correction formula,
-Eq. \eqref{eq:uhatav}.
-%
-As shown in Fig. \ref{fig:lj_xerr},
-even for the simulation using the non-optimal $1/t$ schedule,
-the correction was able to reproduce
-the flatter profile seen in the single-bin case.
-%
-However, this correction also introduced
-some local noise in the large $k$ modes,
-and it would be best used as a post-simulation
-analysis tool for simulations
-with detectable residual bias.
-%
-For example, for the simulation in the $\varrho = 0.8$ case
-with $\sigma = 0.5$ and the inverse-time schedule,
-the correction was able to lower
-the error from $9.8\times10^{-3}$
-(Table \ref{tab:lj_error}) to $3.3\times10^{-3}$.
-
-
 \begin{figure}[h]\centering
   \makebox[\linewidth][c]{
     \includegraphics[angle=0, width=1.0\linewidth]{fig/lj_alpha.pdf}
@@ -3036,27 +2984,22 @@ the error from $9.8\times10^{-3}$
   }
 \end{figure}
 
-For the Gaussian updating scheme,
-there was an optimal width for maximum effectiveness.
+For the same case,
+we further decomposed the error (after $10^7$ production steps)
+into the eigenmodes
+by Eqs. \eqref{eq:gft_def} and \eqref{eq:wband_eigenvector_refl},
+and ploted the error components, $\langle \tilde v_k^2 \rangle$,
+in Fig. \ref{fig:lj_xerr}.
 %
-The optimal width was $\sigma = 0.37$ for $\varrho = 0.1$
-or $0.07$ for $\varrho = 0.8$,
-and it also depended on the simulation length
-and other parameters.
+We found that the inverse-time schedule tended to
+reduce the updating magnitude too quickly,
+leaving a hump on the error profile
+for the $k = 10$ to $25$ modes.
 %
-Although widening the Gaussian can
-effectively suppress random error
-from local histogram fluctuation,
-it also increased the risk of including
-more systematic bias in middle-range modes,
-which can be difficult to remove
-even with the optimal schedule.
-%
-This is because the rate of error reduction
-is proportional to the eigenvalue, $\lambda_k$
-[cf. Eq. \eqref{eq:vt_diffeq_mbin}],
-which decreases rapidly with the mode index $k$,
-cf. Eq. \eqref{eq:lambda_Gaussian}.
+By a delayed reduction,
+the optimal schedule more effectively reduced
+the error in these modes,
+and produced a flatter profile for the final error.
 
 
 \begin{figure}[h]\centering
@@ -3068,7 +3011,8 @@ cf. Eq. \eqref{eq:lambda_Gaussian}.
     Error components from FDS simulations
     using the Gaussian updating scheme
     of width $\sigma = 0.2$
-    on the LJ system at density $\varrho = 0.1$.
+    on the LJ system at density $\varrho = 0.1$
+    after $10^7$ production steps.
     %
     The optimal schedule (opt.) was more effective
     in reducing the errors of middle-range eigenmodes
@@ -3079,53 +3023,117 @@ cf. Eq. \eqref{eq:lambda_Gaussian}.
   }
 \end{figure}
 
-The Gaussian updating scheme produced less error than
-the single-bin scheme in the $\varrho = 0.1$ case,
-but not in the $\varrho = 0.8$ case.
-%
-The effectiveness of the Gaussian updating scheme
-in the low-density case
-was probably because the sampling along
-the collective variable was free from major barriers
-and thus the histogram fluctuation largely
-came from local noise.
-%
-%The optimal schedule also appeared to be more effective
-%in reducing the error than the inverse-time schedule.
-%%
-In this case, we could further reduced the error
-by using the bandpass updating scheme
-(with the mode cutoff $K = 20$).
-%
-On the other hand, in the high-density case,
-the error was dominated by the $k=1$ eigenmode
-corresponding to the longest range fluctuation,
-as $\Gamma_1 \approx \Gamma$,
-and the reduction of local noise
-had little effect on the total error.
 
+Next, we will discuss the applicability of
+the Gaussian updating scheme.
+%
+As shown in Table \ref{tab:lj_error},
+the Gaussian updating schemes,
+or more generally the bandpass updating schemes,
+produced less error than the single-bin scheme 
+only in the low-density $\varrho = 0.1$ case,
+but not in the high-density $\varrho = 0.8$ case.
+%
+We believe that the difference lies in the sampling difficulty.
+%
+In the low-density case,
+the sampling along the collective variable
+was free from major barriers,
+and thus the histogram fluctuation largely
+was largely local in nature.
+%
+In the high-density case, however,
+the error was dominated by the first few eigenmodes
+that correspond to the long-range fluctuations
+(as $\Lambda_1 \approx \Lambda$),
+and the reduction of local noise by multiple-bin schemes
+had little effect on the total error.
+%
+When the local noise are dominant,
+we found that the bandpass updating scheme
+(with the mode cutoff $K = 20$)
+was more effective than the Gaussian updating schemes
+as the expected.
+
+
+
+It is worth mentioning that the width $\sigma$
+of a Gaussian updating scheme
+can critially affect its effectiveness.
+%
+For example, the prediction showed that
+there was a optimal width
+around $\sigma = 0.37$ for $\varrho = 0.1$
+or $0.07$ for $\varrho = 0.8$,
+assuming the optimal schedule,
+and the optimal width also depended on the simulation length
+and other parameters.
+%
+We recall that a wider Gaussian means
+more middle-range eigemodes
+would have diminishing eigenvalues
+by Eq. \eqref{eq:lambda_Gaussian}.
+%
+Thus, although widening the Gaussian can
+effectively suppress random error
+from local histogram fluctuation,
+it also increased the risk of including 
+more systematic bias in middle-range modes,
+which can be difficult to remove
+as the rate of error reduction
+is also proportional to the eigenvalue, $\lambda_k$,
+by Eq. \eqref{eq:vt_diffeq_mbin}.
+
+An overly large width $\sigma$ can have a dramatic
+impact on the initial updating magnitude
+under the optimal schedule.
+%
+The initial updating magnitude, $\alpha(0)$,
+is usually around
+the ideal value of $a_0/2 = 5\times10^{-5}$
+given by Eq. \eqref{eq:half_alpha0},
+for a sufficiently long preliminary run
+under the constant updating magnitude, $a_0$,
+as shown in Fig. \ref{fig:lj_alpha}.
+%
 But if the Gaussian were too wide,
 e.g. if $\sigma = 0.6$,
 the eigenvalues $\lambda_k$ of some modes
 became too small to damp out the initial bias,
-resulting in a much larger initial updating magnitude, $\alpha(0)$
+resulting in a much larger $\alpha(0)$
 [cf. Eq. \eqref{eq:opt_alpha0}].
 %
-In this case, the predicted schedule
-would be unusable because the resulting deviation in the bias potential
-was no longer small,
-and one may have to either decrease the width
-or to elongate the preliminary run.
+In this case, the predicted optimal schedule
+becomes invalid the resulting deviation in the bias potential
+is no longer small.
 
-The initial magnitude was, however, around
-the ideal value of $a_0/2 = 5\times10^{-5}$
-given by Eq. \eqref{eq:half_alpha0}.
+
+
+
+
+In practice, both the width and schedule
+of the Gaussian updating scheme can be sub-optimal.
 %
-Since we have chosen a long equilibration period
-for the preliminary run under the constant updating magnitude, $a_0$,
-
-
-
+We can use the histogram-based correction formula,
+Eq. \eqref{eq:uhatav}, after simulation
+to remove the remaining bias in PMF.
+%
+In Fig. \ref{fig:lj_xerr},
+we show a case where the correction produced
+the flatter profile seen in the single-bin case,
+for a simulation with a sub-optimal schedule.
+%
+However, this correction will also introduce
+some local noise in the large $k$ modes,
+although these noise are largely harmless
+in a post-simulation analysis, since
+the bias potential no longer need to be differentiated
+for force calculation.
+%
+%For example, for the simulation in the $\varrho = 0.8$ case
+%with $\sigma = 0.5$ and the inverse-time schedule,
+%the correction was able to lower
+%the error from $9.8\times10^{-3}$ to $3.3\times10^{-3}$.
 
 
 
