@@ -1,4 +1,4 @@
-\documentclass[reprint, superscriptaddress, floatfix]{revtex4-1}
+\documentclass[preprint, superscriptaddress, floatfix]{revtex4-1}
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{mathtools}
@@ -1224,7 +1224,8 @@ the detailed balance condition for $\pmb\rho$,
 \begin{equation}
   \rho_i \, w_{ij} = \rho_j \, w_{ji}
   .
-  \label{eq:w_detailedbalance}
+  \notag
+  %\label{eq:w_detailedbalance}
 \end{equation}
 %
 This requires the scaled updating matrix,
@@ -2041,11 +2042,14 @@ The curve $q(t)$ is then integrated
 using the trapezoidal rule\cite{press3rd},
 resulting in a list of values, $\bigl(q_{[i]}, t_{[i]} \bigr)$.
 %
-We then compute the updating magnitude by numerical differentiation:
-$\alpha_i = (1 - e^{-\lambda_1 \, \hat \alpha_i})/\lambda_1$\footnote{This
-  discretization follows from the runtime average interpretation
-  discussed in Appendix \ref{sec:equilerr}.}
-and
+We then compute the updating magnitude
+from (cf. Appendix \ref{sec:ave_us}):
+\begin{equation}
+  \alpha_i = \frac{ 1 - e^{-\lambda_1 \, \hat \alpha_i} } { \lambda_1 }
+  ,
+  \label{eq:alphai}
+\end{equation}
+where
 $\hat \alpha_i \equiv (q_{[i+1]} - q_{[i-1]}) / (t_{[i+1]} - t_{[i-1]})$,
 with
 $q_{[ -1]} \equiv 0$,
@@ -2373,7 +2377,7 @@ Bandpass updating schemes constructed from orthogonal polynomial bases}
 
 In addition to the above application to
 homogeneous updating schemes,
-we will consider here bandpass updating schemes
+we will consider here a family of bandpass updating schemes
 constructed from a sequence of orthogonal polynomials.
 %
 These updating schemes are more intuitive and easier to implement
@@ -2463,7 +2467,7 @@ or expanded ensemble\cite{swendsen1986,
   *lyubartsev1992, li2007,
   park2007, *nguyen2013, *zhang2015st},
 we can simultaneously sample multiple target distributions
-spread over a wider range, as exemplified below.
+to cover a wider range, as exemplified below.
 
 
 \subsubsection{LLR algorithm}
@@ -2488,10 +2492,10 @@ In real application, the algorithm is often applied simultaneously
 to an array of adjacent intervals
 to cover a wider range of the collective variable, $z$.
 %
-In this way, an attempt to move out of the current interval
-does not have to be rejected,
-but can be interpreted as a transition to
-another internal and accepted with a proper probability.
+In this way, attempts to move out of the current interval
+are not necessarily rejected,
+but can be interpreted as transitions to
+another internal and accepted with proper probability.
 
 
 
@@ -2673,12 +2677,10 @@ We summarize the method as the following procedure.
   by Eq. \eqref{eq:wl_update}.
 
 \item
-  Change the updating magnitude,
+  Change the updating magnitude, $\alpha(t)$,
   which will be used for both intra-umbrella
   parameters, $c_k^{(i)}$,
   and inter-umbrella parameters, $\ln Z^{(i)}$.
-  %
-
 
 \end{enumerate}
 
@@ -2689,8 +2691,30 @@ the weighted histogram analysis method
 *kobrak2003, *gallicchio2005, *chodera2007,
 *fenwick2008, *kim2011, *shirts2008,
 zhu2012, newman, frenkel},
-can be used to recover the unbiased distribution.
+can be used to recover the unbiased distribution,
 %
+\begin{equation}
+  p(z) \, \delta z
+  =
+  \frac{
+    \sum_i n^{(i)}(z)
+  }
+  {
+    \sum_i N^{(i)} \, e^{-u^{(j)}(z)} / Z^{(i)}
+  }
+  ,
+  \notag
+\end{equation}
+%
+where $n^{(i)}(z)$
+the number of visits to the bin $(z-\delta/2, z+\delta/2)$
+in umbrella $i$,
+and the $N^{(i)}$ is the total number of visits
+to the umbrella $i$.
+%
+We can use the final converged value of $Z^{(i)}$
+without going through WHAM iteration.
+
 
 
 
@@ -3433,44 +3457,234 @@ the National Science Foundation XSEDE grid.
 
 
 \section{\label{sec:equilerr}
-Runtime average interpretation
+Runtime-average interpretation
 of the inverse-time schedule
 }
 
 
 
-The optimality of the inverse-time schedule
+We can understand
+the optimality of the inverse-time schedule
 for the single-bin updating scheme
-can be understood from the observation that
-the schedule allows the bias potential
-to coincide with a runtime average
-of independent corrections.
+by a runtime average interpretation.
+%
+We wish to show that the recurrence updating relation,
+Eq. \eqref{eq:wl_update},
+renders the bias potential
+as a runtime average with a dynamic weight
+determined by the updating schedule.
+%
+For the single-bin updating scheme,
+the inverse-time schedule is optimal
+because it corresponds to an unweighted average.
 
-Assuming that we can linearize the histogram correction
-in Eq. \eqref{eq:vcorr_equil} as
-$\ln x \approx x - 1$ % (for $x \approx 1$),
-and apply it to the instantaneous histogram, $h_i(t)$,
-the independent estimate of bias potential in each step
-would be given by
+
+\subsection{Runtime average and recurrence relation}
+
+Consider the weighted average
 %
 \begin{equation}
-  \hat u_i(t) \approx u_i(t) + \frac{ h_i(t) } { \rho_i } - 1
+  X_\omega(t)
+  =
+  \frac{
+    \omega(0) \, x(0) + \cdots + \omega(t) \, x(t)
+  }
+  {
+    \Omega(t)
+  }
+  ,
+  \label{eq:X_ave}
+\end{equation}
+%
+where
+$\Omega(t) \equiv \omega(0) + \cdots + \omega(t)$
+is the cumulative weight.
+%
+We can write the average as a recurrence relation
+%
+\begin{equation}
+  X_\omega(t)
+  = X_\omega(t-1)
+  +
+  \alpha(t)
+  \, [ x(t) - X_\omega(t-1) ]
+  ,
+  \label{eq:X_recur}
+\end{equation}
+%
+where the updating magnitude is defined as
+%
+%The relative weight, $\omega(t)/\Omega(t)$,
+%can be identified as the updating magnitude,
+\begin{equation}
+  \alpha(t) \equiv
+  \frac{ \omega(t) } {\Omega(t)}
+  =
+  1 - \frac{ \Omega(t-1) } {\Omega(t)}
+  .
+  \label{eq:alpha_from_Omega}
+\end{equation}
+%
+and $x(t) - X_\omega(t-1)$
+is the proposed change from the previous average
+from the data point at step $t$.
+
+Conversely, for a recurrence relation
+in the form of Eq. \eqref{eq:X_recur}
+with a given $\alpha(t)$, we can revert it
+to an average in the form of Eq. \eqref{eq:X_ave}
+with the weight given by
+\begin{align}
+  \frac{ \omega(t) } { \omega(0) }
+  =
+  \left(
+    \prod_{\tau=1}^{t-1} \frac{1}{1- \alpha(\tau)}
+  \right)
+  \frac{ \alpha(t) } { 1 - \alpha(t) }
+  .
+  \label{eq:omega_from_alpha}
+\end{align}
+
+%The inverse-time schedule, Eq. \eqref{eq:alpha_invt1},
+For example,
+the unweighted average, $\omega(t) = \omega(0)/t_0$ (for $t > 0$),
+corresponds to the inverse-time updating magnitude,
+Eq. \eqref{eq:alpha_invt1}.
+%
+Updating magnitudes above and below this value
+correspond to runtime averages
+with growing and diminishing weights, respectively.
+
+
+\subsection{\label{sec:ave_us}
+Application to updating schemes}
+
+To apply the above formalism to updating schemes,
+we need a correction formula for the bias potential.
+%
+We will use a linearized version of Eq. \eqref{eq:vcorr_equil},
+$\hat u_i = u_i + \frac{ H_i } { \rho_i } - 1$.
+%
+%\begin{equation}
+%  \hat u_i = u_i + \frac{ H_i } { \rho_i } -1
+%  .
+%  \label{eq:vcorr_equil1}
+%\end{equation}
+%
+Using this formula to
+the instantaneous histogram, $h_i(t)$,
+we get an independent estimate
+of the bias potential at a single step $t$,
+%
+\begin{equation}
+  \hat u_i(t)
+  \approx u_i(t) + \frac{ h_i(t) } { \rho_i } - 1
   = u_i(t) + f_i(t) - 1
   .
   \label{eq:uhatt}
 \end{equation}
+
+For the single-bin updating scheme, Eq. \eqref{eq:wl_update},
+we have
+\begin{align}
+  u_i(t+1)
+  &=
+  u_i(t) + \alpha(t) \, f_i(t)
+  \notag \\
+  &\approx
+  u_i(t) + \alpha(t) \, [\hat u_i(t) - u_i(t)] + \mathrm{const.}
+  ,
+  \label{eq:u_uhat}
+\end{align}
+where we have used Eq. \eqref{eq:uhatt}
+and ignored a constant shift $\alpha(t)$
+in the second step.
 %
-Below we will use capital letters to denote
-time averages, e.g. for variable $x$, we define
-$X(t) \equiv \frac{1}{t} \sum_{\tau=1}^t x(\tau)$.
+Comparing this to Eq. \eqref{eq:X_recur},
+we find that $u_i(t+1)$
+is equivalent to a runtime average $X_\omega(t)$
+of $\hat u_i(t)$
+with the weight given by Eq. \eqref{eq:omega_from_alpha}.
+%
+The inverse-time schedule is optimal
+because it corresponds to the unweighted average
+that uses the data most efficiently.
+
+Similarly, for the multiple-bin updating scheme,
+we have, from Eq. \eqref{eq:vkupdate},
+${\tilde u}_k(t + 1) = {\tilde u}_k(t) + \alpha(t) \, \lambda_k \, {\tilde f}_k(t)$,
+and from Eq. \eqref{eq:u_uhat},
+$\hat{\tilde u}_k(t) \approx {\tilde u}_k(t) + {\tilde f}_k(t)$,
+for $k > 0$.
+This means that
+$\tilde u_k(t+1)$ can also be cast
+as a runtime average of $\hat{\tilde u}_k(t)$,
+with a weight corresponding to the effective updating magnitude,
+$\lambda_k \, \alpha(t)$.
+
+The runtime average interpretation imposes
+an additional constraint on the updating magnitude.
+%
+By Eq. \eqref{eq:alpha_from_Omega},
+the effective updating magnitude, $\lambda_k \, \alpha(t)$,
+of any mode $k > 0$
+should never exceed $1.0$,
+which is not necessarily satisfied
+for the updating schedule
+derived from the continuous-time formalism.
+%
+An expedient fix,
+which we used in Eq. \eqref{eq:alphai},
+is to derive the effective updating magnitude
+from Eq. \eqref{eq:alpha_from_Omega}
+with
+\begin{align*}
+  \ln \frac{ \Omega(t-1) } { \Omega(t) }
+  &\approx
+  \frac{1}{t-t'} \ln \frac{ \Omega(t') } { \Omega(t) }
+  =
+  \sum_{\tau=t'+1}^t \frac{ \ln[1- \lambda_k \, \alpha(\tau)] } { t - t' }
+  \\
+  &\approx
+  -\lambda_k \cdot \frac{\int_{t'}^t \alpha(\tau) \, d\tau}{t-t'}
+  =
+  -\lambda_k \cdot \frac{q(t) - q(t')}{t- t'}
+  ,
+\end{align*}
+where $t$ and $t'$ are two consecutive grid points.
+%
+Using this formula to mode $k = 1$
+with the largest eigenvalue
+would guarantee $\lambda_k \, \alpha(t) \ge 1$
+for all nontrivial modes.
+
+
+
+\subsection{Histogram correction}
+
+
+
+We have shown above that
+for a general multiple-bin updating scheme,
+each mode of bias potential
+corresponds to a runtime average
+with a dynamic weight,
+which is not necessarily even to be most efficient.
+%
+Below we give a simple correction that
+could largely compensate the efficiency loss.
+%
+We will use capital letters to denote unweighted averages.
+%e.g. for variable $y$,
+%$Y(t) \equiv \frac{1}{t} \sum_{\tau=1}^t y(\tau)$.
 %\begin{equation}
-%  X(t) \equiv \frac{1}{t} \sum_{\tau=1}^t x(\tau)
+%  Y(t) \equiv \frac{1}{t} \sum_{\tau=1}^t x(\tau)
 %  .
 %  \notag
 %  %\label{eq:timeav}
 %\end{equation}
 %
-Time averaging Eq. \eqref{eq:uhatt} yields
+Then, by an unweighted average of Eq. \eqref{eq:uhatt}, we get
 \begin{align}
   \hat U_i(t)
   &\approx
@@ -3483,155 +3697,18 @@ Time averaging Eq. \eqref{eq:uhatt} yields
   \label{eq:uhatav}
 \end{align}
 %
-%Equation \eqref{eq:uhatav}
-This equation serves as
+This correction serves as
 a generalization of Eq. \eqref{eq:vcorr_equil}
-for FDS simulations under a variable bias potential
-and we can use it to improve the estimated PMF
-after simulation.\footnote{Equation \eqref{eq:uhatav}
-  can also be derived
+for FDS simulations under
+a variable bias potential.\footnote{We can also
+  derive Eq. \eqref{eq:uhatav}
   from the self-healing umbrella sampling method\cite{marsili2006}.
-  From Eq. \eqref{eq:uhatt},
-  we can construct an independent estimator
-  of the unbiased distribution as
-  $\hat p_i(t) \approx h_i(t) \, e^{ u_i(t) }$.
-  Upon time averaging, we get
+  We can construct an independent estimator
+  of the unbiased distribution from Eq. \eqref{eq:Vi_target} as
+  $\hat p_i(t) \approx h_i(t) \, e^{ u_i(t) }$,
+  assuming a proper shift of $u_i(t)$.
+  Then after time averaging, we get
   $\rho_i e^{\hat U_i(t)} = \hat P_i(t) \approx H_i \, e^{ U_i(t) }$.}
-%
-In particular, for the single-bin updating scheme,
-Eq. \eqref{eq:wl_update},
-we have, up to a constant shift,
-%
-\begin{align}
-  \hat U_i(t)
-  &\approx
-  \frac{1}{t} \sum_{\tau=1}^t
-  \left[
-    u_i(\tau) +
-    \frac{ u_i(\tau + 1) - u_i(\tau) } { \alpha(t) }
-  \right]
-  ,
-  \notag
-  \\
-  &\approx
-  \Delta u_i
-  +
-  \sum_{\tau=1}^t
-  \left[
-    1 + \frac{1}{\alpha(\tau - 1)} - \frac{1}{\alpha(\tau)}
-  \right]
-  \frac{ u_i(\tau) } {t}
-  ,
-  \label{eq:Uhat_sum}
-\end{align}
-where
-$\Delta u_i \equiv u_i(t+1) /[t \, \alpha(t)]
-- u_i(1)/[t \, \alpha(0)]$.
-%$$
-%\Delta u_i \equiv \frac{u_i(t+1)}{t \, \alpha(t)}
-%- \frac{u_i(1)}{t \, \alpha(0)}.
-%$$
-%
-With the inverse-time schedule, Eq. \eqref{eq:alpha_invt},
-each term in the sum vanishes,
-and if we further define $\alpha(0) \to \infty$,
-then
-$$
-u_i(t+1) = \hat U_i(t),
-$$
-i.e. the bias potential in this case coincides with
-the runtime average of the correction, $\hat u_i(t)$,
-at every step, $t$.
-%
-On the other hand,
-with a constant $\alpha(\tau) = a_0$ for $\tau = 0, 1, \dots$,
-Eq. \eqref{eq:Uhat_sum} is approximately a plain average\cite{zhou2005}:
-$\hat U_i(t) \approx U_i(t)$,
-if we can assume an equilibrium condition
-with $u_i(t+1) \approx u_i(1)$.
-\note{This would be rather risky for metadynamics,
-because we know that the certain noise modes
-do not easily go away, although the plain average
-formula was also recommended for metadynamics.}
-
-We can also cast other updating relations,
-such as Eqs. \eqref{eq:wl_update}
-and \eqref{eq:vkupdate},
-as runtime averages,
-but with dynamic weights.
-%
-The weighted average
-%
-\begin{align*}
-  X_\omega(t)
-  =
-  \frac{
-    \omega(0) \, x(0) + \cdots + \omega(t) \, x(t)
-  }
-  {
-    \Omega(t)
-  }
-  ,
-\end{align*}
-%
-where
-$\Omega(t) \equiv \omega(0) + \cdots + \omega(t)$
-is the accumulated weight,
-is equivalent to the recurrence relation
-%
-\begin{align*}
-X_\omega(t) = X_\omega(t-1)
-  + \frac{\omega(t)}{\Omega(t)}
-  \Delta \, x(t)
-,
-\end{align*}
-where
-$\Delta x(t) \equiv x(t) - X_\omega(t-1)$
-is the proposed change from the previous average
-from the data point at step $t$.
-%
-The relative weight, $\omega(t)/\Omega(t)$,
-can be identified as the updating magnitude,
-\begin{equation}
-  \alpha^*(t) \equiv
-  \frac{ \omega(t) } {\Omega(t)}
-  =
-  1 - \frac{ \Omega(t-1) } {\Omega(t)}
-  .
-  \label{eq:alpha_from_Omega}
-\end{equation}
-%
-The inverse-time schedule, Eq. \eqref{eq:alpha_invt1},
-follows from the case of unweighted average,
-$\omega(t) = 1$ (for $t > 0$),
-and updating magnitudes above and below this value
-correspond to runtime averages that favor future and past data,
-respectively.
-%
-In the case of Eq. \eqref{eq:vkupdate},
-we can identify
-the bias potential $\tilde v_k(t)$
-as $X(t-1)$,
-$\tilde f_k(t)$ as $\Delta x(t)$
-by Eq. \eqref{eq:uhatt},
-and
-the mode-$k$ updating magnitude,
-$\alpha(t) \, \lambda_k$,
-as $\alpha^*(t)$.
-%
-This mapping shows that
-updating magnitude should not exceed $1.0$.
-%
-One way to satisfy this condition
-in converting the results
-from the continuous-time setup is
-to use Eq. \eqref{eq:alpha_from_Omega}
-with
-\begin{align*}
-  \frac{ \Omega(t) } { \omega(0) }
-  = \prod_{\tau=1}^t \frac{1}{1- \alpha^*(\tau)}
-\approx \exp\left(\int_0^t \alpha^*(\tau) \, d\tau \right).
-\end{align*}
 
 
 
@@ -3982,55 +4059,37 @@ Homogeneous updating schemes
 }
 
 
-Here, we give some mathematical details
-on the homogeneous updating schemes,
+Here, we discuss some details
+on the homogeneous updating schemes.
 %
-The updating matrix of the updating schemes, $w_{ij}$,
-can be characterized by
-a fixed window function, $\mu_0, \mu_1, \dots, \mu_b$,
-that shifts with the bin $j$.
+We can characterize
+the updating matrix, $w_{ij}$,
+of a homogeneous updating scheme
+by a rigid window function
+that shifts with the bin $j$ of visit
+(ignoring the boundary adjustment).
 %
-Here $\mu_l$ denotes the relative updating magnitude
-(not adjusted by the boundary correction)
-on the $l$th bin from the center.
+The window function is defined by
+the relative updating magnitude, $\mu_l$,
+on the $l$th bin from the central bin.
 %
-The translational invariance requires $\rho_i$ to be flat,
-and the updating matrix, $\mathbf w$,
-must be symmetric to satisfy detailed balance,
-Eq. \eqref{eq:w_detailedbalance}.
+%The translational invariance requires $\rho_i$ to be flat,
+%and the updating matrix, $\mathbf w$,
+%must be symmetric to satisfy detailed balance,
+%Eq. \eqref{eq:w_detailedbalance}.
 %
-The updating matrices share the same set of eigenvectors
-(which here are sines and cosines of different frequencies),
-and thus are completely determined
-by the eigenvalues.
+By the translational invariance,
+the updating matrices of homogeneous updating schemes
+share the same set of eigenvectors,
+which are sine and cosine functions.
 %
-Further, the multiplication of $\mathbf w$
-can be reduced to a convolution with the window function.
-%
-We will show below that the eigenvalues of the updating matrix
-is related to the window function as a cosine transform.
-%
-Thus, there is a one-to-one correspondence between
-the eigenvalues of $\mathbf w$
-and the window function.
+The eigenvalues of the updating matrix
+are related to the window function as a cosine transform.
 
 
 
 \subsection{\label{sec:wband_eig}
 Eigenvalues and window function}
-
-
-
-%While translationally-invariant
-%updating schemes
-%naturally suit periodic variables\cite{
-%dama2014},
-%they can also be extended to non-periodic variables
-%by imposing the reflective boundary condition\cite{
-%bussi2006}.
-%%
-%For simplicity, we will assume that the target
-%distribution is flat, or $\rho_i = 1/n$, below.
 
 
 
@@ -4359,8 +4418,8 @@ However,
 when discretized on a finite grid,
 some eigenvalues can turn negative.
 %
-We can maintain the convergence of the updating scheme
-by redefining the Gaussian scheme
+To maintain the positivity of eigenvalues,
+we can redefine the Gaussian scheme
 from the same spectrum of eigenvalues, Eq. \eqref{eq:lambda_Gaussian},
 and then inversely computing the window function
 using Eq. \eqref{eq:mu_from_lambda},
@@ -4496,7 +4555,7 @@ is then given by the random part,
 \end{equation}
 and
 %the same holds for the Fourier transform,
-$\tilde f_k(t) \approx \tilde \xi_k(t).$
+$\tilde f_k(t) = \tilde \xi_k(t).$
 %
 If we define the time average,
 %
