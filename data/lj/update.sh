@@ -15,6 +15,7 @@ cp ../../prog/lj/brun6/xerr.dat rho0.1/xerr_sig0.2_opt.dat
 cp ../../prog/lj/brun7/xerr.dat rho0.1/xerr_sig0.5_invt.dat
 cp ../../prog/lj/brun8/xerr.dat rho0.1/xerr_sig0.5_opt.dat
 
+cp ../../prog/lj/drun1/xerr.dat rho0.1/xerr_sbin_t1e8.dat
 cp ../../prog/lj/drun5/xerr.dat rho0.1/xerr_sig0.2_t1e8_invt.dat
 cp ../../prog/lj/drun6/xerr.dat rho0.1/xerr_sig0.2_t1e8_opt.dat
 

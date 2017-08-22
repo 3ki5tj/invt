@@ -1,4 +1,4 @@
-\documentclass[preprint, superscriptaddress, floatfix]{revtex4-1}
+\documentclass[reprint, superscriptaddress, floatfix]{revtex4-1}
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{mathtools}
@@ -91,11 +91,11 @@ Galveston, Texas 77555-0304, USA}
   %Therefore, the optimal schedule follows from
   %the equation of motion of the particle.
   %
-  We will show that
+  We show that
   the optimal schedule depends on the updating scheme.
   %
   While the asymptotically optimal schedule for
-  the single-bin updating scheme (commonly used in WL)
+  the single-bin updating scheme (commonly used in the WL algorithm)
   is given by an inverse-time formula,
   that for the Gaussian updating scheme (commonly used in metadynamics)
   is often more complex.
@@ -108,7 +108,7 @@ Galveston, Texas 77555-0304, USA}
   that are optimal for asymptotic convergence.
   %
   These bandpass updating schemes aim at
-  partially flattening a few selected histogram modes
+  partially flattening a few long-range histogram modes
   and their optimal schedule
   is also given by the inverse-time prescription.
   %
@@ -205,7 +205,7 @@ and Gaussian updating schemes, respectively.
 %
 While the former is popular for MC simulations\cite{wang2001,
   wang2001pre, kim2006, *kim2007},
-the latter is more popular for MD simulations
+the latter is commonly used for MD simulations
 as it provides a smoother bias potential
 that can be readily differentiated for force calculation.\cite{huber1994,
   *laio2002, *laio2008, *barducci2011, *sutto2012, junghans2014}
@@ -231,7 +231,7 @@ barducci2008, dickson2011, dama2014}.
 %
 While an overly slow reduction of the updating magnitude
 increases the variance of the bias potential,
-an too rapid reduction often
+a too rapid reduction often
 converges the bias potential to wrong value.
 %
 For the single-bin case, it is known that
@@ -283,11 +283,10 @@ a class of bandpass updating schemes
 that flatten only
 a few long-range distribution modes.
 %
-The bandpass updating schemes allow
+Compared with the Gaussian updating scheme,
+Bandpass updating schemes have the advantage of allowing
 simpler control of the updating magnitude
-than the Gaussian updating scheme
-for the asymptotically optimal schedule of the former
-is given by the inverse-time formula.
+for asymptotic convergence.
 
 Finally, we present an application of
 the bandpass updating schemes
@@ -296,8 +295,8 @@ a sequence of orthogonal polynomials.
 %
 The bias potential in this case assumes
 a polynomial form,
-and coefficients adjusted on-the-fly
-to achieve the desired target distribution.
+and coefficients are adjusted on-the-fly
+to achieve a particular target distribution.
 %
 This method serves
 as a generalization of the Langfeld-Lucini-Rago (LLR)
@@ -336,16 +335,16 @@ we derive the method of
 computing the optimal schedule
 in the simple case of the
 single-bin updating scheme
-used by the WL algorithm,
+(as in the WL algorithm)
 by proving the optimality
 of the known inverse-time formula.
 %
-Next, we extend the method to the general case
+We extend the method to the general case
 of a multiple-bin updating scheme
 that encompasses the Gaussian scheme used in metadynamics
 in Sec. \ref{sec:multiple-bin}.
 %
-We then compare different updating schemes
+Then, we compare different updating schemes
 and show that the single-bin scheme
 and a class of generalized bandpass schemes
 are optimal for convergence
@@ -372,7 +371,7 @@ Flat-distribution sampling}
 
 Consider the problem of computing
 the distribution, $p_i$,
-along a discrete quantity, $i$,
+along a discrete collective variable, $i$,
 for a given system.
 %
 %For example, $i$ can be the energy, $E$,
@@ -380,7 +379,7 @@ for a given system.
 %in a simulated tempering simulation\cite{
 %marinari1992, *lyubartsev1992}.
 %
-For a continuous quantity, $z$,
+For a continuous collective variable, $z$,
 %which is often the case in a (classical) molecular system,
 we can use the equivalent integer $i$ to represent
 the index of a small interval, or a bin,
@@ -390,7 +389,7 @@ $(z, z + \delta z)$.
 %$\sum_{i = 1}^n p_i = 1$.
 
 
-Sampling a multimodal distribution with deep basin(s)
+Sampling a multimodal distribution with deep basins
 is often challenging in regular MC and MD simulations.
 %
 To promote transitions among the basins,
@@ -477,7 +476,7 @@ accumulation period for a precise histogram,
 and thus disallows
 continuous improvement of the bias potential
 %(hence that of the PMF)
-as simulation lengthens.
+as the simulation lengthens.
 
 Below we will focus on a more recent class of adaptive FDS methods,
 including the WL algorithm\cite{wang2001, wang2001pre}
@@ -489,7 +488,7 @@ by continuously and incrementally updating the bias potential.
 %
 In the WL algorithm\cite{wang2001, wang2001pre},
 the bias potential, $u_i(t)$, is updated
-at each step $t$ as
+at each time step $t$ as
 %
 \begin{equation}
   u_i(t+1)
@@ -515,7 +514,7 @@ at the current bin, $i(t)$.
 In a more general
 \emph{multiple-bin (updating) scheme},
 %including the Gaussian updating scheme used in metadynamics,
-the updating also involves neighboring bins:
+neighboring bins are also updated:
 %
 \begin{equation}
   u_i(t+1)
@@ -530,11 +529,11 @@ the updating also involves neighboring bins:
 \end{equation}
 %
 A common example is the Gaussian updating scheme used in metadynamics,
-with $w_{ij}$ being roughly a Gaussian centered on bin $j$.
+with $w_{ij}$ being roughly a Gaussian centered on bin $j = i(t)$.
 %
 Note that if the updating occurs
 only every few sampling steps,
-then $t$ means the number of updating steps.
+then $t$ denotes the number of updating steps.
 
 %\subsubsection{Updating magnitude and the inverse-time formula}
 
@@ -578,7 +577,7 @@ belardinelli2007, *belardinelli2007jcp, *belardinelli2008, *belardinelli2016}.
 %For the single-bin scheme
 %used in WL algorithm,
 A more effective way
-of controlling the schedule, $\alpha(t)$,
+of controlling the schedule of the updating magnitude, $\alpha(t)$,
 in late stages
 is to follow the formula
 %
@@ -597,12 +596,12 @@ komura2012, *caparica2012, *caparica2014}.
 %
 This is a general result\cite{
   robbins1951, pellegrini2014},
-and it has an intuitive explanation\cite{
+and it has an intuitive explanation:\cite{
   marsili2006, barducci2008}
-that interprets the bias potential
-as a runtime average computed from all data points collected so far,
-which absorbs the contribution of the newest data point
-by its due weight,
+the bias potential undergoing the single-bin updating scheme
+can be mapped to a runtime average computed from all data points collected so far;
+upon the addition of a new data point,
+the average absorbs its contribution by the due weight,
 the inverse of the current sample size, $t$
 (cf. Appendix \ref{sec:equilerr}).
 
@@ -615,7 +614,7 @@ Single-bin updating scheme}
 
 
 In this section,
-we will derive the optimal $\alpha(t)$
+we derive the optimal $\alpha(t)$
 for the single-bin scheme,
 Eq. \eqref{eq:wl_update},
 as a preparation
@@ -636,9 +635,9 @@ and then minimize it by variation.
 We define the net error in the bias potential
 by deducting two contributions.
 %
-First, to deduct the target value given by
-Eq. \eqref{eq:Vi_target},
-we introduce a shifted bias potential
+First, we deduct the target value
+[Eq. \eqref{eq:Vi_target}]
+by introducing a shifted bias potential
 %
 \begin{equation}
   v_i(t)
@@ -653,7 +652,7 @@ we introduce a shifted bias potential
 %
 which should tend to a constant of $i$
 upon convergence.
-Note that the updates to $v_i(t)$ are
+Note that updates to $v_i(t)$ are
 equivalent to the updates to $u_i(t)$,
 since the shift
 remains a constant during simulation.
@@ -674,7 +673,7 @@ remains a constant during simulation.
 %According to Eq. \eqref{eq:pi_p_V},
 
 
-Second, the bias potential following Eq. \eqref{eq:wl_update}
+The bias potential following Eq. \eqref{eq:wl_update}
 generally grows over time.
 %
 Since a uniform increase of $u_i(t)$, or, equivalently, that of $v_i(t)$,
@@ -685,9 +684,9 @@ and a baseline value, $\bav{v}(t)$,
 for the average growth\cite{
 dama2014}.
 %
-We define the bias potential deviation from the
-bin average, $\bav{v}(t) \equiv \sum_{i=1}^n \rho_i \, v_i(t)$,
-as
+In the second deduction, we define
+the bin average as $\bav{v}(t) \equiv \sum_{i=1}^n \rho_i \, v_i(t)$,
+and the deviation of the bias potential as
 %
 \begin{equation}
   v_{*i}(t) \equiv v_i(t) - \bav{v}(t)
@@ -708,7 +707,7 @@ as
   We can readily show that the two definitions are equivalent
   for small $v_{*i}$.}%
 %
-Below we will use the notations, $x_{*i}$ and $\bav{x}$,
+Below we will use the notations, $\bav{x}$ and $x_{*i}$,
 for a general variable, $x_i$.
 %
 The total error is then given by
@@ -730,8 +729,8 @@ Differential equation}
 
 
 
-To proceed, we will
-approximate the finite difference Eq. \eqref{eq:wl_update}
+To proceed, we
+approximate the finite difference equation, Eq. \eqref{eq:wl_update},
 by a differential equation\footnote{In
 going to the continuous-time setup,
 we find it more convenient to shift the origin of time by $-1$,
@@ -870,7 +869,7 @@ and
 
 
 We will approximate the histogram fluctuation part, $\xi_i(t)$,
-hence its deviation from the bin average, $\xi_{*i}(t)$,
+and hence its deviation from the bin average, $\xi_{*i}(t)$,
 as white noise such that
 \begin{equation}
   \langle \xi_{*i}(t) \, \xi_{*i}(t') \rangle
@@ -879,10 +878,11 @@ as white noise such that
   \notag
   %\label{eq:G_def}
 \end{equation}
-for some $G_i$,
+for some constant $G_i$,
 and $\delta(t)$ is the Dirac delta function.
 %
-We expect the approximation to hold for simulation
+We expect the approximation to hold
+for simulations that are
 much longer than the autocorrelation time.
 
 From Eqs.
@@ -901,10 +901,9 @@ we get % a set of decoupled equations
 \end{equation}
 %
 Without the random part, $\xi_{*i}(t)$,
-this equation would drive
-the deviation of the bias potential, $v_{*i}(t)$,
-to $0$ at long times,
-implying the convergence.
+this equation is convergent
+as the deviation of the bias potential, $v_{*i}(t)$,
+would tend to $0$ at long times.
 %
 The formal solution of Eq. \eqref{eq:dxdt_singlebin} is
 %
@@ -1065,12 +1064,12 @@ we get the inverse-time schedule
 \label{eq:alpha_invt1}
 \end{equation}
 %
-and Eq. \eqref{eq:alpha_invt}
-is the special case of $t_0 = 0$.
+with Eq. \eqref{eq:alpha_invt} being
+the special case of $t_0 = 0$.
 %
 
 We now determine the optimal value of $q(T)$,
-which is fixed in the above.
+which was previously held fixed.
 %
 This is equivalent to choosing a value of $t_0$
 \big[because $q(T) = \ln\bigl[1 + (T/t_0)\bigr]$,
@@ -1137,7 +1136,7 @@ Multiple-bin updating scheme}
 We now turn to a general multiple-bin updating scheme.
 %
 By definition, Eq. \eqref{eq:mbin_update},
-a visit to bin $j$ in this case results in updates of the bias potential
+a visit to bin $j = i(t)$ in this case results in updates of the bias potential
 not only at bin $j$, but also at a few neighboring bins $i$'s.
 %
 Similar to Eq. \eqref{eq:ut_diffeq},
@@ -1160,7 +1159,7 @@ The optimization procedure is similar to
 the single-bin case.
 %
 The key simplification comes from the
-projection of the bias potential to the $n$ eigenmodes
+projection of the bias potential to the eigenmodes
 of the updating matrix, $\mathbf w$,
 formed by the relative magnitudes, $w_{ij}$'s.
 
@@ -1210,7 +1209,7 @@ with eigenvalue $1$.
 Thus, the transpose $\mathbf w^T$
 resembles a transition matrix,
 except that some elements can be negative
-for our cases here.
+for cases considered here.
 %
 Below we will %take advantage of the analogy and
 borrow techniques used
@@ -1335,7 +1334,7 @@ Then,
 we can rewrite Eq. \eqref{eq:ortho0} as
 $\mathcal F[1]_k = \delta_{k0}$,
 %
-and Eq. \eqref{eq:eigenmode0} means that
+and Eq. \eqref{eq:eigenmode0} shows that
 the bin average
 %of any quantity, $x_i$, is the first mode of the Fourier transform:
 $\bav{x}= \mathcal F[x_i]_0 = \tilde x_0$,
@@ -1527,20 +1526,20 @@ where
   \approx
   \int_{-\infty}^\infty
   \bigl\langle
-    \tilde\xi_k(t) \tilde\xi_k(0)
+    \tilde\xi_k(t) \, \tilde\xi_k(0)
   \bigr\rangle
   \, dt
   \to
   \sum_{t = -\infty}^\infty
   \bigl\langle
-    \tilde\xi_k(t) \tilde\xi_k(0)
+    \tilde\xi_k(t) \, \tilde\xi_k(0)
   \bigr\rangle
   ,
   \label{eq:Gamma_sum}
 \end{equation}
 %
 with the second expression being
-the equivalent in the discrete-time setting.
+the counterpart in the discrete-time setting.
 %
 Equation \eqref{eq:Gamma_sum} represents
 a first approximation for modeling
@@ -1932,12 +1931,12 @@ wang2001, wang2001pre}.
 
 
 \subsubsection{\label{sec:procedure}
-Procedure of computing the optimal schedule and error
+Procedure for computing the optimal schedule and error
 }
 
 
 Based on the above results,
-we give a procedure of computing
+we give a procedure for computing
 the optimal schedule and the error
 for a given adaptive FDS simulation.
 %
@@ -1953,7 +1952,7 @@ determines $\lambda_k$'s,
 $\Gamma_k$'s depend also on the system
 and the underlying sampling process.
 %
-We have
+The procedure is given below.
 
 \begin{figure}[h]\centering
   \makebox[\linewidth][c]{
@@ -2108,10 +2107,10 @@ Gaussian and homogeneous updating schemes}
 A commonly-used multiple-bin updating scheme in metadynamics
 is the Gaussian updating scheme,
 whose updating matrix can be characterized by
-a fixed Gaussian centered on the bin of visit
-(with some boundary adjustment).
+a fixed Gaussian centered on the current bin
+(with some boundary adjustment),
 %to satisfy the constraints discussed in Sec. \ref{sec:updating-matrix},
-%as shown in Fig. \ref{fig:mat}(a).
+see Fig. \ref{fig:mat}(a) for an example.
 %
 The eigenvalues of this scheme are given by\cite{bussi2006}
 \begin{align}
@@ -2129,13 +2128,19 @@ The eigenvalues of this scheme are given by\cite{bussi2006}
 \label{eq:lambda_Gaussian}
 \end{align}
 where $\sigma_z$ and $\Delta z = z_{\max} - z_{\min}$
-are the width of the Gaussian and the span
-in the original collective variable, $z$,
+are the width of the Gaussian and the range of
+the original collective variable, $z$,
 respectively.
 
-More generally, we can define a class of
-translationally-invariant or \emph{homogeneous} updating schemes
-by a rigid window function with a floating center.
+More generally, we can replace the Gaussian
+in the above updating scheme
+by a window function of different shape.
+%
+This results in a
+translationally-invariant or \emph{homogeneous} updating scheme,
+whose updating matrix can be
+characterized by a rigid window function with a floating center,
+see Fig. \ref{fig:mat}(b) for an example.
 %
 As shown in Appendix \ref{sec:homo},
 the homogeneous updating schemes share
@@ -2159,7 +2164,7 @@ as\cite{bussi2006}
 Thus, it is possible to improve the updating scheme
 by selecting a spectrum of eigenvalues
 optimal for asymptotic convergence.
-We will pursue this strategy below.
+We discuss this strategy in detail below.
 
 
 
@@ -2170,9 +2175,9 @@ Comparison of updating schemes}
 
 Now that we can compute the optimal schedule
 for a given updating scheme,
-we will turn to the problem of finding
+we turn to the problem of finding
 optimal updating schemes
-given that each updating scheme
+assuming that each updating scheme
 adopts the optimal schedule.
 
 
@@ -2181,7 +2186,7 @@ Asymptotic optimality of the single-bin scheme}
 
 
 
-We will first show
+We first show
 that the single-bin scheme is asymptotically optimal.
 %
 Consider a class of updating matrices
@@ -2325,13 +2330,13 @@ of short wavelength.
 If the eigenmodes are sorted in descending order
 of the wavelength,
 and the PMF is sufficiently smooth
-to be representable by the first $K$
+to be represented by the first $K$
 eigenmodes,
-we may assign the first $K$ eigenmodes eigenvalue $1$
-and the rest of eigenmodes eigenvalue $0$:
+we may assign the eigenvalues of the first $K$ eigenmodes to $1$
+and the remaining eigenvalues to $0$:
 %
 \begin{equation}
-  \lambda_1 = \cdots = \lambda_{K-1} = 1
+  \lambda_0 = \cdots = \lambda_{K-1} = 1
   ,
   \mathrm{\; and \;}
   \lambda_K = \cdots = \lambda_{n-1} = 0
@@ -2359,7 +2364,7 @@ from the bias potential.
 %$\Err_A(T) = \sum_{ k = 1 }^{ K - 1 } \Gamma_k T/(T + t_0)^2$,
 %which is less than that from Eq. \eqref{eq:EA_sbin1}.
 
-We will consider two special cases of the bandpass updating schemes.
+We will consider two special classes of bandpass updating schemes.
 %
 First,
 by applying this construction to the basis of cosine and sine functions,
@@ -2369,7 +2374,8 @@ but with better convergence in the asymptotic limit
 (cf. Appendix \ref{sec:homo_bandpass}).
 %
 In Sec. \ref{sec:lj},
-we will further compare the performance of the two updating schemes
+we will further compare the performance of
+the homogeneous bandpass and Gaussian updating schemes
 in an example.
 %
 %While both updating scheme are able to deliver
@@ -2385,7 +2391,8 @@ in an example.
 %  results in an error roughly proportional to
 %  $|\max_i u_i - \min_i u_i|^2/K^3$.}
 %
-The second case is based on a family of orthogonal polynomials,
+The second class of bandpass updating schemes
+is constructed from a sequence of orthogonal polynomials,
 which we will discuss below.
 
 
@@ -2394,27 +2401,28 @@ which we will discuss below.
 Bandpass updating schemes constructed from orthogonal polynomial bases}
 
 
-Here we will consider here a family of bandpass updating schemes
+Here we consider a class of bandpass updating schemes
 constructed from a sequence of orthogonal polynomials.
 %
-These updating schemes are more intuitive and easier to implement
+These updating schemes are more intuitive
+than the homogeneous bandpass updating scheme
 as the bias potential in this case is
-a low-order polynomial of the collective variable.
+a simple polynomial of the collective variable.
 
 \subsubsection{Orthogonal polynomial basis}
 
-It is convenient to
+For convenience, we
 replace the discrete bin index, $i$,
 by the continuous variable, $z$;
 %
-and we will replace $\rho_i$ by $\rho(z) \, \delta z$,
-  $\phi_{ki}$ by $\phi_k(z) \, \delta z$,
-  and
-  $w_{ij}$ by $w(z, z') \, \delta z$, etc.
+$\rho_i$ by $\rho(z) \, \delta z$;
+$\phi_{ki}$ by $\phi_k(z) \, \delta z$;
+and
+$w_{ij}$ by $w(z, z') \, \delta z$, etc.
 %
 We define the eigenvectors by
 $\phi_k(z) = R_k(z) \, \rho(z)$,
-where $R_k(z)$ is the $k$th member of an sequence of orthogonal polynomials
+where $R_k(z)$ is the $k$th member of a sequence of orthogonal polynomials
 that satisfy
 \begin{align*}
   \int R_k(z) \, R_{k'}(z) \, \rho(z) \, d z
@@ -2452,31 +2460,34 @@ with the eigenvalues given by \eqref{eq:lambda_bandpass}:
 \begin{align*}
   w(z, z')
   =
-  \sum_{k=1}^{K-1} \frac{ \phi_k(z) \, \phi_k(z') } { \rho(z) }
-  = \sum_{k=1}^{K-1} R_k(z) \, R_k(z') \, \rho(z'),
+  \sum_{k=0}^{K-1} \frac{ \phi_k(z) \, \phi_k(z') } { \rho(z) }
+  =
+  \sum_{k=0}^{K-1} R_k(z) \, R_k(z') \, \rho(z')
+  .
 \end{align*}
 %
-where we have dropped the $k=0$ mode
-that corresponds to a uniform shift
-of the bias potential.
+%where we have dropped the $k=0$ mode
+%that corresponds to a uniform shift
+%of the bias potential.
 %
 By Eq. \eqref{eq:mbin_update},
 the bias potential is updated as
 %
 $$
 u(z, t+1) = u(z, t)
-+ \sum_{k=1}^{K-1} R_k(z) R_k\bigl( z(t) \bigr) \, \alpha(t).
++ \sum_{k=0}^{K-1} R_k(z) R_k\bigl( z(t) \bigr) \, \alpha(t).
 $$
 %
 We can write the bias potential
 as a superposition of the orthogonal polynomials
 %
 \begin{equation}
-  u(z, t) = \sum_{k=1}^{K-1} c_k(t) \, R_k(z),
+  u(z, t) = \sum_{k=0}^{K-1} c_k(t) \, R_k(z),
   \label{eq:uz_decomp}
 \end{equation}
 %
 with the coefficients updated as
+%
 \begin{equation}
   c_k(t+1) = c_k(t) + \alpha(t) \, R_k\bigl( z(t) \bigr)
   .
@@ -2504,7 +2515,7 @@ we can simultaneously sample multiple target distributions
 to cover a wider range, as exemplified below.
 
 
-\subsubsection{LLR algorithm}
+\subsubsection{Langfeld-Lucini-Rago (LLR) algorithm}
 
 For example,
 to sample a flat distribution, $\rho(z) = 1/\Delta z$,
@@ -2512,24 +2523,25 @@ over $\left[z_c - \frac 1 2 \Delta z, z_c + \frac 1 2 \Delta z\right]$,
 we can use the Legendre polynomials\cite{arfken}.
 %
 If the interval is sufficiently small,
-we can limit the basis to a single linear mode,
-$R_1(z) = 2 \sqrt{3} \, (z - z_c)/\Delta z$,
-with $K = 2$.
+we can use $K = 2$ to limit the basis to the first two modes,
+$R_0(z) = 1$ and $R_1(z) = 2 \sqrt{3} \, (z - z_c)/\Delta z$.
 %
 %The bias potential is a linear function of $z$,
-The updating scheme is essentially the LLR algorithm\cite{langfeld2012}
+If we drop the $k = 0$ mode
+that corresponds to a uniform shift of the bias potential,
+the updating scheme is essentially the LLR algorithm\cite{langfeld2012}
 for the single-interval case,
 and the inverse-time schedule
 was recommended for optimal convergence of $c_1$\cite{pellegrini2014}.
-
-In real application, the algorithm is often applied simultaneously
-to an array of adjacent intervals
-to cover a wider range of the collective variable, $z$.
 %
-In this way, attempts to move out of the current interval
-are not necessarily rejected,
-but can be interpreted as transitions to
-another internal and accepted with proper probability.
+In practical applications, the algorithm is often applied simultaneously
+to an array of adjacent intervals
+to cover a wide range over the collective variable, $z$.
+%
+%In this way, attempts to move out of the current interval
+%are not necessarily rejected,
+%but can be interpreted as transitions to
+%another internal and accepted with proper probability.
 
 
 
@@ -2556,10 +2568,10 @@ a quadratic one,
 $R_2(z) = \bigl[(z - z_c)^2 - \sigma_z^2\bigr] /\left(\sqrt 2 \, \sigma_z^2\right)$,
 to restrict the sampling region.
 %
-The bias potential is
+The bias potential is thus
 quadratic\cite{maragliano2006, *abrams2008, zhu2012, neuhaus2006, *neuhaus2007},
 which is common in umbrella sampling\cite{torrie1974, *torrie1977}
-and the method of Gaussian ensemble\cite{hetherington1987,
+and the Gaussian ensemble method\cite{hetherington1987,
 *challa1988, *costeniuc2006}.
 
 Upon convergence,
@@ -2569,7 +2581,7 @@ can be related to the slope and curvature of the PMF
 %
 By Eq. \eqref{eq:uz_decomp}, we have
 $$
-u(z) = \frac{c_1}{\sigma_z} (z - z_c)
+u(z) = c_0 + \frac{c_1}{\sigma_z} (z - z_c)
 + \sqrt 2 \, c_2 \left[ \frac{(z-z_c)^2}{2 \, \sigma_z^2} - \frac{1}{2} \right].
 $$
 Thus, we can interpret
@@ -2585,9 +2597,39 @@ $-d^2\ln p(z)/dz^2 < 0$.
 
 We can extend the sampling range
 by constructing an expanded ensemble
-from a superposition of multiple Gaussian umbrellas
-centered at different places via
-the frameworks of
+from a superposition of $m$ Gaussian umbrellas
+centered at different places.
+%
+The target distribution is a joint distribution
+of the discrete umbrella index, $i = 1, \dots, m$,
+and the continuous variable, $z$,
+$\rho(i, z) = \rho_i \, \rho^{(i)}(z)$,
+where the marginal inter-umbrella distribution is flat,
+$\rho_i = 1/m$,
+whereas the conditional intra-umbrella distribution, $\rho^{(i)}(z)$
+is the Gaussian given previously.
+%
+To sample this distribution, we give each umbrella
+an independent bias potential, $u^{(i)}(z)$,
+of the form of Eq. \eqref{eq:uz_decomp},
+and update coefficients as
+\begin{align*}
+  c_k^{(i)}(t+1) = c_k^{(i)}(t)
+  + m \, \alpha(t) \, R_k^{(i)}\bigl( z(t) \bigr) \, \delta_{i, i(t)}
+  ,
+\end{align*}
+%
+where the factor $m$ before $\alpha(t)$
+is due to the inverse of the marginal inter-umbrella distribution, $\rho_i$.
+%
+Note that since $R_0^{(i)}(z) = 1$,
+the parameter, $c_0^{(i)}$,
+serves as the bias potential
+for inter-umbrella transitions,
+and it is updated according to the single-bin scheme\cite{li2007}.
+%
+In the expanded ensemble,
+inter-umbrella transitions can be handled via the frameworks of
 parallel\cite{swendsen1986,
   *geyer1991, *hukushima1996, *hansmann1997, *sugita1999,
   *earl2005, *zuckerman2011, *rauscher2009,
@@ -2596,14 +2638,13 @@ and/or simulated tempering\cite{marinari1992,
   *lyubartsev1992, li2007,
   park2007, *nguyen2013, *zhang2015st}.
 %
-Here, we will focus on the latter framework,
-in which the transition probability from
+Using the latter framework,
+the transition probability from
 the $i$th umbrella to the $j$th is given by
 %
 \begin{align}
 A(i\to j) =
 \min\left\{1,
-  \frac{Z^{(i)}}{Z^{(j)}}
   e^{
     u^{(i)}\bigl( z(t), t \bigr)
     - u^{(j)}\bigl( z(t), t \bigr)
@@ -2614,36 +2655,27 @@ A(i\to j) =
 \end{align}
 where $z(t)$ is the current value of $z$.
 %
-The parameter, $Z^{(i)}$, is the inverse weight of the $i$th umbrella,
-in the expanded ensemble,
-and $\ln Z^{(i)}$ serves as the bias potential
-for inter-umbrella transitions.
-%
-We can be estimate $\ln Z^{(i)}$'s on-the-fly
-using the single-bin updating scheme,
-Eq. \eqref{eq:wl_update}\cite{li2007}.
-%
-Upon convergence, $Z^{(i)}$ should be proportional to
-the partition function,
-$\int e^{-\beta \, \Phi(\mathbf x)-u^{(i)}(z(\mathbf x),t)} \, d\mathbf x$,
-as in simulated tempering,
-where
-$\beta = 1/(k_B T)$ is the inverse temperature,
-$\mathbf x$ denotes the internal degrees of freedoms,
-and
-$\Phi(\mathbf x)$ is the unbiased potential energy.
+%and upon convergence, $Z^{(i)}$ should be proportional to
+%the partition function,
+%$\int e^{-\beta \, \Phi(\mathbf x)-u^{(i)}(z(\mathbf x),t)} \, d\mathbf x$,
+%as in simulated tempering,
+%where
+%$\beta = 1/(k_B T)$ is the inverse temperature,
+%$\mathbf x$ denotes the internal degrees of freedoms,
+%and
+%$\Phi(\mathbf x)$ is the unbiased potential energy.
 %
 
-Since bandpass updating schemes are straightforward extension
+Since bandpass updating schemes are a straightforward extension
 of the single-bin updating scheme,
 we can borrow the existing protocol\cite{belardinelli2007,
   *belardinelli2007jcp, *belardinelli2008, *belardinelli2016}
 to optimally control the updating magnitude.
 %
 We can adopt the WL stage-by-stage strategy early in simulation,
-and switch to the inverse-time schedule later
-once the updating magnitude from the former approach
-falls under that from the latter.\footnote{We
+and switch to the inverse-time schedule
+once the updating magnitude from the WL approach
+falls under the value given by the inverse-time formula.\footnote{We
   slightly modified the transition criterion
   from the WL to the inverse-time schedule.
   We allowed such a switch only
@@ -2690,7 +2722,7 @@ We summarize the method as the following procedure.
   %
   For every $i$,
     set $c_1^{(i)}$ to the estimated mean force,
-    and set $\ln Z^{(i)} = c_2^{(i)} = 0$.
+    and set $c_0^{(i)} = c_2^{(i)} = 0$.
 
 \item
   Equilibrate the system at umbrella $i = 1$.
@@ -2699,22 +2731,15 @@ We summarize the method as the following procedure.
 \item
   Conduct a regular MC or MD step
   in the current umbrella $i$ under bias potential $u^{(i)}(z, t)$.
-  Update $c_1^{(i)}$ and $c_2^{(i)}$ according to Eq. \eqref{eq:ckupdate},
-  and compute the fluctuations
-  $\tilde F_1^{(i)}$ and $\tilde F_2^{(i)}$
-  defined in Eq. \eqref{eq:Fk_def}.
+  Update the coefficients, $c_k^{(i)}$'s,
+  according to Eq. \eqref{eq:ckupdate}.
 
 \item
   Attempt a transition to another umbrella
   with the acceptance probability given by Eq. \eqref{eq:transprob_st}.
-  Update $\ln Z^{(i)}$ at the current umbrella
-  by Eq. \eqref{eq:wl_update}.
 
 \item
-  Change the updating magnitude, $\alpha(t)$,
-  which will be used for both intra-umbrella
-  parameters, $c_k^{(i)}$,
-  and inter-umbrella parameters, $\ln Z^{(i)}$.
+  Change the updating magnitude, $\alpha(t)$.
 
 \end{enumerate}
 
@@ -2734,7 +2759,7 @@ can be used to recover the unbiased distribution,
     \sum_i n^{(i)}(z)
   }
   {
-    \sum_i N^{(i)} \, e^{-u^{(j)}(z)} / Z^{(i)}
+    \sum_i N^{(i)} \, e^{-u^{(j)}(z)}
   }
   ,
   \notag
@@ -2748,7 +2773,7 @@ and the $N^{(i)}$ is the total number of visits
 to the umbrella $i$.
 %
 We can use the final converged values of $Z^{(i)}$'s
-without going through the usual WHAM iteration.
+without going through the usual WHAM iterations.
 
 
 
@@ -2768,45 +2793,51 @@ Comparison of updating schemes}
 Our first test system is
 a Lennard-Jones (LJ) fluid of $N = 100$ particles,
 and we wish to compute the PMF along
-the distance, $r$, between two special particles.
+the distance, $r$, between two particular particles.
 %
 We will assume reduced units in the calculation.
 %
-The two special particles, labeled as $1$ and $2$,
+These particles, labeled as $1$ and $2$,
 are mutually non-interacting
-but they interact normally with other particles
-via the pair potential $\varphi(r) = 4(r^{-12} - r^{-6})$.
+but do interact with other particles
+via the pair potential $\varphi(r) = 4 \, \left(r^{-12} - r^{-6}\right)$
+(truncated at half of the box size).
 %
-The intrinsic distribution of distance, $p(r)$, is
+The PMF can be derived from
+the intrinsic distribution of the distance
+between the two tagged particles, $p(r)$,
+as $-\ln p(r)$,
+%
+Formally, we have
 \begin{align*}
   p(r) = \langle \delta(\mathbf r_{12} - \mathbf r) \rangle
   =
   \frac{V}{Z}
-  \int e^{-\beta \Phi(\mathbf r^N)}
+  \int e^{-\beta \, \Phi(\mathbf r^N)}
   d\mathbf r_3 \cdots d\mathbf r_N
   ,
 \end{align*}
 where
-$V$ is the volume,
+$V$ is the reduced volume,
 $\Phi(\mathbf r^{N}) = \sum_{j=3}^N\sum_{i=1}^{j-1} \varphi(r_{ij})$,
 and
 $Z = \int e^{\beta \Phi(\mathbf r^N)} d\mathbf r_1 \cdots d\mathbf r_N$.
 %
-This distribution is related the cavity distribution function
-as $y(r) = \left(1 - \frac{1}{N}\right) \, V \, p(r)$\cite{hansen}.
+This distribution is proportional to the cavity distribution function\cite{hansen}.
+%as $y(r) = \left(1 - \frac{1}{N}\right) \, V \, p(r)$\cite{hansen}.
 
 We used the Metropolis algorithm\cite{frenkel, metropolis1953}
 for configuration sampling.
 %
 Each step consists of
-one MC trial for displacing one of the two special particles,
+one MC trial for displacing one of the two tagged particles,
 and another four trials for displacing the other particles.
 %
 In each trial,
 a random particle is displaced in each spatial dimension
 according to a uniform distribution over $(-\varepsilon, \varepsilon)$.
 %
-However, the two special particles are fixed on the $x$-axis,
+The two tagged particles are fixed on the $x$-axis,
 and are only displaced in this direction.
 %
 We used $\varepsilon = 0.1/\varrho$
@@ -2816,10 +2847,10 @@ and $\varrho = N/V$ is the reduced number density.
 
 We used adaptive FDS to sample a flat distribution along $r$,
 and calculated the PMF from $r = 0$ to half of the box size
-(also the cutoff distance of the potential)
+%(also the cutoff distance of the potential)
 on a grid of size $\delta r = 0.01$ in reduced units.
 %
-Two densities were tried, $\varrho = 0.1$ and $0.8$,
+Two densities were used, $\varrho = 0.1$ and $0.8$,
 and the numbers of bins were $n = 500$ and $250$, respectively.
 %
 The reduced temperature was $T = 3$.
@@ -2853,7 +2884,7 @@ pre-calculated from a longer simulation.
 We repeated each simulation multiple times
 and report the average.
 %
-To make sure the same schedule for multiple runs under the same condition,
+To ensure the same schedule was used for multiple runs under the same condition,
 the optimal schedule was pre-computed using a set of fixed
 $\Gamma_k$'s and $\epsilon_k$'s derived from the longer simulation,
 although ideally they could be estimated from the data
@@ -2863,11 +2894,10 @@ collected from the equilibration phase in individual runs.
 \subsubsection{Results}
 
 As shown in Table \ref{tab:lj_error},
-both the optimal and sometimes sub-optimal inverse-time schedules
+both the optimal and potentially sub-optimal inverse-time schedules
 were able to reduce the error significantly.
 %
-It is also reassuring that
-the errors roughly matched the predicted values
+The errors roughly matched the predicted values
 calculated using the pre-computed
 $\Gamma_k$'s and $\epsilon_k$'s.
 %
@@ -3007,7 +3037,7 @@ in discussing the optimal schedule.
 As shown in Fig. \ref{fig:lj_alpha},
 the optimal schedules for the Gaussian updating schemes
 differed from inverse-time one,
-and the former tended to give larger updating magnitude.
+and the former tended to give a larger updating magnitude.
 %
 The optimal schedule was more effective
 than the sub-optimal inverse-time schedule
@@ -3047,7 +3077,7 @@ $1.8\times10^{-5}$.
 \end{figure}
 
 For the same case,
-we further decomposed the error (after $10^7$ production steps)
+we further decomposed the error
 into the eigenmodes
 by Eqs. \eqref{eq:gft_def} and \eqref{eq:wband_eigenvector_refl},
 and ploted the error components, $\langle \tilde v_k^2 \rangle$,
@@ -3062,7 +3092,7 @@ By a delayed reduction,
 the optimal schedule more effectively reduced
 the error in these modes,
 and produced a flatter profile for the final error
-(the deviation from a perfectly flat profile
+(the remaining unevenness of the profile
 was likely due to the error of estimated values of $\Gamma_k$'s).
 
 
@@ -3076,7 +3106,7 @@ was likely due to the error of estimated values of $\Gamma_k$'s).
     using the Gaussian updating scheme
     of width $\sigma = 0.2$
     on the LJ system at density $\varrho = 0.1$
-    after $10^7$ production steps.
+    after $10^8$ production steps.
     %
     The optimal schedule (opt.) was more effective
     in reducing the errors of middle-range eigenmodes
@@ -3088,7 +3118,7 @@ was likely due to the error of estimated values of $\Gamma_k$'s).
 \end{figure}
 
 
-Next, we will discuss the applicability of
+Next, we discuss the applicability of
 the Gaussian updating scheme.
 %
 As shown in Table \ref{tab:lj_error},
@@ -3109,7 +3139,7 @@ was largely local in nature.
 In the high-density case, however,
 the error was dominated by the first few eigenmodes
 that correspond to the long-range fluctuations
-(as $\Lambda_1 \approx \Lambda$),
+(as $\Gamma_1 \approx \Gamma$),
 and the reduction of local noise by multiple-bin schemes
 had little effect on the total error.
 %
@@ -3117,7 +3147,7 @@ When local noise is dominant,
 we found that the bandpass updating scheme
 (with the mode cutoff $K = 20$)
 was more effective than the Gaussian updating schemes
-as the expected.
+as expected.
 
 
 
@@ -3125,7 +3155,7 @@ It is worth mentioning that the width $\sigma$
 of a Gaussian updating scheme
 can critially affect its effectiveness.
 %
-With a overly wider Gaussian,
+With a overly wide Gaussian,
 the updating scheme would fail to
 capture finer features of the PMF.
 %
@@ -3137,13 +3167,13 @@ by Eq. \eqref{eq:vt_diffeq_mbin}.
 %
 Thus, although widening the Gaussian can
 effectively suppress random error
-from local histogram fluctuation,
+from local histogram fluctuations,
 it also increased the risk of leaving
 more persistent bias in the middle-range modes.
 %
 For the $\varrho = 0.1$ case,
 the prediction showed that
-assuming the optimal schedule
+assuming the optimal schedule,
 the optimal width was around $\sigma = 0.37$,
 and it would decrease with the simulation lengthen.
 %
@@ -3156,7 +3186,7 @@ the limit of single-bin updating scheme
 ($\sigma \to 0$ or $K\to n$).
 
 An overly large width $\sigma$ can
-also induce a huge initial updating magnitude
+also induce a very large initial updating magnitude
 under the optimal schedule.
 %
 The initial updating magnitude, $\alpha(0)$,
@@ -3175,7 +3205,7 @@ resulting in a much larger $\alpha(0)$
 [cf. Eq. \eqref{eq:opt_alpha0}].
 %
 In this case, the predicted optimal schedule
-becomes invalid the resulting deviation in the bias potential
+becomes invalid as the resulting deviation in the bias potential
 is no longer small.
 
 
@@ -3190,15 +3220,15 @@ Eq. \eqref{eq:uhatav}, after simulation
 to remove the remaining bias in PMF.
 %
 In Fig. \ref{fig:lj_xerr},
-we show that the correction produced
-the flatter profile seen in the single-bin case,
+we show that this correction produced
+the flatter profile seen in the single-bin case
 for a simulation with a sub-optimal schedule.
 %
 However, this correction also introduces
 some local noise in the large $k$ modes,
 although these noise are largely harmless
 in a post-simulation analysis, since
-the bias potential no longer need to be differentiated
+the bias potential no longer needs to be differentiated
 for force calculation.
 %
 %For example, for the simulation in the $\varrho = 0.8$ case
@@ -3220,8 +3250,8 @@ on the two-dimensional $L\times L$ ten-state
 Potts model\cite{wu1982, newman, wang2001, wang2001pre}
 in the energy space.
 %
-In this case, $\Phi(\mathbf x) = 0$
-and the intrinsic distribution is
+In this case, % $\Phi(\mathbf x) = 0$ and
+the intrinsic distribution is
 the density of states, $g(E)$.
 %
 We spread the Gaussian umbrellas
@@ -3314,7 +3344,7 @@ Conclusions and Discussions}
 
 
 In conclusion,
-we have proposed a method of computing
+we have proposed a method for computing
 the optimal schedule of the updating magnitude
 for a general class of free energy calculation methods,
 which we refer to as adaptive flat-distribution-sampling (FDS) methods
@@ -3343,8 +3373,8 @@ of computing the PMF.
 
 The optimal schedule depends on the updating scheme,
 which is mathematically characterized by an updating matrix,
-whose element, $w_{ij}$,
-represents the relative updating magnitude
+with the element, $w_{ij}$,
+representing the relative updating magnitude
 at bin $i$ when bin $j$ is visited.
 %
 Our method computes the optimal schedule from
@@ -4514,8 +4544,8 @@ Homogeneous bandpass updating schemes}
 
 
 In a homogeneous bandpass updating scheme,
-the eigenvalues are either $0$ or $1$ and
-it is convenient to set $\lambda_0 = 1$.
+the eigenvalues are either $0$ or $1$.
+%and it is convenient to set $\lambda_0 = 1$.
 %
 We can use Eq. \eqref{eq:mu_from_lambda}
 to find the window function.
