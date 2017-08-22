@@ -31,8 +31,8 @@ set key Left reverse samplen 3.0 width -8
 
 plot [:][1e-8:3e-1] \
     "../../data/lj/rho0.1/xerr_sig0.2_opt.dat"       u 1:($4+$5**2) w lp lt 1 lw 2 pt  2 ps 1.4 t "Gaussian, initial", \
-    "../../data/lj/rho0.1/xerr_sig0.2_invt.dat"      u 1:($2+$3**2) w lp lt 1 lw 1 pt  6 ps 1.4 t "Gaussian, 1/{/Times-Italic t}, final", \
     "../../data/lj/rho0.1/xerr_sig0.2_opt.dat"       u 1:($2+$3**2) w lp lt 1 lw 1 pt  7 ps 1.4 t "Gaussian, opt., final", \
+    "../../data/lj/rho0.1/xerr_sig0.2_invt.dat"      u 1:($2+$3**2) w lp lt 1 lw 1 pt  6 ps 1.4 t "Gaussian, 1/{/Times-Italic t}, final", \
     "../../data/lj/rho0.1/xerr_sig0.2_invt.dat"      u 1:($6+$7**2) w lp lt 1 lw 1 pt 12 ps 1.4 t "Gaussian, 1/{/Times-Italic t}, corrected", \
     "../../data/lj/rho0.1/xerr_sbin.dat"             u 1:($4+$5**2) w lp lt 1 lw 2 pt  1 ps 1.8 t "Single-bin, initial", \
     "../../data/lj/rho0.1/xerr_sbin.dat"             u 1:($2+$3**2) w lp lt 1 lw 1 pt  4 ps 1.4 t "Single-bin, final", \

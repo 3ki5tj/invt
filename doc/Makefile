@@ -1,9 +1,10 @@
 prj=invt
 
-ver=7.4
+ver=7.6
 
+tikzfigs=fig/massq.pdf fig/vardep.pdf
 figgps=$(wildcard fig/*.gp)
-pdffigs=$(patsubst %.gp,%.pdf, $(figgps)) massq.pdf vardep.pdf
+pdffigs=$(patsubst %.gp,%.pdf, $(figgps)) $(tikzfigs)
 epsfigs=$(patsubst %.gp,%.eps, $(figgps))
 
 texpdf = $(prj).pdf $(prj)_notes.pdf
@@ -21,7 +22,7 @@ $(alltexpdf) : %.pdf : %.tex simul.bib $(pdffigs) Makefile
 	pdflatex $<
 	pdflatex $<
 
-$(pdffigs): $(epsfigs) $(figgps)
+$(pdffigs): $(epsfigs) $(figgps) fig/figs.tex
 	make -C fig
 
 clean:
@@ -50,7 +51,8 @@ $(prj)docV$(ver).zip::
 	make diff
 	cd old/V$(ver) && \
 	  zip -r ../../$(prj)docV$(ver).zip *.tex *.pdf simul.bib *.py \
-	       $(epsfigs) $(pdffigs) $(figgps) fig/figs.tex fig/Makefile Makefile README.md
+	       $(epsfigs) $(pdffigs) $(figgps) \
+	       fig/figs.tex fig/Makefile Makefile README.md
 
 #	rsync -avz $(prj)_notes.tex old/V$(ver)/$(prj)_notesV$(ver).tex
 
@@ -62,7 +64,7 @@ $(prj)doc.zip: $(prj).tex $(prj).pdf \
 	       Makefile README.md
 	zip -r $@ $^
 
-refver=7.1
+refver=7.5
 
 diff::
 	mkdir -p old/V$(ver)
