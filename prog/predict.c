@@ -217,8 +217,8 @@ static void invt_geterr(invtpar_t *m,
   intq_save(intq, c1, t0, m->alpha_resample, m->fnalpha);
 
   printf("c %g, t0 %g, err %g, sqr %g (invt), "
-         "opt. c %g, err %g, sqr %g (opt. invt), "
-         "qT %g, a(0) %g, err %g, sqr %g (exact), %s\n",
+         "opt. c %g, err %g, sqr %g (scl. invt), "
+         "qT %g, a(0) %g, err %g, sqr %g (opt.), %s\n",
       c0, t0, err0, err0 * err0,
       c1, err1, err1 * err1,
       qT, inita, err2, err2 * err2, m->fnalpha);

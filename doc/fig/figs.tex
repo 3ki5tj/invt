@@ -86,17 +86,17 @@
 \end{tikzpicture}
 
 
-\begin{tikzpicture}
+\begin{tikzpicture}[scale=1.1, every node/.style={rounded corners=0.1cm}]\sffamily
   \node[draw, text width={width("Updating ")}]
     (w) at (0, 3) {Updating \\matrix, $\mathbf w$};
 
   \node[draw, text width={width("sampling")}]
     (sys) at (0, 1.1) {System\\and\\sampling\\process};
 
-  \node[draw, text width={width("Eigenvalues,")}]
+  \node[draw, text width={width("Eigenvalues, ")}]
     (lambda) at (2.2, 3) {Eigenvalues,\\$\lambda_1, \dots, \lambda_{n-1}$};
 
-  \node[draw, text width={width("Integrals, iii")}]
+  \node[draw, text width={width("Integrals, iiiii")}]
     (Gamma) at (2.1, 1.1) {Integrals, \\$\Gamma_1, \dots, \Gamma_{n-1}$\\and biases,\\$\epsilon_1, \dots, \epsilon_{n-1}$};
 
   \node[draw, text width={width("Simulation")}]

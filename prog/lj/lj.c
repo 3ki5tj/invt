@@ -22,6 +22,7 @@ static void ljpar_help(void)
   fprintf(stderr, "  --tp=:      temperature, default %g\n", tp);
   fprintf(stderr, "  --dr=:      bin width, default %g\n", delr);
   fprintf(stderr, "  --blk=:     number of steps in a Monte Carlo, default %d\n", mcblk);
+  fprintf(stderr, "  --vref=:    reference bias potential, default %s\n", fnvref);
 }
 
 static int ljpar_keymatch(invtpar_t *m, const char *key, const char *val)
@@ -42,6 +43,9 @@ static int ljpar_keymatch(invtpar_t *m, const char *key, const char *val)
   } else if ( strcmpfuzzy(key, "blk") == 0
            || strcmpfuzzy(key, "mcblk") == 0 ) {
     mcblk = invtpar_getint(m, key, val);
+  } else if ( strcmpfuzzy(key, "vref") == 0
+           || strcmpfuzzy(key, "fnvref") == 0 ) {
+    fnvref = val;
   }
   return 0;
 }

@@ -891,7 +891,7 @@ static void invtpar_dump(const invtpar_t *m)
       m->ntrials, m->n, m->c, m->t0, m->alpha0, m->qT, m->pbc,
       sampmethod_names[m->sampmethod][0], m->nsteps, m->nequil);
 
-  if ( m->gammethod != GAMMETHOD_NONE ) {
+  if ( m->gammethod != GAMMETHOD_NONE && m->gammethod != GAMMETHOD_LOAD ) {
     fprintf(stderr, "preliminary run: %ld steps, averaging every %d steps, method %s\n",
       m->gam_nsteps, m->gam_nstave, gammethod_names[m->gammethod][0]);
   } else {

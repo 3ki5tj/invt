@@ -114,4 +114,24 @@ make -C .. && ../lj --rho=0.1 --gam=load --fngamma=gamma.dat --sig=0.5
 make -C .. && ../lj --rho=0.1 --gam=load --fngamma=gamma.dat --sig=0.5 --opta
 ```
 
+# prediction
+
+For rho = 0.1
+
+Method 1
+```
+./lj --rho=0.1 --gam=load --fngamma=../../data/lj/rho0.1/gamma.dat --vref=../../data/lj/rho0.1/vref.dat --sig=0.2 --opta --nsteps=100000000
+```
+
+Method 2 (for existing data folder)
+```
+cd drun6
+../getav.py
+```
+Check the output on line 2
+
+(without vref.dat, not reliable)
+```
+../predict --a0=1e-4 -n500 --gam=load --fngamma=../../data/lj/rho0.1/gamma.dat --sig=0.2 --opta --nsteps=100000000
+```
 

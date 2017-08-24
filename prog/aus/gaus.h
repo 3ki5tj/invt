@@ -13,6 +13,8 @@
 /* values for lnzmethod */
 enum { LNZ_WL, LNZ_AVE };
 
+const char *lnz_names[2] = {"WL", "Ave"};
+
 #ifndef SQRT2
 #define SQRT2 1.4142135623730951
 #endif
@@ -318,11 +320,11 @@ __inline static int gaus_loadhist(gaus_t *gaus, const char *fn)
 /* update the parameters of the bias potential */
 __inline static void gaus_add(gaus_t *gaus, int i, int x, int acc)
 {
-  double ave = gaus->ave[i], sig = gaus->sig[i], y1, y2, alphamm;
+  double ave = gaus->ave[i], sig = gaus->sig[i], y1, y2, alpha, alphamm;
   int j;
   mmwl_t *mm = gaus->mmwl + i;
 
-  gaus_getalpha(gaus, i, &alphamm);
+  alpha = gaus_getalpha(gaus, i, &alphamm);
 
   y1 = (x - ave) / sig;
   y2 = (y1 * y1 - 1) / SQRT2;
@@ -335,6 +337,10 @@ __inline static void gaus_add(gaus_t *gaus, int i, int x, int acc)
   gaus->acc[i] += acc;
   j = (x - gaus->xmin) / gaus->dx;
   gaus->hist[i * gaus->xn + j] += 1;
+
+  if ( gaus->lnzmethod == LNZ_WL ) {
+    gaus->lnz[i] += alpha;
+  }
 }
 
 
@@ -354,11 +360,34 @@ __inline static double gaus_calcfl(gaus_t *gaus)
     for ( i = 0; i < n; i++ ) {
       s += gaus->costab[k*n + i] * gaus->mmwl[i].mm[0] / tot;
     }
-    gaus->hfl[k] = (s /= n);
+    gaus->hfl[k] = s;
     s = fabs(s);
     if ( s > fl ) fl = s;
   }
   return fl;
+}
+
+
+/* calculate the fluctuation of histogram modes (from the variance) */
+__inline static double gaus_calcfl_std(gaus_t *gaus)
+{
+  int i, k, n = gaus->n;
+  double tot = 0, s, fl1 = 0, fl2 = 0, hi;
+
+  /* compute the total sample size */
+  for ( i = 0; i < n; i++ )
+    tot += gaus->mmwl[i].mm[0];
+  if ( tot <= 0 ) return 99.0;
+
+  for ( i = 0; i < n; i++ ) {
+    mmwl_t *mm = gaus->mmwl + i;
+    mmwl_calcfl(mm, 1);
+    hi = mm->mm[0]/tot;
+    fl1 += n*hi*hi; /* inter-umbrella */
+    fl2 += n*hi*hi*(mm->fl[1]*mm->fl[1] + mm->fl[2]*mm->fl[2]); /* intra */
+  }
+  fl1 -= 1;
+  return sqrt(fl1 + fl2);
 }
 
 
@@ -392,7 +421,7 @@ __inline static void gaus_switch(gaus_t *gaus, double magred, int extended)
 __inline static int gaus_wlcheck(gaus_t *gaus,
     double fl, double magred)
 {
-  gaus_calcfl(gaus);
+  gaus_calcfl_std(gaus);
   if ( !gaus->invt && gaus->hflatness < fl ) {
     gaus_switch(gaus, magred, 0);
     return 1;
@@ -411,7 +440,8 @@ __inline static int gaus_wlcheckx(gaus_t *gaus,
   double f, f2;
   mmwl_t *mm;
 
-  f = gaus_calcfl(gaus);
+  f = gaus_calcfl_std(gaus);
+#if 0
   for ( i = 0; i < n; i++ ) {
     mm = gaus->mmwl + i;
     f2 = mmwl_calcfl(mm, 1);
@@ -426,6 +456,7 @@ __inline static int gaus_wlcheckx(gaus_t *gaus,
     }
     if ( f2 > f ) f = f2;
   }
+#endif
   gaus->hflatness = f;
   if ( gaus->lnzmethod == LNZ_WL && !gaus->invt && f < fl ) {
     gaus_switch(gaus, magred, 1);
@@ -440,12 +471,16 @@ __inline static int gaus_wlcheckx(gaus_t *gaus,
 /* transition to a neighboring umbrella */
 __inline static int gaus_move(gaus_t *gaus, double x, int *id)
 {
-  int acc = 0;
-  int jd = (rand01() < 0.5) ? *id - 1 : *id + 1;
+  int acc = 0, n = gaus->n;
+  int jd;
   double xi, xj, vi, vj, dv, sigi, sigj;
   mmwl_t *mm;
 
-  if ( jd < 0 || jd >= gaus->n ) return 0;
+  // jump to a nearest neighbor
+  //jd = (rand01() < 0.5) ? *id - 1 : *id + 1;
+  //if ( jd < 0 || jd >= n ) return 0;
+  // jump any other umbrella
+  jd = ( *id + 1 + (int) (rand01() * (n - 1)) ) % n; 
   sigi = gaus->sig[*id];
   sigj = gaus->sig[ jd];
   if ( gaus->lnzmethod == LNZ_AVE ) {
@@ -466,16 +501,11 @@ __inline static int gaus_move(gaus_t *gaus, double x, int *id)
   acc = ( dv <= 0 || rand01() < exp(-dv) );
   if ( acc ) {
     /* copy parameters to the new umbrella */
-    if ( gaus->cnt[jd] <= 0 ) {
+    if ( gaus->cnt[jd] <= 0 && gaus->lnzmethod == LNZ_AVE ) {
       gaus->c1[jd] = gaus->c1[*id];
       gaus->c2[jd] = gaus->c2[*id];
     }
     *id = jd;
-  }
-  if ( gaus->lnzmethod == LNZ_WL ) {
-    double alpha, alphamm;
-    alpha = gaus_getalpha(gaus, *id, &alphamm);
-    gaus->lnz[*id] += alpha;
   }
   return acc;
 }

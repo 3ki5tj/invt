@@ -16,11 +16,24 @@ class Ave:
     def getave(self):
         return self.sx/(self.cnt+1e-300)
 
-av = Ave()
+avf = Ave()
+avi = Ave()
 
+i = 0
+xiref = xfref = 0
 for ln in open(fn).xreadlines():
-    if ln.startswith("#"): continue
-    x = float( ln.split()[1] )
-    av.add(x)
+    i += 1
+    if ln.startswith("#"):
+        if i == 2:
+            arr = ln.split()
+            xiref = float( arr[-2] )
+            xfref = float( arr[-1] )
+        continue
+    arr = ln.split()
+    xf = float( arr[1] )
+    xi = float( arr[2] )
+    avf.add(xf)
+    avi.add(xi)
 
-print av.cnt, av.getave()
+print "count %s, init. %g(%g) final %g(%g)" % (
+        avf.cnt, avi.getave(), xiref, avf.getave(), xfref)
