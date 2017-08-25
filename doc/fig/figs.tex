@@ -97,7 +97,7 @@
     (w) at (0, 3) {Updating \\matrix, $\mathbf w$};
 
   \node[draw, text width={width("sampling")}]
-    (sys) at (0, 1.1) {System\\and\\sampling\\process};
+    (sys) at (0, 1.1) {System\\and\\sampling\\method};
 
   \node[draw, text width={width("Eigenvalues, ")}]
     (lambda) at (2.2, 3) {Eigenvalues,\\$\lambda_1, \dots, \lambda_{n-1}$};
@@ -158,7 +158,8 @@
     (H) at (-1.6, 3.5)
     {Homogeneous\\
     \note{Sec. II\,C\,7,}\\
-    \note{Appendix D}};
+    \note{Appendix D}.
+    };
 
   \node[draw]
     (G) at (-1.6, 1.0)
@@ -166,50 +167,57 @@
     (metadynamics)\\
     \note{Sec. II\,C\,6,}\\
     \note{Appendix D\,2,}\\
-    \note{Fig. 2(a)}};
+    \note{Fig. 2(a)}.
+    };
 
   \node[draw, minimum width=6.3cm, minimum height=5cm]
     (Hbox) at (0.0, 2) {};
 
   \node[draw, minimum width=8cm, minimum height=5.8cm]
-    (Bbox) at (3.9, 2.1) {};
+    (Bbox) at (3.8, 2.1) {};
 
-  \node[draw, minimum width=3.0cm, minimum height=4.8cm, fill=white!90!black]
+  \node[draw, minimum width=3.2cm, minimum height=4.8cm, fill=white!90!black]
     (HBbox) at (1.5, 2) {};
 
   \node[draw, text width={width("Single-bin ABCD")}, fill=white]
     (sbin) at (1.5, 0.7)
     {Single-bin\\
     (Wang-Landau)\\
-    \note{Sec. II\,A}};
+    \note{Sec. II\,A}.
+    };
 
-  \node[text width={width("Homogeneous AAAA")}]
-    (HB) at (1.5, 3.0)
+  \node[text width={width("Homogeneous AAAAAA")}]
+    (HB) at (1.45, 3.0)
     {Homogeneous\\bandpass\\
-    \note{Fig. 2(b)}\\
-    \note{Sec. II\,D\,2 and III\,A,}\\
-    \note{Appendix D\,3,} };
+    \note{Fig. 2(b),}\\
+    \note{Secs. II\,D\,2 and III\,A,}\\
+    \note{Appendix D\,3}.
+    };
 
   \node[] (B) at (5.5, 4.5)
     {Bandpass \;
-    \note{Sec. II\,D\,2}};
+    \note{Sec. II\,D\,2}.
+    };
 
   \node[draw, minimum width=4.3cm, minimum height=4.5cm]
-    (PBbox) at (5.6, 1.8) {};
+    (PBbox) at (5.5, 1.8) {};
 
-  \node[] (PB) at (5.6, 3.6)
+  \node[] (PB) at (5.5, 3.6)
     {Polynomial bandpass\\
-    \note{Sec. II\,E}};
+    \note{Sec. II\,E}.
+    };
 
   \node[draw]
-    (LLR) at (5.6, 2.3)
+    (LLR) at (5.5, 2.3)
     {Langfeld-Lucini-Rago\\
-    \note{Sec. II\,E\,2}};
+    \note{Sec. II\,E\,2}.
+    };
 
   \node[draw, text width={width("Adaptive Gaussian ABCD")}, fill=white!90!black]
-    (AGE) at (5.6, 0.7)
+    (AGE) at (5.5, 0.7)
     {Adaptive Gaussian\\ensemble\\
-    \note{Secs. II\,E\,3, II\,E\,4, and III\,B}};
+    \note{Secs. II\,E\,3, II\,E\,4, and III\,B}.
+    };
 
 \end{tikzpicture}
 \end{document}

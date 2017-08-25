@@ -1,4 +1,4 @@
-\documentclass[reprint, superscriptaddress, floatfix]{revtex4-1}
+\documentclass[preprint, superscriptaddress, floatfix]{revtex4-1}
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{mathtools}
@@ -2138,6 +2138,32 @@ the original collective variable, $z$,
 respectively.
 
 
+\begin{figure}[h]\centering
+  \makebox[\linewidth][c]{
+    \includegraphics[angle=0, width=1.0\linewidth]{fig/mat.pdf}
+  }
+  \caption{
+    \label{fig:mat}
+    Updating matrices for
+    homogeneous updating schemes of
+    a non-periodic variable ($n = 500$).
+    Here $j$ is the current bin,
+    $i$ is the bin where updating occurs,
+    and $w_{ij}$ is the relative updating magnitude.
+    %
+    (a) The Gaussian updating scheme of width $\sigma = 20$ bins.
+    (b) The bandpass updating scheme of $K = 20$.
+    %
+    Both updating schemes
+    can be characterized by a rigid window
+    centered on the current bin, $j$,
+    with some boundary adjustments.
+  }
+\end{figure}
+
+
+
+
 \subsubsection{\label{sec:homo_scheme}
 Homogeneous updating schemes}
 
@@ -2188,8 +2214,8 @@ Comparison of updating schemes}
 
 Now that we can compute the optimal schedule
 for a given updating scheme,
-we turn to the problem of finding
-the optimal updating scheme.
+we turn to the problem of optimizing
+the updating scheme.
 
 
 \subsubsection{\label{sec:optWL}
@@ -2384,14 +2410,15 @@ but only for the first $K$ fluctuation modes.
 We will consider two special classes of bandpass updating schemes,
 homogeneous and polynomial bandpass updating schemes.
 %
+A summary of updating schemes is given in Fig. \ref{fig:scheme}.
+%
 First,
 by applying this construction to the basis of cosine and sine functions,
 we get a homogeneous bandpass updating scheme
 that resembles the Gaussian updating scheme,
-but with long-range wiggles
-[cf. Appendix \ref{sec:homo_bandpass}
-and Fig. \ref{fig:mat}(b)
-for an example].
+but with long-range wiggles,
+as shown in Fig. \ref{fig:mat}(b)
+(cf. Appendix \ref{sec:homo_bandpass}).
 %
 In Sec. \ref{sec:lj},
 we will further compare the performance of
@@ -2412,6 +2439,30 @@ in an example.
 %  $|\max_i u_i - \min_i u_i|^2/K^3$.}
 %
 The polynomial bandpass updating schemes will be discussed below.
+
+\begin{figure}[h]\centering
+  \makebox[\linewidth][c]{
+    \includegraphics[angle=0, width=1.0\linewidth]{fig/scheme.pdf}
+  }
+  \caption{
+    \label{fig:scheme}
+    Summary of updating schemes.
+    %
+    Only the Gaussian updating scheme
+    require explicit calculation for the optimal schedule,
+    because the optimal schedule of bandpass updating schemes
+    is always given by inverse-time formula.
+    %
+    The target distributions of all updating schemes are flat except
+    that for the adaptive Gaussian ensemble method,
+    which is a Gaussian distribution
+    or a mixture of Gaussian distributions.
+    \note{Do we need these descriptions, or the figure at all?}%
+  }
+\end{figure}
+
+
+
 
 
 
@@ -3016,8 +3067,7 @@ than the inverse-time schedule
 in reducing the error,
 as shown in Table \ref{tab:lj_error}.
 %
-For this case,
-we further decomposed the error
+We further decomposed the error
 into the eigenmodes
 by Eqs. \eqref{eq:gft_def} and \eqref{eq:wband_eigenvector_refl},
 and plotted the error components, $\langle \tilde v_k^2 \rangle$,
@@ -3071,9 +3121,9 @@ it can also mask finer features of the PMF.
 %
 Thus, there is an optimal width that balances the two factors.
 %
-According to the analytical prediction
-(assuming the optimal schedule),
-the optimal width was around $\sigma = 0.29$ in this case,
+According to the analytical prediction,
+the optimal width (assuming the optimal schedule)
+was around $\sigma = 0.29$ in this case,
 and it would decrease with the simulation length
 and approach the limit of single-bin updating scheme,
 $\sigma \to 0$, asymptotically.
@@ -3150,8 +3200,11 @@ of the same width $\sigma_E = L$ over $[-1.8L^2, -0.8L^2]$
 with an even spacing of $L$.
 %
 In attempting inter-umbrella transitions,
-the target umbrella was chosen from
-any of the other umbrellas.
+the target umbrella is randomly chosen from
+either one of the nearest neighbors ($50\%$ chance),
+or any other umbrella.
+%
+\note{Here, we need to rerun simulations.}%
 %
 Initially, we set
 $c_1^{(i)} = \tilde \beta_c \, \sigma_E$
@@ -3191,7 +3244,7 @@ in agreement with a previous study\cite{wang2001pre}.
 As discussed in Sec. \ref{sec:age},
 $c_1/\sigma_E$ roughly represents
 the local or statistical temperature, $\beta(E) = d\ln g(E)/dE$,
-and it manifested 
+and it manifested
 the backbending behavior\cite{kim2006, *kim2007, kim2010}
 typical in a first-order phase transition,
 as shown in Fig. \ref{fig:pt_hist}(b).
@@ -3937,7 +3990,7 @@ Below we use the transition matrix method
 to estimate $\Gamma_k$ in a model for local diffusion\cite{bussi2006}.
 %
 We assume that the propagation along the collective-variable is Markovian
-such that the evolution can be approximately
+such that it can be approximately
 described by a transition matrix, $\mathbf A$, with
 \begin{align*}
 \langle h_i(t) \rangle = \rho_i,
@@ -3947,7 +4000,7 @@ described by a transition matrix, $\mathbf A$, with
 .
 \end{align*}
 Further, if the transition matrix % satisfies detailed balance
-has a full set of orthonormal eigenvectors, $\psi_{li}$
+has a complete set of orthonormal eigenvectors, $\psi_{li}$
 %that are orthonormal with respect to $\pmb\rho$
 [cf. Eqs. \eqref{eq:eig_orthonormal_cols} and
 \eqref{eq:eig_orthonormal_rows}],
@@ -4080,7 +4133,7 @@ for some numbers, $\mu_l$'s, which
 define an unadjusted window function.
 %
 For simplicity, we will assume that
-$\mu_l$'s are symmetric, $\mu_l = \mu_{-l}$,
+the $\mu_l$'s are symmetric, $\mu_l = \mu_{-l}$,
 and they can be cutoff at $l = b$,
 where $b$ is the integral part of $(n-1)/2$,
 i.e. $\mu_l = 0$ for $l > b$.
@@ -4285,7 +4338,7 @@ to satisfy the constraint, $\mu_n = 0$.
 
 
 The Gaussian updating scheme
-is defined by a Gaussian-shaped $\mu_l$.
+is defined by a Gaussian-shaped window function, $\mu_l$.
 %
 This updating scheme is commonly
 used in metadynamics.
@@ -4360,31 +4413,6 @@ from the same spectrum of eigenvalues, Eq. \eqref{eq:lambda_Gaussian},
 and then inversely computing the window function
 using Eq. \eqref{eq:mu_from_lambda},
 or the updating matrix using Eq. \eqref{eq:w_from_phi}.
-%
-An example is shown in Fig. \ref{fig:mat}(a).
-
-\begin{figure}[h]\centering
-  \makebox[\linewidth][c]{
-    \includegraphics[angle=0, width=1.0\linewidth]{fig/mat.pdf}
-  }
-  \caption{
-    \label{fig:mat}
-    Updating matrices for
-    homogeneous updating schemes of
-    a non-periodic variable ($n = 500$).
-    Here $j$ is the current bin,
-    $i$ is the bin where updating occurs,
-    and $w_{ij}$ is the relative updating magnitude.
-    %
-    (a) The Gaussian updating scheme of width $\sigma = 20$ bins.
-    (b) The bandpass updating scheme of $K = 20$.
-    %
-    Both updating schemes
-    can be characterized by a rigid window
-    centered on the current bin, $j$,
-    with some boundary adjustments.
-  }
-\end{figure}
 
 
 
@@ -4451,11 +4479,6 @@ $w_{ij} = \mathrm{sinr}(K, i-j, 2 \, n) + \mathrm{sinr}(K, i+j-1, 2 \, n)$.
   is canceled by its contribution to either $\mu_{i+j-1}$
   or $\mu_{i+j-2n-1}$,
   whichever exists, of the opposite sign.}
-%
-The homogeneous bandpass updating scheme
-resembles the Gaussian updating scheme
-except for some long-range wiggles,
-as shown in Fig. \ref{fig:mat}(b).
 %
 
 
@@ -4691,15 +4714,13 @@ for samples in umbrella $i$.
     $M(q)$          &   Mass function.   \\
     $m(q)$          &   Mass distribution,
                         $m(q) \equiv M(q)/\int_0^{ q(T) } M(q') \, dq'$.  \\
-    $\mu_i$         &   Updating window function of a homogeneous updating scheme. \\
+    $\mu_i$         &   Unadjusted window function of a homogeneous updating scheme. \\
     $n$             &   Number of bins. \\
     $\nu_k$         &   $\nu_k \equiv \lambda_k / \lambda$. \\
     $\rho_i$        &   Flat sampling distribution. \\
     $\pi_i$         &   (Instantaneous) distribution. \\
     $q(t)$          &   $\int_0^t \alpha(t') \, dt'$.  \\
     $\bar q(t)$     &   $q(T) - q(t)$.  \\
-    $s, S$          &   Stage index and the total number of stages in the Wang-Landau algorithm. \\
-    $\sigma_{ij}(t)$   &   Autocorrelation function of $\xi_i(t)$. \\
     $t, \tau$       &   Time. \\
     $T$             &   Simulation length. \\
     $\vartheta_k(q')$       &   $\vartheta_k(q') \equiv e^{\lambda_k \, [q - q(T)]}$. \\
@@ -4707,7 +4728,7 @@ for samples in umbrella $i$.
     $v_i(t)$        &   Shifted bias potential. \\
     $\mathbf w$     &   Updating matrix. \\
     $v_{*i}(t)$     &   Bin-average-deducted bias potential, Eq. \eqref{eq:x_def}. \\
-    $\xi_{*i}(t)$ &   The noise of histogram. \\
+    $\xi_{*i}(t)$   &   Bin-average-deducted The noise of histogram. \\
     ${\tilde v}_k$  &   Mode of the shifted bias potential. \\
     ${\tilde u}_k$  &   Mode of the original bias potential. \\
     $z$             &   Reaction coordinate. \\

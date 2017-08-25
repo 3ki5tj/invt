@@ -144,7 +144,7 @@ static void potts2_gaus(potts2_t *pt,
     } else { /* Metropolis algorithm */
       acc = potts2_metro_mod(pt, beta1, beta2, gaus->ave[id]);
     }
-    gaus_move(gaus, pt->E, &id);
+    gaus_move(gaus, pt->E, &id, rand01() < 0.5);
     gaus_add(gaus, id, pt->E, acc);
 
     /* update the number of round trips */

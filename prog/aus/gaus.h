@@ -469,18 +469,21 @@ __inline static int gaus_wlcheckx(gaus_t *gaus,
 
 
 /* transition to a neighboring umbrella */
-__inline static int gaus_move(gaus_t *gaus, double x, int *id)
+__inline static int gaus_move(gaus_t *gaus, double x, int *id, int local)
 {
   int acc = 0, n = gaus->n;
   int jd;
   double xi, xj, vi, vj, dv, sigi, sigj;
   mmwl_t *mm;
 
-  // jump to a nearest neighbor
-  //jd = (rand01() < 0.5) ? *id - 1 : *id + 1;
-  //if ( jd < 0 || jd >= n ) return 0;
-  // jump any other umbrella
-  jd = ( *id + 1 + (int) (rand01() * (n - 1)) ) % n; 
+  if ( local ) {
+    // jump to a nearest neighbor
+    jd = (rand01() < 0.5) ? *id - 1 : *id + 1;
+    if ( jd < 0 || jd >= n ) return 0;
+  } else {
+    // jump any other umbrella
+    jd = ( *id + 1 + (int) (rand01() * (n - 1)) ) % n; 
+  }
   sigi = gaus->sig[*id];
   sigj = gaus->sig[ jd];
   if ( gaus->lnzmethod == LNZ_AVE ) {
