@@ -105,6 +105,7 @@ static double lnadd(double x, double y)
   return x + log(1 + exp(y));
 }
 
+/* non-iterative histogram reweighting */
 static void reweight(void)
 {
   int ix, i;
@@ -176,7 +177,7 @@ static int findpeak(const double *arr, double bc, int ileft, int iright, double 
 /* find the critical inverse temperature */
 static double seekcrit(const double *arr, int *x1, int *x2, double *shift)
 {
-  double bc, beta, w, sw, y1, y2, y, lns;
+  double bc, beta, w, sw, y1, y2, y, lns, lns2;
   int ix, ix1, ix2, il = -1, ir, im, t, x;
 
   bc = sw = 0;
@@ -197,7 +198,8 @@ static double seekcrit(const double *arr, int *x1, int *x2, double *shift)
   im = (il + ir)/2;
   printf("bc %g, il %d, ir %d, mid %d\n", bc, il, ir, im);
 
-  /* find the two density peaks */
+  /* find the two density peaks
+   * util the heights are equal */
   ix1 = il;
   ix2 = ir;
   for ( t = 0; t < 10; t++ ) {
@@ -220,7 +222,18 @@ static double seekcrit(const double *arr, int *x1, int *x2, double *shift)
     lns = lnadd(lns, y);
   }
   lns += log(dx);
-  printf("lns %g for normalization\n", lns);
+  /* normalize lnz at the critical temperature */
+  {
+    int i;
+    lns2 = LN0;
+    for ( i = 0; i < n; i++ ) {
+      y = lnz[i] - bc * ave[i] - lns;
+      lns2 = lnadd(lns2, y);
+      //printf("i %d, lnz %g, bc %g, ave %g, %g\n", i, lnz[i], bc, ave[i], y);
+    }
+    lns2 += log(delx);
+  }
+  printf("lns for normalization %g (lng), %g (lnz)\n", lns, lns + lns2);
   *shift = lns;
   return bc;
 }
@@ -268,8 +281,14 @@ int main(int argc, char **argv)
 
   if ( getdatinfo(fndat) != 0 ) return -1;
   if ( gethisinfo(fnhis) != 0 ) return -1;
+
+  /* non-iterative histogram reweighting */
   reweight();
+
+  /* smoothing lng to lngs */
   smooth(lngs, lng, nb);
+
+  /* looking for the critical temperature */
   bc = seekcrit(lng, &x1, &x2, &lns);
   for ( ix = 0; ix < xn; ix++ ) {
     lng[ix] -= lns;

@@ -1,4 +1,4 @@
-\documentclass[preprint, superscriptaddress, floatfix]{revtex4-1}
+\documentclass[reprint, superscriptaddress, floatfix]{revtex4-1}
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{mathtools}
@@ -1494,17 +1494,17 @@ of the residual error and the asymptotic error, with
   \label{eq:error_res}
   \\
   \Err_A(T)
-  &=
-  \sum_{k=1}^{n-1}
-  \int_0^T\!\!\int_0^T
-  \langle
-    \tilde\xi_k(t)
-    \tilde\xi_k(t')
-  \rangle
-  \vartheta_k\bigl(q(t)\bigr)
-  \vartheta_k\bigl(q(t')\bigr)
-  \, dtdt'
-  \notag \\
+  %&=
+  %\sum_{k=1}^{n-1}
+  %\int_0^T\!\!\int_0^T
+  %\langle
+  %  \tilde\xi_k(t)
+  %  \tilde\xi_k(t')
+  %\rangle
+  %\vartheta_k\bigl(q(t)\bigr)
+  %\vartheta_k\bigl(q(t')\bigr)
+  %\, dtdt'
+  %\notag \\
   &=
   \int_0^T
   \sum_{k = 1}^{n-1}
@@ -1554,7 +1554,7 @@ few numbers, $\Gamma_k$'s.
 Note that by Eq. \eqref{eq:parseval}, we have
 $\sum_{k=1}^{n-1} \bigl\langle {\tilde \xi}_k(t) \, {\tilde \xi}_k(0) \bigr\rangle
 = \sum_{i=1}^n \rho_i \bigl\langle \xi_{*i}(t) \, \xi_{*i}(0) \bigr\rangle,$
-and after summing $t$ from $-\infty$ to $\infty$,
+and summing $t$ from $-\infty$ to $\infty$ yields,
 \begin{equation}
   \sum_{k=1}^{n-1} \Gamma_k = \sum_{i=1}^n \rho_i \, G_i = \Gamma
   .
@@ -2169,7 +2169,7 @@ Homogeneous updating schemes}
 
 
 More generally, we can replace the Gaussian function
-in the above updating scheme
+in the Gaussian updating scheme
 by a window function of different shape.
 %
 We call the resulting updating scheme
@@ -2410,15 +2410,15 @@ but only for the first $K$ fluctuation modes.
 We will consider two special classes of bandpass updating schemes,
 homogeneous and polynomial bandpass updating schemes.
 %
-A summary of updating schemes is given in Fig. \ref{fig:scheme}.
+%A summary of updating schemes is given in Fig. \ref{fig:scheme}.
 %
 First,
 by applying this construction to the basis of cosine and sine functions,
 we get a homogeneous bandpass updating scheme
+(cf. Appendix \ref{sec:homo_bandpass})
 that resembles the Gaussian updating scheme,
 but with long-range wiggles,
-as shown in Fig. \ref{fig:mat}(b)
-(cf. Appendix \ref{sec:homo_bandpass}).
+as shown in Fig. \ref{fig:mat}(b).
 %
 In Sec. \ref{sec:lj},
 we will further compare the performance of
@@ -2440,26 +2440,28 @@ in an example.
 %
 The polynomial bandpass updating schemes will be discussed below.
 
-\begin{figure}[h]\centering
-  \makebox[\linewidth][c]{
-    \includegraphics[angle=0, width=1.0\linewidth]{fig/scheme.pdf}
-  }
-  \caption{
-    \label{fig:scheme}
-    Summary of updating schemes.
-    %
-    Only the Gaussian updating scheme
-    require explicit calculation for the optimal schedule,
-    because the optimal schedule of bandpass updating schemes
-    is always given by inverse-time formula.
-    %
-    The target distributions of all updating schemes are flat except
-    that for the adaptive Gaussian ensemble method,
-    which is a Gaussian distribution
-    or a mixture of Gaussian distributions.
-    \note{Do we need these descriptions, or the figure at all?}%
-  }
-\end{figure}
+%\begin{figure}[h]\centering
+%  \makebox[\linewidth][c]{
+%    \includegraphics[angle=0, width=1.0\linewidth]{fig/scheme.pdf}
+%  }
+%  \caption{
+%    \label{fig:scheme}
+%    Summary of updating schemes.
+%    %
+%    Existing algorithms are shaded.
+%    %
+%    Only the Gaussian updating scheme
+%    require explicit calculation for the optimal schedule,
+%    because the optimal schedule of bandpass updating schemes
+%    is always given by inverse-time formula.
+%    %
+%    The target distributions of all updating schemes are flat except
+%    that for the adaptive Gaussian ensemble method,
+%    which is a Gaussian distribution
+%    or a mixture of Gaussian distributions.
+%    \note{Do we need these descriptions, or the figure at all?}%
+%  }
+%\end{figure}
 
 
 
@@ -2676,13 +2678,22 @@ and it would exceed $1$ in a barrier region
 where the PMF is locally concave,
 $-d^2\ln p(z)/dz^2 < 0$.
 
+
+
 \subsubsection{\label{sec:st}
 Expanded ensemble}
+
+
 
 We can extend the sampling range
 by constructing an expanded ensemble
 from a superposition of $m$ Gaussian umbrellas
-centered at different places.
+centered at different places.\footnote{This sampling
+  algorithm should not be confused with the Gaussian updating scheme,
+  in which the bias potential is incrementally updated by Gaussian functions,
+  and the target distribution is flat.
+  However, in this case, the bias potential is quadratic,
+  and the target distribution of each umbrella is Gaussian.}
 %
 The target distribution is a joint distribution
 of the discrete umbrella index, $i = 1, \dots, m$,
@@ -2711,6 +2722,11 @@ the parameter, $c_0^{(i)}$,
 serves as the bias potential
 for inter-umbrella transitions,
 and it is updated according to the single-bin scheme\cite{li2007}.
+%
+For a small $\sigma_z$, the converged
+$c_0^{(i)}$ as a function of $z_c^{(i)}$
+also serves as a good approximation of
+the negative PMF, $\ln p(z)$.\cite{maragliano2006, *abrams2008}
 
 In the expanded ensemble,
 inter-umbrella transitions can be handled via the frameworks of
@@ -2813,12 +2829,12 @@ We summarize the method as the following procedure.
 \item
   Attempt a transition to another umbrella
   with the acceptance probability given
-  by Eq. \eqref{eq:transprob_st}.
-  %
-  The above intra-umbrella sampling steps
-  and inter-umbrella transition steps
-  can also be applied in random order
-  with different frequencies.\cite{manousiouthakis1999}
+    by Eq. \eqref{eq:transprob_st}.\cite{*[{Although
+    the intra-umbrella sampling step
+    and inter-umbrella transition step
+    are executed in sequential instead of random order,
+    the sampling scheme is still valid,
+    as shown in }] [{}] manousiouthakis1999}
 
 \item
   Update the $c_k^{(i)}$'s
@@ -3070,13 +3086,14 @@ as shown in Table \ref{tab:lj_error}.
 We further decomposed the error
 into the eigenmodes
 by Eqs. \eqref{eq:gft_def} and \eqref{eq:wband_eigenvector_refl},
-and plotted the error components, $\langle \tilde v_k^2 \rangle$,
+and plotted the error components,
+$\langle \tilde v_k^2 \rangle$'s,
 in Fig. \ref{fig:lj_xerr}.
 %
 We found that the inverse-time schedule tended to
 reduce the updating magnitude too quickly,
 leaving a hump on the error profile
-for the $k = 10$ to $25$ modes.
+for the $k = 9$ to $31$ modes.
 %
 By a delayed reduction,
 the optimal schedule more effectively reduced
@@ -3092,8 +3109,9 @@ was likely due to the error of estimated values of $\Gamma_k$'s).
   }
   \caption{
     \label{fig:lj_xerr}
-    Error components, $\tilde u_k^2$'s, of the PMF
-    after $10^8$ production steps.
+    Error components,
+    $\langle \tilde v_k^2 \rangle$'s,
+    of the PMF after $10^8$ production steps.
     %
     The optimal schedule more effective
     reduced the errors of middle-range eigenmodes
@@ -3199,12 +3217,17 @@ We spread the Gaussian umbrellas
 of the same width $\sigma_E = L$ over $[-1.8L^2, -0.8L^2]$
 with an even spacing of $L$.
 %
-In attempting inter-umbrella transitions,
-the target umbrella is randomly chosen from
-either one of the nearest neighbors ($50\%$ chance),
-or any other umbrella.
+For simplicity, only transitions between neighboring
+umbrellas were performed.\footnote{For
+  wider umbrellas, we might improve convergence
+  by mixing the nearest-neighbor inter-umbrella transitions
+  with some longer-range ones.}
+%In attempting inter-umbrella transitions,
+%the target umbrella is randomly chosen from
+%either one of the nearest neighbors ($50\%$ chance),
+%or any other umbrella.
 %
-\note{Here, we need to rerun simulations.}%
+%\note{Here, we need to rerun simulations.}%
 %
 Initially, we set
 $c_1^{(i)} = \tilde \beta_c \, \sigma_E$
@@ -3238,23 +3261,29 @@ The Gaussian histograms were evenly spaced with similar widths as intended,
 as shown in Fig. \ref{fig:pt_hist}(a).
 %
 We computed the density of states by WHAM,
-and found the critical temperature to be $T_c = 0.70162$,
+and found the critical temperature to be $T_c = 0.70163$,
 in agreement with a previous study\cite{wang2001pre}.
 %
+Since umbrellas were relatively narrow,
+the logarithmic density of states, $\ln g(E)$,
+was roughly captured
+by $c_0^{(i)}$ as a function of $E_c^{(i)}$,
+as shown Fig. \ref{fig:pt_hist}(b).
+%
 As discussed in Sec. \ref{sec:age},
-$c_1/\sigma_E$ roughly represents
+$c_1^{(i)}/\sigma_E$ roughly represents
 the local or statistical temperature, $\beta(E) = d\ln g(E)/dE$,
 and it manifested
 the backbending behavior\cite{kim2006, *kim2007, kim2010}
 typical in a first-order phase transition,
-as shown in Fig. \ref{fig:pt_hist}(b).
+as shown in Fig. \ref{fig:pt_hist}(c).
 %
-The coefficient, $\sqrt 2 \, c_2$,
+The coefficient, $\sqrt 2 \, c_2^{(i)}$,
 was indeed above $1.0$
 in the unstable region,
 where $\beta(E)$ is increasing or, equivalently,
 $\ln g(E)$ is locally convex,
-as shown in Fig. \ref{fig:pt_hist}(c).
+as shown in Fig. \ref{fig:pt_hist}(d).
 
 
 \begin{figure}[h]\centering
@@ -3263,17 +3292,25 @@ as shown in Fig. \ref{fig:pt_hist}(c).
   }
   \caption{
     \label{fig:pt_hist}
-    Umbrella sampling with adaptive quadratic bias potentials
+    Sampling using adaptive Gaussian ensembles
     on the $64 \times 64$ ten-state Potts model.
     %
     (a) Normalized histograms (solid lines)
     and the reweighted distribution
-    at the critical temperature (dashed line).
+    at the critical temperature, $\beta_c$ (dashed line).
     %
-    (b) $c_1^{(i)}/\sigma_E$, roughly corresponding to
+    (b) $c_0^{(i)}$ against $E_c^{(i)}$ (circles)
+    roughly agreed with the logarithmic density of states,
+    $\ln g(E)$ (dashed line).
+    In either case,
+    we have deducted the linear contribution, $\beta_c \, E$,
+    and applied a proper shift so as to normalize
+    the distribution at $\beta_c$.
+    %
+    (c) $c_1^{(i)}/\sigma_E$ roughly corresponded to
     the statistical temperature, $\beta(E)$.
     %
-    (c) $\sqrt 2 \, c_2^{(i)}$
+    (d) $\sqrt 2 \, c_2^{(i)}$
     exceeded $1.0$ in the unstable region,
     where $\beta(E)$ is increasing.
   }
@@ -3299,7 +3336,7 @@ along a collective variable
 to offset the potential of mean force (PMF)
 and thereby sample a flat distribution.
 %
-The optimal schedule delivers the fastest convergence
+The optimal schedule improves the convergence
 of the bias potential,
 and thus helps minimize the effort
 of computing the PMF.
@@ -3437,7 +3474,7 @@ to improve its general applicability and stability.
 
 \section{Acknowledgments}
 
-We thank Dr. Y. Mei, J. Wang,
+We thank Dr. Y. Mei, Dr. W. Tang, J. Wang,
 O. Nassar, Dr. C. Lai, Dr. S. Ou, D. Stuhlsatz,
 Dr. C. Myers, and Dr. O. Samoylova
 for helpful discussions,
@@ -3727,7 +3764,7 @@ a generalization of Eq. \eqref{eq:vcorr_equil}
 for FDS simulations under
 a variable bias potential.\footnote{We can also
   derive Eq. \eqref{eq:uhatav}
-  from constructing an independent estimator
+  by forming an independent estimator
   of the unbiased distribution\cite{marsili2006},
   which is, by Eq. \eqref{eq:Vi_target},
   $\hat p_i(t) \approx h_i(t) \, e^{ u_i(t) }$,
@@ -4409,7 +4446,7 @@ some eigenvalues can turn negative.
 %
 To maintain the positivity of eigenvalues,
 we can redefine the Gaussian scheme
-from the same spectrum of eigenvalues, Eq. \eqref{eq:lambda_Gaussian},
+from the eigenvalues given by Eq. \eqref{eq:lambda_Gaussian},
 and then inversely computing the window function
 using Eq. \eqref{eq:mu_from_lambda},
 or the updating matrix using Eq. \eqref{eq:w_from_phi}.

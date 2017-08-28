@@ -27,7 +27,7 @@ typedef struct {
   double *lnz; /* partition function */
   int lnzmethod; /* WL or average */
   double alphawl; /* updating magnitude */
-  double hflatness;
+  double hfluc, flfr[3];
   double t, t0;
   int invt; /* using 1/t schedule */
   double alpha0; /* initial updating magnitude */
@@ -371,8 +371,8 @@ __inline static double gaus_calcfl(gaus_t *gaus)
 /* calculate the fluctuation of histogram modes (from the variance) */
 __inline static double gaus_calcfl_std(gaus_t *gaus)
 {
-  int i, k, n = gaus->n;
-  double tot = 0, s, fl1 = 0, fl2 = 0, hi;
+  int i, n = gaus->n;
+  double tot = 0, fl0 = 0, fl1 = 0, fl2 = 0, fl, hi;
 
   /* compute the total sample size */
   for ( i = 0; i < n; i++ )
@@ -383,11 +383,16 @@ __inline static double gaus_calcfl_std(gaus_t *gaus)
     mmwl_t *mm = gaus->mmwl + i;
     mmwl_calcfl(mm, 1);
     hi = mm->mm[0]/tot;
-    fl1 += n*hi*hi; /* inter-umbrella */
-    fl2 += n*hi*hi*(mm->fl[1]*mm->fl[1] + mm->fl[2]*mm->fl[2]); /* intra */
+    fl0 += n*hi*hi; /* inter-umbrella */
+    fl1 += n*hi*hi*mm->fl[1]*mm->fl[1]; /* intra */
+    fl2 += n*hi*hi*mm->fl[2]*mm->fl[2]; /* intra */
   }
-  fl1 -= 1;
-  return sqrt(fl1 + fl2);
+  fl0 -= 1;
+  fl = fl0 + fl1 + fl2;
+  gaus->flfr[0] = fl0/fl;
+  gaus->flfr[1] = fl1/fl;
+  gaus->flfr[2] = fl2/fl;
+  return sqrt(fl);
 }
 
 
@@ -401,8 +406,8 @@ __inline static void gaus_switch(gaus_t *gaus, double magred, int extended)
     gaus->invt = 1;
     gaus->t0 = gaus->t;
   }
-  fprintf(stderr, "alpha %g, %g, flatness %g, invt %d\n",
-      gaus->alphawl, gaus->n/gaus->t, gaus->hflatness, gaus->invt);
+  fprintf(stderr, "alpha %g, %g, fluc %g, invt %d\n",
+      gaus->alphawl, gaus->n/gaus->t, gaus->hfluc, gaus->invt);
   gaus->t = 0;
   for ( i = 0; i < n; i++ ) {
     if ( extended ) {
@@ -422,7 +427,7 @@ __inline static int gaus_wlcheck(gaus_t *gaus,
     double fl, double magred)
 {
   gaus_calcfl_std(gaus);
-  if ( !gaus->invt && gaus->hflatness < fl ) {
+  if ( !gaus->invt && gaus->hfluc < fl ) {
     gaus_switch(gaus, magred, 0);
     return 1;
   } else {
@@ -436,12 +441,9 @@ __inline static int gaus_wlcheck(gaus_t *gaus,
 __inline static int gaus_wlcheckx(gaus_t *gaus,
     double fl, double magred)
 {
-  int i, j, n = gaus->n, xn = gaus->xn;
-  double f, f2;
-  mmwl_t *mm;
-
-  f = gaus_calcfl_std(gaus);
+  gaus->hfluc = gaus_calcfl_std(gaus);
 #if 0
+  int i, j, n = gaus->n, xn = gaus->xn;
   for ( i = 0; i < n; i++ ) {
     mm = gaus->mmwl + i;
     f2 = mmwl_calcfl(mm, 1);
@@ -457,8 +459,7 @@ __inline static int gaus_wlcheckx(gaus_t *gaus,
     if ( f2 > f ) f = f2;
   }
 #endif
-  gaus->hflatness = f;
-  if ( gaus->lnzmethod == LNZ_WL && !gaus->invt && f < fl ) {
+  if ( gaus->lnzmethod == LNZ_WL && !gaus->invt && gaus->hfluc < fl ) {
     gaus_switch(gaus, magred, 1);
     return 1;
   }

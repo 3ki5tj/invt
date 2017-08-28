@@ -108,6 +108,7 @@ static void potts2_gaus(potts2_t *pt,
   long t, nstsave, ntrips = 0;
   int id, acc, sgn = 0;
   double ecmin, ecmax, esig, espacing, beta1, beta2, fl, alpha0;
+  double localmove_prob = 1.0;
   const double beta_c = 1.4;
   gaus_t *gaus;
 
@@ -144,7 +145,7 @@ static void potts2_gaus(potts2_t *pt,
     } else { /* Metropolis algorithm */
       acc = potts2_metro_mod(pt, beta1, beta2, gaus->ave[id]);
     }
-    gaus_move(gaus, pt->E, &id, rand01() < 0.5);
+    gaus_move(gaus, pt->E, &id, rand01() <= localmove_prob);
     gaus_add(gaus, id, pt->E, acc);
 
     /* update the number of round trips */
@@ -162,8 +163,9 @@ static void potts2_gaus(potts2_t *pt,
       alpha = gaus_getalpha(gaus, id, &alphamm);
       gaus_save(gaus, fndat);
       gaus_savehist(gaus, fnhis);
-      printf("t %ld/%g, flatness %g, alpha %g/%g, id %d, invt %d, trips %ld\n",
-          t, gaus->t, gaus->hflatness, alpha, alphamm, id, gaus->invt, ntrips);
+      printf("t %ld/%g, fluc %g(%.0f%%/%.0f%%/%.0f%%), alpha %g/%g, id %d, invt %d, trips %ld\n",
+          t, gaus->t, gaus->hfluc, 100*gaus->flfr[0], 100*gaus->flfr[1], 100*gaus->flfr[2],
+          alpha, alphamm, id, gaus->invt, ntrips);
     }
   }
   gaus_close(gaus);

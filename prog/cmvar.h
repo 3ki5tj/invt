@@ -11,7 +11,8 @@
 typedef struct {
   int n;
   long cnt;
-  double *u, *usum, *usqr, *uave, *uvar;
+  double *usum, *usqr;
+  double *u, *uave, *uvar;
   double *costab;
 } cmvar_t;
 
@@ -89,6 +90,16 @@ __inline static void cmvar_get(cmvar_t *cm)
   }
 }
 
-
+/* set input data */
+__inline static void cmvar_set(cmvar_t *cm, long cnt,
+    const double *ave, const double *var)
+{
+  int i;
+  cm->cnt = cnt;
+  for ( i = 0; i < cm->n; i++ ) {
+    cm->usum[i] = ave[i] * cnt;
+    cm->usqr[i] = var[i] * cnt;
+  }
+}
 
 #endif /* CMVAR_H__ */

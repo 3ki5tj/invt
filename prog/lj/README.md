@@ -114,6 +114,18 @@ make -C .. && ../lj --rho=0.1 --gam=load --fngamma=gamma.dat --sig=0.5
 make -C .. && ../lj --rho=0.1 --gam=load --fngamma=gamma.dat --sig=0.5 --opta
 ```
 
+drun1-8: rho = 0.1, nsteps = 100000000
+```
+make -C .. && ../lj --rho=0.1 --nsteps=100000000 --gam=load --fngamma=gamma.dat
+make -C .. && ../lj --rho=0.1 --nsteps=100000000 --gam=load --fngamma=gamma.dat --kc=20
+make -C .. && ../lj --rho=0.1 --nsteps=100000000 --gam=load --fngamma=gamma.dat --sig=0.1
+make -C .. && ../lj --rho=0.1 --nsteps=100000000 --gam=load --fngamma=gamma.dat --sig=0.1 --opta
+make -C .. && ../lj --rho=0.1 --nsteps=100000000 --gam=load --fngamma=gamma.dat --sig=0.2
+make -C .. && ../lj --rho=0.1 --nsteps=100000000 --gam=load --fngamma=gamma.dat --sig=0.2 --opta
+make -C .. && ../lj --rho=0.1 --nsteps=100000000 --gam=load --fngamma=gamma.dat --sig=0.5
+make -C .. && ../lj --rho=0.1 --nsteps=100000000 --gam=load --fngamma=gamma.dat --sig=0.5 --opta
+```
+
 # prediction
 
 For rho = 0.1

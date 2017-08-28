@@ -13,6 +13,7 @@ const char *fnvbias = "vbias.dat";
 const char *fnvref = "vref.dat";
 const char *fnlog = "verr.log";
 const char *fnxerr = "xerr.dat";
+int loadxerr = 0;
 
 static void ljpar_help(void)
 {
@@ -23,6 +24,7 @@ static void ljpar_help(void)
   fprintf(stderr, "  --dr=:      bin width, default %g\n", delr);
   fprintf(stderr, "  --blk=:     number of steps in a Monte Carlo, default %d\n", mcblk);
   fprintf(stderr, "  --vref=:    reference bias potential, default %s\n", fnvref);
+  fprintf(stderr, "  --loadxerr: load xerr from file, default %d\n", loadxerr);
 }
 
 static int ljpar_keymatch(invtpar_t *m, const char *key, const char *val)
@@ -46,6 +48,8 @@ static int ljpar_keymatch(invtpar_t *m, const char *key, const char *val)
   } else if ( strcmpfuzzy(key, "vref") == 0
            || strcmpfuzzy(key, "fnvref") == 0 ) {
     fnvref = val;
+  } else if ( strcmpfuzzy(key, "loadxerr") == 0 ) {
+    loadxerr = 1;
   }
   return 0;
 }
@@ -195,6 +199,75 @@ static int metad_save_cmvar(metad_t *metad,
   return 0;
 }
 
+/* load the error components */
+static int metad_load_cmvar(metad_t *metad,
+    cmvar_t *cmi, cmvar_t *cmf, cmvar_t *cci, cmvar_t *ccf,
+    const char *fn)
+{
+  int k, ki, cc, n = metad->n;
+  long cnt;
+  double uk;
+  double *mfave, *miave, *cfave, *ciave;
+  double *mfvar, *mivar, *cfvar, *civar;
+  FILE *fp;
+  char s[1024];
+
+  if ( (fp = fopen(fn, "r")) == NULL ) {
+    fprintf(stderr, "cannot open %s\n", fn);
+    return -1;
+  }
+
+  /* skip the information lines */
+  fgets(s, sizeof s, fp);
+  if ( s[0] != '#' ) goto ERR;
+  k = atoi(s + 1);
+  if ( k != n ) {
+    fprintf(stderr, "Wrong number of bins %d vs %d(file)\n",
+      n, k);
+    goto ERR;
+  }
+
+  fgets(s, sizeof s, fp);
+  if ( s[0] != '#' ) goto ERR;
+  cnt = atol(s + 1);
+
+  xnew(mfave, n); xnew(mfvar, n);
+  xnew(miave, n); xnew(mivar, n);
+  xnew(cfave, n); xnew(cfvar, n);
+  xnew(ciave, n); xnew(civar, n);
+  getcosmodes(metad->vref, n, metad->vft, metad->costab);
+  for ( k = 1; k < n; k++ ) {
+    uk = metad->vft[k];
+    fgets(s, sizeof s, fp);
+    cc = sscanf(s, "%d%lf%lf%lf%lf%lf%lf%lf%lf", &ki,
+        &mfvar[k], &mfave[k], &mivar[k], &miave[k],
+        &cfvar[k], &cfave[k], &civar[k], &ciave[k]);
+    if ( cc != 9 || ki != k ) {
+      fprintf(stderr, "error for mode %d/%d, cc %d, file %s\n",
+          k, ki, cc, fn);
+      goto ERR;
+    }
+    mfave[k] += uk;
+    miave[k] += uk;
+    cfave[k] += uk;
+    ciave[k] += uk;
+    //printf("var %g\n", mfvar[k]); getchar();
+  }
+  cmvar_set(cmi, cnt, miave, mivar);
+  cmvar_set(cmf, cnt, mfave, mfvar);
+  cmvar_set(cci, cnt, ciave, civar);
+  cmvar_set(ccf, cnt, cfave, cfvar);
+  free(mfave); free(mfvar);
+  free(miave); free(mivar);
+  free(cfave); free(cfvar);
+  free(ciave); free(civar);
+  fclose(fp);
+  return 0;
+ERR:
+  fclose(fp);
+  return -1;
+}
+
 static int work(invtpar_t *m)
 {
   lj_t *lj;
@@ -253,9 +326,15 @@ static int work(invtpar_t *m)
     cmf = cmvar_open(n, 0); /* final */
     cci = cmvar_open(n, 0); /* initial corrected */
     ccf = cmvar_open(n, 0); /* final correct */
+    if ( loadxerr ) {
+      i = metad_load_cmvar(metad, cmi, cmf, cci, ccf, fnxerr);
+      if ( i != 0 ) goto TRIAL_END;
+      metad_save_cmvar(metad, cmi, cmf, cci, ccf, "new_xerr.dat");
+      //printf("please check new_xerr.dat...\n"); getchar();
+    }
     alpha0 = m->opta ? metad->intq->aarr[0] : metad->a/2;
-    fprintf(stderr, "starting %ld metadynamics run of %ld/%ld steps..., a %g (%g), err %g -> %g\n",
-        m->ntrials, m->nequil, m->nsteps, metad->a, alpha0, metad->eiref, metad->efref);
+    fprintf(stderr, "starting %ld metadynamics run of %ld/%ld steps..., a %g (%g), err %g -> %g, loadxerr %d\n",
+        m->ntrials, m->nequil, m->nsteps, metad->a, alpha0, metad->eiref, metad->efref, loadxerr);
     /* write the header information for the log file */
     fplog = fopen(fnlog, "a");
     metad_saveheader(metad, fplog);
@@ -288,6 +367,7 @@ static int work(invtpar_t *m)
       /* save the components */
       metad_save_cmvar(metad, cmi, cmf, cci, ccf, fnxerr);
     }
+TRIAL_END:
     cmvar_close(cmi);
     cmvar_close(cmf);
     cmvar_close(cci);
