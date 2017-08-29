@@ -3061,7 +3061,8 @@ in discussing the optimal schedule.
 As shown in Fig. \ref{fig:lj_alpha},
 the optimal schedule for the Gaussian updating scheme
 was more complex than the inverse-time one,
-and the former tended to give a larger updating magnitude.
+and the former tended to give a larger updating magnitude,
+in agreement with the discussion in Appendix \ref{sec:schedule_geometry}.
 %
 Since our equilibration run was sufficiently long,
 the initial updating magnitude, $\alpha(0)$,
@@ -3806,8 +3807,8 @@ First, we define a normalized mass distribution as
     C_M
   }
   ,
-\notag
-%\label{eq:mass_distr}
+  %\notag
+  \label{eq:mass_distr}
 \end{equation}
 %
 such that
@@ -3825,7 +3826,7 @@ we find that for $\bar q(t) \equiv q(T) - q(t)$,
   \label{eq:mQ_invTa}
   \\
   \int_{\bar q(t)}^{ q(T) }
-    m(q') \, d q'
+    m(\bar q) \, d \bar q
   &=
   \frac t T
   .
@@ -3840,6 +3841,7 @@ on the mass distribution,
 such that the ordinate of the latter curve
 is $1/(T\alpha)$,
 and the area under the curve in the domain, $[\bar q(t), q(T)]$,
+or the complementary cumulative distribution function of $m(\bar q)$,
 is equal to $t/T$,
 as shown in Fig. \ref{fig:massq}(a).
 
@@ -3858,6 +3860,63 @@ as shown in Fig. \ref{fig:massq}(a).
     from the optimal schedule $\alpha(t)$.
   }
 \end{figure}
+
+We can use Eq. \eqref{eq:intmQ_tT} to show that
+for two simulations with equal lengths and initial updating magnitudes,
+the simulation under the Gaussian scheme with the optimal schedule
+has a larger updating magnitude than
+the value given by the inverse-time formula,
+which is optimal for the single-bin scheme.
+%
+From Eqs. \eqref{eq:mass_func} and \eqref{eq:mass_distr},
+we have
+\begin{align}
+  -\frac{ d \ln m(\bar q) }{ d \bar q }
+  %=
+  %-\frac{ dM^2(\bar q)/d\bar q } { 2 M^2(\bar q) }
+  =
+  \frac{ \sum_{k=1}^{n-1} \Gamma_k \, \lambda_k^3 \, e^{-2\lambda_k \bar q} }
+  { \sum_{k=1}^{n-1} \Gamma_k \, \lambda_k^2 \, e^{-2\lambda_k \bar q} }
+  \equiv
+  \bar\lambda(\bar q)
+  ,
+  \label{eq:dlnmdq}
+\end{align}
+which is a weighted average of $\lambda_k$'s
+with the weight being $\Gamma_k \, \lambda_k^2 \, e^{-2\lambda_k \bar q}$.
+%
+Let us use Eqs. \eqref{eq:intmQ_tT} and \eqref{eq:dlnmdq}
+to compare the time of
+reaching a certain updating magnitude, $\alpha_1$,
+in the two simulations:
+%
+\begin{align}
+  \frac{t}{T}
+  %=
+  %\int_{\bar q(t)}^{q(T)} m(\bar q) \, d\bar q
+  =
+  \int_{m( \bar q(t) )}^{m( q(T) )}
+  \!\!\frac{ m(\bar q) } { dm(\bar q)/d\bar q } \, d m
+  =
+  \int^{m( \bar q(t) )}_{m( q(T) )}
+  \!\!\frac{ d m } { \bar \lambda(\bar q) }
+  ,
+  \label{eq:t_int}
+\end{align}
+with the lower and upper limits,
+$m\bigl(q(T)\bigr) = 1/\bigl[T\alpha(0)\bigr]$ and
+$m\bigl(\bar q(t)\bigr) = 1/(T\alpha_1)$,
+being the same in both cases.
+%
+Since for the Gaussian scheme,
+we have $\bar \lambda(\bar q) \le 1$,
+by Eq. \eqref{eq:lambda_Gaussian},
+the integral in Eq. \eqref{eq:t_int}
+is no less than that for the single-bin scheme,
+i.e. it takes longer for the Gaussian scheme
+than the single-bin scheme
+to lower the updating magnitude
+to the same level.
 
 The schedule, $\alpha(t)$,
 also defines a variable transformation from
