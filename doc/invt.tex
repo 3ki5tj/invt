@@ -1,4 +1,4 @@
-\documentclass[reprint, superscriptaddress, floatfix]{revtex4-1}
+\documentclass[preprint, superscriptaddress, floatfix]{revtex4-1}
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{mathtools}
@@ -76,20 +76,8 @@ Galveston, Texas 77555-0304, USA}
   a bias potential that offsets
   the potential of mean force by histogram-based adaptive updates.
   %
-  The updating magnitude should decrease over time
-  to reduce the error in the bias potential,
-  and one may speed up the convergence by choosing an optimal schedule
-  of the updating magnitude.
-  %
-  %Here, we will show that the optimal schedule
-  %can be derived
-  %from a mechanical analogy, in which
-  %the schedule corresponds to
-  %the velocity of a free particle with a position-dependent mass
-  %and the final error serves as the action.
-  %%
-  %Therefore, the optimal schedule follows from
-  %the equation of motion of the particle.
+  The convergence of the bias potential can be accelerated
+  by decreasing the updating magnitude with an optimal schedule.
   %
   We show that
   the optimal schedule depends on the updating scheme.
@@ -104,13 +92,14 @@ Galveston, Texas 77555-0304, USA}
   %
   Further,
   we show that the single-bin updating scheme
-  belongs to a class of bandpass updating schemes
-  that are optimal for asymptotic convergence.
+  is optimal for very long simulations,
+  and it can be generalized to a class of bandpass updating schemes
+  that are similarly but partially optimal.
   %
   These bandpass updating schemes aim at
   partially flattening a few long-range histogram modes
   and their optimal schedule
-  is also given by the inverse-time prescription.
+  is also given by the inverse-time formula.
   %
   Constructed from orthogonal polynomials,
   bandpass updating schemes serve as generalizations
@@ -131,7 +120,10 @@ Galveston, Texas 77555-0304, USA}
 Free energy calculation\cite{frenkel, newman} is a central theme
 in computational physics and chemistry
 that can provide insight into an array of phenomena not easily studied
-with traditional experiments.
+with regular simulation methods.
+\note{``Regular simulation methods'' means MC and MD,
+and they are more pertinent to ``computational physics and chemistry''
+than ``traditional experiments.''}
 %
 Given a system,
 often the task is to compute
@@ -216,7 +208,7 @@ disrupts the underlying equilibrium
 sampling\cite{zhou2005, morozov2007, zhou2008},
 and for convergence of the estimated PMF
 one needs to gradually decrease
-the updating magnitude of the bias.
+the updating magnitude of the bias potential.
 
 
 
@@ -230,12 +222,12 @@ komura2012, *caparica2012, *caparica2014,
 barducci2008, dickson2011, dama2014}.
 %
 While an overly slow reduction of the updating magnitude
-increases the variance of the bias potential,
+is ineffective in controlling the variance of the bias potential,
 a too rapid reduction often
-converges the bias potential to wrong value.
+converges the bias potential to a wrong value.
 %
 For the single-bin case, it is known that
-the optimal updating schedule is given by the
+the optimal updating magnitude is given by the
 inverse time\cite{
 belardinelli2007, *belardinelli2007jcp, *belardinelli2008, *belardinelli2016,
 liang2007,
@@ -247,7 +239,7 @@ the inverse number of updating steps.
 In this study,
 we first present a method of computing
 the optimal schedule
-for an adaptive FDS method
+for an adaptive FDS simulation
 of a general updating scheme,
 including the single-bin and Gaussian versions.
 %
@@ -264,7 +256,7 @@ that minimizes the action.
 %depends on the updating window function
 %through the mass of the particle.
 %
-We found that
+We will show that
 while the optimal schedule in the single-bin case
 is given by the known inverse-time formula,
 that for Gaussian case is more complex.
@@ -287,17 +279,17 @@ a few long-range distribution modes.
 Compared with the Gaussian updating scheme,
 bandpass updating schemes have the advantage of allowing
 simpler control of the updating magnitude
-for asymptotic convergence.
+for optimal convergence.
 
 Finally, we present an application of
 the bandpass updating schemes
-by construction from
+by a construction from
 a sequence of orthogonal polynomials.
 %
 The bias potential in this case assumes
 a polynomial form,
 and coefficients are adjusted on-the-fly
-to achieve a particular target distribution.
+to approximate a particular target distribution.
 %
 This method serves
 as a generalization of the Langfeld-Lucini-Rago (LLR)
@@ -1892,7 +1884,7 @@ Then solve $\partial (\Err_R + \Err_A) / \partial Q_c = 0$.
 We can rewrite the condition in terms of
 the initial updating magnitude by Eq. \eqref{eq:Lagrangian_const} %\eqref{eq:mQ_invTa},
 \begin{align}
-  \alpha(0)
+  \alpha(t = 0)
   %=
   %\frac{1}{T \, m\bigl( q(T) \bigr) }
   =
@@ -1902,25 +1894,18 @@ the initial updating magnitude by Eq. \eqref{eq:Lagrangian_const} %\eqref{eq:mQ_
   \frac{
     \lambda_k \, \epsilon_k \, e^{-2\lambda_k \, q(T)}
   }{M^2\bigl( q(T) \bigr)}
-  .
-  \notag
-  %\label{eq:opt_alpha0}
-\end{align}
-%
-If the initial bias, $\epsilon_k$, is negligible,
-which is often true if no eigenvalue is close to $0$,
-then
-%
-\begin{equation}
-  \alpha( t = 0 )
-  \approx
+  \ge
   \frac{ a_0 }
        { 2 }
-  ,
-\label{eq:half_alpha0}
-\end{equation}
+  .
+  %\notag
+  \label{eq:half_alpha0}
+\end{align}
 %
-i.e. the optimal initial updating magnitude
+The equality in the last step is achievable
+if the initial bias, $\epsilon_k$, is negligible,
+which is often true if no eigenvalue is close to $0$,
+and in this limit, the optimal initial updating magnitude
 is half of the previous equilibrium value.\footnote{This factor, $1/2$,
   happens to coincide with the
   recommended reduction factor of the updating magnitude
@@ -2676,7 +2661,7 @@ to restrain the width of the distribution to
 be the same as the target Gaussian,
 and it would exceed $1$ in a barrier region
 where the PMF is locally concave,
-$-d^2\ln p(z)/dz^2 < 0$.
+i.e. $-d^2\ln p(z)/dz^2 < 0$.
 
 
 
@@ -2884,12 +2869,16 @@ Numerical results}
 
 
 \subsection{\label{sec:lj}
-Comparison of updating schemes}
+Comparison of homogeneous updating schemes}
 
+In this example, we wish to compare the single-bin,
+Gaussian (Sec. \ref{sec:Gaussian_scheme}),
+and homogeneous bandpass (Sec. \ref{sec:bandpass})
+updating schemes in a numerical example.
 
 \subsubsection{System and simulation details}
 
-Our first test system is
+Our test system is
 a Lennard-Jones (LJ) fluid of $N = 100$ particles,
 and we wish to compute the PMF along
 the distance, $r$, between two particular particles.
@@ -2929,7 +2918,7 @@ We used adaptive FDS to calculate
 the PMF from $r = 0$ to half of the box size
 on a grid of size $\delta r = 0.01$ in reduced units.
 %
-The density was $\varrho = 0.1$.
+The reduced density was $\varrho = 0.1$.
 The numbers of bins was $n = 500$.
 The reduced temperature was $T = 3$.
 %
@@ -2937,15 +2926,12 @@ The bias potential, $u(r)$,
 was initially set to zero and
 underwent the test updating scheme and schedule.
 %
-We tested the single-bin, Gaussian,
-and homogeneous bandpass updating schemes.
-%
 Each simulation started with an ``equilibration'' phase
 of $10^7$ steps under a constant updating magnitude,
 $a_0 = 10^{-4}$
 (corresponding to $\ln f = n \, a_0 = 0.05$ in the WL algorithm),
 followed by a production phase of
-$10^8$ steps
+$T = 10^8$ steps
 with the updating magnitude given by
 either the inverse-time or optimal schedule.
 %
@@ -2956,7 +2942,7 @@ with the reference bias potential
 pre-calculated from a longer simulation.
 %
 We repeated each simulation multiple times
-and report the average.
+and report the averages.
 %
 To ensure the same schedule was used for multiple runs,
 the optimal schedule was pre-computed using a set of fixed
@@ -2977,7 +2963,7 @@ The two tagged particles are fixed on the $x$-axis,
 and are only displaced in this direction.
 %
 We used $\varepsilon = 0.1/\varrho$
-to ensure reasonable acceptance ratio.
+to ensure a reasonable acceptance ratio.
 
 
 
@@ -2994,7 +2980,7 @@ The errors roughly matched the predicted values
 calculated using the pre-computed
 $\Gamma_k$'s and $\epsilon_k$'s.
 %
-Since the two schedules are identical
+Since the optimal and inverse-time schedules are identical
 in the single-bin and bandpass updating schemes,
 we will focus on the Gaussian updating scheme with width $\sigma = 0.2$ below
 in discussing the optimal schedule.
@@ -3051,8 +3037,8 @@ in discussing the optimal schedule.
     \\
     %\hline
     Bandpass & $1/t$
-    & $8.3(8.9)\times10^{-3}$
-    & $2.1(2.3)\times10^{-6}$
+    & $7.8(8.9)\times10^{-3}$
+    & $2.0(2.3)\times10^{-6}$
     \\
     \hline
   \end{tabular}
@@ -3102,7 +3088,12 @@ the error in these modes,
 and produced a flatter profile for the final error
 (the remaining unevenness of the profile
 was likely due to the error of estimated values of $\Gamma_k$'s).
-
+%
+However, the gain of using the optimal schedule
+diminished for shorter simulations,
+e.g. when the production phase was shortened to $T = 10^7$ steps,
+the final errors under the optimal and inverse-time schedules
+were $2.4\times 10^{-5}$ and $3.9\times 10^{-5}$, respectively.
 
 \begin{figure}[h]\centering
   \makebox[\linewidth][c]{
@@ -3205,7 +3196,7 @@ Adaptive Gaussian ensemble}
 
 As another proof of principle,
 we tested the adaptive Gaussian ensemble method
-introduced in Sec. \ref{sec:age}
+discussed in Secs. \ref{sec:age} and \ref{sec:st}
 on the two-dimensional $L\times L$ ten-state
 Potts model\cite{wu1982, newman, wang2001, wang2001pre}
 in the energy space.
@@ -3222,7 +3213,7 @@ For simplicity, only transitions between neighboring
 umbrellas were performed.\footnote{For
   wider umbrellas, we might improve convergence
   by mixing the nearest-neighbor inter-umbrella transitions
-  with some longer-range ones.}
+  with some longer-range transitions.}
 %In attempting inter-umbrella transitions,
 %the target umbrella is randomly chosen from
 %either one of the nearest neighbors ($50\%$ chance),
@@ -3238,7 +3229,7 @@ being the approximate inverse critical temperature.
 %
 For configuration sampling in each umbrella,
 we used the Wolff algorithm\cite{wolff1989, newman}
-(which is more efficient than the Metropolis algorithm)
+(which was more efficient than the Metropolis algorithm)
 at the inverse temperature, $\beta = c_1/\sigma_E$,
 followed by a Metropolis step with
 acceptance probability
@@ -3250,7 +3241,7 @@ The acceptance ratio was no less than 92\% in any umbrella.
 In the initial WL stages,
 the initial updating magnitude was $0.01$;
 the fluctuation threshold for stage transitions
-was $F = 0.2$ [using the definition given by Eq. \eqref{eq:F2st}];
+was $F = 0.5$ [using the definition given by Eq. \eqref{eq:F2st}];
 and the reduction factor was $1/2$.
 
 The results for the $L = 64$ case
@@ -3262,7 +3253,7 @@ The Gaussian histograms were evenly spaced with similar widths as intended,
 as shown in Fig. \ref{fig:pt_hist}(a).
 %
 We computed the density of states by WHAM,
-and found the critical temperature to be $T_c = 0.70163$,
+and found the critical temperature to be $T_c = 0.70161$,
 in agreement with a previous study\cite{wang2001pre}.
 %
 Since umbrellas were relatively narrow,
@@ -3314,9 +3305,15 @@ as shown in Fig. \ref{fig:pt_hist}(d).
     (d) $\sqrt 2 \, c_2^{(i)}$
     exceeded $1.0$ in the unstable region,
     where $\beta(E)$ is increasing.
+    \note{When the new data come,
+    run the \texttt{update.sh},
+    copy the new value of the inverse critical temperature,
+    and the value in \texttt{lns for normalization \dots [value] (lnz)}
+    in the output.
+    Use these values to update \texttt{bc} and \texttt{shiftlnz}
+    in \texttt{pt\_hist.gp}, and run \texttt{gnuplot} again.  }%
   }
 \end{figure}
-
 
 
 \section{\label{sec:conclusion}
@@ -3416,11 +3413,11 @@ in error reduction in the long time limit.
 This scheme can be generalized to
 a class of bandpass updating schemes,
 which discard a few noise modes
-and are asymptotically optimal for the non-noise modes.
+and are similarly optimal for the non-noise modes.
 %
 The bandpass updating schemes allow convenient control
 for the updating magnitude
-as the asymptotically optimal schedule
+as the optimal schedule
 is simply given by an inverse-time formula.
 
 As an application,
@@ -3461,11 +3458,21 @@ and the sampling is a quasi-equilibrium one.\cite{
 %which is roughly proportional to
 %the magnitude itself\cite{morozov2007}.
 %
-Second, the white noise approximation
-can break down for relatively short simulations.
+The white noise approximation
+can also be inaccurate for relatively short simulations.
+%
+For the Gaussian updating scheme,
+the calculation of the optimal schedule requires
+the estimation of a few parameters
+in a sufficiently long run
+under a constant updating magnitude,
+whereas the gain of using the optimal schedule
+can sometimes be rather modest,
+especially for relatively short simulations,
+even if the noise is largely local in nature.
 %
 Finally, the adaptive Gaussian ensemble method
-introduced in Sec. \ref{sec:age} can be refined
+introduced in Sec. \ref{sec:age} may still need refinement
 to improve its general applicability and stability.
 %e.g. to prevent the updating scheme from
 %overly updating the parameters.
@@ -3479,7 +3486,7 @@ We thank Dr. Y. Mei, Dr. W. Tang, J. Wang,
 O. Nassar, Dr. C. Lai, Dr. S. Ou, D. Stuhlsatz,
 Dr. C. Myers, and Dr. O. Samoylova
 for helpful discussions,
-and the two anonymous reviewers for critical reading
+and the anonymous reviewers for critical reading
 of earlier versions of the manuscript.
 %
 We gratefully acknowledge the Robert A. Welch Foundation (H-0037),
@@ -3574,9 +3581,9 @@ and $x(t) - X_\omega(t-1)$
 is the proposed change from the previous average
 from the data point at step $t$.
 
-Conversely, for a recurrence relation
+Conversely, we can revert a recurrence relation
 in the form of Eq. \eqref{eq:X_recur}
-with a given $\alpha(t)$, we can revert it
+with a given $\alpha(t)$
 to an average in the form of Eq. \eqref{eq:X_ave}
 with the weight given by
 \begin{align}
@@ -3862,32 +3869,15 @@ as shown in Fig. \ref{fig:massq}(a).
 \end{figure}
 
 We can use Eq. \eqref{eq:intmQ_tT} to show that
-for two simulations with equal lengths and initial updating magnitudes,
-the simulation under the Gaussian scheme with the optimal schedule
-has a larger updating magnitude than
-the value given by the inverse-time formula,
+for simulations with equal lengths and initial updating magnitudes,
+the optimal schedule for the Gaussian scheme
+always lies above the inverse-time schedule,
 which is optimal for the single-bin scheme.
 %
-From Eqs. \eqref{eq:mass_func} and \eqref{eq:mass_distr},
-we have
-\begin{align}
-  -\frac{ d \ln m(\bar q) }{ d \bar q }
-  %=
-  %-\frac{ dM^2(\bar q)/d\bar q } { 2 M^2(\bar q) }
-  =
-  \frac{ \sum_{k=1}^{n-1} \Gamma_k \, \lambda_k^3 \, e^{-2\lambda_k \bar q} }
-  { \sum_{k=1}^{n-1} \Gamma_k \, \lambda_k^2 \, e^{-2\lambda_k \bar q} }
-  \equiv
-  \bar\lambda(\bar q)
-  ,
-  \label{eq:dlnmdq}
-\end{align}
-which is a weighted average of $\lambda_k$'s
-with the weight being $\Gamma_k \, \lambda_k^2 \, e^{-2\lambda_k \bar q}$.
-%
-Let us use Eqs. \eqref{eq:intmQ_tT} and \eqref{eq:dlnmdq}
-to compare the time of
-reaching a certain updating magnitude, $\alpha_1$,
+%Let us use Eqs. \eqref{eq:intmQ_tT} and \eqref{eq:dlnmdq}
+Let us compare the times for the optimal
+schedules to lower the updating magnitude to a certain level,
+$\alpha_1$,
 in the two simulations:
 %
 \begin{align}
@@ -3896,20 +3886,41 @@ in the two simulations:
   %\int_{\bar q(t)}^{q(T)} m(\bar q) \, d\bar q
   =
   \int_{m( \bar q(t) )}^{m( q(T) )}
-  \!\!\frac{ m(\bar q) } { dm(\bar q)/d\bar q } \, d m
+  \!\!\frac{ m(\bar q) } { dm/d\bar q } \, d m
   =
   \int^{m( \bar q(t) )}_{m( q(T) )}
-  \!\!\frac{ d m } { \bar \lambda(\bar q) }
+  \!\!\frac{ d m } { -\frac{d}{d\bar q}\ln m(\bar q) }
+  %=
+  %\int^{m( \bar q(t) )}_{m( q(T) )}
+  %\!\!\frac{ d m } { \bar \lambda(\bar q) }
   ,
   \label{eq:t_int}
 \end{align}
 with the lower and upper limits,
 $m\bigl(q(T)\bigr) = 1/\bigl[T\alpha(0)\bigr]$ and
 $m\bigl(\bar q(t)\bigr) = 1/(T\alpha_1)$,
-being the same in both cases.
+being the same in the two cases.
+%
+But from Eqs. \eqref{eq:mass_func} and \eqref{eq:mass_distr},
+we have
+\begin{align}
+  -\frac{ d }{ d \bar q } \ln m(\bar q)
+  %=
+  %-\frac{ dM^2(\bar q)/d\bar q } { 2 M^2(\bar q) }
+  =
+  \frac{ \sum_{k=1}^{n-1} \Gamma_k \, \lambda_k^3 \, e^{-2\lambda_k \bar q} }
+  { \sum_{k=1}^{n-1} \Gamma_k \, \lambda_k^2 \, e^{-2\lambda_k \bar q} }
+  \equiv
+  \bar\lambda(\bar q)
+  ,
+  \notag
+  %\label{eq:dlnmdq}
+\end{align}
+which is a weighted average of $\lambda_k$'s
+with the weight being $\Gamma_k \, \lambda_k^2 \, e^{-2\lambda_k \bar q}$.
 %
 Since for the Gaussian scheme,
-we have $\bar \lambda(\bar q) \le 1$,
+we have $\bar \lambda(\bar q) \le 1$
 by Eq. \eqref{eq:lambda_Gaussian},
 the integral in Eq. \eqref{eq:t_int}
 is no less than that for the single-bin scheme,
