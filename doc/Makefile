@@ -1,6 +1,6 @@
 prj=invt
 
-ver=8.3
+ver=8.4
 
 tikzfigs=fig/massq.pdf fig/vardep.pdf
 figgps=$(wildcard fig/*.gp)

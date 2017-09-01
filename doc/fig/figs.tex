@@ -16,7 +16,7 @@
 
 \begin{tikzpicture}[thick, scale=1.7, every node/.style={scale=1.0}]
   \begin{scope}[shift={(0,0)}]
-    \node [] at (-0.25, 2.1) {(a)};
+    \node [] at (-0.25, 2.1) {\textsf{(a)}};
 
     % distribution
     \draw[domain=0:2.0, variable=\x, dashed, gray, very thick]
@@ -54,7 +54,7 @@
   \end{scope}
 
   \begin{scope}[shift={(2.5,0)}]
-    \node [] at (-0.25, 2.1) {(b)};
+    \node [] at (-0.25, 2.1) {\textsf{(b)}};
     % distribution
     \draw[domain=0:2.3, variable=\x, dashed, gray, very thick]
       plot({\x}, {1/(\x+0.5)});
@@ -131,9 +131,15 @@
     (sys) edge (Gamma);
 
   \draw[->, >=latex, thick]
-    (lambda) -| (M1)
-    (Gamma)  -- (M1)
-    (T)      -| (M1)
+    (lambda) -| (M1);
+
+  \draw[->, >=latex, thick]
+    (Gamma)  -- (M1);
+
+  \draw[->, >=latex, thick]
+    (T)      -| (M1);
+
+  \draw[->, >=latex, thick]
     (M1)     -- (R1)
     (R1)     |- (qT);
 

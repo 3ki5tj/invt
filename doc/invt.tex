@@ -1,4 +1,4 @@
-\documentclass[preprint, superscriptaddress, floatfix]{revtex4-1}
+\documentclass[reprint, superscriptaddress, floatfix]{revtex4-1}
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{mathtools}
@@ -82,7 +82,7 @@ Galveston, Texas 77555-0304, USA}
   We show that
   the optimal schedule depends on the updating scheme.
   %
-  While the asymptotically optimal schedule for
+  While the optimal schedule for
   the single-bin updating scheme (commonly used in the WL algorithm)
   is given by an inverse-time formula,
   that for the Gaussian updating scheme (commonly used in metadynamics)
@@ -123,7 +123,7 @@ that can provide insight into an array of phenomena not easily studied
 with regular simulation methods.
 \note{``Regular simulation methods'' means MC and MD,
 and they are more pertinent to ``computational physics and chemistry''
-than ``traditional experiments.''}
+than ``traditional experiments.''}%
 %
 Given a system,
 often the task is to compute
@@ -213,7 +213,8 @@ the updating magnitude of the bias potential.
 
 
 The schedule of reducing the updating magnitude
-can critically affect the precision of the final bias potential,
+can critically affect the precision and accuracy
+of the final bias potential,
 and hence that of the PMF\cite{laio2005, bussi2006, poulain2006,
 belardinelli2007, *belardinelli2007jcp, *belardinelli2008, *belardinelli2016,
 liang2007, min2007,
@@ -302,7 +303,7 @@ with predefined means and variances.
 
 The article is organized as follows.
 %
-We present the analytical results in Sec. \ref{sec:theory},
+We present the analytical results in Sec. \ref{sec:methods},
 provide numerical examples
 in Sec. \ref{sec:results},
 and conclude the article
@@ -311,12 +312,12 @@ in Sec. \ref{sec:conclusion}.
 
 
 
-\section{\label{sec:theory}
-Theory}
+\section{\label{sec:methods}
+Methods}
 
 
 
-We develop the theory
+We present the methods 
 in the following order.
 %
 In Sec. \ref{sec:background},
@@ -1771,16 +1772,17 @@ one can show that
 \end{equation}
 %
 where
-$\epsilon_k \equiv \tilde u_k^2 \, e^{-2\, \lambda_k \, a_0 \, T_0}$
-and if no eigenvalue is zero,
-then we can ignore the $\epsilon_k$ term
-in the case of $T_0 \to \infty$,
+$\epsilon_k \equiv \tilde u_k^2 \, e^{-2\, \lambda_k \, a_0 \, T_0}$.
+%
+If $\lambda_k$ is not close to zero, and $T_0 \to \infty$
+we can ignore the $\epsilon_k$ term, and
 %
 \begin{equation}
   \left\langle
     {\tilde v}_k^2(0)
   \right\rangle
-  = \frac 1 2 \, a_0 \, \Gamma_k \, \lambda_k
+  \approx
+  \frac 1 2 \, a_0 \, \Gamma_k \, \lambda_k
   .
   \label{eq:xt2_eql}
 \end{equation}
@@ -1936,7 +1938,7 @@ as shown in Fig. \ref{fig:vardep}.
 While the updating scheme alone
 determines $\lambda_k$'s,
 $\Gamma_k$'s depend also on the system
-and the underlying sampling process.
+and the underlying sampling method.
 %
 The procedure is given below.
 
@@ -2020,7 +2022,7 @@ numerically integrating Eqs. \eqref{eq:q_opt} and \eqref{eq:mint}.
 %($\mathcal N=20000$ here)
 %over $[0, q(T)]$ to be given by
 In our implementation,
-the integration was performed using the trapezoidal rule\cite{press3rd}
+the integration is performed using the trapezoidal rule\cite{press3rd}
 on the grid points,
 $q_{[i]} = \bigl(q(T) + 1\bigr) - \bigl(q(T)+1\bigr)^{1-i/\mathcal N}$,
 where $i = 0, \dots, \mathcal N$.\footnote{The
@@ -2034,7 +2036,7 @@ where $i = 0, \dots, \mathcal N$.\footnote{The
   We used $\mathcal N = 20000$.}
 %
 The resulting values, $\bigl(q_{[i]}, t_{[i]} \bigr)$,
-and used to compute the updating magnitude
+are used to compute the updating magnitude
 as (cf. Appendix \ref{sec:ave_ub}):
 \begin{equation}
   \alpha_{[i]}
@@ -2097,7 +2099,7 @@ Gaussian updating scheme}
 A commonly-used multiple-bin updating scheme in metadynamics
 is the Gaussian updating scheme,
 whose updating matrix can be characterized by
-a fixed Gaussian function centered on the current bin
+a rigid Gaussian function centered on the current bin
 (with some boundary adjustment),
 %to satisfy the constraints discussed in Sec. \ref{sec:updating-matrix},
 see Fig. \ref{fig:mat}(a) for an example.
@@ -2106,21 +2108,21 @@ The eigenvalues of this scheme are given by\cite{bussi2006}
 \begin{align}
   \lambda_k
   =
-  \exp\left[
-        -\frac 1 2
-        \left(
-         \frac{ 2 \, \pi \, k \, \sigma_z }
-              { g \, \Delta z  }
-        \right)^2
-      \right]
+  \exp\left(
+        -
+        \frac{ \pi^2 \, \sigma_z^2 \, k^2 }
+             { 2 \, \Delta z^2 }
+      \right)
   ,
-%\notag
-\label{eq:lambda_Gaussian}
+  %\notag
+  \label{eq:lambda_Gaussian}
 \end{align}
-where $\sigma_z$ and $\Delta z = z_{\max} - z_{\min}$
-are the width of the Gaussian and the range of
-the original collective variable, $z$,
-respectively.
+where $\sigma_z$ and $\Delta z = (z_{\max} - z_{\min}) \, g/2$
+are the width of the Gaussian and the effective span
+in terms of the continuous collective variable, $z$,
+respectively,
+with $g = 1$ if $z$ periodic or $2$ otherwise
+(cf. Appendix \ref{sec:Gaussian_math}).
 
 
 \begin{figure}[h]\centering
@@ -2137,7 +2139,7 @@ respectively.
     and $w_{ij}$ is the relative updating magnitude.
     %
     (a) The Gaussian updating scheme of width $\sigma = 20$ bins.
-    (b) The bandpass updating scheme of $K = 20$.
+    (b) The homogeneous bandpass updating scheme of $K = 20$.
     %
     Both updating schemes
     can be characterized by a rigid window
@@ -2153,15 +2155,17 @@ respectively.
 Homogeneous updating schemes}
 
 
-More generally, we can replace the Gaussian function
+More generally, we can replace the rigid Gaussian function
 in the Gaussian updating scheme
 by a window function of different shape.
 %
 We call the resulting updating scheme
-translationally-invariant or \emph{homogeneous}.
+\emph{homogeneous} or
+translationally-invariant.
 %see Fig. \ref{fig:mat}(b) for an example.
 
-By morphing the window function without losing the translational invariance,
+By morphing the window function
+but preserving the translational invariance,
 we can design a homogeneous updating scheme
 that is more effective in error reduction
 than the Gaussian updating scheme.
@@ -2557,10 +2561,10 @@ represents the deviation of the $k$th statistical moment
 of the instantaneous distribution
 from its expectation.
 Since high-order moments are generally less reliable,
-this method is better used with a small $K$ for a narrow distribution.
+this method works better with a small $K$ for a narrow distribution.
 %
 However, by constructing
-an expanded ensemble or mixture\cite{swendsen1986,
+a mixture or expanded ensemble\cite{swendsen1986,
   *geyer1991, *hukushima1996, *hansmann1997, *sugita1999,
   *earl2005, *zuckerman2011, *rauscher2009,
   neuhaus2006, *neuhaus2007, kim2010,
@@ -2642,7 +2646,7 @@ and the Gaussian ensemble method\cite{hetherington1987,
 
 Upon convergence,
 the parameters, $c_1$ and $c_2$,
-can be related to the slope and curvature of the PMF
+can be related to the local slope and curvature of the PMF
 [cf. Eq. \eqref{eq:Vi_target}].
 %
 By Eq. \eqref{eq:uz_decomp}, we have
@@ -2653,7 +2657,7 @@ By Eq. \eqref{eq:uz_decomp}, we have
   \label{eq:u_age}
 \end{equation}
 Thus, we can interpret
-$c_1/\sigma_z$ as the average local mean force around $z_c$.
+$c_1/\sigma_z$ as the mean force around $z_c$.
 %
 The coefficient
 $\sqrt{2} \, c_2$ represents the relative ``pressure''
@@ -2871,10 +2875,11 @@ Numerical results}
 \subsection{\label{sec:lj}
 Comparison of homogeneous updating schemes}
 
-In this example, we wish to compare the single-bin,
+In this example, we will study the optimal schedule
+and compare the single-bin,
 Gaussian (Sec. \ref{sec:Gaussian_scheme}),
 and homogeneous bandpass (Sec. \ref{sec:bandpass})
-updating schemes in a numerical example.
+updating schemes.
 
 \subsubsection{System and simulation details}
 
@@ -2982,7 +2987,7 @@ $\Gamma_k$'s and $\epsilon_k$'s.
 %
 Since the optimal and inverse-time schedules are identical
 in the single-bin and bandpass updating schemes,
-we will focus on the Gaussian updating scheme with width $\sigma = 0.2$ below
+we will assume the Gaussian updating scheme with width $\sigma = 0.2$ below
 in discussing the optimal schedule.
 
 
@@ -3023,7 +3028,7 @@ in discussing the optimal schedule.
     \hline
     Single-bin & $1/t$
     & $5.7(5.7)\times10^{-2}$
-    & $9.0(11.4)\times10^{-6}$
+    & $9.1(11.4)\times10^{-6}$
     \\
     %\hline
     Gaussian & $1/t$
@@ -3037,8 +3042,8 @@ in discussing the optimal schedule.
     \\
     %\hline
     Bandpass & $1/t$
-    & $7.8(8.9)\times10^{-3}$
-    & $2.0(2.3)\times10^{-6}$
+    & $8.1(8.9)\times10^{-3}$
+    & $2.1(2.3)\times10^{-6}$
     \\
     \hline
   \end{tabular}
@@ -3047,13 +3052,13 @@ in discussing the optimal schedule.
 As shown in Fig. \ref{fig:lj_alpha},
 the optimal schedule for the Gaussian updating scheme
 was more complex than the inverse-time one,
-and the former tended to give a larger updating magnitude,
+and the former lay above the latter,
 in agreement with the discussion in Appendix \ref{sec:schedule_geometry}.
 %
 Since our equilibration run was sufficiently long,
 the initial updating magnitude, $\alpha(0)$,
 was around the ideal value of $a_0/2 = 5\times10^{-5}$
-given by Eq. \eqref{eq:half_alpha0}.
+[cf. Eq. \eqref{eq:half_alpha0}].
 
 \begin{figure}[h]\centering
   \makebox[\linewidth][c]{
@@ -3065,35 +3070,34 @@ given by Eq. \eqref{eq:half_alpha0}.
   }
 \end{figure}
 
-The optimal schedule was more effective
-than the inverse-time schedule
-in reducing the error,
+The optimal schedule more effectively reduced
+the error than the inverse-time schedule,
 as shown in Table \ref{tab:lj_error}.
 %
-We further decomposed the error
-into the eigenmodes
-by Eqs. \eqref{eq:gft_def} and \eqref{eq:wband_eigenvector_refl},
-and plotted the error components,
+By decomposing the error
+into the components of the eigenmodes,
 $\langle \tilde v_k^2 \rangle$'s,
-in Fig. \ref{fig:lj_xerr}.
-%
-We found that the inverse-time schedule tended to
-reduce the updating magnitude too quickly,
+by Eqs. \eqref{eq:gft_def} and \eqref{eq:wband_eigenvector_refl}
+(Fig. \ref{fig:lj_xerr}),
+we found that the inverse-time schedule
+reduced the updating magnitude too quickly,
 leaving a hump on the error profile
 for the $k = 9$ to $31$ modes.
 %
 By a delayed reduction,
 the optimal schedule more effectively reduced
 the error in these modes,
-and produced a flatter profile for the final error
+and produced a flatter profile
 (the remaining unevenness of the profile
-was likely due to the error of estimated values of $\Gamma_k$'s).
+was likely due to the error of estimated values of
+$\Gamma_k$'s and $\epsilon_k$'s).
 %
 However, the gain of using the optimal schedule
 diminished for shorter simulations,
 e.g. when the production phase was shortened to $T = 10^7$ steps,
 the final errors under the optimal and inverse-time schedules
-were $2.4\times 10^{-5}$ and $3.9\times 10^{-5}$, respectively.
+became $2.4\times 10^{-5}$ and $3.9\times 10^{-5}$, respectively,
+which were more similar.
 
 \begin{figure}[h]\centering
   \makebox[\linewidth][c]{
@@ -3133,26 +3137,30 @@ Thus, there is an optimal width that balances the two factors.
 %
 According to the analytical prediction,
 the optimal width (assuming the optimal schedule)
-was around $\sigma = 0.29$ in this case,
+was around $\sigma = 0.29$ in this case
+with the predicted minimal error being $3.3\times 10^{-6}$,
 and it would decrease with the simulation length
-and approach the limit of single-bin updating scheme,
+and approach the limit of the single-bin updating scheme,
 $\sigma \to 0$, asymptotically.
 
 The homogeneous bandpass updating scheme
-yielded less error than the Gaussian updating scheme,
-as shown in Table \ref{tab:lj_error}.
+had a similar behavior.
 %
-Similar to the Gaussian case,
-the mode cutoff, $K$, has an optimal value,
+The mode cutoff, $K$, also has an optimal value,
 which was around $26$ in this case.
 %
+The predicted minimal error was $2.0\times 10^{-6}$,
+  slightly less than the minimal error
+  in the previous Gaussian case.
+%
 The optimal cutoff would increase with the simulation length
-and approach the limit of single-bin scheme, $K \to n$,
+and approach the limit of the single-bin updating scheme, $K \to n$,
 asymptotically.
 
 
-The Gaussian and homogeneous bandpass updating schemes
-helped reduce the error in this case because
+Although the Gaussian and homogeneous bandpass updating schemes
+helped reduce the error in this case,
+it was only because
 the sampling along the collective variable
 was free from major barriers
 such that the histogram fluctuation was mainly local in nature.
@@ -3160,7 +3168,10 @@ such that the histogram fluctuation was mainly local in nature.
 For similar simulations performed at a high density, $\varrho = 0.8$,
 we found the gain of using the above two updating schemes
 over the single-bin updating scheme, if any, to be negligible.
-
+%
+However, one may still prefer the multiple-bin updating schemes
+in MD simulations
+when a smooth bias potential is necessary in deriving the bias force.
 
 In practice, updating schemes and schedules
 are often sub-optimal.
@@ -3230,10 +3241,10 @@ being the approximate inverse critical temperature.
 For configuration sampling in each umbrella,
 we used the Wolff algorithm\cite{wolff1989, newman}
 (which was more efficient than the Metropolis algorithm)
-at the inverse temperature, $\beta = c_1/\sigma_E$,
+at the inverse temperature, $\beta = c_1^{(i)}/\sigma_E$,
 followed by a Metropolis step with
 acceptance probability
-$\min\bigl\{1, e^{c_2 [R_2(E) - R_2(E')]} \bigr\}$,
+$\min\bigl\{1, e^{c_2^{(i)} [R_2(E) - R_2(E')]} \bigr\}$,
 where $E$ and $E'$ are the energies of the old and new states.
 %
 The acceptance ratio was no less than 92\% in any umbrella.
@@ -3886,10 +3897,10 @@ in the two simulations:
   %\int_{\bar q(t)}^{q(T)} m(\bar q) \, d\bar q
   =
   \int_{m( \bar q(t) )}^{m( q(T) )}
-  \!\!\frac{ m(\bar q) } { dm/d\bar q } \, d m
+  \!\!\frac{ m(\bar q) } { \frac{dm(\bar q)}{d\bar q} } \, d m(\bar q)
   =
   \int^{m( \bar q(t) )}_{m( q(T) )}
-  \!\!\frac{ d m } { -\frac{d}{d\bar q}\ln m(\bar q) }
+  \!\!\frac{ d m } { -\frac{d\ln m(\bar q)}{d\bar q} }
   %=
   %\int^{m( \bar q(t) )}_{m( q(T) )}
   %\!\!\frac{ d m } { \bar \lambda(\bar q) }
@@ -4440,15 +4451,16 @@ to satisfy the constraint, $\mu_n = 0$.
 
 
 
-\subsection{Gaussian updating scheme}
+\subsection{\label{sec:Gaussian_math}
+Gaussian updating scheme}
 
 
 
-The Gaussian updating scheme
+The Gaussian updating scheme introduced in Sec. \ref{sec:Gaussian_scheme}
 is defined by a Gaussian-shaped window function, $\mu_l$.
 %
-This updating scheme is commonly
-used in metadynamics.
+%This updating scheme is commonly
+%used in metadynamics.
 %
 Below we show its convergence
 in the continuous limit,

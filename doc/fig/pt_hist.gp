@@ -44,7 +44,7 @@ set xrange [-7600:-3100]
 set ytics 0.002 offset 0.5, 0
 set mytics 2
 set yrange [0:0.007]
-set ylabel "Histogram" offset 2.5, 0 font "Helvetica, 26"
+set ylabel "Histogram" offset 2.5, -0.5 font "Helvetica, 28"
 
 
 #set key left bottom Left reverse font "Times, 22" spacing 1.5
@@ -62,7 +62,7 @@ set size 1, ht2
 set ytics 5
 set mytics 5
 set yrange [-19:-6]
-set ylabel "{/Times-Italic c}@_{/Times*0.7 0}^{/*0.7 {/Times (}{/Times-Italic i}{/Times )}} - {/Symbol-Oblique b}_{/Times-Italic*0.7 c }{/Times-Italic E@_{/*0.7 c}^{/*0.7  {/Times (}{/Times-Italic i}{/Times )}}}" offset 0.0, 0
+set ylabel "{/Times-Italic c}@_{/Times 0}^{/Times ({/Times-Italic i})} - {/Symbol-Oblique b}_{/Times-Italic c }{/Times-Italic E@_{c}^{/Times  ({/Times-Italic i})}}" offset 0.0, -0.5
 
 bc = 1.42530
 shiftlnz = 7600.29
@@ -82,7 +82,7 @@ set ytics 0.01
 set mytics 2
 set yrange [1.405:1.445]
 
-set ylabel "{/Times-Italic c}@_{/Times*0.7 1}^{/*0.7 {/Times (}{/Times-Italic i}{/Times )}}/{/Symbol-Oblique s}_{/Times-Italic*0.7 E}" offset 2.0, 0
+set ylabel "{/Times-Italic c}@_{/Times 1}^{/Times ({/Times-Italic i})}/{/Symbol-Oblique s}_{/Times-Italic E}" offset 2.0, 0
 
 
 plot [:][:] \
@@ -106,7 +106,7 @@ set ytics 0.5
 set mytics 5
 set yrange [0.3:1.2]
 
-set ylabel "{/Symbol \326}{/Times ~2{.7-}} {/Times-Italic c}@_{/Times*0.7 2}^{/*0.7 {/Times (}{/Times-Italic i}{/Times )}}" offset 1.9, 0
+set ylabel "{/Symbol \326}{/Times ~2{.7-}} {/Times-Italic c}@_{/Times 2}^{/Times ({/Times-Italic i})}" offset 1.9, 0
 
 
 plot [:][:] \

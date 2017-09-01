@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 
+import sys
+
 fn = "verr.log"
+if len(sys.argv) > 1:
+    fn = sys.argv[1]
 
 class Ave:
     def __init__(self):
