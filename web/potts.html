@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+  <title> Adaptive Gaussian ensemble Potts model </title>
+  <link rel="stylesheet" type="text/css" href="./css/default.css" />
+  <script type="text/javascript" src="./js/dygraph-combined.js"></script>
+  <script type="text/javascript" src="./js/util.js"></script>
+  <script type="text/javascript" src="./js/mtrand.js"></script>
+  <script type="text/javascript" src="./js/draw.js"></script>
+  <script type="text/javascript" src="./js/potts.js"></script>
+  <script type="text/javascript" src="./js/cosmodes.js"></script>
+  <script type="text/javascript" src="./js/mmwl.js"></script>
+  <script type="text/javascript" src="./js/age.js"></script>
+  <script type="text/javascript" src="./js/pottsmain.js"></script>
+</head>
+<body onload="init()">
+
+<div class="wrapper">
+
+<h2 class="center">
+  Adaptive Gaussian ensemble on the Potts model
+</h2>
+
+
+
+<h3>Online demonstration</h3>
+
+
+
+<!-- container -->
+<div id="container">
+
+  <input id="containerscale" type="range" value="500"
+    min="400" max="600" step="4"
+    onchange="resizecontainer('containerscale')">
+
+  <div id="simulbox">
+    <canvas id="animationbox" width="500" height="500"
+      style="border: 1px solid #cccccc;"
+      onclick="pausesimul2()"></canvas>
+  </div>
+
+  <div id="controlbox">
+    <span onclick="startsimul()" id="start"
+      class="smallbtn" style="color: #40dd40;"
+    >&#9654;</span>
+    <span onclick="pausesimul()" id="pause"
+      class="smallbtn" style="line-height:150%;"
+    >&#9724;</span>
+    <!-- &#10704; or &#9616;&#9616; for the alternative sign-->
+    <span onclick="stopsimul()" id="stop"
+      class="smallbtn" style="color: #dd4020;"
+    >&#9679;</span>
+    <!-- Zoom: -->
+<!--
+    <input id="animationboxscale" type="range" value="1.0"
+      min="0.05" max="3.0" step="0.01"
+      style="width: 400px; height: 10px; border: 1px solid #cccccc;"
+      onchange="changescale()">
+-->
+
+    <span class="math" style="font-size: 100%">ID:</span>
+    <canvas id="tpscale" width="150" height="10"></canvas>
+<!--
+    <span style="font-size: 70%; font-weight: bold;"
+      onclick="runwham()">Run WHAM</span>
+    <span onclick="runwham()" id="runwham"
+      class="smallbtn" style="color: #4040dd;"
+    >&#9654;</span>
+    <br>
+-->
+  </div>
+
+  <div id="histplot" class="plot"></div>
+
+  <div id="vplot" class="plot"></div>
+
+  <div id="tabsrow">
+    <span class="tab" onclick="showtab('system-params')">System</span>
+    <span class="tab" onclick="showtab('age-params')">Adaptive Gaussian ensemble</span>
+  </div>
+
+  <div class="params-panel" id="system-params">
+    <div class="panel-title">System</div>
+
+    Number of particles per side,
+    <span class="math"><i>L</i></span>:
+    <input type="text" size="4" value="16" id="L"
+      onchange="changeparams()">.
+    &nbsp;
+
+    Number of states,
+    <span class="math"><i>q</i></span>:
+    <input type="text" size="4" value="10" id="q"
+      onchange="changeparams()">.
+    &nbsp;
+    <br>
+
+    Initial inverse temperature,
+    <span class="math"><i>&beta;<sub>c</sub></i></span>:
+    <input type="text" size="4" value="1.4" id="betac"
+      onchange="changeparams()">.
+    &nbsp;
+    <br>
+
+    Gaussian, min.
+    <span class="math"><i>E</i><sub><i>c</i>,min</sub>/<i>N</i></span>:
+    <input type="text" size="4" value="-1.8" id="Ecmin"
+      onchange="changeparams()">,
+    &nbsp;
+
+    max.
+    <span class="math"><i>E</i><sub><i>c</i>,max</sub>/<i>N</i></span>:
+    <input type="text" size="4" value="-0.8" id="Ecmax"
+      onchange="changeparams()">,
+    &nbsp;
+    <br>
+
+    width
+    <span class="math"><i>&sigma;<sub>E</sub></i>/<i>L</i></span>:
+    <input type="text" size="4" value="1.0" id="sigma"
+      onchange="changeparams()">,
+    &nbsp;
+
+    spacing
+    <span class="math"><i>&sigma;'<sub>E</sub></i>/<i>L</i></span>:
+    <input type="text" size="4" value="1.0" id="spacing"
+      onchange="changeparams()">.
+    &nbsp;
+    <br>
+
+    Monte Carlo (MC) algorithm:
+    <select id="mc_algorithm" onchange="changeparams()">
+      <option value="Metropolis">Metropolis algorithm</option>
+      <option value="Wolff">Wolff cluster algorithm</option>
+    </select>
+    <br>
+
+    Number of MC steps per block (Metropolis):
+    <input type="text" size="6" value="10" id="blocksizemc"
+      onchange="changeparams()">
+    <br>
+
+    Number of MC steps (blocks) per second:
+    <input type="text" size="6" value="1000" id="nstepspersecmc"
+      onchange="changeparams()">
+    <br>
+
+  </div> <!-- panel: system-params -->
+
+
+
+  <div class="params-panel" id="age-params">
+    <div class="panel-title">Adaptive Gaussian ensemble parameter</div>
+
+    Initial updating magnitude, <i>&alpha;</i><sub>0</sub>:
+    <input type="text" size="6" value="0.01" id="alpha0"
+      onchange="changeparams()">
+    <br>
+
+    Fluctuation threshold for stage transition,
+    <input type="text" size="6" value="0.5" id="flthreshold"
+      onchange="changeparams()">
+    <br>
+
+    Reduction factor for the updating magnitude
+    <input type="text" size="6" value="0.5" id="magred"
+      onchange="changeparams()">
+    <br>
+
+  </div> <!-- panel: age-params -->
+
+  <div id="sinfo"></div>
+
+</div> <!-- container -->
+
+
+
+</div> <!-- wrapper of the entire page -->
+</body>
+</html>

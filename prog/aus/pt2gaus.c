@@ -21,16 +21,16 @@ enum { SAMP_METROPOLIS, SAMP_WOLFF };
 __inline static int potts2_metro_mod(potts2_t *pt,
     double b1, double b2, double Eave)
 {
-  int id, h, sn, enew;
+  int id, sn, h, enew;
   double edev, dv;
 
-  POTTS2_PICK(pt, id, h, sn);
+  POTTS2_PICK(pt, id, sn, h);
   enew = pt->E + h;
   /* compute the change of the bias potential */
   edev = (enew + pt->E)*.5 - Eave;
   dv = h * (b1 + b2 * edev);
   if ( dv <= 0 || rand01() < exp(-dv) ) {
-    POTTS2_FLIP(pt, id, h, sn);
+    POTTS2_FLIP(pt, id, sn, h);
     return 1;
   }
   return 0;
@@ -43,7 +43,7 @@ __inline static int potts2_metro_mod(potts2_t *pt,
 __inline static int potts2_wolff_mod(potts2_t *pt,
     double b1, double b2, double Eave)
 {
-  int l = pt->l, n = pt->n, i, ix, iy, id, so, sn, cnt = 0, h = 0;
+  int l = pt->l, q = pt->q, n = pt->n, i, ix, iy, id, so, sn, cnt = 0, h = 0;
   double padd, enew, dv;
 
   padd = 1 - exp(-b1);
@@ -51,7 +51,7 @@ __inline static int potts2_wolff_mod(potts2_t *pt,
   /* randomly selected a seed */
   id = (int) ( rand01() * n );
   so = pt->s[id];
-  sn = (so + 1 + (int) (rand01() * pt->q)) % pt->q;
+  sn = (so + 1 + (int) (rand01() * (q - 1))) % q;
   pt->queue[ cnt++ ] = id;
   for ( i = 0; i < n; i++ )
     pt->used[i] = 0;
@@ -88,14 +88,14 @@ __inline static int potts2_wolff_mod(potts2_t *pt,
 /* equilibrate the system to raise the energy above ene */
 static void potts2_equil(potts2_t *pt, double ene)
 {
-  int id, h, sn;
+  int id, sn, h;
   long t;
 
   for ( t = 1; ; t++ ) {
-    id = potts2_pick(pt, &h, &sn);
-    potts2_flip(pt, id, h, sn);
-    //POTTS2_PICK(pt, id, h, sn);
-    //POTTS2_FLIP(pt, id, h, sn);
+    id = potts2_pick(pt, &sn, &h);
+    potts2_flip(pt, id, sn, h);
+    //POTTS2_PICK(pt, id, sn, h);
+    //POTTS2_FLIP(pt, id, sn, h);
     if ( pt->E > ene ) break;
   }
 }
@@ -112,7 +112,7 @@ static void potts2_gaus(potts2_t *pt,
   const double beta_c = 1.4;
   gaus_t *gaus;
 
-  mtscramble(clock());
+  //mtscramble(clock());
 
   ecmin = -(int) (1.8 * pt->n + 0.5);
   ecmax = -(int) (0.8 * pt->n + 0.5);

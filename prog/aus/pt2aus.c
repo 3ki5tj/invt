@@ -28,16 +28,16 @@ static void savehist(double *h, int n,
 __inline static int potts2_metro_mod(potts2_t *pt,
     double c1, double c2, double Eave)
 {
-  int id, h, sn, enew;
+  int id, sn, h, enew;
   double edev, dv;
 
-  POTTS2_PICK(pt, id, h, sn);
+  POTTS2_PICK(pt, id, sn, h);
   enew = pt->E + h;
   /* compute the change of bias potential */
   edev = (enew + pt->E)*.5 - Eave;
   dv = h * (c1 + c2 * edev);
   if ( dv <= 0 || rand01() < exp(-dv) ) {
-    POTTS2_FLIP(pt, id, h, sn);
+    POTTS2_FLIP(pt, id, sn, h);
     return 1;
   }
   return 0;
@@ -94,7 +94,7 @@ __inline static int potts2_wolff_mod(potts2_t *pt,
 static void potts2_aus(potts2_t *pt, double Eave, double Esig,
     int wolff, long nsteps)
 {
-  int id, h, sn, dovar = 1;
+  int id, sn, h, dovar = 1;
   long t, nacc = 0, nstrep;
   double c1 = 0, c2 = 0, y1, y2, amp, beta1, beta2;
   double *his;
@@ -108,8 +108,8 @@ static void potts2_aus(potts2_t *pt, double Eave, double Esig,
 
   /* equilibrate the system to raise the energy */
   for ( t = 1; ; t++ ) {
-    POTTS2_PICK(pt, id, h, sn);
-    POTTS2_FLIP(pt, id, h, sn);
+    POTTS2_PICK(pt, id, sn, h);
+    POTTS2_FLIP(pt, id, sn, h);
     if ( pt->E > Eave ) break;
   }
   c1 = 1.4245 * Esig;
