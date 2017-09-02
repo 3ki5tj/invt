@@ -192,7 +192,7 @@ AGE.prototype.switch = function(magred)
     this.invt = true;
     this.t0 = this.t;
   }
-  console.log("alpha " + this.alpha.wl + ", " + this.n/this.t + ", "
+  console.log("alpha " + this.alphawl + ", " + this.n/this.t + ", "
     + "fluc " + this.hfluc + ", invt " + this.invt);
   this.t = 0;
   for ( i = 0; i < n; i++ ) {
@@ -232,10 +232,13 @@ AGE.prototype.move = function(x, id, local)
   if ( local ) {
     // jump to a nearest neighbor
     jd = (rand01() < 0.5) ? id - 1 : id + 1;
-    if ( jd < 0 || jd >= n ) return 0;
+    if ( jd < 0 || jd >= n ) {
+      this.tacc = false;
+      return id;
+    }
   } else {
     // jump any other umbrella
-    jd = ( id + 1 + (int) (rand01() * (n - 1)) ) % n;
+    jd = ( id + 1 + Math.floor(rand01() * (n - 1)) ) % n;
   }
   sigi = this.sig[id];
   sigj = this.sig[jd];
@@ -254,6 +257,7 @@ AGE.prototype.move = function(x, id, local)
   vi = this.c1[ id] * xi + this.c2[ id] * (xi * xi - 1) / SQRT2;
   vj = this.c1[ jd] * xj + this.c2[ jd] * (xj * xj - 1) / SQRT2;
   dv += vj - vi;
+  //console.log(id, jd, x, vi, this.lnz[id], vj, this.lnz[jd], dv, local);
   this.tacc = ( dv <= 0 || rand01() < Math.exp(-dv) );
   if ( this.tacc ) {
     /* copy parameters to the new umbrella */

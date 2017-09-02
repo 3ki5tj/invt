@@ -11,9 +11,6 @@ var potts = null;
 var age = null;
 
 var iage = 0; // current umbrella index
-//var tempfreq = 0.5; // tempering frequency
-//var hist = null; // energy histogram
-//var tpmctot = 1e-16, tpmcacc = 0;
 
 var esig = 16;
 var espacing = 16;
@@ -34,6 +31,7 @@ var blocksizemc = 10; // number of steps for a block in the Metropolis algorithm
 var nstepspsmc = 1000; // number of steps per second for MC
 var nstepspfmc = 100;  // number of steps per frame for MC
 
+var npulses = 0;
 var histplot = null;
 var vplot = null;
 
@@ -53,6 +51,7 @@ function getparams()
   flthreshold = get_float("flthreshold", 0.5);
   magred = get_float("magred", 0.5);
   betac = get_float("betac", 1.4);
+  localmove_prob = get_float("localmove_prob", 1.0);
   age = new AGE(ecmin, ecmax, espacing, esig, lnzmethod,
       betac * esig, alpha0, -2*potts.n, 0, 1, 0);
   iage = 0;
@@ -62,6 +61,7 @@ function getparams()
   blocksizemc = get_int("blocksizemc", 10);
   nstepspsmc = get_int("nstepspersecmc", 10000);
   nstepspfmc = nstepspsmc * timer_interval / 1000;
+  npulses = 0;
 }
 
 
@@ -107,21 +107,23 @@ function potts_metro_mod(b1, b2, Eave)
 function potts_wolff_mod(b1, b2, Eave)
 {
   var q = potts.q;
-  var l = potts.l, n = potts.n, i, ix, iy, id, so, sn, cnt = 0, h = 0;
+  var l = potts.l, n = potts.n, i, ix, iy, id, so, sn, h = 0;
   var padd, enew, dv;
 
   padd = 1 - Math.exp(-b1);
   // randomly selected a seed */
   id = Math.floor( rand01() * n );
+  var id0 = id;
   so = potts.s[id];
   sn = (so + 1 + Math.floor(rand01() * (q - 1))) % q;
-  potts.queue[ cnt++ ] = id;
+  potts.cnt = 0;
+  potts.queue[ potts.cnt++ ] = id;
   for ( i = 0; i < n; i++ )
     potts.used[i] = false;
   potts.used[id] = true;
 
   /* go through spins in the queue */
-  for ( i = 0; i < cnt; i++ ) {
+  for ( i = 0; i < potts.cnt; i++ ) {
     id = potts.queue[i];
     potts.s[id] = sn;
     /* add neighbors of i with the same spins */
@@ -134,12 +136,13 @@ function potts_wolff_mod(b1, b2, Eave)
   }
 
   enew = potts.E + h;
+  //console.log(id0, potts.cnt, potts.E, h, enew);
   dv = h * b2 * ((enew + potts.E)*.5 - Eave);
   if ( dv <= 0 || rand01() < Math.exp(-dv) ) {
     potts.E += h;
     return 1;
   } else { /* reject */
-    for ( i = 0; i < cnt; i++ ) {
+    for ( i = 0; i < potts.cnt; i++ ) {
       id = potts.queue[i];
       potts.s[id] = so;
     }
@@ -173,7 +176,7 @@ function paint()
   var l = potts.l, q = potts.q, id = 0;
   var s, colors = new Array(potts.q);
   for ( s = 0; s < potts.q; s++ ) {
-    colors[s] = getHueColor(1.0*s/potts.q);
+    colors[s] = getHueColor(1.0*s/potts.q, 0, 230);
   }
 
   for ( var i = 0; i < l; i++ ) {
@@ -319,10 +322,8 @@ function pulse()
 {
   var sinfo, istep, jstep;
 
-  for ( istep = 0; istep <= nstepspfmc; istep++ ) {
+  for ( istep = 1; istep <= nstepspfmc; istep++ ) {
     var beta1 = age.c1[iage] / esig;
-    //TODO:
-    //age.c2[iage] = 1.0;
     var beta2 = age.c2[iage] / (esig * esig);
     var Eave = age.ave[iage];
     var acc = 0;
@@ -338,9 +339,7 @@ function pulse()
     age.add(iage, potts.E, acc);
   }
 
-  //var e = potts.E; potts.energy(); console.log("energy " + e + " vs. " + potts.E, esig);
-
-  age.wlcheckx(flthreshold, magred);
+  var swch = age.wlcheckx(flthreshold, magred);
   drawcolorbar("tpscale");
   sinfo = "Umbrella " + iage + "/" + age.n
     + ", ave " + age.ave[iage] + ", sig " + esig
@@ -348,14 +347,16 @@ function pulse()
     + ", c<sub>2</sub> " + roundto(age.c2[iage], 2)
     + ", E/N " + roundto(1.0*potts.E/potts.n, 2) + ", data " + age.cnt[iage]
     + ", &alpha; " + age.getalpha().toPrecision(3) + ", 1/t " + age.invt
-    + ", fl " + roundto(age.hfluc, 2)
+    + ", t " + age.t + ", fl " + roundto(age.hfluc, 2)
     + " (" + roundto(age.flfr[0]*100.0,2) + "%/" + roundto(age.flfr[1]*100.0,2) + "%/" + roundto(age.flfr[2]*100.0,2) + "%)";
   grab("sinfo").innerHTML = sinfo;
-  //if ( age.cnt[iage] > 10000 ) age.invt = true;
+  //console.log("t " + age.t + " fl " + age.hfluc + " id " + iage + " E " + potts.E + " c1 " + (age.c1[iage]/esig) + " c2 " + age.c2[iage]);
 
   paint();
-  updatehistplot();
-  updatevplot();
+  if ( ++npulses % 100 == 0 || swch ) {
+    updatehistplot();
+    updatevplot();
+  }
 }
 
 
@@ -367,8 +368,6 @@ function stopsimul()
     potts_timer = null;
   }
   grab("pause").innerHTML = "&#9724;";
-  //tpmctot = 1e-16;
-  //tpmcacc = 0;
 }
 
 
@@ -406,22 +405,9 @@ function startsimul()
 
 function pausesimul2()
 {
-  // skip a mouse-move
-  //if ( mousemoved > 0 ) {
-  //  return;
-  //}
   if ( !potts ) {
     startsimul();
-  //} else if ( mousemoved === 0 ) {
   } else {
-    pausesimul();
-  }
-}
-
-
-function runwham()
-{
-  if ( potts_timer ) {
     pausesimul();
   }
 }
@@ -500,14 +486,14 @@ function resizecontainer(a)
   var htbar = 30; // height of the tabs bar
   var wr = h*3/4; // width of the plots
   var wtab = 560; // width of the tabs
-  var htab = 280;
+  var htab = 360;
 
   grab("simulbox").style.width = "" + w + "px";
   grab("simulbox").style.height = "" + h + "px";
   grab("simulbox").style.top = "" + hsbar + "px";
   grab("controlbox").style.top = "" + (h + hsbar) + "px";
   //grab("animationboxscale").style.width = "" + (w - 100) + "px";
-  grab("tpscale").style.width = "" + (w - 220) + "px";
+  grab("tpscale").style.width = "" + (w - 120) + "px";
   drawcolorbar("tpscale");
   histplot = null;
   grab("histplot").style.left = "" + w + "px";

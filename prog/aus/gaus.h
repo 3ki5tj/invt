@@ -406,8 +406,8 @@ __inline static void gaus_switch(gaus_t *gaus, double magred, int extended)
     gaus->invt = 1;
     gaus->t0 = gaus->t;
   }
-  fprintf(stderr, "alpha %g, %g, fluc %g, invt %d\n",
-      gaus->alphawl, gaus->n/gaus->t, gaus->hfluc, gaus->invt);
+  fprintf(stderr, "alpha %g, %g, t %g, fluc %g, invt %d\n",
+      gaus->alphawl, gaus->n/gaus->t, gaus->t, gaus->hfluc, gaus->invt);
   gaus->t = 0;
   for ( i = 0; i < n; i++ ) {
     if ( extended ) {
@@ -502,6 +502,8 @@ __inline static int gaus_move(gaus_t *gaus, double x, int *id, int local)
   vi = gaus->c1[*id] * xi + gaus->c2[*id] * (xi * xi - 1) / SQRT2;
   vj = gaus->c1[ jd] * xj + gaus->c2[ jd] * (xj * xj - 1) / SQRT2;
   dv += vj - vi;
+  //printf("id %d, jd %d, x %g, dv %g(%g), %g(%g), %g; local %d\n",
+  //    *id, jd, x, vi, gaus->lnz[*id], vj, gaus->lnz[jd], dv, local);
   acc = ( dv <= 0 || rand01() < exp(-dv) );
   if ( acc ) {
     /* copy parameters to the new umbrella */

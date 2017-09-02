@@ -14,6 +14,7 @@ const char *fndat = "pt2gaus.dat";
 
 enum { SAMP_METROPOLIS, SAMP_WOLFF };
 
+double localmovef = 1.0;
 
 
 /* modified Metropolis algorithm
@@ -43,13 +44,14 @@ __inline static int potts2_metro_mod(potts2_t *pt,
 __inline static int potts2_wolff_mod(potts2_t *pt,
     double b1, double b2, double Eave)
 {
-  int l = pt->l, q = pt->q, n = pt->n, i, ix, iy, id, so, sn, cnt = 0, h = 0;
-  double padd, enew, dv;
+  int l = pt->l, q = pt->q, n = pt->n, i, ix, iy, id, so, sn, cnt = 0, h = 0, enew;
+  double padd, dv;
 
   padd = 1 - exp(-b1);
 
   /* randomly selected a seed */
   id = (int) ( rand01() * n );
+  int id0 = id;
   so = pt->s[id];
   sn = (so + 1 + (int) (rand01() * (q - 1))) % q;
   pt->queue[ cnt++ ] = id;
@@ -71,6 +73,7 @@ __inline static int potts2_wolff_mod(potts2_t *pt,
   }
 
   enew = pt->E + h;
+  //printf("spin %d, cnt %d, E %d %d %d\n", id0, cnt, pt->E, h, enew);
   dv = h * b2 * ((enew + pt->E)*.5 - Eave);
   if ( dv <= 0 || rand01() < exp(-dv) ) {
     pt->E += h;
@@ -108,8 +111,8 @@ static void potts2_gaus(potts2_t *pt,
   long t, nstsave, ntrips = 0;
   int id, acc, sgn = 0;
   double ecmin, ecmax, esig, espacing, beta1, beta2, fl, alpha0;
-  double localmove_prob = 1.0;
   const double beta_c = 1.4;
+  const double magred = 0.5;
   gaus_t *gaus;
 
   //mtscramble(clock());
@@ -120,7 +123,7 @@ static void potts2_gaus(potts2_t *pt,
   espacing = esig;
   potts2_equil(pt, ecmin);
   if (lnzmethod == LNZ_WL) {
-    fl = 0.5;
+    fl = 0.2;
     alpha0 = 0.01;
   } else {
     fl = 0.05;
@@ -145,7 +148,7 @@ static void potts2_gaus(potts2_t *pt,
     } else { /* Metropolis algorithm */
       acc = potts2_metro_mod(pt, beta1, beta2, gaus->ave[id]);
     }
-    gaus_move(gaus, pt->E, &id, rand01() <= localmove_prob);
+    gaus_move(gaus, pt->E, &id, rand01() <= localmovef);
     gaus_add(gaus, id, pt->E, acc);
 
     /* update the number of round trips */
@@ -155,8 +158,9 @@ static void potts2_gaus(potts2_t *pt,
       ntrips++;
     }
 
-    if ( t % 100 == 0 ) {
-      gaus_wlcheckx(gaus, fl, 0.5);
+    if ( t % 10000 == 0 ) {
+      gaus_wlcheckx(gaus, fl, magred);
+      //printf("t %d, fl %g, id %d, E %d, c1 %g, c2 %g\n", t, gaus->hfluc, id, pt->E, gaus->c1[id]/esig, gaus->c2[id]); if ( t % 100 == 0 ) getchar();
     }
     if ( t % nstsave == 0 ) {
       double alpha, alphamm;
@@ -184,7 +188,8 @@ int main(int argc, char **argv)
   if ( argc > 2 ) lnzmethod  = atoi( argv[2] );
   if ( argc > 3 ) nsteps     = atol( argv[3] );
   if ( argc > 4 ) sig        = atof( argv[4] );
-  if ( argc > 5 ) q          = atoi( argv[5] );
+  if ( argc > 5 ) localmovef = atof( argv[5] );
+  if ( argc > 6 ) q          = atoi( argv[6] );
   if ( nsteps <= 0 )
     nsteps = (sampmethod == 0) ? 100000000L : 100000L;
 
