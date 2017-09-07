@@ -4429,7 +4429,112 @@ The
     .
   \end{align*}
 
-
+Next we will use a model to show that $\Gamma_k$
+assumes a large value for a small $k$,
+and then decays rapidly to $1$ as $k$ increases
+in a local sampling process.
+%
+We assume that the propagation along the collective-variable is Markovian
+such that it can be approximately
+described by a transition matrix, $\mathbf A$, with
+\begin{align*}
+\langle h_i(t) \rangle = \rho_i,
+\quad
+\langle h_i(t) \, h_j(0) \rangle = \bigl(\mathbf A^t\bigr)_{ij} \, \rho_j
+\quad \mbox{(for $t \ge 0$)}
+.
+\end{align*}
+%
+We further assume that
+the transition matrix
+has a complete set of orthonormal eigenvectors,
+and the eigenvectors coincide with
+those of the updating matrix, $\phi_{ki}$'s.
+Then the transition matrix can be decomposed as
+$A_{ij} = \sum_{l=0}^{n-1} \Lambda_l \, \phi_{li} \, \phi_{lj} / \rho_j$,
+with $\Lambda_l$ being the eigenvalue of mode $l$,
+and
+%
+$\bigl\langle
+  \tilde f_k(t) \, \tilde f_k(0)
+\bigr\rangle
+=
+\Lambda_k^t$.
+%If the transition matrix % satisfies detailed balance
+%has a complete set of orthonormal eigenvectors, $\psi_{li}$
+%%that are orthonormal with respect to $\pmb\rho$
+%[cf. Eqs. \eqref{eq:eig_orthonormal_cols} and
+%\eqref{eq:eig_orthonormal_rows}],
+%it can be decomposed as
+%$A_{ij} = \sum_{l=0}^{n-1} \Lambda_l \, \psi_{li} \, \psi_{lj} / \rho_j$,
+%with $\Lambda_l$ being the eigenvalue of mode $l$.
+%%
+%The autocorrelation function can then be computed as
+%%
+%\begin{align*}
+%\bigl\langle
+%  \tilde f_k(t) \, \tilde f_k(0)
+%\bigr\rangle
+%=
+%\sum_{l = 0}^{n-1} \Lambda_l^t \,
+%\left(
+%  \sum_{i=1}^n \frac{ \phi_{ki} \, \psi_{li} }{ \rho_i }
+%\right)^2
+%.
+%\end{align*}
+%%
+%In particular, if the eigenvectors, $\pmb \phi_k$
+%and $\pmb \psi_k$, coincide,
+%we would have
+%$\bigl\langle
+%  \tilde f_k(t) \, \tilde f_k(0)
+%\bigr\rangle
+%=
+%\Lambda_k^t$.
+%and
+%\begin{equation}
+%  \Gamma_k = 1 + 2 \, \sum_{t=1}^\infty
+%  \bigl\langle
+%    \tilde f_k(t) \, \tilde f_k(0)
+%  \bigr\rangle
+%  = \frac{1+\Lambda_k}{1-\Lambda_k}
+%  .
+%  \notag
+%  %\label{eq:Gamma_est}
+%\end{equation}
+%
+To model a local sampling process,
+we can borrow Eq. \eqref{eq:lambda_Gaussian} for $\Lambda_k$,
+with $\sigma_z$ reinterpreted as
+the average move size along $z$ during sampling,
+then
+\begin{align}
+  \Gamma_k = 1 + 2 \, \sum_{t=1}^\infty
+  \bigl\langle
+    \tilde f_k(t) \, \tilde f_k(0)
+  \bigr\rangle
+  %= \frac{1+\Lambda_k}{1-\Lambda_k}
+%\Gamma_k
+  = \coth\left(
+  \frac{ \pi^2 \, k^2 \, {\sigma_z^\mathrm{(samp)}}^2 } { 4 \, \Delta z^2}
+  \right).
+  \notag
+  %\label{eq:Gamma_local}
+\end{align}
+Thus, we have $\Gamma_k \propto \Delta z^2/k^2$
+for small $k$,\cite{bussi2006}
+whereas $\Gamma_k \to 1$ as $k$ increases.
+%
+However, this model tends to underestimate
+the first few $\Gamma_k$'s in a typical simulation.
+%which means that doubling the sampling range, $\Delta z$,
+%would make the histogram flattening
+%at least four times as difficult,
+%i.e. FDS methods are most effective
+%for short ranges\cite{wang2001, wang2001pre}.
+%
+%Using finer bins would, however, not change this value.
+%
 
 \bibliography{simul}
 \end{document}

@@ -1,5 +1,7 @@
+#ifndef L
 #ifndef POTTS2_LB
 #define POTTS2_LB 5
+#endif
 #endif
 #include "potts2.h"
 #include "util.h"
@@ -25,13 +27,21 @@ __inline static int potts2_metro_mod(potts2_t *pt,
   int id, sn, h, enew;
   double edev, dv;
 
+#ifndef L
   POTTS2_PICK(pt, id, sn, h);
+#else
+  id = potts2_pick(pt, &sn, &h);
+#endif
   enew = pt->E + h;
   /* compute the change of the bias potential */
   edev = (enew + pt->E)*.5 - Eave;
   dv = h * (b1 + b2 * edev);
   if ( dv <= 0 || rand01() < exp(-dv) ) {
+#ifndef L
     POTTS2_FLIP(pt, id, sn, h);
+#else
+    potts2_flip(pt, id, sn, h);
+#endif
     return 1;
   }
   return 0;
@@ -97,8 +107,6 @@ static void potts2_equil(potts2_t *pt, double ene)
   for ( t = 1; ; t++ ) {
     id = potts2_pick(pt, &sn, &h);
     potts2_flip(pt, id, sn, h);
-    //POTTS2_PICK(pt, id, sn, h);
-    //POTTS2_FLIP(pt, id, sn, h);
     if ( pt->E > ene ) break;
   }
 }
@@ -186,6 +194,11 @@ int main(int argc, char **argv)
   int sampmethod = SAMP_METROPOLIS, lnzmethod = LNZ_WL, q = 10;
   long nsteps = 0;
   double sig = 1.0;
+#ifndef L
+  int l = POTTS2_L;
+#else
+  int l = L;
+#endif
 
   if ( argc > 1 ) sampmethod = atoi( argv[1] );
   if ( argc > 2 ) lnzmethod  = atoi( argv[2] );
@@ -196,7 +209,7 @@ int main(int argc, char **argv)
   if ( nsteps <= 0 )
     nsteps = (sampmethod == 0) ? 100000000L : 100000L;
 
-  pt = potts2_open(POTTS2_L, q);
+  pt = potts2_open(l, q);
   nsteps *= pt->n;
   potts2_gaus(pt, sampmethod, lnzmethod, nsteps, sig);
   potts2_close(pt);

@@ -131,7 +131,7 @@ hr {
 
 #container {
   position: relative;
-  height: 1000px;
+  height: 1200px;
   width: 1000px;
   text-align: center;
   margin: auto;
@@ -158,14 +158,6 @@ hr {
   margin: 20px 10px;
   left: 600px;
   width: 360px;
-}
-
-#histplot {
-  top: 20px;
-}
-
-#vclsplot {
-  top: 320px;
 }
 
 #controlbox {

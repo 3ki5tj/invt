@@ -33,7 +33,8 @@ var nstepspfmc = 100;  // number of steps per frame for MC
 
 var npulses = 0;
 var histplot = null;
-var vplot = null;
+var c1plot = null;
+var c2plot = null;
 
 function getparams()
 {
@@ -176,7 +177,9 @@ function paint()
   var l = potts.l, q = potts.q, id = 0;
   var s, colors = new Array(potts.q);
   for ( s = 0; s < potts.q; s++ ) {
-    colors[s] = getHueColor(1.0*s/potts.q, 0, 230);
+    // adjust the darkest according to the umbrella ID
+    var bright = 80 + Math.floor(170 * iage / (age.n - 1.0));
+    colors[s] = getHueColor(1.0*s/potts.q, 0, bright);
   }
 
   for ( var i = 0; i < l; i++ ) {
@@ -187,6 +190,38 @@ function paint()
       ctx.fillStyle = colors[s];
       ctx.fillRect(x, y, dx1, dy1)
     }
+  }
+}
+
+
+
+/* draw a color bar for the umbrella ID */
+function drawcolorbar(target)
+{
+  var c = grab(target);
+  var ctx = c.getContext("2d");
+  var width = c.width;
+  var height = c.height;
+
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, width, height);
+
+  var grd = ctx.createLinearGradient(0, 0, width, 0);
+  grd.addColorStop(0, "#505050");
+  grd.addColorStop(1, "#fafafa");
+
+  ctx.fillStyle = grd;
+  ctx.fillRect(0, 4, width, height-4);
+
+  // draw grids
+  if ( age ) {
+    var i, x;
+    for ( i = 0; i < age.n; i++ ) {
+      x = width * i / (age.n - 1.0);
+      drawLine(ctx, x, 4, x, height, "#808080", 1);
+    }
+    x = width * iage / (age.n - 1.0);
+    drawLine(ctx, x, 0, x, height, "#000000", 2);
   }
 }
 
@@ -229,7 +264,7 @@ function updatehistplot()
     dat += "\n";
   }
 
-  if ( histplot === null || 1 ) {
+  if ( histplot === null ) {
     var h = grab("animationbox").height / 2 - 5;
     var w = h * 3 / 2;
     var options = {
@@ -252,7 +287,7 @@ function updatehistplot()
 
 
 
-function updatevplot()
+function updatec1plot()
 {
   var i, j, ntp = age.n;
   // prepare the header
@@ -260,17 +295,15 @@ function updatevplot()
 
   // fill in the energy histogram data
   for ( j = 0; j < ntp; j++ ) {
-    var ene = age.ave[j];
-    dat += "" + ene + "," + (age.c1[j]/esig) + "\n";
+    dat += "" + age.ave[j] + "," + (age.c1[j]/esig) + "\n";
   }
 
-  if ( vplot === null || 1 ) {
+  if ( c1plot === null ) {
     var h = grab("animationbox").height / 2 - 5;
     var w = h * 3 / 2;
     var options = {
       xlabel: "<small>Energy</small>",
       ylabel: "<small><i>c</i><sub>1</sub>/<i>&sigma;</i></small>",
-      //includeZero:true,
       axisLabelFontSize: 10,
       xRangePad: 2,
       drawPoints: true,
@@ -278,41 +311,41 @@ function updatevplot()
       width: w,
       height: h
     };
-    vplot = new Dygraph(grab("vplot"), dat, options);
+    c1plot = new Dygraph(grab("c1plot"), dat, options);
   } else {
-    vplot.updateOptions({file: dat});
+    c1plot.updateOptions({file: dat});
   }
 }
 
 
 
-/* draw a color bar */
-function drawcolorbar(target)
+function updatec2plot()
 {
-  var c = grab(target);
-  var ctx = c.getContext("2d");
-  var width = c.width;
-  var height = c.height;
+  var i, j, ntp = age.n;
+  // prepare the header
+  var dat = "Energy,c2\n";
 
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0, 0, width, height);
+  // fill in the energy histogram data
+  for ( j = 0; j < ntp; j++ ) {
+    dat += "" + age.ave[j] + "," + age.c2[j] + "\n";
+  }
 
-  var grd = ctx.createLinearGradient(0, 0, width, 0);
-  grd.addColorStop(0, "#0000cc");
-  grd.addColorStop(1, "#cc0000");
-
-  ctx.fillStyle = grd;
-  ctx.fillRect(0, 4, width, height-4);
-
-  // draw grids
-  if ( age ) {
-    var i, x;
-    for ( i = 0; i < age.n; i++ ) {
-      x = width * i / (age.n - 1.0);
-      drawLine(ctx, x, 4, x, height, "#808080", 1);
-    }
-    x = width * iage / (age.n - 1.0);
-    drawLine(ctx, x, 0, x, height, "#000000", 3);
+  if ( c2plot === null ) {
+    var h = grab("animationbox").height / 2 - 5;
+    var w = h * 3 / 2;
+    var options = {
+      xlabel: "<small>Energy</small>",
+      ylabel: "<small><i>c</i><sub>2</sub></small>",
+      axisLabelFontSize: 10,
+      xRangePad: 2,
+      drawPoints: true,
+      pointSize: 2,
+      width: w,
+      height: h
+    };
+    c2plot = new Dygraph(grab("c2plot"), dat, options);
+  } else {
+    c2plot.updateOptions({file: dat});
   }
 }
 
@@ -355,7 +388,8 @@ function pulse()
   paint();
   if ( ++npulses % 100 == 0 || swch ) {
     updatehistplot();
-    updatevplot();
+    updatec1plot();
+    updatec2plot();
   }
 }
 
@@ -395,7 +429,9 @@ function startsimul()
 {
   stopsimul();
   getparams();
-  //installmouse("animationbox", "animationboxscale");
+  histplot = null;
+  c1plot = null;
+  c2plot = null;
   potts_timer = setInterval(
     function(){ pulse(); },
     timer_interval );
@@ -469,15 +505,8 @@ function resizecontainer(a)
   var canvas = grab("animationbox");
   var ctx = canvas.getContext("2d");
   var w, h;
-  if ( a === null || a === undefined ) {
-    w = canvas.width;
-    h = canvas.height;
-  } else {
-    a = parseInt( grab(a).value );
-    w = h = a;
-    canvas.width = w;
-    canvas.height = h;
-  }
+  w = canvas.width;
+  h = canvas.height;
   ctx.font = "24px Verdana";
   ctx.fillText("Click to start", w/2-40, h/2-10);
 
@@ -485,7 +514,7 @@ function resizecontainer(a)
   var hcbar = 40; // height of the control bar
   var htbar = 30; // height of the tabs bar
   var wr = h*3/4; // width of the plots
-  var wtab = 560; // width of the tabs
+  var wtab = w; // width of the tabs
   var htab = 360;
 
   grab("simulbox").style.width = "" + w + "px";
@@ -493,18 +522,24 @@ function resizecontainer(a)
   grab("simulbox").style.top = "" + hsbar + "px";
   grab("controlbox").style.top = "" + (h + hsbar) + "px";
   //grab("animationboxscale").style.width = "" + (w - 100) + "px";
-  grab("tpscale").style.width = "" + (w - 120) + "px";
+  grab("tpscale").style.width = "" + (w - 190) + "px";
   drawcolorbar("tpscale");
+  c1plot = null;
+  grab("c1plot").style.left = "" + w + "px";
+  grab("c1plot").style.width = "" + wr + "px";
+  grab("c1plot").style.top = "" + (hcbar) + "px";
+  grab("c1plot").style.height = "" + h/2 + "px";
+  c2plot = null;
+  grab("c2plot").style.left = "" + w + "px";
+  grab("c2plot").style.width = "" + wr + "px";
+  grab("c2plot").style.top = "" + ((h/2) + hcbar) + "px";
+  grab("c2plot").style.height = "" + h/2 + "px";
   histplot = null;
   grab("histplot").style.left = "" + w + "px";
   grab("histplot").style.width = "" + wr + "px";
-  grab("vplot").style.top = "" + hcbar + "px";
   grab("histplot").style.height = "" + h/2 + "px";
-  vplot = null;
-  grab("vplot").style.left = "" + w + "px";
-  grab("vplot").style.width = "" + wr + "px";
-  grab("vplot").style.top = "" + (h/2 + hcbar) + "px";
-  grab("vplot").style.height = "" + h/2 + "px";
+  grab("histplot").style.top = "" + ((h/2)*2 + hcbar) + "px";
+
   grab("tabsrow").style.top = "" + (h + hsbar + hcbar) + "px";
   grab("tabsrow").style.width = "" + wtab + "px";
 
@@ -518,12 +553,12 @@ function resizecontainer(a)
       c[i].style.height = "" + htab + "px";
     }
   }
-  grab("sinfo").style.top = "" + (h + hsbar + hcbar + htbar) + "px";
+  grab("sinfo").style.top = "" + (h*3/2 + hsbar + hcbar + htbar) + "px";
   grab("sinfo").style.left = "" + (wtab + 10) + "px";
   grab("sinfo").style.width = "" + (w + wr - wtab - 20) + "px";
   grab("sinfo").innerHTML = "simulation information";
 
-  grab("container").style.height = "" + (h + hsbar + hcbar + htbar + htab) + "px";
+  grab("container").style.height = "" + (h + hsbar + hcbar*2 + htbar + htab) + "px";
   grab("container").style.width = "" + (w + wr) + "px";
 }
 

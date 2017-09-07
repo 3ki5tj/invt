@@ -4,13 +4,11 @@
   <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
   <title> Adaptive Gaussian ensemble Potts model </title>
   <link rel="stylesheet" type="text/css" href="./css/default.css" />
-  <script type="text/javascript" src="./js/dygraph-combined.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dygraph/1.1.1/dygraph-combined.js"></script>
   <script type="text/javascript" src="./js/util.js"></script>
   <script type="text/javascript" src="./js/mtrand.js"></script>
   <script type="text/javascript" src="./js/draw.js"></script>
   <script type="text/javascript" src="./js/potts.js"></script>
-  <script type="text/javascript" src="./js/cosmodes.js"></script>
-  <script type="text/javascript" src="./js/mmwl.js"></script>
   <script type="text/javascript" src="./js/age.js"></script>
   <script type="text/javascript" src="./js/pottsmain.js"></script>
 </head>
@@ -24,16 +22,8 @@
 
 
 
-<h3>Online demonstration</h3>
-
-
-
 <!-- container -->
 <div id="container">
-
-  <input id="containerscale" type="range" value="500"
-    min="400" max="600" step="4"
-    onchange="resizecontainer('containerscale')">
 
   <div id="simulbox">
     <canvas id="animationbox" width="500" height="500"
@@ -54,14 +44,14 @@
     >&#9679;</span>
     <!-- Zoom: -->
 
-    <span class="math" style="font-size: 100%">ID:</span>
-    <canvas id="tpscale" width="180" height="10"></canvas>
+    <span class="math" style="font-size: 100%">Umbrella ID:</span>
+    <canvas id="tpscale" width="140" height="10"></canvas>
 
   </div>
 
+  <div id="c1plot" class="plot"></div>
+  <div id="c2plot" class="plot"></div>
   <div id="histplot" class="plot"></div>
-
-  <div id="vplot" class="plot"></div>
 
   <div id="tabsrow">
     <span class="tab" onclick="showtab('system-params')">System</span>
@@ -76,6 +66,7 @@
     <input type="text" size="4" value="16" id="L"
       onchange="changeparams()">.
     &nbsp;
+    <br>
 
     Number of states,
     <span class="math"><i>q</i></span>:
@@ -166,7 +157,6 @@
   <div id="sinfo"></div>
 
 </div> <!-- container -->
-
 
 
 </div> <!-- wrapper of the entire page -->

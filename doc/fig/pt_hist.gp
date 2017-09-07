@@ -62,7 +62,7 @@ set size 1, ht2
 set ytics 5
 set mytics 5
 set yrange [-19:-6]
-set ylabel "{/Times-Italic c}@_{/Times 0}^{/Times ({/Times-Italic i})} - {/Symbol-Oblique b}_{/Times-Italic c }{/Times-Italic E@_{c}^{/Times  ({/Times-Italic i})}}" offset 0.0, -0.5
+set ylabel "{/Times-Italic c}@_{/Times 0}^{/Times ({/Times-Italic s})} - {/Symbol-Oblique b}_{/Times-Italic c }{/Times-Italic E@_{c}^{/Times  ({/Times-Italic s})}}" offset 0.0, -0.5
 
 bc = 1.42525373
 shiftlnz = 7600
@@ -82,7 +82,7 @@ set ytics 0.01
 set mytics 2
 set yrange [1.405:1.445]
 
-set ylabel "{/Times-Italic c}@_{/Times 1}^{/Times ({/Times-Italic i})}/{/Symbol-Oblique s}_{/Times-Italic E}" offset 2.0, 0
+set ylabel "{/Times-Italic c}@_{/Times 1}^{/Times ({/Times-Italic s})}/{/Symbol-Oblique s}_{/Times-Italic E}" offset 2.0, 0
 
 
 plot [:][:] \
@@ -106,7 +106,7 @@ set ytics 0.5
 set mytics 5
 set yrange [0.3:1.2]
 
-set ylabel "{/Symbol \326}{/Times ~2{.7-}} {/Times-Italic c}@_{/Times 2}^{/Times ({/Times-Italic i})}" offset 1.9, 0
+set ylabel "{/Symbol \326}{/Times ~2{.7-}} {/Times-Italic c}@_{/Times 2}^{/Times ({/Times-Italic s})}" offset 1.9, 0
 
 
 plot [:][:] \
