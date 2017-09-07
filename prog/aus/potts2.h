@@ -202,7 +202,7 @@ __inline static int potts2_wolff(potts2_t *pt, double padd)
   /* randomly selected a seed */
   id = (int) ( rand01() * n );
   so = pt->s[id];
-  sn = (so + 1 + (int) (rand01() * pt->q)) % pt->q;
+  sn = (so + 1 + (int) (rand01() * (pt->q - 1))) % pt->q;
   pt->queue[ cnt++ ] = id;
   for ( i = 0; i < n; i++ )
     pt->used[i] = 0;

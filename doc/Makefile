@@ -71,7 +71,9 @@ diff::
 	#module load perl
 	# consider the flag --math-markup=0 if there is trouble for formulae
 	cd old/V$(ver) && latexdiff \
-	  --append-safecmd="footnote" \
+	  --exclude-textcmd="footnote" \
+	  --exclude-textcmd="bibinfo" \
+	  --append-safecmd="bibinfo" \
 	  --config="PICTUREENV=(?:picture|DIFnomarkup|align|equation|tikzpicture|table|tabular|enumerate)[\w\d*@]*" \
 	  ../V$(refver)/$(prj)_annotatedV$(refver).tex $(prj)_annotatedV$(ver).tex > $(prj)_diffV$(ver).tex
 	make -C old/V$(ver) $(prj)_diffV$(ver).pdf
@@ -81,7 +83,7 @@ refver2=4.1_jd
 diff2::
 	mkdir -p old/V$(ver)
 	cd old/V$(ver) && latexdiff \
-	  --config="PICTUREENV=(?:picture|DIFnomarkup|align|equation|tikzpicture|table|tabular|enumerate)[\w\d*@]*" \
+	  --config="PICTUREENV=(?:picture|DIFnomarkup|displaymath|align|equation|tikzpicture|table|tabular|enumerate)[\w\d*@]*" \
 	  ../V$(refver2)/invtV$(refver2).tex invt_annotatedV$(ver).tex > invt_diffV$(ver)_$(refver2).tex
 	make -C old/V$(ver) invt_diffV$(ver)_$(refver2).pdf
 

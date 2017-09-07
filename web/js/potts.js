@@ -124,7 +124,7 @@ Potts.prototype.wolff = function(padd)
   // randomly selected a seed
   var id = Math.floor ( rand01() * n );
   var so = this.s[id];
-  var sn = (so + 1 + Math.floor(rand01() * this.q)) % this.q;
+  var sn = (so + 1 + Math.floor(rand01() * (this.q - 1))) % this.q;
   this.cnt = 0;
   this.queue[ this.cnt++ ] = id;
   for ( i = 0; i < n; i++ ) {

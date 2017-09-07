@@ -13,7 +13,7 @@ const char *fndat = "pt2gaus.dat";
 
 
 enum { SAMP_METROPOLIS, SAMP_WOLFF };
-
+const char *samp_names[] = {"Metropolis", "Wolff"};
 double localmovef = 1.0;
 
 
@@ -131,6 +131,9 @@ static void potts2_gaus(potts2_t *pt,
   }
   gaus = gaus_open(ecmin, ecmax, espacing, esig, lnzmethod,
       beta_c * esig, alpha0, -2*pt->n, 0, 1, 0);
+
+  fprintf(stderr, "samping-method %s, lnz-method %s, sig %g, spacing %g, localmove %g%%\n",
+      samp_names[sampmethod], lnz_names[lnzmethod], esig, espacing, localmovef*100.0);
 
   id = 0;
   sgn = 0;

@@ -64,8 +64,8 @@ set mytics 5
 set yrange [-19:-6]
 set ylabel "{/Times-Italic c}@_{/Times 0}^{/Times ({/Times-Italic i})} - {/Symbol-Oblique b}_{/Times-Italic c }{/Times-Italic E@_{c}^{/Times  ({/Times-Italic i})}}" offset 0.0, -0.5
 
-bc = 1.42530
-shiftlnz = 7600.29
+bc = 1.42525373
+shiftlnz = 7600
 
 plot [:][:] \
     "../../data/pt/pt2gaus_L64b.dat" u 2:($6-bc*$2-shiftlnz) w p pt 6 lc "black" notitle, \
