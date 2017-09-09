@@ -85,7 +85,7 @@ function AGE(xcmin, xcmax, delx, sig,
 
 
 /* retrieve the updating magnitude */
-AGE.prototype.getalpha = function(i)
+AGE.prototype.getalpha = function()
 {
   var alpha = this.invt ? this.n / (this.t + this.t0) : this.alphawl;
   return alpha;
@@ -97,7 +97,7 @@ AGE.prototype.getalpha = function(i)
 AGE.prototype.add = function(i, x, acc)
 {
   var ave = this.ave[i], sig = this.sig[i];
-  var alpha = this.getalpha(i);
+  var alpha = this.getalpha();
 
   var y1 = (x - ave) / sig;
   var y2 = (y1 * y1 - 1) / SQRT2;
@@ -116,7 +116,7 @@ AGE.prototype.add = function(i, x, acc)
 
 
 /* calculate the fluctuation of histogram modes (from the variance) */
-AGE.prototype.calcfl = function()
+AGE.prototype.calcfl_rms = function()
 {
   var i, n = this.n, mm, nhh;
   var tot = 0, fl0 = 0, fl1 = 0, fl2 = 0, fl, hi;
@@ -171,7 +171,7 @@ AGE.prototype.switch = function(magred)
 /* extensive check of histogram fluctuation */
 AGE.prototype.wlcheckx = function(fl, magred)
 {
-  this.hfluc = this.calcfl();
+  this.hfluc = this.calcfl_rms();
   if ( !this.invt && this.hfluc < fl ) {
     this.switch(magred);
     return 1;
@@ -185,8 +185,7 @@ AGE.prototype.wlcheckx = function(fl, magred)
 /* transition to a neighboring umbrella */
 AGE.prototype.move = function(x, id, local)
 {
-  var acc = 0, n = this.n;
-  var jd, mm;
+  var acc = 0, n = this.n, jd;
   var xi, xj, vi, vj, dv, sigi, sigj;
 
   if ( local ) {
