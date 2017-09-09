@@ -4,10 +4,6 @@
 
 "use strict";
 
-/* values for lnzmethod */
-//enum { LNZ_WL, LNZ_AVE };
-//const char *lnz_names[2] = {"WL", "Ave"};
-
 var SQRT2 = 1.4142135623730951;
 
 function MMWL()
@@ -37,20 +33,19 @@ MMWL.prototype.calcfl = function()
 }
 
 
-function AGE(xcmin, xcmax, delx, sig, lnzmethod,
-  c1, alpha0, xmin, xmax, dx, pbc)
+function AGE(xcmin, xcmax, delx, sig,
+  c1, alpha0, xmin, xmax, dx)
 {
   var i, xn, n;
 
   n = Math.floor((xcmax - xcmin) / delx) + 1;
   this.n = n;
-  this.lnzmethod = lnzmethod;
   this.alpha0 = alpha0;
   this.ave = new Array(n);
   this.sig = new Array(n);
+  this.c0 = new Array(n);
   this.c1 = new Array(n);
   this.c2 = new Array(n);
-  this.lnz = new Array(n);
   this.mmwl = new Array(n);
   this.cnt = new Array(n);
   this.acc = new Array(n);
@@ -58,9 +53,9 @@ function AGE(xcmin, xcmax, delx, sig, lnzmethod,
   for ( i = 0; i < n; i++ ) {
     this.ave[i] = xcmin + i * delx;
     this.sig[i] = sig;
+    this.c0[i] = (i - (n - 1)*0.5) * c1 / sig * delx;
     this.c1[i] = c1;
     this.c2[i] = 0;
-    this.lnz[i] = (i - (n - 1)*0.5) * c1 / sig * delx;
     this.mmwl[i] = new MMWL();
     this.cnt[i] = 0;
     this.acc[i] = 0;
@@ -115,7 +110,7 @@ AGE.prototype.add = function(i, x, acc)
   this.acc[i] += acc;
   var j = Math.floor( (x - this.xmin) / this.dx );
   this.hist[i][j] += 1;
-  this.lnz[i] += alpha;
+  this.c0[i] += alpha;
 }
 
 
@@ -207,14 +202,14 @@ AGE.prototype.move = function(x, id, local)
   }
   sigi = this.sig[id];
   sigj = this.sig[jd];
-  dv = this.lnz[jd] - this.lnz[id];
+  dv = this.c0[jd] - this.c0[id];
   /* compute the acceptance probability */
   xi = (x - this.ave[ id]) / sigi;
   xj = (x - this.ave[ jd]) / sigj;
   vi = this.c1[ id] * xi + this.c2[ id] * (xi * xi - 1) / SQRT2;
   vj = this.c1[ jd] * xj + this.c2[ jd] * (xj * xj - 1) / SQRT2;
   dv += vj - vi;
-  //console.log(id, jd, x, vi, this.lnz[id], vj, this.lnz[jd], dv, local);
+  //console.log(id, jd, x, vi, this.c0[id], vj, this.c0[jd], dv, local);
   this.tacc = ( dv <= 0 || rand01() < Math.exp(-dv) );
   if ( this.tacc ) {
     this.id = jd;

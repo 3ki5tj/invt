@@ -147,8 +147,9 @@ of the complicated, multimodal free energy surface.
 Thus,
 to overcome these energetic barriers in sampling,
 %and to capture the global shape of the free energy surface
-an effective strategy is to introduce a bias potential that
-offsets the PMF
+an effective strategy is to introduce
+a bias potential\cite{torrie1974, *torrie1977}
+that offsets the PMF
 such that the distribution along $z$ is
 flat.\cite{mezei1987, berg1992, *lee1993,
 wang2001, wang2001pre,
@@ -177,7 +178,7 @@ among others\cite{yan2004, kim2006, *kim2007, kim2010, junghans2014,
 %
 These techniques regularly update the bias potential
 to discourage future visits to previously sampled configurations
-by incremental elevation of the bias potential.
+by incremental local elevation of the bias potential.
 %
 A key difference lies
 in the updating window function,
@@ -211,7 +212,7 @@ regular updates to the bias potential
 disrupts the underlying equilibrium
 sampling,\cite{zhou2005, morozov2007, zhou2008}
 and the convergence of the bias potential
-can benefit from a gradually decreasing
+can often benefit from a gradually decreasing
 updating magnitude of the bias potential.
 
 
@@ -221,9 +222,10 @@ affects the precision and accuracy
 of the final bias potential,
 and hence that of the PMF.\cite{
 belardinelli2007, *belardinelli2007jcp, *belardinelli2008, *belardinelli2016,
-liang2007, min2007,
+liang2007,
 morozov2007, morozov2009, zhou2008,
 komura2012, *caparica2012, *caparica2014,
+min2007,
 barducci2008, dickson2011, dama2014, poulain2006}
 %
 While an overly slow reduction of the updating magnitude
@@ -269,7 +271,7 @@ that for Gaussian case is more complex.
 %and the width of the Gaussian.
 
 We will then show by comparing the errors
-of different updating schemes
+of simulations under different updating schemes
 that the single-bin updating scheme
 is optimal for very long simulations.
 %without a priori assumption of the smoothness of the PMF.
@@ -908,7 +910,7 @@ The formal solution of Eq. \eqref{eq:dxdt_singlebin} is
   v_{*i}(0) \, e^{-q(T)}
   +
   \int_0^T
-    \dot{\vartheta}\bigl( q(t) \bigr) \, \xi_{*i}(t) \, dt,
+    \dot{\theta}\bigl( q(t) \bigr) \, \xi_{*i}(t) \, dt,
   \label{eq:xt_solution}
 \end{equation}
 %
@@ -919,7 +921,7 @@ $q(t) \equiv \int_0^t \alpha(t') \, dt'$,
 and
 %
 \begin{align}
-  \vartheta(q')
+  \theta(q')
   &\equiv
   e^{q' - q(T)}.
   \label{eq:theta_def}
@@ -959,11 +961,11 @@ where
     \langle
       \xi_{*i}(t) \xi_{*i}(t')
     \rangle
-    \dot \vartheta\bigl( q(t) \bigr)
-    \dot \vartheta\bigl( q(t') \bigr)
+    \dot \theta\bigl( q(t) \bigr)
+    \dot \theta\bigl( q(t') \bigr)
     \, dt dt'
   \notag \\
-  &= \Gamma \, \int_0^T \dot \vartheta^2\bigl( q(t) \bigr) \, dt
+  &= \Gamma \, \int_0^T \dot \theta^2\bigl( q(t) \bigr) \, dt
   ,
   \label{eq:EA_sbin}
 \end{align}
@@ -1012,11 +1014,11 @@ by adjusting the value of $q(T)$.
 %
 Note that the asymptotic error
 has the form of an action of a free particle
-at $\vartheta\bigl( q(t) \bigr)$,
+at $\theta\bigl( q(t) \bigr)$,
 with the endpoints fixed at
-$\vartheta\bigl( q(0) \bigr)  = e^{- q(T)}$
+$\theta\bigl( q(0) \bigr)  = e^{- q(T)}$
 and
-$\vartheta\bigl( q(T) \bigr) = 1$.
+$\theta\bigl( q(T) \bigr) = 1$.
 %
 Thus, the velocity should be a constant
 %Since the residual error
@@ -1026,7 +1028,7 @@ Thus, the velocity should be a constant
 %demands a constant velocity
 %
 \begin{equation}
-  \frac{d}{dt} \vartheta\bigl( q(t) \bigr) = c
+  \frac{d}{dt} \theta\bigl( q(t) \bigr) = c
   .
 \label{eq:dthetadt_const}
 \end{equation}
@@ -1434,14 +1436,13 @@ The formal solution is given by
   \tilde v_k(0) \, e^{-\lambda_k \, q(T)}
   +
   \int_0^T
-    \dot{\vartheta}_k\bigl( q(t) \bigr) \, \tilde\xi_k(t) \, dt
+    \dot{\theta}_k\bigl( q(t) \bigr) \, \tilde\xi_k(t) \, dt
   ,
-  \notag
-  %\label{eq:xt_solution}
+  \label{eq:xt_solution}
 \end{equation}
 where
 \begin{equation}
-  \vartheta_k(q') \equiv e^{\lambda_k \, [q' - q(T)]}
+  \theta_k(q') \equiv e^{\lambda_k \, [q' - q(T)]}
   .
   \label{eq:uk_def}
 \end{equation}
@@ -1501,14 +1502,14 @@ of the residual error and the asymptotic error, with
     \tilde\xi_k(t)
     \tilde\xi_k(t')
   \rangle
-  \vartheta_k\bigl(q(t)\bigr)
-  \vartheta_k\bigl(q(t')\bigr)
+  \theta_k\bigl(q(t)\bigr)
+  \theta_k\bigl(q(t')\bigr)
   \, dtdt'
   \notag \\
   &=
   \int_0^T
   \sum_{k = 1}^{n-1}
-  \Gamma_k \, \dot \vartheta_k^2\bigl( q(t) \bigr) \, dt
+  \Gamma_k \, \dot \theta_k^2\bigl( q(t) \bigr) \, dt
   ,
   \label{eq:error_asym}
 \end{align}
@@ -1604,13 +1605,13 @@ where the Lagrangian is
   {\mathcal L} \bigl[ q(t) \bigr]
   &=
   \sum_{ k = 1 }^{n - 1}
-    \Gamma_k \, {\dot \vartheta}_k^2\bigl[ q(t) \bigr]
+    \Gamma_k \, {\dot \theta}_k^2\bigl[ q(t) \bigr]
   %\notag
   %\\
   %&=
   =
   %\sum_{ k = 1 }^{n - 1}
-  %  \Gamma_k \, \lambda_k^2 \, \vartheta_k^2 \bigl[ q(t) \bigr]
+  %  \Gamma_k \, \lambda_k^2 \, \theta_k^2 \bigl[ q(t) \bigr]
   %\; \dot q^2( t )
   %\notag
   %\\
@@ -1667,7 +1668,7 @@ Here, the Hamiltonian coincides with the Lagrangian:
 %
 Since the Lagrangian
 does not explicitly depend on time, $t$,
-the Hamiltonian is conserved,\cite{goldstein, *landau_mechanics, *arnold}
+the Hamiltonian is conserved,\cite{goldstein, *landau_mechanics, *arnold, *jose}
 which means that the asymptotic error grows
 linearly with time at a rate of $\mathcal L$.
 We may set
@@ -1767,63 +1768,40 @@ for $T_0$ steps.
 %
 If the initial bias potential
 before the preliminary run is zero,
-one can show that
-\begin{equation}
-  \left\langle
-    {\tilde v}_k^2(0)
-  \right\rangle
-  = \frac 1 2 \, a_0 \, \Gamma_k \, \lambda_k
-  + \epsilon_k
+we have, from Eq. \eqref{eq:xt_solution} [with $T\to T_0, q(t) \to a_0 \, t$],
+%
+\begin{align}
+  \left\langle {\tilde v}_k(0) \right\rangle
+  &=
+  \tilde u_k \, e^{-\lambda_k \, a_0 \, T_0}
   ,
-  \label{eq:xt2_eql1}
-\end{equation}
-%
-where
-$\epsilon_k \equiv \tilde u_k^2 \, e^{-2\, \lambda_k \, a_0 \, T_0}$.
-%
-If $\lambda_k$ is not close to zero, and $T_0 \to \infty$
-we can ignore the $\epsilon_k$ term, and
-%
-\begin{equation}
-  \left\langle
-    {\tilde v}_k^2(0)
-  \right\rangle
-  \approx
-  \frac 1 2 \, a_0 \, \Gamma_k \, \lambda_k
+  \notag \\
+  \operatorname{var} \tilde v_k(0)
+  &=
+  \frac 1 2 \, \Gamma_k \, \lambda_k \, a_0
+  \left( 1 - e^{-2 \, \lambda_k \, a_0 \, T_0} \right)
+  ,
+  \label{eq:xtvar}
+  \\
+  \left\langle \tilde v_k^2(0) \right\rangle
+  &=
+  %\operatorname{var} \tilde v_k(0) + \zeta_k^2
+  %=
+  \frac 1 2 \, \Gamma_k \, \lambda_k \, a_0
+  +
+  \epsilon_k \, e^{-2 \, \lambda_k \, a_0 \, T_0}
   .
   \label{eq:xt2_eql}
-\end{equation}
+\end{align}
 %
-\note{
-Consider a long period, $T_0$, under a fixed schedule,
-$\alpha(t) = a_0$,
-the residual error becomes negligible, and
-the $k$th component of the asymptotic error
-is given by
-%
-\begin{align*}
-  \left\langle
-    {\tilde v}_k^2(T_0)
-  \right\rangle
-  =
-  \int_0^{T_0}
-    \Gamma_k \, (\lambda_k \, a_0)^2 \,
-      e^{ 2 \, \lambda_k \, a_0 \, (t - T_0) }
-    \, dt
-  \stackrel{ T_0 \to \infty }
-  { =\joinrel=\joinrel=\joinrel= }
-  \frac 1 2 \, \Gamma_k \, \lambda_k \, a_0
-  .
-\notag
-%\label{eq:error_eql}
-\end{align*}
-}
-%
+where
+$\epsilon_k \equiv \left(\tilde u_k^2 - \frac{1}{2} \Gamma_k \, \lambda_k \, a_0\right) \, e^{-2\,\lambda_k a_0 T_0}$.
 
 
 
 %
-From Eqs. \eqref{eq:error_res}, \eqref{eq:xt2_eql1},
+From Eqs. \eqref{eq:error_res},
+\eqref{eq:xt2_eql},
 and \eqref{eq:error_asym2},
 we find that
 the optimal $q(T)$ satisfies
@@ -1839,9 +1817,10 @@ the optimal $q(T)$ satisfies
   -\sum_{k = 1}^{n-1}
   \lambda_k \, \epsilon_k \, e^{-2\lambda_k \, q(T)}
   =0
-  .
+  ,
 \label{eq:opt_qT}
 \end{align}
+where
 %
 %\begin{align}
 %  m\bigl( q(T) \bigr)
@@ -1856,9 +1835,23 @@ the optimal $q(T)$ satisfies
 %\label{eq:opt_qT}
 %\end{align}
 %
-\note{Let $q_T \equiv q(T)$,
-$$
-\begin{aligned}
+\note{We can write
+\begin{align*}
+  \left\langle
+    {\tilde v}_k^2(0)
+  \right\rangle
+  &=
+  \frac { a_0 \, \Gamma_k \, \lambda_k } { 2 }
+  +
+  \Delta_k
+  e^{-2\, \lambda_k a_0 T_0}
+  ,
+\end{align*}
+%
+where $\Delta_k \equiv \tilde u_k^2 - \frac{a_0 \lambda_k \Gamma_k}{2}$.
+%
+Let $q_T \equiv q(T)$,
+\begin{align*}
   \frac{
     \partial \Err_R(T)
   }
@@ -1866,10 +1859,17 @@ $$
     \partial q_T
   }
   &=
+  -2\sum_{k=1}^{n-1} \lambda_k
+  \left\langle
+    \tilde v_k^2(0)
+  \right\rangle \,
+  e^{-2 \, \lambda_k \, q_T}
+  \\
+  &=
   -a_0 \, M^2(q_T)
   -2
   \sum_{k=1}^{n-1} \lambda_k \,
-  \tilde u_k^2 e^{-2 \, \lambda_k \, (a_0 \, T_0 + q_T)}
+  \Delta_k e^{-2 \, \lambda_k \, (a_0 \, T_0 + q_T)}
   ,
   \\
   \frac{
@@ -1885,9 +1885,16 @@ $$
   =
   \frac{ 2 \, C_M } { T } \, M(q_T)
   .
-\end{aligned}
-$$
-Then solve $\partial (\Err_R + \Err_A) / \partial Q_c = 0$.
+\end{align*}
+Then solve $\partial (\Err_R + \Err_A) / \partial q_T = 0$,
+\begin{align*}
+  \frac{ M\bigl( q_T \bigr) } { T } C_M
+  -\frac{a_0}{2} \, M^2\bigl( q_T \bigr)
+  -\sum_{k = 1}^{n-1}
+  \lambda_k \, \Delta_k \, e^{-2\lambda_k \, (q_T + a_0 T_0)}
+  =0
+  .
+\end{align*}
 }
 %
 We can rewrite the condition in terms of
@@ -1911,6 +1918,7 @@ by Eq. \eqref{eq:Lagrangian_const}, %\eqref{eq:mQ_invTa},
   %\notag
   \label{eq:half_alpha0}
 \end{align}
+%
 %
 The equality in the last step is achievable
 if the initial bias, $\epsilon_k$, is negligible,
@@ -2081,7 +2089,7 @@ Compute the total error $\Err(T)$ from
 Eqs.
 \eqref{eq:error_tot},
 \eqref{eq:error_res},
-\eqref{eq:xt2_eql1},
+\eqref{eq:xt2_eql},
 and
 \eqref{eq:error_asym2}.
 
@@ -2236,7 +2244,7 @@ We first show
 that the single-bin updating scheme is asymptotically optimal.
 %
 We wish to find a lower bound of the asymptotic error,
-$\Err_A(T)$, as defined in Eq. \eqref{eq:error_asym}
+$\Err_A(T)$ [given by Eq. \eqref{eq:error_asym}],
 for a class of updating matrices that
 share the same set of eigenvectors,
 hence the same $\Gamma_k$'s,
@@ -2246,17 +2254,16 @@ $\lambda_k$'s.
 If all eigenvalues are positive,
 we can use the Cauchy-Schwarz inequality,\footnote{This
   inequality follows from the nonnegativity of
-  the quadratic polynomial,
+  the quadratic polynomial of $y$,
   \begin{align*}
-  \int_0^T
-    dt \sum_{k = 1}^{n-1} \Gamma_k \,
-      ( {\dot \vartheta}_k \, \chi - 1 )^2
+  \int_0^T \!\!dt \sum_{k = 1}^{n-1} \Gamma_k \,
+      ( y - {\dot \theta}_k )^2
     \equiv
-    A_2 \, \chi^2 + A_1 \, \chi + A_0
+    A_2 \, y^2 + A_1 \, y + A_0
     ,
   \end{align*}
-  which implies a nonpositive discriminant,
-  $A_1^2 - 4 \, A_0 \, A_2$.}
+  which implies that the discriminant is nonpositive,
+  $A_1^2 - 4 \, A_0 \, A_2 \le 0$.}
 %
 %
 \begin{align}
@@ -2264,7 +2271,7 @@ we can use the Cauchy-Schwarz inequality,\footnote{This
   \left(
     \int_0^T \!\!dt
       \sum_{k = 1}^{n-1}
-        \Gamma_k \, {\dot \vartheta}_k^2\bigl( q(t) \bigr)
+        \Gamma_k \, {\dot \theta}_k^2\bigl( q(t) \bigr)
   \right)
   %
   \left(
@@ -2274,22 +2281,22 @@ we can use the Cauchy-Schwarz inequality,\footnote{This
   \right)
   %
   \notag \\
-  & \qquad \qquad \qquad
+  & %\qquad \qquad \qquad
   \ge
-  \left(
+  \Biggl[
     \int_0^T \!\!dt
       \sum_{k = 1}^{n-1}
-        \Gamma_k \, {\dot \vartheta}_k \, \bigl( q(t) \bigr)
-  \right)^{\!\!2}
-  \notag \\
-  & \qquad \qquad \qquad
-  =
-  \left(
+        \Gamma_k \, {\dot \theta}_k \, \bigl( q(t) \bigr)
+  \Biggr]^{\!2}
+  %\notag \\
+  %& \qquad \qquad \qquad
+  \!\!=
+  \Biggl\{
     \sum_{k = 1}^{n-1} \Gamma_k
-      \left[
+      \Bigl[
         1 - e^{ -\lambda_k \, q(T) }
-      \right]
-  \right)^{\!\!2}
+      \Bigr]
+  \Biggr\}^{\!2}
   .
   \notag
   %\label{eq:CSineq}
@@ -2307,7 +2314,7 @@ $\Err_A(T) \ge \sum_{k=1}^{n-1} \Gamma_k/T$.
 This inequality applies to any schedule
 and any updating scheme in the class,
 and the equality is achieved
-if $\dot \vartheta_k\left( q(t) \right) = \mathrm{constant}$
+if $\dot \theta_k\bigl( q(t) \bigr) = \mathrm{constant}$
 for all $k > 0$ at any $t$.
 %
 Solving these equations yields
@@ -2337,7 +2344,7 @@ that represents the single-bin updating scheme.
 %the single-bin updating scheme.
 %
 %We can further verify that
-%$\vartheta_k = (t+t_0)/(T+t_0)$
+%$\theta_k = (t+t_0)/(T+t_0)$
 %in this case,
 %and the optimal schedule coincides with
 %Eq. \eqref{eq:alpha_invt1}.
@@ -2618,12 +2625,12 @@ that corresponds to a uniform shift of the bias potential,
 the updating scheme is essentially the LLR algorithm\cite{langfeld2012}
 in the single-interval case,
 and the inverse-time schedule
-was recommended for optimal convergence of $c_1$.\cite{pellegrini2014}
+was recommended for the optimal convergence of $c_1$.\cite{pellegrini2014}
 %
 In practical applications,
 the LLR algorithm is often applied simultaneously
 to an array of adjacent intervals
-to cover a wide range over the collective variable, $z$.
+to cover a wide range of the collective variable, $z$.
 %
 %In this way, attempts to move out of the current interval
 %are not necessarily rejected,
@@ -2665,7 +2672,7 @@ to restrict the sampling region.
 %
 The bias potential is thus
 quadratic\cite{maragliano2006, *abrams2008, zhu2012, neuhaus2006, *neuhaus2007},
-which is common in umbrella sampling\cite{torrie1974, *torrie1977}
+which is common in umbrella sampling
 and the Gaussian ensemble method\cite{hetherington1987,
 *challa1988, *costeniuc2006}.
 
@@ -2702,21 +2709,31 @@ Expanded ensemble}
 We can expand the sampling range
 by constructing an expanded ensemble
 from a superposition of $S$ Gaussian umbrellas
-centered at different places.\footnote{This sampling
-  algorithm should not be confused with the Gaussian updating scheme,
-  in which the bias potential is incrementally updated by Gaussian functions,
-  and the target distribution is flat.
-  However, in this case, the bias potential is quadratic,
-  and the target distribution of each umbrella is Gaussian.}
+centered at different places.
 %
-The target distribution is a joint distribution
-of the discrete umbrella index, $s = 1, \dots, S$,
+The expanded ensemble treats
+the umbrella index, $s = 1, \dots, S$,
+also as a random variable,
+and the biased sampling targets a joint distribution
+of the umbrella index
 and the continuous variable, $z$,
-$\rho(s, z) = \rho_s \, \rho^{(s)}(z)$,
-where the marginal inter-umbrella distribution is flat,
+$\rho(s, z) = \rho_s \, \rho^{(s)}(z)$.
+%
+Here,
+the marginal inter-umbrella distribution is flat,
 $\rho_s = 1/S$,
 and the conditional intra-umbrella distribution, $\rho^{(s)}(z)$,
-is the Gaussian given in Eq. \eqref{eq:rho_Gaussian}. % previously.
+is the Gaussian given in Eq. \eqref{eq:rho_Gaussian}.
+\footnote{This method
+  should not be confused with the Gaussian updating scheme.
+  %
+  In the former case, the bias potential is quadratic
+  and the target distribution is Gaussian in each umbrella,
+  although the inter-umbrella distribution, $\rho_s$, is flat.
+  %
+  In the latter case, the bias potential is a sum of
+  Gaussian functions, and the target distribution
+  is flat.}
 %
 To sample this distribution, we give each umbrella
 an independent bias potential, $u^{(s)}(z)$,
@@ -2737,10 +2754,26 @@ serves as the bias potential
 for inter-umbrella transitions,
 and it is updated according to the single-bin updating scheme.\cite{li2007}
 %
-With a small width, $\sigma_z$, the converged
+With a small width, $\sigma_z^{(s)}$, the converged
 $c_0^{(s)}$ as a function of $z_c^{(s)}$
 also serves as a good approximation of
 the negative PMF, $\ln p(z)$.\cite{maragliano2006, *abrams2008}
+%
+Thus, we have\cite{park2007, *nguyen2013, *zhang2015st}
+\begin{equation}
+  c_0^{(s+1)} - c_0^{(s)}
+  \approx
+  \frac{1}{2}\left(
+    \frac{ c_1^{(s+1)} } { \sigma_z^{(s+1)} }
+    +
+    \frac{ c_1^{(s)} } { \sigma_z^{(s)} }
+  \right)
+  \left(
+  z_c^{(s+1)} - z_c^{(s)}
+  \right)
+  .
+  \label{eq:c0_est}
+\end{equation}
 
 In the expanded ensemble,
 inter-umbrella transitions can be handled via the frameworks of
@@ -2835,10 +2868,12 @@ We summarize the method as the following procedure.
     the mean,
     $z_c^{(s)} = z_{\min} + \frac{s - 1}{S - 1} (z_{\max} - z_{\min})$,
     and
-    the width, $\sigma_z^{(s)}$, to be a constant.
+    the width, $\sigma_z^{(s)}$, to be a constant, $\sigma_z$.
     For the polynomial coefficients, we can set
-    $c_1^{(s)}/\sigma_z^{(s)}$ to the estimated mean force,
-    and $c_0^{(s)} = c_2^{(s)} = 0$.
+    $c_1^{(s)}/\sigma_z^{(s)}$ to some estimated mean force, $f_z$,
+    $c_0^{(s)} = f_z \bigl[ z_c^{(s)} - \frac{1}{2}(z_{\min} + z_{\max}) \bigr]$
+    by Eq. \eqref{eq:c0_est},
+    and $c_2^{(s)} = 0$.
 
 \item
   Equilibrate the system at umbrella $s = 1$.
@@ -2851,12 +2886,17 @@ We summarize the method as the following procedure.
 \item
   Attempt a transition to another umbrella
   with the acceptance probability given
-    by Eq. \eqref{eq:transprob_st}.\cite{*[{Although
-    the intra-umbrella sampling step
-    and inter-umbrella transition step
-    are executed in sequential instead of random order,
-    the sampling scheme is still valid,
-    as shown in }] [{}] manousiouthakis1999}
+    by Eq. \eqref{eq:transprob_st}.\cite{*[{The
+    intra-umbrella sampling step and
+    the inter-umbrella transition step
+    can be executed at different frequencies
+    without affecting the correctness of the algorithm.
+    Although some prefers mixing the two steps
+    in a random order,
+    the sequential execution adopted here
+    is also valid,
+    as discussed in }] [{}]
+    manousiouthakis1999}
 
 \item
   Update the $c_k^{(s)}$'s
@@ -3257,8 +3297,7 @@ with an even spacing of $L$.
 For simplicity, only transitions between neighboring
 umbrellas were performed.\footnote{For
   wider umbrellas,
-  one may consider
-  mixing the nearest-neighbor inter-umbrella transitions
+  one may mix the nearest-neighbor inter-umbrella transitions
   with some longer-range transitions
   to improve the convergence.}
 %In attempting inter-umbrella transitions,
@@ -3270,7 +3309,7 @@ umbrellas were performed.\footnote{For
 %
 Initially, we set
 $c_1^{(s)} = \tilde \beta_c \, \sigma_E$
-for all umbrellas,
+for all umbrellas
 with $\tilde \beta_c = 1.4$
 being the approximate inverse critical temperature.
 %
@@ -3832,9 +3871,9 @@ a variable bias potential.\footnote{We can also
   Then after time averaging, we get
   $\rho_i e^{\hat U_i(t)} = \hat P_i(t) \approx H_i \, e^{ U_i(t) }$.}
 %
-However, this is only an approximate result,
-and it does not remove the systematic bias
-caused by the adaptive updates.
+However, it does not remove the systematic bias
+caused by the adaptive updates,
+and thus still requires a sufficiently small updating magnitude.
 
 
 
@@ -4078,18 +4117,11 @@ This method has the advantage of not requiring
 explicit computation of
 the autocorrelation functions of the eigenmodes.
 
-We will use Eq. \eqref{eq:xt2_eql}
-but modify it to avoid the unknown
-intrinsic distribution, $p_i$,
-hence the unknown shift,
-$u_i(t) - v_i(t) = \ln(p_i/\rho_i)$.
-%
-Because the shift,
-hence its generalized Fourier transform,
-$\tilde u_k(t) - \tilde v_k(t)$,
-is a constant of time,
+Because the difference between $u_i$ and $v_i$,
+is a constant of time [cf. Eq. \eqref{eq:v_def}],
 ${\tilde u}_{k}$ and ${\tilde v}_{k}$
-should share the same variance.
+share the same variance.
+%
 %$\operatorname{var} {\tilde u}_{k} =
 % \operatorname{var} {\tilde v}_{k} =
 % \left\langle {\tilde v}_{k}^2 \right\rangle$,
@@ -4099,29 +4131,27 @@ should share the same variance.
 %  .
 %\end{equation*}
 %
-Then, from Eq. \eqref{eq:xt2_eql}, we get
+Then, from Eq. \eqref{eq:xtvar}, we get
 %
 \begin{equation}
   \operatorname{var} {\tilde u}_k
   =
   \operatorname{var} {\tilde v}_{k}
   =
-  \left\langle {\tilde v}_{k}^2 \right\rangle
-  =
-  \frac{1}{2} \,
-  a_0 \, \Gamma_k \, \lambda_k
-  ,
+  \frac{1}{2} \, \Gamma_k \, \lambda_k \, a_0
+  \left( 1 - e^{-2 \, \lambda_k \, a_0 \, T_0} \right)
+  .
 \label{eq:varXt}
 \end{equation}
 %
-where we have used the fact that the ensemble average of ${\tilde v}_{k}$
-is zero in the second step.
+%where we have used the fact that the ensemble average of ${\tilde v}_{k}$
+%is zero in the second step.
 %
 The variance, $\operatorname{var} \tilde u_k$, can be computed
 by trajectory averaging in a long simulation.
 %
-In practice, Eq. \eqref{eq:varXt}
-would fail for a near zero eigenvalue.
+In practice, Eq. \eqref{eq:varXt} would fail for a near zero eigenvalue.
+%
 So it is best used for the single-bin updating scheme.%\footnote{Alternatively,
 %  we can split the trajectory into blocks,
 %  compute $\Gamma_k$ from the histogram fluctuation of each block
@@ -4780,7 +4810,7 @@ for samples in umbrella $s$.
     $\bar q(t)$     &   $q(T) - q(t)$.  \\
     $t, \tau$       &   Time. \\
     $T$             &   Simulation length. \\
-    $\vartheta_k(q')$       &   $\vartheta_k(q') \equiv e^{\lambda_k \, [q - q(T)]}$. \\
+    $\theta_k(q')$       &   $\theta_k(q') \equiv e^{\lambda_k \, [q - q(T)]}$. \\
     $u_i(t)$        &   Original bias potential. \\
     $v_i(t)$        &   Shifted bias potential. \\
     $\mathbf w$     &   Updating matrix. \\

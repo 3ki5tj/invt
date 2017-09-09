@@ -20,7 +20,6 @@ var flthreshold = 0.5;
 var alpha0 = 0.01;
 var magred = 0.5;
 
-var lnzmethod = "WL";
 var localmove_prob = 1.0;
 
 var timer_interval = 100; // in milliseconds
@@ -53,8 +52,8 @@ function getparams()
   magred = get_float("magred", 0.5);
   betac = get_float("betac", 1.4);
   localmove_prob = get_float("localmove_prob", 1.0);
-  age = new AGE(ecmin, ecmax, espacing, esig, lnzmethod,
-      betac * esig, alpha0, -2*potts.n, 0, 1, 0);
+  age = new AGE(ecmin, ecmax, espacing, esig,
+      betac * esig, alpha0, -2*potts.n, 0, 1);
   iage = 0;
 
   mc_algorithm = grab("mc_algorithm").value;

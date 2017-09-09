@@ -61,7 +61,6 @@ __inline static int potts2_wolff_mod(potts2_t *pt,
 
   /* randomly selected a seed */
   id = (int) ( rand01() * n );
-  int id0 = id;
   so = pt->s[id];
   sn = (so + 1 + (int) (rand01() * (q - 1))) % q;
   pt->queue[ cnt++ ] = id;
@@ -138,7 +137,7 @@ static void potts2_gaus(potts2_t *pt,
     alpha0 = 0.001;
   }
   gaus = gaus_open(ecmin, ecmax, espacing, esig, lnzmethod,
-      beta_c * esig, alpha0, -2*pt->n, 0, 1, 0);
+      beta_c * esig, alpha0, -2*pt->n, 0, 1);
 
   fprintf(stderr, "samping-method %s, lnz-method %s, sig %g, spacing %g, localmove %g%%\n",
       samp_names[sampmethod], lnz_names[lnzmethod], esig, espacing, localmovef*100.0);
@@ -163,7 +162,7 @@ static void potts2_gaus(potts2_t *pt,
     gaus_add(gaus, id, pt->E, acc);
 
     /* update the number of round trips */
-    if ( (sgn == 0 && id == gaus->n - 1) 
+    if ( (sgn == 0 && id == gaus->n - 1)
       || (sgn == 1 && id == 0) ) {
       sgn = !sgn;
       ntrips++;
