@@ -700,7 +700,7 @@ and the deviation of the bias potential as
   We can readily show that the two definitions are equivalent
   for small $v_{*i}$.}%
 %
-Below we will use the notations, ``$\bav{}$'' and ``$_{*i}$,''
+Below we will use the notations ``$\bav{}$'' and ``$_{*i}$''
 for other quantities.
 %
 The total error is then given by
@@ -796,7 +796,7 @@ and the same bias potential at time $t$.
 The initial states and the stochastic forces
 during the process may differ, however.
 %
-For sufficiently small $\alpha(t)$,
+For a sufficiently small $\alpha(t)$,
 the bias potential remains roughly the same for a short period,
 and we may assume a quasi-equilibrium sampling process
 such that
@@ -867,7 +867,7 @@ and
 
 
 We will approximate the histogram fluctuation part, $\xi_i(t)$,
-and hence its deviation from the bin average, $\xi_{*i}(t)$,
+%and hence its deviation from the bin average, $\xi_{*i}(t)$,
 as white noise such that
 \begin{equation}
   \langle \xi_{*i}(t) \, \xi_{*i}(t') \rangle
@@ -880,8 +880,7 @@ for some constant $G_i$,
 and $\delta(t)$ is Dirac's delta function.
 %
 We expect the approximation to hold
-for simulations that are
-much longer than the autocorrelation time.
+for simulations much longer than the autocorrelation time.
 
 From Eqs.
 \eqref{eq:vt_diffeq} and \eqref{eq:sh_ave},
@@ -935,8 +934,8 @@ and
 
 From Eqs. \eqref{eq:error_def} and \eqref{eq:xt_solution},
 we can write the total error at the end of period $T$
-as a sum of a residual error, $E_R$ (from the decay of the initial error)
-and an asymptotic error, $E_A$:
+as a sum of a residual error, $E_R(T)$ (from the decay of the initial error)
+and an asymptotic error, $E_A(T)$:
 %
 \begin{align}
   \Err(T)
@@ -999,7 +998,7 @@ or, equivalently, the curve, $q(t)$.
 %  \label{eq:error_equil_sbin}
 %\end{equation}
 %
-Our aim is to find the $q(t)$
+We wish to find the $q(t)$
 that minimizes this error.
 %
 It is convenient to
@@ -1070,8 +1069,8 @@ We now determine the optimal value of $q(T)$,
 which was previously held fixed.
 %
 This is equivalent to choosing a value of $t_0$
-\big[because $q(T) = \ln\bigl(1 + \frac{T}{t_0}\bigr)$,
-from the $t = 0$ case of Eq. \eqref{eq:expqt}\big].
+because $q(T) = \ln\bigl(1 + \frac{T}{t_0}\bigr)$
+from the $t = 0$ case of Eq. \eqref{eq:expqt}.
 %
 Using Eq. \eqref{eq:alpha_invt1} in
 Eqs. \eqref{eq:ER_sbin} and \eqref{eq:EA_sbin}
@@ -1131,7 +1130,7 @@ Multiple-bin updating scheme}
 
 
 
-We now turn to a general multiple-bin updating scheme.
+We now turn to the general multiple-bin updating scheme.
 %
 By definition, Eq. \eqref{eq:mbin_update},
 a visit to bin $j = i(t)$ in this case results in updates of the bias potential
@@ -1775,14 +1774,15 @@ we have, from Eq. \eqref{eq:xt_solution} [with $T\to T_0, q(t) \to a_0 \, t$],
   &=
   \tilde u_k \, e^{-\lambda_k \, a_0 \, T_0}
   ,
-  \notag \\
-  \operatorname{var} \tilde v_k(0)
-  &=
-  \frac 1 2 \, \Gamma_k \, \lambda_k \, a_0
-  \left( 1 - e^{-2 \, \lambda_k \, a_0 \, T_0} \right)
-  ,
-  \label{eq:xtvar}
+  \label{eq:xt_eql}
   \\
+  %\operatorname{var} \tilde v_k(0)
+  %&=
+  %\frac 1 2 \, \Gamma_k \, \lambda_k \, a_0
+  %\left( 1 - e^{-2 \, \lambda_k \, a_0 \, T_0} \right)
+  %,
+  %\label{eq:xtvar}
+  %\\
   \left\langle \tilde v_k^2(0) \right\rangle
   &=
   %\operatorname{var} \tilde v_k(0) + \zeta_k^2
@@ -1790,7 +1790,7 @@ we have, from Eq. \eqref{eq:xt_solution} [with $T\to T_0, q(t) \to a_0 \, t$],
   \frac 1 2 \, \Gamma_k \, \lambda_k \, a_0
   +
   \epsilon_k \, e^{-2 \, \lambda_k \, a_0 \, T_0}
-  .
+  ,
   \label{eq:xt2_eql}
 \end{align}
 %
@@ -1807,7 +1807,7 @@ we find that
 the optimal $q(T)$ satisfies
 %
 \begin{align}
-  \eta\bigl( q(T) \bigr)
+  \Delta\bigl( q(T) \bigr)
   &\equiv
   \frac{ M\bigl( q(T) \bigr) } { T }
     \int_0^{q(T)} M(q') \, d q'
@@ -2009,8 +2009,8 @@ by solving Eq. \eqref{eq:opt_qT}.\cite{*[{We
   We solved the equation for $\ln q(T)$
   to avoid negative values of $q(T)$,
   and imposed a lower bound,
-  $\bigl|\eta\bigl(q(T)\bigr)/q(T)\bigr|$, for
-  $\eta'\bigl(q(T)\bigr)$
+  $\bigl|\Delta\bigl(q(T)\bigr)/q(T)\bigr|$, for
+  $\Delta'\bigl(q(T)\bigr)$
   in computing its change.
   The initial value was given by
   $q(T) = \ln\left(1+\frac{1}{2}T\,a_0\right)$.}]
@@ -2190,7 +2190,7 @@ translationally-invariant.
 By morphing the window function
 but preserving the translational invariance,
 we can design a homogeneous updating scheme
-that is more effective in error control
+that is more convenient in error control
 than the Gaussian updating scheme.
 %
 %whose updating matrix can be
@@ -2217,10 +2217,11 @@ is given by\cite{bussi2006}
 %
 %We discuss this strategy in detail below.
 As shown below,
-the optimized updating scheme will spare the need to
-go through the general procedure in Sec. \ref{sec:procedure}
-because the optimal schedule is given by
-the inverse-time formula.
+the optimized updating scheme
+allows the optimal schedule to coincide with
+the inverse-time formula,
+and thus spare the need to
+go through the general procedure in Sec. \ref{sec:procedure}.
 
 
 
@@ -2338,8 +2339,8 @@ By Eqs. \eqref{eq:w_from_phi} and
   = \lambda_1 \, \delta_{ij}
   ,
 \end{align*}
-which is essentially the diagonal updating matrix
-that represents the single-bin updating scheme.
+which is a multiple of the identity updating matrix
+that defines the single-bin updating scheme.
 %
 %This demonstrates the asymptotic optimality of
 %the single-bin updating scheme.
@@ -2408,7 +2409,7 @@ In effect, each updating step of the bandpass updating scheme
 is equivalent to a single-bin updating step,
 Eq. \eqref{eq:wl_update},
 followed by a filtering step
-that completely removes the components of the noise modes of $k \ge K$
+that eliminates the components of the noise modes of $k \ge K$
 from the bias potential.
 %
 %The asymptotic error is then
@@ -2498,9 +2499,9 @@ Polynomial bandpass updating scheme}
 Here we consider a class of bandpass updating schemes
 constructed from a sequence of orthogonal polynomials.
 %
-These updating schemes are more intuitive
+The resulting polynomial bandpass updating schemes are more intuitive
 than the homogeneous bandpass updating scheme
-as the former expresses the bias potential as
+in that the former express the bias potential as
 a simple polynomial of the collective variable.
 
 \subsubsection{Orthogonal polynomial basis}
@@ -2529,8 +2530,8 @@ where the overline denotes the average for the distribution, $\rho(z)$.
 %
 The first few members are
 \begin{align*}
-  R_0(z) = 1,
-  R_1(z) = \frac{z - \overline{z}}{\sigma_z},
+  R_0(z) = 1, \;
+  R_1(z) = \frac{z - \overline{z}}{\sigma_z}, \;
   R_2(z) = \frac{ (z - \overline{z})^2 - \sigma_z^2 } {\kappa_z},
 \end{align*}
 %
@@ -2578,7 +2579,7 @@ as a superposition of the orthogonal polynomials
   \label{eq:uz_decomp}
 \end{equation}
 %
-with the coefficients updated as
+with the variable coefficients updated as
 %
 \begin{equation}
   c_k(t+1) = c_k(t) + \alpha(t) \, R_k\bigl( z(t) \bigr)
@@ -2629,7 +2630,7 @@ was recommended for the optimal convergence of $c_1$.\cite{pellegrini2014}
 In practical applications,
 the LLR algorithm is often applied simultaneously
 to an array of adjacent intervals
-to cover a wide range of the collective variable, $z$.
+to cover a wide range of the collective variable, $z$.\cite{langfeld2012, pellegrini2014}
 %
 %In this way, attempts to move out of the current interval
 %are not necessarily rejected,
@@ -2662,41 +2663,17 @@ and thus we will assume a small width, $\sigma_z$.
 %
 Because the Gaussian distribution has no hard boundaries
 as in the previous case,
-we need to use
+we need to use,
 in addition to the linear mode,
 $R_1(z) = (z - z_c)/\sigma_z$,
 a quadratic one,
 $R_2(z) = \bigl[(z - z_c)^2 - \sigma_z^2\bigr] /\left(\sqrt 2 \, \sigma_z^2\right)$,
 to restrict the sampling region.
 %
-The bias potential is thus
-quadratic\cite{maragliano2006, *abrams2008, zhu2012, neuhaus2006, *neuhaus2007},
-which is common in umbrella sampling
+The bias potential is thus quadratic,
+which is common in umbrella sampling\cite{maragliano2006, *abrams2008, zhu2012}
 and the Gaussian ensemble method\cite{hetherington1987,
-*challa1988, *costeniuc2006}.
-
-Upon convergence,
-the parameters, $c_1$ and $c_2$,
-can be related to the local slope and curvature of the PMF
-[cf. Eq. \eqref{eq:Vi_target}].
-%
-By Eq. \eqref{eq:uz_decomp}, we have
-\begin{equation}
-  u(z) = c_0 + \frac{c_1}{\sigma_z} (z - z_c)
-  + \sqrt 2 \, c_2 \left[ \frac{(z-z_c)^2}{2 \, \sigma_z^2} - \frac{1}{2} \right]
-  .
-  \label{eq:u_age}
-\end{equation}
-Thus, we can interpret
-$c_1/\sigma_z$ as the mean force around $z_c$.
-%
-The coefficient
-$\sqrt{2} \, c_2$ represents the relative ``pressure''
-to restrain the width of the distribution to
-be the same as the target Gaussian,
-and it would exceed $1$ in a barrier region
-where the PMF is locally concave,
-i.e. $-d^2\ln p(z)/dz^2 < 0$.
+*challa1988, *costeniuc2006, neuhaus2006, *neuhaus2007}.
 
 
 
@@ -2735,44 +2712,32 @@ is the Gaussian given in Eq. \eqref{eq:rho_Gaussian}.
   is flat.}
 %
 To sample this distribution, we give each umbrella
-an independent bias potential, $u^{(s)}(z)$,
-of the form of Eq. \eqref{eq:u_age},
+an independent bias potential of the form of Eq. \eqref{eq:uz_decomp},
+%
+\begin{equation}
+  %u^{(s)}(z)
+  u(s, z)
+  = \hat c_0^{(s)}
+  + \frac{c_1^{(s)}}{\sigma_z^{(s)}} \bigl(z - z_c^{(s)}\bigr)
+  + \sqrt 2 \, c_2^{(s)} \frac{\bigl(z-z_c^{(s)}\bigr)^2}
+  {2 \, \bigl( \sigma_z^{(s)} \bigr)^2}
+  ,
+  \label{eq:u_age}
+\end{equation}
+%
+with $\hat c_0^{(s)} \equiv c_0^{(s)} - c_2^{(s)}/\sqrt 2$,
 and update the coefficients as
-\begin{align*}
+%
+\begin{align}
   c_k^{(s)}(t+1) = c_k^{(s)}(t)
   + \frac{ \alpha(t) } { \rho_s } \, R_k^{(s)}\bigl( z(t) \bigr) \,
     \delta_{s, s(t)}
   ,
-\end{align*}
+  \label{eq:ck_age_update}
+\end{align}
 %
 where $s(t)$ is the umbrella at time $t$.
 %
-Since $R_0^{(s)}(z) = 1$,
-the parameter, $c_0^{(s)}$,
-serves as the bias potential
-for inter-umbrella transitions,
-and it is updated according to the single-bin updating scheme.\cite{li2007}
-%
-With a small width, $\sigma_z^{(s)}$, the converged
-$c_0^{(s)}$ as a function of $z_c^{(s)}$
-also serves as a good approximation of
-the negative PMF, $\ln p(z)$.\cite{maragliano2006, *abrams2008}
-%
-Thus, we have\cite{park2007, *nguyen2013, *zhang2015st}
-\begin{equation}
-  c_0^{(s+1)} - c_0^{(s)}
-  \approx
-  \frac{1}{2}\left(
-    \frac{ c_1^{(s+1)} } { \sigma_z^{(s+1)} }
-    +
-    \frac{ c_1^{(s)} } { \sigma_z^{(s)} }
-  \right)
-  \left(
-  z_c^{(s+1)} - z_c^{(s)}
-  \right)
-  .
-  \label{eq:c0_est}
-\end{equation}
 
 In the expanded ensemble,
 inter-umbrella transitions can be handled via the frameworks of
@@ -2807,16 +2772,12 @@ A(s \to s') =
 \end{align}
 where $z(t)$ is the current value of $z$.
 %
-%and upon convergence, $\exp c_1^{(s)}$ should be proportional to
-%the partition function,
-%$\int e^{-\beta \, \Phi(\mathbf x)-u^{(s)}(z(\mathbf x),t)} \, d\mathbf x$,
-%as in simulated tempering,
-%where
-%$\beta = 1/(k_B T)$ is the inverse temperature,
-%$\mathbf x$ denotes the internal degrees of freedoms,
-%and
-%$\Phi(\mathbf x)$ is the unbiased potential energy.
-%
+In this case,
+the parameter, $c_0^{(s)}$,
+serves as the bias potential
+for inter-umbrella transitions,
+and it is updated by Eq. \eqref{eq:ck_age_update},
+much like in the single-bin updating scheme.\cite{li2007}
 
 Since the bandpass updating schemes are a straightforward extension
 of the single-bin updating scheme,
@@ -2857,6 +2818,80 @@ to include the intra-umbrella fluctuations.
 %should be computed from only the first $K$ modes,
 %where the histogram flattening was performed
 
+Upon convergence,
+the parameters, $c_k^{(s)}$,
+can be approximately related to the PMF.
+By Eqs. \eqref{eq:Vi_target} and \eqref{eq:rho_Gaussian}, we have
+\begin{align*}
+  u(s, z)
+  \approx
+  \ln p(z)
+  +
+  \frac{ \bigl(z - z_c^{(s)} \bigr)^2 }
+  { 2 \, \bigl( \sigma_z^{(s)} \bigr)^2 }
+  +
+  \mathrm{const.}
+\end{align*}
+%
+Comparing this to Eq. \eqref{eq:u_age}, we get
+\begin{align*}
+  \hat c_0^{(s)}
+  &\approx \ln p\bigl(z_c^{(s)}\bigr) + \mathrm{const.}
+  ,
+  \\
+  c_1^{(s)}
+  &\approx \left. \frac{d \ln p(z) } { d z } \right|_{z = z_c^{(s)}}
+  ,
+  \\
+  \frac{
+    \sqrt 2 \, c_2^{(s)} - 1
+  } { \bigl( \sigma_c^{(s)} \bigr)^2 }
+  &\approx \left. \frac{d^2 \ln p(z) } { d z^2 } \right|_{z = z_c^{(s)}}
+  ,
+\end{align*}
+%
+Thus,
+the converged $c_0^{(s)}$ as a function of $z_c^{(s)}$
+approximates the negative PMF, $\ln p(z)$;\cite{maragliano2006, *abrams2008}
+$c_1^{(s)}/\sigma_z^{(s)}$
+approximates the mean force at $z = z_c^{(s)}$.
+%
+and $\sqrt{2} \, c_2^{(s)}$,
+serving as the relative ``pressure''
+to restrain the width of the distribution,
+would exceed $1$ in a barrier region
+where the PMF is locally concave,
+i.e. $-d^2\ln p(z)/dz^2 < 0$.
+%
+%
+We also have approximately\cite{park2007, *nguyen2013, *zhang2015st}
+\begin{equation}
+  \hat c_0^{(s+1)} - \hat c_0^{(s)}
+  \approx
+  \frac{1}{2}\left(
+    \frac{ c_1^{(s+1)} } { \sigma_z^{(s+1)} }
+    +
+    \frac{ c_1^{(s)} } { \sigma_z^{(s)} }
+  \right)
+  \left(
+  z_c^{(s+1)} - z_c^{(s)}
+  \right)
+  .
+  \label{eq:c0_est}
+\end{equation}
+%
+%and upon convergence, $\exp c_1^{(s)}$ should be proportional to
+%the partition function,
+%$\int e^{-\beta \, \Phi(\mathbf x)-u^{(s)}(z(\mathbf x),t)} \, d\mathbf x$,
+%as in simulated tempering,
+%where
+%$\beta = 1/(k_B T)$ is the inverse temperature,
+%$\mathbf x$ denotes the internal degrees of freedoms,
+%and
+%$\Phi(\mathbf x)$ is the unbiased potential energy.
+%
+
+
 We summarize the method as the following procedure.
 
 \begin{enumerate}
@@ -2869,8 +2904,8 @@ We summarize the method as the following procedure.
     and
     the width, $\sigma_z^{(s)}$, to be a constant, $\sigma_z$.
     For the polynomial coefficients, we can set
-    $c_1^{(s)}/\sigma_z^{(s)}$ to some estimated mean force, $f_z$,
-    $c_0^{(s)} = f_z \bigl[ z_c^{(s)} - \frac{1}{2}(z_{\min} + z_{\max}) \bigr]$
+    $c_1^{(s)}/\sigma_z^{(s)}$ to some estimated mean force, $\eta_z$,
+    $c_0^{(s)} = \eta_z \bigl[ z_c^{(s)} - \frac{1}{2}(z_{\min} + z_{\max}) \bigr]$
     by Eq. \eqref{eq:c0_est},
     and $c_2^{(s)} = 0$.
 
@@ -3017,7 +3052,8 @@ The deviation of the bias potential was calculated from
 Eqs. \eqref{eq:v_def} and \eqref{eq:x_def},
 and the error from Eq. \eqref{eq:error_def},
 with the reference bias potential
-pre-calculated from a longer simulation.
+pre-calculated from a longer simulation
+under the single-bin updating scheme.
 %
 We repeated each simulation multiple times
 and report the averages.
@@ -3156,8 +3192,8 @@ we found that the inverse-time schedule
 failed to reduce to the errors in the $k = 9$ to $31$ modes adequately.
 %
 By a delayed reduction,
-the optimal schedule more effectively reduced
-the error in these modes,
+the optimal schedule reduced
+more error in these modes,
 and produced a flatter profile
 (The remaining unevenness of the profile
 might be due to errors of the estimated values of
@@ -4128,28 +4164,28 @@ share the same variance.
 %  .
 %\end{equation*}
 %
-Then, from Eq. \eqref{eq:xtvar}, we get
+Then, from Eqs. \eqref{eq:xt_eql} and \eqref{eq:xt2_eql}, we have
 %
 \begin{equation}
   \operatorname{var} {\tilde u}_k
   =
   \operatorname{var} {\tilde v}_{k}
-  =
+  \approx
   \frac{1}{2} \, \Gamma_k \, \lambda_k \, a_0
-  \left( 1 - e^{-2 \, \lambda_k \, a_0 \, T_0} \right)
-  .
+  %\left( 1 - e^{-2 \, \lambda_k \, a_0 \, T_0} \right)
+  ,
 \label{eq:varXt}
 \end{equation}
 %
+for a sufficiently long period, $T_0$.
 %where we have used the fact that the ensemble average of ${\tilde v}_{k}$
 %is zero in the second step.
 %
 The variance, $\operatorname{var} \tilde u_k$, can be computed
 by trajectory averaging in a long simulation.
 %
-In practice, Eq. \eqref{eq:varXt} would fail for a near zero eigenvalue.
-%
-So it is best used for the single-bin updating scheme.%\footnote{Alternatively,
+Note that Eq. \eqref{eq:varXt} would fail for a near zero, $\lambda_k$,
+and it is best used for the single-bin updating scheme.%\footnote{Alternatively,
 %  we can split the trajectory into blocks,
 %  compute $\Gamma_k$ from the histogram fluctuation of each block
 %  using Eq. \eqref{eq:Fk2_Gammak},
@@ -4512,7 +4548,7 @@ to find the window function.
 For a periodic variable,
 we will take into account the two-fold degeneracy
 and modify Eq. \eqref{eq:lambda_bandpass}
-by setting $\lambda_{n-K-1}, \dots, \lambda_{n-1}$
+by setting $\lambda_{n-K+1}, \dots, \lambda_{n-1}$
 also to $1$.
 %
 Then, $\mu_l = \mathrm{sinr}(K, l, n)$ and $w_{ij} = \mu_{i-j}$,

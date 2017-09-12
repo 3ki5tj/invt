@@ -62,13 +62,13 @@ set size 1, ht2
 set ytics 5
 set mytics 5
 set yrange [-19:-6]
-set ylabel "{/Times-Italic c}@_{/Times 0}^{/Times ({/Times-Italic s})} - {/Symbol-Oblique b}_{/Times-Italic c }{/Times-Italic E@_{c}^{/Times  ({/Times-Italic s})}}" offset 0.0, -0.5
+set ylabel '{/Times-Italic ~c{0.2\^}}@_{/Times 0}^{/Times ({/Times-Italic s})} - {/Symbol-Oblique b}_{/Times-Italic c }{/Times-Italic E@_{c}^{/Times  ({/Times-Italic s})}}' offset 0.0, -0.5
 
 bc = 1.42525373
-shiftlnz = 7600
+shiftlnz = 7599.57
 
 plot [:][:] \
-    "../../data/pt/pt2gaus_L64b.dat" u 2:($6-bc*$2-shiftlnz) w p pt 6 lc "black" notitle, \
+    "../../data/pt/pt2gaus_L64b.dat" u 2:($6-$5/sqrt(2)-bc*$2-shiftlnz) w p pt 6 lc "black" notitle, \
     "../../data/pt/lng_L64b.dat"     u 1:($2-bc*$1)      w l ls 2 t ""
 
 

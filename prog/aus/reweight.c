@@ -9,7 +9,7 @@
 const char *fndat = "pt2gaus.dat";
 const char *fnhis = "pt2gaus.his";
 int n; /* number of Gaussians */
-double *ave, *sig, *c1, *c2, *lnz, *cnt;
+double *ave, *sig, *c1, *c2, *c0, *cnt;
 double xcmin, xcmax, delx;
 double *hist, *htot, *lng, *lngs;
 int xmin, xmax, dx, xn;
@@ -31,11 +31,11 @@ static int getdatinfo(const char *fn)
   xnew(sig, n);
   xnew(c1, n);
   xnew(c2, n);
-  xnew(lnz, n);
+  xnew(c0, n);
   xnew(cnt, n);
   for ( i = 0; i < n; i++ ) {
     fgets(buf, sizeof buf, fp);
-    sscanf(buf, "%d%lf%lf%lf%lf%lf", &i1, &ave[i], &sig[i], &c1[i], &c2[i], &lnz[i]);
+    sscanf(buf, "%d%lf%lf%lf%lf%lf", &i1, &ave[i], &sig[i], &c1[i], &c2[i], &c0[i]);
     cnt[i] = 0;
   }
   xcmin = ave[0];
@@ -113,7 +113,7 @@ static void reweight(void)
 
   for ( ix = 0; ix < xn; ix++ ) {
     /* compute the density of states
-     * g[ix] = htot[ix] / Sum_i cnt[i] exp(-ui[ix]-lnz[i]) */
+     * g[ix] = htot[ix] / Sum_i cnt[i] exp(-ui[ix]-c0[i]) */
     lng[ix] = lnden = LN0;
     x = xmin + ix * dx;
     if ( htot[ix] <= 0 ) continue;
@@ -122,7 +122,7 @@ static void reweight(void)
       dxi = (x - ave[i])/sig[i];
       ui = c1[i] * dxi + c2[i] * (dxi*dxi - 1) / SQRT2;
       //printf("ix %d, x %g, i %d, dxi %g, c1 %g, c2 %g, ui %g, lnden %g\n", ix, x, i, dxi, c1[i], c2[i], ui, lnden); // getchar();
-      lnden = lnadd(lnden, log(cnt[i]) - ui - lnz[i]);
+      lnden = lnadd(lnden, log(cnt[i]) - ui - c0[i]);
     }
     lng[ix] = log(htot[ix]) - lnden;
     //printf("ix %d, lnden %g, htot %g, lng %g\n", ix, lnden, htot[ix], lng[ix]); // getchar();
@@ -222,18 +222,19 @@ static double seekcrit(const double *arr, int *x1, int *x2, double *shift)
     lns = lnadd(lns, y);
   }
   lns += log(dx);
-  /* normalize lnz at the critical temperature */
+  /* normalize c0 at the critical temperature */
   {
     int i;
+    double sqrt2 = sqrt(2);
     lns2 = LN0;
     for ( i = 0; i < n; i++ ) {
-      y = lnz[i] - bc * ave[i] - lns;
+      y = c0[i] - c2[i]/sqrt2 - bc * ave[i] - lns;
       lns2 = lnadd(lns2, y);
-      //printf("i %d, lnz %g, bc %g, ave %g, %g\n", i, lnz[i], bc, ave[i], y);
+      //printf("i %d, c0 %g, bc %g, ave %g, %g\n", i, c0[i], bc, ave[i], y);
     }
     lns2 += log(delx);
   }
-  printf("lns for normalization %g (lng), %g (lnz)\n", lns, lns + lns2);
+  printf("lns for normalization %g (lng), %g (c0hat)\n", lns, lns + lns2);
   *shift = lns;
   return bc;
 }
