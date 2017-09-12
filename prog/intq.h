@@ -76,7 +76,8 @@ static void intq_setqgrid(intq_t *intq, double qT)
 
 
 
-/* compute the integrand for `intq` */
+/* compute the integrand for `intq`
+ * return the square-root mass function */
 static double intq_getmassx(intq_t *intq, double dq,
     double *massK)
 {
@@ -89,7 +90,7 @@ static double intq_getmassx(intq_t *intq, double dq,
     y = intq->gamma[k] * lam * lam * exp( 2 * lam * dq );
     mass += y;
     if ( kc <= 0 || k < kc || (pbc && k > n - kc) ) {
-      *massK += y; /* for mode limited optimal schedule */
+      *massK += y; /* for mode-limited optimal schedule */
     }
   }
 
@@ -242,7 +243,8 @@ static double intq_reserr(intq_t *intq, double a0, const double *xerr, double qT
 
 /* compute the error components */
 __inline static double intq_errcomp(intq_t *intq, double a0,
-    double qT, double *xerr, double *xerr_r, double *xerr_a)
+    double qT, const double *xerr0,
+    double *xerr, double *xerr_r, double *xerr_a)
 {
   int k, j, m = intq->m, n = intq->n;
   double err_r, err_a, err;
@@ -255,7 +257,9 @@ __inline static double intq_errcomp(intq_t *intq, double a0,
     gam = intq->gamma[k];
 
     /* residual error */
-    err_r = 0.5 * a0 * gam * lam * exp(-2.0 * lam * qT);
+    err_r = 0.5 * a0 * gam * lam;
+    if ( xerr0 != NULL ) err_r += xerr0[k];
+    err_r *= exp(-2.0 * lam * qT);
 
     /* asymptotic error */
     err_a = 0;
@@ -834,10 +838,11 @@ static double esterror_opt(double T, double a0,
 
 /* return the square-root error from the optimal schedule */
 static double esterror_optx(double T, double a0,
-    double *xerr, double *qT, double qprec,
+    double *xerr0, double *qT, double qprec,
     int m, intq_t **intq_ptr,
     int n, int kc, int pbc,
     const double *lambda, const double *gamma,
+    double *xerr,
     int verbose)
 {
   intq_t *intq;
@@ -847,10 +852,15 @@ static double esterror_optx(double T, double a0,
 
   /* compute the optimal schedule and error */
   if ( *qT <= 0 ) {
-    *qT = intq_optqTx(intq, a0, xerr, qprec, verbose);
+    *qT = intq_optqTx(intq, a0, xerr0, qprec, verbose);
     //printf("qT %g\n", *qT); getchar();
   }
-  err = intq_geterrx(intq, a0, xerr, *qT);
+  err = intq_geterrx(intq, a0, xerr0, *qT);
+
+  if ( xerr != NULL ) {
+    /* compute the error components */
+    intq_errcomp(intq, a0, *qT, xerr0, xerr, NULL, NULL);
+  }
 
   if ( intq_ptr != NULL ) {
     *intq_ptr = intq;

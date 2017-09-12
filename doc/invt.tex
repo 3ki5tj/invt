@@ -2291,12 +2291,13 @@ we can use the Cauchy-Schwarz inequality,\footnote{This
   %\notag \\
   %& \qquad \qquad \qquad
   \!\!=
-  \Biggl\{
+  \Biggl[
     \sum_{k = 1}^{n-1} \Gamma_k
-      \Bigl[
+      \Bigl(
         1 - e^{ -\lambda_k \, q(T) }
-      \Bigr]
-  \Biggr\}^{\!2}
+      \Bigr)
+  \Biggr]^{\!2}
+  \!\!
   .
   \notag
   %\label{eq:CSineq}
@@ -2333,7 +2334,7 @@ By Eqs. \eqref{eq:w_from_phi} and
 \eqref{eq:eig_orthonormal_cols}, we have
 \begin{align*}
   w_{ij}
-  = \frac{1}{\rho_i} \sum_{k=0}^{n-1} \lambda_1 \phi_{ki} \phi_{kj}
+  = \frac{1}{\rho_i} \sum_{k=0}^{n-1} \lambda_1 \, \phi_{ki} \, \phi_{kj}
   = \lambda_1 \, \delta_{ij}
   ,
 \end{align*}
@@ -2530,14 +2531,12 @@ The first few members are
 \begin{align*}
   R_0(z) = 1,
   R_1(z) = \frac{z - \overline{z}}{\sigma_z},
-  R_2(z) = \frac{ (z - \overline{z})^2 - \sigma_z^2 }
-  {\sqrt{\overline{\left[
-    (z - \overline z)^2 - \sigma_z^2
-  \right]^2 }}}
-  ,
+  R_2(z) = \frac{ (z - \overline{z})^2 - \sigma_z^2 } {\kappa_z},
 \end{align*}
 %
-where $\sigma_z \equiv \sqrt{\overline{\left(z - \overline z\right)^2}}$.
+where $\sigma_z \equiv \sqrt{\overline{\left(z - \overline z\right)^2}}$,
+and
+$\kappa_z \equiv \sqrt{\overline{\left[  (z - \overline z)^2 - \sigma_z^2  \right]^2 }}$.
 %
 We can readily verify that the eigenvectors satisfy
 Eqs. \eqref{eq:eig_orthonormal_cols}, \eqref{eq:eig_orthonormal_rows},
@@ -3051,9 +3050,9 @@ to ensure a reasonable acceptance ratio.
 
 
 
-As shown in Table \ref{tab:lj_error},
-both the optimal and potentially sub-optimal inverse-time schedules
-reduced the error significantly.
+Both the optimal and potentially sub-optimal inverse-time schedules
+reduced the error significantly,
+as shown in Table \ref{tab:lj_error}.
 %
 The errors roughly matched the predicted values
 calculated using the pre-computed
@@ -3107,12 +3106,12 @@ in discussing the optimal schedule.
     %\hline
     Gaussian & $1/t$
     & $6.7(7.8)\times10^{-3}$
-    & $1.8(2.6)\times10^{-5}$
+    & $1.8(2.2)\times10^{-5}$
     \\
     %\hline
     Gaussian & optimal
     & $6.7(7.8)\times10^{-3}$
-    & $2.9(3.7)\times10^{-6}$
+    & $2.9(3.6)\times10^{-6}$
     \\
     %\hline
     Bandpass & $1/t$
@@ -3129,7 +3128,7 @@ was more complex than the inverse-time one,
 and the former lay above the latter,
 in agreement with the discussion in Appendix \ref{sec:schedule_geometry}.
 %
-Since our equilibration run was sufficiently long,
+Since our equilibration phase was sufficiently long,
 the initial updating magnitude, $\alpha(0)$,
 was around the ideal value of $a_0/2 = 5\times10^{-5}$
 [cf. Eq. \eqref{eq:half_alpha0}].
@@ -3154,17 +3153,15 @@ $\langle \tilde v_k^2 \rangle$'s,
 by Eqs. \eqref{eq:gft_def} and \eqref{eq:wband_eigenvector_refl}
 (Fig. \ref{fig:lj_xerr}),
 we found that the inverse-time schedule
-reduced the updating magnitude too quickly,
-leaving a hump on the error profile
-for the $k = 9$ to $31$ modes.
+failed to reduce to the errors in the $k = 9$ to $31$ modes adequately.
 %
 By a delayed reduction,
 the optimal schedule more effectively reduced
 the error in these modes,
 and produced a flatter profile
-(the remaining unevenness of the profile
+(The remaining unevenness of the profile
 might be due to errors of the estimated values of
-$\Gamma_k$'s and $\epsilon_k$'s).
+$\Gamma_k$'s and $\epsilon_k$'s.)
 %
 However, the gain of using the optimal schedule
 diminished for shorter simulations,

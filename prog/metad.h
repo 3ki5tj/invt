@@ -46,6 +46,7 @@ typedef struct {
   double *vc; /* corrected */
   intq_t *intq;
   double eiref, efref; /* estimated errors */
+  double *xeiref, *xefref; /* error profile */
 } metad_t;
 
 
@@ -124,6 +125,12 @@ static metad_t *metad_open(int imin, int imax, int idel,
   xnew(metad->vft, n);
   metad->intq = NULL;
   metad->eiref = metad->efref = 0;
+  xnew(metad->xeiref, n);
+  xnew(metad->xefref, n);
+  for ( i = 0; i < n; i++ ) {
+    metad->xeiref[i] = 0;
+    metad->xefref[i] = 0;
+  }
   return metad;
 }
 
@@ -162,6 +169,8 @@ static void metad_close(metad_t *metad)
   if ( metad->intq != NULL ) {
     intq_close( metad->intq );
   }
+  free(metad->xeiref);
+  free(metad->xefref);
   free(metad);
 }
 
@@ -557,11 +566,11 @@ __inline static void metad_getgamma_tmat(metad_t *metad, double dt,
 }
 
 /* estimate the components of the systematic bias error */
-__inline static double *metad_estxerr(metad_t *metad,
-    const double *v, double alpha0, double T0, double *err0)
+__inline static void metad_estxerr(metad_t *metad,
+    const double *v, double alpha0, double T0, double *xerr, double *err0)
 {
   int k, n = metad->n;
-  double vk, *xerr;
+  double vk;
 
   /* estimate the minimum and maximum */
   //double vmin, vmax; vmin = vmax = metad->vref[0];
@@ -575,17 +584,16 @@ __inline static double *metad_estxerr(metad_t *metad,
 
   getcosmodes(v, n, metad->vft, metad->costab);
 
-  xnew(xerr, n);
   *err0 = 0;
   for ( k = 1; k < n; k++ ) {
     //double vest = sqrt(8)/(M_PI*M_PI*k*k) * (vmax - vmin);
-    vk = metad->vft[k] * exp(-metad->lambda[k]*alpha0*T0);
+    vk = metad->vft[k];
+    vk = vk * vk - 0.5 * metad->gamma[k] * metad->lambda[k] * alpha0;
+    vk *= exp(-2*metad->lambda[k]*alpha0*T0);
     //if (i < 20) printf("i %d, lambda %g, vk %g, %g\n", i, metad->lambda[i], v, metad->vft[i]);
-    xerr[k] = vk * vk;
+    xerr[k] = vk;
     *err0 += xerr[k];
   }
-  //getchar();
-  return xerr;
 }
 
 
@@ -595,8 +603,8 @@ static void metad_getalphaerr(metad_t *metad, int opta, double T,
     const double *vest, double alpha0, double T0, double *qT,
     double qprec, int nint, const char *fnalpha)
 {
-  double *gamma = metad->gamma, t0 = 2/alpha0, y, *xerr0, err0 = 0;
-  int n = metad->n;
+  double *gamma = metad->gamma, t0 = 2/alpha0, y, *xerr0;
+  int i, n = metad->n;
 
   if ( gammethod == GAMMETHOD_LOAD ) {
     if ( loadgamma(n, gamma, fngamma) != 0 )
@@ -608,21 +616,28 @@ static void metad_getalphaerr(metad_t *metad, int opta, double T,
   }
 
   /* estimate the initial systematic error */
-  xerr0 = metad_estxerr(metad, vest, alpha0, T0, &err0);
+  xnew(xerr0, n);
+  metad_estxerr(metad, vest, alpha0, T0, xerr0, &metad->eiref);
 
-  y = esterror_eql(alpha0, n, NULL, metad->lambda, gamma);
-  metad->eiref = y * y + err0;
+  for ( i = 0; i < n; i++ ) {
+    y = 0.5 * gamma[i] * metad->lambda[i] * alpha0;
+    metad->xeiref[i] = xerr0[i] + y;
+    metad->eiref += y;
+  }
+
+  //y = esterror_eql(alpha0, n, NULL, metad->lambda, gamma);
+  //metad->eiref = y * y + err0;
 
   if ( opta ) {
     y = esterror_optx(T, alpha0, xerr0, qT, qprec,
     //y = esterror_opt(T, alpha0, 0, qT, qprec,
         nint, &metad->intq, n, -1, metad->pbc,
-        metad->lambda, gamma, 0);
+        metad->lambda, gamma, metad->xefref, 0);
     /* save the optimal schedule to file */
     intq_save(metad->intq, 1.0, t0, 0, fnalpha);
   } else {
     y = esterror_invt_x(T, 1.0, alpha0, t0, n, NULL, NULL,
-        xerr0, NULL, NULL, NULL, metad->lambda, gamma);
+        xerr0, metad->xefref, NULL, NULL, metad->lambda, gamma);
   }
   free(xerr0);
   metad->efref = y * y;

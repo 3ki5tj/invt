@@ -188,12 +188,12 @@ static int metad_save_cmvar(metad_t *metad,
   fprintf(fp, "# %ld\n", cmi->cnt);
   for ( k = 1; k < n; k++ ) {
     uk = metad->vft[k];
-    fprintf(fp, "%d %g %g %g %g %g %g %g %g %g\n", k,
+    fprintf(fp, "%d %g %g %g %g %g %g %g %g %g %g %g\n", k,
         cmf->uvar[k], cmf->uave[k] - uk,
         cmi->uvar[k], cmi->uave[k] - uk,
         ccf->uvar[k], ccf->uave[k] - uk,
         cci->uvar[k], cci->uave[k] - uk,
-        uk);
+        uk, metad->xefref[k], metad->xeiref[k]);
   }
   fclose(fp);
   return 0;
