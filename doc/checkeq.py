@@ -95,7 +95,10 @@ def listeq(s, tag, pref):
 
     # check if this line is in a comment
     if not incomment(s, pos):
-      ls += [ name, ]
+      if name in ls:
+        print "the name %s has already been defined in %s" % (name, pat)
+      else:
+        ls += [ name, ]
 
     pos += len(tag)
   return ls

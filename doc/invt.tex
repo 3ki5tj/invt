@@ -701,7 +701,7 @@ and the deviation of the bias potential as
   for small $v_{*i}$.}%
 %
 Below we will use the notations ``$\bav{}$'' and ``$_{*i}$''
-for other quantities.
+for other variables.
 %
 The total error is then given by
 %
@@ -866,16 +866,17 @@ and
 \end{equation}
 
 
-We will approximate the histogram fluctuation part, $\xi_i(t)$,
+We will approximate the histogram fluctuation part, $\xi_{*i}(t)$,
 %and hence its deviation from the bin average, $\xi_{*i}(t)$,
 as white noise such that
+%
 \begin{equation}
   \langle \xi_{*i}(t) \, \xi_{*i}(t') \rangle
   = G_i \, \delta(t - t')
   ,
-  \notag
-  %\label{eq:G_def}
+  \label{eq:Gi_def}
 \end{equation}
+%
 for some constant $G_i$,
 and $\delta(t)$ is Dirac's delta function.
 %
@@ -910,7 +911,7 @@ The formal solution of Eq. \eqref{eq:dxdt_singlebin} is
   +
   \int_0^T
     \dot{\theta}\bigl( q(t) \bigr) \, \xi_{*i}(t) \, dt,
-  \label{eq:xt_solution}
+  \label{eq:vi_solution}
 \end{equation}
 %
 where
@@ -932,7 +933,9 @@ and
 
 
 
-From Eqs. \eqref{eq:error_def} and \eqref{eq:xt_solution},
+From Eqs. \eqref{eq:error_def},
+\eqref{eq:vi_solution}, and
+\eqref{eq:Gi_def},
 we can write the total error at the end of period $T$
 as a sum of a residual error, $E_R(T)$ (from the decay of the initial error)
 and an asymptotic error, $E_A(T)$:
@@ -1045,8 +1048,8 @@ Then, by using Eq. \eqref{eq:theta_def}, we have
 \label{eq:expqt}
 \end{equation}
 %
-where $t_0$ and $c$ are two constants,
-and the latter has been determined
+where $t_0$ is some constant,
+and the previous constant, $c$, has been determined
 from the $t = T$ case
 in the second step.
 %
@@ -1079,13 +1082,14 @@ yields
   \Err_R(T)
   &= \frac{ \Err(0) \, t_0^2 } { (T + t_0)^2 }
   ,
-  \notag
+  &
+  %\notag
   %\label{eq:ER_sbin1}
   \\
   \Err_A(T)
   &= \frac{ \Gamma \, T } { (T + t_0)^2 }
   ,
-  \label{eq:EA_sbin1}
+  %\label{eq:EA_sbin1}
 \end{align}
 %
 and the total has a minimum of
@@ -1284,7 +1288,7 @@ with eigenvalue $1$:
   %\label{eq:w_balance}
 \end{equation}
 %
-We will label this eigenvector by $k = 0$,
+We will label this eigenvector by index $k = 0$,
 and
 %
 \begin{equation}
@@ -1428,7 +1432,8 @@ for $k > 0$.
 %becomes more complicated and it often
 %involves a compromise among eigenmodes.
 %
-The formal solution is given by
+The formal solution of Eq. \eqref{eq:vt_diffeq_mbin}
+is given by
 \begin{equation}
   \tilde v_k(T)
   =
@@ -1437,7 +1442,7 @@ The formal solution is given by
   \int_0^T
     \dot{\theta}_k\bigl( q(t) \bigr) \, \tilde\xi_k(t) \, dt
   ,
-  \label{eq:xt_solution}
+  \label{eq:vk_solution}
 \end{equation}
 where
 \begin{equation}
@@ -1561,7 +1566,7 @@ and summing $t$ from $-\infty$ to $\infty$ yields,
   \label{eq:Gammak_sum}
 \end{equation}
 This shows the equivalence of
-Eq. \eqref{eq:EA_sbin1} and \eqref{eq:error_asym}
+Eq. \eqref{eq:EA_sbin} and \eqref{eq:error_asym}
 in the case of the single-bin updating scheme, with $\lambda_k \equiv 1$.
 %In Appendix \ref{sec:Gamma_measure},
 %we discuss a way of estimating $\Gamma_k$
@@ -1767,7 +1772,7 @@ for $T_0$ steps.
 %
 If the initial bias potential
 before the preliminary run is zero,
-we have, from Eq. \eqref{eq:xt_solution} [with $T\to T_0, q(t) \to a_0 \, t$],
+we have, from Eq. \eqref{eq:vk_solution} [with $T\to T_0, q(t) \to a_0 \, t$],
 %
 \begin{align}
   \left\langle {\tilde v}_k(0) \right\rangle
@@ -3378,7 +3383,7 @@ in agreement with a previous study\cite{wang2001pre}.
 Since umbrellas were relatively narrow,
 the logarithmic density of states, $\ln g(E)$,
 was roughly captured
-by $c_0^{(s)}$ as a function of $E_c^{(s)}$,
+by $\hat c_0^{(s)}$ as a function of $E_c^{(s)}$,
 as shown Fig. \ref{fig:pt_hist}(b).
 %
 As discussed in Sec. \ref{sec:age},
@@ -3410,7 +3415,7 @@ as shown in Fig. \ref{fig:pt_hist}(d).
     and the reweighted distribution
     at the critical temperature, $\beta_c$ (dashed line).
     %
-    (b) $c_0^{(s)}$ against $E_c^{(s)}$ (circles)
+    (b) $\hat c_0^{(s)}$ against $E_c^{(s)}$ (circles)
     roughly agreed with the logarithmic density of states,
     $\ln g(E)$ (dashed line).
     In either case,
@@ -3568,10 +3573,10 @@ While this is justified in the asymptotic regime,
 where the updating magnitude is small
 and the sampling is a quasi-equilibrium one,\cite{
   zhou2005, morozov2007, zhou2008, barducci2008, dama2014}
-our analysis is inapplicable
-to early stages of a simulation
+it is invalid in
+early stages of a simulation
 and we still have to resort to the WL stage-by-stage
-technique even for the bandpass updating schemes.
+technique even for the single-bin and bandpass updating schemes.
 %the random error,
 %which is roughly proportional to
 %the square root of the updating magnitude\cite{
@@ -3590,9 +3595,10 @@ the estimation of a few parameters
 in a sufficiently long run
 under a constant updating magnitude,
 whereas the gain of using the optimal schedule
-can sometimes be rather modest,
-especially for relatively short simulations,
-even if the noise is largely local in nature.
+can sometimes be rather modest
+for relatively short simulations,
+even if the histogram fluctuation is largely
+local noise.
 %
 Finally, the adaptive Gaussian ensemble method
 introduced in Sec. \ref{sec:age} may still need refinement
@@ -4037,7 +4043,8 @@ Thus the inverse updating magnitude
 increases more slowly
 in the Gaussian updating scheme
 than in the single-bin updating scheme,
-and the updating magnitude is larger in the former case.
+resulting in a larger updating magnitude
+in the former case.
 
 The schedule, $\alpha(t)$,
 also defines a variable transformation from
@@ -4603,13 +4610,14 @@ $w_{ij} = \mathrm{sinr}(K, i-j, 2 \, n) + \mathrm{sinr}(K, i+j-1, 2 \, n)$.
 Histogram fluctuation}
 
 
-Here we first review the relation
-between the histogram fluctuation and the error
-in a long FDS simulation under the single-bin updating scheme.
+Here we first relate the error
+in a long FDS simulation under the single-bin updating scheme
+to a measure of histogram fluctuation,
+which can be used in the WL criterion of stage transitions.
 %
-We then give a measure of the overall histogram fluctuation
-that can be used in the WL criterion of stage transitions
-for the polynomial bandpass updating schemes.
+We then modify the measure
+such that it applies to
+the polynomial bandpass updating schemes.
 
 %\subsection{Histogram fluctuation and error}
 
