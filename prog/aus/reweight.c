@@ -120,9 +120,9 @@ static void reweight(void)
     for ( i = 0; i < n; i++ ) {
       if ( cnt[i] <= 0 ) continue;
       dxi = (x - ave[i])/sig[i];
-      ui = c1[i] * dxi + c2[i] * (dxi*dxi - 1) / SQRT2;
+      ui = c0[i] + c1[i] * dxi + c2[i] * (dxi*dxi - 1) / SQRT2;
       //printf("ix %d, x %g, i %d, dxi %g, c1 %g, c2 %g, ui %g, lnden %g\n", ix, x, i, dxi, c1[i], c2[i], ui, lnden); // getchar();
-      lnden = lnadd(lnden, log(cnt[i]) - ui - c0[i]);
+      lnden = lnadd(lnden, log(cnt[i]) - ui);
     }
     lng[ix] = log(htot[ix]) - lnden;
     //printf("ix %d, lnden %g, htot %g, lng %g\n", ix, lnden, htot[ix], lng[ix]); // getchar();
@@ -189,10 +189,12 @@ static double seekcrit(const double *arr, int *x1, int *x2, double *shift)
     } else {
       ir = ix;
     }
-    beta = (arr[ix + 1] - arr[ix]) / dx;
-    w = (htot[ix] + htot[ix+1]) / 2;
-    bc += beta * w;
-    sw += w;
+    if ( htot[ix] > 0 && htot[ix+1] > 0 ) {
+      beta = (arr[ix + 1] - arr[ix]) / dx;
+      w = (htot[ix] + htot[ix+1]) / 2;
+      bc += beta * w;
+      sw += w;
+    }
   }
   bc /= sw;
   im = (il + ir)/2;
@@ -228,13 +230,13 @@ static double seekcrit(const double *arr, int *x1, int *x2, double *shift)
     double sqrt2 = sqrt(2);
     lns2 = LN0;
     for ( i = 0; i < n; i++ ) {
-      y = c0[i] - c2[i]/sqrt2 - bc * ave[i] - lns;
+      y = c0[i] - c2[i]/sqrt2 - bc * ave[i];
       lns2 = lnadd(lns2, y);
       //printf("i %d, c0 %g, bc %g, ave %g, %g\n", i, c0[i], bc, ave[i], y);
     }
     lns2 += log(delx);
   }
-  printf("lns for normalization %g (lng), %g (c0hat)\n", lns, lns + lns2);
+  printf("lns for normalization %g (lng), %g (c0hat)\n", lns, lns2);
   *shift = lns;
   return bc;
 }

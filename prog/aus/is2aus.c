@@ -56,7 +56,8 @@ __inline static int is2_wolff_mod(is2_t *is,
 
   enew = is->E + 2 * s * h;
   dv = 2 * s * h * c2 * ((enew + is->E)/2 - Eave);
-  if ( dv <= 0 || rand01() < exp(-dv) ) {
+  //if ( dv <= 0 || rand01() < exp(-dv) ) {
+  if ( metroacc(dv) ) {
     is->E += 2 * s * h;
     is->M -= 2 * s * cnt;
     return 1;
@@ -101,7 +102,8 @@ static void is2_aus(is2_t *is, double Eave, double Esig,
       /* compute the change of bias potential */
       edev = (enew + is->E)/2 - Eave;
       dv = 2 * h * (c1 + c2 * edev);
-      if ( dv <= 0 || rand01() < exp(-dv) ) {
+      //if ( dv <= 0 || rand01() < exp(-dv) ) {
+      if ( metroacc(dv) ) {
         IS2_FLIP(is, id, h);
         nacc++;
       }

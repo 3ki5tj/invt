@@ -34,6 +34,7 @@ var npulses = 0;
 var histplot = null;
 var c1plot = null;
 var c2plot = null;
+var c0plot = null;
 
 function getparams()
 {
@@ -149,7 +150,6 @@ function potts_wolff_mod(b1, b2, Eave)
     return 0;
   }
 }
-
 
 function paint()
 {
@@ -317,16 +317,17 @@ function updatec1plot()
 }
 
 
+var sqrt2 = Math.sqrt(2);
 
 function updatec2plot()
 {
   var i, j, ntp = age.n;
   // prepare the header
-  var dat = "Energy,c2\n";
+  var dat = "Energy,sqrt(2)*c2\n";
 
   // fill in the energy histogram data
   for ( j = 0; j < ntp; j++ ) {
-    dat += "" + age.ave[j] + "," + age.c2[j] + "\n";
+    dat += "" + age.ave[j] + "," + (age.c2[j]*sqrt2) + "\n";
   }
 
   if ( c2plot === null ) {
@@ -334,7 +335,7 @@ function updatec2plot()
     var w = h * 3 / 2;
     var options = {
       xlabel: "<small>Energy</small>",
-      ylabel: "<small><i>c</i><sub>2</sub></small>",
+      ylabel: "<small>&radic;2 <i>c</i><sub>2</sub></small>",
       axisLabelFontSize: 10,
       xRangePad: 2,
       drawPoints: true,
@@ -347,6 +348,45 @@ function updatec2plot()
     c2plot.updateOptions({file: dat});
   }
 }
+
+function updatec0plot()
+{
+  var i, j, ntp = age.n, xn = age.xn;
+  // prepare the header
+  var dat = "Energy,c0,ln pc(E)\n";
+  var bc = betac;
+
+  if ( age.reweight() > 0 ) {
+    bc = age.seekcrit();
+  }
+  // fill in the energy histogram data
+  //for ( i = 0; i < xn; i++ ) {
+  //  
+  //}
+  for ( j = 0; j < ntp; j++ ) {
+    var y = age.c0[j] - age.c2[j]/sqrt2 - bc*age.ave[j] - age.shiftc0hat;
+    dat += "" + age.ave[j] + "," + y + "\n";
+  }
+
+  if ( c0plot === null ) {
+    var h = grab("animationbox").height / 2 - 5;
+    var w = h * 3 / 2;
+    var options = {
+      xlabel: "<small>Energy</small>",
+      ylabel: "<small><i>c</i><sub>0</sub> - <i>c</i><sub>2</sub>/&radic;2 - <i>&beta;<sub>c</sub>E<sub>c</sub></i></small>",
+      axisLabelFontSize: 10,
+      xRangePad: 2,
+      drawPoints: true,
+      pointSize: 2,
+      width: w,
+      height: h
+    };
+    c0plot = new Dygraph(grab("c0plot"), dat, options);
+  } else {
+    c0plot.updateOptions({file: dat});
+  }
+}
+
 
 
 
@@ -386,9 +426,10 @@ function pulse()
 
   paint();
   if ( ++npulses % 100 == 0 || swch ) {
-    updatehistplot();
     updatec1plot();
     updatec2plot();
+    updatehistplot();
+    updatec0plot();
   }
 }
 
@@ -431,6 +472,7 @@ function startsimul()
   histplot = null;
   c1plot = null;
   c2plot = null;
+  c0plot = null;
   potts_timer = setInterval(
     function(){ pulse(); },
     timer_interval );
@@ -533,11 +575,16 @@ function resizecontainer(a)
   grab("c2plot").style.width = "" + wr + "px";
   grab("c2plot").style.top = "" + ((h/2) + hcbar) + "px";
   grab("c2plot").style.height = "" + h/2 + "px";
+  c0plot = null;
+  grab("c0plot").style.left = "" + w + "px";
+  grab("c0plot").style.width = "" + wr + "px";
+  grab("c0plot").style.top = "" + ((h/2*2) + hcbar) + "px";
+  grab("c0plot").style.height = "" + h/2 + "px";
   histplot = null;
   grab("histplot").style.left = "" + w + "px";
   grab("histplot").style.width = "" + wr + "px";
   grab("histplot").style.height = "" + h/2 + "px";
-  grab("histplot").style.top = "" + ((h/2)*2 + hcbar) + "px";
+  grab("histplot").style.top = "" + ((h/2)*3 + hcbar) + "px";
 
   grab("tabsrow").style.top = "" + (h + hsbar + hcbar) + "px";
   grab("tabsrow").style.width = "" + wtab + "px";

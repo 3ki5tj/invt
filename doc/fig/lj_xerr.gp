@@ -40,6 +40,10 @@ plot [:][2e-9:1e-2] \
     -1 notitle
 
 
+#    "../../data/lj/rho0.1/xerr_kc20_t1e8.dat"       u 1:($4+$5**2) w lp t "Bandpass, 1/{/Times-Italic t}, initial",
+#    "../../data/lj/rho0.1/xerr_kc20_t1e8.dat"       u 1:($2+$3**2) w lp t "Bandpass, 1/{/Times-Italic t}, final",
+
+
 unset output
 set terminal pop
 reset

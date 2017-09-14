@@ -36,7 +36,8 @@ __inline static int potts2_metro_mod(potts2_t *pt,
   /* compute the change of the bias potential */
   edev = (enew + pt->E)*.5 - Eave;
   dv = h * (b1 + b2 * edev);
-  if ( dv <= 0 || rand01() < exp(-dv) ) {
+  //if ( dv <= 0 || rand01() < exp(-dv) ) {
+  if ( metroacc(dv) ) {
 #ifndef L
     POTTS2_FLIP(pt, id, sn, h);
 #else
@@ -84,7 +85,8 @@ __inline static int potts2_wolff_mod(potts2_t *pt,
   enew = pt->E + h;
   //printf("spin %d, cnt %d, E %d %d %d\n", id0, cnt, pt->E, h, enew);
   dv = h * b2 * ((enew + pt->E)*.5 - Eave);
-  if ( dv <= 0 || rand01() < exp(-dv) ) {
+  //if ( dv <= 0 || rand01() < exp(-dv) ) {
+  if ( metroacc(dv) ) {
     pt->E += h;
     return 1;
   } else { /* reject */
@@ -185,7 +187,7 @@ int main(int argc, char **argv)
 {
   potts2_t *pt;
   int sampmethod = SAMP_METROPOLIS, q = 10;
-  int lnzmethod = 0;
+  //int lnzmethod = 0;
   long nsteps = 0;
   double sig = 1.0;
 #ifndef L
@@ -195,7 +197,7 @@ int main(int argc, char **argv)
 #endif
 
   if ( argc > 1 ) sampmethod = atoi( argv[1] );
-  if ( argc > 2 ) lnzmethod  = atoi( argv[2] );
+  //if ( argc > 2 ) lnzmethod  = atoi( argv[2] );
   if ( argc > 3 ) nsteps     = atol( argv[3] );
   if ( argc > 4 ) sig        = atof( argv[4] );
   if ( argc > 5 ) localmovef = atof( argv[5] );

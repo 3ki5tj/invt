@@ -36,7 +36,8 @@ __inline static int potts2_metro_mod(potts2_t *pt,
   /* compute the change of bias potential */
   edev = (enew + pt->E)*.5 - Eave;
   dv = h * (c1 + c2 * edev);
-  if ( dv <= 0 || rand01() < exp(-dv) ) {
+  //if ( dv <= 0 || rand01() < exp(-dv) ) {
+  if ( metroacc(dv) ) {
     POTTS2_FLIP(pt, id, sn, h);
     return 1;
   }
@@ -78,7 +79,8 @@ __inline static int potts2_wolff_mod(potts2_t *pt,
 
   enew = pt->E + h;
   dv = h * c2 * ((enew + pt->E)*.5 - Eave);
-  if ( dv <= 0 || rand01() < exp(-dv) ) {
+  //if ( dv <= 0 || rand01() < exp(-dv) ) {
+  if ( metroacc(dv) ) {
     pt->E += h;
     return 1;
   } else { /* reject */

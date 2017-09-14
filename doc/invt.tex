@@ -229,7 +229,7 @@ min2007,
 barducci2008, dickson2011, dama2014, poulain2006}
 %
 While an overly slow reduction of the updating magnitude
-is ineffective in restricting the variance of the bias potential,
+can be ineffective in restricting the variance of the bias potential,
 a too rapid reduction often
 converges the bias potential to a wrong value.
 %
@@ -700,9 +700,6 @@ and the deviation of the bias potential as
   We can readily show that the two definitions are equivalent
   for small $v_{*i}$.}%
 %
-Below we will use the notations ``$\bav{}$'' and ``$_{*i}$''
-for other variables.
-%
 The total error is then given by
 %
 \begin{equation}
@@ -713,6 +710,9 @@ The total error is then given by
   .
 \label{eq:error_def}
 \end{equation}
+%
+Below we will use the notations ``$\bav{}$'' and ``$_{*i}$''
+for other variables.
 
 
 
@@ -725,9 +725,9 @@ Differential equation}
 To proceed, we
 approximate the finite difference equation, Eq. \eqref{eq:wl_update},
 by a differential equation\footnote{In
-going to the continuous-time setup,
-we find it more convenient to shift the origin of time by $-1$,
-e.g. the sum $\sum_{i=1}^T$ is mapped to the integral $\int_0^T dt$.}
+  switching to the continuous-time setup,
+  we find it convenient to shift the origin of time by $-1$,
+  e.g. the sum $\sum_{i=1}^T$ is mapped to the integral $\int_0^T dt$.}
 %
 \begin{equation}
   \dot u_i(t)
@@ -1809,7 +1809,8 @@ From Eqs. \eqref{eq:error_res},
 \eqref{eq:xt2_eql},
 and \eqref{eq:error_asym2},
 we find that
-the optimal $q(T)$ satisfies
+the optimal $q(T)$ that minimizes $\Err_R(T) + \Err_A(T)$
+satisfies
 %
 \begin{align}
   \Delta\bigl( q(T) \bigr)
@@ -1916,7 +1917,7 @@ by Eq. \eqref{eq:Lagrangian_const}, %\eqref{eq:mQ_invTa},
   \frac{
     \lambda_k \, \epsilon_k \, e^{-2\lambda_k \, q(T)}
   }{M^2\bigl( q(T) \bigr)}
-  \ge
+  \stackrel{\epsilon_k \to 0}{=\joinrel=\joinrel=}
   \frac{ a_0 }
        { 2 }
   .
@@ -1929,7 +1930,8 @@ The equality in the last step is achievable
 if the initial bias, $\epsilon_k$, is negligible,
 %which is often true if no eigenvalue is close to $0$,
 and in this limit, the optimal initial updating magnitude
-is half of the previous equilibrium value.\note{This factor, $1/2$,
+is half of the value
+in the preliminary run.\note{This factor, $1/2$,
   happens to coincide with the
   recommended reduction factor of the updating magnitude
   at stage transitions
@@ -2150,9 +2152,10 @@ with $g = 1$ for a periodic variable or $2$ otherwise
 
 The optimal schedule of the Gaussian updating scheme
 generally has no simple closed-form expression.
-However, we can show that it always lies above
-the inverse-time schedule
-(cf. Appendix \ref{sec:schedule_geometry}).
+Nonetheless, we can show that it always lies above
+the inverse-time schedule,
+and may assume a roughly exponentially-decaying form
+initially (cf. Appendix \ref{sec:schedule_geometry}).
 
 \begin{figure}[h]\centering
   \makebox[\linewidth][c]{
@@ -2160,7 +2163,7 @@ the inverse-time schedule
   }
   \caption{
     \label{fig:mat}
-    Updating matrices for
+    Updating matrices for two
     homogeneous updating schemes of
     a non-periodic variable ($n = 500$).
     Here $j$ is the current bin,
@@ -2299,9 +2302,9 @@ we can use the Cauchy-Schwarz inequality,\footnote{This
   \!\!=
   \Biggl[
     \sum_{k = 1}^{n-1} \Gamma_k
-      \Bigl(
+      \bigl(
         1 - e^{ -\lambda_k \, q(T) }
-      \Bigr)
+      \bigr)
   \Biggr]^{\!2}
   \!\!
   .
@@ -2533,7 +2536,14 @@ that satisfy
 %
 where the overline denotes the average for the distribution, $\rho(z)$.
 %
-The first few members are
+The first few members are\footnote{The
+  orthogonal polynomials share the same form
+  for different target distributions,
+  but the parameters,
+  $\overline z$,
+  $\sigma_z$,
+  $\kappa_z$, etc.,
+  are determined by the target distribution, $\rho(z)$.}
 \begin{align*}
   R_0(z) = 1, \;
   R_1(z) = \frac{z - \overline{z}}{\sigma_z}, \;
@@ -2545,8 +2555,7 @@ and
 $\kappa_z \equiv \sqrt{\overline{\left[  (z - \overline z)^2 - \sigma_z^2  \right]^2 }}$.
 %
 We can readily verify that the eigenvectors satisfy
-Eqs. \eqref{eq:eig_orthonormal_cols}, \eqref{eq:eig_orthonormal_rows},
-and \eqref{eq:ortho0}.
+Eqs. \eqref{eq:eig_orthonormal_cols}-\eqref{eq:ortho0}.
 %
 \note{For $k = 0$, $R_0(z)$ must be a constant,
   and by the orthonormal condition, we have $R_0(z) = 1$.
@@ -2592,9 +2601,17 @@ with the variable coefficients updated as
   \label{eq:ckupdate}
 \end{equation}
 
-For $k > 0$, $R_k(z)$ is a polynomial of degree $k$ with zero expectation.
+Note that although the target distribution, $\rho(z)$,
+does not explicitly appear in the bias potential, Eq. \eqref{eq:uz_decomp},
+or the updating scheme, Eq. \eqref{eq:ckupdate},
+it affects both via the parameters,
+$\overline z$,
+$\sigma_z$,
+$\kappa_z$, etc.
 %
-Thus, $R_k\bigl(z(t)\bigr)$ roughly
+For $k > 0$, $R_k(z)$ is a polynomial of degree $k$ with zero expectation,
+%
+and $R_k\bigl(z(t)\bigr)$ roughly
 represents the deviation of the $k$th statistical moment
 of the instantaneous distribution
 from its expectation.
@@ -2708,9 +2725,11 @@ is the Gaussian given in Eq. \eqref{eq:rho_Gaussian}.
 \footnote{This method
   should not be confused with the Gaussian updating scheme.
   %
-  In the former case, the bias potential is quadratic
-  and the target distribution is Gaussian in each umbrella,
-  although the inter-umbrella distribution, $\rho_s$, is flat.
+  In the former case, the bias potential, $u^{(s)}(z)$,
+  is quadratic
+  and the conditional intra-umbrella target distribution, $\rho^{(s)}(z)$,
+  is Gaussian,
+  although the marginal inter-umbrella distribution, $\rho_s$, is flat.
   %
   In the latter case, the bias potential is a sum of
   Gaussian functions, and the target distribution
@@ -2720,8 +2739,8 @@ To sample this distribution, we give each umbrella
 an independent bias potential of the form of Eq. \eqref{eq:uz_decomp},
 %
 \begin{equation}
-  %u^{(s)}(z)
-  u(s, z)
+  u^{(s)}(z)
+  %u(s, z)
   = \hat c_0^{(s)}
   + \frac{c_1^{(s)}}{\sigma_z^{(s)}} \bigl(z - z_c^{(s)}\bigr)
   + \sqrt 2 \, c_2^{(s)} \frac{\bigl(z-z_c^{(s)}\bigr)^2}
@@ -2825,10 +2844,11 @@ to include the intra-umbrella fluctuations.
 
 Upon convergence,
 the parameters, $c_k^{(s)}$,
-can be approximately related to the PMF.
+can be related to the PMF.
 By Eqs. \eqref{eq:Vi_target} and \eqref{eq:rho_Gaussian}, we have
 \begin{align*}
-  u(s, z)
+  u^{(s)}(z)
+  %u(s, z)
   \approx
   \ln p(z)
   +
@@ -2839,24 +2859,25 @@ By Eqs. \eqref{eq:Vi_target} and \eqref{eq:rho_Gaussian}, we have
 \end{align*}
 %
 Comparing this to Eq. \eqref{eq:u_age}, we get
-\begin{align*}
+\begin{align}
   \hat c_0^{(s)}
   &\approx \ln p\bigl(z_c^{(s)}\bigr) + \mathrm{const.}
   ,
-  \\
+  \label{eq:c0hat_limit} \\
   c_1^{(s)}
   &\approx \left. \frac{d \ln p(z) } { d z } \right|_{z = z_c^{(s)}}
   ,
-  \\
+  \label{eq:c1_limit} \\
   \frac{
     \sqrt 2 \, c_2^{(s)} - 1
   } { \bigl( \sigma_c^{(s)} \bigr)^2 }
   &\approx \left. \frac{d^2 \ln p(z) } { d z^2 } \right|_{z = z_c^{(s)}}
-  ,
-\end{align*}
+  .
+  \label{eq:c2_limit}
+\end{align}
 %
 Thus,
-the converged $c_0^{(s)}$ as a function of $z_c^{(s)}$
+$\hat c_0^{(s)}$ as a function of $z_c^{(s)}$
 approximates the negative PMF, $\ln p(z)$;\cite{maragliano2006, *abrams2008}
 $c_1^{(s)}/\sigma_z^{(s)}$
 approximates the mean force at $z = z_c^{(s)}$.
@@ -2909,10 +2930,11 @@ We summarize the method as the following procedure.
     and
     the width, $\sigma_z^{(s)}$, to be a constant, $\sigma_z$.
     For the polynomial coefficients, we can set
-    $c_1^{(s)}/\sigma_z^{(s)}$ to some estimated mean force, $\eta_z$,
+    $c_1^{(s)}/\sigma_z^{(s)}$ to some estimated mean force, $\eta_z$;
+    $c_2^{(s)} = 0$;
+    and
     $c_0^{(s)} = \eta_z \bigl[ z_c^{(s)} - \frac{1}{2}(z_{\min} + z_{\max}) \bigr]$
-    by Eq. \eqref{eq:c0_est},
-    and $c_2^{(s)} = 0$.
+    by Eq. \eqref{eq:c0_est}.
 
 \item
   Equilibrate the system at umbrella $s = 1$.
@@ -2920,7 +2942,8 @@ We summarize the method as the following procedure.
 
 \item
   Perform a regular MC or MD step
-  in the current umbrella $s$ under bias potential $u^{(s)}(z, t)$.
+  in the current umbrella $s$ under
+  the bias potential $u^{(s)}(z, t)$.
 
 \item
   Attempt a transition to another umbrella
@@ -2948,8 +2971,7 @@ We summarize the method as the following procedure.
 \end{enumerate}
 
 After simulation,
-we can use the weighted histogram analysis method
-(WHAM)\cite{ferrenberg1988, *ferrenberg1989,
+we can use the multiple histogram method\cite{ferrenberg1988, *ferrenberg1989,
 *kumar1992, *roux1995, *bartels1997, *souaille2001,
 *kobrak2003, *gallicchio2005, *chodera2007,
 *fenwick2008, *kim2011, *shirts2008,
@@ -2966,7 +2988,7 @@ to recover the unbiased distribution,
     \sum_{s=1}^S N^{(s)} \, e^{-u^{(s)}(z)}
   }
   ,
-  \notag
+  \label{eq:WHAM}
 \end{equation}
 %
 where $n^{(s)}(z)$
@@ -3003,7 +3025,7 @@ the distance, $r$, between two particular particles.
 %
 We will assume reduced units in the calculation.
 %
-These particles, labeled as $1$ and $2$,
+The two particular particles, labeled as $1$ and $2$,
 are mutually non-interacting
 but do interact with other particles
 via the pair potential $\varphi(r) = 4 \, \left(r^{-12} - r^{-6}\right)$
@@ -3032,7 +3054,7 @@ which is proportional to the cavity distribution function\cite{hansen}.
 %This distribution is proportional to the cavity distribution function\cite{hansen}.
 %as $y(r) = \left(1 - \frac{1}{N}\right) \, V \, p(r)$\cite{hansen}.
 
-We used adaptive FDS to calculate
+We used biased sampling to calculate
 the PMF from $r = 0$ to half of the box size
 on a grid of size $\delta r = 0.01$ in reduced units.
 %
@@ -3099,10 +3121,6 @@ The errors roughly matched the predicted values
 calculated using the pre-computed
 $\Gamma_k$'s and $\epsilon_k$'s.
 %
-Since the optimal and inverse-time schedules are identical
-in the single-bin and bandpass updating schemes,
-we will assume the Gaussian updating scheme with width $\sigma = 0.2$ below
-in discussing the optimal schedule.
 
 
 \begin{table}[h]
@@ -3165,8 +3183,14 @@ in discussing the optimal schedule.
 
 As shown in Fig. \ref{fig:lj_alpha},
 the optimal schedule for the Gaussian updating scheme
-was more complex than the inverse-time one,
-and the former lay above the latter,
+with width $\sigma = 0.2$
+was more complex than the inverse-time one
+(We chose the Gaussian updating scheme here because
+the optimal and inverse-time schedules were identical
+in the single-bin and bandpass updating schemes.)
+%
+The optimal schedule lay above the inverse-time schedule,
+and its initial decay was roughly exponential,
 in agreement with the discussion in Appendix \ref{sec:schedule_geometry}.
 %
 Since our equilibration phase was sufficiently long,
@@ -3180,12 +3204,13 @@ was around the ideal value of $a_0/2 = 5\times10^{-5}$
   }
   \caption{
     \label{fig:lj_alpha}
-    Optimal schedule of the Gaussian updating scheme.
+    Optimal schedule of a Gaussian updating scheme.
   }
 \end{figure}
 
 The optimal schedule more effectively reduced
-the error than the inverse-time schedule,
+the error than the inverse-time schedule
+for the Gaussian updating scheme,
 as shown in Table \ref{tab:lj_error}.
 %
 By decomposing the error
@@ -3197,7 +3222,7 @@ we found that the inverse-time schedule
 failed to reduce to the errors in the $k = 9$ to $31$ modes adequately.
 %
 By a delayed reduction,
-the optimal schedule reduced
+the optimal schedule removed 
 more error in these modes,
 and produced a flatter profile
 (The remaining unevenness of the profile
@@ -3232,8 +3257,8 @@ which were more similar.
 
 
 For the Gaussian updating scheme,
-the error depended not only the schedule
-but also the width of the Gaussian.
+the error depended not only on the schedule
+but also on the width of the Gaussian.
 %
 Although widening the Gaussian
 can suppress local noise,
@@ -3329,13 +3354,13 @@ the intrinsic distribution is
 the density of states, $g(E)$.
 %
 We spread the Gaussian umbrellas
-of the same width $\sigma_E = L$ over $[-1.8L^2, -0.8L^2]$
+of the same width $\sigma_E^{(s)} = L$ over $[-1.8L^2, -0.8L^2]$
 with an even spacing of $L$.
 %
 For simplicity, only transitions between neighboring
 umbrellas were performed.\footnote{For
   wider umbrellas,
-  one may mix the nearest-neighbor inter-umbrella transitions
+  one may need to mix the nearest-neighbor inter-umbrella transitions
   with some longer-range transitions
   to improve the convergence.}
 %In attempting inter-umbrella transitions,
@@ -3346,7 +3371,7 @@ umbrellas were performed.\footnote{For
 %\note{Here, we need to rerun simulations.}%
 %
 Initially, we set
-$c_1^{(s)} = \tilde \beta_c \, \sigma_E$
+$c_1^{(s)} = \tilde \beta_c \, \sigma_E^{(s)}$
 for all umbrellas
 with $\tilde \beta_c = 1.4$
 being the approximate inverse critical temperature.
@@ -3354,7 +3379,7 @@ being the approximate inverse critical temperature.
 For configuration sampling in each umbrella,
 we used the Wolff algorithm\cite{wolff1989, newman}
 (which was more efficient than the Metropolis algorithm)
-at the inverse temperature, $\beta = c_1^{(s)}/\sigma_E$,
+at the inverse temperature, $\beta = c_1^{(s)}/\sigma_E^{(s)}$,
 followed by a Metropolis step with
 acceptance probability
 $\min\bigl\{1, e^{c_2^{(s)} [R_2(E) - R_2(E')]} \bigr\}$,
@@ -3376,25 +3401,25 @@ The Gaussian histograms were evenly spaced with similar widths as intended,
 %and the overall energy histogram was roughly flat,
 as shown in Fig. \ref{fig:pt_hist}(a).
 %
-We computed the density of states by WHAM,
+We computed the density of states by Eq. \eqref{eq:WHAM},
 and found the critical temperature to be $T_c = 0.70163$,
 in agreement with a previous study\cite{wang2001pre}.
 %
-Since umbrellas were relatively narrow,
+Since Gaussian umbrellas were sufficiently narrow,
+we could readily verify
+Eqs. \eqref{eq:c0hat_limit}-\eqref{eq:c2_limit}:
 the logarithmic density of states, $\ln g(E)$,
 was roughly captured
 by $\hat c_0^{(s)}$ as a function of $E_c^{(s)}$,
-as shown Fig. \ref{fig:pt_hist}(b).
+as shown Fig. \ref{fig:pt_hist}(b);
 %
-As discussed in Sec. \ref{sec:age},
-$c_1^{(s)}/\sigma_E$ roughly represents
+$c_1^{(s)}/\sigma_E^{(s)}$ roughly representing
 the local or statistical temperature, $\beta(E) = d\ln g(E)/dE$,
-and it manifested
-the backbending behavior\cite{kim2006, *kim2007, kim2010}
+manifested the backbending behavior\cite{kim2006, *kim2007, kim2010}
 typical in a first-order phase transition,
-as shown in Fig. \ref{fig:pt_hist}(c).
+as shown in Fig. \ref{fig:pt_hist}(c);
 %
-The coefficient, $\sqrt 2 \, c_2^{(s)}$,
+$\sqrt 2 \, c_2^{(s)}$,
 was indeed above $1.0$
 in the unstable region,
 where $\beta(E)$ is increasing or, equivalently,
@@ -3415,7 +3440,8 @@ as shown in Fig. \ref{fig:pt_hist}(d).
     and the reweighted distribution
     at the critical temperature, $\beta_c$ (dashed line).
     %
-    (b) $\hat c_0^{(s)}$ against $E_c^{(s)}$ (circles)
+    (b) $\hat c_0^{(s)} = c_0^{(s)} - c_2^{(s)}/\sqrt 2$
+    against $E_c^{(s)}$ (circles)
     roughly agreed with the logarithmic density of states,
     $\ln g(E)$ (dashed line).
     In either case,
@@ -3458,9 +3484,9 @@ along a collective variable
 to offset the potential of mean force (PMF)
 and thereby sample a flat distribution.
 %
-The optimal schedule improves the convergence
+The optimal schedule can improve the convergence
 of the bias potential,
-and thus helps minimize the effort
+and thus reduce the effort
 of computing the PMF.
 %They differ by the updating schemes,
 %which specify how the bias potential is modified
@@ -3534,7 +3560,7 @@ for the error control in the long time limit.
 %without a priori assumptions
 %on the smoothness of the PMF.
 %
-This scheme can be generalized to
+The single-bin updating scheme can be generalized to
 a class of bandpass updating schemes,
 which discard a few noise modes
 and are similarly optimal for the non-noise modes.
@@ -3552,7 +3578,7 @@ which allows the bias potential
 to be conveniently expressed as a low-order polynomial.
 %with the coefficients adjusted on-the-fly.
 %
-This construction serves as a generalization
+This construction leads to a generalization
 of the LLR algorithm\cite{langfeld2012, pellegrini2014},
 and hopefully it could be used for
 adaptive parameter adjustment
@@ -3573,10 +3599,10 @@ While this is justified in the asymptotic regime,
 where the updating magnitude is small
 and the sampling is a quasi-equilibrium one,\cite{
   zhou2005, morozov2007, zhou2008, barducci2008, dama2014}
-it is invalid in
+it is inadequate in
 early stages of a simulation
-and we still have to resort to the WL stage-by-stage
-technique even for the single-bin and bandpass updating schemes.
+(This is why we still have to resort to the WL stage-by-stage
+technique even for the single-bin and bandpass updating schemes.)
 %the random error,
 %which is roughly proportional to
 %the square root of the updating magnitude\cite{
@@ -4785,7 +4811,7 @@ and
 $\tilde F_k^{(s)}$
 is the histogram fluctuation of the $k$th mode in umbrella $s$,
 which is the average of $R_k^{(s)}\bigl( z(t) \bigr)$
-for samples in umbrella $s$.
+for the data points in umbrella $s$.
 %If the eigenmodes are made of a sequence of orthogonal polynomials
 %as in Sec. \ref{sec:bandpass_poly},
 %then

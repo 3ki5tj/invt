@@ -44,9 +44,9 @@ set ylabel "{/Times-Italic w_{ij}}" offset 1.5, 0
 set key right top Left reverse font "Times, 22" spacing 1.0
 
 plot [:][-0.:0.045] \
-    "../../data/lj/rho0.1/win_sig0.2.dat"    u ($2):($1==  1?$3:1/0) w l lt 1 lw 2 t "{/Times-Italic j} = 1", \
+    "../../data/lj/rho0.1/win_sig0.2.dat"    u ($2):($1==  1?$3:1/0) w l lt 3 lw 2 t "{/Times-Italic j} = 1", \
     "../../data/lj/rho0.1/win_sig0.2.dat"    u ($2):($1==150?$3:1/0) w l lt 2 lw 2 t "{/Times-Italic j} = 150", \
-    "../../data/lj/rho0.1/win_sig0.2.dat"    u ($2):($1==300?$3:1/0) w l lt 3 lw 2 t "{/Times-Italic j} = 300", \
+    "../../data/lj/rho0.1/win_sig0.2.dat"    u ($2):($1==300?$3:1/0) w l lt 1 lw 2 t "{/Times-Italic j} = 300", \
     "../../data/lj/rho0.1/win_sig0.2.dat"    u ($2):($1==450?$3:1/0) w l lt 4 lw 2 t "{/Times-Italic j} = 450", \
     -1 notitle
 
@@ -58,9 +58,9 @@ set format x "%g"
 set xlabel "{/Times-Italic i}" offset 0, 0.5
 
 plot [:][-0.02:0.09] \
-    "../../data/lj/rho0.1/win_kc20.dat"      u ($2):($1==  1?$3:1/0) w l lt 1 lw 2 t "{/Times-Italic j} = 1", \
+    "../../data/lj/rho0.1/win_kc20.dat"      u ($2):($1==  1?$3:1/0) w l lt 3 lw 2 t "{/Times-Italic j} = 1", \
     "../../data/lj/rho0.1/win_kc20.dat"      u ($2):($1==150?$3:1/0) w l lt 2 lw 2 t "{/Times-Italic j} = 150", \
-    "../../data/lj/rho0.1/win_kc20.dat"      u ($2):($1==300?$3:1/0) w l lt 3 lw 2 t "{/Times-Italic j} = 300", \
+    "../../data/lj/rho0.1/win_kc20.dat"      u ($2):($1==300?$3:1/0) w l lt 1 lw 2 t "{/Times-Italic j} = 300", \
     "../../data/lj/rho0.1/win_kc20.dat"      u ($2):($1==450?$3:1/0) w l lt 4 lw 2 t "{/Times-Italic j} = 450", \
     -1 notitle
 

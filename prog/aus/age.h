@@ -5,6 +5,7 @@
 /* Multiple Gaussian ensembles */
 
 
+#include "mtrand.h"
 #include "mmwl.h"
 
 
@@ -378,7 +379,7 @@ __inline static int age_move(age_t *age, double x, int *id, int local)
   dv += vj - vi;
   //printf("id %d, jd %d, x %g, dv %g(%g), %g(%g), %g; local %d\n",
   //    *id, jd, x, vi, age->c0[*id], vj, age->c0[jd], dv, local);
-  acc = ( dv <= 0 || rand01() < exp(-dv) );
+  acc = metroacc(dv); // ( dv <= 0 || rand01() < exp(-dv) );
   if ( acc ) {
     *id = jd;
   }

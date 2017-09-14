@@ -484,12 +484,13 @@ __inline static int lj_metro(lj_t *lj, int i, double amp,
   }
   du = lj_depot(lj, i, xi, metad, &du6, &du12, &du01, &dvir);
   dux = bet * du + du01;
-  if ( dux < 0 ) {
-    acc = 1;
-  } else {
-    r = rand01();
-    acc = ( r < exp( -dux ) );
-  }
+  //if ( dux < 0 ) {
+  //  acc = 1;
+  //} else {
+  //  r = rand01();
+  //  acc = ( r < exp( -dux ) );
+  //}
+  acc = metroacc(dux);
   if ( acc ) {
     lj_commit(lj, i, xi, du6, du12, dvir);
     return 1;

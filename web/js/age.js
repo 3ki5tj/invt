@@ -50,6 +50,7 @@ function AGE(xcmin, xcmax, delx, sig,
   this.cnt = new Array(n);
   this.acc = new Array(n);
   this.hfl = new Array(n);
+  this.delx = delx;
   for ( i = 0; i < n; i++ ) {
     this.ave[i] = xcmin + i * delx;
     this.sig[i] = sig;
@@ -66,15 +67,17 @@ function AGE(xcmin, xcmax, delx, sig,
   this.xn = xn = (xmax - xmin) / this.dx + 1;
   this.xmax = this.xmin + this.dx * xn;
   this.hist = new Array(n);
-  this.htot = new Array(xn);
   for ( i = 0; i < n; i++ ) {
     this.hist[i] = new Array(xn);
     for ( var j = 0; j < xn; j++ ) {
       this.hist[i][j] = 0.0;
     }
   }
+  this.htot = new Array(xn);
+  this.lng = new Array(xn);
   for ( i = 0; i < xn; i++ ) {
     this.htot[i] = 0.0;
+    this.lng[i] = 0.0;
   }
   this.alphawl = this.alpha0;
   this.t = 0;
@@ -215,4 +218,147 @@ AGE.prototype.move = function(x, id, local)
   }
   return this.id;
 }
+
+var LN0 = -1000000;
+
+// ln(exp(x) + exp(y))
+function lnadd(x, y)
+{
+  if ( x < y ) { // swap x and y
+    var z = y;
+    y = x;
+    x = z;
+  }
+  y -= x;
+  return x + Math.log(1 + Math.exp(y));
+}
+
+/* non-iterative histogram reweighting */
+AGE.prototype.reweight = function()
+{
+  var ix, i, x, dxi, ui, lnden, htot, all = 0;
+  var xn = this.xn, n = this.n, xmin = this.xmin, dx = this.dx;
+
+  for ( ix = 0; ix < xn; ix++ ) {
+    // compute the density of states
+    // g[ix] = htot[ix] / Sum_i cnt[i] exp(-ui[ix]-c0[i])
+    this.lng[ix] = lnden = LN0;
+    x = xmin + ix * dx;
+    htot = 0;
+    for ( i = 0; i < n; i++ ) {
+      htot += this.hist[i][ix];
+    }
+    this.htot[ix] = htot;
+    all += htot;
+    if ( htot <= 0 ) continue;
+    for ( i = 0; i < n; i++ ) {
+      if ( this.cnt[i] <= 0 ) continue;
+      dxi = (x - this.ave[i])/this.sig[i];
+      ui = this.c0[i] + this.c1[i] * dxi + this.c2[i] * (dxi*dxi - 1) / SQRT2;
+      lnden = lnadd(lnden, Math.log(this.cnt[i]) - ui);
+    }
+    this.lng[ix] = Math.log(htot) - lnden;
+    //console.log(ix, this.lng[ix]);
+  }
+  return all;
+}
+
+/* find the peak of arr[i] - x_i * bc in [ileft, iright) */
+function findpeak(arr, bc, ileft, iright, xmin, dx)
+{
+  var x, y, i, imax = ileft, ym = -1e100;
+
+  for ( i = ileft; i < iright; i++ ) {
+    if ( arr[i] <= LN0 ) continue;
+    x = xmin + i * dx;
+    y = arr[i] - x * bc;
+    if ( y > ym ) {
+      ym = y;
+      imax = i;
+    }
+  }
+  return [imax, ym];
+}
+
+/* find the critical inverse temperature */
+AGE.prototype.seekcrit = function()
+{
+  var bc, beta, w, sw, y1, y2, y, lns, lns2;
+  var ix, ix1, ix2, il = -1, ir, im, t, x, ret;
+  var xn = this.xn, n = this.n, dx = this.dx, xmin = this.xmin;
+  var arr = this.lng;
+
+  bc = sw = 0;
+  for ( ix = 0; ix < xn - 1; ix++ ) {
+    if ( arr[ix] <= LN0 || arr[ix+1] < LN0 ) {
+      continue;
+    } else if ( il < 0 ) {
+      il = ix;
+    } else {
+      ir = ix;
+    }
+    if ( this.htot[ix] > 0 && this.htot[ix+1] > 0 ) {
+      beta = (arr[ix + 1] - arr[ix]) / dx;
+      w = (this.htot[ix] + this.htot[ix+1]) / 2;
+      bc += beta * w;
+      sw += w;
+    }
+  }
+  bc /= sw;
+  im = Math.floor((il + ir)/2);
+  console.log(bc, il, ir, im);
+  //return bc;
+
+  // find the two density peaks
+  // util the heights are equal
+  ix1 = il;
+  ix2 = ir;
+  for ( t = 0; t < 10; t++ ) {
+    ret = findpeak(arr, bc, 0,  im, xmin, dx);
+    ix1 = ret[0]; y1 = ret[1];
+    ret = findpeak(arr, bc, im, xn, xmin, dx);
+    ix2 = ret[0]; y2 = ret[1];
+    //printf("%d: bc %g, x %d(%g) %d(%g) | %d(%d) %g\n", t, bc, xmin + ix1*dx, y1, xmin + ix2*dx, y2, xmin + im*dx, im, fabs(y2-y1));
+    console.log(t, bc, ix1, y1, ix2, y2, im);
+    if ( Math.abs(y2-y1) < 1e-14 ) break;
+    bc += (y2 - y1) / ((ix2 - ix1)*dx);
+  }
+  this.bc = bc;
+  this.x1 = xmin + ix1*dx;
+  this.x2 = xmin + ix2*dx;
+  //printf("bc %.8f, T %.8f, x %d %d\n", bc, 1/bc, xmin + ix1*dx, xmin + ix2*dx);
+
+  /* normalize lng at the critical point */
+  lns = LN0;
+  for ( ix = 0; ix < xn; ix++ ) {
+    if ( arr[ix] <= LN0 ) continue;
+    x = xmin + ix * dx;
+    y = arr[ix] - x * bc;
+    lns = lnadd(lns, y);
+  }
+  lns += Math.log(dx);
+  // normalize the density of states
+  for ( ix = 0; ix < xn; ix++ ) {
+    arr[ix] -= lns;
+  }
+
+  // normalize c0 at the critical temperature
+  {
+    lns2 = LN0;
+    for ( var i = 0; i < n; i++ ) {
+      y = this.c0[i] - this.c2[i]/SQRT2 - bc * this.ave[i];
+      lns2 = lnadd(lns2, y);
+      console.log(i, y, lns2);
+      //printf("i %d, c0 %g, bc %g, ave %g, %g\n", i, c0[i], bc, ave[i], y);
+    }
+    lns2 += Math.log(this.delx);
+  }
+  //printf("lns for normalization %g (lng), %g (c0hat)\n", lns, lns + lns2);
+  this.shift = lns;
+  this.shiftc0hat = lns2;
+
+  return bc;
+}
+
+
 
