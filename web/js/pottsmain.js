@@ -351,21 +351,29 @@ function updatec2plot()
 
 function updatec0plot()
 {
-  var i, j, ntp = age.n, xn = age.xn;
+  var i, ix, j, ntp = age.n, xn = age.xn;
+  var x, xmin = age.xmin, dx = age.dx, y, z;
   // prepare the header
-  var dat = "Energy,c0,ln pc(E)\n";
+  var dat = "Energy,c0,lnpc(E)\n";
   var bc = betac;
 
-  if ( age.reweight() > 0 ) {
-    bc = age.seekcrit();
-  }
+  if ( age.reweight() <= 0 ) return;
+  bc = age.seekcrit();
+
   // fill in the energy histogram data
-  //for ( i = 0; i < xn; i++ ) {
-  //  
-  //}
-  for ( j = 0; j < ntp; j++ ) {
-    var y = age.c0[j] - age.c2[j]/sqrt2 - bc*age.ave[j] - age.shiftc0hat;
-    dat += "" + age.ave[j] + "," + y + "\n";
+  i = 0;
+  for ( ix = 0; ix < xn; ix++ ) {
+    x = xmin + dx * ix;
+    if ( i < ntp && Math.abs(x - age.ave[i]) <= 0.5*dx ) {
+      // has c data
+      y = age.c0[i] - age.c2[i]/sqrt2 - bc*age.ave[i] - age.shiftc0hat;
+      i += 1;
+    } else {
+      y = null;
+    }
+    if ( age.lng[ix] <= LN0 || age.htot[ix] <= 10 ) continue;
+    z = age.lng[ix] - bc*x;
+    dat += "" + x + "," + (y != null ? y : "") + "," + z + "\n";
   }
 
   if ( c0plot === null ) {
@@ -377,7 +385,7 @@ function updatec0plot()
       axisLabelFontSize: 10,
       xRangePad: 2,
       drawPoints: true,
-      pointSize: 2,
+      pointSize: 1,
       width: w,
       height: h
     };
@@ -420,7 +428,8 @@ function pulse()
     + ", E/N " + roundto(1.0*potts.E/potts.n, 2) + ", data " + age.cnt[iage]
     + ", &alpha; " + age.getalpha().toPrecision(3) + ", 1/t " + age.invt
     + ", t " + age.t + ", fl " + roundto(age.hfluc, 2)
-    + " (" + roundto(age.flfr[0]*100.0,2) + "%/" + roundto(age.flfr[1]*100.0,2) + "%/" + roundto(age.flfr[2]*100.0,2) + "%)";
+    + " (" + roundto(age.flfr[0]*100.0,2) + "%/" + roundto(age.flfr[1]*100.0,2) + "%/" + roundto(age.flfr[2]*100.0,2) + "%)"
+    + ", &beta;<sub>c</sub> " + age.bc;
   grab("sinfo").innerHTML = sinfo;
   //console.log("t " + age.t + " fl " + age.hfluc + " id " + iage + " E " + potts.E + " c1 " + (age.c1[iage]/esig) + " c2 " + age.c2[iage]);
 
@@ -554,6 +563,7 @@ function resizecontainer(a)
   var hsbar = 30; // height of the global scaling bar
   var hcbar = 40; // height of the control bar
   var htbar = 30; // height of the tabs bar
+  var hplot = h/2.5; // height of a plot
   var wr = h*3/4; // width of the plots
   var wtab = w; // width of the tabs
   var htab = 360;
@@ -569,22 +579,22 @@ function resizecontainer(a)
   grab("c1plot").style.left = "" + w + "px";
   grab("c1plot").style.width = "" + wr + "px";
   grab("c1plot").style.top = "" + (hcbar) + "px";
-  grab("c1plot").style.height = "" + h/2 + "px";
+  grab("c1plot").style.height = "" + hplot + "px";
   c2plot = null;
   grab("c2plot").style.left = "" + w + "px";
   grab("c2plot").style.width = "" + wr + "px";
-  grab("c2plot").style.top = "" + ((h/2) + hcbar) + "px";
-  grab("c2plot").style.height = "" + h/2 + "px";
+  grab("c2plot").style.top = "" + (hplot + hcbar) + "px";
+  grab("c2plot").style.height = "" + hplot + "px";
   c0plot = null;
   grab("c0plot").style.left = "" + w + "px";
   grab("c0plot").style.width = "" + wr + "px";
-  grab("c0plot").style.top = "" + ((h/2*2) + hcbar) + "px";
-  grab("c0plot").style.height = "" + h/2 + "px";
+  grab("c0plot").style.top = "" + (hplot*2 + hcbar) + "px";
+  grab("c0plot").style.height = "" + hplot + "px";
   histplot = null;
   grab("histplot").style.left = "" + w + "px";
   grab("histplot").style.width = "" + wr + "px";
-  grab("histplot").style.height = "" + h/2 + "px";
-  grab("histplot").style.top = "" + ((h/2)*3 + hcbar) + "px";
+  grab("histplot").style.top = "" + (hplot*3 + hcbar) + "px";
+  grab("histplot").style.height = "" + hplot + "px";
 
   grab("tabsrow").style.top = "" + (h + hsbar + hcbar) + "px";
   grab("tabsrow").style.width = "" + wtab + "px";
@@ -599,7 +609,7 @@ function resizecontainer(a)
       c[i].style.height = "" + htab + "px";
     }
   }
-  grab("sinfo").style.top = "" + (h*3/2 + hsbar + hcbar + htbar) + "px";
+  grab("sinfo").style.top = "" + (hplot*4 + hsbar + hcbar + htbar) + "px";
   grab("sinfo").style.left = "" + (wtab + 10) + "px";
   grab("sinfo").style.width = "" + (w + wr - wtab - 20) + "px";
   grab("sinfo").innerHTML = "simulation information";

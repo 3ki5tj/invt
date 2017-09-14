@@ -177,10 +177,23 @@ static int findpeak(const double *arr, double bc, int ileft, int iright, double 
 /* find the critical inverse temperature */
 static double seekcrit(const double *arr, int *x1, int *x2, double *shift)
 {
-  double bc, beta, w, sw, y1, y2, y, lns, lns2;
-  int ix, ix1, ix2, il = -1, ir, im, t, x;
+  double bc = 0, y1, y2, y, lns, lns2;
+  int i, ix, ix1, ix2, il = -1, ir, im, t, x;
 
-  bc = sw = 0;
+  // since c1/sigma is roughly beta, we will estimate the critical temperature
+  // at a point where c1/sigma rises quickest
+  double dbmax = 0, b0, b1, db;
+  for ( i = 0; i < n - 1; i++ ) {
+    b0 = c1[i]/sig[i];
+    b1 = c1[i+1]/sig[i+1];
+    db = (b1 - b0) / (ave[i+1] - ave[i]);
+    if ( db > dbmax ) {
+      dbmax = db;
+      bc = b0;
+      im = (int) ((ave[i] - xmin) / dx);
+    }
+  }
+
   for ( ix = 0; ix < xn - 1; ix++ ) {
     if ( arr[ix] <= LN0 || arr[ix+1] < LN0 ) {
       continue;
@@ -189,19 +202,10 @@ static double seekcrit(const double *arr, int *x1, int *x2, double *shift)
     } else {
       ir = ix;
     }
-    if ( htot[ix] > 0 && htot[ix+1] > 0 ) {
-      beta = (arr[ix + 1] - arr[ix]) / dx;
-      w = (htot[ix] + htot[ix+1]) / 2;
-      bc += beta * w;
-      sw += w;
-    }
   }
-  bc /= sw;
-  im = (il + ir)/2;
-  printf("bc %g, il %d, ir %d, mid %d\n", bc, il, ir, im);
+  printf("estimated bc %g, il %d, ir %d, mid %d\n", bc, il, ir, im);
 
-  /* find the two density peaks
-   * util the heights are equal */
+  /* adjust bc such that the heights are equal */
   ix1 = il;
   ix2 = ir;
   for ( t = 0; t < 10; t++ ) {
@@ -224,18 +228,15 @@ static double seekcrit(const double *arr, int *x1, int *x2, double *shift)
     lns = lnadd(lns, y);
   }
   lns += log(dx);
+  
   /* normalize c0 at the critical temperature */
-  {
-    int i;
-    double sqrt2 = sqrt(2);
-    lns2 = LN0;
-    for ( i = 0; i < n; i++ ) {
-      y = c0[i] - c2[i]/sqrt2 - bc * ave[i];
-      lns2 = lnadd(lns2, y);
-      //printf("i %d, c0 %g, bc %g, ave %g, %g\n", i, c0[i], bc, ave[i], y);
-    }
-    lns2 += log(delx);
+  lns2 = LN0;
+  for ( i = 0; i < n; i++ ) {
+    y = c0[i] - c2[i]/SQRT2 - bc * ave[i];
+    lns2 = lnadd(lns2, y);
+    //printf("i %d, c0 %g, bc %g, ave %g, %g\n", i, c0[i], bc, ave[i], y);
   }
+  lns2 += log(delx);
   printf("lns for normalization %g (lng), %g (c0hat)\n", lns, lns2);
   *shift = lns;
   return bc;

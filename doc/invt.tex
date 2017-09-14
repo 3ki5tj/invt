@@ -1997,9 +1997,9 @@ under a constant updating magnitude, $a_0$.
   multiple of $1.0$.}
 
 \item \label{step:Gamma}
-Estimate $\Gamma_k$'s from Eq. \eqref{eq:varXt}
+Estimate $\Gamma_k$'s
 (cf. Appendix \ref{sec:Gamma_measure})
-as well as the initial bias $\epsilon_k$.\footnote{The
+and the initial bias $\epsilon_k$.\footnote{The
   value of $\tilde u_k$ can be estimated
   from the histogram-corrected bias potential
   by Eq. \eqref{eq:uhatav},
@@ -4113,7 +4113,7 @@ can differ greatly in magnitude
 Then, at a large $\bar q$,
 the sum in Eq. \eqref{eq:mass_func} will be dominated by
 the largest term, where $\lambda_k \approx 1/\bar q$,
-and $m(\bar q) \sim 1/\bar q$,
+and $m(\bar q) \propto M(\bar q) \propto 1/\bar q$,
 and we would expect a roughly exponentially-decaying schedule.
 
 \begin{table}[h]
@@ -4683,10 +4683,12 @@ then the total fluctuation is
   =
   \sum_{i=1}^n
   \frac{ [ H_i(T) -\rho_i]^2 }{\rho_i}
-  .
+  ,
   \notag
   %\label{eq:hfluc_def}
 \end{align}
+%
+where we have used Eq. \eqref{eq:parseval} in the last step.
 %
 From Eq. \eqref{eq:f_xi}, we have
 %$$\bigl\langle \tilde F_k^2(T) \bigr\rangle

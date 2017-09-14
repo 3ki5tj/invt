@@ -51,6 +51,7 @@ function AGE(xcmin, xcmax, delx, sig,
   this.acc = new Array(n);
   this.hfl = new Array(n);
   this.delx = delx;
+  this.bc = c1/sig;
   for ( i = 0; i < n; i++ ) {
     this.ave[i] = xcmin + i * delx;
     this.sig[i] = sig;
@@ -225,9 +226,7 @@ var LN0 = -1000000;
 function lnadd(x, y)
 {
   if ( x < y ) { // swap x and y
-    var z = y;
-    y = x;
-    x = z;
+    var z = y; y = x; x = z;
   }
   y -= x;
   return x + Math.log(1 + Math.exp(y));
@@ -283,12 +282,25 @@ function findpeak(arr, bc, ileft, iright, xmin, dx)
 /* find the critical inverse temperature */
 AGE.prototype.seekcrit = function()
 {
-  var bc, beta, w, sw, y1, y2, y, lns, lns2;
-  var ix, ix1, ix2, il = -1, ir, im, t, x, ret;
+  var bc, beta, y1, y2, y, lns, lns2;
+  var i, ix, ix1, ix2, il = -1, ir, im, t, x, ret;
   var xn = this.xn, n = this.n, dx = this.dx, xmin = this.xmin;
   var arr = this.lng;
 
-  bc = sw = 0;
+  // since c1/sigma is roughly beta, we will estimate the critical temperature
+  // at a point where c1/sigma rises quickest
+  var dbmax = 0;
+  for ( i = 0; i < n - 1; i++ ) {
+    var b0 = this.c1[i]/this.sig[i];
+    var b1 = this.c1[i+1]/this.sig[i+1];
+    var db = (b1 - b0)/(this.ave[i+1] - this.ave[i]);
+    if ( db > dbmax ) {
+      dbmax = db;
+      bc = b0;
+      im = Math.floor((this.ave[i] - this.xmin)/this.dx);
+    }
+  }
+
   for ( ix = 0; ix < xn - 1; ix++ ) {
     if ( arr[ix] <= LN0 || arr[ix+1] < LN0 ) {
       continue;
@@ -297,20 +309,9 @@ AGE.prototype.seekcrit = function()
     } else {
       ir = ix;
     }
-    if ( this.htot[ix] > 0 && this.htot[ix+1] > 0 ) {
-      beta = (arr[ix + 1] - arr[ix]) / dx;
-      w = (this.htot[ix] + this.htot[ix+1]) / 2;
-      bc += beta * w;
-      sw += w;
-    }
   }
-  bc /= sw;
-  im = Math.floor((il + ir)/2);
-  console.log(bc, il, ir, im);
-  //return bc;
 
-  // find the two density peaks
-  // util the heights are equal
+  // adjust the critical temperature util the heights are equal
   ix1 = il;
   ix2 = ir;
   for ( t = 0; t < 10; t++ ) {
@@ -318,17 +319,15 @@ AGE.prototype.seekcrit = function()
     ix1 = ret[0]; y1 = ret[1];
     ret = findpeak(arr, bc, im, xn, xmin, dx);
     ix2 = ret[0]; y2 = ret[1];
-    //printf("%d: bc %g, x %d(%g) %d(%g) | %d(%d) %g\n", t, bc, xmin + ix1*dx, y1, xmin + ix2*dx, y2, xmin + im*dx, im, fabs(y2-y1));
-    console.log(t, bc, ix1, y1, ix2, y2, im);
+    console.log("iter", t, "bc", bc, ix1, y1, ix2, y2, im);
     if ( Math.abs(y2-y1) < 1e-14 ) break;
     bc += (y2 - y1) / ((ix2 - ix1)*dx);
   }
   this.bc = bc;
   this.x1 = xmin + ix1*dx;
   this.x2 = xmin + ix2*dx;
-  //printf("bc %.8f, T %.8f, x %d %d\n", bc, 1/bc, xmin + ix1*dx, xmin + ix2*dx);
 
-  /* normalize lng at the critical point */
+  // normalize lng at the critical point
   lns = LN0;
   for ( ix = 0; ix < xn; ix++ ) {
     if ( arr[ix] <= LN0 ) continue;
@@ -343,17 +342,13 @@ AGE.prototype.seekcrit = function()
   }
 
   // normalize c0 at the critical temperature
-  {
-    lns2 = LN0;
-    for ( var i = 0; i < n; i++ ) {
-      y = this.c0[i] - this.c2[i]/SQRT2 - bc * this.ave[i];
-      lns2 = lnadd(lns2, y);
-      console.log(i, y, lns2);
-      //printf("i %d, c0 %g, bc %g, ave %g, %g\n", i, c0[i], bc, ave[i], y);
-    }
-    lns2 += Math.log(this.delx);
+  lns2 = LN0;
+  for ( i = 0; i < n; i++ ) {
+    y = this.c0[i] - this.c2[i]/SQRT2 - bc * this.ave[i];
+    lns2 = lnadd(lns2, y);
+    //console.log(i, y, lns2);
   }
-  //printf("lns for normalization %g (lng), %g (c0hat)\n", lns, lns + lns2);
+  lns2 += Math.log(this.delx);
   this.shift = lns;
   this.shiftc0hat = lns2;
 
