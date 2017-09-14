@@ -228,7 +228,7 @@ static double seekcrit(const double *arr, int *x1, int *x2, double *shift)
     lns = lnadd(lns, y);
   }
   lns += log(dx);
-  
+
   /* normalize c0 at the critical temperature */
   lns2 = LN0;
   for ( i = 0; i < n; i++ ) {

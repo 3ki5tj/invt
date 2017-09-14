@@ -101,6 +101,7 @@ static double prodrun(invtpar_t *m, metad_t *metad, is2_t *is, int prod, long ns
   int icur, inew, enew;
   double t0;
 
+  metad->winn = 1; // make sure it is single-bin
   metad->a = m->alpha0;
   t0 = 2/metad->a;
   icur = metad_getindex(metad, is->E);
@@ -121,7 +122,7 @@ static double prodrun(invtpar_t *m, metad_t *metad, is2_t *is, int prod, long ns
         metad->a = 1.0/(t + t0);
       }
     }
-    metad_updatev_wl(metad, icur);
+    metad_updatev(metad, icur);
   }
   return metad_geterror(metad);
 }

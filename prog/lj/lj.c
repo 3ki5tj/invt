@@ -275,7 +275,7 @@ static int work(invtpar_t *m)
   double dr, errtrunc, hfl, errc;
   metad_t *metad;
 
-  mtscramble(clock());
+  //mtscramble(clock());
 
   lj = lj_open(np, rho, rcdef);
   lj_energy(lj);

@@ -29,6 +29,7 @@ typedef struct {
   int pbc; /* periodic boundary condition */
   int winn;
   double *win;
+  double *mat; /* explicit updating matrix */
   double *lambda; /* eigenvalues of the updating marix */
   double gaussig;
   int kc;
@@ -50,14 +51,45 @@ typedef struct {
 } metad_t;
 
 
+/* for the homogeneous bandpass updating scheme
+__inline double sinr(double kc, int l, int n) { return (l == 0) ? (2*kc-1.)/n : sin((2*kc-1)*l*M_PI/n)/n/sin(l*M_PI/n); }
+*/
+
+static int metad_savewinmat(metad_t *metad, const char *fn)
+{
+  int i, j, n = metad->n;
+  FILE *fp;
+
+  if ( (fp = fopen(fn, "w")) == NULL ) {
+    fprintf(stderr, "cannot open %s\n", fn);
+    return -1;
+  }
+  fprintf(fp, "# %d %d\n", metad->winn, n);
+  for ( i = 0; i < n; i++ ) {
+    for ( j = 0; j < n; j++ ) {
+      /* verification for the bandpass updating scheme
+      //double y = sinr(metad->kc, i - j, 2*n) + sinr(metad->kc, i+j+1,2*n); // non-pbc
+      double y = sinr(metad->kc, i - j, n); // pbc
+      fprintf(fp, "%d %d %9.6f\n", i+1, j+1, y);
+      */
+      fprintf(fp, "%d %d %9.6f\n", i+1, j+1, metad->mat[i*n+j]);
+    }
+    fprintf(fp, "\n");
+  }
+
+  fclose(fp);
+  return 0;
+}
 
 /* prepare the window function */
 static void metad_prepwin(metad_t *metad,
     double gaussig, int kc, const double *win0, int winn0)
 {
-  int i, n = metad->n, pbc = metad->pbc;
+  int i, j, k, n = metad->n, pbc = metad->pbc;
 
   xnew(metad->win, n);
+  for ( i = 0; i < n; i++ ) metad->win[i] = 0;
+  xnew(metad->mat, n * n);
   if ( gaussig > 0 ) {
     mkgauswin(gaussig, n, pbc, metad->win, &metad->winn);
   } else if ( kc > 0 ) {
@@ -72,10 +104,30 @@ static void metad_prepwin(metad_t *metad,
   /* modify the window function such that all eigenvalues
    * lambda[i] are positive-definite */
   stablizewin(metad->lambda, n, metad->win, &metad->winn, pbc, 0.0, 1);
+
+  /* construct the explicit updating matrix */
+  for ( i = 0; i < n * n; i++ ) metad->mat[i] = 0;
+  for ( i = 0; i < n; i++ ) {
+    metad->mat[i*n + i] += metad->win[0];
+    for ( j = 1; j < metad->winn; j++ ) {
+      /* left neighbor */
+      k = i - j;
+      if ( k < 0 ) k = pbc ? k + n : - k - 1;
+      metad->mat[i*n + k] += metad->win[j];
+      if ( j * 2 == n && pbc ) continue;
+
+      /* right neighbor */
+      k = i + j;
+      if ( k >= n ) k = pbc ? k - n : 2 * n - 1 - k;
+      metad->mat[i*n + k] += metad->win[j];
+    }
+  }
+
   /* save the window kernel */
   savewin(metad->win, metad->winn, "ker.dat");
   /* save the n x n updating matrix */
-  savewinmat(metad->win, metad->winn, n, pbc, "win.dat", 0);
+  //savewinmat(metad->win, metad->winn, n, pbc, "win.dat", 0);
+  metad_savewinmat(metad, "win.dat");
 }
 
 static metad_t *metad_open(int imin, int imax, int idel,
@@ -156,6 +208,7 @@ static void metad_close(metad_t *metad)
   free(metad->v);
   free(metad->h);
   free(metad->win);
+  free(metad->mat);
   free(metad->lambda);
   cmvar_close(metad->cm);
   free(metad->gamma);
@@ -280,32 +333,18 @@ __inline static int metad_wlcheck(metad_t *metad, double fl, double magred)
 
 
 
-__inline static void metad_updatev_wl(metad_t *metad, int i)
-{
-  double amp = metad->n * metad->a;
-  metad->v[i] += amp;
-  metad->h[i] += 1;
-}
-
 /* multiple-bin update */
 __inline static void metad_updatev(metad_t *metad, int i)
 {
-  int j, k, n = metad->n;
-  double amp = metad->n * metad->a;
+  int j, n = metad->n;
+  double amp = metad->n * metad->a, *arr;
 
-  metad->v[i] += amp * metad->win[0];
-  /* update the bias potential at the neighbors */
-  for ( j = 1; j < metad->winn; j++ ) {
-    /* left neighbor */
-    k = i - j;
-    if ( k < 0 ) k = metad->pbc ? k + n : - k - 1;
-    metad->v[k] += amp * metad->win[j];
-    if ( j * 2 == n && metad->pbc ) continue;
-
-    /* right neighbor */
-    k = i + j;
-    if ( k >= n ) k = metad->pbc ? k - n : 2 * n - 1 - k;
-    metad->v[k] += amp * metad->win[j];
+  if ( metad->winn == 1 ) { 
+    metad->v[i] += amp * metad->win[0];
+  } else {
+    arr = metad->mat + i * n;
+    for ( j = 0; j < n; j++ )
+      metad->v[j] += amp * arr[j];
   }
   metad->h[i] += 1;
 }

@@ -342,7 +342,7 @@ static void invt_getalpha(invtdata_t *invt, invtpar_t *m)
 
   if ( m->verbose ) {
     if ( m->opta ) {
-      intq_errcomp(invt->intq, m->alpha0, m->qT, invt->xerr, NULL, NULL);
+      intq_errcomp(invt->intq, m->alpha0, m->qT, NULL, invt->xerr, NULL, NULL);
     }
     dumperror(m->n, invt->lambda, invt->gamma, 2, invt->xerr0, invt->xerr);
   }

@@ -4584,20 +4584,24 @@ and modify Eq. \eqref{eq:lambda_bandpass}
 by setting $\lambda_{n-K+1}, \dots, \lambda_{n-1}$
 also to $1$.
 %
-Then, $\mu_l = \mathrm{sinr}(K, l, n)$ and $w_{ij} = \mu_{i-j}$,
+Then, $\mu_l = \operatorname{sinr}(K, l, n)$ for $l \le b$
+and $w_{ij} = \operatorname{sinr}(K, i-j, n)$,
 where we have defined
 \begin{equation}
-  \mathrm{sinr}(K, l, n)
+  \operatorname{sinr}(K, l, n)
   \equiv
-  \frac{
-    \sin
-    \frac{ (2 K - 1) \, l \, \pi }
-         {              n        }
-  }
-  {
-    n \, \sin \frac{ l \, \pi } { n }
-  }
-  .
+  \begin{dcases}
+    \frac{
+      \sin
+      \frac{ (2 K - 1) \, l \, \pi }
+           {              n        }
+    }
+    {
+      n \, \sin \frac{ l \, \pi } { n }
+    }
+    & l \ne 0, \\
+    \frac{2K-1}{n} & l = 0. 
+  \end{dcases}
 \notag
 %\label{eq:mu_sinc_pbc}
 \end{equation}
@@ -4606,20 +4610,21 @@ where we have defined
 For a non-periodic variable,
 we have $\lambda_n = (-1)^{n-K}$
 from Eqs. \eqref{eq:lambda_bandpass} and \eqref{eq:lambdan},
-and $\mu_l = (-1)^{n-K+l}/(2 \, n) + \mathrm{sinr}(K, l, 2 \, n)$.
+and $\mu_l = (-1)^{n-K+l}/(2 \, n) + \operatorname{sinr}(K, l, 2 \, n)$
+for $l \le b$.
 %\begin{equation}
 %  \mu_l
 %  =
 %  (-1)^{n-K+l} / ( 2 \, n )
 %    +
-%  \mathrm{sinr}(K, l, 2n)
+%  \operatorname{sinr}(K, l, 2n)
 %  .
 %  \notag
 %  %\label{eq:mu_sinc_refl}
 %\end{equation}
 %
 The updating matrix is given by
-$w_{ij} = \mathrm{sinr}(K, i-j, 2 \, n) + \mathrm{sinr}(K, i+j-1, 2 \, n)$.
+$w_{ij} = \operatorname{sinr}(K, i-j, 2 \, n) + \operatorname{sinr}(K, i+j-1, 2 \, n)$.
 %
 \note{$w_{ij}$
   is free from the oscillatory term, $(-1)^{n-K+1}$,

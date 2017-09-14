@@ -264,6 +264,7 @@ __inline static int savewinmat(double *win, int winn,
       /* add contributions from ks[0], ks[1], ks[2] */
       for ( l = 0; l < 3; l++ ) {
         k = ks[l];
+        if ( pbc && k * 2 == -n ) continue;
         if ( k < winn && k > -winn ) {
           if ( k >= 0 ) {
             y += win[k];
@@ -393,6 +394,7 @@ __inline static double *prepwin(double *lambda, int n,
 {
   int i;
 
+  for ( i = 0; i < n; i++ ) win[i] = 0;
   if ( gaussig > 0 ) {
     mkgauswin(gaussig, n, pbc, win, winn);
   } else if ( kc > 0 ) {

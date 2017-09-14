@@ -229,7 +229,7 @@ static void invt_geterr(invtpar_t *m,
   if ( m->fnxerr[0] != '\0' ) {
     if ( m->opta ) {
       /* optimal schedule */
-      intq_errcomp(intq, m->alpha0, qT, xerrf, xerrf_r, xerrf_a);
+      intq_errcomp(intq, m->alpha0, qT, NULL, xerrf, xerrf_r, xerrf_a);
     } else {
       /* inverse-time schedule */
       err0 = esterror_invt_x(T, m->c, m->alpha0, m->t0, m->n,
