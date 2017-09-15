@@ -87,27 +87,39 @@ static int gammrun(invtpar_t *m, metad_t *metad, lj_t *lj, long nsteps)
   long t;
   int ir0, ir;
   double dr, sacc = 0;
+  int hblksz;
 
   metad->a = m->alpha0;
+
+  hblksz = (int)(0.2/metad->a);
+  if ( hblksz <= 0 ) hblksz = 0;
+
   ir0 = dist01(metad, lj, &dr);
 
   fprintf(stderr, "starting gamma run of %ld steps (updating magnitude %g)...%20s\n",
       nsteps, metad->a, "");
   metad_varv_clear(metad);
-  metad_clearav(metad); /* clear the average correction data */
+  metad_hblk_clear(metad);
+  //metad_clearav(metad); /* clear the average correction data */
   for ( t = 1; t <= nsteps; t++ ) {
     sacc += lj_metroblk(lj, metad);
     ir = dist01(metad, lj, &dr);
     metad_updatev(metad, ir);
-    metad_updateav(metad, ir); /* for the average histogram-corrected bias potential */
+    //metad_updateav(metad, ir); /* for the average histogram-corrected bias potential */
     metad->tmat[ir*metad->n + ir0] += 1;
+    metad_hblk_add(metad, ir);
     ir0 = ir;
-    if ( t % m->gam_nstave == 0 )
-      metad_varv_add(metad);
+    if ( t % m->gam_nstave == 0 ) {
+      metad_varv_add(metad, metad->v);
+    }
+    if ( t % hblksz == 0 ) {
+      metad_hblk_dump(metad);
+    }
     if ( t % 10000 == 0 ) fprintf(stderr, "t %ld/%ld = %5.2f%%, acc %.2f%% \r", t, nsteps, 100.*t/nsteps, 100*sacc/t);
     if ( t % nstsave == 0 || t == nsteps ) {
       metad_getgamma_varv(metad, m->alpha0, metad->gamma, "gamma.dat");
       metad_getgamma_tmat(metad, 1, metad->tgamma, "tgamma.dat");
+      metad_getgamma_hblk(metad, metad->hgamma, "hgamma.dat");
       metad_save(metad, fnvbias);
     }
   }
@@ -275,7 +287,7 @@ static int work(invtpar_t *m)
   double dr, errtrunc, hfl, errc;
   metad_t *metad;
 
-  //mtscramble(clock());
+  mtscramble(clock());
 
   lj = lj_open(np, rho, rcdef);
   lj_energy(lj);
@@ -300,7 +312,7 @@ static int work(invtpar_t *m)
     // * bias potential obtained from the gamma run */
     //metad_getalphaerr(metad, m->opta, (double) m->nsteps,
     //    m->gammethod, m->fngamma, m->sampmethod,
-    //    metad->vc, m->alpha0, (double) m->nequil, &m->qT,
+    //    metad->vcorr, m->alpha0, (double) m->nequil, &m->qT,
     //    m->qprec, m->alpha_nint, "alpha_vc.dat");
   }
 
@@ -348,13 +360,13 @@ static int work(invtpar_t *m)
       ave_add(fi, hfli);
       ave_add(eci, erci);
       cmvar_add(cmi, metad->v);
-      cmvar_add(cci, metad->vc);
+      cmvar_add(cci, metad->vcorr);
       errf = prodrun(m, metad, lj, 0, m->nsteps, "vf.dat", &hflf, &ercf);
       ave_add(ef, errf);
       ave_add(ff, hflf);
       ave_add(ecf, ercf);
       cmvar_add(cmf, metad->v);
-      cmvar_add(ccf, metad->vc);
+      cmvar_add(ccf, metad->vcorr);
       printf("%4d: %9.7f %9.7f/%9.7f(%5.2f/%5.2f) %9.7f %9.7f/%9.7f(%5.2f/%5.2f) | %9.7f %9.7f %9.7f %9.7f\n",
           itr, errf, ef->ave, ecf->ave, ef->ave/metad->efref, ecf->ave/metad->efref,
                erri, ei->ave, eci->ave, ei->ave/metad->eiref, eci->ave/metad->eiref,

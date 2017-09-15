@@ -57,7 +57,7 @@ __inline static void cmvar_close(cmvar_t *cm)
 }
 
 /* deposit a vector into the mode */
-__inline static void cmvar_add(cmvar_t *cm, double *v)
+__inline static void cmvar_add(cmvar_t *cm, const double *v)
 {
   double uave, du;
   long cnt = cm->cnt;

@@ -51,12 +51,12 @@ cp vtrunc.dat dr0.01/rho0.1/vref.dat
 
 Single-bin (WL)
 ```
-./lj --try=0 --nequil=100000 --gamnsteps=10000000 --gam=varv
+make && ./lj --rho=0.1 --try=0 --nequil=100000 --gamnsteps=10000000 --gam=varv
 ```
 
 Gaussian
 ```
-./lj --try=0 --nequil=1000000 --gamnsteps=10000000 --gam=varv --sig=0.5 --opta
+make && ./lj --rho=0.1 --try=0 --nequil=1000000 --gamnsteps=10000000 --gam=varv --sig=0.29
 ```
 
 ### Compute the reference value, `vref.dat`
@@ -112,9 +112,12 @@ make -C .. && ../lj --rho=0.1 --gam=load --fngamma=gamma.dat --sig=0.2
 make -C .. && ../lj --rho=0.1 --gam=load --fngamma=gamma.dat --sig=0.2 --opta
 make -C .. && ../lj --rho=0.1 --gam=load --fngamma=gamma.dat --sig=0.5
 make -C .. && ../lj --rho=0.1 --gam=load --fngamma=gamma.dat --sig=0.5 --opta
+
+brun11: make -C .. && ../lj --rho=0.1 --gam=load --fngamma=gamma.dat --sig=0.29
+brun12: make -C .. && ../lj --rho=0.1 --gam=load --fngamma=gamma.dat --sig=0.29 --opta
 ```
 
-drun1-8: rho = 0.1, nsteps = 100000000
+drun: rho = 0.1, nsteps = 100000000
 ```
 make -C .. && ../lj --rho=0.1 --nsteps=100000000 --gam=load --fngamma=gamma.dat --loadxerr
 make -C .. && ../lj --rho=0.1 --nsteps=100000000 --gam=load --fngamma=gamma.dat --loadxerr --kc=20
@@ -124,6 +127,10 @@ make -C .. && ../lj --rho=0.1 --nsteps=100000000 --gam=load --fngamma=gamma.dat 
 make -C .. && ../lj --rho=0.1 --nsteps=100000000 --gam=load --fngamma=gamma.dat --sig=0.2 --opta
 make -C .. && ../lj --rho=0.1 --nsteps=100000000 --gam=load --fngamma=gamma.dat --sig=0.5
 make -C .. && ../lj --rho=0.1 --nsteps=100000000 --gam=load --fngamma=gamma.dat --sig=0.5 --opta
+
+drun10: make -C .. && ../lj --rho=0.1 --nsteps=100000000 --gam=load --fngamma=gamma.dat --kc=26
+drun11: make -C .. && ../lj --rho=0.1 --nsteps=100000000 --gam=load --fngamma=gamma.dat --sig=0.29
+drun12: make -C .. && ../lj --rho=0.1 --nsteps=100000000 --gam=load --fngamma=gamma.dat --sig=0.29 --opta
 ```
 
 # prediction

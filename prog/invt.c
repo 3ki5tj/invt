@@ -66,6 +66,8 @@ __inline static void premeta(const invtpar_t *m, double *gamma)
   int i, n = m->n;
   long t;
   double a, *gamma0;
+  int hblksz = (int)(0.1/m->alpha0);
+  double hgamcnt = 0, *hblk, *hft, *hgamsum;
 
   /* data for sampling */
   invtsamp_t *its;
@@ -79,14 +81,20 @@ __inline static void premeta(const invtpar_t *m, double *gamma)
   cm = cmvar_open(n, m->pbc);
 
   xnew(gamma0, n);
+  xnew(hblk, n);
+  xnew(hft, n);
+  xnew(hgamsum, n);
 
   for ( i = 0; i < n; i++ ) {
     gamma0[i] = gamma[i];
     gamma[i] = 0;
+    hblk[i] = 0;
+    hgamsum[i] = 0;
+    hft[i] = 0;
   }
 
   i = 0;
-  for ( t = 0; t < m->gam_nsteps; t++ ) {
+  for ( t = 1; t <= m->gam_nsteps; t++ ) {
     /* sampling */
     if ( m->tcorr <= 0 || rand01() * m->tcorr < 1 ) {
       invtsamp_step(its, &i);
@@ -99,8 +107,18 @@ __inline static void premeta(const invtpar_t *m, double *gamma)
     its->v[i] += a;
 
     /* accumulate data for variance */
-    if ( (t + 1) % m->gam_nstave == 0 ) {
+    if ( t % m->gam_nstave == 0 ) {
       cmvar_add(cm, its->v);
+    }
+
+    hblk[i] += 1;
+    if ( t % hblksz == 0 ) {
+      for ( i = 0; i < n; i++ ) hblk[i] *= 1.0*n/hblksz;
+      getcosmodes(hblk, n, hft, its->costab);
+      hgamcnt += 1;
+      for ( i = 1; i < n; i++ )
+        hgamsum[i] += hft[i] * hft[i] * hblksz;
+      for ( i = 0; i < n; i++ ) hblk[i] = 0;
     }
   }
 
@@ -109,13 +127,17 @@ __inline static void premeta(const invtpar_t *m, double *gamma)
   fprintf(stderr, "mode    old-gamma    new-gamma\n");
   for ( i = 1; i < n; i++ ) {
     gamma[i] = 2 * cm->uvar[i] / m->alpha0;
-    fprintf(stderr, "%4d %12.6f %12.6f\n", i, gamma0[i], gamma[i]);
+    fprintf(stderr, "%4d %12.6f %12.6f %12.6f\n",
+        i, gamma0[i], gamma[i], hgamsum[i]/hgamcnt);
   }
 
   if ( m->fngamma[0] != '\0' )
     savegamma(n, gamma, m->fngamma);
 
   invtsamp_close(its);
+  free(hft);
+  free(hblk);
+  free(hgamsum);
 }
 
 

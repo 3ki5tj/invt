@@ -83,7 +83,7 @@ static int gammrun(invtpar_t *m, metad_t *metad, is2_t *is)
     metad->tmat[icur*metad->n + iold] += 1;
     iold = icur;
     if ( t % m->gam_nstave == 0 )
-      metad_varv_add(metad);
+      metad_varv_add(metad, metad->v);
   }
 
   /* estimate gamma */

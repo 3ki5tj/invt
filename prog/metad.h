@@ -44,7 +44,11 @@ typedef struct {
   double avcnt;
   double *hav; /* histogram */
   double *vav; /* average */
-  double *vc; /* corrected */
+  double *vcorr; /* corrected bias potential */
+  double *hblk; /* block histogram */
+  double hgamcnt;
+  double *hgamsum; /* gamma sum from block histogram */
+  double *hgamma; /* gamma from block histogram */
   intq_t *intq;
   double eiref, efref; /* estimated errors */
   double *xeiref, *xefref; /* error profile */
@@ -152,14 +156,20 @@ static metad_t *metad_open(int imin, int imax, int idel,
   metad->avcnt = 0;
   xnew(metad->hav, n);
   xnew(metad->vav, n);
-  xnew(metad->vc, n);
+  xnew(metad->vcorr, n);
+  xnew(metad->hblk, n);
+  xnew(metad->hgamma, n);
+  xnew(metad->hgamsum, n);
   for ( i = 0; i < n; i++ ) {
     metad->v[i] = 0;
     metad->h[i] = 0;
     metad->vref[i] = 0;
     metad->hav[i] = 0;
     metad->vav[i] = 0;
-    metad->vc[i] = 0;
+    metad->vcorr[i] = 0;
+    metad->hblk[i] = 0;
+    metad->hgamma[i] = 0;
+    metad->hgamsum[i] = 0;
   }
   metad->a = 1.0 / n;
   metad->pbc = pbc;
@@ -218,7 +228,10 @@ static void metad_close(metad_t *metad)
   free(metad->vft);
   free(metad->vav);
   free(metad->hav);
-  free(metad->vc);
+  free(metad->vcorr);
+  free(metad->hblk);
+  free(metad->hgamma);
+  free(metad->hgamsum);
   if ( metad->intq != NULL ) {
     intq_close( metad->intq );
   }
@@ -472,9 +485,9 @@ __inline static int metad_savegamma(metad_t *metad,
 
 
 /* update the accumulator for computing the gamma */
-__inline static void metad_varv_add(metad_t *metad)
+__inline static void metad_varv_add(metad_t *metad, const double *v)
 {
-  cmvar_add(metad->cm, metad->v);
+  cmvar_add(metad->cm, v);
 }
 
 __inline static void metad_varv_clear(metad_t *metad)
@@ -746,9 +759,49 @@ __inline static void metad_calcav(metad_t *metad, double *vc)
 
 static double metad_geterrav(metad_t *metad, double *erc)
 {
-  metad_calcav(metad, metad->vc);
-  *erc = metad_geterr(metad, metad->vc);
+  metad_calcav(metad, metad->vcorr);
+  *erc = metad_geterr(metad, metad->vcorr);
   return metad_geterr(metad, metad->v);
+}
+
+__inline static void metad_hblk_clear(metad_t *metad)
+{
+  int i, n = metad->n;
+  for ( i = 0; i < n; i++ ) metad->hblk[i] = 0;
+}
+
+__inline static void metad_hblk_add(metad_t *metad, int i)
+{
+  metad->hblk[i] += 1;
+}
+
+__inline static void metad_hblk_dump(metad_t *metad)
+{
+  int i, k, n = metad->n;
+  double tot = 0;
+  for ( i = 0; i < n; i++ ) {
+    tot += metad->hblk[i];
+    metad->hblk[i] *= n;
+  }
+  getcosmodes(metad->hblk, n, metad->vft, metad->costab);
+  metad->hgamcnt += 1;
+  for ( k = 1; k < n; k++ ) {
+    metad->hgamsum[k] += metad->vft[k] * metad->vft[k] / tot;
+  }
+  metad_hblk_clear(metad);
+}
+
+/* compute the autocorrelation integrals (gamma)
+ * from the block histogram */
+__inline static void metad_getgamma_hblk(metad_t *metad,
+    double *gamma, const char *fn)
+{
+  int k, n = metad->n;
+
+  for ( k = 1; k < n; k++ ) {
+    gamma[k] = metad->hgamsum[k] / metad->hgamcnt;
+  }
+  if ( fn != NULL ) metad_savegamma(metad, gamma, 0, fn);
 }
 
 /* save the bias potential to file
@@ -767,7 +820,7 @@ static int metad_save(metad_t *metad, const char *fn)
   dv = v0 - metad_getave(metad, metad->v);
   if ( avcnt > 0 ) {
     dvav = v0 - metad_getave(metad, metad->vav)/avcnt;
-    metad_calcav(metad, metad->vc);
+    metad_calcav(metad, metad->vcorr);
   }
   getcosmodes(metad->v, n, metad->vft, metad->costab);
 
@@ -778,7 +831,7 @@ static int metad_save(metad_t *metad, const char *fn)
         metad->v[i] + dv, metad->h[i], metad->vref[i], metad->vft[i]);
     if ( metad->avcnt > 0 ) {
       fprintf(fp, " %g %g %g",
-          metad->vav[i]/avcnt + dvav, metad->hav[i]/avcnt*n - 1, metad->vc[i]+dvav);
+          metad->vav[i]/avcnt + dvav, metad->hav[i]/avcnt*n - 1, metad->vcorr[i]+dvav);
     }
     fprintf(fp, "\n");
   }
