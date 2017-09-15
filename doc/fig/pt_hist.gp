@@ -51,9 +51,9 @@ set ylabel "Histogram" offset 2.5, -0.5 font "Helvetica, 28"
 
 plot [:][:] \
     "../../data/pt/pt2gaus_L64b.his" u 1:($5 >= 0 ? $2 : 1/0) w l ls 1 t "", \
-    "../../data/pt/lng_L64b.dat"     u 1:($4)                 w l ls 2 t "", \
     -1 notitle
 
+# "../../data/pt/pt2gaus_L64b.his" u 1:($5 < 0  ? ($2*20) : 1/0) w l ls 2 t "", \
 
 
 set origin 0, ht3+ht4
@@ -86,7 +86,8 @@ set ylabel "{/Times-Italic c}@_{/Times 1}^{/Times ({/Times-Italic s})}/{/Symbol-
 
 
 plot [:][:] \
-    "../../data/pt/pt2gaus_L64b.dat" u 2:($4/64) w p pt 6 lc "black" notitle
+    "../../data/pt/pt2gaus_L64b.dat" u 2:($4/64) w p pt 6 lc "black" notitle, \
+    bc w l ls 2 t ""
 
 
 #    "../../data/pt/lng_L64b.dat"     u 1:($1 < -3200 ? $3 : 1/0)                 w l ls 2 lw 1 t "", \

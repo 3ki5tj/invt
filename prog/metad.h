@@ -504,9 +504,9 @@ __inline static void metad_getgamma_varv(metad_t *metad, double alpha0,
 
   cmvar_get(metad->cm);
   for ( i = 1; i < n; i++ ) {
-    double lam = metad->lambda[i];
-    if ( lam < 0.1 ) lam = 0.1;
-    gamma[i] = metad->cm->uvar[i]*2/alpha0/lam;
+    //double lam = metad->lambda[i];
+    //if ( lam < 0.1 ) lam = 0.1;
+    gamma[i] = metad->cm->uvar[i]*2/alpha0; // /lam;
   }
   if ( fn != NULL ) metad_savegamma(metad, gamma, 1, fn);
 }
@@ -763,6 +763,22 @@ static double metad_geterrav(metad_t *metad, double *erc)
   *erc = metad_geterr(metad, metad->vcorr);
   return metad_geterr(metad, metad->v);
 }
+
+/* update the WEIGHTED average histogram-corrected bias potential */
+__inline static void metad_vav_wupdate(metad_t *metad, int i, double a)
+{
+  int j, n = metad->n;
+  double v0, v1, vold, vnew;
+
+  v0 = metad_getave(metad, metad->v);
+  v1 = metad_getave(metad, metad->vav);
+  for ( j = 0; j < n; j++ ) {
+    vold = metad->vav[j] - v1;
+    vnew = metad->v[j] - v0 + (i == j ? n : 0) - 1;
+    metad->vav[j] = vold + a * (vnew - vold);
+  }
+}
+
 
 __inline static void metad_hblk_clear(metad_t *metad)
 {

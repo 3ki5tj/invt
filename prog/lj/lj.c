@@ -106,17 +106,18 @@ static int gammrun(invtpar_t *m, metad_t *metad, lj_t *lj, long nsteps)
       nsteps, metad->a, "");
   metad_varv_clear(metad);
   metad_hblk_clear(metad);
-  //metad_clearav(metad); /* clear the average correction data */
+  metad_clearav(metad); /* clear the average correction data */
   for ( t = 1; t <= nsteps; t++ ) {
     sacc += lj_metroblk(lj, metad);
     ir = dist01(metad, lj, &dr);
     metad_updatev(metad, ir);
-    //metad_updateav(metad, ir); /* for the average histogram-corrected bias potential */
+    metad_vav_wupdate(metad, ir, metad->a);
     metad->tmat[ir*metad->n + ir0] += 1;
     metad_hblk_add(metad, ir);
     ir0 = ir;
     if ( t % m->gam_nstave == 0 ) {
-      metad_varv_add(metad, metad->v);
+      double *v = ( metad->winn == 1 ) ? metad->v : metad->vav;
+      metad_varv_add(metad, v);
     }
     if ( t % hblksz == 0 ) {
       metad_hblk_dump(metad);
@@ -129,6 +130,7 @@ static int gammrun(invtpar_t *m, metad_t *metad, lj_t *lj, long nsteps)
       metad_save(metad, fnvbias);
     }
   }
+  fprintf(stderr, "\n");
   return 0;
 }
 

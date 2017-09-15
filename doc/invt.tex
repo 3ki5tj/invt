@@ -2126,9 +2126,9 @@ A commonly-used multiple-bin updating scheme in metadynamics
 is the Gaussian updating scheme,
 whose updating matrix can be characterized by
 a rigid Gaussian function centered on the current bin
-(with some boundary adjustment),
+(with some boundary adjustment).
 %to satisfy the constraints discussed in Sec. \ref{sec:updating-matrix},
-see Fig. \ref{fig:mat}(a) for an example.
+%see Fig. \ref{fig:mat}(a) for an example.
 %
 In terms of the continuous collective variable, $z = i \, \delta z$,
 the eigenvalues of this scheme are given by\cite{bussi2006}
@@ -2157,28 +2157,28 @@ the inverse-time schedule,
 and may assume a roughly exponentially-decaying form
 initially (cf. Appendix \ref{sec:schedule_geometry}).
 
-\begin{figure}[h]\centering
-  \makebox[\linewidth][c]{
-    \includegraphics[angle=0, width=1.0\linewidth]{fig/mat.pdf}
-  }
-  \caption{
-    \label{fig:mat}
-    Updating matrices for two
-    homogeneous updating schemes of
-    a non-periodic variable ($n = 500$).
-    Here $j$ is the current bin,
-    $i$ is the bin where updating occurs,
-    and $w_{ij}$ is the relative updating magnitude.
-    %
-    (a) The Gaussian updating scheme of width $\sigma = 20$ bins.
-    (b) The homogeneous bandpass updating scheme of $K = 20$.
-    %
-    Both updating schemes
-    can be characterized by a rigid window
-    centered on the current bin, $j$,
-    with some boundary adjustments.
-  }
-\end{figure}
+%\begin{figure}[h]\centering
+%  \makebox[\linewidth][c]{
+%    \includegraphics[angle=0, width=1.0\linewidth]{fig/mat.pdf}
+%  }
+%  \caption{
+%    \label{fig:mat}
+%    Updating matrices for two
+%    homogeneous updating schemes of
+%    a non-periodic variable ($n = 500$).
+%    Here $j$ is the current bin,
+%    $i$ is the bin where updating occurs,
+%    and $w_{ij}$ is the relative updating magnitude.
+%    %
+%    (a) The Gaussian updating scheme of width $\sigma = 20$ bins.
+%    (b) The homogeneous bandpass updating scheme of $K = 20$.
+%    %
+%    Both updating schemes
+%    can be characterized by a rigid window
+%    centered on the current bin, $j$,
+%    with some boundary adjustments.
+%  }
+%\end{figure}
 
 
 
@@ -2448,8 +2448,8 @@ by applying this construction to the basis of cosine and sine functions,
 we get a homogeneous bandpass updating scheme
 (cf. Appendix \ref{sec:homo_bandpass}),
 which resembles the Gaussian updating scheme,
-but with long-range wiggles,
-as shown in Fig. \ref{fig:mat}(b).
+but with long-range wiggles.
+%as shown in Fig. \ref{fig:mat}(b).
 %
 In Sec. \ref{sec:lj},
 we will further compare
@@ -2859,22 +2859,27 @@ By Eqs. \eqref{eq:Vi_target} and \eqref{eq:rho_Gaussian}, we have
 \end{align*}
 %
 Comparing this to Eq. \eqref{eq:u_age}, we get
+\begin{subequations}
 \begin{align}
   \hat c_0^{(s)}
   &\approx \ln p\bigl(z_c^{(s)}\bigr) + \mathrm{const.}
   ,
-  \label{eq:c0hat_limit} \\
+  %\label{eq:c0hat_limit}
+  \\
   c_1^{(s)}
   &\approx \left. \frac{d \ln p(z) } { d z } \right|_{z = z_c^{(s)}}
   ,
-  \label{eq:c1_limit} \\
+  %\label{eq:c1_limit}
+  \\
   \frac{
     \sqrt 2 \, c_2^{(s)} - 1
   } { \bigl( \sigma_c^{(s)} \bigr)^2 }
   &\approx \left. \frac{d^2 \ln p(z) } { d z^2 } \right|_{z = z_c^{(s)}}
   .
-  \label{eq:c2_limit}
+  %\label{eq:c2_limit}
 \end{align}
+\label{eq:ck_limit}
+\end{subequations}
 %
 Thus,
 $\hat c_0^{(s)}$ as a function of $z_c^{(s)}$
@@ -3407,13 +3412,13 @@ in agreement with a previous study\cite{wang2001pre}.
 %
 Since Gaussian umbrellas were sufficiently narrow,
 we could readily verify
-Eqs. \eqref{eq:c0hat_limit}-\eqref{eq:c2_limit}:
+Eqs. \eqref{eq:ck_limit}:
 the logarithmic density of states, $\ln g(E)$,
 was roughly captured
 by $\hat c_0^{(s)}$ as a function of $E_c^{(s)}$,
 as shown Fig. \ref{fig:pt_hist}(b);
 %
-$c_1^{(s)}/\sigma_E^{(s)}$ roughly representing
+$c_1^{(s)}/\sigma_E^{(s)}$, roughly representing
 the local or statistical temperature, $\beta(E) = d\ln g(E)/dE$,
 manifested the backbending behavior\cite{kim2006, *kim2007, kim2010}
 typical in a first-order phase transition,
@@ -3436,21 +3441,20 @@ as shown in Fig. \ref{fig:pt_hist}(d).
     Sampling using adaptive Gaussian ensembles
     on the $64 \times 64$ ten-state Potts model.
     %
-    (a) Normalized histograms (solid lines)
-    and the reweighted distribution
-    at the critical temperature, $\beta_c$ (dashed line).
+    (a) Normalized histograms.
     %
-    (b) $\hat c_0^{(s)} = c_0^{(s)} - c_2^{(s)}/\sqrt 2$
+    (b) $\hat c_0^{(s)} = c_0^{(s)} - c_2^{(s)}/\sqrt 2$ 
     against $E_c^{(s)}$ (circles)
     roughly agreed with the logarithmic density of states,
     $\ln g(E)$ (dashed line).
     In either case,
     we have deducted the linear contribution, $\beta_c \, E$,
     and applied a proper shift so as to normalize
-    the distribution at $\beta_c$.
+    the distribution at the critical temperature, $\beta_c$.
     %
-    (c) $c_1^{(s)}/\sigma_E$ roughly corresponded to
-    the statistical temperature, $\beta(E)$.
+    (c) $c_1^{(s)}/\sigma_E$ (circles), roughly corresponding to
+    the statistical temperature, $\beta(E) = d\ln g(E)/dE$;
+    $\beta_c$ (dashed line).
     %
     (d) $\sqrt 2 \, c_2^{(s)}$
     exceeded $1.0$ in the unstable region,
@@ -3933,8 +3937,8 @@ a variable bias potential.\footnote{We can also
   which is, by Eq. \eqref{eq:Vi_target},
   $\hat p_i(t) \approx h_i(t) \, e^{ u_i(t) }$,
   assuming a proper shift of $u_i(t)$.
-  Then after time averaging, we get
-  $\rho_i e^{\hat U_i(t)} = \hat P_i(t) \approx H_i \, e^{ U_i(t) }$.}
+  Time averaging the equation yields
+  $\rho_i \, e^{\hat U_i(t)} = \hat P_i(t) \approx H_i \, e^{ U_i(t) }$.}
 %
 However, it does not remove the systematic bias
 caused by the adaptive updates,
@@ -4174,16 +4178,16 @@ Integrals of the autocorrelation functions of the eigenmodes
 
 
 
-Here we give a method of measuring
+Here we give two methods of estimating
 the integrals of the autocorrelation functions, $\Gamma_k$'s,
 in an adaptive FDS simulation
 under a constant updating magnitude.
 %
-This method has the advantage of not requiring
+They have the advantage of not requiring
 explicit computation of
 the autocorrelation functions of the eigenmodes.
 
-Because the difference between $u_i$ and $v_i$,
+First, because the difference between $u_i$ and $v_i$,
 is a constant of time [cf. Eq. \eqref{eq:v_def}],
 ${\tilde u}_{k}$ and ${\tilde v}_{k}$
 share the same variance.
@@ -4211,20 +4215,56 @@ Then, from Eqs. \eqref{eq:xt_eql} and \eqref{eq:xt2_eql}, we have
 \end{equation}
 %
 for a sufficiently long period, $T_0$.
-%where we have used the fact that the ensemble average of ${\tilde v}_{k}$
-%is zero in the second step.
 %
-The variance, $\operatorname{var} \tilde u_k$, can be computed
-by trajectory averaging in a long simulation.
+We can compute the variance, $\operatorname{var} \tilde u_k$,
+by trajectory averaging in a long simulation,
+and use Eq. \eqref{eq:varXt} to estimate $\Gamma_k$.
 %
-Note that Eq. \eqref{eq:varXt} would fail for a near zero, $\lambda_k$,
-and it is best used for the single-bin updating scheme.%\footnote{Alternatively,
-%  we can split the trajectory into blocks,
-%  compute $\Gamma_k$ from the histogram fluctuation of each block
-%  using Eq. \eqref{eq:Fk2_Gammak},
-%  and then average the results.}
+However, this method would fail for a near zero, $\lambda_k$,
+and it is best used for the single-bin updating scheme,
+where $\lambda_k \equiv 1$.
 
+To use the method in a simulation under a multiple-bin updating scheme,
+we can construct a virtual bias potential, $u_i^\mathrm{vir}$,
+that emulates the bias potential in a simulation
+under the single-bin updating scheme.
+%
+This virtual bias potential can be constructed as (cf. Appendix \ref{sec:ave_us}),
+\begin{equation}
+  u_i^\mathrm{vir}(t+1)
+  =
+  u_i^\mathrm{vir}(t)
+  +
+  a_0 \, [\hat u_i(t) - u_i^\mathrm{vir}(t)]
+  ,
+  \notag
+\end{equation}
+%
+where $\hat u_i(t)$ is given by Eq. \eqref{eq:uhatt}.
+%
+We can then apply Eq. \eqref{eq:varXt} to $u_i^\mathrm{vir}$
+with the effective $\lambda_k \equiv 1$.
 
+In this method, the updating magnitude, $a_0$,
+needs to be sufficiently small, such that
+$a_0 < 1/\left(\max_k \Gamma_k \right)$.
+
+Alternatively, we can estimate $\Gamma_k$ using Eq. \eqref{eq:Fk2_Gammak}.
+%
+We can split the trajectory into blocks of $T_\mathrm{blk}$ steps,
+compute the histogram fluctuation, $\tilde F_k(T_\mathrm{blk})$,
+and estimate $\Gamma_k$ from the average of
+$T_\mathrm{blk} \, \tilde F_k^2(T_\mathrm{blk})$
+over the blocks.
+%
+For this method to work,
+the trajectory block should be large enough
+to cover at least a few autocorrelation times (which is roughly $\Gamma_k/2$),
+but also sufficiently small
+to avoid the artificial histogram flattening
+caused by the frequent non-equilibrium updates.
+Thus, we require $\max_k \Gamma_k < T_\mathrm{blk} < 1/a_0$
+(We used $T_\mathrm{blk} = 0.1/a_0$.)
 
 
 
@@ -4730,8 +4770,8 @@ From Eq. \eqref{eq:f_xi}, we have
   =
   \frac{ \Gamma_k } { T }
   ,
-  \notag
-  %\label{eq:Fk2_Gammak}
+  %\notag
+  \label{eq:Fk2_Gammak}
 \end{align}
 %
 and the total histogram fluctuation is
