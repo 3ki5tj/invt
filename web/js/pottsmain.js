@@ -26,7 +26,7 @@ var timer_interval = 100; // in milliseconds
 var potts_timer = null;
 var mc_algorithm = "Metropolis";
 
-var blocksizemc = 10; // number of steps for a block in the Metropolis algorithm
+var metroblk = 10; // number of steps for a block in the Metropolis algorithm
 var nstepspsmc = 1000; // number of steps per second for MC
 var nstepspfmc = 100;  // number of steps per frame for MC
 
@@ -59,7 +59,7 @@ function getparams()
 
   mc_algorithm = grab("mc_algorithm").value;
 
-  blocksizemc = get_int("blocksizemc", 10);
+  metroblk = get_int("metroblk", 10);
   nstepspsmc = get_int("nstepspersecmc", 10000);
   nstepspfmc = nstepspsmc * timer_interval / 1000;
   npulses = 0;
@@ -381,7 +381,7 @@ function updatec0plot()
     var w = h * 3 / 2;
     var options = {
       xlabel: "<small>Energy</small>",
-      ylabel: "<small><i>c</i><sub>0</sub> - <i>c</i><sub>2</sub>/&radic;2 - <i>&beta;<sub>c</sub>E<sub>c</sub></i></small>",
+      ylabel: "<small><i>c</i><sub>0</sub> - <i>c</i><sub>2</sub>/&radic;2 - <i>&beta;<sub>c</sub> E<sub>c</sub></i></small>",
       axisLabelFontSize: 10,
       xRangePad: 2,
       drawPoints: true,
@@ -408,10 +408,10 @@ function pulse()
     var Eave = age.ave[iage];
     var acc = 0;
     if ( mc_algorithm === "Metropolis" ) {
-      for ( jstep = 0; jstep < blocksizemc; jstep++ ) {
+      for ( jstep = 0; jstep < metroblk; jstep++ ) {
         acc += potts_metro_mod(beta1, beta2, Eave);
       }
-      acc = 1.0*acc/blocksizemc;
+      acc = 1.0*acc/metroblk;
     } else if ( mc_algorithm === "Wolff" ) {
       acc = potts_wolff_mod(beta1, beta2, Eave);
     }
@@ -428,8 +428,8 @@ function pulse()
     + ", E/N " + roundto(1.0*potts.E/potts.n, 2) + ", data " + age.cnt[iage]
     + ", &alpha; " + age.getalpha().toPrecision(3) + ", 1/t " + age.invt
     + ", t " + age.t + ", fl " + roundto(age.hfluc, 2)
-    + " (" + roundto(age.flfr[0]*100.0,2) + "%/" + roundto(age.flfr[1]*100.0,2) + "%/" + roundto(age.flfr[2]*100.0,2) + "%)"
-    + ", &beta;<sub>c</sub> " + age.bc;
+    + " (" + roundto(age.flfr[0]*100.0, 2) + "%/" + roundto(age.flfr[1]*100.0, 2) + "%/" + roundto(age.flfr[2]*100.0, 2) + "%)"
+    + ", &beta;<sub>c</sub> " + roundto(age.bc, 5);
   grab("sinfo").innerHTML = sinfo;
   //console.log("t " + age.t + " fl " + age.hfluc + " id " + iage + " E " + potts.E + " c1 " + (age.c1[iage]/esig) + " c2 " + age.c2[iage]);
 

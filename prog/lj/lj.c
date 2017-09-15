@@ -7,6 +7,7 @@ double rho = 0.8;
 double rcdef = 100.0;
 double tp = 3.0;
 int mcblk = 5;
+int hblksz = 0;
 double delr = 0.01; /* spacing */
 long nstsave = 1000000; /* interval of saving data */
 const char *fnvbias = "vbias.dat";
@@ -23,6 +24,7 @@ static void ljpar_help(void)
   fprintf(stderr, "  --tp=:      temperature, default %g\n", tp);
   fprintf(stderr, "  --dr=:      bin width, default %g\n", delr);
   fprintf(stderr, "  --blk=:     number of steps in a Monte Carlo, default %d\n", mcblk);
+  fprintf(stderr, "  --hblk=:    number of steps in a histogram block, default %d\n", hblksz);
   fprintf(stderr, "  --vref=:    reference bias potential, default %s\n", fnvref);
   fprintf(stderr, "  --loadxerr: load xerr from file, default %d\n", loadxerr);
 }
@@ -48,6 +50,9 @@ static int ljpar_keymatch(invtpar_t *m, const char *key, const char *val)
   } else if ( strcmpfuzzy(key, "vref") == 0
            || strcmpfuzzy(key, "fnvref") == 0 ) {
     fnvref = val;
+  } else if ( strcmpfuzzy(key, "hblk") == 0
+           || strcmpfuzzy(key, "hblksz") == 0 ) {
+    hblksz = invtpar_getint(m, key, val);
   } else if ( strcmpfuzzy(key, "loadxerr") == 0 ) {
     loadxerr = 1;
   }
@@ -87,12 +92,13 @@ static int gammrun(invtpar_t *m, metad_t *metad, lj_t *lj, long nsteps)
   long t;
   int ir0, ir;
   double dr, sacc = 0;
-  int hblksz;
 
   metad->a = m->alpha0;
 
-  hblksz = (int)(0.2/metad->a);
-  if ( hblksz <= 0 ) hblksz = 0;
+  if ( hblksz <= 0 ) {
+    hblksz = (int)(0.1/metad->a);
+    if ( hblksz <= 0 ) hblksz = 0;
+  }
 
   ir0 = dist01(metad, lj, &dr);
 

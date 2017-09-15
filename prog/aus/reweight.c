@@ -178,7 +178,7 @@ static int findpeak(const double *arr, double bc, int ileft, int iright, double 
 static double seekcrit(const double *arr, int *x1, int *x2, double *shift)
 {
   double bc = 0, y1, y2, y, lns, lns2;
-  int i, ix, ix1, ix2, il = -1, ir, im, t, x;
+  int i, ix, ix1, ix2, im, t, x;
 
   // since c1/sigma is roughly beta, we will estimate the critical temperature
   // at a point where c1/sigma rises quickest
@@ -193,26 +193,14 @@ static double seekcrit(const double *arr, int *x1, int *x2, double *shift)
       im = (int) ((ave[i] - xmin) / dx);
     }
   }
-
-  for ( ix = 0; ix < xn - 1; ix++ ) {
-    if ( arr[ix] <= LN0 || arr[ix+1] < LN0 ) {
-      continue;
-    } else if ( il < 0 ) {
-      il = ix;
-    } else {
-      ir = ix;
-    }
-  }
-  printf("estimated bc %g, il %d, ir %d, mid %d\n", bc, il, ir, im);
+  printf("estimated bc %g, mid %d\n", bc, im);
 
   /* adjust bc such that the heights are equal */
-  ix1 = il;
-  ix2 = ir;
   for ( t = 0; t < 10; t++ ) {
     ix1 = findpeak(arr, bc, 0, im, &y1);
     ix2 = findpeak(arr, bc, im, xn, &y2);
     printf("%d: bc %g, x %d(%g) %d(%g) | %d(%d) %g\n", t, bc, xmin + ix1*dx, y1, xmin + ix2*dx, y2, xmin + im*dx, im, fabs(y2-y1));
-    if ( fabs(y2-y1) < 1e-14 ) break;
+    if ( fabs(y2 - y1) < 1e-10 ) break;
     bc += (y2 - y1) / ((ix2 - ix1)*dx);
   }
   *x1 = xmin + ix1*dx;
@@ -231,11 +219,8 @@ static double seekcrit(const double *arr, int *x1, int *x2, double *shift)
 
   /* normalize c0 at the critical temperature */
   lns2 = LN0;
-  for ( i = 0; i < n; i++ ) {
-    y = c0[i] - c2[i]/SQRT2 - bc * ave[i];
-    lns2 = lnadd(lns2, y);
-    //printf("i %d, c0 %g, bc %g, ave %g, %g\n", i, c0[i], bc, ave[i], y);
-  }
+  for ( i = 0; i < n; i++ )
+    lns2 = lnadd(lns2, c0[i] - c2[i]/SQRT2 - bc * ave[i]);
   lns2 += log(delx);
   printf("lns for normalization %g (lng), %g (c0hat)\n", lns, lns2);
   *shift = lns;

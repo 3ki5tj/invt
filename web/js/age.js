@@ -6,33 +6,6 @@
 
 var SQRT2 = 1.4142135623730951;
 
-function MMWL()
-{
-  this.mm = [0, 0, 0];
-  this.fl = [0, 0, 0];
-}
-
-MMWL.prototype.add = function(y1, y2)
-{
-  this.mm[0] += 1;
-  this.mm[1] += y1;
-  this.mm[2] += y2;
-}
-
-/* compute the fluctuation of the statistical moments
- * return the maximum fluctuation */
-MMWL.prototype.calcfl = function()
-{
-  var t = this.mm[0];
-  if ( t <= 0 ) return 99.0;
-  this.fl[1] = this.mm[1] / t;
-  this.fl[2] = this.mm[2] / t;
-  var fl1 = Math.abs(this.fl[1]);
-  var fl2 = Math.abs(this.fl[2]);
-  return Math.max(fl1, fl2);
-}
-
-
 function AGE(xcmin, xcmax, delx, sig,
   c1, alpha0, xmin, xmax, dx)
 {
@@ -46,7 +19,7 @@ function AGE(xcmin, xcmax, delx, sig,
   this.c0 = new Array(n);
   this.c1 = new Array(n);
   this.c2 = new Array(n);
-  this.mmwl = new Array(n);
+  this.mm = new Array(n);
   this.cnt = new Array(n);
   this.acc = new Array(n);
   this.hfl = new Array(n);
@@ -57,12 +30,13 @@ function AGE(xcmin, xcmax, delx, sig,
     this.sig[i] = sig;
     this.c0[i] = (i - (n - 1)*0.5) * c1 / sig * delx;
     this.c1[i] = c1;
-    this.c2[i] = 0;
-    this.mmwl[i] = new MMWL();
+    this.c2[i] = SQRT2*0.5;
+    this.mm[i] = [0, 0, 0];
     this.cnt[i] = 0;
     this.acc[i] = 0;
     this.hfl[i] = 0;
   }
+  this.flfr = [0, 0, 0];
   this.xmin = xmin;
   this.dx = dx;
   this.xn = xn = (xmax - xmin) / this.dx + 1;
@@ -105,16 +79,18 @@ AGE.prototype.add = function(i, x, acc)
 
   var y1 = (x - ave) / sig;
   var y2 = (y1 * y1 - 1) / SQRT2;
+  this.c0[i] += alpha;
   this.c1[i] += y1 * alpha;
   this.c2[i] += y2 * alpha;
-  this.mmwl[i].add(y1, y2);
+  this.mm[i][0] += 1;
+  this.mm[i][1] += y1;
+  this.mm[i][2] += y2;
 
   this.t += 1;
   this.cnt[i] += 1;
   this.acc[i] += acc;
   var j = Math.floor( (x - this.xmin) / this.dx );
   this.hist[i][j] += 1;
-  this.c0[i] += alpha;
 }
 
 
@@ -122,27 +98,24 @@ AGE.prototype.add = function(i, x, acc)
 /* calculate the fluctuation of histogram modes (from the variance) */
 AGE.prototype.calcfl_rms = function()
 {
-  var i, n = this.n, mm, nhh;
-  var tot = 0, fl0 = 0, fl1 = 0, fl2 = 0, fl, hi;
-
-  /* compute the total sample size */
-  for ( i = 0; i < n; i++ )
-    tot += this.mmwl[i].mm[0];
-  if ( tot <= 0 ) return 99.0;
+  var i, k, n = this.n;
+  var tot = 0, fl = [0, 0, 0], flsum = 0, s;
 
   for ( i = 0; i < n; i++ ) {
-    mm = this.mmwl[i];
-    mm.calcfl();
-    hi = mm.mm[0]/tot;
-    nhh = n * hi * hi;
-    fl0 += nhh; /* inter-umbrella */
-    fl1 += nhh * mm.fl[1] * mm.fl[1]; /* intra */
-    fl2 += nhh * mm.fl[2] * mm.fl[2]; /* intra */
+    for ( k = 0; k < 3; k++ )
+      fl[k] += this.mm[i][k] * this.mm[i][k];
+    tot += this.mm[i][0];
   }
-  fl0 -= 1;
-  fl = fl0 + fl1 + fl2;
-  this.flfr = [fl0/fl, fl1/fl, fl2/fl];
-  return Math.sqrt(fl);
+  // normalize the fluctuations
+  var s = n / (tot * tot);
+  for ( k = 0; k < 3; k++ ) {
+    fl[k] *= s;
+    if ( k == 0 ) fl[0] -= 1;
+    flsum += fl[k];
+  }
+  for ( k = 0; k < 3; k++ )
+    this.flfr[k] = fl[k]/flsum;
+  return Math.sqrt(flsum);
 }
 
 
@@ -160,10 +133,8 @@ AGE.prototype.switch = function(magred)
     + "fluc " + this.hfluc + ", invt " + this.invt);
   this.t = 0;
   for ( i = 0; i < n; i++ ) {
-    /* renew the accumulators */
-    this.mmwl[i] = new MMWL(this.alphawl);
-    this.mmwl[i].invt = this.invt;
-    this.mmwl[i].t0 = this.t0;
+    // renew the accumulators
+    this.mm[i] = [0, 0, 0];
   }
   for ( i = 0; i < n; i++ )
     for ( j = 0; j < xn; j++ )
@@ -205,13 +176,12 @@ AGE.prototype.move = function(x, id, local)
   }
   sigi = this.sig[id];
   sigj = this.sig[jd];
-  dv = this.c0[jd] - this.c0[id];
   /* compute the acceptance probability */
   xi = (x - this.ave[ id]) / sigi;
   xj = (x - this.ave[ jd]) / sigj;
-  vi = this.c1[ id] * xi + this.c2[ id] * (xi * xi - 1) / SQRT2;
-  vj = this.c1[ jd] * xj + this.c2[ jd] * (xj * xj - 1) / SQRT2;
-  dv += vj - vi;
+  vi = this.c0[id] + this.c1[id] * xi + this.c2[id] * (xi * xi - 1) / SQRT2;
+  vj = this.c0[jd] + this.c1[jd] * xj + this.c2[jd] * (xj * xj - 1) / SQRT2;
+  dv = vj - vi;
   //console.log(id, jd, x, vi, this.c0[id], vj, this.c0[jd], dv, local);
   this.tacc = ( dv <= 0 || rand01() < Math.exp(-dv) );
   if ( this.tacc ) {
@@ -283,7 +253,7 @@ function findpeak(arr, bc, ileft, iright, xmin, dx)
 AGE.prototype.seekcrit = function()
 {
   var bc, beta, y1, y2, y, lns, lns2;
-  var i, ix, ix1, ix2, il = -1, ir, im, t, x, ret;
+  var i, ix, ix1, ix2, im, t, x, ret;
   var xn = this.xn, n = this.n, dx = this.dx, xmin = this.xmin;
   var arr = this.lng;
 
@@ -301,26 +271,14 @@ AGE.prototype.seekcrit = function()
     }
   }
 
-  for ( ix = 0; ix < xn - 1; ix++ ) {
-    if ( arr[ix] <= LN0 || arr[ix+1] < LN0 ) {
-      continue;
-    } else if ( il < 0 ) {
-      il = ix;
-    } else {
-      ir = ix;
-    }
-  }
-
   // adjust the critical temperature util the heights are equal
-  ix1 = il;
-  ix2 = ir;
   for ( t = 0; t < 10; t++ ) {
     ret = findpeak(arr, bc, 0,  im, xmin, dx);
     ix1 = ret[0]; y1 = ret[1];
     ret = findpeak(arr, bc, im, xn, xmin, dx);
     ix2 = ret[0]; y2 = ret[1];
     console.log("iter", t, "bc", bc, ix1, y1, ix2, y2, im);
-    if ( Math.abs(y2-y1) < 1e-14 ) break;
+    if ( Math.abs(y2-y1) < 1e-10 ) break;
     bc += (y2 - y1) / ((ix2 - ix1)*dx);
   }
   this.bc = bc;
@@ -337,17 +295,13 @@ AGE.prototype.seekcrit = function()
   }
   lns += Math.log(dx);
   // normalize the density of states
-  for ( ix = 0; ix < xn; ix++ ) {
+  for ( ix = 0; ix < xn; ix++ )
     arr[ix] -= lns;
-  }
 
   // normalize c0 at the critical temperature
   lns2 = LN0;
-  for ( i = 0; i < n; i++ ) {
-    y = this.c0[i] - this.c2[i]/SQRT2 - bc * this.ave[i];
-    lns2 = lnadd(lns2, y);
-    //console.log(i, y, lns2);
-  }
+  for ( i = 0; i < n; i++ )
+    lns2 = lnadd(lns2, this.c0[i] - this.c2[i]/SQRT2 - bc * this.ave[i]);
   lns2 += Math.log(this.delx);
   this.shift = lns;
   this.shiftc0hat = lns2;
