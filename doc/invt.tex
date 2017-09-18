@@ -3092,7 +3092,11 @@ and report the averages.
 %
 To ensure the same schedule was used for multiple runs,
 the optimal schedule was pre-computed using a set of fixed
-$\Gamma_k$'s and $\epsilon_k$'s derived from the longer simulation.
+$\Gamma_k$'s and $\epsilon_k$'s derived
+from a longer simulation under
+a smaller updating magnitude, $a_0 = 10^{-5}$.
+\note{Maybe using a simulation with constant updating magnitude
+using the block histogram method?}
 
 We used the Metropolis algorithm\cite{frenkel, metropolis1953}
 for configuration sampling.
@@ -3126,14 +3130,21 @@ The errors roughly matched the predicted values
 calculated using the pre-computed
 $\Gamma_k$'s and $\epsilon_k$'s.
 %
+The initial errors
+at a relatively large updating magnitude
+were generally underestimated,
+suggesting that
+the regular updating might have caused the sampling
+to deviate from the quasi-equilibrium one
+as assumed in our theory.
 
 
 \begin{table}[h]
   \caption{\label{tab:lj_error}
     Errors of the bias potential under
     the single-bin,
-    Gaussian (with width $\sigma = 0.2$),
-    and homogeneous bandpass (with mode cutoff $K = 20$)
+    Gaussian (with width $\sigma = 0.29$),
+    and homogeneous bandpass (with mode cutoff $K = 26$)
     updating schemes
     on the LJ system.
     %
@@ -3164,23 +3175,23 @@ $\Gamma_k$'s and $\epsilon_k$'s.
     %} \\
     \hline
     Single-bin & $1/t$
-    & $5.7(5.7)\times10^{-2}$
-    & $9.1(11.4)\times10^{-6}$
+    & $5.7(4.4)\times10^{-2}$
+    & $9.1(8.8)\times10^{-6}$
     \\
     %\hline
     Gaussian & $1/t$
-    & $6.7(7.8)\times10^{-3}$
-    & $1.8(2.2)\times10^{-5}$
+    & $6.5(5.9)\times10^{-3}$
+    & $1.4(1.4)\times10^{-5}$
     \\
     %\hline
     Gaussian & optimal
-    & $6.7(7.8)\times10^{-3}$
-    & $2.9(3.6)\times10^{-6}$
+    & $6.0(5.9)\times10^{-3}$
+    & $2.6(2.6)\times10^{-6}$
     \\
     %\hline
     Bandpass & $1/t$
-    & $8.0(8.9)\times10^{-3}$
-    & $2.0(2.3)\times10^{-6}$
+    & $8.0(7.6)\times10^{-3}$
+    & $1.7(1.6)\times10^{-6}$
     \\
     \hline
   \end{tabular}
@@ -3188,11 +3199,12 @@ $\Gamma_k$'s and $\epsilon_k$'s.
 
 As shown in Fig. \ref{fig:lj_alpha},
 the optimal schedule for the Gaussian updating scheme
-with width $\sigma = 0.2$
-was more complex than the inverse-time one
-(We chose the Gaussian updating scheme here because
+with width $\sigma = 0.29$
+was more complex than the inverse-time one.
+%
+We chose the Gaussian updating scheme here because
 the optimal and inverse-time schedules were identical
-in the single-bin and bandpass updating schemes.)
+in the single-bin and bandpass updating schemes.
 %
 The optimal schedule lay above the inverse-time schedule,
 and its initial decay was roughly exponential,
@@ -3224,21 +3236,21 @@ $\langle \tilde v_k^2 \rangle$'s,
 by Eqs. \eqref{eq:gft_def} and \eqref{eq:wband_eigenvector_refl}
 (Fig. \ref{fig:lj_xerr}),
 we found that the inverse-time schedule
-failed to reduce to the errors in the $k = 9$ to $31$ modes adequately.
+failed to reduce to the errors in the $k = 7$ to $21$ modes adequately.
 %
 By a delayed reduction,
 the optimal schedule removed
 more error in these modes,
-and produced a flatter profile
-(The remaining unevenness of the profile
-might be due to errors of the estimated values of
-$\Gamma_k$'s and $\epsilon_k$'s.)
+and produced a flatter profile.
+%(The remaining unevenness of the profile
+%might be due to errors of the estimated values of
+%$\Gamma_k$'s and $\epsilon_k$'s.)
 %
 However, the gain of using the optimal schedule
 diminished for shorter simulations,
 e.g. when the production phase was shortened to $T = 10^7$ steps,
 the final errors under the optimal and inverse-time schedules
-became $2.4\times 10^{-5}$ and $3.9\times 10^{-5}$, respectively,
+became $2.1\times 10^{-5}$ and $3.3\times 10^{-5}$, respectively,
 which were more similar.
 
 \begin{figure}[h]\centering
@@ -3279,8 +3291,7 @@ Thus, there is an optimal width that balances the two factors.
 %
 According to the analytical prediction,
 the optimal width (assuming the optimal schedule)
-was around $\sigma = 0.29$ in this case
-with the predicted minimal error being $3.3\times 10^{-6}$,
+was $\sigma = 0.29$, which we used in the simulations,
 and it would decrease with the simulation length
 and approach the limit of the single-bin updating scheme,
 $\sigma \to 0$, asymptotically.
@@ -3289,11 +3300,11 @@ The homogeneous bandpass updating scheme
 had a similar behavior.
 %
 The mode cutoff, $K$, also has an optimal value,
-which was around $26$ in this case.
+which was $26$ according to the prediction.
 %
-The predicted minimal error was $2.0\times 10^{-6}$,
-  slightly less than the corresponding value
-  in the Gaussian case.
+The minimal error of the bandpass case
+was slightly less than the corresponding value
+in the Gaussian case, as shown in Table \ref{tab:lj_error}.
 %
 The optimal cutoff would increase with the simulation length
 and approach the limit of the single-bin updating scheme, $K \to n$,
@@ -3407,7 +3418,7 @@ The Gaussian histograms were evenly spaced with similar widths as intended,
 as shown in Fig. \ref{fig:pt_hist}(a).
 %
 We computed the density of states by Eq. \eqref{eq:WHAM},
-and found the critical temperature to be $T_c = 0.70163$,
+and found the critical temperature to be $T_c = 0.70161$,
 in agreement with a previous study\cite{wang2001pre}.
 %
 Since Gaussian umbrellas were sufficiently narrow,
@@ -4245,9 +4256,16 @@ where $\hat u_i(t)$ is given by Eq. \eqref{eq:uhatt}.
 We can then apply Eq. \eqref{eq:varXt} to $u_i^\mathrm{vir}$
 with the effective $\lambda_k \equiv 1$.
 
-In this method, the updating magnitude, $a_0$,
-needs to be sufficiently small, such that
-$a_0 < 1/\left(\max_k \Gamma_k \right)$.
+The above method
+requires a sufficiently small
+the updating magnitude,
+$a_0 \ll 2/\left(\max_k \Gamma_k \right)$,
+and it tends to overestimate the value of $\Gamma_k$,
+since Eq. \eqref{eq:varXt}
+does not take into account
+the non-equilibrium sampling effect
+caused by frequent updating.
+
 
 Alternatively, we can estimate $\Gamma_k$ using Eq. \eqref{eq:Fk2_Gammak}.
 %
@@ -4263,8 +4281,8 @@ to cover at least a few autocorrelation times (which is roughly $\Gamma_k/2$),
 but also sufficiently small
 to avoid the artificial histogram flattening
 caused by the frequent non-equilibrium updates.
-Thus, we require $\max_k \Gamma_k < T_\mathrm{blk} < 1/a_0$
-(We used $T_\mathrm{blk} = 0.1/a_0$.)
+%
+Thus, we require $\max_k \Gamma_k/2 \ll T_\mathrm{blk} \ll 1/a_0$.
 
 
 

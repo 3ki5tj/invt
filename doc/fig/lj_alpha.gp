@@ -22,7 +22,7 @@ hbot = 1 - htop
 dx = 0.01
 dy = 0.05
 
-set lmargin 7
+set lmargin 8
 
 set logscale x
 #set xtics 0.2 offset 0, 0.2
@@ -45,11 +45,11 @@ set key left bottom Left reverse spacing 1.5
 alpha0 = 1e-4
 t0 = 2 / alpha0
 
-set arrow from 6.5e3, alpha0*0.5 to 2e4, alpha0*0.5 lt 1 lw 2 filled size screen 0.03,15,45
-set label "{/Times {/Times-Italic a}_0/2}" at 2.5e3, alpha0*0.5
+set arrow from 6.0e3, alpha0*0.5 to 2e4, alpha0*0.5 lt 1 lw 1 filled size screen 0.02,10,35
+set label "{/Times {/Times-Italic a}_0&{/*0.5 i}/2}" at 2.0e3, alpha0*0.5
 
-fn = "../../data/lj/rho0.1/alpha_sig0.2_t1e8.dat"
-k = -1.6
+fn = "../../data/lj/rho0.1/alpha_sig0.29_t1e8.dat"
+k = -2.0
 b = -log(alpha0*0.5)
 f(x) = k*1e-7*x - b
 fit [0:5e6] f(x) fn u 1:(log($2)) via k, b
@@ -59,7 +59,7 @@ print a, k, b
 plot [t0:][:] \
     fn  u ($1+t0):($2) w l lt 1 lw 2 t "Optimal", \
     1/x lt 3 lw 2 t "1 / ({/Times-Italic t} + {/Times-Italic t}_{/*0.8 0})", \
-    exp(f(x - t0)) lt 2 lw 5 t sprintf("{/Times %.1f{/Symbol \264}10^{/*0.7-5}{/Times-Italic e}^{%.1f{/Symbol \264}10^{/*0.7-7}{/Times-Italic t}}}", a, k), \
+    exp(f(x - t0)) lt 2 lw 5 t sprintf("{/Times %.1f {/Symbol \264} 10^{/*0.7-5}{/Times-Italic e}^{%.1f {/Symbol \264} 10^{/*0.7-7}{/Times-Italic t}}}", a, k), \
     -1 notitle
 
 unset output

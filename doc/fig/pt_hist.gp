@@ -64,8 +64,8 @@ set mytics 5
 set yrange [-19:-6]
 set ylabel '{/Times-Italic ~c{0.2\^}}@_{/Times 0}^{/Times ({/Times-Italic s})} - {/Symbol-Oblique b}_{/Times-Italic c }{/Times-Italic E@_{c}^{/Times  ({/Times-Italic s})}}' offset 0.0, -0.5
 
-bc = 1.42525373
-shiftlnz = 7599.57
+bc = 1.42529047
+shiftlnz = 7599.78
 
 plot [:][:] \
     "../../data/pt/pt2gaus_L64b.dat" u 2:($6-$5/sqrt(2)-bc*$2-shiftlnz) w p pt 6 lc "black" notitle, \
@@ -111,7 +111,7 @@ set ylabel "{/Symbol \326}{/Times ~2{.7-}} {/Times-Italic c}@_{/Times 2}^{/Times
 
 
 plot [:][:] \
-    1 w lp lt -1 pi -2 lw 1.0 lc rgb "#888888" notitle, \
+    1 w l ls 2 notitle, \
     "../../data/pt/pt2gaus_L64b.dat" u 2:($5*sqrt(2)) w p pt 6 lc "black" notitle
 
 

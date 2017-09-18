@@ -306,6 +306,8 @@ static int work(invtpar_t *m)
   metad->a = m->alpha0;
   /* load the reference bias potential */
   metad_load(metad, metad->vref, fnvref);
+  /* estimate the ``truncation error'' for the Gaussian updating scheme
+   * does not alter vref */
   errtrunc = metad_errtrunc(metad, metad->vref, &kcerr, "vtrunc.dat");
   ir = dist01(metad, lj, &dr);
   fprintf(stderr, "n %d, rmax %g, r %d/%g, err trunc %g, mode %d\n", n, metad->xmax, ir, dr, errtrunc, kcerr);

@@ -419,7 +419,7 @@ __inline static double metad_getx(metad_t *metad, int i)
  * a clear cutoff, the routine will only give rough
  * estimate for the truncation error */
 __inline static double metad_errtrunc(metad_t *metad,
-    double *v, int *kc, const char *fntrunc)
+    const double *v, int *kc, const char *fntrunc)
 {
   int k, i, n = metad->n;
   double x, vi, err = 0;
