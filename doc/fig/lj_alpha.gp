@@ -48,7 +48,7 @@ t0 = 2 / alpha0
 set arrow from 6.0e3, alpha0*0.5 to 2e4, alpha0*0.5 lt 1 lw 1 filled size screen 0.02,10,35
 set label "{/Times {/Times-Italic a}_0&{/*0.5 i}/2}" at 2.0e3, alpha0*0.5
 
-fn = "../../data/lj/rho0.1/alpha_sig0.29_t1e8.dat"
+fn = "../../data/lj/rho0.1/alpha_sig0.28_t1e8.dat"
 k = -2.0
 b = -log(alpha0*0.5)
 f(x) = k*1e-7*x - b
