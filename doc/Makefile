@@ -64,7 +64,7 @@ $(prj)doc.zip: $(prj).tex $(prj).pdf \
 	       Makefile README.md
 	zip -r $@ $^
 
-refver=7.8
+refver=7.1
 
 diff::
 	mkdir -p old/V$(ver)

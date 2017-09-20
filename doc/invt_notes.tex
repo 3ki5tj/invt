@@ -4366,7 +4366,7 @@ from Eq. \eqref{eq:Gamma_sum}, we get
 
 The
   following method appeared to have some stability issues,
-  so we switched back to the double-WL approach,
+  so we switched back to the double-WL (both for $c_0$ and for $c_1$, $c_2$) approach,
   which hopefully is stable.
   %
   The reason of instability might be
@@ -4431,10 +4431,10 @@ The
 
 Next we will use a model to show that $\Gamma_k$
 assumes a large value for a small $k$,
-and then decays rapidly to $1$ as $k$ increases
+and then decays rapidly to a constant as $k$ increases
 in a local sampling process.
 %
-We assume that the propagation along the collective-variable is Markovian
+We assume that the evolution along the collective-variable is Markovian
 such that it can be approximately
 described by a transition matrix, $\mathbf A$, with
 \begin{align*}
@@ -4504,26 +4504,34 @@ $\bigl\langle
 %\end{equation}
 %
 To model a local sampling process,
-we can borrow Eq. \eqref{eq:lambda_Gaussian} for $\Lambda_k$,
-with $\sigma_z$ reinterpreted as
-the average move size along $z$ during sampling,
+we can borrow Eq. \eqref{eq:lambda_Gaussian} for
+$\Lambda_k$,
+$$
+\Lambda_k = 1 - \bar A + \bar A \exp\left( -\frac{ \pi^2 \, k^2 \, {\sigma_z^\mathrm{(samp)}}^2 } { 2 \, \Delta z^2} \right)
+$$
+where $\sigma_z^\mathrm{(samp)}$ is
+the average move size along $z$ during sampling
+and $\bar A$ is the acceptance ratio,
 then
 \begin{align}
-  \Gamma_k = 1 + 2 \, \sum_{t=1}^\infty
+  \Gamma_k
+  &= 1 + 2 \, \sum_{t=1}^\infty
   \bigl\langle
     \tilde f_k(t) \, \tilde f_k(0)
   \bigr\rangle
-  %= \frac{1+\Lambda_k}{1-\Lambda_k}
-%\Gamma_k
-  = \coth\left(
+  = \frac{1+\Lambda_k}{1-\Lambda_k}
+  \notag \\
+  %\Gamma_k
+  &= \frac{2/\bar A}{1 -
+  \exp\left(
   \frac{ \pi^2 \, k^2 \, {\sigma_z^\mathrm{(samp)}}^2 } { 4 \, \Delta z^2}
-  \right).
+  \right) } - 1.
   \notag
   %\label{eq:Gamma_local}
 \end{align}
 Thus, we have $\Gamma_k \propto \Delta z^2/k^2$
 for small $k$,\cite{bussi2006}
-whereas $\Gamma_k \to 1$ as $k$ increases.
+whereas $\Gamma_k$ tends to a constant $(2 - \bar A)/\bar A$ as $k$ increases.
 %
 However, this model tends to underestimate
 the first few $\Gamma_k$'s in a typical simulation.
