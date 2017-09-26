@@ -1,3 +1,6 @@
+/* flat-distribution sampling with fixed bias potential, load from --vref=
+ * to compute the values of Gammas using the block histogram methods
+ * the results will be saved in hgamma.dat */
 #include "lj.h"
 #include "../ave.h"
 #include <time.h>

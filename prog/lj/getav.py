@@ -39,5 +39,5 @@ for ln in open(fn).xreadlines():
     avf.add(xf)
     avi.add(xi)
 
-print "count %s, init. %g(%g) final %g(%g)" % (
+print "%s: count %s, init. %g(%g) final %g(%g)" % (fn,
         avf.cnt, avi.getave(), xiref, avf.getave(), xfref)

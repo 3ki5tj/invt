@@ -1,4 +1,4 @@
-\documentclass[reprint, superscriptaddress, floatfix]{revtex4-1}
+\documentclass[preprint, superscriptaddress, floatfix]{revtex4-1}
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{mathtools}
@@ -537,10 +537,11 @@ then $t$ denotes the number of updating steps.
 
 While adaptive FDS simulations
 can often sample the desired distribution,
-frequent updates to the bias potential
-disrupt the underlying equilibrium sampling
-and introduce artificial errors, which can be
-reduced by gradually decreasing the updating magnitude.\cite{
+the frequent updates cause the bias potential to fluctuate constantly,
+and disrupt the underlying equilibrium sampling.
+%
+To reduce the sampling error,
+the updating magnitude is often decreased gradually.\cite{
   belardinelli2007, *belardinelli2007jcp, *belardinelli2008, *belardinelli2016,
   zhou2005, morozov2007, morozov2009, zhou2008, min2007,
   poulain2006, liang2007,
@@ -771,15 +772,15 @@ we get
   \label{eq:vt_diffeq}
 \end{equation}
 
-We can split the $f_i(t)$ into
-a deterministic averaged part, $\langle f_i(t) \rangle$,
-and a random fluctuating part, $\xi_i(t)$,
+We can split the $f_{*i}(t)$ into
+a deterministic averaged part, $\langle f_{*i}(t) \rangle$,
+and a random fluctuating part, $\xi_{*i}(t)$,
 %
 \begin{equation}
-  f_i(t) =
-  \langle f_i(t) \rangle
+  f_{*i}(t) =
+  \langle f_{*i}(t) \rangle
   +
-  \xi_i(t)
+  \xi_{*i}(t)
   .
   \notag
   %\label{eq:h_split}
@@ -899,16 +900,12 @@ we get % a set of decoupled equations
   %\alpha(t) \, \left[ \langle f_{*i}(t) \rangle + \xi_{*i}(t) \right]
   \approx
   -\alpha(t) \, \left[ v_{*i}(t) - \xi_{*i}(t) \right]
-  .
-  %\notag
-  \label{eq:dxdt_singlebin}
+  ,
+  \notag
+  %\label{eq:dxdt_singlebin}
 \end{equation}
 %
-Without the random part, $\xi_{*i}(t)$,
-the deviation of the bias potential, $v_{*i}(t)$,
-would tend to $0$ at long times, reaching convergence.
-%
-The formal solution of Eq. \eqref{eq:dxdt_singlebin} is
+and the formal solution is % of Eq. \eqref{eq:dxdt_singlebin} is
 %
 \begin{equation}
   v_{*i}(T)
@@ -932,6 +929,13 @@ and
   e^{q' - q(T)}.
   \label{eq:theta_def}
 \end{align}
+%
+Thus, without the random part, $\xi_{*i}(t)$,
+the deviation of the bias potential, $v_{*i}(t)$,
+would tend to $0$ at long times, reaching convergence,
+if $\alpha(t)$ decays sufficiently slowly,
+i.e. $q(T) \to \infty$ as $T \to \infty$.
+
 
 
 
@@ -979,16 +983,18 @@ where
 In Eq. \eqref{eq:EA_sbin},
 we have used Eq. \eqref{eq:Gi_def} and introduced
 %$\Gamma \equiv \sum_{i=1}^n \rho_i \, G_i$.
-$\Gamma \equiv \sum_{i=1}^n \rho_i \, G_i
-\approx \sum_{i=1}^n \rho_i \int_{-\infty}^{\infty} \langle \xi_{*i}(t) \xi_{*i}(0) \rangle \, dt$.
-%\begin{equation}
-%  \Gamma \equiv \sum_{i=1}^n \rho_i \, G_i
-%  =
-%  \sum_{i=1}^n \rho_i \int_0^T
-%    \langle \xi_{*i}(t) \xi_{*i}(0) \rangle \, dt
-%  .
-%  \notag%\label{eq:Gamma_from_G}
-%\end{equation}
+%$\Gamma \equiv \sum_{i=1}^n \rho_i \, G_i
+%\approx \sum_{i=1}^n \rho_i \int_{-\infty}^{\infty} \langle \xi_{*i}(t) \xi_{*i}(0) \rangle \, dt$.
+\begin{equation}
+  \Gamma
+  \equiv
+  \sum_{i=1}^n \rho_i \, G_i
+  \approx
+  \sum_{i=1}^n \rho_i \int_0^T
+    \langle \xi_{*i}(t) \xi_{*i}(0) \rangle \, dt
+  .
+  \notag%\label{eq:Gamma_from_G}
+\end{equation}
 
 The error depends implicitly on the curve, $\alpha(t)$,
 or, equivalently, the curve, $q(t)$.
@@ -1402,11 +1408,11 @@ as
   {\tilde v}_k(t + 1) =
   {\tilde v}_k(t) + \alpha(t) \, \lambda_k \,
   {\tilde f}_k(t)
-  ,
+  .
   \label{eq:vkupdate}
 \end{equation}
 %
-or in continuous time, we have, for $k > 0$,
+In continuous time, we have, for $k > 0$,
 %
 \begin{equation}
   \dot{\tilde v}_k(t)
@@ -1420,8 +1426,8 @@ or in continuous time, we have, for $k > 0$,
 \end{equation}
 %
 where
-we have used Eq. \eqref{eq:xtstar} and
-the transformed version of Eq. \eqref{eq:sh_ave}
+we have Fourier transformed Eq. \eqref{eq:sh_ave}
+and used Eq. \eqref{eq:xtstar}
 in the second step.
 
 Equation \eqref{eq:vt_diffeq_mbin} shows that
@@ -1681,8 +1687,10 @@ Here, the Hamiltonian coincides with the Lagrangian:
 Since the Lagrangian
 does not explicitly depend on time, $t$,
 the Hamiltonian is conserved,\cite{goldstein, *landau_mechanics, *arnold, *jose}
-which means that the asymptotic error grows
-linearly with time at a rate of $\mathcal L$.
+i.e. the asymptotic error grows
+linearly with time at a rate of
+$\mathcal L = \mathcal H$.
+%
 We may set
 %
 \begin{equation}
@@ -1824,7 +1832,7 @@ satisfies
   \Delta\bigl( q(T) \bigr)
   &\equiv
   \frac{ M\bigl( q(T) \bigr) } { T }
-    \int_0^{q(T)} M(q') \, d q'
+    \int_0^{q(T)} \!\!\! M(\bar q) \, d\bar q
   -\frac{a_0}{2} \, M^2\bigl( q(T) \bigr)
   \notag \\
   &\quad
@@ -1913,7 +1921,7 @@ Then solve $\partial (\Err_R + \Err_A) / \partial q_T = 0$,
 %
 We can rewrite the condition in terms of
 the initial updating magnitude
-by Eq. \eqref{eq:Lagrangian_const}, %\eqref{eq:mQ_invTa},
+by Eqs. \eqref{eq:Lagrangian_const} and \eqref{eq:mint}, %\eqref{eq:mQ_invTa},
 \begin{align}
   \alpha(t = 0)
   %=
@@ -1924,7 +1932,9 @@ by Eq. \eqref{eq:Lagrangian_const}, %\eqref{eq:mQ_invTa},
   \sum_{k = 1}^{n-1}
   \frac{
     \lambda_k \, \epsilon_k \, e^{-2\lambda_k \, q(T)}
-  }{M^2\bigl( q(T) \bigr)}
+  }{
+    M^2\bigl( q(T) \bigr)
+  }
   \stackrel{\epsilon_k \to 0}{=\joinrel=\joinrel=}
   \frac{ a_0 }
        { 2 }
@@ -2139,7 +2149,7 @@ a rigid Gaussian function centered on the current bin
 %see Fig. \ref{fig:mat}(a) for an example.
 %
 In terms of the continuous collective variable, $z$,
-the eigenvalues of this scheme are given by\cite{bussi2006}
+the eigenvalues of the updating matrix are given by\cite{bussi2006}
 \begin{align}
   \lambda_k
   =
@@ -2611,7 +2621,7 @@ with the variable coefficients updated as
 
 Note that although the target distribution, $\rho(z)$,
 does not explicitly appear in the bias potential, Eq. \eqref{eq:uz_decomp},
-or the updating scheme, Eq. \eqref{eq:ckupdate},
+or in the updating scheme, Eq. \eqref{eq:ckupdate},
 it affects both via the parameters,
 $\overline z$,
 $\sigma_z$,
@@ -2657,7 +2667,7 @@ in the single-interval case,
 and the inverse-time schedule
 was recommended for the optimal convergence of $c_1$.\cite{pellegrini2014}
 %
-In practical applications,
+In practice,
 the LLR algorithm is often applied simultaneously
 to an array of adjacent intervals
 to cover a wide range of the collective variable, $z$.\cite{langfeld2012, pellegrini2014}
@@ -3167,7 +3177,9 @@ could fail with a large updating magnitude.
     \note{The reference values can be found
     on the second line of \texttt{verr.log}.
     To check use \texttt{getav.py} under \texttt{prog/lj},
-    which will show the simulation and prediction values.}%
+    which will show the simulation and prediction values.
+    Alternatively, run \texttt{data/lj/update.sh} and copy the values
+    on the last few lines.}%
   }
   \setlength{\tabcolsep}{2pt}
   \renewcommand\arraystretch{1.4}
@@ -3196,12 +3208,12 @@ could fail with a large updating magnitude.
     \\
     %\hline
     Gaussian & optimal
-    & $6.1(6.2)\times10^{-3}$
-    & $2.9(2.7)\times10^{-6}$
+    & $6.3(6.2)\times10^{-3}$
+    & $2.7(2.7)\times10^{-6}$
     \\
     %\hline
     Bandpass & $1/t$
-    & $8.5(8.0)\times10^{-3}$
+    & $8.4(8.0)\times10^{-3}$
     & $1.7(1.7)\times10^{-6}$
     \\
     \hline
@@ -3261,7 +3273,7 @@ However, the gain of using the optimal schedule
 diminished for shorter simulations,
 e.g. when the production phase was shortened to $T = 10^7$ steps,
 the final errors under the optimal and inverse-time schedules
-became $2.1\times 10^{-5}$ and $3.3\times 10^{-5}$, respectively,
+became $2.2\times 10^{-5}$ and $3.4\times 10^{-5}$, respectively,
 which were more similar.
 
 \begin{figure}[h]\centering

@@ -353,6 +353,8 @@ static int work(invtpar_t *m)
       if ( i != 0 ) goto TRIAL_END;
       metad_save_cmvar(metad, cmi, cmf, cci, ccf, "new_xerr.dat");
       //printf("please check new_xerr.dat...\n"); getchar();
+    } else {
+      metad_save_cmvar(metad, cmi, cmf, cci, ccf, "xerr0.dat");
     }
     alpha0 = m->opta ? metad->intq->aarr[0] : metad->a/2;
     fprintf(stderr, "starting %ld metadynamics run of %ld/%ld steps..., a %g (%g), err %g -> %g, loadxerr %d\n",
