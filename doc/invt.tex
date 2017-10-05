@@ -1,4 +1,4 @@
-\documentclass[reprint, superscriptaddress, floatfix]{revtex4-1}
+\documentclass[preprint, superscriptaddress, floatfix]{revtex4-1}
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{mathtools}
@@ -868,7 +868,7 @@ We will approximate the histogram fluctuation part, $\xi_{*i}(t)$,
 as white noise such that
 %
 \begin{equation}
-  \langle \xi_{*i}(t) \, \xi_{*i}(t') \rangle
+  \bigl\langle \xi_{*i}(t) \, \xi_{*i}(t') \bigr\rangle
   = G_i \, \delta(t - t')
   ,
   \label{eq:Gi_def}
@@ -959,12 +959,13 @@ where
   \sum_{i=1}^n \rho_i
     \int_0^T\!\!\!\int_0^T
     \!\!
-    \langle
+    \bigl\langle
       \xi_{*i}(t) \xi_{*i}(t')
-    \rangle
+    \bigr\rangle
+    \,
     \dot \theta\bigl( q(t) \bigr)
     \dot \theta\bigl( q(t') \bigr)
-    \, dt dt'
+    \, dt \, dt'
   \notag \\
   &= \Gamma \, \int_0^T \dot \theta^2\bigl( q(t) \bigr) \, dt
   .
@@ -981,7 +982,8 @@ we have used Eq. \eqref{eq:Gi_def} and introduced
   \sum_{i=1}^n \rho_i \, G_i
   \approx
   \sum_{i=1}^n \rho_i \int_0^T
-    \langle \xi_{*i}(t) \xi_{*i}(0) \rangle \, dt
+    \bigl\langle \xi_{*i}(t) \xi_{*i}(0) \bigr\rangle
+    \, dt
   .
   \notag%\label{eq:Gamma_from_G}
 \end{equation}
@@ -1066,7 +1068,7 @@ we get the inverse-time schedule
 \label{eq:alpha_invt1}
 \end{equation}
 %
-with Eq. \eqref{eq:alpha_invt} being
+and Eq. \eqref{eq:alpha_invt} is
 the special case of $t_0 = 0$.
 %
 
@@ -1242,7 +1244,7 @@ $\sqrt{ \rho_i/\rho_j } \, w_{ij}$,
 to be symmetric,
 and the symmetry allows the diagonalization
 of $\mathbf w$ with a set of
-eigenvectors, $\phi_{ki}$,
+eigenvectors, $\phi_{ki}$, as
 %
 \begin{equation}
   \sum_{i = 1}^n \phi_{ki} \, w_{ij}
@@ -1252,7 +1254,7 @@ eigenvectors, $\phi_{ki}$,
 \label{eq:eig_w}
 \end{equation}
 %
-satisfying the orthonormal conditions\cite{vankampen}:
+with the $\phi_{ki}$'s satisfying the orthonormal conditions\cite{vankampen}:
 %
 \begin{align}
   \sum_{k = 0}^{n - 1}
@@ -1266,11 +1268,11 @@ satisfying the orthonormal conditions\cite{vankampen}:
          { \rho_i }
   &=
   \delta_{kl}
-  ,
+  .
   \label{eq:eig_orthonormal_rows}
 \end{align}
 %
-where we have started the index of the eigenmodes at $0$
+Here we have started the index of the eigenmodes at $0$
 instead of $1$ for later convenience.
 
 The above symmetry implies the existence of
@@ -1391,7 +1393,8 @@ we have Parseval's theorem,
 
 We can now use Eq. \eqref{eq:eig_w} to diagonalize
 the multiple-bin updating scheme,
-Eq. \eqref{eq:mbin_update} [using $u_i(t)$ instead of $v_i(t)$],
+Eq. \eqref{eq:mbin_update}
+[using $v_i(t)$ instead of $u_i(t)$],
 as
 %
 \begin{equation}
@@ -1505,13 +1508,13 @@ of the residual error and the asymptotic error, with
   \sum_{k=1}^{n-1}
   \int_0^T\!\!\!\int_0^T
   \!\!
-  \langle
+  \bigl\langle
     \tilde\xi_k(t)
     \tilde\xi_k(t')
-  \rangle
+  \bigr\rangle \,
   \theta_k\bigl(q(t)\bigr)
   \theta_k\bigl(q(t')\bigr)
-  \, dtdt'
+  \, dt \, dt'
   \notag \\
   &=
   \int_0^T
@@ -1593,7 +1596,7 @@ $\Err_A(T)$.
 The value of $q(T)$ will be adjusted later
 to minimize the total error. % in Sec. \ref{sec:optinitalpha}.
 %
-We can rewrite Eq. \eqref{eq:error_asym} much like an action
+We can rewrite Eq. \eqref{eq:error_asym} much like the action
 of a particle whose position is given by $q(t)$:
 %
 \begin{equation}
@@ -1925,7 +1928,8 @@ by Eqs. \eqref{eq:Lagrangian_const} and \eqref{eq:mint}, %\eqref{eq:mQ_invTa},
   }{
     M^2\bigl( q(T) \bigr)
   }
-  \stackrel{\epsilon_k \to 0}{=\joinrel=\joinrel=}
+  %\stackrel{\epsilon_k \to 0}{=\joinrel=\joinrel=}
+  \xrightarrow{\epsilon_k \to 0}
   \frac{ a_0 }
        { 2 }
   .
@@ -1934,12 +1938,12 @@ by Eqs. \eqref{eq:Lagrangian_const} and \eqref{eq:mint}, %\eqref{eq:mQ_invTa},
 \end{align}
 %
 %
-The equality in the last step is achievable
-if the initial bias, $\epsilon_k$, is negligible,
-%which is often true if no eigenvalue is close to $0$,
-and in this limit, the optimal initial updating magnitude
-is half of the value
-in the preliminary run.\note{This factor, $1/2$,
+If the initial bias, $\epsilon_k$, is negligible,
+the optimal initial updating magnitude
+will reach the ideal limit given by
+half of the updating magnitude in the preliminary run.
+
+\note{This factor, $1/2$,
   happens to coincide with the
   recommended reduction factor of the updating magnitude
   at stage transitions
@@ -2059,8 +2063,8 @@ Eqs. \eqref{eq:q_opt} and \eqref{eq:mint}.\footnote{We
   %
   The grid points were designed for long simulations
   under the Gaussian updating scheme:
-  for a mass function, $M(\bar q)$, that is roughly
-  inversely proportional to $\bar q$
+  for a mass function, $M(\bar q)$,
+  that is roughly proportional to $1/\bar q$
   (cf. Appendix \ref{sec:schedule_geometry}),
   this grid makes the integral,
   $t_{[i+1]} - t_{[i]}$,
@@ -2545,7 +2549,7 @@ that satisfy
 where the overline denotes the average for the distribution, $\rho(z)$.
 %
 The first few members are\footnote{The
-  orthogonal polynomials share the same form
+  orthogonal polynomials share the same forms
   for different target distributions,
   but the parameters,
   $\overline z$,
@@ -2623,7 +2627,7 @@ and $R_k\bigl(z(t)\bigr)$ roughly
 represents the deviation of the $k$th statistical moment
 of the instantaneous distribution
 from its expectation.
-Because high-order moments are generally unreliable,
+As high-order moments are generally unreliable,
 this method works better with a small $K$ for a narrow distribution.
 %
 However, by constructing
@@ -2657,19 +2661,19 @@ that corresponds to a uniform shift of the bias potential,
 the updating scheme is essentially the LLR algorithm\cite{langfeld2012}
 in the single-interval case,
 and the inverse-time schedule
-was recommended for the optimal convergence of $c_1$.\cite{pellegrini2014}
+has been recommended for the optimal convergence of $c_1$.\cite{pellegrini2014}
 
 In practice,
 the above algorithm is often applied simultaneously
 to an array of adjacent intervals
 to cover a wide range of the collective variable, $z$.\cite{langfeld2012, pellegrini2014}
 %
-In this expanded ensemble setup,
+Note that in this expanded ensemble setup,
 the updating equation for $c_0$ is no longer trivial,
-but corresponds to the WL way of constructing the bias potential
-for transitions among different intervals.
+but corresponds to a single-bin updating scheme of
+constructing the bias potential for transitions among different intervals.
 %
-The WL algorithm is in fact the $K = 1$ case.
+The WL algorithm is in fact recovered by the $K = 1$ case.
 %
 However, the LLR algorithm estimates $c_0$ from
 an approximate relation similar to Eq. \eqref{eq:c0_est} below.
@@ -2696,7 +2700,7 @@ a Gaussian distribution
   ,
   \label{eq:rho_Gaussian}
 \end{equation}
-using a basis of the Hermite polynomials\cite{arfken}.
+using a basis of Hermite polynomials\cite{arfken}.
 %
 As discussed above,
 the method is effective only for
@@ -2780,7 +2784,7 @@ and update the coefficients as
   \label{eq:ck_age_update}
 \end{align}
 %
-where $s(t)$ is the umbrella at time $t$.
+where $s(t)$ denotes the umbrella index at time $t$.
 %
 
 In the expanded ensemble,
@@ -2843,7 +2847,8 @@ falls under the value given by the inverse-time formula.\footnote{We
   the above $t$ was used as the $t_0$
   in the inverse-time regime.}
   %
-However, we need to redefine the measure of histogram fluctuation
+However, for this application,
+it is natural to redefine the measure of histogram fluctuation
 used in the WL strategy for stage transitions
 by Eq. \eqref{eq:F2st}
 to include the intra-umbrella fluctuations.
@@ -2934,9 +2939,9 @@ We also have approximately\cite{park2007, *nguyen2013, *zhang2015st}
 \end{equation}
 %
 Note that the LLR algorithm (cf. Sec. \ref{sec:LLR}) implicitly uses
-a similar relation for the estimation of $c_0^{(s)}$,
-with $\hat c_0^{(s)}$ replaced by $c_0^{(s)}$
-(for lack of $c_2^{(s)}$ in that case).
+a similar relation for the estimation of $c_0^{(s)}$
+(with $\hat c_0^{(s)}$ replaced by $c_0^{(s)}$
+for lack of $c_2^{(s)}$ in that case).
 
 We summarize the method as the following procedure.
 
@@ -2962,7 +2967,7 @@ We summarize the method as the following procedure.
 
 \item
   Perform a regular MC or MD step
-  in the current umbrella $s$ under
+  in the current umbrella, $s = s(t)$, under
   the bias potential $u^{(s)}(z, t)$.
 
 \item
@@ -2975,7 +2980,6 @@ We summarize the method as the following procedure.
     without affecting the correctness of the algorithm.
     Although a random mixing of the two steps
     is sometimes preferred,
-    in a random order,
     the sequential execution adopted here
     is also valid,
     as discussed in }] [{}]
@@ -3080,7 +3084,7 @@ the PMF from $r = 0$ to half of the box size
 on a grid of size $\delta r = 0.01$ in reduced units.
 %
 The reduced density was $\varrho = 0.1$.
-The numbers of bins was $n = 500$.
+The number of bins was $n = 500$.
 The reduced temperature was $T = 3$.
 %
 The bias potential, $u(r)$,
@@ -3107,8 +3111,8 @@ We repeated each simulation multiple times
 and report the averages.
 %
 For the Gaussian updating scheme,
-we used a set of fixed reference values of $\Gamma_k$'s\footnote{We
-  derived the reference $\Gamma_k$'s
+we used a set of fixed reference values of $\Gamma_k$'s\footnote{For
+  accuracy, we derived the reference $\Gamma_k$'s
   from a long equilibrium simulation under the reference bias 
   potential using the block histogram method with $T_\mathrm{blk} = 10^5$ steps
   (cf. Appendix \ref{sec:Gamma_measure}).
@@ -3147,7 +3151,7 @@ as shown in Table \ref{tab:lj_error}.
 While the final errors agreed well with
 the predicted values (which were calculated using the reference
 $\Gamma_k$'s and $\tilde u_k$'s),
-there were considerable derivations
+there were considerable deviations
 in the initial errors.
 %
 This shows that
@@ -3199,18 +3203,18 @@ could fail with a large updating magnitude.
     \\
     %\hline
     Gaussian & $1/t$
-    & $6.3(6.2)\times10^{-3}$
-    & $1.5(1.4)\times10^{-5}$
+    & $6.2(6.2)\times10^{-3}$
+    & $1.46(1.44)\times10^{-5}$
     \\
     %\hline
     Gaussian & optimal
-    & $6.3(6.2)\times10^{-3}$
-    & $2.7(2.7)\times10^{-6}$
+    & $6.4(6.2)\times10^{-3}$
+    & $2.72(2.74)\times10^{-6}$
     \\
     %\hline
     Bandpass & $1/t$
-    & $8.4(8.0)\times10^{-3}$
-    & $1.7(1.7)\times10^{-6}$
+    & $8.3(8.0)\times10^{-3}$
+    & $1.69(1.67)\times10^{-6}$
     \\
     \hline
   \end{tabular}
@@ -3265,7 +3269,7 @@ and produced a flatter profile.
 %might be due to errors of the estimated values of
 %$\Gamma_k$'s and $\epsilon_k$'s.)
 %
-However, the gain of using the optimal schedule
+However, the gain in error reduction of using the optimal schedule
 diminished for shorter simulations,
 e.g. when the production phase was shortened to $T = 10^7$ steps,
 the final errors under the optimal and inverse-time schedules
@@ -3338,8 +3342,9 @@ was free from major barriers
 such that the histogram fluctuation was largely local in nature.
 %
 For similar simulations performed at a higher density, $\varrho = 0.8$,
-we found the gain of using the above two updating schemes
-over the single-bin updating scheme, if any, to be negligible.
+we found that the above two updating schemes
+did not improve the convergence of the bias potential significantly
+compared to the single-bin updating scheme.
 %
 However,
 the multiple-bin updating schemes have advantages in MD simulations
@@ -3389,7 +3394,7 @@ the intrinsic distribution is
 the density of states, $g(E)$.
 %
 We spread the Gaussian umbrellas
-of the same width $\sigma_E^{(s)} = L$ over $[-1.8L^2, -0.8L^2]$
+of the same width, $\sigma_E^{(s)} = L$, over $[-1.8L^2, -0.8L^2]$
 with an even spacing of $L$.
 %
 For simplicity, only transitions between neighboring
@@ -3593,7 +3598,7 @@ Eq. \eqref{eq:q_opt}.
 In comparing different updating schemes,
 we found
 the single-bin updating scheme to be optimal
-for the error control in the long time limit.
+for error control in the long time limit.
 %without a priori assumptions
 %on the smoothness of the PMF.
 %
@@ -3614,7 +3619,7 @@ constructed from a family of orthogonal polynomials.
 %
 This construction, 
 as a generalization of
-the WL and LLR\cite{langfeld2012, pellegrini2014} algorithm,
+the WL and LLR\cite{langfeld2012, pellegrini2014} algorithms,
 delegates the biased sampling to a local umbrella
 with a simple polynomial bias potential,
 and applies the flat-distribution sampling
@@ -3656,15 +3661,12 @@ The white noise approximation
 can also be inaccurate for relatively short simulations.
 %
 For the Gaussian updating scheme,
-the calculation of the optimal schedule requires
-the estimation of a few parameters
-in a sufficiently long run
-under a constant updating magnitude,
-whereas the gain of using the optimal schedule
+the optimal schedule requires
+a long preliminary run under a constant updating magnitude,
+to extract a few parameters,
+while the gain in error reduction
 is sometimes rather modest
-for a relatively short simulation,
-even if the histogram fluctuation is largely
-local noise.
+for a relatively short simulation.
 %
 Finally, the adaptive Gaussian ensemble method
 introduced in Sec. \ref{sec:age} can be refined
@@ -3808,7 +3810,7 @@ growing and diminishing weights, respectively.
 Application to updating schemes}
 
 To apply the above formalism to the updating schemes,
-we need a correction formula for the bias potential.
+we will need a correction formula for the bias potential.
 %
 We will use a linearized version of Eq. \eqref{eq:vcorr_equil},
 %$$\hat u_i = u_i + \frac{ H_i } { \rho_i } - 1.$$
@@ -3857,7 +3859,7 @@ a CMA with the weight given by Eq. \eqref{eq:omega_from_alpha}.
 %
 The inverse-time schedule is optimal
 because it corresponds to the equally-weighted average,
-which is statistically most efficient.
+which is statistically most efficient, at least asymptotically.
 
 Similarly, for the multiple-bin updating scheme,
 we have, from Eqs. \eqref{eq:v_def} and \eqref{eq:vkupdate},
@@ -3901,7 +3903,7 @@ An expedient fix,
 which we used in Sec. \ref{sec:procedure},
 is to derive the effective updating magnitude
 from Eq. \eqref{eq:alpha_from_Omega}
-for the $k = 1$ mode with the largest eigenvalue,
+for the $k = 1$ mode, which has the largest eigenvalue,
 i.e.
 $\alpha(t) = \lambda_1^{-1}[1-\Omega(t-1)/\Omega(t)]$,
 with
@@ -3911,12 +3913,12 @@ with
   \frac{1}{t_+ - t_-} \ln \frac{ \Omega(t_-) } { \Omega(t_+) }
   =
   \!\!\sum_{\tau=t_- + 1}^{t_+}
-  \frac{ \ln[1- \lambda_k \, \alpha(\tau)] } { t_+ - t_- }
+  \frac{ \ln[1- \lambda_1 \, \alpha(\tau)] } { t_+ - t_- }
   \\
   &\approx
-  -\frac{ \lambda_k \int_{t_-}^{t_+} \alpha(\tau) \, d\tau}{t_+ - t_-}
+  -\frac{ \lambda_1 \int_{t_-}^{t_+} \alpha(\tau) \, d\tau}{t_+ - t_-}
   =
-  -\lambda_k \, \frac{q(t_+) - q(t_-)}{t_+ - t_-}
+  -\lambda_1 \, \frac{q(t_+) - q(t_-)}{t_+ - t_-}
   ,
 \end{align*}
 where $t_-$ and $t_+$ are two neighboring grid points
@@ -3927,7 +3929,7 @@ for all nontrivial modes.
 
 
 
-\subsection{Histogram correction}
+\subsection{Histogram-based correction}
 
 
 
@@ -3936,20 +3938,9 @@ each mode of the bias potential
 corresponds to a CMA with a dynamic weight,
 which is not necessarily the optimal equal weight.
 %
-Below we give a simple correction
-to recover the equally-weighted average.
+We can, however, recover the equally-weighted average
+by averaging both sides of Eq. \eqref{eq:uhatt}:
 %
-We will use capital letters to denote equally-weighted averages.
-%e.g. for variable $y$,
-%$Y(t) \equiv \frac{1}{t} \sum_{\tau=1}^t y(\tau)$.
-%\begin{equation}
-%  Y(t) \equiv \frac{1}{t} \sum_{\tau=1}^t x(\tau)
-%  .
-%  \notag
-%  %\label{eq:timeav}
-%\end{equation}
-%
-Then, by averaging both sides of Eq. \eqref{eq:uhatt}, we get
 \begin{align}
   \hat U_i(t)
   &\approx
@@ -3958,12 +3949,14 @@ Then, by averaging both sides of Eq. \eqref{eq:uhatt}, we get
   \approx
   U_i(t)
   + \ln \frac{ H_i(t) } { \rho_i }
-  .
+  ,
   \label{eq:uhatav}
 \end{align}
 %
+where the capital letters denote the equally-weighted averages.
+%
 This correction serves as
-a generalization of Eq. \eqref{eq:vcorr_equil}
+an approximate generalization of Eq. \eqref{eq:vcorr_equil}
 for FDS simulations under
 a variable bias potential.\footnote{We can also
   derive Eq. \eqref{eq:uhatav}
@@ -4020,7 +4013,7 @@ First, we define a normalized mass distribution as
 such that
 $\int_0^{q(T)} m(\bar q) \, d\bar q = 1$.
 %
-Then from Eqs. \eqref{eq:Lagrangian_const} and \eqref{eq:q_opt},
+Then, from Eqs. \eqref{eq:Lagrangian_const} and \eqref{eq:q_opt},
 we find that for $\bar q(t) \equiv q(T) - q(t)$,
 %
 \begin{align}
@@ -4032,21 +4025,21 @@ we find that for $\bar q(t) \equiv q(T) - q(t)$,
   \label{eq:mQ_invTa}
   \\
   \int_{\bar q(t)}^{ q(T) }
-    m(\bar q) \, d \bar q
+    \!\! m(\bar q) \, d \bar q
   &=
   \frac t T
   .
   \label{eq:intmQ_tT}
 \end{align}
 %
-This allows each point on the schedule,
+The above two equations map each point on the schedule,
 $\bigl(t, \alpha(t)\bigr)$,
-to be mapped to a point,
+to a point,
 $\Bigl(\bar q(t), m\bigl(\bar q(t)\bigr)\Bigr)$,
-on the mass distribution,
+on the mass distribution
 such that the ordinate of the latter curve
 is $1/(T\alpha)$,
-and the area under the curve in the domain, $[\bar q(t), q(T)]$,
+and the area under the curve between $\bar q(t)$ and $q(T)$,
 or the complementary cumulative distribution function of $m(\bar q)$,
 is equal to $t/T$,
 as shown in Fig. \ref{fig:massq}(a).
@@ -4063,14 +4056,14 @@ as shown in Fig. \ref{fig:massq}(a).
     $m(\bar q)$.
     %
     (b) Inverse construction of $m(\bar q)$
-    from the optimal schedule $\alpha(t)$.
+    from the optimal schedule, $\alpha(t)$.
   }
 \end{figure}
 
 We can now show that
 for simulations with equal lengths and
 equal initial updating magnitudes,
-the optimal schedule for the Gaussian updating scheme
+the optimal schedule for a Gaussian updating scheme
 always lies above the inverse-time schedule,
 which is optimal for the single-bin updating scheme.
 %
@@ -4102,7 +4095,7 @@ we have
 which is a weighted average of $\lambda_k$'s
 with the weight being $\Gamma_k \, \lambda_k^2 \, e^{-2\lambda_k \bar q}$.
 %
-For the Gaussian updating scheme,
+For a Gaussian updating scheme,
 we have $\bar \lambda(\bar q) < 1$ for $\bar q > 0$
 by Eq. \eqref{eq:lambda_Gaussian}.
 %
@@ -4136,7 +4129,7 @@ but with the natural variables
 being $\bar q^*$ and $t^*$, respectively.
 %
 Further, the transformation is an involution:
-if we apply the same transform on $\alpha^*(t^*)$
+if we apply the same transform on $\alpha^*(t^*)$,
 we would recover $m^*(\bar q^*)$,
 as shown in Fig. \ref{fig:massq}(b).
 %
@@ -4290,23 +4283,23 @@ with the effective $\lambda_k \equiv 1$.
 
 The above method requires a sufficiently small updating magnitude,
 $a_0 \ll 2/\left(\max_k \Gamma_k \right)$,
-and it tends to overestimate the value of $\Gamma_k$
-(possibly because of the deviation from
-the quasi-equilibrium sampling).
+and it tends to overestimate $\Gamma_k$
+(possibly because the sampling often
+deviates from the presumed quasi-equilibrium limit).
 
 
 Alternatively, we can estimate $\Gamma_k$ using Eq. \eqref{eq:Fk2_Gammak}.
 %
-By splitting the trajectory into blocks of $T_\mathrm{blk}$ steps,
+By breaking the trajectory into blocks of $T_\mathrm{blk}$ steps,
 we can compute the histogram fluctuation, $\tilde F_k(T_\mathrm{blk})$,
 and estimate $\Gamma_k$ from the average of
 $T_\mathrm{blk} \, \tilde F_k^2(T_\mathrm{blk})$
 over the blocks.
 %
-The trajectory block should be large enough
+The trajectory block should be long enough
 to cover at least a few autocorrelation times (which is roughly $\Gamma_k/2$),
-but also sufficiently small
-when there are dynamic updates to the bias potential
+but not too long
+when dynamic updates to the bias potential exist
 to avoid the artificial histogram flattening
 caused by the frequent non-equilibrium updates.
 %
@@ -4463,7 +4456,7 @@ The eigenvalues are given by
   \label{eq:wband_eigenvalue}
 \end{equation}
 %
-with $g = 1$.
+with $g = 1$ here.
 Note also the two-fold degeneracy,
 %There is a two-fold degeneracy,
   $\lambda_{n - k} = \lambda_k$.
@@ -4684,8 +4677,9 @@ where we have defined
     {
       n \, \sin \frac{ l \, \pi } { n }
     }
-    & l \ne 0, \\
-    \frac{2K-1}{n} & l = 0.
+    & \text{for $l \ne 0$}, \\
+    \frac{2K-1}{n}
+    & \text{for $l = 0$}.
   \end{dcases}
 \notag
 %\label{eq:mu_sinc_pbc}
@@ -4830,7 +4824,8 @@ and the total histogram fluctuation is
   =
   \frac{ \Gamma } { T }
   ,
-  \label{eq:F2sum}
+  \notag
+  %\label{eq:F2sum}
 \end{equation}
 where we have used Eq. \eqref{eq:Gammak_sum}
 in the last step.
