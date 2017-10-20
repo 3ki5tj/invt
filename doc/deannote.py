@@ -202,6 +202,7 @@ def main():
   s = open(fninp).read()
 
   s = delete(r"\note{", s)
+  s = delete(r"\notep{", s)
   s = delete(r"\del{", s)
   s = add(r"\add{", s)
   s = repl(r"\repl{", s)

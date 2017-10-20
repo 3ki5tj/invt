@@ -1,6 +1,6 @@
 prj=invt
 
-ver=8.8
+ver=8.9
 
 tikzfigs=fig/massq.pdf fig/vardep.pdf
 figgps=$(wildcard fig/*.gp)
@@ -64,7 +64,7 @@ $(prj)doc.zip: $(prj).tex $(prj).pdf \
 	       Makefile README.md
 	zip -r $@ $^
 
-refver=8.7
+refver=8.8
 
 diff::
 	mkdir -p old/V$(ver)

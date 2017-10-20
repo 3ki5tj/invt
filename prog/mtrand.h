@@ -219,7 +219,7 @@ __inline static int mtload(const char *fn, unsigned long seed)
 
 
 /* randomly accept by probability exp(-de) */
-__inline int metroacc(double de)
+__inline static int metroacc(double de)
 {
   double r;
   if ( de <= 0 ) return 1;
